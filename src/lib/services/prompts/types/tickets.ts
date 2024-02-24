@@ -167,7 +167,7 @@ class TicketService extends PromptService<{
 		return ticketDocument;
 	}
 
-	public async handleDelete(ticketDocument: Ticket): Promise<void> {
+	async handleDelete(ticketDocument: Ticket): Promise<void> {
 		await super.handleDelete(ticketDocument);
 
 		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {

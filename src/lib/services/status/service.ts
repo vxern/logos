@@ -5,17 +5,16 @@ import { Client } from "../../client";
 import { GlobalService } from "../service";
 
 class StatusService extends GlobalService {
-	isActive: boolean;
-	currentIndex: number;
+	#currentIndex: number;
 
 	constructor(client: Client) {
 		super(client);
-		this.isActive = true;
-		this.currentIndex = 0;
+
+		this.#currentIndex = 0;
 	}
 
 	get status(): string | undefined {
-		return constants.statuses[this.currentIndex];
+		return constants.statuses[this.#currentIndex];
 	}
 
 	async start(): Promise<void> {
@@ -23,26 +22,25 @@ class StatusService extends GlobalService {
 			return;
 		}
 
-		this.cycleStatus();
+		this.#cycleStatus();
 	}
 
 	async stop(): Promise<void> {
-		this.isActive = false;
-		this.currentIndex = 0;
+		this.#currentIndex = 0;
 	}
 
-	private cycleStatus(): void {
+	#cycleStatus(): void {
 		const status = this.status;
 		if (status === undefined) {
-			this.currentIndex = 0;
-			this.cycleStatus();
+			this.#currentIndex = 0;
+			this.#cycleStatus();
 			return;
 		}
 
-		if (this.currentIndex === constants.statuses.length - 1) {
-			this.currentIndex = 0;
+		if (this.#currentIndex === constants.statuses.length - 1) {
+			this.#currentIndex = 0;
 		} else {
-			this.currentIndex++;
+			this.#currentIndex++;
 		}
 
 		this.client.bot.gateway
@@ -59,7 +57,7 @@ class StatusService extends GlobalService {
 				this.client.log.warn("Unable to edit bot status.");
 			});
 
-		setTimeout(() => this.cycleStatus(), defaults.STATUS_CYCLE);
+		setTimeout(() => this.#cycleStatus(), defaults.STATUS_CYCLE);
 	}
 }
 

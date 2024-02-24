@@ -130,12 +130,12 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const canEnter = await this.vetUser(buttonPress, { locale });
+		const canEnter = await this.#vetUser(buttonPress, { locale });
 		if (!canEnter) {
 			return;
 		}
 
-		const requiresVerification = this.requiresVerification(buttonPress.user);
+		const requiresVerification = this.#requiresVerification(buttonPress.user);
 		if (requiresVerification === undefined) {
 			return;
 		}
@@ -282,7 +282,7 @@ class EntryService extends LocalService {
 		});
 
 		createModalComposer<EntryRequest["answers"]>(this.client, buttonPress, {
-			modal: this.generateVerificationQuestionModal(buttonPress.featureLanguage, { locale }),
+			modal: this.#generateVerificationQuestionModal(buttonPress.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
 				if (entryRequest !== undefined) {
 					const strings = {
@@ -377,7 +377,7 @@ class EntryService extends LocalService {
 		});
 	}
 
-	private generateVerificationQuestionModal(
+	#generateVerificationQuestionModal(
 		language: FeatureLanguage,
 		{ locale }: { locale: Locale },
 	): Modal<EntryRequest["answers"]> {
@@ -437,7 +437,7 @@ class EntryService extends LocalService {
 		};
 	}
 
-	private async vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
+	async #vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
 		const [userDocument, entryRequestDocument] = await Promise.all([
 			User.getOrCreate(this.client, { userId: interaction.user.id.toString() }),
 			EntryRequest.get(this.client, { guildId: this.guildIdString, authorId: interaction.user.id.toString() }),
@@ -488,7 +488,7 @@ class EntryService extends LocalService {
 		return true;
 	}
 
-	requiresVerification(user: Logos.User): boolean | undefined {
+	#requiresVerification(user: Logos.User): boolean | undefined {
 		const verificationConfiguration = this.verificationConfiguration;
 		if (verificationConfiguration === undefined) {
 			return undefined;

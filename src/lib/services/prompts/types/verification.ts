@@ -40,7 +40,7 @@ class VerificationService extends PromptService<{
 		await super.start();
 
 		this.#_openInquiry.onCollect(async (selection) => {
-			this.handleOpenInquiry(selection, selection.metadata[1]);
+			this.#handleOpenInquiry(selection, selection.metadata[1]);
 		});
 
 		this.client.registerInteractionCollector(this.#_openInquiry);
@@ -82,7 +82,7 @@ class VerificationService extends PromptService<{
 				continue;
 			}
 
-			const voteInformation = this.getVoteInformation(entryRequestDocument);
+			const voteInformation = this.#getVoteInformation(entryRequestDocument);
 			if (voteInformation === undefined) {
 				continue;
 			}
@@ -102,7 +102,7 @@ class VerificationService extends PromptService<{
 						return;
 					}
 
-					this.finalise(entryRequestDocument, configuration, [author, member, guild], [isAccepted, isRejected]);
+					this.#finalise(entryRequestDocument, configuration, [author, member, guild], [isAccepted, isRejected]);
 				});
 
 				continue;
@@ -126,7 +126,7 @@ class VerificationService extends PromptService<{
 			return undefined;
 		}
 
-		const voteInformation = this.getVoteInformation(entryRequestDocument);
+		const voteInformation = this.#getVoteInformation(entryRequestDocument);
 		if (voteInformation === undefined) {
 			return undefined;
 		}
@@ -294,7 +294,7 @@ class VerificationService extends PromptService<{
 
 		const guild = this.client.entities.guilds.get(BigInt(guildId));
 		if (guild === undefined) {
-			this.displayVoteError(interaction, { locale });
+			this.#displayVoteError(interaction, { locale });
 			return undefined;
 		}
 
@@ -302,7 +302,7 @@ class VerificationService extends PromptService<{
 			Model.buildPartialId<EntryRequest>({ guildId, authorId: userId }),
 		);
 		if (entryRequestDocument === undefined) {
-			this.displayVoteError(interaction, { locale });
+			this.#displayVoteError(interaction, { locale });
 			return undefined;
 		}
 
@@ -311,7 +311,7 @@ class VerificationService extends PromptService<{
 			entryRequestDocument.votedAgainst ?? [],
 		].map((voterIds) => voterIds.some((voterId) => voterId === interaction.user.id.toString())) as [boolean, boolean];
 
-		const voteInformation = this.getVoteInformation(entryRequestDocument);
+		const voteInformation = this.#getVoteInformation(entryRequestDocument);
 		if (voteInformation === undefined) {
 			return undefined;
 		}
@@ -360,7 +360,7 @@ class VerificationService extends PromptService<{
 							return;
 						}
 
-						await this.finalise(entryRequestDocument, configuration, [author, member, guild], [true, false]);
+						await this.#finalise(entryRequestDocument, configuration, [author, member, guild], [true, false]);
 
 						resolve(null);
 					});
@@ -445,7 +445,7 @@ class VerificationService extends PromptService<{
 							return;
 						}
 
-						await this.finalise(entryRequestDocument, configuration, [author, member, guild], [false, true]);
+						await this.#finalise(entryRequestDocument, configuration, [author, member, guild], [false, true]);
 
 						resolve(null);
 					});
@@ -557,7 +557,7 @@ class VerificationService extends PromptService<{
 		}
 
 		if (isAccepted || isRejected) {
-			await this.finalise(entryRequestDocument, configuration, [author, member, guild], [isAccepted, isRejected]);
+			await this.#finalise(entryRequestDocument, configuration, [author, member, guild], [isAccepted, isRejected]);
 
 			return null;
 		}
@@ -566,7 +566,7 @@ class VerificationService extends PromptService<{
 	}
 
 	// TODO(vxern): Improve how authorised.
-	private async finalise(
+	async #finalise(
 		entryRequestDocument: EntryRequest,
 		configuration: Configuration,
 		[author, voter, guild]: [Logos.User, Logos.Member, Logos.Guild],
@@ -649,7 +649,7 @@ class VerificationService extends PromptService<{
 		}
 	}
 
-	private async handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
+	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
 		await this.client.postponeReply(interaction);
 
 		const [configuration, guild, guildDocument] = [this.configuration, this.guild, this.guildDocument];
@@ -752,7 +752,7 @@ class VerificationService extends PromptService<{
 		}
 	}
 
-	private getVoteInformation(entryRequest: EntryRequest): VoteInformation | undefined {
+	#getVoteInformation(entryRequest: EntryRequest): VoteInformation | undefined {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
 			return undefined;
@@ -795,7 +795,7 @@ class VerificationService extends PromptService<{
 		return { acceptance, rejection };
 	}
 
-	private async displayVoteError(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<void> {
+	async #displayVoteError(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<void> {
 		const strings = {
 			title: this.client.localise("entry.verification.vote.failed.title", locale)(),
 			description: this.client.localise("entry.verification.vote.failed.description", locale)(),

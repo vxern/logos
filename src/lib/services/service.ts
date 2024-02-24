@@ -92,8 +92,8 @@ abstract class GlobalService extends Service {
 }
 
 abstract class LocalService extends Service {
-	protected readonly guildId: bigint;
-	protected readonly guildIdString: string;
+	readonly guildId: bigint;
+	readonly guildIdString: string;
 
 	get guild(): Logos.Guild | undefined {
 		return this.client.entities.guilds.get(this.guildId);
@@ -117,6 +117,7 @@ abstract class LocalService extends Service {
 
 	constructor(client: Client, guildId: bigint) {
 		super(client);
+
 		this.guildId = guildId;
 		this.guildIdString = guildId.toString();
 	}

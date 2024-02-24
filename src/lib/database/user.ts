@@ -68,6 +68,7 @@ class User extends Model<{ idParts: ["userId"] }> {
 				createdAt,
 				"@metadata": { "@collection": "Users", "@id": Model.buildPartialId<User>(data) },
 			});
+
 			this.account = account ?? { id: data.userId };
 		}
 

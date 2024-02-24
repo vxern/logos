@@ -782,9 +782,11 @@ class CommandStore {
 		autocompleteHandlers: Map<string, InteractionHandler>;
 	}) {
 		this.commands = commands;
+
 		this.#collection = { showable, withRateLimit };
 		this.#lastCommandUseTimestamps = new Map();
 		this.#handlers = { execute: executeHandlers, autocomplete: autocompleteHandlers };
+
 		this.#_defaultCommands = compact([
 			this.commands.information,
 			this.commands.acknowledgements,

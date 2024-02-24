@@ -35,16 +35,17 @@ const configurationLocators: ConfigurationLocators = {
 type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
 abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalService {
-	private noticeData: NoticeData | undefined;
+	#noticeData: NoticeData | undefined;
 
-	private readonly _configuration: ConfigurationLocators[NoticeType];
+	readonly #_configuration: ConfigurationLocators[NoticeType];
+
 	get configuration(): Configurations[NoticeType] | undefined {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
 			return undefined;
 		}
 
-		return this._configuration(guildDocument);
+		return this.#_configuration(guildDocument);
 	}
 
 	get channelId(): bigint | undefined {
@@ -63,8 +64,8 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 	constructor(client: Client, guildId: bigint, { type }: { type: NoticeType }) {
 		super(client, guildId);
-		this.noticeData = undefined;
-		this._configuration = configurationLocators[type];
+
+		this.#_configuration = configurationLocators[type];
 	}
 
 	async start(): Promise<void> {
@@ -139,12 +140,12 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 	}
 
 	async stop(): Promise<void> {
-		this.noticeData = undefined;
+		this.#noticeData = undefined;
 	}
 
 	// Anti-tampering feature; detects notices being deleted.
 	async messageDelete(message: Discord.Message): Promise<void> {
-		const [channelId, noticeData] = [this.channelId, this.noticeData];
+		const [channelId, noticeData] = [this.channelId, this.#noticeData];
 		if (channelId === undefined || noticeData === undefined) {
 			return;
 		}
@@ -218,7 +219,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 	}
 
 	registerNotice(noticeId: bigint, hash: string): void {
-		this.noticeData = { id: noticeId, hash };
+		this.#noticeData = { id: noticeId, hash };
 	}
 
 	static hash(contents: HashableMessageContents): string {

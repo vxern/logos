@@ -55,24 +55,24 @@ abstract class PromptService<
 		metadata: [partialId: string, isResolve: string];
 	},
 > extends LocalService {
-	private readonly type: Generic["type"];
-	private readonly customId: string;
-	private readonly deleteMode: PromptDeleteMode;
+	readonly magicButton: InteractionCollector<Generic["metadata"]>;
+	readonly removeButton: InteractionCollector<[partialId: string]>;
 
-	protected readonly documents: Map<string, Generic["model"]>;
+	// TODO(vxern): These were protected.
+	readonly documents: Map<string, Generic["model"]>;
+	readonly promptByPartialId: Map</*partialId: */ string, Discord.CamelizedDiscordMessage>;
 
-	private readonly handlerByPartialId: Map<
+	readonly #type: Generic["type"];
+	readonly #deleteMode: PromptDeleteMode;
+
+	readonly #handlerByPartialId: Map<
 		/*partialId: */ string,
 		(interaction: Logos.Interaction<Generic["metadata"]>) => void
 	>;
-	protected readonly promptByPartialId: Map</*partialId: */ string, Discord.CamelizedDiscordMessage>;
-	private readonly documentByPromptId: Map</*promptId: */ string, Generic["model"]>;
-	private readonly userIdByPromptId: Map</*promptId: */ string, bigint>;
+	readonly #documentByPromptId: Map</*promptId: */ string, Generic["model"]>;
+	readonly #userIdByPromptId: Map</*promptId: */ string, bigint>;
 
-	private readonly _configuration: ConfigurationLocators[Generic["type"]];
-
-	readonly magicButton: InteractionCollector<Generic["metadata"]>;
-	readonly removeButton: InteractionCollector<[partialId: string]>;
+	readonly #_configuration: ConfigurationLocators[Generic["type"]];
 
 	get configuration(): Configurations[Generic["type"]] | undefined {
 		const guildDocument = this.guildDocument;
@@ -80,7 +80,7 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		return this._configuration(guildDocument);
+		return this.#_configuration(guildDocument);
 	}
 
 	get channelId(): bigint | undefined {
@@ -107,28 +107,30 @@ abstract class PromptService<
 		{ type, deleteMode }: { type: Generic["type"]; deleteMode: PromptDeleteMode },
 	) {
 		super(client, guildId);
-		this.type = type;
-		this.deleteMode = deleteMode;
-		this.customId = customIds[type];
 
-		this.documents = this.getAllDocuments();
+		const customId = customIds[type];
 
-		this.handlerByPartialId = new Map();
-		this.promptByPartialId = new Map();
-		this.documentByPromptId = new Map();
-		this.userIdByPromptId = new Map();
-
-		this._configuration = configurationLocators[type];
-
-		this.magicButton = new InteractionCollector(client, { customId: this.customId, isPermanent: true });
+		this.magicButton = new InteractionCollector(client, { customId, isPermanent: true });
 		this.removeButton = new InteractionCollector(client, {
 			customId: InteractionCollector.encodeCustomId([
 				constants.components.removePrompt,
-				this.customId,
+				customId,
 				this.guildId.toString(),
 			]),
 			isPermanent: true,
 		});
+
+		this.#type = type;
+		this.#deleteMode = deleteMode;
+
+		this.documents = this.getAllDocuments();
+		this.promptByPartialId = new Map();
+
+		this.#handlerByPartialId = new Map();
+		this.#documentByPromptId = new Map();
+		this.#userIdByPromptId = new Map();
+
+		this.#_configuration = configurationLocators[type];
 	}
 
 	async start(): Promise<void> {
@@ -183,7 +185,7 @@ abstract class PromptService<
 		}
 
 		this.magicButton.onCollect(async (buttonPress) => {
-			const handle = this.handlerByPartialId.get(buttonPress.metadata[1]);
+			const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
 			if (handle === undefined) {
 				return;
 			}
@@ -208,7 +210,7 @@ abstract class PromptService<
 			}
 
 			let management: { roles?: string[]; users?: string[] } | undefined;
-			switch (this.type) {
+			switch (this.#type) {
 				case "verification": {
 					management = (configuration as Configurations["verification"])?.management;
 					break;
@@ -244,7 +246,7 @@ abstract class PromptService<
 			if (!isAuthorised) {
 				const locale = buttonPress.locale;
 
-				if (this.deleteMode === "delete") {
+				if (this.#deleteMode === "delete") {
 					const strings = {
 						title: this.client.localise("cannotRemovePrompt.title", locale)(),
 						description: this.client.localise("cannotRemovePrompt.description", locale)(),
@@ -259,7 +261,7 @@ abstract class PromptService<
 							},
 						],
 					});
-				} else if (this.deleteMode === "close") {
+				} else if (this.#deleteMode === "close") {
 					const strings = {
 						title: this.client.localise("cannotCloseIssue.title", locale)(),
 						description: this.client.localise("cannotCloseIssue.description", locale)(),
@@ -286,7 +288,7 @@ abstract class PromptService<
 				return;
 			}
 
-			const promptDocument = this.documentByPromptId.get(prompt.id);
+			const promptDocument = this.#documentByPromptId.get(prompt.id);
 			if (promptDocument === undefined) {
 				return;
 			}
@@ -299,15 +301,15 @@ abstract class PromptService<
 	}
 
 	async stop(): Promise<void> {
-		this.documents.clear();
-
-		this.handlerByPartialId.clear();
-		this.promptByPartialId.clear();
-		this.documentByPromptId.clear();
-		this.userIdByPromptId.clear();
-
 		await this.magicButton.close();
 		await this.removeButton.close();
+
+		this.documents.clear();
+		this.promptByPartialId.clear();
+
+		this.#handlerByPartialId.clear();
+		this.#documentByPromptId.clear();
+		this.#userIdByPromptId.clear();
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.
@@ -317,12 +319,12 @@ abstract class PromptService<
 			return;
 		}
 
-		const promptDocument = this.documentByPromptId.get(message.id.toString());
+		const promptDocument = this.#documentByPromptId.get(message.id.toString());
 		if (promptDocument === undefined) {
 			return;
 		}
 
-		const userId = this.userIdByPromptId.get(message.id.toString());
+		const userId = this.#userIdByPromptId.get(message.id.toString());
 		if (userId === undefined) {
 			return;
 		}
@@ -344,8 +346,8 @@ abstract class PromptService<
 
 		this.registerPrompt(prompt, userId, promptDocument);
 
-		this.documentByPromptId.delete(message.id.toString());
-		this.userIdByPromptId.delete(message.id.toString());
+		this.#documentByPromptId.delete(message.id.toString());
+		this.#userIdByPromptId.delete(message.id.toString());
 	}
 
 	async messageUpdate(message: Discord.Message): Promise<void> {
@@ -441,19 +443,21 @@ abstract class PromptService<
 	}
 
 	registerPrompt(prompt: Discord.CamelizedDiscordMessage, userId: bigint, promptDocument: Generic["model"]): void {
-		this.documentByPromptId.set(prompt.id, promptDocument);
-		this.userIdByPromptId.set(prompt.id, userId);
 		this.promptByPartialId.set(promptDocument.partialId, prompt);
+
+		this.#documentByPromptId.set(prompt.id, promptDocument);
+		this.#userIdByPromptId.set(prompt.id, userId);
 	}
 
 	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, promptDocument: Generic["model"]): void {
-		this.documentByPromptId.delete(prompt.id);
-		this.userIdByPromptId.delete(prompt.id);
 		this.promptByPartialId.delete(promptDocument.partialId);
+
+		this.#documentByPromptId.delete(prompt.id);
+		this.#userIdByPromptId.delete(prompt.id);
 	}
 
 	registerHandler(promptDocument: Generic["model"]): void {
-		this.handlerByPartialId.set(promptDocument.partialId, async (interaction) => {
+		this.#handlerByPartialId.set(promptDocument.partialId, async (interaction) => {
 			const updatedDocument = await this.handlePromptInteraction(interaction);
 			if (updatedDocument === undefined) {
 				return;
@@ -469,7 +473,7 @@ abstract class PromptService<
 				this.unregisterPrompt(prompt, promptDocument);
 				this.unregisterHandler(promptDocument);
 			} else {
-				this.documentByPromptId.set(prompt.id, updatedDocument);
+				this.#documentByPromptId.set(prompt.id, updatedDocument);
 			}
 
 			this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
@@ -479,14 +483,14 @@ abstract class PromptService<
 	}
 
 	unregisterHandler(promptDocument: Generic["model"]): void {
-		this.handlerByPartialId.delete(promptDocument.partialId);
+		this.#handlerByPartialId.delete(promptDocument.partialId);
 	}
 
 	abstract handlePromptInteraction(
 		interaction: Logos.Interaction<Generic["metadata"]>,
 	): Promise<Generic["model"] | undefined | null>;
 
-	protected async handleDelete(promptDocument: Generic["model"]): Promise<void> {
+	async handleDelete(promptDocument: Generic["model"]): Promise<void> {
 		await promptDocument.delete(this.client);
 
 		const prompt = this.promptByPartialId.get(promptDocument.partialId);

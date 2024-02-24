@@ -53,14 +53,14 @@ interface Session {
 
 // TODO(vxern): This needs cleaning up.
 class MusicService extends LocalService {
-	private session: Session | undefined;
+	#session: Session | undefined;
 
 	get configuration(): Guild["music"] {
 		return this.guildDocument?.music;
 	}
 
 	get channelId(): bigint | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -69,7 +69,7 @@ class MusicService extends LocalService {
 	}
 
 	get events(): EventEmitter | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -78,7 +78,7 @@ class MusicService extends LocalService {
 	}
 
 	get volume(): number | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -87,7 +87,7 @@ class MusicService extends LocalService {
 	}
 
 	get history(): SongListing[] | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -96,7 +96,7 @@ class MusicService extends LocalService {
 	}
 
 	get current(): SongListing | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -105,7 +105,7 @@ class MusicService extends LocalService {
 	}
 
 	get currentSong(): Song | SongStream | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -123,7 +123,7 @@ class MusicService extends LocalService {
 	}
 
 	get queue(): SongListing[] | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -132,7 +132,7 @@ class MusicService extends LocalService {
 	}
 
 	get isQueueVacant(): boolean | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -141,7 +141,7 @@ class MusicService extends LocalService {
 	}
 
 	get isQueueEmpty(): boolean | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -150,7 +150,7 @@ class MusicService extends LocalService {
 	}
 
 	get isHistoryVacant(): boolean | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -159,7 +159,7 @@ class MusicService extends LocalService {
 	}
 
 	get isHistoryEmpty(): boolean | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -168,7 +168,7 @@ class MusicService extends LocalService {
 	}
 
 	get isOccupied(): boolean {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return false;
 		}
@@ -177,7 +177,7 @@ class MusicService extends LocalService {
 	}
 
 	get isPaused(): boolean | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -186,7 +186,7 @@ class MusicService extends LocalService {
 	}
 
 	get playingSince(): number | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -195,7 +195,7 @@ class MusicService extends LocalService {
 	}
 
 	get position(): number | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -204,7 +204,7 @@ class MusicService extends LocalService {
 	}
 
 	get length(): number | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -214,7 +214,8 @@ class MusicService extends LocalService {
 
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId);
-		this.session = undefined;
+
+		this.#session = undefined;
 	}
 
 	async start(): Promise<void> {
@@ -227,7 +228,7 @@ class MusicService extends LocalService {
 	}
 
 	async voiceStateUpdate(_: Discord.VoiceState): Promise<void> {
-		const [guild, session] = [this.guild, this.session];
+		const [guild, session] = [this.guild, this.#session];
 		if (guild === undefined || session === undefined) {
 			return;
 		}
@@ -240,7 +241,7 @@ class MusicService extends LocalService {
 	}
 
 	async handleSessionAbandoned(): Promise<void> {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -266,7 +267,7 @@ class MusicService extends LocalService {
 	}
 
 	async createSession(channelId: bigint): Promise<Session | undefined> {
-		const [configuration, oldSession] = [this.configuration, this.session];
+		const [configuration, oldSession] = [this.configuration, this.#session];
 		if (configuration === undefined) {
 			return undefined;
 		}
@@ -295,18 +296,18 @@ class MusicService extends LocalService {
 			},
 		};
 
-		this.session = session;
+		this.#session = session;
 
 		return session;
 	}
 
 	async destroySession(): Promise<void> {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
 
-		this.session = undefined;
+		this.#session = undefined;
 
 		session.events.emit("stop");
 		session.player.removeAllListeners();
@@ -324,7 +325,7 @@ class MusicService extends LocalService {
 			.leaveVoiceChannel(this.guildId)
 			.catch(() => this.client.log.warn("Failed to leave voice channel."));
 
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -370,7 +371,7 @@ class MusicService extends LocalService {
 	}
 
 	async handleConnectionRestored(): Promise<void> {
-		const oldSession = this.session;
+		const oldSession = this.#session;
 		if (oldSession === undefined) {
 			return;
 		}
@@ -390,12 +391,12 @@ class MusicService extends LocalService {
 		await this.destroySession();
 		await this.createSession(oldSession.channelId);
 
-		const newSession = this.session;
+		const newSession = this.#session;
 		if (newSession === undefined) {
 			return;
 		}
 
-		this.session = { ...oldSession, player: newSession.player };
+		this.#session = { ...oldSession, player: newSession.player };
 
 		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 
@@ -424,7 +425,7 @@ class MusicService extends LocalService {
 	verifyVoiceState(interaction: Logos.Interaction, action: "manage" | "check"): boolean {
 		const locale = interaction.locale;
 
-		const [guild, session] = [this.guild, this.session];
+		const [guild, session] = [this.guild, this.#session];
 		if (guild === undefined) {
 			return false;
 		}
@@ -538,7 +539,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const current = this.session?.listings.current;
+		const current = this.#session?.listings.current;
 		if (current === undefined) {
 			return true;
 		}
@@ -566,7 +567,7 @@ class MusicService extends LocalService {
 	}
 
 	moveListingToHistory(listing: SongListing): void {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -590,7 +591,7 @@ class MusicService extends LocalService {
 	}
 
 	tryClearDisconnectTimeout(): void {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -599,7 +600,7 @@ class MusicService extends LocalService {
 	}
 
 	setDisconnectTimeout(): void {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -610,7 +611,7 @@ class MusicService extends LocalService {
 	}
 
 	async receiveNewListing(listing: SongListing, channelId: bigint): Promise<void> {
-		const [guild, session] = [this.guild, this.session ?? (await this.createSession(channelId))];
+		const [guild, session] = [this.guild, this.#session ?? (await this.createSession(channelId))];
 		if (guild === undefined || session === undefined) {
 			return;
 		}
@@ -664,7 +665,7 @@ class MusicService extends LocalService {
 	}
 
 	async advanceQueueAndPlay(): Promise<void> {
-		const [isQueueEmpty, session] = [this.isQueueEmpty, this.session];
+		const [isQueueEmpty, session] = [this.isQueueEmpty, this.#session];
 		if (isQueueEmpty === undefined || session === undefined) {
 			return;
 		}
@@ -723,7 +724,7 @@ class MusicService extends LocalService {
 	}
 
 	async loadSong(song: Song | SongStream, restore?: { paused: boolean; volume: number }): Promise<boolean | undefined> {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -781,7 +782,7 @@ class MusicService extends LocalService {
 		}
 
 		session.player.once("trackException", async (_: string | null, error: Error) => {
-			const session = this.session;
+			const session = this.#session;
 			if (session === undefined) {
 				return;
 			}
@@ -821,7 +822,7 @@ class MusicService extends LocalService {
 		});
 
 		session.player.once("trackEnd", async () => {
-			const session = this.session;
+			const session = this.#session;
 			if (session === undefined) {
 				return;
 			}
@@ -923,7 +924,7 @@ class MusicService extends LocalService {
 	}
 
 	async skip(skipCollection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -977,7 +978,7 @@ class MusicService extends LocalService {
 	}
 
 	async unskip(unskipCollection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -1045,7 +1046,7 @@ class MusicService extends LocalService {
 	}
 
 	replay(replayCollection: boolean): void {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -1082,7 +1083,7 @@ class MusicService extends LocalService {
 	}
 
 	setVolume(volume: number): void {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -1091,7 +1092,7 @@ class MusicService extends LocalService {
 	}
 
 	pause(): void {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -1100,7 +1101,7 @@ class MusicService extends LocalService {
 	}
 
 	resume(): void {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -1109,7 +1110,7 @@ class MusicService extends LocalService {
 	}
 
 	async skipTo(timestampMilliseconds: number): Promise<void> {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
@@ -1119,7 +1120,7 @@ class MusicService extends LocalService {
 	}
 
 	remove(index: number): SongListing | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
@@ -1131,7 +1132,7 @@ class MusicService extends LocalService {
 	}
 
 	loop(isCollection: boolean): boolean | undefined {
-		const session = this.session;
+		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}

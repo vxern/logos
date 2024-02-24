@@ -155,18 +155,18 @@ class DynamicVoiceChannelService extends LocalService {
 		const oldVoiceState = this.oldVoiceStates.get(newVoiceState.userId);
 
 		if (oldVoiceState === undefined || oldVoiceState.channelId === undefined) {
-			this.onConnect(newVoiceState);
+			this.#onConnect(newVoiceState);
 		} else if (newVoiceState.channelId === undefined) {
-			this.onDisconnect(oldVoiceState);
+			this.#onDisconnect(oldVoiceState);
 		} else {
-			this.onConnect(newVoiceState);
-			this.onDisconnect(oldVoiceState);
+			this.#onConnect(newVoiceState);
+			this.#onDisconnect(oldVoiceState);
 		}
 
 		this.oldVoiceStates.set(newVoiceState.userId, newVoiceState);
 	}
 
-	private async onConnect(newVoiceState: Logos.VoiceState): Promise<void> {
+	async #onConnect(newVoiceState: Logos.VoiceState): Promise<void> {
 		const channels = this.channels;
 		if (channels === undefined) {
 			return;
@@ -221,7 +221,7 @@ class DynamicVoiceChannelService extends LocalService {
 			);
 	}
 
-	private async onDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
+	async #onDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
 		const channels = this.channels;
 		if (channels === undefined) {
 			return;

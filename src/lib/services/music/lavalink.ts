@@ -9,6 +9,7 @@ class LavalinkService extends GlobalService {
 
 	constructor(client: Client) {
 		super(client);
+
 		this.node = new Lavaclient.Node({
 			connection: {
 				host: client.environment.lavalinkHost,
