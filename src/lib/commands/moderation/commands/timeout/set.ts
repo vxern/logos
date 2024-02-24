@@ -57,8 +57,8 @@ async function handleSetTimeout(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.timeouts;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.timeouts;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -109,7 +109,7 @@ async function handleSetTimeout(
 		.editMember(guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
 		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
 
-	if (configuration.journaling) {
+	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("memberTimeoutAdd", {
 			args: [member, until, interaction.parameters.reason, interaction.user],

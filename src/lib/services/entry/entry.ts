@@ -12,30 +12,15 @@ import diagnostics from "../../diagnostics";
 import { Modal, createModalComposer } from "../../interactions";
 import { LocalService } from "../service";
 
-type EntryStepButtonID = [parameter: string];
-
-type EntryConfiguration = NonNullable<Guild["features"]["server"]["features"]>["entry"];
-type VerificationConfiguration = NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
-
 class EntryService extends LocalService {
 	readonly #_acceptedRulesButton: InteractionCollector;
 
-	get configuration(): EntryConfiguration | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return guildDocument.features.server.features?.entry;
+	get configuration(): Guild["entry"] {
+		return this.guildDocument?.entry;
 	}
 
-	get verificationConfiguration(): VerificationConfiguration | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return guildDocument.features.moderation.features?.verification;
+	get verificationConfiguration(): Guild["verification"] {
+		return this.guildDocument?.verification;
 	}
 
 	constructor(client: Client, guildId: bigint) {
@@ -509,10 +494,6 @@ class EntryService extends LocalService {
 			return undefined;
 		}
 
-		if (!verificationConfiguration.enabled) {
-			return undefined;
-		}
-
 		for (const rule of verificationConfiguration.activation) {
 			switch (rule.type) {
 				case "account-age": {
@@ -533,4 +514,3 @@ class EntryService extends LocalService {
 }
 
 export { EntryService };
-export type { EntryStepButtonID };

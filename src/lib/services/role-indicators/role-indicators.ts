@@ -5,25 +5,14 @@ import * as Logos from "../../../types";
 import { Guild, RoleWithIndicator } from "../../database/guild";
 import { LocalService } from "../service";
 
-type Configuration = NonNullable<NonNullable<Guild["features"]["server"]["features"]>["roleIndicators"]>;
-
 class RoleIndicatorService extends LocalService {
-	get configuration(): Configuration | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return guildDocument.features.server.features?.roleIndicators;
+	get configuration(): Guild["roleIndicators"] {
+		return this.guildDocument?.roleIndicators;
 	}
 
 	async start(): Promise<void> {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
-			return;
-		}
-
-		if (!configuration.enabled) {
 			return;
 		}
 
@@ -41,10 +30,6 @@ class RoleIndicatorService extends LocalService {
 	async guildMemberUpdate(member: Discord.Member | Logos.Member, user: Discord.User | Logos.User): Promise<void> {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
-			return;
-		}
-
-		if (!configuration.enabled) {
 			return;
 		}
 

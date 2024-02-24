@@ -41,8 +41,8 @@ async function handlePardonUserAutocomplete(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.warns;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.warns;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -113,8 +113,8 @@ async function handlePardonUser(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.warns;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.warns;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -156,7 +156,7 @@ async function handlePardonUser(
 		return;
 	}
 
-	if (configuration.journaling) {
+	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("memberWarnRemove", { args: [member, warning, interaction.user] });
 	}

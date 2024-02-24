@@ -7,25 +7,14 @@ import generators from "./generators";
 
 const messageGenerators: MessageGenerators<Events> = { ...generators.client, ...generators.guild };
 
-type Configuration = NonNullable<Guild["features"]["information"]["features"]>["journaling"];
-
 class JournallingService extends LocalService {
-	get configuration(): Configuration | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return guildDocument.features.information.features?.journaling;
+	get configuration(): Guild["journalling"] {
+		return this.guildDocument?.journalling;
 	}
 
 	get channelId(): bigint | undefined {
 		const configuration = this.configuration;
 		if (configuration === undefined) {
-			return undefined;
-		}
-
-		if (!configuration.enabled) {
 			return undefined;
 		}
 

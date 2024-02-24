@@ -5,7 +5,7 @@ import defaults from "../../../../defaults";
 import { MentionTypes, mention, trim } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
-import { PageButtonMetadata, getPageButtons } from "../../../interactions";
+import { getPageButtons } from "../../../interactions";
 import { MusicService } from "../../../services/music/music";
 import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
@@ -133,7 +133,7 @@ async function generateEmbed(
 	const isFirst = data.pageIndex === 0;
 	const isLast = data.pageIndex === pages.length - 1;
 
-	const pageButtons = new InteractionCollector<PageButtonMetadata>(client, { only: [interaction.user.id] });
+	const pageButtons = new InteractionCollector<[action: "previous" | "next"]>(client, { only: [interaction.user.id] });
 	const selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
 
 	pageButtons.onCollect(async (buttonPress) => {

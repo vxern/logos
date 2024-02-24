@@ -27,8 +27,8 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.policy;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.policy;
+	if (configuration === undefined) {
 		return;
 	}
 

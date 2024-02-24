@@ -14,10 +14,6 @@ class InformationNoticeService extends NoticeService<"information"> {
 			return undefined;
 		}
 
-		if (!configuration.enabled) {
-			return undefined;
-		}
-
 		const guildLocale = this.guildLocale;
 		const informationFields = rules.map((rule, index) => {
 			const strings = {

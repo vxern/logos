@@ -41,7 +41,6 @@ import { Ticket } from "./database/ticket";
 import { User } from "./database/user";
 import { Warning } from "./database/warning";
 import diagnostics from "./diagnostics";
-import { isAutocomplete, isSubcommand, isSubcommandGroup } from "./interactions";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
@@ -729,6 +728,22 @@ class LocalisationStore {
 	}
 }
 
+type AutocompleteInteraction = (Discord.Interaction | Logos.Interaction) & {
+	type: Discord.InteractionTypes.ApplicationCommandAutocomplete;
+};
+
+function isAutocomplete(interaction: Discord.Interaction | Logos.Interaction): interaction is AutocompleteInteraction {
+	return interaction.type === Discord.InteractionTypes.ApplicationCommandAutocomplete;
+}
+
+function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
+}
+
+function isSubcommand(option: Discord.InteractionDataOption): boolean {
+	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
+}
+
 interface RateLimit {
 	nextAllowedUsageTimestamp: number;
 }
@@ -1071,101 +1086,93 @@ class CommandStore {
 	getEnabledCommands(guildDocument: Guild): Command[] {
 		const commands: (Command | undefined)[] = [];
 
-		if (guildDocument.features.language.enabled) {
-			const language = guildDocument.features.language.features;
-
-			if (language.answers?.enabled) {
+		if (guildDocument.areEnabled("languageFeatures")) {
+			if (guildDocument.areEnabled("answers")) {
 				commands.push(this.commands.answerMessage);
 			}
 
-			if (language.corrections?.enabled) {
+			if (guildDocument.areEnabled("corrections")) {
 				commands.push(this.commands.correctionFullMessage, this.commands.correctionPartialMessage);
 			}
 
-			if (language.cefr?.enabled) {
+			if (guildDocument.isEnabled("cefr")) {
 				commands.push(this.commands.cefr);
 			}
 
-			if (language.game.enabled) {
+			if (guildDocument.isEnabled("game")) {
 				commands.push(this.commands.game);
 			}
 
-			if (language.resources.enabled) {
+			if (guildDocument.areEnabled("resources")) {
 				commands.push(this.commands.resources);
 			}
 
-			if (language.translate.enabled) {
+			if (guildDocument.areEnabled("translate")) {
 				commands.push(this.commands.translate, this.commands.translateMessage);
 			}
 
-			if (language.word.enabled) {
+			if (guildDocument.isEnabled("word")) {
 				// TODO(vxern): Re-enable
 				// commands.push(this.commands.word);
 			}
 		}
 
-		if (guildDocument.features.moderation.enabled) {
+		if (guildDocument.areEnabled("moderationFeatures")) {
 			commands.push(this.commands.list);
 
-			const moderation = guildDocument.features.moderation.features;
-
-			if (moderation.policy.enabled) {
+			if (guildDocument.isEnabled("policy")) {
 				commands.push(this.commands.policy);
 			}
 
-			if (moderation.rules.enabled) {
+			if (guildDocument.areEnabled("rules")) {
 				commands.push(this.commands.rule);
 			}
 
-			if (moderation.slowmode?.enabled) {
+			if (guildDocument.isEnabled("slowmode")) {
 				commands.push(this.commands.slowmode);
 			}
 
-			if (moderation.timeouts.enabled) {
+			if (guildDocument.areEnabled("timeouts")) {
 				commands.push(this.commands.timeout);
 			}
 
-			if (moderation.purging.enabled) {
+			if (guildDocument.isEnabled("purging")) {
 				commands.push(this.commands.purge);
 			}
 
-			if (moderation.warns.enabled) {
+			if (guildDocument.areEnabled("warns")) {
 				commands.push(this.commands.warn, this.commands.pardon);
 			}
 
-			if (moderation.reports.enabled) {
+			if (guildDocument.areEnabled("reports")) {
 				commands.push(this.commands.report);
 			}
 		}
 
-		if (guildDocument.features.server.enabled) {
-			const server = guildDocument.features.server.features;
-
-			if (server.suggestions.enabled) {
+		if (guildDocument.areEnabled("serverFeatures")) {
+			if (guildDocument.areEnabled("suggestions")) {
 				commands.push(this.commands.suggestion);
 			}
 
-			if (server.tickets?.enabled) {
+			if (guildDocument.areEnabled("tickets")) {
 				commands.push(this.commands.ticket);
 			}
 
-			if (server.resources?.enabled) {
+			if (guildDocument.areEnabled("resources")) {
 				commands.push(this.commands.resource);
 			}
 		}
 
-		if (guildDocument.features.social.enabled) {
-			const social = guildDocument.features.social.features;
-
-			if (social.music.enabled) {
+		if (guildDocument.areEnabled("socialFeatures")) {
+			if (guildDocument.isEnabled("music")) {
 				commands.push(this.commands.music);
 			}
 
-			if (social.praises.enabled) {
+			if (guildDocument.isEnabled("praises")) {
 				commands.push(this.commands.praise);
 			}
 
-			if (social.profile.enabled) {
+			if (guildDocument.isEnabled("profile")) {
 				commands.push(this.commands.profile);
 			}
 		}
@@ -1678,13 +1685,8 @@ class InteractionCollector<
 			return undefined;
 		}
 
-		const language = guildDocument.features.language;
-		if (!language.enabled) {
-			return undefined;
-		}
-
-		const roleLanguages = language.features.roleLanguages;
-		if (roleLanguages === undefined || !roleLanguages.enabled) {
+		const roleLanguages = guildDocument.roleLanguages;
+		if (roleLanguages === undefined) {
 			return undefined;
 		}
 
@@ -2054,41 +2056,37 @@ class ServiceStore {
 	): Promise<void> {
 		const services: Service[] = [];
 
-		if (guildDocument.features.information.enabled) {
-			const information = guildDocument.features.information.features;
-
-			if (information.journaling.enabled) {
+		if (guildDocument.areEnabled("informationFeatures")) {
+			if (guildDocument.isEnabled("journalling")) {
 				const service = new JournallingService(client, guildId);
 				services.push(service);
 
 				this.local.journalling.set(guildId, service);
 			}
 
-			if (information.notices.enabled) {
-				const notices = information.notices.features;
-
-				if (notices.information.enabled) {
+			if (guildDocument.areEnabled("noticeFeatures")) {
+				if (guildDocument.isEnabled("informationNotice")) {
 					const service = new InformationNoticeService(client, guildId);
 					services.push(service);
 
 					this.local.notices.information.set(guildId, service);
 				}
 
-				if (notices.resources?.enabled) {
+				if (guildDocument.isEnabled("resourceNotice")) {
 					const service = new ResourceNoticeService(client, guildId);
 					services.push(service);
 
 					this.local.notices.resources.set(guildId, service);
 				}
 
-				if (notices.roles.enabled) {
+				if (guildDocument.isEnabled("roleNotice")) {
 					const service = new RoleNoticeService(client, guildId);
 					services.push(service);
 
 					this.local.notices.roles.set(guildId, service);
 				}
 
-				if (notices.welcome.enabled) {
+				if (guildDocument.isEnabled("welcomeNotice")) {
 					const service = new WelcomeNoticeService(client, guildId);
 					services.push(service);
 
@@ -2097,24 +2095,22 @@ class ServiceStore {
 			}
 		}
 
-		if (guildDocument.features.moderation.enabled) {
-			const moderation = guildDocument.features.moderation.features;
-
-			if (moderation.alerts.enabled) {
+		if (guildDocument.areEnabled("moderationFeatures")) {
+			if (guildDocument.areEnabled("alerts")) {
 				const service = new AlertService(client, guildId);
 				services.push(service);
 
 				this.local.alerts.set(guildId, service);
 			}
 
-			if (moderation.reports.enabled) {
+			if (guildDocument.areEnabled("reports")) {
 				const service = new ReportService(client, guildId);
 				services.push(service);
 
 				this.local.prompts.reports.set(guildId, service);
 			}
 
-			if (moderation.verification.enabled) {
+			if (guildDocument.isEnabled("verification")) {
 				const service = new VerificationService(client, guildId);
 				services.push(service);
 
@@ -2122,45 +2118,43 @@ class ServiceStore {
 			}
 		}
 
-		if (guildDocument.features.server.enabled) {
-			const server = guildDocument.features.server.features;
-
-			if (server.dynamicVoiceChannels.enabled) {
+		if (guildDocument.areEnabled("serverFeatures")) {
+			if (guildDocument.areEnabled("dynamicVoiceChannels")) {
 				const service = new DynamicVoiceChannelService(client, guildId);
 				services.push(service);
 
 				this.local.dynamicVoiceChannels.set(guildId, service);
 			}
 
-			if (server.entry.enabled) {
+			if (guildDocument.isEnabled("entry")) {
 				const service = new EntryService(client, guildId);
 				services.push(service);
 
 				this.local.entry.set(guildId, service);
 			}
 
-			if (server.roleIndicators?.enabled) {
+			if (guildDocument.areEnabled("roleIndicators")) {
 				const service = new RoleIndicatorService(client, guildId);
 				services.push(service);
 
 				this.local.roleIndicators.set(guildId, service);
 			}
 
-			if (server.suggestions.enabled) {
+			if (guildDocument.areEnabled("suggestions")) {
 				const service = new SuggestionService(client, guildId);
 				services.push(service);
 
 				this.local.prompts.suggestions.set(guildId, service);
 			}
 
-			if (server.tickets?.enabled) {
+			if (guildDocument.areEnabled("tickets")) {
 				const service = new TicketService(client, guildId);
 				services.push(service);
 
 				this.local.prompts.tickets.set(guildId, service);
 			}
 
-			if (server.resources?.enabled) {
+			if (guildDocument.areEnabled("resources")) {
 				const service = new ResourceService(client, guildId);
 				services.push(service);
 
@@ -2168,10 +2162,8 @@ class ServiceStore {
 			}
 		}
 
-		if (guildDocument.features.social.enabled) {
-			const social = guildDocument.features.social.features;
-
-			if (social.music.enabled) {
+		if (guildDocument.areEnabled("socialFeatures")) {
+			if (guildDocument.isEnabled("music")) {
 				const service = new MusicService(client, guildId);
 				services.push(service);
 

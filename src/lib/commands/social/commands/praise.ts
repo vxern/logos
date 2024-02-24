@@ -45,8 +45,8 @@ async function handlePraiseUser(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.social.features?.praises;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.praises;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -112,7 +112,7 @@ async function handlePraiseUser(
 		comment: interaction.parameters.comment,
 	});
 
-	if (configuration.journaling) {
+	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("praiseAdd", { args: [member, praiseDocument, interaction.user] });
 	}

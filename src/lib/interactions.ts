@@ -5,25 +5,6 @@ import time from "../constants/time";
 import * as Logos from "../types";
 import { Client, InteractionCollector } from "./client";
 
-type AutocompleteInteraction = (Discord.Interaction | Logos.Interaction) & {
-	type: Discord.InteractionTypes.ApplicationCommandAutocomplete;
-};
-
-function isAutocomplete(interaction: Discord.Interaction | Logos.Interaction): interaction is AutocompleteInteraction {
-	return interaction.type === Discord.InteractionTypes.ApplicationCommandAutocomplete;
-}
-
-function isSubcommandGroup(option: Discord.InteractionDataOption): boolean {
-	return option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup;
-}
-
-function isSubcommand(option: Discord.InteractionDataOption): boolean {
-	return option.type === Discord.ApplicationCommandOptionTypes.SubCommand;
-}
-
-type SkipAction = "previous" | "next";
-type PageButtonMetadata = [type: SkipAction];
-
 /**
  * Paginates an array of elements, allowing the user to browse between pages
  * in an embed view.
@@ -46,7 +27,7 @@ async function paginate<T>(
 	},
 	{ locale }: { locale: Locale },
 ): Promise<() => Promise<void>> {
-	const pageButtons = new InteractionCollector<PageButtonMetadata>(client, {
+	const pageButtons = new InteractionCollector<[action: "previous" | "next"]>(client, {
 		only: show ? [interaction.user.id] : undefined,
 	});
 
@@ -70,7 +51,7 @@ async function paginate<T>(
 		};
 	};
 
-	const editView = async (action?: SkipAction) => {
+	const editView = async (action?: "previous" | "next") => {
 		switch (action) {
 			case "previous": {
 				if (!isFirst()) {
@@ -150,7 +131,7 @@ function getPageButtons({
 	isFirst,
 	isLast,
 }: {
-	pageButtons: InteractionCollector<PageButtonMetadata>;
+	pageButtons: InteractionCollector<[action: "previous" | "next"]>;
 	isFirst: boolean;
 	isLast: boolean;
 }): Discord.MessageComponents {
@@ -488,13 +469,5 @@ function parseVerboseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
-export {
-	createModalComposer,
-	getPageButtons,
-	isAutocomplete,
-	paginate,
-	parseTimeExpression,
-	isSubcommand,
-	isSubcommandGroup,
-};
-export type { PageButtonMetadata, Modal };
+export { createModalComposer, getPageButtons, paginate, parseTimeExpression };
+export type { Modal };

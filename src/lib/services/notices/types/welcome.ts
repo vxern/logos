@@ -15,10 +15,6 @@ class WelcomeNoticeService extends NoticeService<"welcome"> {
 			return undefined;
 		}
 
-		if (!configuration.enabled) {
-			return undefined;
-		}
-
 		const ruleChannelId = BigInt(configuration.ruleChannelId);
 
 		const guildLocale = this.guildLocale;

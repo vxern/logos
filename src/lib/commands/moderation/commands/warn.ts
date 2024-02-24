@@ -44,8 +44,8 @@ async function handleWarnUserAutocomplete(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.warns;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.warns;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -104,8 +104,8 @@ async function handleWarnUser(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.warns;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.warns;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -166,7 +166,7 @@ async function handleWarnUser(
 		}),
 	]);
 
-	if (configuration.journaling) {
+	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("memberWarnAdd", { args: [member, warningDocument, interaction.user] });
 	}
@@ -196,12 +196,10 @@ async function handleWarnUser(
 		],
 	});
 
-	const alertService = client.getAlertService(guild.id);
-
 	const surpassedLimit = relevantWarnings.length > configuration.limit;
 	if (surpassedLimit) {
 		let strings: { title: string; description: string };
-		if (configuration.autoTimeout.enabled) {
+		if (configuration.autoTimeout?.enabled) {
 			const timeout = configuration.autoTimeout.duration ?? defaults.WARN_TIMEOUT;
 
 			const language = interaction.guildLanguage;
@@ -241,15 +239,18 @@ async function handleWarnUser(
 			};
 		}
 
-		alertService?.alert({
-			embeds: [
-				{
-					title: `${constants.symbols.indicators.exclamation} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.red,
-				},
-			],
-		});
+		if (guildDocument.areEnabled("alerts")) {
+			const alertService = client.getAlertService(guild.id);
+			alertService?.alert({
+				embeds: [
+					{
+						title: `${constants.symbols.indicators.exclamation} ${strings.title}`,
+						description: strings.description,
+						color: constants.colors.red,
+					},
+				],
+			});
+		}
 
 		return;
 	}
@@ -265,15 +266,18 @@ async function handleWarnUser(
 			)({ user_mention: mention(user.id, MentionTypes.User), limit: defaults.WARN_LIMIT }),
 		};
 
-		alertService?.alert({
-			embeds: [
-				{
-					title: `${constants.symbols.indicators.warning} ${strings.title}`,
-					description: strings.description,
-					color: constants.colors.yellow,
-				},
-			],
-		});
+		if (guildDocument.areEnabled("alerts")) {
+			const alertService = client.getAlertService(guild.id);
+			alertService?.alert({
+				embeds: [
+					{
+						title: `${constants.symbols.indicators.warning} ${strings.title}`,
+						description: strings.description,
+						color: constants.colors.yellow,
+					},
+				],
+			});
+		}
 
 		return;
 	}

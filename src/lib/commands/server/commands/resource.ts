@@ -29,8 +29,8 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.server.features?.resources;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.resourceSubmissions;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -82,7 +82,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 				answers,
 			});
 
-			if (configuration.journaling) {
+			if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 				const journallingService = client.getJournallingService(guild.id);
 				journallingService?.log("resourceSend", { args: [member, resourceDocument] });
 			}

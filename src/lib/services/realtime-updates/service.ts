@@ -26,7 +26,6 @@ class RealtimeUpdateService extends GlobalService {
 			if (this.isHandlingUpdate) {
 				this.handlerQueue.push(() => this.handleUpdateGuildConfiguration(data));
 			} else {
-				// unawaited
 				this.handleUpdateGuildConfiguration(data);
 			}
 		};

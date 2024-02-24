@@ -60,8 +60,8 @@ async function handlePurgeMessages(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.purging;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.purging;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -575,9 +575,8 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	const journallingService = client.getJournallingService(guild.id);
-
-	if (configuration.journaling) {
+	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
+		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("purgeBegin", { args: [member, channel, messages.length] });
 	}
 
@@ -635,7 +634,8 @@ async function handlePurgeMessages(
 		} message(s) in channel ID ${channelId} as requested by ${diagnostics.display.user(interaction.user)}.`,
 	);
 
-	if (configuration.journaling) {
+	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
+		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("purgeEnd", { args: [member, channel, deletedCount] });
 	}
 

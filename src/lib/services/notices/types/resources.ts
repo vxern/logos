@@ -1,8 +1,8 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import localisations from "../../../../constants/localisations";
-import { Client } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
+import { Client } from "../../../client";
 
 class ResourceNoticeService extends NoticeService<"resources"> {
 	constructor(client: Client, guildId: bigint) {
@@ -15,8 +15,13 @@ class ResourceNoticeService extends NoticeService<"resources"> {
 			return undefined;
 		}
 
-		const configuration = guildDocument.features.language.features?.resources;
-		if (configuration === undefined || !configuration.enabled) {
+		const configuration = this.configuration;
+		if (configuration === undefined) {
+			return;
+		}
+
+		const resourceConfiguration = guildDocument.resources;
+		if (resourceConfiguration === undefined) {
 			return;
 		}
 
@@ -29,7 +34,7 @@ class ResourceNoticeService extends NoticeService<"resources"> {
 				storedInRepository: this.client.localise(
 					"notices.resources.description.storedInRepository",
 					guildLocale,
-				)({ link: configuration.url }),
+				)({ link: resourceConfiguration.url }),
 				easierToManage: this.client.localise("notices.resources.description.easierToManage", guildLocale)(),
 				contributable: {
 					contributable: this.client.localise("notices.resources.description.contributable", guildLocale)(),
@@ -74,7 +79,7 @@ class ResourceNoticeService extends NoticeService<"resources"> {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.redirect,
 							style: Discord.ButtonStyles.Link,
-							url: configuration.url,
+							url: resourceConfiguration.url,
 						},
 					],
 				},

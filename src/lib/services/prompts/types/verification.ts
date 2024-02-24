@@ -12,7 +12,7 @@ import { User } from "../../../database/user";
 import diagnostics from "../../../diagnostics";
 import { Configurations, PromptService } from "../service";
 
-type Configuration = Configurations["verification"];
+type Configuration = NonNullable<Configurations["verification"]>;
 type VoteInformation = {
 	[K in keyof NonNullable<Configuration["voting"]>["verdict"]]: {
 		required: number;
@@ -97,7 +97,6 @@ class VerificationService extends PromptService<{
 					continue;
 				}
 
-				// unawaited
 				this.getUserDocument(entryRequestDocument).then((authorDocument) => {
 					if (authorDocument === undefined) {
 						return;
@@ -277,7 +276,7 @@ class VerificationService extends PromptService<{
 		const locale = interaction.locale;
 
 		const configuration = this.configuration;
-		if (configuration === undefined || !configuration.enabled) {
+		if (configuration === undefined) {
 			return undefined;
 		}
 
@@ -580,6 +579,7 @@ class VerificationService extends PromptService<{
 		if (isAccepted || isRejected) {
 			isFinalised = true;
 
+			// TODO(vxern): Check against the global journalling setting.
 			if (configuration.journaling) {
 				const journallingService = this.client.getJournallingService(this.guildId);
 
@@ -601,7 +601,6 @@ class VerificationService extends PromptService<{
 					throw "StateError: Unable to find ticket document.";
 				}
 
-				// unawaited
 				ticketService.handleDelete(ticketDocument);
 			}
 		}
@@ -658,8 +657,8 @@ class VerificationService extends PromptService<{
 			return;
 		}
 
-		const ticketConfiguration = guildDocument.features.server.features?.tickets;
-		if (ticketConfiguration === undefined || !ticketConfiguration.enabled) {
+		const ticketConfiguration = guildDocument.tickets;
+		if (ticketConfiguration === undefined) {
 			return;
 		}
 
@@ -756,10 +755,6 @@ class VerificationService extends PromptService<{
 	private getVoteInformation(entryRequest: EntryRequest): VoteInformation | undefined {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
-			return undefined;
-		}
-
-		if (!configuration.enabled) {
 			return undefined;
 		}
 

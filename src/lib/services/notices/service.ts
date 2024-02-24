@@ -15,12 +15,10 @@ interface NoticeData {
 }
 
 interface Configurations {
-	information: NonNullable<
-		NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]
-	>["information"];
-	resources: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["resources"];
-	roles: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["roles"];
-	welcome: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["welcome"];
+	information: Guild["informationNotice"];
+	resources: Guild["resourceNotice"];
+	roles: Guild["roleNotice"];
+	welcome: Guild["welcomeNotice"];
 }
 
 type ConfigurationLocators = {
@@ -28,10 +26,10 @@ type ConfigurationLocators = {
 };
 
 const configurationLocators: ConfigurationLocators = {
-	information: (guildDocument) => guildDocument.features.information.features?.notices.features?.information,
-	resources: (guildDocument) => guildDocument.features.information.features?.notices.features?.resources,
-	roles: (guildDocument) => guildDocument.features.information.features?.notices.features?.roles,
-	welcome: (guildDocument) => guildDocument.features.information.features?.notices.features?.welcome,
+	information: (guildDocument) => guildDocument.informationNotice,
+	resources: (guildDocument) => guildDocument.resourceNotice,
+	roles: (guildDocument) => guildDocument.roleNotice,
+	welcome: (guildDocument) => guildDocument.welcomeNotice,
 };
 
 type NoticeTypes = keyof ServiceStore["local"]["notices"];
@@ -52,10 +50,6 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 	get channelId(): bigint | undefined {
 		const configuration = this.configuration;
 		if (configuration === undefined) {
-			return undefined;
-		}
-
-		if (!configuration.enabled) {
 			return undefined;
 		}
 

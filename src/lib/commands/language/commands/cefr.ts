@@ -3,7 +3,6 @@ import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
-import { CefrConfiguration } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
@@ -27,9 +26,6 @@ interface Data {
 	tab: Tab;
 }
 
-type BracketButtonMetadata = [bracket: Bracket];
-type TabButtonMetadata = [tab: Tab];
-
 async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
@@ -40,16 +36,15 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const levelExamples = guildDocument.features.language.features?.cefr?.examples;
-	if (levelExamples === undefined) {
+	// TODO(vxern): Better define the requirements for a command.
+	const configuration = guildDocument.cefr;
+	if (configuration === undefined) {
 		return;
 	}
 
-	const isExtended = guildDocument.features.language.features?.cefr?.extended ?? false;
-
-	const guide = getBracketGuide(client, { isExtended }, { locale });
-	const examples = levelExamples.enabled
-		? getBracketExamples(client, levelExamples.levels, { isExtended }, { locale })
+	const guide = getBracketGuide(client, { isExtended: configuration.extended }, { locale });
+	const examples = configuration.examples?.enabled
+		? getBracketExamples(client, configuration.examples.levels, { isExtended: configuration.extended }, { locale })
 		: undefined;
 
 	const data: Data = { bracket: "a", tab: "guide" };
@@ -88,10 +83,10 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 		},
 	};
 
-	const bracketButtons = new InteractionCollector<BracketButtonMetadata>(client, {
+	const bracketButtons = new InteractionCollector<[bracket: Bracket]>(client, {
 		only: !interaction.parameters.show ? [interaction.user.id] : undefined,
 	});
-	const tabButtons = new InteractionCollector<TabButtonMetadata>(client, {
+	const tabButtons = new InteractionCollector<[tab: Tab]>(client, {
 		only: !interaction.parameters.show ? [interaction.user.id] : undefined,
 	});
 
@@ -135,7 +130,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 			}
 		}
 
-		if (!levelExamples.enabled) {
+		if (!configuration.examples?.enabled) {
 			return [{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtonComponents }];
 		}
 
@@ -318,7 +313,7 @@ function getBracketGuide(
 
 function getBracketExamples(
 	client: Client,
-	levels: NonNullable<CefrConfiguration["examples"]["levels"]>,
+	levels: NonNullable<NonNullable<NonNullable<Guild["cefr"]>["examples"]>["levels"]>,
 	options: { isExtended: boolean },
 	{ locale }: { locale: Locale },
 ): Record<Bracket, Discord.CamelizedDiscordEmbed> {

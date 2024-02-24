@@ -29,8 +29,8 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.server.features?.tickets;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.tickets;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -182,6 +182,7 @@ async function openTicket(
 		answers,
 	});
 
+	// TODO(vxern): Check against the global journalling setting.
 	if (configuration.journaling) {
 		const journallingService = client.getJournallingService(guild.id);
 

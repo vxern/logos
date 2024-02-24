@@ -10,11 +10,11 @@ import { getAllMessages } from "../../utils";
 import { LocalService } from "../service";
 
 interface Configurations {
-	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
-	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
-	resources: NonNullable<Guild["features"]["server"]["features"]>["resources"];
-	suggestions: NonNullable<Guild["features"]["server"]["features"]>["suggestions"];
-	tickets: NonNullable<Guild["features"]["server"]["features"]>["tickets"];
+	verification: Guild["verification"];
+	reports: Guild["reports"];
+	resources: Guild["resourceSubmissions"];
+	suggestions: Guild["suggestions"];
+	tickets: Guild["tickets"];
 }
 
 type ConfigurationLocators = {
@@ -22,11 +22,11 @@ type ConfigurationLocators = {
 };
 
 const configurationLocators: ConfigurationLocators = {
-	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
-	reports: (guildDocument) => guildDocument.features.moderation.features?.reports,
-	resources: (guildDocument) => guildDocument.features.server.features?.resources,
-	suggestions: (guildDocument) => guildDocument.features.server.features?.suggestions,
-	tickets: (guildDocument) => guildDocument.features.server.features?.tickets,
+	verification: (guildDocument) => guildDocument.verification,
+	reports: (guildDocument) => guildDocument.reports,
+	resources: (guildDocument) => guildDocument.resourceSubmissions,
+	suggestions: (guildDocument) => guildDocument.suggestions,
+	tickets: (guildDocument) => guildDocument.tickets,
 };
 
 type CustomIDs = Record<keyof Configurations, string>;
@@ -89,7 +89,7 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		if (!configuration.enabled) {
+		if (configuration.channelId === undefined) {
 			return undefined;
 		}
 
@@ -209,8 +209,12 @@ abstract class PromptService<
 
 			let management: { roles?: string[]; users?: string[] } | undefined;
 			switch (this.type) {
+				case "verification": {
+					management = (configuration as Configurations["verification"])?.management;
+					break;
+				}
 				case "reports": {
-					management = (configuration as Configurations["reports"]).management;
+					management = (configuration as Configurations["reports"])?.management;
 					break;
 				}
 				case "resources": {
@@ -218,7 +222,7 @@ abstract class PromptService<
 					break;
 				}
 				case "suggestions": {
-					management = (configuration as Configurations["suggestions"]).management;
+					management = (configuration as Configurations["suggestions"])?.management;
 					break;
 				}
 				case "tickets": {

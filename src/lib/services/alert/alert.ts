@@ -3,25 +3,14 @@ import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
 
-type Configuration = NonNullable<Guild["features"]["moderation"]["features"]>["alerts"];
-
 class AlertService extends LocalService {
-	get configuration(): Configuration | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return guildDocument.features.moderation.features?.alerts;
+	get configuration(): Guild["alerts"] {
+		return this.guildDocument?.alerts;
 	}
 
 	get channelId(): bigint | undefined {
 		const configuration = this.configuration;
 		if (configuration === undefined) {
-			return undefined;
-		}
-
-		if (!configuration.enabled) {
 			return undefined;
 		}
 

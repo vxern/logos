@@ -28,8 +28,8 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.language.features?.resources;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.resources;
+	if (configuration === undefined) {
 		return;
 	}
 

@@ -82,12 +82,10 @@ async function handleToggleSlowmode(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.slowmode;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.slowmode;
+	if (configuration === undefined) {
 		return;
 	}
-
-	const journallingService = client.getJournallingService(guild.id);
 
 	const isEnabled = channel.rateLimitPerUser !== undefined && channel.rateLimitPerUser !== 0;
 	if (isEnabled) {
@@ -125,7 +123,8 @@ async function handleToggleSlowmode(
 						client.log.warn(`Failed to downgrade slowmode level on ${diagnostics.display.channel(channel)}.`),
 					);
 
-				if (configuration.journaling) {
+				if (configuration.journaling && guildDocument.isEnabled("journalling")) {
+					const journallingService = client.getJournallingService(guild.id);
 					journallingService?.log("slowmodeDowngrade", {
 						args: [interaction.user, channel, previousLevel, level],
 					});
@@ -157,7 +156,8 @@ async function handleToggleSlowmode(
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
 					.catch(() => client.log.warn(`Failed to upgrade slowmode level on ${diagnostics.display.channel(channel)}.`));
 
-				if (configuration.journaling) {
+				if (configuration.journaling && guildDocument.isEnabled("journalling")) {
+					const journallingService = client.getJournallingService(guild.id);
 					journallingService?.log("slowmodeUpgrade", { args: [interaction.user, channel, previousLevel, level] });
 				}
 
@@ -241,7 +241,8 @@ async function handleToggleSlowmode(
 			.editChannel(channel.id, { rateLimitPerUser: null })
 			.catch(() => client.log.warn(`Failed to disable slowmode on ${diagnostics.display.channel(channel)}.`));
 
-		if (configuration.journaling) {
+		if (configuration.journaling && guildDocument.isEnabled("journalling")) {
+			const journallingService = client.getJournallingService(guild.id);
 			journallingService?.log("slowmodeDisable", { args: [interaction.user, channel] });
 		}
 
@@ -315,7 +316,8 @@ async function handleToggleSlowmode(
 			client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}: ${reason}`),
 		);
 
-	if (configuration.journaling) {
+	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
+		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("slowmodeEnable", { args: [interaction.user, channel, level] });
 	}
 

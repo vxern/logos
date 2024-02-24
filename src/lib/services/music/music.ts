@@ -51,19 +51,12 @@ interface Session {
 	};
 }
 
-type Configuration = NonNullable<Guild["features"]["social"]["features"]>["music"];
-
 // TODO(vxern): This needs cleaning up.
 class MusicService extends LocalService {
 	private session: Session | undefined;
 
-	get configuration(): Configuration | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return guildDocument.features.social.features?.music;
+	get configuration(): Guild["music"] {
+		return this.guildDocument?.music;
 	}
 
 	get channelId(): bigint | undefined {
@@ -275,10 +268,6 @@ class MusicService extends LocalService {
 	async createSession(channelId: bigint): Promise<Session | undefined> {
 		const [configuration, oldSession] = [this.configuration, this.session];
 		if (configuration === undefined) {
-			return undefined;
-		}
-
-		if (!configuration.enabled) {
 			return undefined;
 		}
 

@@ -11,8 +11,6 @@ function isVoice(channel: Logos.Channel): channel is VoiceChannel {
 	return channel.type === Discord.ChannelTypes.GuildVoice;
 }
 
-type Configuration = NonNullable<Guild["features"]["server"]["features"]>["dynamicVoiceChannels"];
-
 type WithVoiceStates<T> = T & { voiceStates: Logos.VoiceState[] };
 type DynamicVoiceChannelData = {
 	parent: WithVoiceStates<{ channel: Logos.Channel }>;
@@ -23,22 +21,13 @@ type DynamicVoiceChannelData = {
 class DynamicVoiceChannelService extends LocalService {
 	readonly oldVoiceStates: Map</*userId:*/ bigint, Logos.VoiceState> = new Map();
 
-	get configuration(): Configuration | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return guildDocument.features.server.features?.dynamicVoiceChannels;
+	get configuration(): Guild["dynamicVoiceChannels"] {
+		return this.guildDocument?.dynamicVoiceChannels;
 	}
 
 	get channels(): DynamicVoiceChannelData[] | undefined {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
-			return undefined;
-		}
-
-		if (!configuration.enabled) {
 			return undefined;
 		}
 
@@ -115,10 +104,6 @@ class DynamicVoiceChannelService extends LocalService {
 	async start(): Promise<void> {
 		const [channels, configuration, guild] = [this.channels, this.configuration, this.guild];
 		if (channels === undefined || configuration === undefined || guild === undefined) {
-			return;
-		}
-
-		if (!configuration.enabled) {
 			return;
 		}
 

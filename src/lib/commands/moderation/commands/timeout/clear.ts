@@ -28,8 +28,8 @@ async function handleClearTimeout(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.timeouts;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.timeouts;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -84,7 +84,7 @@ async function handleClearTimeout(
 		.editMember(guildId, member.id, { communicationDisabledUntil: null })
 		.catch(() => client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`));
 
-	if (configuration.journaling) {
+	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
 		journallingService?.log("memberTimeoutRemove", { args: [member, interaction.user] });
 	}

@@ -41,8 +41,8 @@ async function handleCiteRuleAutocomplete(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.warns;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.warns;
+	if (configuration === undefined) {
 		return;
 	}
 

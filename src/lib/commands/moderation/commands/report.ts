@@ -29,8 +29,8 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const configuration = guildDocument.features.moderation.features?.reports;
-	if (configuration === undefined || !configuration.enabled) {
+	const configuration = guildDocument.reports;
+	if (configuration === undefined) {
 		return;
 	}
 
@@ -82,7 +82,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 				answers,
 			});
 
-			if (configuration.journaling) {
+			if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 				const journallingService = client.getJournallingService(guild.id);
 				journallingService?.log("reportSubmit", { args: [member, reportDocument] });
 			}

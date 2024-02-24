@@ -22,15 +22,15 @@ interface GuildFeatures {
 		/** Features part of the information section. */
 		features: {
 			/** Logging events on the server. */
-			journaling: Activatable<{
+			journaling?: Activatable<{
 				/** The ID of the channel the events will be logged to. */
 				channelId: string;
 			}>;
 
 			/** Informational notices. */
-			notices: Activatable<{
+			notices?: Activatable<{
 				features: {
-					information: Activatable<{
+					information?: Activatable<{
 						channelId: string;
 						inviteLink: string;
 					}>;
@@ -41,11 +41,11 @@ interface GuildFeatures {
 						channelId: string;
 					}>;
 
-					roles: Activatable<{
+					roles?: Activatable<{
 						channelId: string;
 					}>;
 
-					welcome: Activatable<{
+					welcome?: Activatable<{
 						channelId: string;
 						ruleChannelId: string;
 					}>;
@@ -66,15 +66,15 @@ interface GuildFeatures {
 			/** @since v3.1.0 */
 			cefr?: Activatable<CefrConfiguration>;
 
-			game: Activatable;
+			game?: Activatable;
 
-			resources: Activatable<{
+			resources?: Activatable<{
 				url: string;
 			}>;
 
-			translate: Activatable;
+			translate?: Activatable;
 
-			word: Activatable;
+			word?: Activatable;
 
 			/** @since v3.8.0 */
 			targetOnly?: Activatable<{
@@ -92,16 +92,16 @@ interface GuildFeatures {
 	moderation: Activatable<{
 		/** Features part of the moderation section. */
 		features: {
-			alerts: Activatable<{
+			alerts?: Activatable<{
 				channelId: string;
 			}>;
 
-			policy: Activatable;
+			policy?: Activatable;
 
-			rules: Activatable;
+			rules?: Activatable;
 
 			/** Message purging. */
-			purging: Activatable<{
+			purging?: Activatable<{
 				journaling: boolean;
 			}>;
 
@@ -110,12 +110,12 @@ interface GuildFeatures {
 				journaling: boolean;
 			}>;
 
-			timeouts: Activatable<{
+			timeouts?: Activatable<{
 				journaling: boolean;
 			}>;
 
 			/** Warning and pardoning users. */
-			warns: Activatable<{
+			warns?: Activatable<{
 				journaling: boolean;
 
 				/**
@@ -133,13 +133,13 @@ interface GuildFeatures {
 				 *
 				 * Implies `limit` being set to a specific value.
 				 */
-				autoTimeout: Activatable<{
+				autoTimeout?: Activatable<{
 					duration?: TimeStruct;
 				}>;
 			}>;
 
 			/** User reports. */
-			reports: Activatable<{
+			reports?: Activatable<{
 				channelId: string;
 				journaling: boolean;
 				rateLimit?: RateLimit;
@@ -152,7 +152,7 @@ interface GuildFeatures {
 
 			/** User verification. */
 			/** Relies on guild.features.server.tickets.categoryId */
-			verification: Activatable<{
+			verification?: Activatable<{
 				channelId: string;
 
 				journaling: boolean;
@@ -182,11 +182,11 @@ interface GuildFeatures {
 	server: Activatable<{
 		features: {
 			/** Automatic channel creation/deletion. */
-			dynamicVoiceChannels: Activatable<{
+			dynamicVoiceChannels?: Activatable<{
 				channels: DynamicVoiceChannel[];
 			}>;
 
-			entry: Activatable;
+			entry?: Activatable;
 
 			/** @since v3.7.0 */
 			roleIndicators?: Activatable<{
@@ -195,7 +195,7 @@ interface GuildFeatures {
 			}>;
 
 			/** User suggestions for the server. */
-			suggestions: Activatable<{
+			suggestions?: Activatable<{
 				channelId: string;
 				journaling: boolean;
 				rateLimit?: RateLimit;
@@ -235,16 +235,16 @@ interface GuildFeatures {
 	/** Social section of features. */
 	social: Activatable<{
 		features: {
-			music: Activatable<{
+			music?: Activatable<{
 				implicitVolume: number; // Increments of 5, 50 - 100.
 			}>;
 
-			praises: Activatable<{
+			praises?: Activatable<{
 				journaling: boolean;
 				rateLimit?: RateLimit;
 			}>;
 
-			profile: Activatable;
+			profile?: Activatable;
 		};
 	}>;
 }
@@ -271,6 +271,7 @@ type Activatable<T extends Record<string, unknown> = Record<string, unknown>> = 
 	| ({ enabled: false } & Partial<T>)
 	| ({ enabled: true } & T)
 );
+type Enabled<T> = T & { enabled: true };
 
 type RateLimit = {
 	uses: number;
@@ -291,7 +292,7 @@ type CefrLevelExamplesExtended = CefrLevelExamples & {
 };
 type CefrConfiguration<Extended extends boolean = boolean> = {
 	extended: Extended;
-	examples: Activatable<{
+	examples?: Activatable<{
 		levels: true extends Extended ? CefrLevelExamplesExtended : CefrLevelExamples;
 	}>;
 };
@@ -346,18 +347,343 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return this.languages?.feature ?? defaults.LOCALISATION_LANGUAGE;
 	}
 
-	get #targetLanguageOnlyChannelIds(): string[] {
-		const language = this.features.language;
-		if (!language.enabled) {
-			return [];
+	get informationFeatures(): GuildFeatures["information"]["features"] | undefined {
+		if (!this.features.information.enabled) {
+			return undefined;
 		}
 
-		const targetOnly = language.features.targetOnly;
-		if (targetOnly === undefined || !targetOnly.enabled) {
-			return [];
+		return this.features.information.features;
+	}
+
+	get journalling(): Enabled<NonNullable<Guild["informationFeatures"]>["journaling"]> | undefined {
+		const informationFeatures = this.informationFeatures;
+		if (!informationFeatures?.journaling?.enabled) {
+			return undefined;
 		}
 
-		return targetOnly.channelIds;
+		return informationFeatures.journaling;
+	}
+
+	get noticeFeatures(): NonNullable<NonNullable<Guild["informationFeatures"]>["notices"]>["features"] | undefined {
+		const informationFeatures = this.informationFeatures;
+		if (!informationFeatures?.notices?.enabled) {
+			return undefined;
+		}
+
+		return informationFeatures.notices?.features;
+	}
+
+	get informationNotice(): Enabled<NonNullable<Guild["noticeFeatures"]>["information"]> | undefined {
+		const noticeFeatures = this.noticeFeatures;
+		if (!noticeFeatures?.information?.enabled) {
+			return undefined;
+		}
+
+		return noticeFeatures.information;
+	}
+
+	get resourceNotice(): Enabled<NonNullable<Guild["noticeFeatures"]>["resources"]> | undefined {
+		const noticeFeatures = this.noticeFeatures;
+		if (!noticeFeatures?.resources?.enabled) {
+			return undefined;
+		}
+
+		return noticeFeatures.resources;
+	}
+
+	get roleNotice(): Enabled<NonNullable<Guild["noticeFeatures"]>["roles"]> | undefined {
+		const noticeFeatures = this.noticeFeatures;
+		if (!noticeFeatures?.roles?.enabled) {
+			return undefined;
+		}
+
+		return noticeFeatures.roles;
+	}
+
+	get welcomeNotice(): Enabled<NonNullable<Guild["noticeFeatures"]>["welcome"]> | undefined {
+		const noticeFeatures = this.noticeFeatures;
+		if (!noticeFeatures?.welcome?.enabled) {
+			return undefined;
+		}
+
+		return noticeFeatures.welcome;
+	}
+
+	get languageFeatures(): GuildFeatures["language"]["features"] | undefined {
+		if (!this.features.language.enabled) {
+			return undefined;
+		}
+
+		return this.features.language.features;
+	}
+
+	get answers(): Enabled<NonNullable<Guild["languageFeatures"]>["answers"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.answers?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.answers;
+	}
+
+	get corrections(): Enabled<NonNullable<Guild["languageFeatures"]>["corrections"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.corrections?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.corrections;
+	}
+
+	get cefr(): Enabled<NonNullable<Guild["languageFeatures"]>["cefr"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.cefr?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.cefr;
+	}
+
+	get game(): Enabled<NonNullable<Guild["languageFeatures"]>["game"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.game?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.game;
+	}
+
+	get resources(): Enabled<NonNullable<Guild["languageFeatures"]>["resources"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.resources?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.resources;
+	}
+
+	get translate(): Enabled<NonNullable<Guild["languageFeatures"]>["translate"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.translate?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.translate;
+	}
+
+	get word(): Enabled<NonNullable<Guild["languageFeatures"]>["word"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.word?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.word;
+	}
+
+	get targetOnly(): Enabled<NonNullable<Guild["languageFeatures"]>["targetOnly"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.targetOnly?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.targetOnly;
+	}
+
+	get roleLanguages(): Enabled<NonNullable<Guild["languageFeatures"]>["roleLanguages"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.roleLanguages?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.roleLanguages;
+	}
+
+	get moderationFeatures(): GuildFeatures["moderation"]["features"] | undefined {
+		if (!this.features.moderation.enabled) {
+			return undefined;
+		}
+
+		return this.features.moderation.features;
+	}
+
+	get alerts(): Enabled<NonNullable<Guild["moderationFeatures"]>["alerts"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.alerts?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.alerts;
+	}
+
+	get policy(): Enabled<NonNullable<Guild["moderationFeatures"]>["policy"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.policy?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.policy;
+	}
+
+	get rules(): Enabled<NonNullable<Guild["moderationFeatures"]>["rules"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.rules?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.rules;
+	}
+
+	get purging(): Enabled<NonNullable<Guild["moderationFeatures"]>["purging"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.purging?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.purging;
+	}
+
+	get slowmode(): Enabled<NonNullable<Guild["moderationFeatures"]>["slowmode"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.slowmode?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.slowmode;
+	}
+
+	get timeouts(): Enabled<NonNullable<Guild["moderationFeatures"]>["timeouts"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.timeouts?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.timeouts;
+	}
+
+	get warns(): Enabled<NonNullable<Guild["moderationFeatures"]>["warns"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.warns?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.warns;
+	}
+
+	get reports(): Enabled<NonNullable<Guild["moderationFeatures"]>["reports"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.reports?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.reports;
+	}
+
+	/** Relies on guild.features.server.tickets.categoryId */
+	get verification(): Enabled<NonNullable<Guild["moderationFeatures"]>["verification"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.verification?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.verification;
+	}
+
+	get serverFeatures(): GuildFeatures["server"]["features"] | undefined {
+		if (!this.features.server.enabled) {
+			return undefined;
+		}
+
+		return this.features.server.features;
+	}
+
+	get dynamicVoiceChannels(): Enabled<NonNullable<Guild["serverFeatures"]>["dynamicVoiceChannels"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.dynamicVoiceChannels?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.dynamicVoiceChannels;
+	}
+
+	get entry(): Enabled<NonNullable<Guild["serverFeatures"]>["entry"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.entry?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.entry;
+	}
+
+	get roleIndicators(): Enabled<NonNullable<Guild["serverFeatures"]>["roleIndicators"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.roleIndicators?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.roleIndicators;
+	}
+
+	get suggestions(): Enabled<NonNullable<Guild["serverFeatures"]>["suggestions"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.suggestions?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.suggestions;
+	}
+
+	// TODO(vxern): Naming?
+	get resourceSubmissions(): Enabled<NonNullable<Guild["serverFeatures"]>["resources"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.resources?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.resources;
+	}
+
+	get tickets(): Enabled<NonNullable<Guild["serverFeatures"]>["tickets"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.tickets?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.tickets;
+	}
+
+	get socialFeatures(): GuildFeatures["social"]["features"] | undefined {
+		if (!this.features.social.enabled) {
+			return undefined;
+		}
+
+		return this.features.social.features;
+	}
+
+	get music(): Enabled<NonNullable<Guild["socialFeatures"]>["music"]> | undefined {
+		const socialFeatures = this.socialFeatures;
+		if (!socialFeatures?.music?.enabled) {
+			return undefined;
+		}
+
+		return socialFeatures.music;
+	}
+
+	get praises(): Enabled<NonNullable<Guild["socialFeatures"]>["praises"]> | undefined {
+		const socialFeatures = this.socialFeatures;
+		if (!socialFeatures?.praises?.enabled) {
+			return undefined;
+		}
+
+		return socialFeatures.praises;
+	}
+
+	get profile(): Enabled<NonNullable<Guild["socialFeatures"]>["profile"]> | undefined {
+		const socialFeatures = this.socialFeatures;
+		if (!socialFeatures?.profile?.enabled) {
+			return undefined;
+		}
+
+		return socialFeatures.profile;
 	}
 
 	constructor({
@@ -419,10 +745,18 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return promise;
 	}
 
+	isEnabled(feature: keyof Guild) {
+		return this[feature] !== undefined;
+	}
+
+	areEnabled(feature: keyof Guild) {
+		return this[feature] !== undefined;
+	}
+
 	isTargetLanguageOnly(channelId: string): boolean {
-		return this.#targetLanguageOnlyChannelIds.includes(channelId);
+		return this.targetOnly?.channelIds?.includes(channelId) ?? false;
 	}
 }
 
 export { timeStructToMilliseconds, Guild };
-export type { DynamicVoiceChannel, CefrConfiguration, TimeStruct, RoleWithIndicator, RateLimit };
+export type { DynamicVoiceChannel, TimeStruct, RoleWithIndicator, RateLimit };
