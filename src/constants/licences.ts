@@ -53,16 +53,13 @@ const licences = {
 	},
 	software: {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
-		cldpre: apache("Copyright [yyyy] [name of copyright owner]"),
 		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
 		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
 		"event-stream": mit("Copyright (c) 2011 Dominic Tarr"),
-		"fancy-log": mit(
-			"Copyright (c) 2014, 2015, 2018, 2021 Blaine Bublitz <blaine.bublitz@gmail.com> and Eric Schoffstall <yo@contra.io>",
-		),
 		"fastest-levenshtein": mit("Copyright (c) 2020 Kasper Unn Weihe"),
 		ioredis: mit("Copyright (c) 2015-2022 Zihua Li"),
 		lavaclient: apache("Copyright 2023 Dimensional Fun & Contributors"),
+		loglevel: mit("Copyright (c) 2013 Tim Perry"),
 		nanoid: mit("Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>"),
 		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
 		"parse-wiktionary": mit(

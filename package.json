@@ -48,7 +48,6 @@
   },
   "dependencies": {
     "@discordeno/bot": "^19.0.0-next",
-    "cldpre": "^2.9.0",
     "dexonline-scraper": "^0.1.1",
     "dotenv": "^16.4.1",
     "event-stream": "^4.0.1",
