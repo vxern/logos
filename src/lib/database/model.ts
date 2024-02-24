@@ -1,16 +1,7 @@
 import constants from "../../constants/constants";
 import { capitalise, decapitalise } from "../../formatting";
 import { Client, Database } from "../client";
-import { EntryRequest } from "./entry-request";
-import { Guild, RateLimit, timeStructToMilliseconds } from "./guild";
-import { GuildStats } from "./guild-stats";
-import { Praise } from "./praise";
-import { Report } from "./report";
-import { Resource } from "./resource";
-import { Suggestion } from "./suggestion";
-import { Ticket } from "./ticket";
-import { User } from "./user";
-import { Warning } from "./warning";
+import { RateLimit, timeStructToMilliseconds } from "./guild";
 
 interface DocumentMetadata {
 	"@id": string;
@@ -23,17 +14,23 @@ interface RawDocument {
 	"@metadata": Omit<DocumentMetadata, "@collection"> & { "@collection": string };
 }
 
-type Collection =
-	| "EntryRequests"
-	| "GuildStats"
-	| "Guilds"
-	| "Praises"
-	| "Reports"
-	| "Resources"
-	| "Suggestions"
-	| "Tickets"
-	| "Users"
-	| "Warnings";
+const collections = [
+	"EntryRequests",
+	"GuildStats",
+	"Guilds",
+	"Praises",
+	"Reports",
+	"Resources",
+	"Suggestions",
+	"Tickets",
+	"Users",
+	"Warnings",
+] as const;
+type Collection = (typeof collections)[number];
+
+function isSupportedCollection(collection: string): collection is Collection {
+	return (collections as unknown as string[]).includes(collection);
+}
 
 type IdentifierParts<M extends Model> = M["_idParts"];
 type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: string };
@@ -45,19 +42,6 @@ type ClientOrDatabase = Client | Database;
 const IDENTIFIER_PARTS_ORDERED: string[] = ["guildId", "userId", "authorId", "targetId", "createdAt"];
 
 abstract class Model<Generic extends { idParts: readonly string[] } = any> {
-	static readonly #_classes: Record<Collection, { new (data: any): Model }> = {
-		EntryRequests: EntryRequest,
-		GuildStats: GuildStats,
-		Guilds: Guild,
-		Praises: Praise,
-		Reports: Report,
-		Resources: Resource,
-		Suggestions: Suggestion,
-		Tickets: Ticket,
-		Users: User,
-		Warnings: Warning,
-	};
-
 	readonly _idParts: Generic["idParts"];
 
 	readonly createdAt: number;
@@ -84,20 +68,6 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 		this._idParts = idParts;
 	}
 
-	static from<M extends Model>(payload: RawDocument): M {
-		if (payload["@metadata"]["@collection"] === "@empty") {
-			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
-		}
-
-		if (!(payload["@metadata"]["@collection"] in Model.#_classes)) {
-			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
-		}
-
-		const Class = Model.#_classes[payload["@metadata"]["@collection"] as Collection];
-
-		return new Class(payload) as M;
-	}
-
 	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {
 		const parts: string[] = [];
 		for (const part of IDENTIFIER_PARTS_ORDERED) {
@@ -121,7 +91,7 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	static getDataFromId<M extends Model>(id: string): [collection: Collection, data: IdentifierParts<M>] {
 		const [collectionCamelCase, ...data] = id.split(constants.symbols.database.separator);
 		const collection = capitalise(collectionCamelCase!);
-		if (!(collection in Model.#_classes)) {
+		if (!isSupportedCollection(collection)) {
 			throw `Collection "${collection}" encoded in ID "${id}" is unknown.`;
 		}
 

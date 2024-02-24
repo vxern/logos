@@ -32,7 +32,7 @@ import commandTemplates from "./commands/commands";
 import { EntryRequest } from "./database/entry-request";
 import { Guild, timeStructToMilliseconds } from "./database/guild";
 import { GuildStats } from "./database/guild-stats";
-import { Model, RawDocument } from "./database/model";
+import { Collection, Model, RawDocument } from "./database/model";
 import { Praise } from "./database/praise";
 import { Report } from "./database/report";
 import { Resource } from "./database/resource";
@@ -116,7 +116,40 @@ class Logger {
 }
 
 class DocumentSession extends ravendb.DocumentSession {
+	static readonly #_classes: Record<Collection, { new (data: any): Model }> = {
+		EntryRequests: EntryRequest,
+		GuildStats: GuildStats,
+		Guilds: Guild,
+		Praises: Praise,
+		Reports: Report,
+		Resources: Resource,
+		Suggestions: Suggestion,
+		Tickets: Ticket,
+		Users: User,
+		Warnings: Warning,
+	};
+
 	readonly #database: Database;
+
+	constructor({ database, id, options }: { database: Database; id: string; options: ravendb.SessionOptions }) {
+		super(database, id, options);
+
+		this.#database = database;
+	}
+
+	static instantiateModel<M extends Model>(payload: RawDocument): M {
+		if (payload["@metadata"]["@collection"] === "@empty") {
+			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
+		}
+
+		if (!(payload["@metadata"]["@collection"] in DocumentSession.#_classes)) {
+			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
+		}
+
+		const Class = DocumentSession.#_classes[payload["@metadata"]["@collection"] as Collection];
+
+		return new Class(payload) as M;
+	}
 
 	async get<M extends Model>(id: string): Promise<M | undefined>;
 	async get<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
@@ -138,7 +171,7 @@ class DocumentSession extends ravendb.DocumentSession {
 				continue;
 			}
 
-			const document = Model.from(documentRaw!) as M;
+			const document = DocumentSession.instantiateModel(documentRaw!) as M;
 			documents.push(document);
 		}
 
@@ -159,12 +192,6 @@ class DocumentSession extends ravendb.DocumentSession {
 		// We don't call `delete()` here because we don't actually delete from the database.
 
 		this.#database.unloadDocument(document);
-	}
-
-	constructor({ database, id, options }: { database: Database; id: string; options: ravendb.SessionOptions }) {
-		super(database, id, options);
-
-		this.#database = database;
 	}
 }
 
