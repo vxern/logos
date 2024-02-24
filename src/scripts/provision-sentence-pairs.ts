@@ -126,6 +126,22 @@ const readStream = new stream.Writable({
 	},
 });
 
+function addPolyfills(): void {
+	Promise.withResolvers = <T>() => {
+		let resolve!: (value: T) => void;
+		let reject!: () => void;
+
+		const promise = new Promise<T>((resolve_, reject_) => {
+			resolve = resolve_;
+			reject = reject_;
+		});
+
+		return { promise, resolve, reject };
+	};
+}
+
+addPolyfills();
+
 const promises = [];
 for (const file of await getFiles(defaults.SENTENCE_PAIRS_DIRECTORY)) {
 	promises.push(subscribeToReadStream(readStream, file));
