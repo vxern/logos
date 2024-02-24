@@ -3,7 +3,7 @@ import { Client } from "../../../client";
 import { rules } from "../../../commands/moderation/commands/rule";
 import { HashableMessageContents, NoticeService } from "../service";
 
-class InformationNoticeService extends NoticeService<"information"> {
+class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "information" });
 	}

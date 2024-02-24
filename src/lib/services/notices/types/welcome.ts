@@ -4,7 +4,7 @@ import { MentionTypes, mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
 
-class WelcomeNoticeService extends NoticeService<"welcome"> {
+class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "welcome" });
 	}

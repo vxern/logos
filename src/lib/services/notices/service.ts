@@ -34,12 +34,12 @@ const configurationLocators: ConfigurationLocators = {
 
 type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
-abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalService {
+abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
 	#noticeData: NoticeData | undefined;
 
-	readonly #_configuration: ConfigurationLocators[NoticeType];
+	readonly #_configuration: ConfigurationLocators[Generic["type"]];
 
-	get configuration(): Configurations[NoticeType] | undefined {
+	get configuration(): Configurations[Generic["type"]] | undefined {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
 			return undefined;
@@ -62,7 +62,7 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		return channelId;
 	}
 
-	constructor(client: Client, guildId: bigint, { type }: { type: NoticeType }) {
+	constructor(client: Client, guildId: bigint, { type }: { type: Generic["type"] }) {
 		super(client, guildId);
 
 		this.#_configuration = configurationLocators[type];

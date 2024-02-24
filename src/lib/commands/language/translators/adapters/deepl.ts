@@ -51,7 +51,7 @@ class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 			return undefined;
 		}
 
-		let data;
+		let data: any;
 		try {
 			data = await response.json();
 		} catch (exception) {

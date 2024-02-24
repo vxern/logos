@@ -4,7 +4,7 @@ import { Client, InteractionCollector } from "../../../client";
 import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
 import { HashableMessageContents, NoticeService } from "../service";
 
-class RoleNoticeService extends NoticeService<"roles"> {
+class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	readonly #_selectRolesButton: InteractionCollector;
 
 	constructor(client: Client, guildId: bigint) {

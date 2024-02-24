@@ -1,10 +1,10 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import localisations from "../../../../constants/localisations";
-import { HashableMessageContents, NoticeService } from "../service";
 import { Client } from "../../../client";
+import { HashableMessageContents, NoticeService } from "../service";
 
-class ResourceNoticeService extends NoticeService<"resources"> {
+class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 	constructor(client: Client, guildId: bigint) {
 		super(client, guildId, { type: "resources" });
 	}

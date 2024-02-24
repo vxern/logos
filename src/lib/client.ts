@@ -2007,7 +2007,7 @@ class ServiceStore {
 	getNoticeService(
 		guildId: bigint,
 		{ type }: { type: keyof ServiceStore["local"]["notices"] },
-	): NoticeService<typeof type> | undefined {
+	): NoticeService<{ type: typeof type }> | undefined {
 		switch (type) {
 			case "information": {
 				return this.local.notices.information.get(guildId);

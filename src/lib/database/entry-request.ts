@@ -134,7 +134,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 					return;
 				}
 
-        this.votedFor.push(userId);
+				this.votedFor.push(userId);
 				break;
 			}
 			case "against": {
@@ -143,7 +143,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 					return;
 				}
 
-        this.votedAgainst.push(userId);
+				this.votedAgainst.push(userId);
 				break;
 			}
 		}
