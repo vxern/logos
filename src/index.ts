@@ -2,6 +2,9 @@ import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
 import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "./constants/languages";
 import { Client } from "./lib/client";
+import log from "loglevel";
+
+log.enableAll();
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";
