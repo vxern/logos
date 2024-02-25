@@ -84,7 +84,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 
 			if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 				const journallingService = client.getJournallingService(guild.id);
-				journallingService?.log("suggestionSend", { args: [member, suggestionDocument] });
+				journallingService?.logEvent("suggestionSend", { args: [member, suggestionDocument] });
 			}
 
 			const user = client.entities.users.get(interaction.user.id);

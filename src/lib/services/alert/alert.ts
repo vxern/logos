@@ -1,4 +1,5 @@
 import * as Discord from "@discordeno/bot";
+import { Client } from "../../client";
 import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
@@ -22,8 +23,11 @@ class AlertService extends LocalService {
 		return channelId;
 	}
 
-	async start(): Promise<void> {}
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "AlertService", guildId });
+	}
 
+	async start(): Promise<void> {}
 	async stop(): Promise<void> {}
 
 	async alert(message: Discord.CreateMessageOptions): Promise<void> {
@@ -32,13 +36,15 @@ class AlertService extends LocalService {
 			return;
 		}
 
-		this.client.bot.rest.sendMessage(channelId, message).catch(() => {
-			this.client.log.warn(
-				`Failed to send alert to ${diagnostics.display.channel(channelId)} on ${diagnostics.display.guild(
-					this.guildId,
-				)}.`,
+		this.client.bot.rest
+			.sendMessage(channelId, message)
+			.catch(() =>
+				this.log.warn(
+					`Failed to send alert to ${diagnostics.display.channel(channelId)} on ${diagnostics.display.guild(
+						this.guildId,
+					)}.`,
+				),
 			);
-		});
 	}
 }
 

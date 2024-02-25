@@ -12,8 +12,8 @@ class ReportService extends PromptService<{
 	model: Report;
 	metadata: [partialId: string, isResolve: string];
 }> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "reports", deleteMode: "delete" });
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "ReportPromptService", guildId }, { type: "reports", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Report> {

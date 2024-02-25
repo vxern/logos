@@ -27,8 +27,8 @@ class VerificationService extends PromptService<{
 }> {
 	readonly #_openInquiry: InteractionCollector<[partialId: string]>;
 
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "verification", deleteMode: "none" });
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "VerificationPromptService", guildId }, { type: "verification", deleteMode: "none" });
 
 		this.#_openInquiry = new InteractionCollector(client, {
 			customId: InteractionCollector.encodeCustomId([constants.components.createInquiry, this.guildIdString]),
@@ -584,9 +584,9 @@ class VerificationService extends PromptService<{
 				const journallingService = this.client.getJournallingService(this.guildId);
 
 				if (isAccepted) {
-					journallingService?.log("entryRequestAccept", { args: [author, voter] });
+					journallingService?.logEvent("entryRequestAccept", { args: [author, voter] });
 				} else {
-					journallingService?.log("entryRequestReject", { args: [author, voter] });
+					journallingService?.logEvent("entryRequestReject", { args: [author, voter] });
 				}
 			}
 		}
@@ -615,14 +615,14 @@ class VerificationService extends PromptService<{
 				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "authorised" });
 			});
 
-			this.client.log.info(
+			this.log.info(
 				`Accepted ${diagnostics.display.user(authorDocument.account.id)} onto ${diagnostics.display.guild(guild)}.`,
 			);
 
 			this.client.bot.rest
 				.addRole(this.guildId, author.id, BigInt(entryRequestDocument.requestedRoleId), "User-requested role addition.")
 				.catch(() =>
-					this.client.log.warn(
+					this.log.warn(
 						`Failed to add ${diagnostics.display.role(
 							entryRequestDocument.requestedRoleId,
 						)} to ${diagnostics.display.user(authorDocument.account.id)} on ${diagnostics.display.guild(guild)}.`,
@@ -633,14 +633,14 @@ class VerificationService extends PromptService<{
 				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "rejected" });
 			});
 
-			this.client.log.info(
+			this.log.info(
 				`Rejected ${diagnostics.display.user(authorDocument.account.id)} from ${diagnostics.display.guild(guild)}.`,
 			);
 
 			this.client.bot.rest
 				.banMember(this.guildId, author.id, {}, "Voted to reject entry request.")
 				.catch(() =>
-					this.client.log.warn(
+					this.log.warn(
 						`Failed to ban ${diagnostics.display.user(authorDocument.account.id)} on ${diagnostics.display.guild(
 							guild,
 						)}.`,
@@ -725,9 +725,9 @@ class VerificationService extends PromptService<{
 			return;
 		}
 
-		await this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
-			this.client.log.warn("Failed to delete prompt.");
-		});
+		await this.client.bot.rest
+			.deleteMessage(prompt.channelId, prompt.id)
+			.catch(() => this.log.warn("Failed to delete prompt."));
 
 		{
 			const strings = {

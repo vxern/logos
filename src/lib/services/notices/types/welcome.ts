@@ -5,8 +5,8 @@ import { Client } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "welcome" });
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "WelcomeNoticeService", guildId }, { type: "welcome" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {

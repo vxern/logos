@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
 import defaults from "../../defaults";
 import * as Logos from "../../types";
-import { Client } from "../client";
+import { Client, Logger } from "../client";
 import { Guild } from "../database/guild";
 
 type ServiceBase = {
@@ -10,9 +10,11 @@ type ServiceBase = {
 };
 
 abstract class Service implements ServiceBase {
+	readonly log: Logger;
 	readonly client: Client;
 
-	constructor(client: Client) {
+	constructor(client: Client, { identifier }: { identifier: string }) {
+		this.log = Logger.create({ identifier, isDebug: client.environment.isDebug });
 		this.client = client;
 	}
 
@@ -115,8 +117,8 @@ abstract class LocalService extends Service {
 		return guildLocale;
 	}
 
-	constructor(client: Client, guildId: bigint) {
-		super(client);
+	constructor(client: Client, { identifier, guildId }: { identifier: string; guildId: bigint }) {
+		super(client, { identifier: `${identifier}@${guildId}` });
 
 		this.guildId = guildId;
 		this.guildIdString = guildId.toString();

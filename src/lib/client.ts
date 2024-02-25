@@ -67,23 +67,23 @@ import { StatusService } from "./services/status/service";
 import { compact } from "./utils";
 
 interface Environment {
-	isDebug: boolean;
-	discordSecret: string;
-	deeplSecret: string;
-	rapidApiSecret: string;
-	ravendbHost: string;
-	ravendbDatabase: string;
-	ravendbSecure: boolean;
-	lavalinkHost: string;
-	lavalinkPort: string;
-	lavalinkPassword: string;
+	readonly isDebug: boolean;
+	readonly discordSecret: string;
+	readonly deeplSecret: string;
+	readonly rapidApiSecret: string;
+	readonly ravendbHost: string;
+	readonly ravendbDatabase: string;
+	readonly ravendbSecure: boolean;
+	readonly lavalinkHost: string;
+	readonly lavalinkPort: string;
+	readonly lavalinkPassword: string;
 }
 
 class Logger {
+	static readonly #_instances = new Map<string, Logger>();
+
 	readonly #identifierDisplayed: string;
 	readonly #isDebug: boolean;
-
-	static readonly #instances = new Map<string, Logger>();
 
 	private constructor({ identifier, isDebug = false }: { identifier: string; isDebug?: boolean }) {
 		this.#identifierDisplayed = `[${identifier}]`;
@@ -91,8 +91,8 @@ class Logger {
 	}
 
 	static create({ identifier, isDebug = false }: { identifier: string; isDebug?: boolean }): Logger {
-		if (Logger.#instances.has(identifier)) {
-			return Logger.#instances.get(identifier)!;
+		if (Logger.#_instances.has(identifier)) {
+			return Logger.#_instances.get(identifier)!;
 		}
 
 		return new Logger({ identifier, isDebug });
@@ -210,7 +210,14 @@ class Database extends ravendb.DocumentStore {
 		readonly warningsByTarget: Map<string, Map<string, Warning>>;
 	};
 
-	private constructor({ host, database, certificate }: { host: string; database: string; certificate?: Buffer }) {
+	readonly #log: Logger;
+
+	private constructor({
+		host,
+		database,
+		certificate,
+		isDebug,
+	}: { host: string; database: string; certificate?: Buffer; isDebug?: boolean }) {
 		if (certificate !== undefined) {
 			super(host, database, { certificate, type: "pfx" });
 		} else {
@@ -230,11 +237,11 @@ class Database extends ravendb.DocumentStore {
 			users: new Map(),
 			warningsByTarget: new Map(),
 		};
+
+		this.#log = Logger.create({ identifier: "Client/Database", isDebug });
 	}
 
 	static async create(options: { host: string; database: string; certificate?: Buffer }): Promise<Database> {
-		console.info("[Setup/Client/Database] Initialising the database...");
-
 		const database = new Database(options);
 
 		database.initialize();
@@ -245,7 +252,7 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	async #prefetchDocuments(): Promise<void> {
-		console.info("[Setup/Client/Database] Prefetching documents...");
+		this.#log.info("Prefetching documents...");
 
 		const result = await Promise.all([
 			EntryRequest.getAll(this),
@@ -260,6 +267,8 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	cacheDocuments<M extends Model>(documents: M[]): void {
+		this.#log.info(`Caching ${documents.length} documents...`);
+
 		for (const document of documents) {
 			this.cacheDocument(document);
 		}
@@ -429,7 +438,13 @@ class DiscordConnection {
 		};
 	};
 
-	constructor({ bot, events }: { bot: Discord.Bot; events: Partial<Discord.EventHandlers> }) {
+	readonly #log: Logger;
+
+	constructor({
+		bot,
+		events,
+		isDebug,
+	}: { bot: Discord.Bot; events: Partial<Discord.EventHandlers>; isDebug?: boolean }) {
 		this.bot = bot;
 		this.cache = {
 			guilds: new Map(),
@@ -441,6 +456,8 @@ class DiscordConnection {
 				previous: new Map(),
 			},
 		};
+
+		this.#log = Logger.create({ identifier: "Client/DiscordConnection", isDebug });
 
 		// TODO(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
 		this.bot.handlers.MESSAGE_UPDATE = (bot, data) => {
@@ -572,13 +589,13 @@ class DiscordConnection {
 	}
 
 	async open(): Promise<void> {
-		console.info("[Setup/Client] Opening connection to Discord...");
+		this.#log.info("Opening connection to Discord...");
 
 		await this.bot.start();
 	}
 
 	async close(): Promise<void> {
-		console.info("[Client] Closing connection to Discord...");
+		this.#log.info("Closing connection to Discord...");
 
 		await this.bot.shutdown();
 	}
@@ -597,18 +614,20 @@ type Localisations = Map<
 	>
 >;
 interface NameLocalisations {
-	name: string;
-	nameLocalizations?: Partial<Record<Discord.Locales, string>>;
+	readonly name: string;
+	readonly nameLocalizations?: Partial<Record<Discord.Locales, string>>;
 }
 interface DescriptionLocalisations {
-	description: string;
-	descriptionLocalizations?: Partial<Record<Discord.Locales, string>>;
+	readonly description: string;
+	readonly descriptionLocalizations?: Partial<Record<Discord.Locales, string>>;
 }
 class LocalisationStore {
+	readonly #log: Logger;
 	readonly #localisations: Localisations;
 
-	constructor({ localisations }: { localisations: RawLocalisations }) {
+	constructor({ localisations, isDebug }: { localisations: RawLocalisations; isDebug?: boolean }) {
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
+		this.#log = Logger.create({ identifier: "Client/LocalisationStore", isDebug });
 	}
 
 	static #buildLocalisations(localisations: Map<string, Map<LocalisationLanguage, string>>): Localisations {
@@ -639,10 +658,10 @@ class LocalisationStore {
 		return result;
 	}
 
-	static getOptionName({ key }: { key: string }): string | undefined {
+	getOptionName({ key }: { key: string }): string | undefined {
 		const optionName = key.split(".")?.at(-1);
 		if (optionName === undefined) {
-			console.warn(`Failed to get option name from localisation key '${key}'.`);
+			this.#log.warn(`Failed to get option name from localisation key '${key}'.`);
 			return undefined;
 		}
 
@@ -650,7 +669,7 @@ class LocalisationStore {
 	}
 
 	getNameLocalisations({ key }: { key: string }): NameLocalisations | undefined {
-		const optionName = LocalisationStore.getOptionName({ key });
+		const optionName = this.getOptionName({ key });
 		if (optionName === undefined) {
 			return undefined;
 		}
@@ -664,7 +683,7 @@ class LocalisationStore {
 
 		const name = localisation?.get(defaults.LOCALISATION_LANGUAGE)?.();
 		if (name === undefined) {
-			console.warn(`Failed to get command name from localisation key '${key}'.`);
+			this.#log.warn(`Could not get command name from string with key '${key}'.`);
 			return undefined;
 		}
 
@@ -685,7 +704,7 @@ class LocalisationStore {
 	}
 
 	getDescriptionLocalisations({ key }: { key: string }): DescriptionLocalisations | undefined {
-		const optionName = LocalisationStore.getOptionName({ key });
+		const optionName = this.getOptionName({ key });
 		if (optionName === undefined) {
 			return undefined;
 		}
@@ -699,6 +718,7 @@ class LocalisationStore {
 
 		const description = stringLocalisations?.get(defaults.LOCALISATION_LANGUAGE)?.({});
 		if (description === undefined) {
+			this.#log.warn(`Could not get command description from string with key '${key}'.`);
 			return undefined;
 		}
 
@@ -750,8 +770,11 @@ class LocalisationStore {
 			}
 
 			const localisation = this.#localisations.get(key)!;
-			const buildLocalisation =
-				localisation.get(language) ?? localisation.get(defaults.LOCALISATION_LANGUAGE) ?? (() => key);
+			const buildLocalisation = localisation.get(language) ?? localisation.get(defaults.LOCALISATION_LANGUAGE);
+			if (buildLocalisation === undefined) {
+				this.#log.warn(`Attempted to localise string with unknown key '${key}'.`);
+				return key;
+			}
 
 			const string = buildLocalisation(data);
 			if (language !== defaults.LOCALISATION_LANGUAGE && string.trim().length === 0) {
@@ -774,7 +797,8 @@ class LocalisationStore {
 
 		const pluralised = pluralise(`${number}`, { one, two, many });
 		if (pluralised === undefined) {
-			return "?";
+			this.#log.warn(`Could not pluralise string with key '${key}' in ${language}.`);
+			return key;
 		}
 
 		return pluralised;
@@ -806,14 +830,13 @@ type BuildResult<Object extends Command | Option> = [object: Object, namesWithFl
 class CommandStore {
 	readonly commands: Partial<Record<CommandName, Command>>;
 
+	readonly #log: Logger;
 	readonly #collection: {
 		readonly showable: Set<string>;
 		readonly withRateLimit: Set<string>;
 	};
-
 	// The keys are member IDs, the values are command usage timestamps mapped by command IDs.
 	readonly #lastCommandUseTimestamps: Map<bigint, Map<bigint, number[]>>;
-
 	readonly #handlers: {
 		readonly execute: Map<string, InteractionHandler>;
 		readonly autocomplete: Map<string, InteractionHandler>;
@@ -822,12 +845,14 @@ class CommandStore {
 	readonly #_defaultCommands: Command[];
 
 	private constructor({
+		log,
 		commands,
 		showable,
 		withRateLimit,
 		executeHandlers,
 		autocompleteHandlers,
 	}: {
+		log: Logger;
 		commands: Partial<Record<CommandName, Command>>;
 		showable: Set<string>;
 		withRateLimit: Set<string>;
@@ -836,6 +861,7 @@ class CommandStore {
 	}) {
 		this.commands = commands;
 
+		this.#log = log;
 		this.#collection = { showable, withRateLimit };
 		this.#lastCommandUseTimestamps = new Map();
 		this.#handlers = { execute: executeHandlers, autocomplete: autocompleteHandlers };
@@ -854,7 +880,10 @@ class CommandStore {
 	static create({
 		localisations,
 		templates,
-	}: { localisations: LocalisationStore; templates: CommandTemplate[] }): CommandStore {
+		isDebug,
+	}: { localisations: LocalisationStore; templates: CommandTemplate[]; isDebug?: boolean }): CommandStore {
+		const log = Logger.create({ identifier: "Client/InteractionStore", isDebug });
+
 		// Build commands from templates.
 		const commandsByName: Partial<Record<CommandName, Command>> = {};
 		const namesWithMetadata: LocalisedNamesWithMetadata[] = [];
@@ -885,7 +914,8 @@ class CommandStore {
 			const { name, nameLocalizations } = nameLocalisations;
 
 			if (commandMetadataByDisplayName.has(name)) {
-				console.warn(`Duplicate command "${name}". Skipping addition...`);
+				log.warn(`Duplicate command "${name}". Skipping addition...`);
+				continue;
 			}
 
 			if (nameLocalizations === undefined) {
@@ -902,7 +932,7 @@ class CommandStore {
 				const buffer = nameBuffers[locale]!;
 				if (buffer.has(name)) {
 					const language = getDiscordLanguageByLocale(locale)!;
-					console.warn(`Duplicate command "${name}" in ${language}. Skipping addition...`);
+					log.warn(`Duplicate command "${name}" in ${language}. Skipping addition...`);
 					delete nameLocalizations[locale];
 					continue;
 				}
@@ -940,6 +970,7 @@ class CommandStore {
 		}
 
 		return new CommandStore({
+			log,
 			commands: commandsByName,
 			showable,
 			withRateLimit,
@@ -1084,9 +1115,20 @@ class CommandStore {
 		descriptionLocalisations: DescriptionLocalisations;
 		options?: Option[];
 	}): Command {
+		if (template.type === Discord.ApplicationCommandTypes.ChatInput) {
+			return {
+				...nameLocalisations,
+				...descriptionLocalisations,
+				type: template.type,
+				defaultMemberPermissions: template.defaultMemberPermissions,
+				dmPermission: template.dmPermission,
+				nsfw: template.nsfw,
+				options,
+			};
+		}
+
 		return {
 			...nameLocalisations,
-			...descriptionLocalisations,
 			type: template.type,
 			defaultMemberPermissions: template.defaultMemberPermissions,
 			dmPermission: template.dmPermission,
@@ -1416,18 +1458,17 @@ type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.Even
 ) => unknown;
 type DoneEvent = () => unknown;
 class Collector<Event extends keyof Discord.EventHandlers = any> {
+	readonly done: Promise<void>;
+
 	readonly #isSingle: boolean;
 	readonly #removeAfter?: number;
-
 	readonly #dependsOn?: Collector;
 
 	#onCollect?: CollectEvent<Event>;
 	#onDone?: DoneEvent;
-
-	readonly done: Promise<void>;
-	readonly #_resolveDone: () => void;
-
 	#isClosed = false;
+
+	readonly #_resolveDone: () => void;
 
 	get close(): DoneEvent {
 		return this.dispatchDone.bind(this);
@@ -1770,11 +1811,12 @@ class InteractionCollector<
 
 type Event = keyof Discord.EventHandlers;
 class EventStore {
+	readonly #log: Logger;
 	readonly #services: ServiceStore;
-
 	readonly #collectors: Map<Event, Set<Collector<Event>>>;
 
-	constructor({ services }: { services: ServiceStore }) {
+	constructor({ services, isDebug }: { services: ServiceStore; isDebug?: boolean }) {
+		this.#log = Logger.create({ identifier: "Client/EventStore", isDebug });
 		this.#services = services;
 		this.#collectors = new Map();
 	}
@@ -1878,6 +1920,8 @@ class EventStore {
 	}
 
 	#registerCollector(event: Event, collector: Collector<Event>): void {
+		this.#log.info(`Registering collector for event '${event}'...`);
+
 		const collectors = this.#collectors.get(event);
 		if (collectors === undefined) {
 			this.#collectors.set(event, new Set([collector]));
@@ -1911,21 +1955,12 @@ class EventStore {
 }
 
 class ServiceStore {
-	readonly collection: {
-		/** Singular services running across all guilds. */
-		readonly global: Service[];
-
-		/** Particular services running under specific guilds. */
-		readonly local: Map<bigint, Service[]>;
-	};
-
 	readonly global: {
 		readonly lavalink: LavalinkService;
 		readonly interactionRepetition: InteractionRepetitionService;
 		readonly realtimeUpdates: RealtimeUpdateService;
 		readonly status: StatusService;
 	};
-
 	readonly local: {
 		readonly alerts: Map<bigint, AlertService>;
 		readonly dynamicVoiceChannels: Map<bigint, DynamicVoiceChannelService>;
@@ -1948,14 +1983,22 @@ class ServiceStore {
 		readonly roleIndicators: Map<bigint, RoleIndicatorService>;
 	};
 
-	constructor({ client }: { client: Client }) {
+	readonly #log: Logger;
+	readonly #collection: {
+		/** Singular services running across all guilds. */
+		readonly global: Service[];
+
+		/** Particular services running under specific guilds. */
+		readonly local: Map<bigint, Service[]>;
+	};
+
+	constructor({ client, isDebug }: { client: Client; isDebug?: boolean }) {
 		this.global = {
 			lavalink: new LavalinkService(client),
 			interactionRepetition: new InteractionRepetitionService(client),
 			realtimeUpdates: new RealtimeUpdateService(client),
 			status: new StatusService(client),
 		};
-		this.collection = { global: [], local: new Map() };
 		this.local = {
 			alerts: new Map(),
 			dynamicVoiceChannels: new Map(),
@@ -1977,10 +2020,13 @@ class ServiceStore {
 			},
 			roleIndicators: new Map(),
 		};
+
+		this.#log = Logger.create({ identifier: "Client/ServiceStore", isDebug });
+		this.#collection = { global: [], local: new Map() };
 	}
 
 	async start(): Promise<void> {
-		console.info("[Setup/Client/Services] Starting services...");
+		this.#log.info("Starting global services...");
 
 		const services = Object.values(this.global);
 
@@ -1990,17 +2036,19 @@ class ServiceStore {
 		}
 		await Promise.all(promises);
 
-		this.collection.global.push(...services);
+		this.#collection.global.push(...services);
 	}
 
 	async stop(): Promise<void> {
+		this.#log.info("Stopping services...");
+
 		const promises: Promise<void>[] = [];
-		for (const services of this.collection.local.values()) {
+		for (const services of this.#collection.local.values()) {
 			promises.push(this.#stopServices(services));
 		}
 		await Promise.all(promises);
 
-		await this.#stopServices(this.collection.global);
+		await this.#stopServices(this.#collection.global);
 	}
 
 	async startLocal(
@@ -2011,7 +2059,7 @@ class ServiceStore {
 
 		if (guildDocument.areEnabled("informationFeatures")) {
 			if (guildDocument.isEnabled("journalling")) {
-				const service = new JournallingService(client, guildId);
+				const service = new JournallingService(client, { guildId });
 				services.push(service);
 
 				this.local.journalling.set(guildId, service);
@@ -2019,28 +2067,28 @@ class ServiceStore {
 
 			if (guildDocument.areEnabled("noticeFeatures")) {
 				if (guildDocument.isEnabled("informationNotice")) {
-					const service = new InformationNoticeService(client, guildId);
+					const service = new InformationNoticeService(client, { guildId });
 					services.push(service);
 
 					this.local.notices.information.set(guildId, service);
 				}
 
 				if (guildDocument.isEnabled("resourceNotice")) {
-					const service = new ResourceNoticeService(client, guildId);
+					const service = new ResourceNoticeService(client, { guildId });
 					services.push(service);
 
 					this.local.notices.resources.set(guildId, service);
 				}
 
 				if (guildDocument.isEnabled("roleNotice")) {
-					const service = new RoleNoticeService(client, guildId);
+					const service = new RoleNoticeService(client, { guildId });
 					services.push(service);
 
 					this.local.notices.roles.set(guildId, service);
 				}
 
 				if (guildDocument.isEnabled("welcomeNotice")) {
-					const service = new WelcomeNoticeService(client, guildId);
+					const service = new WelcomeNoticeService(client, { guildId });
 					services.push(service);
 
 					this.local.notices.welcome.set(guildId, service);
@@ -2050,21 +2098,21 @@ class ServiceStore {
 
 		if (guildDocument.areEnabled("moderationFeatures")) {
 			if (guildDocument.areEnabled("alerts")) {
-				const service = new AlertService(client, guildId);
+				const service = new AlertService(client, { guildId });
 				services.push(service);
 
 				this.local.alerts.set(guildId, service);
 			}
 
 			if (guildDocument.areEnabled("reports")) {
-				const service = new ReportService(client, guildId);
+				const service = new ReportService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.reports.set(guildId, service);
 			}
 
 			if (guildDocument.isEnabled("verification")) {
-				const service = new VerificationService(client, guildId);
+				const service = new VerificationService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.verification.set(guildId, service);
@@ -2073,42 +2121,42 @@ class ServiceStore {
 
 		if (guildDocument.areEnabled("serverFeatures")) {
 			if (guildDocument.areEnabled("dynamicVoiceChannels")) {
-				const service = new DynamicVoiceChannelService(client, guildId);
+				const service = new DynamicVoiceChannelService(client, { guildId });
 				services.push(service);
 
 				this.local.dynamicVoiceChannels.set(guildId, service);
 			}
 
 			if (guildDocument.isEnabled("entry")) {
-				const service = new EntryService(client, guildId);
+				const service = new EntryService(client, { guildId });
 				services.push(service);
 
 				this.local.entry.set(guildId, service);
 			}
 
 			if (guildDocument.areEnabled("roleIndicators")) {
-				const service = new RoleIndicatorService(client, guildId);
+				const service = new RoleIndicatorService(client, { guildId });
 				services.push(service);
 
 				this.local.roleIndicators.set(guildId, service);
 			}
 
 			if (guildDocument.areEnabled("suggestions")) {
-				const service = new SuggestionService(client, guildId);
+				const service = new SuggestionService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.suggestions.set(guildId, service);
 			}
 
 			if (guildDocument.areEnabled("tickets")) {
-				const service = new TicketService(client, guildId);
+				const service = new TicketService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.tickets.set(guildId, service);
 			}
 
 			if (guildDocument.areEnabled("resources")) {
-				const service = new ResourceService(client, guildId);
+				const service = new ResourceService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.resources.set(guildId, service);
@@ -2117,14 +2165,14 @@ class ServiceStore {
 
 		if (guildDocument.areEnabled("socialFeatures")) {
 			if (guildDocument.isEnabled("music")) {
-				const service = new MusicService(client, guildId);
+				const service = new MusicService(client, { guildId });
 				services.push(service);
 
 				this.local.music.set(guildId, service);
 			}
 		}
 
-		this.collection.local.set(guildId, services);
+		this.#collection.local.set(guildId, services);
 
 		const promises = [];
 		for (const service of services) {
@@ -2134,13 +2182,13 @@ class ServiceStore {
 	}
 
 	async stopLocal(guildId: bigint): Promise<void> {
-		if (!this.collection.local.has(guildId)) {
+		if (!this.#collection.local.has(guildId)) {
 			return;
 		}
 
-		const services = this.collection.local.get(guildId)!;
+		const services = this.#collection.local.get(guildId)!;
 
-		this.collection.local.delete(guildId);
+		this.#collection.local.delete(guildId);
 
 		await this.#stopServices(services);
 	}
@@ -2157,7 +2205,7 @@ class ServiceStore {
 		eventName: EventName,
 		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
 	): Promise<void> {
-		for (const service of this.collection.global) {
+		for (const service of this.#collection.global) {
 			// @ts-ignore: This is fine.
 			service[eventName](...args);
 		}
@@ -2172,7 +2220,7 @@ class ServiceStore {
 			return;
 		}
 
-		const services = this.collection.local.get(guildId);
+		const services = this.#collection.local.get(guildId);
 		if (services === undefined) {
 			return;
 		}
@@ -2431,29 +2479,34 @@ class Client {
 
 	private constructor({
 		environment,
+		log,
 		bot,
 		database,
 		localisations,
 	}: {
 		environment: Environment;
+		log: Logger;
 		bot: Discord.Bot;
 		database: Database;
 		localisations: RawLocalisations;
 	}) {
+		const isDebug = environment.isDebug;
+
 		this.environment = environment;
-		this.log = Logger.create({ identifier: "Client", isDebug: environment.isDebug });
+		this.log = log;
 		this.database = database;
 		this.cache = new Cache();
 
-		this.#localisations = new LocalisationStore({ localisations });
+		this.#localisations = new LocalisationStore({ localisations, isDebug });
 		this.#commands = CommandStore.create({
 			localisations: this.#localisations,
 			templates: Array.from(Object.values(commandTemplates)),
+			isDebug,
 		});
-		this.#interactions = new InteractionStore({ bot, isDebug: environment.isDebug });
-		this.#services = new ServiceStore({ client: this });
-		this.#events = new EventStore({ services: this.#services });
-		this.#connection = new DiscordConnection({ bot, events: this.#events.buildEventHandlers() });
+		this.#interactions = new InteractionStore({ bot, isDebug });
+		this.#services = new ServiceStore({ client: this, isDebug });
+		this.#events = new EventStore({ services: this.#services, isDebug });
+		this.#connection = new DiscordConnection({ bot, events: this.#events.buildEventHandlers(), isDebug });
 
 		this.#_guildCreateCollector = new Collector<"guildCreate">();
 		this.#_guildDeleteCollector = new Collector<"guildDelete">();
@@ -2478,7 +2531,9 @@ class Client {
 			return Client.#client;
 		}
 
-		console.info("[Setup/Client] Bootstrapping the client...");
+		const log = Logger.create({ identifier: "Client", isDebug: environment.isDebug });
+
+		log.info("Bootstrapping the client...");
 
 		const database = await Database.create({
 			host: environment.ravendbHost,
@@ -2511,20 +2566,15 @@ class Client {
 			},
 		});
 
-		const client = new Client({ environment, bot, database, localisations });
-
-		return client;
+		return new Client({ environment, log, bot, database, localisations });
 	}
 
 	async #setupCollectors(): Promise<void> {
-		console.info("[Setup/Client] Setting up event collectors...");
+		this.log.info("Setting up event collectors...");
 
 		this.#_guildCreateCollector.onCollect(this.#setupGuild.bind(this));
-
 		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
-
 		this.#_interactionCollector.onCollect(this.handleInteraction.bind(this));
-
 		this.#_channelDeleteCollector.onCollect((channel) => {
 			this.#connection.cache.channels.delete(channel.id);
 
@@ -2540,7 +2590,7 @@ class Client {
 	}
 
 	#teardownCollectors(): void {
-		console.info("[Setup/Client] Tearing down event collectors...");
+		this.log.info("Tearing down event collectors...");
 
 		this.#_guildCreateCollector.close();
 		this.#_guildDeleteCollector.close();
@@ -2918,6 +2968,7 @@ export {
 	Client,
 	Collector,
 	Database,
+	Logger,
 	InteractionCollector,
 	isValidIdentifier,
 	isValidSnowflake,

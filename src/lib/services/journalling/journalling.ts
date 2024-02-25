@@ -1,4 +1,5 @@
 import * as Discord from "@discordeno/bot";
+import { Client } from "../../client";
 import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
@@ -26,11 +27,15 @@ class JournallingService extends LocalService {
 		return channelId;
 	}
 
-	async start(): Promise<void> {}
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "JournallingService", guildId });
+	}
 
+	async start(): Promise<void> {}
 	async stop(): Promise<void> {}
 
-	async log<Event extends keyof Events>(event: Event, { args }: { args: Events[Event] }): Promise<void> {
+	// TODO(vxern): Rename to something else.
+	async logEvent<Event extends keyof Events>(event: Event, { args }: { args: Events[Event] }): Promise<void> {
 		const journalEntryGenerator = messageGenerators[event];
 		if (journalEntryGenerator === undefined) {
 			return;
@@ -60,36 +65,34 @@ class JournallingService extends LocalService {
 					},
 				],
 			})
-			.catch(() =>
-				this.client.log.warn(`Failed to log '${event}' event on ${diagnostics.display.guild(this.guildId)}.`),
-			);
+			.catch(() => this.log.warn(`Failed to log '${event}' event on ${diagnostics.display.guild(this.guildId)}.`));
 	}
 
 	async guildBanAdd(user: Discord.User, guildId: bigint): Promise<void> {
-		this.log("guildBanAdd", { args: [user, guildId] });
+		this.logEvent("guildBanAdd", { args: [user, guildId] });
 	}
 
 	async guildBanRemove(user: Discord.User, guildId: bigint): Promise<void> {
-		this.log("guildBanRemove", { args: [user, guildId] });
+		this.logEvent("guildBanRemove", { args: [user, guildId] });
 	}
 
 	async guildMemberAdd(member: Discord.Member, user: Discord.User): Promise<void> {
-		this.log("guildMemberAdd", { args: [member, user] });
+		this.logEvent("guildMemberAdd", { args: [member, user] });
 	}
 
 	async guildMemberRemove(user: Discord.User, guildId: bigint): Promise<void> {
-		this.log("guildMemberRemove", { args: [user, guildId] });
+		this.logEvent("guildMemberRemove", { args: [user, guildId] });
 	}
 
 	async messageDelete(
 		payload: { id: bigint; channelId: bigint; guildId?: bigint | undefined },
 		message?: Discord.Message | undefined,
 	): Promise<void> {
-		this.log("messageDelete", { args: [payload, message] });
+		this.logEvent("messageDelete", { args: [payload, message] });
 	}
 
 	async messageUpdate(message: Discord.Message, oldMessage?: Discord.Message | undefined): Promise<void> {
-		this.log("messageUpdate", { args: [message, oldMessage] });
+		this.logEvent("messageUpdate", { args: [message, oldMessage] });
 	}
 }
 

@@ -1,8 +1,8 @@
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
+import log from "loglevel";
 import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "./constants/languages";
 import { Client } from "./lib/client";
-import log from "loglevel";
 
 log.enableAll();
 
@@ -147,13 +147,11 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 		}
 	}
 
-	console.info(
-		`[Localisations] Loaded ${
-			Array.from(localisations.values())
-				.flatMap((map) => map.values())
-				.flat().length
-		} strings.`,
-	);
+	const stringCount = Array.from(localisations.values())
+		.flatMap((map) => map.values())
+		.flat().length;
+
+	console.info(`[Setup/Localisations] Loaded ${stringCount} strings.`);
 
 	return localisations;
 }

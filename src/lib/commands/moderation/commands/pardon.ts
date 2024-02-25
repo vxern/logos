@@ -158,7 +158,7 @@ async function handlePardonUser(
 
 	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.log("memberWarnRemove", { args: [member, warning, interaction.user] });
+		journallingService?.logEvent("memberWarnRemove", { args: [member, warning, interaction.user] });
 	}
 
 	const strings = {

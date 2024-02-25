@@ -12,8 +12,8 @@ class ResourceService extends PromptService<{
 	model: Resource;
 	metadata: [partialId: string, isResolve: string];
 }> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "resources", deleteMode: "delete" });
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "ResourcePromptService", guildId }, { type: "resources", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Resource> {

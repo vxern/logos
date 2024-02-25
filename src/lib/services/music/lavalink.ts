@@ -8,7 +8,7 @@ class LavalinkService extends GlobalService {
 	readonly node: Lavaclient.Node;
 
 	constructor(client: Client) {
-		super(client);
+		super(client, { identifier: "LavalinkService" });
 
 		this.node = new Lavaclient.Node({
 			connection: {
@@ -44,20 +44,18 @@ class LavalinkService extends GlobalService {
 				return;
 			}
 
-			this.client.log.error(`The audio node has encountered an error: ${error}`);
+			this.log.error(`The audio node has encountered an error: ${error}`);
 		});
 
 		this.node.on("disconnect", async (_) => {
-			this.client.log.warn("Unable to reach audio node. Attempting to reconnect...");
+			this.log.warn("Unable to reach audio node. Attempting to reconnect...");
 
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 
 			this.node.connect(this.client.bot.id.toString());
 		});
 
-		this.node.on("connect", ({ took: tookMs }) =>
-			this.client.log.info(`Connected to audio node. Time taken: ${tookMs} ms`),
-		);
+		this.node.on("connect", ({ took: tookMs }) => this.log.info(`Connected to audio node. Time taken: ${tookMs} ms`));
 
 		return this.node.connect(this.client.bot.id.toString());
 	}
@@ -85,7 +83,7 @@ class LavalinkService extends GlobalService {
 
 	async voiceServerUpdate(voiceServerUpdate: Discord.VoiceServerUpdate): Promise<void> {
 		if (voiceServerUpdate.endpoint === undefined) {
-			this.client.log.info(
+			this.log.info(
 				`Discarding voice server update for ${diagnostics.display.guild(
 					voiceServerUpdate.guildId,
 				)}: The endpoint is undefined.`,

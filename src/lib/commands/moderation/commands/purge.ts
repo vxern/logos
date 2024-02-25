@@ -577,7 +577,7 @@ async function handlePurgeMessages(
 
 	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.log("purgeBegin", { args: [member, channel, messages.length] });
+		journallingService?.logEvent("purgeBegin", { args: [member, channel, messages.length] });
 	}
 
 	const twoWeeksAgo = now - time.week * 2 + time.hour;
@@ -636,7 +636,7 @@ async function handlePurgeMessages(
 
 	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.log("purgeEnd", { args: [member, channel, deletedCount] });
+		journallingService?.logEvent("purgeEnd", { args: [member, channel, deletedCount] });
 	}
 
 	clearTimeout(responseDeletionTimeoutId);

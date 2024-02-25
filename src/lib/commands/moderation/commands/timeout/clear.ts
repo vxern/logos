@@ -86,7 +86,7 @@ async function handleClearTimeout(
 
 	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.log("memberTimeoutRemove", { args: [member, interaction.user] });
+		journallingService?.logEvent("memberTimeoutRemove", { args: [member, interaction.user] });
 	}
 
 	const strings = {

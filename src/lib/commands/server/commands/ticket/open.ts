@@ -188,11 +188,11 @@ async function openTicket(
 
 		switch (type) {
 			case "standalone": {
-				journallingService?.log("ticketOpen", { args: [member, ticketDocument] });
+				journallingService?.logEvent("ticketOpen", { args: [member, ticketDocument] });
 				break;
 			}
 			case "inquiry": {
-				journallingService?.log("inquiryOpen", { args: [member, ticketDocument] });
+				journallingService?.logEvent("inquiryOpen", { args: [member, ticketDocument] });
 				break;
 			}
 		}

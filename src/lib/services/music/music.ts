@@ -212,8 +212,8 @@ class MusicService extends LocalService {
 		return session.player.trackData?.length;
 	}
 
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId);
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "MusicService", guildId });
 
 		this.#session = undefined;
 	}
@@ -261,7 +261,7 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.client.log.warn("Failed to send stopped music message."));
+			.catch(() => this.log.warn("Failed to send stopped music message."));
 
 		this.destroySession();
 	}
@@ -323,7 +323,7 @@ class MusicService extends LocalService {
 	handleConnectionLost(): void {
 		this.client.bot.gateway
 			.leaveVoiceChannel(this.guildId)
-			.catch(() => this.client.log.warn("Failed to leave voice channel."));
+			.catch(() => this.log.warn("Failed to leave voice channel."));
 
 		const session = this.#session;
 		if (session === undefined) {
@@ -356,7 +356,7 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.client.log.warn("Failed to send audio halted message."));
+			.catch(() => this.log.warn("Failed to send audio halted message."));
 
 		session.player.removeAllListeners();
 
@@ -419,7 +419,7 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.client.log.warn("Failed to send audio restored message."));
+			.catch(() => this.log.warn("Failed to send audio restored message."));
 	}
 
 	verifyVoiceState(interaction: Logos.Interaction, action: "manage" | "check"): boolean {
@@ -657,7 +657,7 @@ class MusicService extends LocalService {
 
 			await this.client.bot.rest
 				.sendMessage(session.channelId, { embeds: [embed] })
-				.catch(() => this.client.log.warn("Failed to send music feedback message."));
+				.catch(() => this.log.warn("Failed to send music feedback message."));
 			return;
 		}
 
@@ -756,7 +756,7 @@ class MusicService extends LocalService {
 					],
 				})
 				.catch(() =>
-					this.client.log.warn(
+					this.log.warn(
 						`Failed to send track load failure to ${diagnostics.display.channel(
 							session.channelId,
 						)} on ${diagnostics.display.guild(this.guildId)}.`,
@@ -789,7 +789,7 @@ class MusicService extends LocalService {
 
 			session.flags.loop.song = false;
 
-			this.client.log.warn(`Failed to play track: ${error}`);
+			this.log.warn(`Failed to play track: ${error}`);
 
 			const guildLocale = this.guildLocale;
 			const strings = {
@@ -813,7 +813,7 @@ class MusicService extends LocalService {
 					],
 				})
 				.catch(() =>
-					this.client.log.warn(
+					this.log.warn(
 						`Failed to send track play failure to ${diagnostics.display.channel(
 							session.channelId,
 						)} on ${diagnostics.display.guild(this.guildId)}.`,
@@ -912,7 +912,7 @@ class MusicService extends LocalService {
 					],
 				})
 				.catch(() =>
-					this.client.log.warn(
+					this.log.warn(
 						`Failed to send now playing message to ${diagnostics.display.channel(
 							session.channelId,
 						)} on ${diagnostics.display.guild(this.guildId)}.`,

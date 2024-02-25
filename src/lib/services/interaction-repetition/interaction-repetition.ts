@@ -11,7 +11,7 @@ class InteractionRepetitionService extends GlobalService {
 	readonly #_showInChatButtons: InteractionCollector<[interactionId: string]>;
 
 	constructor(client: Client) {
-		super(client);
+		super(client, { identifier: "InteractionRepetitionService" });
 
 		this.#_commandInteractions = new InteractionCollector(client, {
 			type: Discord.InteractionTypes.ApplicationCommand,

@@ -12,8 +12,8 @@ class SuggestionService extends PromptService<{
 	model: Suggestion;
 	metadata: [partialId: string, isResolve: string];
 }> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "suggestions", deleteMode: "delete" });
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "SuggestionPromptService", guildId }, { type: "suggestions", deleteMode: "delete" });
 	}
 
 	getAllDocuments(): Map<string, Suggestion> {

@@ -1,6 +1,7 @@
 import * as Discord from "@discordeno/bot";
 import defaults from "../../../defaults";
 import * as Logos from "../../../types";
+import { Client } from "../../client";
 import { DynamicVoiceChannel, Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
@@ -99,6 +100,10 @@ class DynamicVoiceChannelService extends LocalService {
 		const channels = Array.from(parentChannelById.values());
 
 		return channels;
+	}
+
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "DynamicVoiceChannelService", guildId });
 	}
 
 	async start(): Promise<void> {
@@ -216,9 +221,7 @@ class DynamicVoiceChannelService extends LocalService {
 				parentId: parent.channel.parentId,
 				position: parent.channel.position,
 			})
-			.catch(() =>
-				this.client.log.warn(`Failed to create voice channel on ${diagnostics.display.guild(this.guildId)}.`),
-			);
+			.catch(() => this.log.warn(`Failed to create voice channel on ${diagnostics.display.guild(this.guildId)}.`));
 	}
 
 	async #onDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
@@ -265,9 +268,7 @@ class DynamicVoiceChannelService extends LocalService {
 
 		this.client.bot.rest
 			.deleteChannel(lastVacantChannelId)
-			.catch(() =>
-				this.client.log.warn(`Failed to delete voice channel on ${diagnostics.display.guild(this.guildId)}.`),
-			);
+			.catch(() => this.log.warn(`Failed to delete voice channel on ${diagnostics.display.guild(this.guildId)}.`));
 	}
 }
 

@@ -23,8 +23,8 @@ class EntryService extends LocalService {
 		return this.guildDocument?.verification;
 	}
 
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId);
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "EntryService", guildId });
 
 		this.#_acceptedRulesButton = new InteractionCollector(client, {
 			customId: constants.components.entry.acceptedRules,
@@ -223,7 +223,7 @@ class EntryService extends LocalService {
 		this.client.bot.rest
 			.addRole(guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
 			.catch(() =>
-				this.client.log.warn(
+				this.log.warn(
 					`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
 						buttonPress.user,
 					)} on ${diagnostics.display.guild(guild.id)}.`,
@@ -313,7 +313,7 @@ class EntryService extends LocalService {
 				});
 
 				const journallingService = this.client.getJournallingService(this.guildId);
-				journallingService?.log("entryRequestSubmit", { args: [buttonPress.user, entryRequestDocument] });
+				journallingService?.logEvent("entryRequestSubmit", { args: [buttonPress.user, entryRequestDocument] });
 
 				const user = this.client.entities.users.get(buttonPress.user.id);
 				if (user === undefined) {

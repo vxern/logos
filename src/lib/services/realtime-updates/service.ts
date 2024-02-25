@@ -1,4 +1,5 @@
 import * as ravendb from "ravendb";
+import { Client } from "../../client";
 import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";
 import { GlobalService } from "../service";
@@ -16,8 +17,12 @@ class RealtimeUpdateService extends GlobalService {
 	isHandlingUpdate = false;
 	readonly handlerQueue: (() => Promise<void>)[] = [];
 
+	constructor(client: Client) {
+		super(client, { identifier: "RealtimeUpdateService" });
+	}
+
 	async start(): Promise<void> {
-		this.client.log.info("Streaming updates to guild documents...");
+		this.log.info("Streaming updates to guild documents...");
 
 		const changes = this.client.database.changes();
 		const streamSubscription = changes.forDocumentsInCollection("Guilds");
@@ -30,8 +35,8 @@ class RealtimeUpdateService extends GlobalService {
 			}
 		};
 		this.onError = (error) => {
-			this.client.log.info(`Guild document stream closed: ${error}`);
-			this.client.log.info("Reopening in 10 seconds...");
+			this.log.info(`Guild document stream closed: ${error}`);
+			this.log.info("Reopening in 10 seconds...");
 
 			changes.dispose();
 
@@ -70,7 +75,7 @@ class RealtimeUpdateService extends GlobalService {
 			return;
 		}
 
-		this.client.log.info(`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`);
+		this.log.info(`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`);
 
 		const oldGuildDocument = await Guild.get(this.client, { guildId: data.id });
 

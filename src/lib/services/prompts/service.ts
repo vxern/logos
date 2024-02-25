@@ -103,10 +103,10 @@ abstract class PromptService<
 
 	constructor(
 		client: Client,
-		guildId: bigint,
+		{ identifier, guildId }: { identifier: string; guildId: bigint },
 		{ type, deleteMode }: { type: Generic["type"]; deleteMode: PromptDeleteMode },
 	) {
-		super(client, guildId);
+		super(client, { identifier, guildId });
 
 		const customId = customIds[type];
 
@@ -180,7 +180,7 @@ abstract class PromptService<
 
 		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
 			await this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
-				this.client.log.warn("Failed to delete invalid or expired prompt.");
+				this.log.warn("Failed to delete invalid or expired prompt.");
 			});
 		}
 
@@ -365,7 +365,7 @@ abstract class PromptService<
 		this.client.bot.rest
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
-				this.client.log.warn(
+				this.log.warn(
 					`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
 						message.channelId,
 					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
@@ -427,7 +427,7 @@ abstract class PromptService<
 		}
 
 		const message = await this.client.bot.rest.sendMessage(channelId, content).catch(() => {
-			this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+			this.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
 			return undefined;
 		});
 
@@ -476,9 +476,9 @@ abstract class PromptService<
 				this.#documentByPromptId.set(prompt.id, updatedDocument);
 			}
 
-			this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
-				this.client.log.warn("Failed to delete prompt.");
-			});
+			this.client.bot.rest
+				.deleteMessage(prompt.channelId, prompt.id)
+				.catch(() => this.log.warn("Failed to delete prompt."));
 		});
 	}
 
@@ -497,7 +497,7 @@ abstract class PromptService<
 		if (prompt !== undefined) {
 			this.client.bot.rest
 				.deleteMessage(prompt.channelId, prompt.id)
-				.catch(() => this.client.log.warn("Failed to delete prompt after deleting document."));
+				.catch(() => this.log.warn("Failed to delete prompt after deleting document."));
 			this.unregisterPrompt(prompt, promptDocument);
 		}
 

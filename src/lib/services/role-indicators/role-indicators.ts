@@ -2,12 +2,17 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import symbols from "../../../constants/types/symbols";
 import * as Logos from "../../../types";
+import { Client } from "../../client";
 import { Guild, RoleWithIndicator } from "../../database/guild";
 import { LocalService } from "../service";
 
 class RoleIndicatorService extends LocalService {
 	get configuration(): Guild["roleIndicators"] {
 		return this.guildDocument?.roleIndicators;
+	}
+
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "RoleIndicatorService", guildId });
 	}
 
 	async start(): Promise<void> {
@@ -60,7 +65,7 @@ class RoleIndicatorService extends LocalService {
 			const nickname = applyIndicators(user.username, applicableIndicators);
 			this.client.bot.rest
 				.editMember(member.guildId, user.id, { nick: nickname })
-				.catch(() => this.client.log.warn("Failed to set member's role indicators."));
+				.catch(() => this.log.warn("Failed to set member's role indicators."));
 
 			return;
 		}
@@ -75,7 +80,7 @@ class RoleIndicatorService extends LocalService {
 			const nickname = applyIndicators(member.nick, applicableIndicators);
 			this.client.bot.rest
 				.editMember(member.guildId, user.id, { nick: nickname })
-				.catch(() => this.client.log.warn("Failed to set member's role indicators."));
+				.catch(() => this.log.warn("Failed to set member's role indicators."));
 
 			return;
 		}
@@ -88,7 +93,7 @@ class RoleIndicatorService extends LocalService {
 		if (!hasApplicableIndicators) {
 			this.client.bot.rest
 				.editMember(member.guildId, user.id, { nick: username })
-				.catch(() => this.client.log.warn("Failed to reset member's role indicators."));
+				.catch(() => this.log.warn("Failed to reset member's role indicators."));
 
 			return;
 		}
@@ -104,7 +109,7 @@ class RoleIndicatorService extends LocalService {
 		const nicknameModified = applyIndicators(username, applicableIndicators);
 		this.client.bot.rest
 			.editMember(member.guildId, user.id, { nick: nicknameModified })
-			.catch(() => this.client.log.warn("Failed to update member's role indicators."));
+			.catch(() => this.log.warn("Failed to update member's role indicators."));
 	}
 }
 

@@ -111,7 +111,7 @@ async function handleSetTimeout(
 
 	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.log("memberTimeoutAdd", {
+		journallingService?.logEvent("memberTimeoutAdd", {
 			args: [member, until, interaction.parameters.reason, interaction.user],
 		});
 	}

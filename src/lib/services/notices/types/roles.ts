@@ -7,8 +7,8 @@ import { HashableMessageContents, NoticeService } from "../service";
 class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	readonly #_selectRolesButton: InteractionCollector;
 
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "roles" });
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "InformationNoticeService", guildId }, { type: "roles" });
 
 		this.#_selectRolesButton = new InteractionCollector(client, {
 			customId: constants.components.selectRoles,

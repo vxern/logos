@@ -125,7 +125,7 @@ async function handleToggleSlowmode(
 
 				if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 					const journallingService = client.getJournallingService(guild.id);
-					journallingService?.log("slowmodeDowngrade", {
+					journallingService?.logEvent("slowmodeDowngrade", {
 						args: [interaction.user, channel, previousLevel, level],
 					});
 				}
@@ -158,7 +158,7 @@ async function handleToggleSlowmode(
 
 				if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 					const journallingService = client.getJournallingService(guild.id);
-					journallingService?.log("slowmodeUpgrade", { args: [interaction.user, channel, previousLevel, level] });
+					journallingService?.logEvent("slowmodeUpgrade", { args: [interaction.user, channel, previousLevel, level] });
 				}
 
 				const strings = {
@@ -243,7 +243,7 @@ async function handleToggleSlowmode(
 
 		if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 			const journallingService = client.getJournallingService(guild.id);
-			journallingService?.log("slowmodeDisable", { args: [interaction.user, channel] });
+			journallingService?.logEvent("slowmodeDisable", { args: [interaction.user, channel] });
 		}
 
 		const strings = {
@@ -318,7 +318,7 @@ async function handleToggleSlowmode(
 
 	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.log("slowmodeEnable", { args: [interaction.user, channel, level] });
+		journallingService?.logEvent("slowmodeEnable", { args: [interaction.user, channel, level] });
 	}
 
 	const strings = {

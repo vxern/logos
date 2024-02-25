@@ -8,7 +8,7 @@ class StatusService extends GlobalService {
 	#currentIndex: number;
 
 	constructor(client: Client) {
-		super(client);
+		super(client, { identifier: "StatusService" });
 
 		this.#currentIndex = 0;
 	}
@@ -53,9 +53,7 @@ class StatusService extends GlobalService {
 				],
 				status: "online",
 			})
-			.catch(() => {
-				this.client.log.warn("Unable to edit bot status.");
-			});
+			.catch(() => this.log.warn("Unable to edit bot status."));
 
 		setTimeout(() => this.#cycleStatus(), defaults.STATUS_CYCLE);
 	}

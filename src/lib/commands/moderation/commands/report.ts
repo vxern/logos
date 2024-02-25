@@ -84,7 +84,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 
 			if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 				const journallingService = client.getJournallingService(guild.id);
-				journallingService?.log("reportSubmit", { args: [member, reportDocument] });
+				journallingService?.logEvent("reportSubmit", { args: [member, reportDocument] });
 			}
 
 			const user = client.entities.users.get(interaction.user.id);

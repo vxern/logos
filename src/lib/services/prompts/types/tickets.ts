@@ -12,8 +12,8 @@ class TicketService extends PromptService<{
 	model: Ticket;
 	metadata: [partialId: string, isResolve: string];
 }> {
-	constructor(client: Client, guildId: bigint) {
-		super(client, guildId, { type: "tickets", deleteMode: "close" });
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "TicketPromptService", guildId }, { type: "tickets", deleteMode: "close" });
 	}
 
 	getAllDocuments(): Map<string, Ticket> {
@@ -171,7 +171,7 @@ class TicketService extends PromptService<{
 		await super.handleDelete(ticketDocument);
 
 		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {
-			this.client.log.warn("Failed to delete ticket channel.");
+			this.log.warn("Failed to delete ticket channel.");
 		});
 	}
 }

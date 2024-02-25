@@ -84,7 +84,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 
 			if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 				const journallingService = client.getJournallingService(guild.id);
-				journallingService?.log("resourceSend", { args: [member, resourceDocument] });
+				journallingService?.logEvent("resourceSend", { args: [member, resourceDocument] });
 			}
 
 			const user = client.entities.users.get(interaction.user.id);

@@ -114,7 +114,7 @@ async function handlePraiseUser(
 
 	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
 		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.log("praiseAdd", { args: [member, praiseDocument, interaction.user] });
+		journallingService?.logEvent("praiseAdd", { args: [member, praiseDocument, interaction.user] });
 	}
 
 	const strings = {
