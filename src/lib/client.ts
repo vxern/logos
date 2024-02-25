@@ -573,7 +573,14 @@ class DiscordConnection {
 
 	async open(): Promise<void> {
 		console.info("[Setup/Client] Opening connection to Discord...");
+
 		await this.bot.start();
+	}
+
+	async close(): Promise<void> {
+		console.info("[Client] Closing connection to Discord...");
+
+		await this.bot.shutdown();
 	}
 }
 
@@ -1507,6 +1514,7 @@ class InteractionCollector<
 
 	static readonly #_defaultParameters: Logos.InteractionParameters<Record<string, unknown>> = { show: false };
 
+	readonly anyType: boolean;
 	readonly type: Discord.InteractionTypes;
 	readonly anyCustomId: boolean;
 	readonly customId: string;
@@ -1520,6 +1528,7 @@ class InteractionCollector<
 	constructor(
 		client: Client,
 		{
+			anyType,
 			type,
 			anyCustomId,
 			customId,
@@ -1528,6 +1537,7 @@ class InteractionCollector<
 			isSingle,
 			isPermanent,
 		}: {
+			anyType?: boolean;
 			type?: Discord.InteractionTypes;
 			anyCustomId?: boolean;
 			customId?: string;
@@ -1539,6 +1549,7 @@ class InteractionCollector<
 	) {
 		super({ isSingle, removeAfter: !isPermanent ? constants.INTERACTION_TOKEN_EXPIRY : undefined, dependsOn });
 
+		this.anyType = anyType ?? false;
 		this.type = type ?? Discord.InteractionTypes.MessageComponent;
 		this.anyCustomId = anyCustomId ?? false;
 		this.customId = customId ?? nanoid();
@@ -1584,8 +1595,10 @@ class InteractionCollector<
 	}
 
 	filter(interaction: Discord.Interaction): boolean {
-		if (interaction.type !== this.type) {
-			return false;
+		if (!this.anyType) {
+			if (interaction.type !== this.type) {
+				return false;
+			}
 		}
 
 		if (!this.only.has(interaction.user.id) && !this.#_acceptAnyUser) {
@@ -1966,8 +1979,8 @@ class ServiceStore {
 		};
 	}
 
-	async setupGlobalServices(): Promise<void> {
-		console.info("[Setup/Client/Services] Starting global services...");
+	async start(): Promise<void> {
+		console.info("[Setup/Client/Services] Starting services...");
 
 		const services = Object.values(this.global);
 
@@ -1980,125 +1993,17 @@ class ServiceStore {
 		this.collection.global.push(...services);
 	}
 
-	async dispatchToGlobal<EventName extends keyof Discord.EventHandlers>(
-		eventName: EventName,
-		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
-	): Promise<void> {
-		for (const service of this.collection.global) {
-			// @ts-ignore: This is fine.
-			service[eventName](...args);
+	async stop(): Promise<void> {
+		const promises: Promise<void>[] = [];
+		for (const services of this.collection.local.values()) {
+			promises.push(this.#stopServices(services));
 		}
+		await Promise.all(promises);
+
+		await this.#stopServices(this.collection.global);
 	}
 
-	async dispatchToLocal<EventName extends keyof Discord.EventHandlers>(
-		guildId: bigint | undefined,
-		eventName: EventName,
-		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
-	): Promise<void> {
-		if (guildId === undefined) {
-			return;
-		}
-
-		const services = this.collection.local.get(guildId);
-		if (services === undefined) {
-			return;
-		}
-
-		for (const service of services) {
-			// @ts-ignore: This is fine.
-			service[eventName](...args);
-		}
-	}
-
-	async dispatchEvent<EventName extends keyof Discord.EventHandlers>(
-		guildId: bigint | undefined,
-		eventName: EventName,
-		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
-	): Promise<void> {
-		this.dispatchToGlobal(eventName, { args });
-
-		if (guildId !== undefined) {
-			this.dispatchToLocal(guildId, eventName, { args });
-		}
-	}
-
-	getAlertService(guildId: bigint): AlertService | undefined {
-		return this.local.alerts.get(guildId);
-	}
-
-	getDynamicVoiceChannelService(guildId: bigint): DynamicVoiceChannelService | undefined {
-		return this.local.dynamicVoiceChannels.get(guildId);
-	}
-
-	getEntryService(guildId: bigint): EntryService | undefined {
-		return this.local.entry.get(guildId);
-	}
-
-	getJournallingService(guildId: bigint): JournallingService | undefined {
-		return this.local.journalling.get(guildId);
-	}
-
-	getMusicService(guildId: bigint): MusicService | undefined {
-		return this.local.music.get(guildId);
-	}
-
-	getRoleIndicatorService(guildId: bigint): RoleIndicatorService | undefined {
-		return this.local.roleIndicators.get(guildId);
-	}
-
-	getNoticeService(guildId: bigint, { type }: { type: "information" }): InformationNoticeService | undefined;
-	getNoticeService(guildId: bigint, { type }: { type: "resources" }): ResourceNoticeService | undefined;
-	getNoticeService(guildId: bigint, { type }: { type: "roles" }): RoleNoticeService | undefined;
-	getNoticeService(guildId: bigint, { type }: { type: "welcome" }): WelcomeNoticeService | undefined;
-	getNoticeService(
-		guildId: bigint,
-		{ type }: { type: keyof ServiceStore["local"]["notices"] },
-	): NoticeService<{ type: typeof type }> | undefined {
-		switch (type) {
-			case "information": {
-				return this.local.notices.information.get(guildId);
-			}
-			case "resources": {
-				return this.local.notices.resources.get(guildId);
-			}
-			case "roles": {
-				return this.local.notices.roles.get(guildId);
-			}
-			case "welcome": {
-				return this.local.notices.welcome.get(guildId);
-			}
-		}
-	}
-
-	getPromptService(guildId: bigint, { type }: { type: "verification" }): VerificationService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "reports" }): ReportService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "resources" }): ResourceService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "suggestions" }): SuggestionService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "tickets" }): TicketService | undefined;
-	getPromptService(
-		guildId: bigint,
-		{ type }: { type: keyof ServiceStore["local"]["prompts"] },
-	): PromptService | undefined {
-		switch (type) {
-			case "verification": {
-				return this.local.prompts.verification.get(guildId);
-			}
-			case "reports": {
-				return this.local.prompts.reports.get(guildId);
-			}
-			case "resources": {
-				return this.local.prompts.resources.get(guildId);
-			}
-			case "suggestions": {
-				return this.local.prompts.suggestions.get(guildId);
-			}
-			case "tickets": {
-				return this.local.prompts.tickets.get(guildId);
-			}
-		}
-	}
-
-	async startServices(
+	async startLocal(
 		client: Client,
 		{ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild },
 	): Promise<void> {
@@ -2228,7 +2133,7 @@ class ServiceStore {
 		await Promise.all(promises);
 	}
 
-	async stopServices(guildId: bigint): Promise<void> {
+	async stopLocal(guildId: bigint): Promise<void> {
 		if (!this.collection.local.has(guildId)) {
 			return;
 		}
@@ -2237,11 +2142,133 @@ class ServiceStore {
 
 		this.collection.local.delete(guildId);
 
+		await this.#stopServices(services);
+	}
+
+	async #stopServices(services: Service[]): Promise<void> {
 		const promises: Promise<void>[] = [];
 		for (const service of services) {
 			promises.push(service.stop());
 		}
 		await Promise.all(promises);
+	}
+
+	async dispatchToGlobal<EventName extends keyof Discord.EventHandlers>(
+		eventName: EventName,
+		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
+	): Promise<void> {
+		for (const service of this.collection.global) {
+			// @ts-ignore: This is fine.
+			service[eventName](...args);
+		}
+	}
+
+	async dispatchToLocal<EventName extends keyof Discord.EventHandlers>(
+		guildId: bigint | undefined,
+		eventName: EventName,
+		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
+	): Promise<void> {
+		if (guildId === undefined) {
+			return;
+		}
+
+		const services = this.collection.local.get(guildId);
+		if (services === undefined) {
+			return;
+		}
+
+		for (const service of services) {
+			// @ts-ignore: This is fine.
+			service[eventName](...args);
+		}
+	}
+
+	async dispatchEvent<EventName extends keyof Discord.EventHandlers>(
+		guildId: bigint | undefined,
+		eventName: EventName,
+		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
+	): Promise<void> {
+		this.dispatchToGlobal(eventName, { args });
+
+		if (guildId !== undefined) {
+			this.dispatchToLocal(guildId, eventName, { args });
+		}
+	}
+
+	getAlertService(guildId: bigint): AlertService | undefined {
+		return this.local.alerts.get(guildId);
+	}
+
+	getDynamicVoiceChannelService(guildId: bigint): DynamicVoiceChannelService | undefined {
+		return this.local.dynamicVoiceChannels.get(guildId);
+	}
+
+	getEntryService(guildId: bigint): EntryService | undefined {
+		return this.local.entry.get(guildId);
+	}
+
+	getJournallingService(guildId: bigint): JournallingService | undefined {
+		return this.local.journalling.get(guildId);
+	}
+
+	getMusicService(guildId: bigint): MusicService | undefined {
+		return this.local.music.get(guildId);
+	}
+
+	getRoleIndicatorService(guildId: bigint): RoleIndicatorService | undefined {
+		return this.local.roleIndicators.get(guildId);
+	}
+
+	getNoticeService(guildId: bigint, { type }: { type: "information" }): InformationNoticeService | undefined;
+	getNoticeService(guildId: bigint, { type }: { type: "resources" }): ResourceNoticeService | undefined;
+	getNoticeService(guildId: bigint, { type }: { type: "roles" }): RoleNoticeService | undefined;
+	getNoticeService(guildId: bigint, { type }: { type: "welcome" }): WelcomeNoticeService | undefined;
+	getNoticeService(
+		guildId: bigint,
+		{ type }: { type: keyof ServiceStore["local"]["notices"] },
+	): NoticeService<{ type: typeof type }> | undefined {
+		switch (type) {
+			case "information": {
+				return this.local.notices.information.get(guildId);
+			}
+			case "resources": {
+				return this.local.notices.resources.get(guildId);
+			}
+			case "roles": {
+				return this.local.notices.roles.get(guildId);
+			}
+			case "welcome": {
+				return this.local.notices.welcome.get(guildId);
+			}
+		}
+	}
+
+	getPromptService(guildId: bigint, { type }: { type: "verification" }): VerificationService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "reports" }): ReportService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "resources" }): ResourceService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "suggestions" }): SuggestionService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "tickets" }): TicketService | undefined;
+	getPromptService(
+		guildId: bigint,
+		{ type }: { type: keyof ServiceStore["local"]["prompts"] },
+	): PromptService | undefined {
+		switch (type) {
+			case "verification": {
+				return this.local.prompts.verification.get(guildId);
+			}
+			case "reports": {
+				return this.local.prompts.reports.get(guildId);
+			}
+			case "resources": {
+				return this.local.prompts.resources.get(guildId);
+			}
+			case "suggestions": {
+				return this.local.prompts.suggestions.get(guildId);
+			}
+			case "tickets": {
+				return this.local.prompts.tickets.get(guildId);
+			}
+		}
 	}
 }
 
@@ -2265,10 +2292,10 @@ class Client {
 	readonly #services: ServiceStore;
 	readonly #events: EventStore;
 
-	readonly #_interactionCreateCollector: InteractionCollector;
-	readonly #_channelDeleteCollector: Collector<"channelDelete">;
 	readonly #_guildCreateCollector: Collector<"guildCreate">;
 	readonly #_guildDeleteCollector: Collector<"guildDelete">;
+	readonly #_interactionCollector: InteractionCollector;
+	readonly #_channelDeleteCollector: Collector<"channelDelete">;
 
 	static #client?: Client;
 
@@ -2428,10 +2455,14 @@ class Client {
 		this.#events = new EventStore({ services: this.#services });
 		this.#connection = new DiscordConnection({ bot, events: this.#events.buildEventHandlers() });
 
-		this.#_interactionCreateCollector = new InteractionCollector(this);
-		this.#_channelDeleteCollector = new Collector<"channelDelete">();
 		this.#_guildCreateCollector = new Collector<"guildCreate">();
 		this.#_guildDeleteCollector = new Collector<"guildDelete">();
+		this.#_interactionCollector = new InteractionCollector(this, {
+			anyType: true,
+			anyCustomId: true,
+			isPermanent: true,
+		});
+		this.#_channelDeleteCollector = new Collector<"channelDelete">();
 	}
 
 	static async create({
@@ -2485,20 +2516,14 @@ class Client {
 		return client;
 	}
 
-	async start(): Promise<void> {
-		await this.#services.setupGlobalServices();
-		await this.#setupListeners();
-		await this.#connection.open();
-	}
-
-	async #setupListeners(): Promise<void> {
+	async #setupCollectors(): Promise<void> {
 		console.info("[Setup/Client] Setting up event collectors...");
 
 		this.#_guildCreateCollector.onCollect(this.#setupGuild.bind(this));
 
 		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
 
-		this.#_interactionCreateCollector.onCollect(this.handleInteraction.bind(this));
+		this.#_interactionCollector.onCollect(this.handleInteraction.bind(this));
 
 		this.#_channelDeleteCollector.onCollect((channel) => {
 			this.#connection.cache.channels.delete(channel.id);
@@ -2510,8 +2535,17 @@ class Client {
 
 		await this.registerCollector("guildCreate", this.#_guildCreateCollector);
 		await this.registerCollector("guildDelete", this.#_guildDeleteCollector);
-		await this.registerInteractionCollector(this.#_interactionCreateCollector);
+		await this.registerInteractionCollector(this.#_interactionCollector);
 		await this.registerCollector("channelDelete", this.#_channelDeleteCollector);
+	}
+
+	#teardownCollectors(): void {
+		console.info("[Setup/Client] Tearing down event collectors...");
+
+		this.#_guildCreateCollector.close();
+		this.#_guildDeleteCollector.close();
+		this.#_channelDeleteCollector.close();
+		this.#_interactionCollector.close();
 	}
 
 	async #setupGuild(
@@ -2526,7 +2560,7 @@ class Client {
 
 		await GuildStats.getOrCreate(this, { guildId: guild.id.toString() });
 
-		await this.#services.startServices(this, { guildId: guild.id, guildDocument });
+		await this.#services.startLocal(this, { guildId: guild.id, guildDocument });
 
 		this.bot.rest
 			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
@@ -2550,7 +2584,19 @@ class Client {
 	}
 
 	async #teardownGuild(guildId: bigint): Promise<void> {
-		await this.#services.stopServices(guildId);
+		await this.#services.stopLocal(guildId);
+	}
+
+	async start(): Promise<void> {
+		await this.#services.start();
+		await this.#setupCollectors();
+		await this.#connection.open();
+	}
+
+	async stop(): Promise<void> {
+		await this.#services.stop();
+		this.#teardownCollectors();
+		await this.#connection.close();
 	}
 
 	// TODO(vxern): Add some kind of locking mechanism.

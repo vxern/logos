@@ -197,7 +197,9 @@ async function setup(): Promise<void> {
 		certificate = await fs.readFile(".cert.pfx");
 	}
 
-	Client.create({ environment, localisations, certificate });
+	const client = await Client.create({ environment, localisations, certificate });
+
+	await client.start();
 }
 
 function addPolyfills(): void {
