@@ -16,8 +16,10 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 	static readonly #_initialStats: GameStats = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
 
 	get guildId(): string {
-		return this.idParts[0]!;
+		return this.idParts[0];
 	}
+
+	readonly createdAt: number;
 
 	stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
 
@@ -30,10 +32,10 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 		stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
 	} & MetadataOrIdentifierData<GuildStats>) {
 		super({
-			createdAt,
 			"@metadata": Model.buildMetadata(data, { collection: "GuildStats" }),
 		});
 
+		this.createdAt = createdAt ?? Date.now();
 		this.stats = stats;
 	}
 

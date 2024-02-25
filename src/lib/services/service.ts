@@ -14,7 +14,7 @@ abstract class Service implements ServiceBase {
 	readonly client: Client;
 
 	constructor(client: Client, { identifier }: { identifier: string }) {
-		this.log = Logger.create({ identifier, isDebug: client.environment.isDebug });
+		this.log = Logger.create({ identifier: `Client/ServiceStore/${identifier}`, isDebug: client.environment.isDebug });
 		this.client = client;
 	}
 

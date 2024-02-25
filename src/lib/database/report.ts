@@ -7,14 +7,17 @@ interface ReportFormData {
 	messageLink?: string;
 }
 
-// TODO(vxern): Does this not have a createdAt in the ID?
-class Report extends Model<{ idParts: ["guildId", "authorId"] }> {
+class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
-		return this.idParts[0]!;
+		return this.idParts[0];
 	}
 
 	get authorId(): string {
-		return this.idParts[1]!;
+		return this.idParts[1];
+	}
+
+	get createdAt(): number {
+		return Number(this.idParts[2]);
 	}
 
 	// TODO(vxern): Rename this to `formData`.
@@ -23,13 +26,11 @@ class Report extends Model<{ idParts: ["guildId", "authorId"] }> {
 	isResolved: boolean;
 
 	constructor({
-		createdAt,
 		answers,
 		isResolved,
 		...data
-	}: { createdAt?: number; answers: ReportFormData; isResolved?: boolean } & MetadataOrIdentifierData<Report>) {
+	}: { answers: ReportFormData; isResolved?: boolean } & MetadataOrIdentifierData<Report>) {
 		super({
-			createdAt,
 			"@metadata": Model.buildMetadata(data, { collection: "Reports" }),
 		});
 
@@ -43,7 +44,7 @@ class Report extends Model<{ idParts: ["guildId", "authorId"] }> {
 	): Promise<Report[]> {
 		const result = await Model.all<Report>(clientOrDatabase, {
 			collection: "Reports",
-			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined }),
+			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, createdAt: undefined }),
 		});
 
 		return result;

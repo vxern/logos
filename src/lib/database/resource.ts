@@ -5,14 +5,17 @@ interface ResourceFormData {
 	readonly resource: string;
 }
 
-// TODO(vxern): Does this not have a createdAt in the ID?
-class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
+class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
-		return this.idParts[0]!;
+		return this.idParts[0];
 	}
 
 	get authorId(): string {
-		return this.idParts[1]!;
+		return this.idParts[1];
+	}
+
+	get createdAt(): number {
+		return Number(this.idParts[2]);
 	}
 
 	// TODO(vxern): Rename this to `formData`.
@@ -21,13 +24,11 @@ class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 	isResolved: boolean;
 
 	constructor({
-		createdAt,
 		answers,
 		isResolved,
 		...data
-	}: { createdAt?: number; answers: ResourceFormData; isResolved?: boolean } & MetadataOrIdentifierData<Resource>) {
+	}: { answers: ResourceFormData; isResolved?: boolean } & MetadataOrIdentifierData<Resource>) {
 		super({
-			createdAt,
 			"@metadata": Model.buildMetadata(data, { collection: "Resources" }),
 		});
 
@@ -41,7 +42,7 @@ class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 	): Promise<Resource[]> {
 		const result = await Model.all<Resource>(clientOrDatabase, {
 			collection: "Resources",
-			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined }),
+			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, createdAt: undefined }),
 		});
 
 		return result;

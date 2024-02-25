@@ -3,25 +3,23 @@ import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } fro
 
 // TODO(vxern): This needs a guild in the ID as well.
 // TODO(vxern): Verify order of ID parts.
-// TODO(vxern): Does this not have a createdAt in the ID?
-class Praise extends Model<{ idParts: ["authorId", "targetId"] }> {
+class Praise extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> {
 	get authorId(): string {
-		return this.idParts[0]!;
+		return this.idParts[0];
 	}
 
 	get targetId(): string {
-		return this.idParts[1]!;
+		return this.idParts[1];
+	}
+
+	get createdAt(): number {
+		return Number(this.idParts[2]);
 	}
 
 	comment?: string;
 
-	constructor({
-		createdAt,
-		comment,
-		...data
-	}: { createdAt?: number; comment?: string } & MetadataOrIdentifierData<Praise>) {
+	constructor({ comment, ...data }: { comment?: string } & MetadataOrIdentifierData<Praise>) {
 		super({
-			createdAt,
 			"@metadata": Model.buildMetadata(data, { collection: "Praises" }),
 		});
 
@@ -34,7 +32,7 @@ class Praise extends Model<{ idParts: ["authorId", "targetId"] }> {
 	): Promise<Praise[]> {
 		const result = await Model.all<Praise>(clientOrDatabase, {
 			collection: "Praises",
-			where: Object.assign({ ...clauses?.where }, { authorId: undefined, targetId: undefined }),
+			where: Object.assign({ ...clauses?.where }, { authorId: undefined, targetId: undefined, createdAt: undefined }),
 		});
 
 		return result;

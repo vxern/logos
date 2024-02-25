@@ -4,14 +4,17 @@ import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } fro
 type Rule = "behaviour" | "quality" | "relevance" | "suitability" | "exclusivity" | "adherence";
 
 // TODO(vxern): This needs a guild in the ID as well.
-// TODO(vxern): Does this not have a createdAt in the ID?
-class Warning extends Model<{ idParts: ["authorId", "targetId"] }> {
+class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> {
 	get authorId(): string {
-		return this.idParts[0]!;
+		return this.idParts[0];
 	}
 
 	get targetId(): string {
-		return this.idParts[1]!;
+		return this.idParts[1];
+	}
+
+	get createdAt(): number {
+		return Number(this.idParts[2]);
 	}
 
 	readonly reason: string;
@@ -19,14 +22,8 @@ class Warning extends Model<{ idParts: ["authorId", "targetId"] }> {
 	/** @since v3.37.0 */
 	rule?: Rule;
 
-	constructor({
-		createdAt,
-		reason,
-		rule,
-		...data
-	}: { createdAt?: number; reason: string; rule?: Rule } & MetadataOrIdentifierData<Warning>) {
+	constructor({ reason, rule, ...data }: { reason: string; rule?: Rule } & MetadataOrIdentifierData<Warning>) {
 		super({
-			createdAt,
 			"@metadata": Model.buildMetadata(data, { collection: "Warnings" }),
 		});
 
@@ -40,7 +37,7 @@ class Warning extends Model<{ idParts: ["authorId", "targetId"] }> {
 	): Promise<Warning[]> {
 		const result = await Model.all<Warning>(clientOrDatabase, {
 			collection: "Warnings",
-			where: Object.assign({ ...clauses?.where }, { authorId: undefined, targetId: undefined }),
+			where: Object.assign({ ...clauses?.where }, { authorId: undefined, targetId: undefined, createdAt: undefined }),
 		});
 
 		return result;

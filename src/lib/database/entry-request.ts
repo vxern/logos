@@ -11,13 +11,14 @@ type VoteType = "for" | "against";
 
 class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
-		return this.idParts[0]!;
+		return this.idParts[0];
 	}
 
 	get authorId(): string {
-		return this.idParts[1]!;
+		return this.idParts[1];
 	}
 
+	readonly createdAt: number;
 	readonly requestedRoleId: string;
 	// TODO(vxern): Rename to "formData".
 	readonly answers: EntryRequestFormData;
@@ -47,13 +48,12 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 		votedAgainst?: string[];
 	} & MetadataOrIdentifierData<EntryRequest>) {
 		super({
-			createdAt,
 			"@metadata": Model.buildMetadata(data, { collection: "EntryRequests" }),
 		});
 
+		this.createdAt = createdAt ?? Date.now();
 		this.requestedRoleId = requestedRoleId;
 		this.answers = answers;
-
 		this.isFinalised = isFinalised ?? false;
 		this.ticketChannelId = ticketChannelId;
 		this.votedFor = votedFor;

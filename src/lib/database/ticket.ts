@@ -7,20 +7,20 @@ interface TicketFormData {
 	readonly topic: string;
 }
 
-// TODO(vxern): Does this not have a createdAt in the ID?
 class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 	get guildId(): string {
-		return this.idParts[0]!;
+		return this.idParts[0];
 	}
 
 	get authorId(): string {
-		return this.idParts[1]!;
+		return this.idParts[1];
 	}
 
 	get channelId(): string {
-		return this.idParts[2]!;
+		return this.idParts[2];
 	}
 
+	readonly createdAt: number;
 	readonly type: TicketType;
 	// TODO(vxern): Rename this to `formData`.
 	readonly answers: TicketFormData;
@@ -40,10 +40,10 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 		isResolved?: boolean;
 	} & MetadataOrIdentifierData<Ticket>) {
 		super({
-			createdAt,
 			"@metadata": Model.buildMetadata(data, { collection: "Tickets" }),
 		});
 
+		this.createdAt = createdAt ?? Date.now();
 		this.type = type;
 		this.answers = answers;
 		this.isResolved = isResolved ?? false;

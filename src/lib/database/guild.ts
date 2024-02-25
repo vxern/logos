@@ -323,9 +323,10 @@ type RoleWithIndicator = { roleId: string; indicator: string };
 /** @since v3.0.0 */
 class Guild extends Model<{ idParts: ["guildId"] }> {
 	get guildId(): string {
-		return this.idParts[0]!;
+		return this.idParts[0];
 	}
 
+	readonly createdAt: number;
 	readonly languages: GuildLanguages;
 	readonly features: GuildFeatures;
 	/**
@@ -699,11 +700,10 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		isNative?: boolean;
 	} & MetadataOrIdentifierData<Guild>) {
 		super({
-			createdAt,
 			"@metadata": Model.buildMetadata(data, { collection: "Guilds" }),
 		});
 
-		// TODO(vxern): At some point, remove this when the object becomes nullable.
+		this.createdAt = createdAt ?? Date.now();
 		this.languages = languages ?? { localisation: "English/American", feature: "English" };
 		this.features = features ?? {
 			information: { enabled: false },

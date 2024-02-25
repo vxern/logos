@@ -42,11 +42,11 @@ type ClientOrDatabase = Client | Database;
 const IDENTIFIER_PARTS_ORDERED: string[] = ["guildId", "userId", "authorId", "targetId", "createdAt"];
 
 abstract class Model<Generic extends { idParts: readonly string[] } = any> {
+	readonly "@metadata": DocumentMetadata;
+
 	readonly #_idParts: Generic["idParts"];
 
-	readonly createdAt: number;
-
-	readonly "@metadata": DocumentMetadata;
+	abstract get createdAt(): number;
 
 	get idParts(): Generic["idParts"] {
 		return this.#_idParts;
@@ -56,11 +56,11 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 		return this.#_idParts.join(constants.symbols.database.separator);
 	}
 
-	constructor({ createdAt, "@metadata": metadata }: { createdAt?: number; "@metadata": DocumentMetadata }) {
-		this.createdAt = createdAt ?? Date.now();
+	constructor({ "@metadata": metadata }: { "@metadata": DocumentMetadata }) {
+		const [_, idParts] = Model.getDataFromId(metadata["@id"]);
+
 		this["@metadata"] = metadata;
 
-		const [_, idParts] = Model.getDataFromId(metadata["@id"]);
 		this.#_idParts = idParts;
 	}
 
