@@ -233,7 +233,7 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	static async create(options: { host: string; database: string; certificate?: Buffer }): Promise<Database> {
-		console.info("[Database] Initialising the database...");
+		console.info("[Setup/Client/Database] Initialising the database...");
 
 		const database = new Database(options);
 
@@ -245,7 +245,7 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	async #prefetchDocuments(): Promise<void> {
-		console.info("[Database] Prefetching documents...");
+		console.info("[Setup/Client/Database] Prefetching documents...");
 
 		const result = await Promise.all([
 			EntryRequest.getAll(this),
@@ -429,7 +429,7 @@ class DiscordConnection {
 		};
 	};
 
-	constructor({ bot }: { bot: Discord.Bot }) {
+	constructor({ bot, events }: { bot: Discord.Bot; events: Partial<Discord.EventHandlers> }) {
 		this.bot = bot;
 		this.cache = {
 			guilds: new Map(),
@@ -441,9 +441,19 @@ class DiscordConnection {
 				previous: new Map(),
 			},
 		};
+
+		// TODO(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
+		this.bot.handlers.MESSAGE_UPDATE = (bot, data) => {
+			const payload = data.d as Discord.DiscordMessage;
+			if (!payload.author) return;
+
+			bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
+		};
+		this.bot.events = events;
+		this.bot.transformers = this.#buildTransformers();
 	}
 
-	buildTransformers(): Discord.Transformers {
+	#buildTransformers(): Discord.Transformers {
 		const transformers = Discord.createTransformers({
 			guild: this.#transformGuild.bind(this),
 			channel: this.#transformChannel.bind(this),
@@ -559,6 +569,11 @@ class DiscordConnection {
 		}
 
 		return result;
+	}
+
+	async open(): Promise<void> {
+		console.info("[Setup/Client] Opening connection to Discord...");
+		await this.bot.start();
 	}
 }
 
@@ -1581,17 +1596,15 @@ class InteractionCollector<
 			return false;
 		}
 
-		if (this.anyCustomId) {
-			return true;
-		}
+		if (!this.anyCustomId) {
+			if (interaction.data.customId === undefined) {
+				return false;
+			}
 
-		if (interaction.data.customId === undefined) {
-			return false;
-		}
-
-		const data = InteractionCollector.decodeId(interaction.data.customId);
-		if (data[0] !== this.#_baseId) {
-			return false;
+			const data = InteractionCollector.decodeId(interaction.data.customId);
+			if (data[0] !== this.#_baseId) {
+				return false;
+			}
 		}
 
 		return true;
@@ -1954,6 +1967,8 @@ class ServiceStore {
 	}
 
 	async setupGlobalServices(): Promise<void> {
+		console.info("[Setup/Client/Services] Starting global services...");
+
 		const services = Object.values(this.global);
 
 		const promises = [];
@@ -2242,8 +2257,8 @@ class Client {
 	readonly log: Logger;
 	readonly database: Database;
 	readonly cache: Cache;
-	readonly discord: DiscordConnection;
 
+	readonly #connection: DiscordConnection;
 	readonly #localisations: LocalisationStore;
 	readonly #commands: CommandStore;
 	readonly #interactions: InteractionStore;
@@ -2257,16 +2272,8 @@ class Client {
 
 	static #client?: Client;
 
-	get bot(): Discord.Bot {
-		return this.discord.bot;
-	}
-
 	get documents(): Database["cache"] {
 		return this.database.cache;
-	}
-
-	get entities(): DiscordConnection["cache"] {
-		return this.discord.cache;
 	}
 
 	get localise(): LocalisationStore["localise"] {
@@ -2379,6 +2386,14 @@ class Client {
 		return this.#events.registerCollector.bind(this.#events);
 	}
 
+	get bot(): DiscordConnection["bot"] {
+		return this.#connection.bot;
+	}
+
+	get entities(): DiscordConnection["cache"] {
+		return this.#connection.cache;
+	}
+
 	get registerInteractionCollector(): <Metadata extends string[]>(
 		collector: InteractionCollector<Metadata>,
 	) => Promise<void> {
@@ -2402,7 +2417,6 @@ class Client {
 		this.log = Logger.create({ identifier: "Client", isDebug: environment.isDebug });
 		this.database = database;
 		this.cache = new Cache();
-		this.discord = new DiscordConnection({ bot });
 
 		this.#localisations = new LocalisationStore({ localisations });
 		this.#commands = CommandStore.create({
@@ -2412,6 +2426,7 @@ class Client {
 		this.#interactions = new InteractionStore({ bot, isDebug: environment.isDebug });
 		this.#services = new ServiceStore({ client: this });
 		this.#events = new EventStore({ services: this.#services });
+		this.#connection = new DiscordConnection({ bot, events: this.#events.buildEventHandlers() });
 
 		this.#_interactionCreateCollector = new InteractionCollector(this);
 		this.#_channelDeleteCollector = new Collector<"channelDelete">();
@@ -2432,7 +2447,7 @@ class Client {
 			return Client.#client;
 		}
 
-		console.info("[Client] Bootstrapping the client...");
+		console.info("[Setup/Client] Bootstrapping the client...");
 
 		const database = await Database.create({
 			host: environment.ravendbHost,
@@ -2467,27 +2482,18 @@ class Client {
 
 		const client = new Client({ environment, bot, database, localisations });
 
-		await client.#services.setupGlobalServices();
-
-		// TODO(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
-		bot.handlers.MESSAGE_UPDATE = (bot, data) => {
-			const payload = data.d as Discord.DiscordMessage;
-			if (!payload.author) return;
-
-			bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
-		};
-
-		bot.events = client.#events.buildEventHandlers();
-		bot.transformers = client.discord.buildTransformers();
-
-		client.#setupListeners();
-
-		await bot.start();
-
 		return client;
 	}
 
-	#setupListeners() {
+	async start(): Promise<void> {
+		await this.#services.setupGlobalServices();
+		await this.#setupListeners();
+		await this.#connection.open();
+	}
+
+	async #setupListeners(): Promise<void> {
+		console.info("[Setup/Client] Setting up event collectors...");
+
 		this.#_guildCreateCollector.onCollect(this.#setupGuild.bind(this));
 
 		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
@@ -2495,17 +2501,17 @@ class Client {
 		this.#_interactionCreateCollector.onCollect(this.handleInteraction.bind(this));
 
 		this.#_channelDeleteCollector.onCollect((channel) => {
-			this.discord.cache.channels.delete(channel.id);
+			this.#connection.cache.channels.delete(channel.id);
 
 			if (channel.guildId !== undefined) {
-				this.discord.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
+				this.#connection.cache.guilds.get(channel.guildId)?.channels.delete(channel.id);
 			}
 		});
 
-		this.registerCollector("guildCreate", this.#_guildCreateCollector);
-		this.registerCollector("guildDelete", this.#_guildDeleteCollector);
-		this.registerInteractionCollector(this.#_interactionCreateCollector);
-		this.registerCollector("channelDelete", this.#_channelDeleteCollector);
+		await this.registerCollector("guildCreate", this.#_guildCreateCollector);
+		await this.registerCollector("guildDelete", this.#_guildDeleteCollector);
+		await this.registerInteractionCollector(this.#_interactionCreateCollector);
+		await this.registerCollector("channelDelete", this.#_channelDeleteCollector);
 	}
 
 	async #setupGuild(
@@ -2549,7 +2555,7 @@ class Client {
 
 	// TODO(vxern): Add some kind of locking mechanism.
 	async reloadGuild(guildId: bigint): Promise<void> {
-		const guild = this.discord.cache.guilds.get(guildId);
+		const guild = this.#connection.cache.guilds.get(guildId);
 		if (guild === undefined) {
 			return;
 		}
@@ -2631,12 +2637,12 @@ class Client {
 			return [[], false];
 		}
 
-		const seeker = this.discord.cache.members.get(Discord.snowflakeToBigint(`${seekerUserId}${guildId}`));
+		const seeker = this.#connection.cache.members.get(Discord.snowflakeToBigint(`${seekerUserId}${guildId}`));
 		if (seeker === undefined) {
 			return undefined;
 		}
 
-		const guild = this.discord.cache.guilds.get(guildId);
+		const guild = this.#connection.cache.guilds.get(guildId);
 		if (guild === undefined) {
 			return undefined;
 		}
@@ -2648,7 +2654,7 @@ class Client {
 
 		const id = extractIDFromIdentifier(identifier);
 		if (id !== undefined) {
-			const member = this.discord.cache.members.get(Discord.snowflakeToBigint(`${id}${guildId}`));
+			const member = this.#connection.cache.members.get(Discord.snowflakeToBigint(`${id}${guildId}`));
 			if (member === undefined) {
 				return undefined;
 			}
