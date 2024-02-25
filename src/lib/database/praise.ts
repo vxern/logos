@@ -25,7 +25,7 @@ class Praise extends Model<{ idParts: ["authorId", "targetId"] }> {
 			"@metadata":
 				"@metadata" in data
 					? data["@metadata"]
-					: { "@collection": "Praises", "@id": Model.buildPartialId<Praise>(data) },
+					: { "@collection": "Praises", "@id": Model.buildId<Praise>(data, { collection: "Praises" }) },
 		});
 
 		this.comment = comment;

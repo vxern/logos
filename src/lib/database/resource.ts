@@ -31,7 +31,7 @@ class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 			"@metadata":
 				"@metadata" in data
 					? data["@metadata"]
-					: { "@collection": "Resources", "@id": Model.buildPartialId<Resource>(data) },
+					: { "@collection": "Resources", "@id": Model.buildId<Resource>(data, { collection: "Resources" }) },
 		});
 
 		this.answers = answers;

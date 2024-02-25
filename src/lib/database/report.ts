@@ -33,7 +33,7 @@ class Report extends Model<{ idParts: ["guildId", "authorId"] }> {
 			"@metadata":
 				"@metadata" in data
 					? data["@metadata"]
-					: { "@collection": "Reports", "@id": Model.buildPartialId<Report>(data) },
+					: { "@collection": "Reports", "@id": Model.buildId<Report>(data, { collection: "Reports" }) },
 		});
 
 		this.answers = answers;

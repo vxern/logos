@@ -701,7 +701,9 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		super({
 			createdAt,
 			"@metadata":
-				"@metadata" in data ? data["@metadata"] : { "@collection": "Guilds", "@id": Model.buildPartialId<Guild>(data) },
+				"@metadata" in data
+					? data["@metadata"]
+					: { "@collection": "Guilds", "@id": Model.buildId<Guild>(data, { collection: "Guilds" }) },
 		});
 
 		// TODO(vxern): At some point, remove this when the object becomes nullable.

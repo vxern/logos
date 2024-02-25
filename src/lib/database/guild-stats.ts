@@ -34,7 +34,7 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 			"@metadata":
 				"@metadata" in data
 					? data["@metadata"]
-					: { "@collection": "GuildStats", "@id": Model.buildPartialId<GuildStats>(data) },
+					: { "@collection": "GuildStats", "@id": Model.buildId<GuildStats>(data, { collection: "GuildStats" }) },
 		});
 
 		this.stats = stats;

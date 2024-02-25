@@ -31,7 +31,7 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId"] }> {
 			"@metadata":
 				"@metadata" in data
 					? data["@metadata"]
-					: { "@collection": "Suggestions", "@id": Model.buildPartialId<Suggestion>(data) },
+					: { "@collection": "Suggestions", "@id": Model.buildId<Suggestion>(data, { collection: "Suggestions" }) },
 		});
 
 		this.answers = answers;

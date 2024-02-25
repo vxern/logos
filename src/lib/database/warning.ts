@@ -30,7 +30,7 @@ class Warning extends Model<{ idParts: ["authorId", "targetId"] }> {
 			"@metadata":
 				"@metadata" in data
 					? data["@metadata"]
-					: { "@collection": "Warnings", "@id": Model.buildPartialId<Warning>(data) },
+					: { "@collection": "Warnings", "@id": Model.buildId<Warning>(data, { collection: "Warnings" }) },
 		});
 
 		this.reason = reason;

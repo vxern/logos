@@ -51,7 +51,10 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 			"@metadata":
 				"@metadata" in data
 					? data["@metadata"]
-					: { "@collection": "EntryRequests", "@id": Model.buildPartialId<EntryRequest>(data) },
+					: {
+							"@collection": "EntryRequests",
+							"@id": Model.buildId<EntryRequest>(data, { collection: "EntryRequests" }),
+					  },
 		});
 
 		this.requestedRoleId = requestedRoleId;

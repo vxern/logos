@@ -82,15 +82,15 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	}
 
 	static buildId<M extends Model>(data: IdentifierData<M>, { collection }: { collection: Collection }): string {
-		const collectionCamelCase = decapitalise(collection);
+		const collectionCamelcase = decapitalise(collection);
 		const partialId = Model.buildPartialId(data);
 
-		return `${collectionCamelCase}${constants.symbols.database.separator}${partialId}`;
+		return `${collectionCamelcase}${constants.symbols.database.separator}${partialId}`;
 	}
 
 	static getDataFromId<M extends Model>(id: string): [collection: Collection, data: IdentifierParts<M>] {
-		const [collectionCamelCase, ...data] = id.split(constants.symbols.database.separator);
-		const collection = capitalise(collectionCamelCase!);
+		const [collectionCamelcase, ...data] = id.split(constants.symbols.database.separator);
+		const collection = capitalise(collectionCamelcase!);
 		if (!isSupportedCollection(collection)) {
 			throw `Collection "${collection}" encoded in ID "${id}" is unknown.`;
 		}

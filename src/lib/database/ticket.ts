@@ -44,7 +44,7 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 			"@metadata":
 				"@metadata" in data
 					? data["@metadata"]
-					: { "@collection": "Tickets", "@id": Model.buildPartialId<Ticket>(data) },
+					: { "@collection": "Tickets", "@id": Model.buildId<Ticket>(data, { collection: "Tickets" }) },
 		});
 
 		this.type = type;
