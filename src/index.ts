@@ -156,6 +156,8 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 }
 
 async function setup(): Promise<void> {
+	console.info("[Setup] Setting up...");
+
 	const [envConfiguration, templateEnvConfiguration] = await Promise.all([
 		readDotEnvFile(".env"),
 		readDotEnvFile(".env.example", true),

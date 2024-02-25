@@ -233,16 +233,20 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	static async create(options: { host: string; database: string; certificate?: Buffer }): Promise<Database> {
+		console.info("[Database] Initialising the database...");
+
 		const database = new Database(options);
 
 		database.initialize();
 
-		await database.#prefetchData();
+		await database.#prefetchDocuments();
 
 		return database;
 	}
 
-	async #prefetchData(): Promise<void> {
+	async #prefetchDocuments(): Promise<void> {
+		console.info("[Database] Prefetching documents...");
+
 		const result = await Promise.all([
 			EntryRequest.getAll(this),
 			Report.getAll(this),
@@ -1874,9 +1878,9 @@ class EventStore {
 
 		collector.initialise();
 
-		await collector.done;
-
-		this.#unregisterCollector(event, collector);
+		collector.done.then(() => {
+			this.#unregisterCollector(event, collector);
+		});
 	}
 }
 
@@ -2428,6 +2432,8 @@ class Client {
 			return Client.#client;
 		}
 
+		console.info("[Client] Bootstrapping the client...");
+
 		const database = await Database.create({
 			host: environment.ravendbHost,
 			database: environment.ravendbDatabase,
@@ -2482,6 +2488,10 @@ class Client {
 	}
 
 	#setupListeners() {
+		this.#_guildCreateCollector.onCollect(this.#setupGuild.bind(this));
+
+		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
+
 		this.#_interactionCreateCollector.onCollect(this.handleInteraction.bind(this));
 
 		this.#_channelDeleteCollector.onCollect((channel) => {
@@ -2492,14 +2502,10 @@ class Client {
 			}
 		});
 
-		this.#_guildCreateCollector.onCollect(this.#setupGuild.bind(this));
-
-		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
-
-		this.registerInteractionCollector(this.#_interactionCreateCollector);
-		this.registerCollector("channelDelete", this.#_channelDeleteCollector);
 		this.registerCollector("guildCreate", this.#_guildCreateCollector);
 		this.registerCollector("guildDelete", this.#_guildDeleteCollector);
+		this.registerInteractionCollector(this.#_interactionCreateCollector);
+		this.registerCollector("channelDelete", this.#_channelDeleteCollector);
 	}
 
 	async #setupGuild(
