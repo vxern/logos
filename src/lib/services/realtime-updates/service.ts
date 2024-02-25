@@ -72,7 +72,11 @@ class RealtimeUpdateService extends GlobalService {
 
 		this.client.log.info(`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`);
 
-		const oldGuildDocument = await Guild.getOrCreate(this.client, { guildId: data.id });
+		const oldGuildDocument = await Guild.get(this.client, { guildId: data.id });
+
+		if (oldGuildDocument === undefined) {
+			return;
+		}
 
 		await this.client.database.withSession(async (session) => {
 			// TODO(vxern): What does this do again?
