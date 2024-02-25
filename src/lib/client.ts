@@ -64,7 +64,7 @@ import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
-import { compact } from "./utils";
+import { isDefined } from "./utils";
 
 interface Environment {
 	readonly isDebug: boolean;
@@ -866,7 +866,7 @@ class CommandStore {
 		this.#lastCommandUseTimestamps = new Map();
 		this.#handlers = { execute: executeHandlers, autocomplete: autocompleteHandlers };
 
-		this.#_defaultCommands = compact([
+		this.#_defaultCommands = [
 			this.commands.information,
 			this.commands.acknowledgements,
 			this.commands.credits,
@@ -874,7 +874,7 @@ class CommandStore {
 			this.commands.settings,
 			this.commands.recognise,
 			this.commands.recogniseMessage,
-		]);
+		].filter(isDefined);
 	}
 
 	static create({
@@ -1274,7 +1274,7 @@ class CommandStore {
 			}
 		}
 
-		return [...this.#_defaultCommands, ...compact(commands)];
+		return [...this.#_defaultCommands, ...commands.filter(isDefined)];
 	}
 
 	#getLastCommandUseTimestamps({

@@ -109,9 +109,8 @@ async function* asStream<ElementType, ResultType>(
 	}
 }
 
-// TODO(vxern): Create type guard "isDefined" instead of this.
-function compact<T>(array: T[]): Exclude<T, undefined>[] {
-	return array.filter((element) => element !== undefined) as Exclude<T, undefined>[];
+function isDefined<T>(element: T | undefined): element is T {
+	return element !== undefined;
 }
 
-export { chunk, chunked, getAllMessages, reverseObject, asStream, compact };
+export { chunk, chunked, getAllMessages, reverseObject, asStream, isDefined };
