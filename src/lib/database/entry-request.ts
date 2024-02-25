@@ -11,11 +11,11 @@ type VoteType = "for" | "against";
 
 class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	get authorId(): string {
-		return this._idParts[1]!;
+		return this.idParts[1]!;
 	}
 
 	readonly requestedRoleId: string;
@@ -48,13 +48,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	} & MetadataOrIdentifierData<EntryRequest>) {
 		super({
 			createdAt,
-			"@metadata":
-				"@metadata" in data
-					? data["@metadata"]
-					: {
-							"@collection": "EntryRequests",
-							"@id": Model.buildId<EntryRequest>(data, { collection: "EntryRequests" }),
-					  },
+			"@metadata": Model.buildMetadata(data, { collection: "EntryRequests" }),
 		});
 
 		this.requestedRoleId = requestedRoleId;

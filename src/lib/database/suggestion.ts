@@ -8,11 +8,11 @@ interface SuggestionFormData {
 // TODO(vxern): Does this not have a createdAt in the ID?
 class Suggestion extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	get authorId(): string {
-		return this._idParts[1]!;
+		return this.idParts[1]!;
 	}
 
 	// TODO(vxern): Rename this to `formData`.
@@ -28,10 +28,7 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId"] }> {
 	}: { createdAt?: number; answers: SuggestionFormData; isResolved?: boolean } & MetadataOrIdentifierData<Suggestion>) {
 		super({
 			createdAt,
-			"@metadata":
-				"@metadata" in data
-					? data["@metadata"]
-					: { "@collection": "Suggestions", "@id": Model.buildId<Suggestion>(data, { collection: "Suggestions" }) },
+			"@metadata": Model.buildMetadata(data, { collection: "Suggestions" }),
 		});
 
 		this.answers = answers;

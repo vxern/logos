@@ -32,7 +32,7 @@ class User extends Model<{ idParts: ["userId"] }> {
 	static readonly #_initialScores: GameScores = { totalScore: 0, sessionCount: 1 };
 
 	get userId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	readonly account: Account;
@@ -57,20 +57,12 @@ class User extends Model<{ idParts: ["userId"] }> {
 		account?: Account;
 		scores?: Partial<Record<Locale, Partial<Record<GameType, GameScores>>>>;
 	} & MetadataOrIdentifierData<User>) {
-		if ("@metadata" in data) {
-			super({
-				createdAt,
-				"@metadata": data["@metadata"],
-			});
-			this.account = account ?? { id: data["@metadata"]["@id"] };
-		} else {
-			super({
-				createdAt,
-				"@metadata": { "@collection": "Users", "@id": Model.buildId<User>(data, { collection: "Users" }) },
-			});
+		super({
+			createdAt,
+			"@metadata": Model.buildMetadata(data, { collection: "Users" }),
+		});
 
-			this.account = account ?? { id: data.userId };
-		}
+		this.account = account ?? { id: this.userId };
 
 		this.scores = scores;
 	}

@@ -4,8 +4,8 @@ import { Client, Database } from "../client";
 import { RateLimit, timeStructToMilliseconds } from "./guild";
 
 interface DocumentMetadata {
-	"@id": string;
-	"@collection": Collection;
+	readonly "@id": string;
+	readonly "@collection": Collection;
 	"@is-deleted"?: boolean;
 }
 
@@ -32,7 +32,7 @@ function isSupportedCollection(collection: string): collection is Collection {
 	return (collections as unknown as string[]).includes(collection);
 }
 
-type IdentifierParts<M extends Model> = M["_idParts"];
+type IdentifierParts<M extends Model> = M["idParts"];
 type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: string };
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
 type MetadataOrIdentifierData<M extends Model> = { "@metadata": DocumentMetadata } | IdentifierData<M>;
@@ -42,22 +42,18 @@ type ClientOrDatabase = Client | Database;
 const IDENTIFIER_PARTS_ORDERED: string[] = ["guildId", "userId", "authorId", "targetId", "createdAt"];
 
 abstract class Model<Generic extends { idParts: readonly string[] } = any> {
-	readonly _idParts: Generic["idParts"];
+	readonly #_idParts: Generic["idParts"];
 
 	readonly createdAt: number;
 
 	readonly "@metadata": DocumentMetadata;
 
+	get idParts(): Generic["idParts"] {
+		return this.#_idParts;
+	}
+
 	get partialId(): string {
-		return this._idParts.join(constants.symbols.database.separator);
-	}
-
-	get id(): string {
-		return this["@metadata"]["@id"];
-	}
-
-	get collection(): string {
-		return this["@metadata"]["@collection"];
+		return this.#_idParts.join(constants.symbols.database.separator);
 	}
 
 	constructor({ createdAt, "@metadata": metadata }: { createdAt?: number; "@metadata": DocumentMetadata }) {
@@ -65,7 +61,20 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 		this["@metadata"] = metadata;
 
 		const [_, idParts] = Model.getDataFromId(metadata["@id"]);
-		this._idParts = idParts;
+		this.#_idParts = idParts;
+	}
+
+	static #hasMetadata<M extends Model>(data: MetadataOrIdentifierData<M>): data is { "@metadata": DocumentMetadata } {
+		return "@metadata" in data;
+	}
+
+	static buildMetadata<M extends Model>(
+		data: MetadataOrIdentifierData<M>,
+		{ collection }: { collection: Collection },
+	): DocumentMetadata {
+		return Model.#hasMetadata(data)
+			? data["@metadata"]
+			: { "@collection": collection, "@id": Model.buildId<M>(data, { collection }) };
 	}
 
 	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {
@@ -95,7 +104,7 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 			throw `Collection "${collection}" encoded in ID "${id}" is unknown.`;
 		}
 
-		return [collection as Collection, data];
+		return [collection as Collection, data as IdentifierParts<M>];
 	}
 
 	static #withDummiesReplaced<M extends Model>(

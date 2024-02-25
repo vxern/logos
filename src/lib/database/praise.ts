@@ -6,11 +6,11 @@ import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } fro
 // TODO(vxern): Does this not have a createdAt in the ID?
 class Praise extends Model<{ idParts: ["authorId", "targetId"] }> {
 	get authorId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	get targetId(): string {
-		return this._idParts[1]!;
+		return this.idParts[1]!;
 	}
 
 	comment?: string;
@@ -22,10 +22,7 @@ class Praise extends Model<{ idParts: ["authorId", "targetId"] }> {
 	}: { createdAt?: number; comment?: string } & MetadataOrIdentifierData<Praise>) {
 		super({
 			createdAt,
-			"@metadata":
-				"@metadata" in data
-					? data["@metadata"]
-					: { "@collection": "Praises", "@id": Model.buildId<Praise>(data, { collection: "Praises" }) },
+			"@metadata": Model.buildMetadata(data, { collection: "Praises" }),
 		});
 
 		this.comment = comment;

@@ -323,7 +323,7 @@ type RoleWithIndicator = { roleId: string; indicator: string };
 /** @since v3.0.0 */
 class Guild extends Model<{ idParts: ["guildId"] }> {
 	get guildId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	readonly languages: GuildLanguages;
@@ -700,10 +700,7 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 	} & MetadataOrIdentifierData<Guild>) {
 		super({
 			createdAt,
-			"@metadata":
-				"@metadata" in data
-					? data["@metadata"]
-					: { "@collection": "Guilds", "@id": Model.buildId<Guild>(data, { collection: "Guilds" }) },
+			"@metadata": Model.buildMetadata(data, { collection: "Guilds" }),
 		});
 
 		// TODO(vxern): At some point, remove this when the object becomes nullable.
@@ -718,7 +715,7 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		this.isNative = isNative ?? false;
 	}
 
-	static async getOrCreate(client: Client, data: IdentifierData<Guild>): Promise<Guild> {
+	static async get(client: Client, data: IdentifierData<Guild>): Promise<Guild | undefined> {
 		const partialId = Model.buildPartialId(data);
 		if (client.documents.guilds.has(partialId)) {
 			return client.documents.guilds.get(partialId)!;
@@ -734,6 +731,17 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 
 			resolve(guildDocument);
 		});
+
+		return promise;
+	}
+
+	static async getOrCreate(client: Client, data: IdentifierData<Guild>): Promise<Guild> {
+		const guildDocument = await Guild.get(client, data);
+		if (guildDocument !== undefined) {
+			return guildDocument;
+		}
+
+		const { promise, resolve } = Promise.withResolvers<Guild>();
 
 		await client.database.withSession(async (session) => {
 			const guildDocument = new Guild(data);

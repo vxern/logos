@@ -8,11 +8,11 @@ interface ResourceFormData {
 // TODO(vxern): Does this not have a createdAt in the ID?
 class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	get authorId(): string {
-		return this._idParts[1]!;
+		return this.idParts[1]!;
 	}
 
 	// TODO(vxern): Rename this to `formData`.
@@ -28,10 +28,7 @@ class Resource extends Model<{ idParts: ["guildId", "authorId"] }> {
 	}: { createdAt?: number; answers: ResourceFormData; isResolved?: boolean } & MetadataOrIdentifierData<Resource>) {
 		super({
 			createdAt,
-			"@metadata":
-				"@metadata" in data
-					? data["@metadata"]
-					: { "@collection": "Resources", "@id": Model.buildId<Resource>(data, { collection: "Resources" }) },
+			"@metadata": Model.buildMetadata(data, { collection: "Resources" }),
 		});
 
 		this.answers = answers;

@@ -183,7 +183,7 @@ class DocumentSession extends ravendb.DocumentSession {
 	}
 
 	async set<M extends Model>(document: M): Promise<void> {
-		await this.store<M>(document);
+		await this.store<M>(document, document["@metadata"]["@id"]);
 
 		this.#database.cacheDocument(document);
 	}

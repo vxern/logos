@@ -10,15 +10,15 @@ interface TicketFormData {
 // TODO(vxern): Does this not have a createdAt in the ID?
 class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 	get guildId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	get authorId(): string {
-		return this._idParts[1]!;
+		return this.idParts[1]!;
 	}
 
 	get channelId(): string {
-		return this._idParts[2]!;
+		return this.idParts[2]!;
 	}
 
 	readonly type: TicketType;
@@ -41,10 +41,7 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 	} & MetadataOrIdentifierData<Ticket>) {
 		super({
 			createdAt,
-			"@metadata":
-				"@metadata" in data
-					? data["@metadata"]
-					: { "@collection": "Tickets", "@id": Model.buildId<Ticket>(data, { collection: "Tickets" }) },
+			"@metadata": Model.buildMetadata(data, { collection: "Tickets" }),
 		});
 
 		this.type = type;

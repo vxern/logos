@@ -10,11 +10,11 @@ interface ReportFormData {
 // TODO(vxern): Does this not have a createdAt in the ID?
 class Report extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	get authorId(): string {
-		return this._idParts[1]!;
+		return this.idParts[1]!;
 	}
 
 	// TODO(vxern): Rename this to `formData`.
@@ -30,10 +30,7 @@ class Report extends Model<{ idParts: ["guildId", "authorId"] }> {
 	}: { createdAt?: number; answers: ReportFormData; isResolved?: boolean } & MetadataOrIdentifierData<Report>) {
 		super({
 			createdAt,
-			"@metadata":
-				"@metadata" in data
-					? data["@metadata"]
-					: { "@collection": "Reports", "@id": Model.buildId<Report>(data, { collection: "Reports" }) },
+			"@metadata": Model.buildMetadata(data, { collection: "Reports" }),
 		});
 
 		this.answers = answers;

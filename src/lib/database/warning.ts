@@ -7,11 +7,11 @@ type Rule = "behaviour" | "quality" | "relevance" | "suitability" | "exclusivity
 // TODO(vxern): Does this not have a createdAt in the ID?
 class Warning extends Model<{ idParts: ["authorId", "targetId"] }> {
 	get authorId(): string {
-		return this._idParts[0]!;
+		return this.idParts[0]!;
 	}
 
 	get targetId(): string {
-		return this._idParts[1]!;
+		return this.idParts[1]!;
 	}
 
 	readonly reason: string;
@@ -27,10 +27,7 @@ class Warning extends Model<{ idParts: ["authorId", "targetId"] }> {
 	}: { createdAt?: number; reason: string; rule?: Rule } & MetadataOrIdentifierData<Warning>) {
 		super({
 			createdAt,
-			"@metadata":
-				"@metadata" in data
-					? data["@metadata"]
-					: { "@collection": "Warnings", "@id": Model.buildId<Warning>(data, { collection: "Warnings" }) },
+			"@metadata": Model.buildMetadata(data, { collection: "Warnings" }),
 		});
 
 		this.reason = reason;
