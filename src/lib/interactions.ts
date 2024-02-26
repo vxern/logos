@@ -4,39 +4,126 @@ import { Locale, LocalisationLanguage } from "../constants/languages";
 import time from "../constants/time";
 import * as Logos from "../types";
 import { Client, InteractionCollector } from "./client";
+import {chunk} from "./utils";
+import defaults from "../defaults";
 
-/**
- * Paginates an array of elements, allowing the user to browse between pages
- * in an embed view.
- */
-async function paginate<T>(
+type PageAction = "previous" | "next";
+type PageBuilder<T = any> = (page: T[]) => Omit<Discord.CamelizedDiscordEmbed, "footer">;
+
+class PaginatedViewComponent<T> {
+	static readonly #defaultPageBuilder: PageBuilder = <T>(page: T[]) => {
+		const strings = {
+			page: this.#client.localise("interactions.page", this.#_anchor.locale)(),
+			continuedOnNextPage: this.#client.localise("interactions.continuedOnNextPage", this.#_anchor.locale)(),
+		};
+
+		return {
+			...embed,
+			title:
+				data.elements.length === 1
+					? data.view.title
+					: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
+			description: data.view.generate(elements, data.pageIndex),
+			footer: isLast ? undefined : { text: strings.continuedOnNextPage },
+		};
+	}
+
+	readonly #client: Client;
+	readonly #builder: PageBuilder<T>;
+
+	#pages: T[][];
+	#pageIndex: number;
+
+	readonly #_pageButtons: InteractionCollector<[action: PageAction]>;
+
+	#_anchor: Logos.Interaction;
+
+	get isFirst(): boolean {
+		return this.#pageIndex === 0;
+	}
+
+	get isLast(): boolean {
+		return this.#pageIndex === Math.max(this.#pages.length - 1, 0);
+	}
+
+	get currentPage(): T[] {
+		return this.#pages.at(this.#pageIndex)!;
+	}
+
+	constructor(client: Client, { interaction, builder, elements }: { interaction: Logos.Interaction, builder?: PageBuilder, elements: T[] }) {
+		this.#client = client;
+		this.#builder = builder;
+		this.#pages = chunk(elements, defaults.RESULTS_PER_PAGE);
+		this.#pageIndex = 0;
+
+		this.#_pageButtons = new InteractionCollector<[action: PageAction]>(client, {
+			only: interaction.parameters.show ? [interaction.user.id] : undefined,
+		});
+		this.#_anchor = interaction;
+	}
+
+	#getPageEmbed(): Discord.CamelizedDiscordEmbed {
+		const strings = {
+			page: this.#client.localise("interactions.page", this.#_anchor.locale)(),
+			continuedOnNextPage: this.#client.localise("interactions.continuedOnNextPage", this.#_anchor.locale)(),
+		};
+
+		return {
+			...embed,
+			title:
+				data.elements.length === 1
+					? data.view.title
+					: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
+			description: data.view.generate(elements, data.pageIndex),
+			footer: isLast ? undefined : { text: strings.continuedOnNextPage },
+		};
+	}
+
+	#getPageButtons(): Discord.MessageComponents {
+		return [
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						customId: this.#_pageButtons.encodeId(["previous"]),
+						disabled: this.isFirst,
+						style: Discord.ButtonStyles.Secondary,
+						label: constants.symbols.interactions.menu.controls.back,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						customId: this.#_pageButtons.encodeId(["next"]),
+						disabled: this.isLast,
+						style: Discord.ButtonStyles.Secondary,
+						label: constants.symbols.interactions.menu.controls.forward,
+					},
+				],
+			},
+		];
+	}
+
+	display() {
+		this.#_pageButtons.onCollect(async (buttonPress) => {
+			this.#client.acknowledge(buttonPress);
+
+
+		});
+
+		this.#client.registerInteractionCollector(this.#_pageButtons);
+
+		const showButton = this.#client.interactionRepetitionService.getShowButton(this.#_anchor, { locale: this.#_anchor.locale });
+
+	}
+}
+
+async function displayPaginated<T>(
 	client: Client,
 	interaction: Logos.Interaction,
-	{
-		getElements,
-		embed,
-		view,
-		show,
-		showable,
-	}: {
-		getElements: () => T[];
-		embed: Omit<Discord.CamelizedDiscordEmbed, "footer">;
-		view: PaginationDisplayData<T>;
-		show: boolean;
-		showable: boolean;
-	},
+	{ builder }: { builder: () => Omit<Discord.CamelizedDiscordEmbed, "footer">[], },
+	{ show }: { show: boolean },
 	{ locale }: { locale: Locale },
 ): Promise<() => Promise<void>> {
-	const pageButtons = new InteractionCollector<[action: "previous" | "next"]>(client, {
-		only: show ? [interaction.user.id] : undefined,
-	});
-
-	const data: PaginationData<T> = { elements: getElements(), view, pageIndex: 0 };
-
-	const showButton = client.interactionRepetitionService.getShowButton(interaction, { locale });
-
-	const isFirst = () => data.pageIndex === 0;
-	const isLast = () => data.pageIndex === data.elements.length - 1;
 
 	const getView = (): Discord.InteractionCallbackData => {
 		const buttons = getPageButtons({ pageButtons, isFirst: isFirst(), isLast: isLast() });
@@ -70,92 +157,12 @@ async function paginate<T>(
 		client.editReply(interaction, getView());
 	};
 
-	pageButtons.onCollect(async (buttonPress) => {
-		client.acknowledge(buttonPress);
-
-		await editView(buttonPress.metadata[1]);
-	});
-
-	client.registerInteractionCollector(pageButtons);
-
 	client.reply(interaction, getView(), { visible: show });
 
 	return async () => {
 		data.elements = getElements();
 		editView();
 	};
-}
-
-interface PaginationDisplayData<T> {
-	readonly title: string;
-	readonly generate: (element: T, index: number) => string;
-}
-
-interface PaginationData<T> {
-	elements: T[];
-	readonly view: PaginationDisplayData<T>;
-
-	pageIndex: number;
-}
-
-function getPageEmbed<T>(
-	client: Client,
-	data: PaginationData<T>,
-	embed: Discord.CamelizedDiscordEmbed,
-	isLast: boolean,
-	locale: Locale,
-): Discord.CamelizedDiscordEmbed {
-	const strings = {
-		page: client.localise("interactions.page", locale)(),
-		continuedOnNextPage: client.localise("interactions.continuedOnNextPage", locale)(),
-	};
-
-	const elements = data.elements.at(data.pageIndex);
-	if (elements === undefined) {
-		throw `StateError: Failed to get elements on page with index '${data.pageIndex}'.`;
-	}
-
-	return {
-		...embed,
-		title:
-			data.elements.length === 1
-				? data.view.title
-				: `${data.view.title} ~ ${strings.page} ${data.pageIndex + 1}/${data.elements.length}`,
-		description: data.view.generate(elements, data.pageIndex),
-		footer: isLast ? undefined : { text: strings.continuedOnNextPage },
-	};
-}
-
-function getPageButtons({
-	pageButtons,
-	isFirst,
-	isLast,
-}: {
-	pageButtons: InteractionCollector<[action: "previous" | "next"]>;
-	isFirst: boolean;
-	isLast: boolean;
-}): Discord.MessageComponents {
-	return [
-		{
-			type: Discord.MessageComponentTypes.ActionRow,
-			components: [
-				{
-					type: Discord.MessageComponentTypes.Button,
-					customId: pageButtons.encodeId(["previous"]),
-					disabled: isFirst,
-					style: Discord.ButtonStyles.Secondary,
-					label: constants.symbols.interactions.menu.controls.back,
-				},
-				{
-					type: Discord.MessageComponentTypes.Button,
-					customId: pageButtons.encodeId(["next"]),
-					disabled: isLast,
-					style: Discord.ButtonStyles.Secondary,
-					label: constants.symbols.interactions.menu.controls.forward,
-				},
-			],
-		},
-	];
 }
 
 type ComposerActionRow<ComposerContent, SectionNames = keyof ComposerContent> = {
@@ -469,5 +476,5 @@ function parseVerboseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
-export { createModalComposer, getPageButtons, paginate, parseTimeExpression };
+export { createModalComposer, getPageButtons, displayPaginated, parseTimeExpression };
 export type { Modal };
