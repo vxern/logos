@@ -1,15 +1,13 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import defaults from "../../../../defaults";
-import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
+import { MentionTypes, mention, timestamp } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { paginate } from "../../../interactions";
 import { isCollection } from "../../../services/music/music";
-import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { collection, show } from "../../parameters";
 import { Song, SongCollection, SongStream } from "../data/types";
+import { PaginatedSongCollectionViewComponent } from "../../../components/paginated-view";
 
 const command: OptionTemplate = {
 	id: "now",
@@ -120,45 +118,16 @@ async function handleDisplayCurrentlyPlaying(
 		const strings = {
 			nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),
 			songs: client.localise("music.options.now.strings.songs", locale)(),
-			listEmpty: client.localise("music.strings.listEmpty", locale)(),
 		};
 
-		paginate(
-			client,
+		const viewComponent = new PaginatedSongCollectionViewComponent(client, {
 			interaction,
-			{
-				getElements: () => chunk(collection.songs, defaults.RESULTS_PER_PAGE),
-				embed: {
-					color: constants.colors.blue,
-				},
-				view: {
-					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
-					generate: (songs, pageIndex) => {
-						if (songs.length === 0) {
-							return strings.listEmpty;
-						}
+			title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
+			collection,
+		});
 
-						return songs
-							.map((song, index) => {
-								const isCurrent = pageIndex * 10 + index === collection.position;
+		await viewComponent.open();
 
-								const titleFormatted = trim(
-									song.title.replaceAll("(", "❨").replaceAll(")", "❩").replaceAll("[", "⁅").replaceAll("]", "⁆"),
-									50,
-								);
-								const titleHyperlink = `[${titleFormatted}](${song.url})`;
-								const titleHighlighted = isCurrent ? `**${titleHyperlink}**` : titleHyperlink;
-
-								return `${pageIndex * 10 + (index + 1)}. ${titleHighlighted}`;
-							})
-							.join("\n");
-					},
-				},
-				show: interaction.parameters.show,
-				showable: true,
-			},
-			{ locale },
-		);
 		return;
 	}
 

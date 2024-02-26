@@ -1,12 +1,10 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import defaults from "../../../../defaults";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
-import { chunk } from "../../../utils";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
-import { displayListings } from "../module";
+import { PaginatedSongListingViewComponent } from "../../../components/paginated-view";
 
 const command: OptionTemplate = {
 	id: "history",
@@ -67,23 +65,23 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 		title: client.localise("music.options.history.strings.playbackHistory", locale)(),
 	};
 
-	const regenerate = await displayListings(
-		client,
+	// TODO(vxern): This will not display the updated listings on history change.
+	const viewComponent = new PaginatedSongListingViewComponent(client, {
 		interaction,
-		{
-			title: `${constants.symbols.music.list} ${strings.title}`,
-			getSongListings: () => chunk(structuredClone(historyReversed).reverse(), defaults.RESULTS_PER_PAGE),
-		},
-		interaction.parameters.show,
-		{ locale },
-	);
+		title: `${constants.symbols.music.list} ${strings.title}`,
+		listings: structuredClone(historyReversed).reverse(),
+	});
 
-	events.on("historyUpdate", regenerate);
-	events.on("stop", regenerate);
+	await viewComponent.open();
+
+	const refreshViewComponent = () => viewComponent.refresh();
+
+	events.on("queueUpdate", refreshViewComponent);
+	events.on("stop", refreshViewComponent);
 
 	setTimeout(() => {
-		events.off("historyUpdate", regenerate);
-		events.off("stop", regenerate);
+		events.off("queueUpdate", refreshViewComponent);
+		events.off("stop", refreshViewComponent);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 }
 

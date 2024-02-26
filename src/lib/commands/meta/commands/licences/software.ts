@@ -5,9 +5,8 @@ import licences from "../../../../../constants/licences";
 import { code } from "../../../../../formatting";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
-import { paginate } from "../../../../interactions";
-import { chunk } from "../../../../utils";
 import { OptionTemplate } from "../../../command";
+import { PaginatedSoftwareLicenceViewComponent } from "../../../../components/paginated-view";
 
 const command: OptionTemplate = {
 	id: "software",
@@ -53,38 +52,23 @@ async function handleDisplaySoftwareLicence(
 	const locale = interaction.locale;
 
 	if (!(interaction.parameters.package in licences.software)) {
-		displayError(client, interaction, { locale: interaction.locale });
+		displayError(client, interaction, { locale: locale });
 		return;
 	}
 
 	const packageName = interaction.parameters.package as keyof typeof licences.software;
-	const licenceParts = chunk(licences.software[packageName], 1);
 
 	const strings = {
-		title: client.localise("license.strings.license", locale)({ entity: code(packageName) }),
+		license: client.localise("license.strings.license", locale)({ entity: code(packageName) }),
 	};
 
-	paginate(
-		client,
+	const viewComponent = new PaginatedSoftwareLicenceViewComponent(client, {
 		interaction,
-		{
-			getElements: () => licenceParts,
-			embed: { color: constants.colors.greenishLightGray },
-			view: {
-				title: strings.title,
-				generate: (page) => {
-					if (page.length === 0) {
-						return "?";
-					}
+		title: strings.license,
+		sections: licences.software[packageName],
+	});
 
-					return `*${page}*`;
-				},
-			},
-			showable: false,
-			show: false,
-		},
-		{ locale },
-	);
+	await viewComponent.open();
 }
 
 async function displayError(
