@@ -72,17 +72,18 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 		listings: queue,
 	});
 
-	await viewComponent.open();
-
-	const refreshViewComponent = () => viewComponent.refresh();
+	const refreshViewComponent = async () => viewComponent.refresh();
+	const closeViewComponent = async () => viewComponent.close();
 
 	events.on("queueUpdate", refreshViewComponent);
-	events.on("stop", refreshViewComponent);
+	events.on("stop", closeViewComponent);
 
 	setTimeout(() => {
 		events.off("queueUpdate", refreshViewComponent);
-		events.off("stop", refreshViewComponent);
+		events.off("stop", closeViewComponent);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
+
+	await viewComponent.open();
 }
 
 export default command;

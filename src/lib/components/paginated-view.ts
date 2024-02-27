@@ -8,7 +8,7 @@ import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../comman
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";
 
-type PageView = Omit<Discord.CamelizedDiscordEmbed, "footer"> & Required<Pick<Discord.CamelizedDiscordEmbed, "title">>;
+type PageView = { embed: Discord.CamelizedDiscordEmbed; components?: Discord.MessageComponents };
 type PageAction = "previous" | "next";
 
 abstract class PaginatedViewComponent<T> {
@@ -39,20 +39,20 @@ abstract class PaginatedViewComponent<T> {
 		return this.#pages.at(this.#index)!;
 	}
 
-	get #view(): Discord.CamelizedDiscordEmbed {
+	get #view(): PageView {
 		const locale = this.anchor.parameters.show ? this.anchor.guildLocale : this.anchor.locale;
 
-		const view = this.build(this.#currentPage, this.#index, { locale });
+		const { embed, components } = this.build(this.#currentPage, this.#index, { locale });
 
-		let title: string;
+		let title: string | undefined;
 		if (!this.#hasSinglePage) {
 			const strings = {
 				page: this.client.localise("interactions.page", locale)(),
 			};
 
-			title = `${view.title} ~ ${strings.page} ${this.#index + 1}/${this.#pages.length}`;
+			title = `${embed.title} ~ ${strings.page} ${this.#index + 1}/${this.#pages.length}`;
 		} else {
-			title = view.title;
+			title = embed.title;
 		}
 
 		if (!this.#isOnLastPage) {
@@ -60,10 +60,10 @@ abstract class PaginatedViewComponent<T> {
 				continuedOnNextPage: this.client.localise("interactions.continuedOnNextPage", locale)(),
 			};
 
-			return { ...view, title, footer: { text: strings.continuedOnNextPage } };
+			return { embed: { ...embed, title, footer: { text: strings.continuedOnNextPage } }, components };
 		}
 
-		return { ...view, title };
+		return { embed: { ...embed, title }, components };
 	}
 
 	get #paginationControls(): Discord.MessageComponents {
@@ -123,11 +123,16 @@ abstract class PaginatedViewComponent<T> {
 	abstract build(page: T[], index: number, { locale }: { locale: Locale }): PageView;
 
 	async #display(): Promise<void> {
-		await this.client.reply(this.anchor, { embeds: [this.#view], components: this.#paginationControls });
+		await this.client.reply(this.anchor, { embeds: [this.#view.embed], components: this.#paginationControls });
 	}
 
 	async refresh(): Promise<void> {
-		await this.client.editReply(this.anchor, { embeds: [this.#view], components: this.#paginationControls });
+		const view = this.#view;
+
+		await this.client.editReply(this.anchor, {
+			embeds: [view.embed],
+			components: [...(view.components ?? []), ...this.#paginationControls],
+		});
 	}
 
 	navigateToPreviousPage(): void {
@@ -194,7 +199,7 @@ class PaginatedSongListingViewComponent extends PaginatedViewComponent<SongListi
 				listEmpty: this.client.localise("music.strings.listEmpty", locale)(),
 			};
 
-			return { title: this.#title, description: strings.listEmpty, color: constants.colors.blue };
+			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colors.blue } };
 		}
 
 		const listingsFormatted = page
@@ -206,7 +211,7 @@ class PaginatedSongListingViewComponent extends PaginatedViewComponent<SongListi
 			})
 			.join("\n");
 
-		return { title: this.#title, description: listingsFormatted, color: constants.colors.blue };
+		return { embed: { title: this.#title, description: listingsFormatted, color: constants.colors.blue } };
 	}
 }
 
@@ -230,7 +235,7 @@ class PaginatedSongCollectionViewComponent extends PaginatedViewComponent<Song> 
 				listEmpty: this.client.localise("music.strings.listEmpty", locale)(),
 			};
 
-			return { title: this.#title, description: strings.listEmpty, color: constants.colors.blue };
+			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colors.blue } };
 		}
 
 		const songsFormatted = page
@@ -248,7 +253,77 @@ class PaginatedSongCollectionViewComponent extends PaginatedViewComponent<Song> 
 			})
 			.join("\n");
 
-		return { title: this.#title, description: songsFormatted, color: constants.colors.blue };
+		return { embed: { title: this.#title, description: songsFormatted, color: constants.colors.blue } };
+	}
+}
+
+class PaginatedRemoveSongListingViewComponent extends PaginatedViewComponent<SongListing> {
+	readonly #_selectMenuSelection: InteractionCollector;
+
+	constructor(client: Client, { interaction, listings }: { interaction: Logos.Interaction; listings: SongListing[] }) {
+		super(client, { interaction, elements: listings, showable: true });
+
+		this.#_selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
+	}
+
+	#buildSelectMenu(page: SongListing[], pageIndex: number): Discord.ActionRow {
+		const options = page.map<Discord.SelectOption>((songListing, index) => ({
+			emoji: { name: listingTypeToEmoji[songListing.content.type] },
+			label: trim(songListing.content.title, 100),
+			value: (pageIndex * defaults.RESULTS_PER_PAGE + index).toString(),
+		}));
+
+		return {
+			type: Discord.MessageComponentTypes.ActionRow,
+			components: [
+				{
+					type: Discord.MessageComponentTypes.SelectMenu,
+					customId: this.#_selectMenuSelection.customId,
+					minValues: 1,
+					maxValues: 1,
+					options,
+				},
+			],
+		};
+	}
+
+	build(page: SongListing[], pageIndex: number, { locale }: { locale: Locale }): PageView {
+		if (page.length === 0) {
+			const strings = {
+				title: this.client.localise("music.options.remove.strings.queueEmpty.title", locale)(),
+				description: this.client.localise("music.options.remove.strings.queueEmpty.description", locale)(),
+			};
+
+			return { embed: { title: strings.title, description: strings.description, color: constants.colors.blue } };
+		}
+
+		const selectMenu = this.#buildSelectMenu(page, pageIndex);
+
+		const strings = {
+			title: this.client.localise("music.options.remove.strings.selectSong.title", locale)(),
+			description: this.client.localise("music.options.remove.strings.selectSong.description", locale)(),
+		};
+
+		return {
+			embed: { title: strings.title, description: strings.description, color: constants.colors.blue },
+			components: [selectMenu],
+		};
+	}
+
+	onCollect(callback: (buttonPress: Logos.Interaction) => Promise<void>): void {
+		this.#_selectMenuSelection.onCollect(callback);
+	}
+
+	async open(): Promise<void> {
+		await super.open();
+
+		this.client.registerInteractionCollector(this.#_selectMenuSelection);
+	}
+
+	async close(): Promise<void> {
+		await super.close();
+
+		this.#_selectMenuSelection.close();
 	}
 }
 
@@ -265,7 +340,7 @@ class PaginatedSoftwareLicenceViewComponent extends PaginatedViewComponent<strin
 	}
 
 	build(page: string[], _: number, { locale: __ }: { locale: Locale }): PageView {
-		return { title: this.#title, description: `*${page}*` };
+		return { embed: { title: this.#title, description: `*${page}*` } };
 	}
 }
 
@@ -273,5 +348,6 @@ export {
 	PaginatedViewComponent,
 	PaginatedSongListingViewComponent,
 	PaginatedSongCollectionViewComponent,
+	PaginatedRemoveSongListingViewComponent,
 	PaginatedSoftwareLicenceViewComponent,
 };
