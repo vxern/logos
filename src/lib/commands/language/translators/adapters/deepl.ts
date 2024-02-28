@@ -6,7 +6,7 @@ import {
 	getDeepLTranslationLanguageByLocale,
 	isDeepLLocale,
 } from "../../../../../constants/languages";
-import defaults from "../../../../../defaults";
+import defaults from "../../../../../constants/defaults";
 import { Client } from "../../../../client";
 import { Translation, TranslationAdapter } from "../adapter";
 

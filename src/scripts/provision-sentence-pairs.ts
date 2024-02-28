@@ -4,7 +4,7 @@ import eventStream from "event-stream";
 import * as fs from "fs/promises";
 import Redis from "ioredis";
 import { Locale, getLocaleByLearningLanguage, isLearningLanguage, locales } from "../constants/languages";
-import defaults from "../defaults";
+import defaults from "../constants/defaults";
 import { capitalise } from "../formatting";
 
 const RECORD_DELIMETER = "	";

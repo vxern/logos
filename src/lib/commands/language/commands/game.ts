@@ -3,7 +3,7 @@ import * as levenshtein from "fastest-levenshtein";
 import constants from "../../../../constants/constants";
 import { Locale, getLocaleByLearningLanguage } from "../../../../constants/languages";
 import licences from "../../../../constants/licences";
-import defaults from "../../../../defaults";
+import defaults from "../../../../constants/defaults";
 import { capitalise } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";

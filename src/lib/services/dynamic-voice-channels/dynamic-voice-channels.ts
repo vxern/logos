@@ -1,5 +1,5 @@
 import * as Discord from "@discordeno/bot";
-import defaults from "../../../defaults";
+import defaults from "../../../constants/defaults";
 import * as Logos from "../../../types";
 import { Client } from "../../client";
 import { DynamicVoiceChannel, Guild } from "../../database/guild";

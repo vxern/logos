@@ -17,7 +17,7 @@ import languages, {
 } from "../constants/languages";
 import { getDiscordLanguageByLocale } from "../constants/languages/localisation";
 import time from "../constants/time";
-import defaults from "../defaults";
+import defaults from "../constants/defaults";
 import { capitalise, timestamp, trim } from "../formatting";
 import * as Logos from "../types";
 import {

@@ -9,7 +9,7 @@ import {
 	getGoogleTranslateLanguageByLocale,
 	isGoogleTranslateLocale,
 } from "../../../../../constants/languages/translation";
-import defaults from "../../../../../defaults";
+import defaults from "../../../../../constants/defaults";
 import { Client } from "../../../../client";
 import { Translation, TranslationAdapter } from "../adapter";
 

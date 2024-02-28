@@ -3,7 +3,7 @@ import constants from "../../constants/constants";
 import * as Logos from "../../types";
 import { Client, InteractionCollector } from "../client";
 import { chunk } from "../utils";
-import defaults from "../../defaults";
+import defaults from "../../constants/defaults";
 import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../commands/music/data/types";
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";

@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import defaults from "../../../../../defaults";
+import defaults from "../../../../../constants/defaults";
 import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 

@@ -1,6 +1,6 @@
 import * as Discord from "@discordeno/bot";
 import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
-import defaults from "../../defaults";
+import defaults from "../../constants/defaults";
 import * as Logos from "../../types";
 import { Client, Logger } from "../client";
 import { Guild } from "../database/guild";

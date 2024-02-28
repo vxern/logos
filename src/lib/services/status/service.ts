@@ -1,6 +1,6 @@
 import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
-import defaults from "../../../defaults";
+import defaults from "../../../constants/defaults";
 import { Client } from "../../client";
 import { GlobalService } from "../service";
 

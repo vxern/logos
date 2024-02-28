@@ -4,8 +4,8 @@ import {
 	Locale,
 	LocalisationLanguage,
 	TranslationLanguage,
-} from "./constants/languages";
-import { RateLimit, TimeStruct } from "./lib/database/guild";
+} from "./languages";
+import { RateLimit, TimeStruct } from "../lib/database/guild";
 
 const PROJECT_NAME = "Logos";
 const USER_AGENT = "Logos (https://logos.wordcollector.co.uk)";

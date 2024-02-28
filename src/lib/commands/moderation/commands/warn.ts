@@ -2,7 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import components from "../../../../constants/types/components";
-import defaults from "../../../../defaults";
+import defaults from "../../../../constants/defaults";
 import { MentionTypes, mention } from "../../../../formatting";
 import * as Logos from "../../../../types";
 import { Client } from "../../../client";
