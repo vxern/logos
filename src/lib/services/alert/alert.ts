@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { Client } from "../../client";
 import { Guild } from "../../database/guild";
 import diagnostics from "../../diagnostics";

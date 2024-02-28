@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
 import { handleDisplayVolume } from "./volume/display";

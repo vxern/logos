@@ -1,10 +1,6 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
-import components from "../../../../constants/types/components";
-import defaults from "../../../../constants/defaults";
 import { MentionTypes, mention } from "../../../../formatting";
-import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
@@ -81,7 +77,7 @@ async function handleWarnUserAutocomplete(
 						};
 					})
 					.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase)),
-				{ name: strings.other, value: components.none },
+				{ name: strings.other, value: constants.components.none },
 			];
 
 			client.respond(interaction, choices);
@@ -109,7 +105,10 @@ async function handleWarnUser(
 		return;
 	}
 
-	if (interaction.parameters.rule !== components.none && !(rules as string[]).includes(interaction.parameters.rule)) {
+	if (
+		interaction.parameters.rule !== constants.components.none &&
+		!(rules as string[]).includes(interaction.parameters.rule)
+	) {
 		const strings = {
 			title: client.localise("warn.strings.invalidRule.title", locale)(),
 			description: client.localise("warn.strings.invalidRule.description", locale)(),
@@ -171,7 +170,7 @@ async function handleWarnUser(
 		journallingService?.logEvent("memberWarnAdd", { args: [member, warningDocument, interaction.user] });
 	}
 
-	const expirationMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
+	const expirationMilliseconds = timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY);
 
 	const relevantWarnings = getActiveWarnings(warningDocuments, expirationMilliseconds);
 
@@ -200,7 +199,7 @@ async function handleWarnUser(
 	if (surpassedLimit) {
 		let strings: { title: string; description: string };
 		if (configuration.autoTimeout?.enabled) {
-			const timeout = configuration.autoTimeout.duration ?? defaults.WARN_TIMEOUT;
+			const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
 
 			const language = interaction.guildLanguage;
 			const locale = interaction.guildLocale;
@@ -255,7 +254,7 @@ async function handleWarnUser(
 		return;
 	}
 
-	const reachedLimit = relevantWarnings.length === defaults.WARN_LIMIT;
+	const reachedLimit = relevantWarnings.length === constants.defaults.WARN_LIMIT;
 	if (reachedLimit) {
 		const locale = interaction.guildLocale;
 		const strings = {
@@ -263,7 +262,7 @@ async function handleWarnUser(
 			description: client.localise(
 				"warn.strings.limitReached.description",
 				locale,
-			)({ user_mention: mention(user.id, MentionTypes.User), limit: defaults.WARN_LIMIT }),
+			)({ user_mention: mention(user.id, MentionTypes.User), limit: constants.defaults.WARN_LIMIT }),
 		};
 
 		if (guildDocument.areEnabled("alerts")) {

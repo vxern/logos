@@ -1,9 +1,7 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import defaults from "../../../../../constants/defaults";
 import { MentionTypes, mention, trim } from "../../../../../formatting";
-import * as Logos from "../../../../../types";
 import { Client, InteractionCollector } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import { Ticket, TicketType } from "../../../../database/ticket";

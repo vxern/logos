@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../../command";
 import open from "./ticket/open";
 

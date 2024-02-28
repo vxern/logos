@@ -25,5 +25,8 @@
     "indentWidth": 2,
     "indentStyle": "tab",
     "lineWidth": 120
+  },
+  "javascript": {
+    "globals": ["Discord", "Logos"]
   }
 }

@@ -1,6 +1,5 @@
 import constants from "../../../../../constants/constants";
 import defaults from "../../../../../constants/defaults";
-import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 
 async function handleSetVolume(client: Client, interaction: Logos.Interaction<any, { volume: number }>): Promise<void> {

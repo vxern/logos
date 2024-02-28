@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import Hash from "object-hash";
 import { Client, ServiceStore } from "../../client";
 import { Guild } from "../../database/guild";

@@ -1,10 +1,8 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
 import time from "../../../../constants/time";
 import defaults from "../../../../constants/defaults";
 import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
-import * as Logos from "../../../../types";
 import { Client, InteractionCollector, isValidSnowflake } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";

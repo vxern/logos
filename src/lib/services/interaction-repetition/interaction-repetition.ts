@@ -1,7 +1,5 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import { Locale } from "../../../constants/languages";
-import * as Logos from "../../../types";
 import { Client, InteractionCollector, InteractionStore } from "../../client";
 import { GlobalService } from "../service";
 

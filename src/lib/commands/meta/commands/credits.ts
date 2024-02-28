@@ -1,9 +1,7 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale, LocalisationLanguage } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
-import { Translation } from "../../../../constants/types/contributions";
-import * as Logos from "../../../../types";
+import { Translation } from "../../../../constants/contributions";
 import { Client } from "../../../client";
 import { CommandTemplate } from "../../command";
 

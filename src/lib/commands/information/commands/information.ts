@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../../command";
 import bot from "./information/bot";
 import guild from "./information/guild";

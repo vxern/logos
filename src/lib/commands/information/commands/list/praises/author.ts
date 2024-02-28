@@ -1,7 +1,5 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../../../constants/constants";
 import { Locale } from "../../../../../../constants/languages";
-import * as Logos from "../../../../../../types";
 import { Client } from "../../../../../client";
 import { Praise } from "../../../../../database/praise";
 import { OptionTemplate } from "../../../../command";

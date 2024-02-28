@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { OptionTemplate } from "../../../command";
 import clear from "./language/clear";
 import set from "./language/set";

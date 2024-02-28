@@ -1,7 +1,5 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../../formatting";
-import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
 import { Warning } from "../../../../database/warning";

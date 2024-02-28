@@ -1,7 +1,4 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
-import acknowledgements from "../../../../constants/types/acknowledgements";
-import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { CommandTemplate } from "../../command";
 
@@ -19,7 +16,7 @@ async function handleDisplayAcknowledgements(client: Client, interaction: Logos.
 		acknowledgements: client.localise("acknowledgements.strings.acknowledgements", locale)(),
 	};
 
-	const fields = acknowledgements.map<Discord.CamelizedDiscordEmbedField>((acknowledgement) => {
+	const fields = constants.acknowledgements.map<Discord.CamelizedDiscordEmbedField>((acknowledgement) => {
 		const contributorsFormatted = acknowledgement.users.map((contributor) => contributor.username).join(", ");
 
 		return {

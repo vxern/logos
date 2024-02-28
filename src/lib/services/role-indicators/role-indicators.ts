@@ -1,7 +1,4 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
-import symbols from "../../../constants/types/symbols";
-import * as Logos from "../../../types";
 import { Client } from "../../client";
 import { Guild, RoleWithIndicator } from "../../database/guild";
 import { LocalService } from "../service";
@@ -98,7 +95,7 @@ class RoleIndicatorService extends LocalService {
 			return;
 		}
 
-		const indicators = indicatorsFormatted.split(symbols.sigils.separator);
+		const indicators = indicatorsFormatted.split(constants.symbols.sigils.separator);
 		const hasNoChange =
 			indicators.length === applicableIndicators.length &&
 			applicableIndicators.every((applicableIndicator, index) => indicators[index] === applicableIndicator);
@@ -114,7 +111,7 @@ class RoleIndicatorService extends LocalService {
 }
 
 function applyIndicators(username: string, sigils: string[]): string {
-	const modification = `${symbols.sigils.divider}${sigils.join(symbols.sigils.separator)}`;
+	const modification = `${constants.symbols.sigils.divider}${sigils.join(constants.symbols.sigils.separator)}`;
 	const usernameSlice = username.slice(0, constants.MAXIMUM_USERNAME_LENGTH - modification.length);
 
 	return `${usernameSlice}${modification}`;

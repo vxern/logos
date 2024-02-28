@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../../command";
 import roles from "./profile/roles";
 import view from "./profile/view";

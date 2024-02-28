@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import * as Discord from "@discordeno/bot";
 import { Redis } from "ioredis";
 import log from "loglevel";
 import { nanoid } from "nanoid";
@@ -19,7 +18,6 @@ import { getDiscordLanguageByLocale } from "../constants/languages/localisation"
 import time from "../constants/time";
 import defaults from "../constants/defaults";
 import { capitalise, timestamp, trim } from "../formatting";
-import * as Logos from "../types";
 import {
 	Command,
 	CommandMetadata,
@@ -482,7 +480,7 @@ class DiscordConnection {
 		});
 
 		// TODO(vxern): Move this to `createBot()` once it's supported.
-		transformers.desiredProperties = Logos.desiredProperties as Discord.Transformers["desiredProperties"];
+		transformers.desiredProperties = constants.properties as Discord.Transformers["desiredProperties"];
 
 		return transformers;
 	}

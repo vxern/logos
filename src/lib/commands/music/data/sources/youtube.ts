@@ -1,8 +1,6 @@
-import * as Discord from "@discordeno/bot";
 import * as YouTubeSearch from "youtube-sr";
 import constants from "../../../../../constants/constants";
 import { trim } from "../../../../../formatting";
-import * as Logos from "../../../../../types";
 import { Client, InteractionCollector } from "../../../../client";
 import { Song, SongListing } from "../types";
 import { ListingResolver } from "./sources";

@@ -1,6 +1,4 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
-import * as Logos from "../../../types";
 import { Client, InteractionCollector, ServiceStore } from "../../client";
 import { Guild } from "../../database/guild";
 import { Model } from "../../database/model";

@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { CommandTemplate } from "../command";
 import fastForward from "./commands/fast-forward";
 import history from "./commands/history";

@@ -1,6 +1,4 @@
-import * as Discord from "@discordeno/bot";
 import { Locale } from "../../../../constants/languages";
-import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { CommandTemplate } from "../../command";

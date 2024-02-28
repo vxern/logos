@@ -1,8 +1,6 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/languages";
 import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
-import * as Logos from "../../../../types";
 import { Client, InteractionCollector } from "../../../client";
 import { openTicket } from "../../../commands/server/commands/ticket/open";
 import { EntryRequest } from "../../../database/entry-request";

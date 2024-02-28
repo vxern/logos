@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import languages, {
 	Languages,
@@ -9,7 +8,6 @@ import languages, {
 } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
-import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";

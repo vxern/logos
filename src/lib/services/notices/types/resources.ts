@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import localisations from "../../../../constants/localisations";
 import { Client } from "../../../client";

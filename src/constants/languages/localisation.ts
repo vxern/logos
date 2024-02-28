@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { reverseObject } from "../../lib/utils";
 
 const languages = {

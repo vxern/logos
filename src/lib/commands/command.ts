@@ -1,5 +1,3 @@
-import * as Discord from "@discordeno/bot";
-import * as Logos from "../../types";
 import { Client } from "../client";
 
 // TODO(vxern): This whole file could be improved.

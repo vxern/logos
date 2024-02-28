@@ -1,6 +1,5 @@
 import constants from "../../../../../constants/constants";
 import { MentionTypes, mention } from "../../../../../formatting";
-import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";

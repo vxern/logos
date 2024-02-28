@@ -2,7 +2,6 @@ import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import time from "../../../../../constants/time";
 import { MentionTypes, mention, timestamp, trim } from "../../../../../formatting";
-import * as Logos from "../../../../../types";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";

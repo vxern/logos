@@ -1,4 +1,4 @@
-import { LearningLanguage } from "../languages";
+import { LearningLanguage } from "./languages";
 
 type Contributor = {
 	username: string;

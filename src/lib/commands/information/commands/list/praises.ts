@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import { Client } from "../../../../client";

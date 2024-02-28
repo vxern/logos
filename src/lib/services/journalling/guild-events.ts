@@ -1,4 +1,3 @@
-import * as Logos from "../../../types";
 import { SlowmodeLevel } from "../../commands/moderation/commands/slowmode";
 import { EntryRequest } from "../../database/entry-request";
 import { Praise } from "../../database/praise";

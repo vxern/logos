@@ -1,10 +1,8 @@
 import { EventEmitter } from "events";
-import * as Discord from "@discordeno/bot";
 import * as Lavaclient from "lavaclient";
 import constants from "../../../constants/constants";
 import defaults from "../../../constants/defaults";
 import { MentionTypes, mention } from "../../../formatting";
-import * as Logos from "../../../types";
 import { Client } from "../../client";
 import {
 	Song,

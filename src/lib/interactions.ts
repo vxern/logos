@@ -1,7 +1,5 @@
-import * as Discord from "@discordeno/bot";
 import { Locale, LocalisationLanguage } from "../constants/languages";
 import time from "../constants/time";
-import * as Logos from "../types";
 import { Client, InteractionCollector } from "./client";
 
 type ComposerActionRow<ComposerContent, SectionNames = keyof ComposerContent> = {

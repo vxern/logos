@@ -1,7 +1,5 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import { MentionTypes, mention, timestamp } from "../../../../formatting";
-import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";

@@ -1,8 +1,6 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../constants/constants";
 import { FeatureLanguage, Locale } from "../../../constants/languages";
 import { trim } from "../../../formatting";
-import * as Logos from "../../../types";
 import { Client, InteractionCollector } from "../../client";
 import { proficiency } from "../../commands/social/roles/categories/language";
 import { EntryRequest } from "../../database/entry-request";

@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { OptionTemplate } from "../../command";
 import { query } from "../../parameters";
 import { sources } from "../data/sources/sources";

@@ -1,8 +1,6 @@
-import * as Discord from "@discordeno/bot";
 import constants from "../../../../constants/constants";
 import time from "../../../../constants/time";
 import { TimestampFormat, timestamp } from "../../../../formatting";
-import * as Logos from "../../../../types";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
