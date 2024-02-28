@@ -41,7 +41,7 @@
     "provision": "tsx src/scripts/provision-sentence-pairs.ts",
     "setup": "npm run get && npm run provision",
     "#": "",
-    "dev": "pm2 start ecosystem.config.cjs --instances 1 --no-autorestart --no-daemon",
+    "dev": "npx tsx ./src/index.ts",
     "format": "biome check src/ --apply-unsafe --organize-imports-enabled true",
     "##": "",
     "start": "pm2 start ecosystem.config.cjs --instances 1 --exp-backoff-restart-delay=500"
@@ -68,6 +68,8 @@
     "@types/event-stream": "^4.0.5",
     "@types/node": "^20.11.16",
     "@types/object-hash": "^3.0.6",
+    "chai": "^5.1.0",
+    "mocha": "^10.3.0",
     "pm2": "^5.3.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"
