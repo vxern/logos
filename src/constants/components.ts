@@ -1,10 +1,7 @@
-export default {
+export default Object.freeze({
+	// * Special code - Interactions with this code are auto-acknowledged and left be.
 	none: "none",
-	entry: {
-		acceptedRules: "accepted_rules",
-		selectedLanguageProficiency: "selected_language_proficiency",
-		requestedVerification: "requested_verification",
-	},
+	acceptedRules: "accepted_rules",
 	verification: "verification",
 	reports: "reports",
 	resources: "resources",
@@ -14,4 +11,4 @@ export default {
 	removePrompt: "remove_prompt",
 	selectRoles: "select_roles",
 	showInChat: "show_in_chat",
-};
+});

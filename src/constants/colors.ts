@@ -1,15 +1,21 @@
+import patterns from "./patterns";
+
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.
  *
- * @param color - The color represented as a 6-digit hexadecimal value prefixed
+ * @param colour - The color represented as a 6-digit hexadecimal value prefixed
  * with a hashtag.
  * @returns The decimal form.
  */
-function fromHex(color: string): number {
-	return parseInt(color.replace("#", "0x"));
+function fromHex(colour: string): number {
+	if (!patterns.rgbHex.test(colour)) {
+		throw "The passed colour was not in the correct format (#ffffff).";
+	}
+
+	return parseInt(colour.replace("#", "0x"));
 }
 
-export default {
+export default Object.freeze({
 	invisible: fromHex("#36393f"),
 	red: fromHex("#b42f2f"),
 	darkRed: fromHex("#820000"),
@@ -29,4 +35,5 @@ export default {
 	green: fromHex("#00cc66"), // Alienated
 	greenishLightGray: fromHex("#c5e0d8"), // Ulthuan gray
 	orange: fromHex("#f28123"), // Beer
-};
+});
+export { fromHex };

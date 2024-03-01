@@ -1,10 +1,4 @@
-import {
-	FeatureLanguage,
-	LearningLanguage,
-	Locale,
-	LocalisationLanguage,
-	TranslationLanguage,
-} from "./languages";
+import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage, TranslationLanguage } from "./languages";
 import { RateLimit, TimeStruct } from "../lib/database/guild";
 
 const PROJECT_NAME = "Logos";

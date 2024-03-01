@@ -1,4 +1,4 @@
-export default {
+export default Object.freeze({
 	deepl: {
 		translate: "https://api-free.deepl.com/v2/translate",
 	},
@@ -14,4 +14,4 @@ export default {
 		host: "dicolink.p.rapidapi.com",
 		definitions: (word: string) => `https://dicolink.p.rapidapi.com/mot/${word}/definitions`,
 	},
-};
+} as const);

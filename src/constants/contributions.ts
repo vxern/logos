@@ -1,12 +1,19 @@
 import { LearningLanguage } from "./languages";
 
-type Contributor = {
-	username: string;
-	id: string;
-	link?: string;
-};
+interface Contributor {
+	readonly username: string;
+	readonly id: string;
+	readonly link?: string;
+}
 
-const contributors = {
+interface Translation {
+	readonly flag: string;
+	readonly completion: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
+	readonly contributors: Contributor[];
+}
+type TranslatedLanguage = Exclude<LearningLanguage, "English/American" | "English/British">;
+
+const contributors = Object.freeze({
 	"16wardm": {
 		username: "@16wardm",
 		id: "758385691851096195",
@@ -105,15 +112,9 @@ const contributors = {
 		username: "@yeetfe",
 		id: "249248581435916299",
 	},
-} satisfies Record<string, Contributor>;
+} as const satisfies Record<string, Contributor>);
 
-type Translation = {
-	flag: string;
-	completion: 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
-	contributors: Contributor[];
-};
-
-export default {
+export default Object.freeze({
 	translation: {
 		"Armenian/Eastern": {
 			flag: "🇦🇲",
@@ -192,7 +193,7 @@ export default {
 			completion: 7,
 			contributors: [contributors.yeetfe, contributors.theodeninmuhafizi],
 		},
-	} satisfies Partial<Record<Exclude<LearningLanguage, "English/American" | "English/British">, Translation>>,
-};
+	} satisfies Partial<Record<TranslatedLanguage, Translation>>,
+} as const);
 export { contributors };
 export type { Contributor, Translation };

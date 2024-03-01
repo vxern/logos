@@ -5,7 +5,7 @@ type Acknowledgement = {
 	reason: string;
 };
 
-const acknowledgements: Acknowledgement[] = [
+export default Object.freeze([
 	{
 		users: [contributors.nemokosch, contributors["16wardm"], contributors.victor, contributors.mymy],
 		reason:
@@ -31,6 +31,4 @@ const acknowledgements: Acknowledgement[] = [
 		reason:
 			"Without them and the time and effort they put into the translations, the bot would not be accessible to as large an audience as it is today and will be in the future.",
 	},
-];
-
-export default acknowledgements;
+] satisfies Acknowledgement[]);
