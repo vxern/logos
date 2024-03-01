@@ -27,6 +27,6 @@
     "lineWidth": 120
   },
   "javascript": {
-    "globals": ["Discord", "Logos"]
+    "globals": ["Discord", "Logos", "describe", "it", "expect"]
   }
 }

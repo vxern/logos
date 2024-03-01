@@ -23,13 +23,12 @@ import {
 	Locale,
 	getDiscordLanguageByLocale as getDiscordLocalisationLanguageByLocale,
 	getDiscordLocaleByLanguage as getDiscordLocaleByLocalisationLanguage,
-	getLanguageByLocale as getLocalisationLanguageByLocale,
-	getLocaleByLanguage as getLocaleByLocalisationLanguage,
+	getLogosLanguageByLocale as getLocalisationLanguageByLocale,
+	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
 	isDiscordLanguage as isDiscordLocalisationLanguage,
-	isLanguage as isLocalisationLanguage,
+	isLogosLanguage as isLocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
-	locales,
 } from "./languages/localisation";
 import {
 	DeepLLanguage,
@@ -152,7 +151,6 @@ export {
 	isCLDLocale,
 	getTranslationLanguage,
 	getBaseLanguage,
-	locales,
 };
 export type {
 	LearningLanguage,

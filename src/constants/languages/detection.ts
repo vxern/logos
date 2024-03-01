@@ -1,6 +1,6 @@
 import { reverseObject } from "../../lib/utils";
 
-const languages = {
+const languages = Object.freeze({
 	cld: [
 		"Abkhazian",
 		"Afar",
@@ -240,9 +240,9 @@ const languages = {
 		"Volapuk",
 		"Yiddish",
 	],
-} as const;
+} as const);
 
-const languageToLocale = {
+const languageToLocale = Object.freeze({
 	cld: {
 		Abkhazian: "ab",
 		Afar: "aa",
@@ -482,7 +482,7 @@ const languageToLocale = {
 		Volapuk: "vol",
 		Yiddish: "yid",
 	} as const satisfies Record<TinyLDLanguage, string>,
-} as const;
+} as const);
 
 type CLDLanguage = (typeof languages.cld)[number];
 type TinyLDLanguage = (typeof languages.tinyld)[number];

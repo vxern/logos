@@ -1,6 +1,6 @@
 import { reverseObject } from "../../lib/utils";
 
-const languages = {
+const languages = Object.freeze({
 	discord: [
 		"Dutch",
 		"Danish",
@@ -40,9 +40,9 @@ const languages = {
 		"Swedish",
 		"Turkish",
 	],
-} as const;
+} as const);
 
-const languageToLocale = {
+const languageToLocale = Object.freeze({
 	discord: {
 		Dutch: "nl",
 		Danish: "da",
@@ -60,7 +60,7 @@ const languageToLocale = {
 		Spanish: "es-ES",
 		Swedish: "sv-SE",
 		Turkish: "tr",
-	} satisfies Record<DiscordLanguage, Discord.Locale>,
+	} as const satisfies Record<DiscordLanguage, Discord.Locale>,
 	logos: {
 		"Armenian/Eastern": "hye",
 		"Armenian/Western": "hyw",
@@ -82,7 +82,14 @@ const languageToLocale = {
 		Swedish: "swe",
 		Turkish: "tur",
 	} as const satisfies Record<LogosLanguage, string>,
-};
+} as const);
+
+const localeToLanguage = Object.freeze({
+	discord: reverseObject(languageToLocale.discord),
+	logos: reverseObject(languageToLocale.logos),
+});
+
+const locales = Object.freeze(Object.keys(localeToLanguage.logos) as Locale[]);
 
 type DiscordLanguage = (typeof languages.discord)[number];
 type LogosLanguage = (typeof languages.logos)[number];
@@ -92,19 +99,16 @@ type DiscordLocale = (typeof languageToLocale.discord)[keyof typeof languageToLo
 type LogosLocale = (typeof languageToLocale.logos)[keyof typeof languageToLocale.logos];
 type Locale = LogosLocale;
 
-const localeToLanguage = Object.freeze({
-	discord: reverseObject(languageToLocale.discord),
-	logos: reverseObject(languageToLocale.logos),
-});
-
-const locales = Object.freeze(Object.keys(localeToLanguage.logos) as Locale[]);
-
-function isLanguage(language: string): language is Language {
-	return isLogosLanguage(language);
+function isDiscordLanguage(language: string): language is DiscordLanguage {
+	return (languages.discord as readonly string[]).includes(language);
 }
 
-function isLocale(locale: string): locale is Locale {
-	return isLogosLocale(locale);
+function isLogosLanguage(language: string): language is LogosLanguage {
+	return (languages.logos as readonly string[]).includes(language);
+}
+
+function isLogosLocale(locale: string): locale is LogosLocale {
+	return locale in localeToLanguage.logos;
 }
 
 function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
@@ -113,10 +117,6 @@ function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
 
 function getLogosLocaleByLanguage(language: LogosLanguage): LogosLocale {
 	return languageToLocale.logos[language];
-}
-
-function getLocaleByLanguage(language: Language): Locale {
-	return getLogosLocaleByLanguage(language);
 }
 
 function getDiscordLanguageByLocale(locale: string | undefined): DiscordLanguage | undefined {
@@ -131,30 +131,14 @@ function getLogosLanguageByLocale(locale: LogosLocale): LogosLanguage {
 	return localeToLanguage.logos[locale];
 }
 
-function getLanguageByLocale(locale: Locale): Language {
-	return getLogosLanguageByLocale(locale);
-}
-
-function isDiscordLanguage(language: string): language is DiscordLanguage {
-	return (languages.discord as readonly string[]).includes(language);
-}
-
-function isLogosLanguage(language: string): language is LogosLanguage {
-	return (languages.logos as readonly string[]).includes(language);
-}
-
-function isLogosLocale(locale: string): locale is LogosLocale {
-	return locale in localeToLanguage.logos;
-}
-
 export {
 	getDiscordLocaleByLanguage,
-	getLocaleByLanguage,
+	getLogosLocaleByLanguage,
 	getDiscordLanguageByLocale,
-	getLanguageByLocale,
+	getLogosLanguageByLocale,
 	isDiscordLanguage,
-	isLanguage,
-	isLocale,
+	isLogosLanguage,
+	isLogosLocale,
 	languages,
 	languageToLocale,
 	locales,

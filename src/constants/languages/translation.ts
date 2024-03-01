@@ -1,6 +1,6 @@
 import { reverseObject } from "../../lib/utils";
 
-const languages = {
+const languages = Object.freeze({
 	deepl: [
 		"Bulgarian",
 		"CzechoSlovak/Czech",
@@ -172,9 +172,9 @@ const languages = {
 		"Yoruba",
 		"Zulu",
 	],
-} as const;
+} as const);
 
-const languageToLocale = {
+const languageToLocale = Object.freeze({
 	deepl: {
 		Bulgarian: "BG",
 		"CzechoSlovak/Czech": "CS",
@@ -346,7 +346,7 @@ const languageToLocale = {
 		Yoruba: "yo",
 		Zulu: "zu",
 	} as const satisfies Record<GoogleTranslateLanguage, string>,
-} as const;
+} as const);
 
 type DeepLLanguage = (typeof languages.deepl)[number];
 type GoogleTranslateLanguage = (typeof languages.google)[number];
