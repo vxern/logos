@@ -1,4 +1,3 @@
-import constants from "../../constants/constants";
 import { capitalise, decapitalise } from "../../formatting";
 import { Client } from "../client";
 import { Database } from "../database";

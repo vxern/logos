@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import diagnostics from "../../../../diagnostics";
 import { codeMultiline, mention } from "../../../../formatting";
 import { ClientEvents, MessageGenerators } from "../generator";

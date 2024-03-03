@@ -1,4 +1,3 @@
-import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import diagnostics from "../../../../../diagnostics";
 import { trim } from "../../../../../formatting";

@@ -1,4 +1,3 @@
-import defaults from "../constants/defaults";
 import languages, {
 	Locale,
 	LocalisationLanguage,

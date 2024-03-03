@@ -3,7 +3,6 @@ import * as stream from "stream";
 import eventStream from "event-stream";
 import * as fs from "fs/promises";
 import Redis from "ioredis";
-import defaults from "../constants/defaults";
 import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../constants/languages";
 import { locales } from "../constants/languages/localisation";
 import { capitalise } from "../formatting";

@@ -1,5 +1,3 @@
-import constants from "../../constants/constants";
-import defaults from "../../constants/defaults";
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";
 import { chunk } from "../../utils";

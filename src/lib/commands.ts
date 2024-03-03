@@ -1,4 +1,3 @@
-import defaults from "../constants/defaults";
 import { getDiscordLanguageByLocale } from "../constants/languages/localisation";
 import { capitalise } from "../formatting";
 import { isDefined } from "../utils";

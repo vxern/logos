@@ -1,4 +1,6 @@
 import * as Discord from "@discordeno/bot";
+import constants_ from "./constants/constants";
+import defaults_ from "./constants/defaults";
 import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import { Properties } from "./constants/properties";
 
@@ -6,7 +8,9 @@ declare global {
 	interface PromiseConstructor {
 		withResolvers<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: () => void };
 	}
+}
 
+declare global {
 	namespace Logos {
 		type Guild = Pick<
 			Omit<Discord.Guild, "roles" | "members" | "channels" | "voiceStates"> & {
@@ -54,6 +58,9 @@ declare global {
 				parameters: InteractionParameters<Parameters>;
 			};
 	}
+
+	const constants: typeof constants_;
+	const defaults: typeof defaults_;
 }
 
 declare global {

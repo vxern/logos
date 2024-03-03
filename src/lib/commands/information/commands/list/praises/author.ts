@@ -1,4 +1,3 @@
-import constants from "../../../../../../constants/constants";
 import { Locale } from "../../../../../../constants/languages";
 import { Client } from "../../../../../client";
 import { Praise } from "../../../../../database/praise";

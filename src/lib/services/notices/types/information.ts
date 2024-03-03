@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import { Client } from "../../../client";
 import { rules } from "../../../commands/moderation/commands/rule";
 import { HashableMessageContents, NoticeService } from "../service";

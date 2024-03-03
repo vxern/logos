@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { mention, timestamp } from "../../../../formatting";

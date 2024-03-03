@@ -1,4 +1,3 @@
-import constants from "../../../../../constants/constants";
 import { RoleCategory, RoleCategorySingle, RoleCollectionImplicit } from "../types";
 
 const proficiency: RoleCategorySingle & { collection: RoleCollectionImplicit } = {

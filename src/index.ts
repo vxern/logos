@@ -1,3 +1,27 @@
+import constants_ from "./constants/constants";
+import defaults_ from "./constants/defaults";
+
+// ! Polyfill + override area - It's absolutely key that these are synchronised with `types.d.ts`.
+// #region
+
+// TODO(vxern): Remove this once it's available in the runtime.
+Promise.withResolvers = <T>() => {
+	let resolve!: (value: T) => void;
+	let reject!: () => void;
+
+	const promise = new Promise<T>((resolve_, reject_) => {
+		resolve = resolve_;
+		reject = reject_;
+	});
+
+	return { promise, resolve, reject };
+};
+
+(globalThis as any).constants = constants_;
+(globalThis as any).defaults = defaults_;
+
+// #endregion
+
 import * as dotenv from "dotenv";
 import * as fs from "fs/promises";
 import log from "loglevel";
@@ -203,30 +227,4 @@ async function setup(): Promise<void> {
 	await client.start();
 }
 
-function addPolyfills(): void {
-	Promise.withResolvers = <T>() => {
-		let resolve!: (value: T) => void;
-		let reject!: () => void;
-
-		const promise = new Promise<T>((resolve_, reject_) => {
-			resolve = resolve_;
-			reject = reject_;
-		});
-
-		return { promise, resolve, reject };
-	};
-}
-
-function customiseGlobals(): void {
-	const { info, warn } = console;
-	console.info = (message, ...params) => {
-		return info(`[i] ${message}`, ...params);
-	};
-	console.warn = (message, ...params) => {
-		return warn(`[?] ${message}`, ...params);
-	};
-}
-
-addPolyfills();
-customiseGlobals();
 setup();

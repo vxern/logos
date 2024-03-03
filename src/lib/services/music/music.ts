@@ -1,7 +1,5 @@
 import { EventEmitter } from "events";
 import * as Lavaclient from "lavaclient";
-import constants from "../../../constants/constants";
-import defaults from "../../../constants/defaults";
 import diagnostics from "../../../diagnostics";
 import { mention } from "../../../formatting";
 import { Client } from "../../client";

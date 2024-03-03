@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import localisations from "../../../../constants/localisations";
 import { Client } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";

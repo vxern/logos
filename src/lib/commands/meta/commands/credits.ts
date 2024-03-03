@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import { Translation } from "../../../../constants/contributions";
 import { Locale, LocalisationLanguage } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";

@@ -1,6 +1,4 @@
 import * as levenshtein from "fastest-levenshtein";
-import constants from "../../../../constants/constants";
-import defaults from "../../../../constants/defaults";
 import { Locale, getLocaleByLearningLanguage } from "../../../../constants/languages";
 import licences from "../../../../constants/licences";
 import { capitalise } from "../../../../formatting";

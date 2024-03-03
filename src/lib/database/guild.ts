@@ -1,4 +1,3 @@
-import defaults from "../../constants/defaults";
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
 import time from "../../constants/time";
 import { Client } from "../client";

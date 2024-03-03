@@ -1,4 +1,3 @@
-import constants from "../../../../../../constants/constants";
 import { Client } from "../../../../../client";
 import { User } from "../../../../../database/user";
 import { OptionTemplate } from "../../../../command";

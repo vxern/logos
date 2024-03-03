@@ -1,5 +1,4 @@
 import * as YouTubeSearch from "youtube-sr";
-import constants from "../../../../../constants/constants";
 import { trim } from "../../../../../formatting";
 import { Client, InteractionCollector } from "../../../../client";
 import { Song, SongListing } from "../types";

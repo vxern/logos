@@ -1,4 +1,3 @@
-import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";

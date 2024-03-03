@@ -1,5 +1,3 @@
-import constants from "../../../../../constants/constants";
-import defaults from "../../../../../constants/defaults";
 import {
 	GoogleTranslateLanguage,
 	Languages,

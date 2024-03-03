@@ -1,4 +1,3 @@
-import constants from "../constants/constants";
 import { Logger } from "./logger";
 
 class DiscordConnection {

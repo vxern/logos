@@ -1,5 +1,4 @@
 import { nanoid } from "nanoid";
-import defaults from "../constants/defaults";
 import {
 	LearningLanguage,
 	getDiscordLocalisationLanguageByLocale,

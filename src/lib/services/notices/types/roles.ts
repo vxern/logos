@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import { Client, InteractionCollector } from "../../../client";
 import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
 import { HashableMessageContents, NoticeService } from "../service";

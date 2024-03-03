@@ -1,4 +1,3 @@
-import constants from "../../../../../constants/constants";
 import { list } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { OptionTemplate } from "../../../command";

@@ -1,5 +1,3 @@
-import constants from "./constants/constants";
-
 /**
  * Capitalises the first letter of the given text.
  *

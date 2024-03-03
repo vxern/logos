@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import diagnostics from "../../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 

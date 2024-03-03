@@ -1,4 +1,3 @@
-import constants from "../../../../constants/constants";
 import { getLocaleByLocalisationLanguage } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { codeMultiline } from "../../../../formatting";

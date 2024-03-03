@@ -1,4 +1,3 @@
-import defaults from "../../constants/defaults";
 import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
 import diagnostics from "../../diagnostics";
 import { Client } from "../client";

@@ -1,4 +1,3 @@
-import constants from "../../../../../constants/constants";
 import { RoleCategory } from "../types";
 
 const category: RoleCategory = {
