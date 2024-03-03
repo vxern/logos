@@ -1,6 +1,7 @@
 import constants from "../../constants/constants";
 import { capitalise, decapitalise } from "../../formatting";
-import { Client, Database } from "../client";
+import { Client } from "../client";
+import { Database } from "../database";
 import { RateLimit, timeStructToMilliseconds } from "./guild";
 
 interface DocumentMetadata {

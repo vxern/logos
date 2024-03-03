@@ -3,6 +3,7 @@ import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languag
 import diagnostics from "../../diagnostics";
 import { Client } from "../client";
 import { Guild } from "../database/guild";
+import { Logger } from "../logger";
 
 type ServiceBase = {
 	[K in keyof Discord.EventHandlers]: (..._: Parameters<Discord.EventHandlers[K]>) => Promise<void>;

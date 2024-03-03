@@ -20,6 +20,7 @@ import { InteractionRepetitionService } from "./services/interaction-repetition/
 import { LavalinkService } from "./services/music/lavalink";
 import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { StatusService } from "./services/status/service";
+import { Cache } from "./cache";
 
 interface Environment {
 	readonly isDebug: boolean;

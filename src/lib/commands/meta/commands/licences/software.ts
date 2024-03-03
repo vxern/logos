@@ -63,7 +63,7 @@ async function handleDisplaySoftwareLicence(
 	const viewComponent = new PaginatedSoftwareLicenceViewComponent(client, {
 		interaction,
 		title: strings.license,
-		sections: licences.software[packageName],
+		sections: Array.from(licences.software[packageName]),
 	});
 
 	await viewComponent.open();

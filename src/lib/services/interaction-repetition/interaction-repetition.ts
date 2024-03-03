@@ -1,6 +1,7 @@
 import constants from "../../../constants/constants";
 import { Locale } from "../../../constants/languages";
-import { Client, InteractionCollector, InteractionStore } from "../../client";
+import { Client, InteractionCollector } from "../../client";
+import { InteractionStore } from "../../interactions";
 import { GlobalService } from "../service";
 
 // TODO(vxern): Improve this by getting rid of the "message could not be loaded" text.
