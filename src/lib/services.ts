@@ -5,7 +5,6 @@ import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
 import { EntryService } from "./services/entry/entry";
 import { InteractionRepetitionService } from "./services/interaction-repetition/interaction-repetition";
-import { JournallingService } from "./services/journalling/journalling";
 import { LavalinkService } from "./services/music/lavalink";
 import { MusicService } from "./services/music/music";
 import { NoticeService } from "./services/notices/service";
@@ -35,7 +34,6 @@ class ServiceStore {
 		readonly alerts: Map<bigint, AlertService>;
 		readonly dynamicVoiceChannels: Map<bigint, DynamicVoiceChannelService>;
 		readonly entry: Map<bigint, EntryService>;
-		readonly journalling: Map<bigint, JournallingService>;
 		readonly music: Map<bigint, MusicService>;
 		readonly notices: {
 			readonly information: Map<bigint, InformationNoticeService>;
@@ -73,7 +71,6 @@ class ServiceStore {
 			alerts: new Map(),
 			dynamicVoiceChannels: new Map(),
 			entry: new Map(),
-			journalling: new Map(),
 			music: new Map(),
 			notices: {
 				information: new Map(),
@@ -128,13 +125,6 @@ class ServiceStore {
 		const services: Service[] = [];
 
 		if (guildDocument.areEnabled("informationFeatures")) {
-			if (guildDocument.isEnabled("journalling")) {
-				const service = new JournallingService(client, { guildId });
-				services.push(service);
-
-				this.local.journalling.set(guildId, service);
-			}
-
 			if (guildDocument.areEnabled("noticeFeatures")) {
 				if (guildDocument.isEnabled("informationNotice")) {
 					const service = new InformationNoticeService(client, { guildId });
@@ -323,10 +313,6 @@ class ServiceStore {
 
 	getEntryService(guildId: bigint): EntryService | undefined {
 		return this.local.entry.get(guildId);
-	}
-
-	getJournallingService(guildId: bigint): JournallingService | undefined {
-		return this.local.journalling.get(guildId);
 	}
 
 	getMusicService(guildId: bigint): MusicService | undefined {

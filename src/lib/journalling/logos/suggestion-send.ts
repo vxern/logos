@@ -1,7 +1,7 @@
 import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
 import { Suggestion } from "../../database/suggestion";
-import { EventLogger } from "../../services/journalling/logger";
+import { EventLogger } from "../logger";
 
 class SuggestionSendEventLogger extends EventLogger<"suggestionSend"> {
 	constructor(client: Client) {

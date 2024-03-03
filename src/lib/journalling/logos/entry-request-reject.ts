@@ -1,6 +1,6 @@
 import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
-import { EventLogger } from "../../services/journalling/logger";
+import { EventLogger } from "../logger";
 
 class EntryRequestRejectEventLogger extends EventLogger<"entryRequestReject"> {
 	constructor(client: Client) {

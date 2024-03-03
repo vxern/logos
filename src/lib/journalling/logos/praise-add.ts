@@ -1,7 +1,7 @@
 import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
 import { Praise } from "../../database/praise";
-import { EventLogger } from "../../services/journalling/logger";
+import { EventLogger } from "../logger";
 
 class PraiseAddEventLogger extends EventLogger<"praiseAdd"> {
 	constructor(client: Client) {

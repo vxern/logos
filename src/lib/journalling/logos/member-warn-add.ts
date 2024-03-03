@@ -1,7 +1,7 @@
 import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
 import { Warning } from "../../database/warning";
-import { EventLogger } from "../../services/journalling/logger";
+import { EventLogger } from "../logger";
 
 class MemberWarnAddEventLogger extends EventLogger<"memberWarnAdd"> {
 	constructor(client: Client) {

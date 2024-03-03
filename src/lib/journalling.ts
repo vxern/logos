@@ -1,3 +1,4 @@
+import diagnostics from "../diagnostics";
 import { Client } from "./client";
 import { GuildBanAddEventLogger } from "./journalling/discord/guild-ban-add";
 import { GuildBanRemoveEventLogger } from "./journalling/discord/guild-ban-remove";
@@ -5,6 +6,7 @@ import { GuildMemberAddEventLogger } from "./journalling/discord/guild-member-ad
 import { GuildMemberRemoveEventLogger } from "./journalling/discord/guild-member-remove";
 import { MessageDeleteEventLogger } from "./journalling/discord/message-delete";
 import { MessageUpdateEventLogger } from "./journalling/discord/message-update";
+import { Events } from "./journalling/logger";
 import { EntryRequestAcceptEventLogger } from "./journalling/logos/entry-request-accept";
 import { EntryRequestRejectEventLogger } from "./journalling/logos/entry-request-reject";
 import { EntryRequestSubmitEventLogger } from "./journalling/logos/entry-request-submit";
@@ -24,6 +26,7 @@ import { SlowmodeEnableEventLogger } from "./journalling/logos/slowmode-enable";
 import { SlowmodeUpgradeEventLogger } from "./journalling/logos/slowmode-upgrade";
 import { SuggestionSendEventLogger } from "./journalling/logos/suggestion-send";
 import { TicketOpenEventLogger } from "./journalling/logos/ticket-open";
+import { Logger } from "./logger";
 
 class JournallingStore {
 	readonly discord: {
@@ -56,7 +59,10 @@ class JournallingStore {
 		readonly slowmodeDowngrade: SlowmodeDowngradeEventLogger;
 	};
 
-	constructor(client: Client) {
+	readonly #client: Client;
+	readonly #log: Logger;
+
+	constructor(client: Client, { isDebug }: { isDebug?: boolean }) {
 		this.discord = {
 			guildBanAdd: new GuildBanAddEventLogger(client),
 			guildBanRemove: new GuildBanRemoveEventLogger(client),
@@ -86,6 +92,42 @@ class JournallingStore {
 			slowmodeUpgrade: new SlowmodeUpgradeEventLogger(client),
 			slowmodeDowngrade: new SlowmodeDowngradeEventLogger(client),
 		};
+
+		this.#client = client;
+		this.#log = Logger.create({ identifier: "JournallingStore", isDebug });
+	}
+
+	async tryLog<Event extends keyof Logos.Events>(event: Event, { args }: { args: Logos.Events[Event] }): Promise<void> {
+		const logger = this.logos[event];
+		if (logger === undefined) {
+			return;
+		}
+
+		const channelId = this.channelId;
+		if (channelId === undefined) {
+			return;
+		}
+
+		if (!journalEntryGenerator.filter(this.guildId, ...args)) {
+			return;
+		}
+
+		const journalEntry = await journalEntryGenerator.message(...args);
+		if (journalEntry === undefined) {
+			return;
+		}
+
+		await this.#client.bot.rest
+			.sendMessage(channelId, {
+				embeds: [
+					{
+						title: journalEntryGenerator.title,
+						description: journalEntry,
+						color: journalEntryGenerator.color,
+					},
+				],
+			})
+			.catch(() => this.#log.warn(`Failed to log '${event}' event on ${diagnostics.display.guild(this.guildId)}.`));
 	}
 }
 

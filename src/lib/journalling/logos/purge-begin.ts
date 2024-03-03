@@ -1,7 +1,7 @@
 import diagnostics from "../../../diagnostics";
 import { mention } from "../../../formatting";
 import { Client } from "../../client";
-import { EventLogger } from "../../services/journalling/logger";
+import { EventLogger } from "../logger";
 
 class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
 	constructor(client: Client) {

@@ -4,7 +4,7 @@ import { codeMultiline } from "../../../formatting";
 import { Client } from "../../client";
 import { EntryRequest } from "../../database/entry-request";
 import { Guild } from "../../database/guild";
-import { EventLogger } from "../../services/journalling/logger";
+import { EventLogger } from "../logger";
 
 class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 	constructor(client: Client) {

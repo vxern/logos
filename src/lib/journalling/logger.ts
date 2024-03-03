@@ -1,4 +1,4 @@
-import { Client } from "../../client";
+import { Client } from "../client";
 
 type Events = Logos.Events & Discord.Events;
 

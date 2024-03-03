@@ -1,7 +1,7 @@
 import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
 import { SlowmodeLevel } from "../../commands/moderation/commands/slowmode";
-import { EventLogger } from "../../services/journalling/logger";
+import { EventLogger } from "../logger";
 
 class SlowmodeDowngradeEventLogger extends EventLogger<"slowmodeDowngrade"> {
 	constructor(client: Client) {

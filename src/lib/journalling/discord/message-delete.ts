@@ -1,7 +1,7 @@
 import diagnostics from "../../../diagnostics";
 import { codeMultiline, mention } from "../../../formatting";
 import { Client } from "../../client";
-import { EventLogger } from "../../services/journalling/logger";
+import { EventLogger } from "../logger";
 
 class MessageDeleteEventLogger extends EventLogger<"messageDelete"> {
 	constructor(client: Client) {

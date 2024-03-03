@@ -149,10 +149,6 @@ class Client {
 		return this.#services.getEntryService.bind(this.#services);
 	}
 
-	get getJournallingService() {
-		return this.#services.getJournallingService.bind(this.#services);
-	}
-
 	get getMusicService() {
 		return this.#services.getMusicService.bind(this.#services);
 	}
