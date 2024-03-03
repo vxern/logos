@@ -1,18 +1,30 @@
 import diagnostics from "../../../../diagnostics";
-import { GuildEvents, MessageGenerators } from "../generator";
+import { Client } from "../../../client";
+import { Warning } from "../../../database/warning";
+import { EventLogger } from "../logger";
 
-export default {
-	title: `${constants.symbols.events.warned} Member warned`,
-	message: (client, member, warning, by) => {
-		const memberUser = client.entities.users.get(member.id);
+class MemberWarnAddEventLogger extends EventLogger<"memberWarnAdd"> {
+	constructor(client: Client) {
+		super(client, {
+			title: `${constants.symbols.events.warned} Member warned`,
+			colour: constants.colors.dullYellow,
+		});
+	}
+
+	filter(originGuildId: bigint, member: Logos.Member, _: Warning, __: Logos.User): boolean {
+		return originGuildId === member.guildId;
+	}
+
+	message(member: Logos.Member, warning: Warning, by: Logos.User): string | undefined {
+		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {
-			return;
+			return undefined;
 		}
 
 		return `${diagnostics.display.user(memberUser)} has been warned by ${diagnostics.display.user(by)} for: ${
 			warning.reason
 		}`;
-	},
-	filter: (_, originGuildId, member, __, ___) => originGuildId === member.guildId,
-	color: constants.colors.dullYellow,
-} satisfies MessageGenerators<GuildEvents>["memberWarnAdd"];
+	}
+}
+
+export { MemberWarnAddEventLogger };

@@ -1,10 +1,22 @@
 import diagnostics from "../../../../diagnostics";
-import { GuildEvents, MessageGenerators } from "../generator";
+import { Client } from "../../../client";
+import { Report } from "../../../database/report";
+import { EventLogger } from "../logger";
 
-export default {
-	title: `${constants.symbols.events.report} Report submitted`,
-	message: (client, author, report) => {
-		const authorUser = client.entities.users.get(author.id);
+class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
+	constructor(client: Client) {
+		super(client, {
+			title: `${constants.symbols.events.report} Report submitted`,
+			colour: constants.colors.darkRed,
+		});
+	}
+
+	filter(originGuildId: bigint, author: Logos.Member, _: Report): boolean {
+		return originGuildId === author.guildId;
+	}
+
+	message(author: Logos.Member, report: Report): string | undefined {
+		const authorUser = this.client.entities.users.get(author.id);
 		if (authorUser === undefined) {
 			return;
 		}
@@ -21,7 +33,7 @@ ${report.answers.users}
 
 **MESSAGE LINK**
 ${messageLink}`;
-	},
-	filter: (_, originGuildId, author, __) => originGuildId === author.guildId,
-	color: constants.colors.darkRed,
-} satisfies MessageGenerators<GuildEvents>["reportSubmit"];
+	}
+}
+
+export { ReportSubmitEventLogger };

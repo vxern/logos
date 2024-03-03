@@ -1,18 +1,29 @@
 import diagnostics from "../../../../diagnostics";
-import { GuildEvents, MessageGenerators } from "../generator";
+import { Client } from "../../../client";
+import { EventLogger } from "../logger";
 
-export default {
-	title: `${constants.symbols.events.timeout.removed} Member's timeout cleared`,
-	message: (client, member, by) => {
-		const memberUser = client.entities.users.get(member.id);
+class MemberTimeoutRemoveEventLogger extends EventLogger<"memberTimeoutRemove"> {
+	constructor(client: Client) {
+		super(client, {
+			title: `${constants.symbols.events.timeout.removed} Member's timeout cleared`,
+			colour: constants.colors.blue,
+		});
+	}
+
+	filter(originGuildId: bigint, member: Logos.Member, _: Logos.User): boolean {
+		return originGuildId === member.guildId;
+	}
+
+	message(member: Logos.Member, by: Logos.User): string | undefined {
+		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {
-			return;
+			return undefined;
 		}
 
 		return `The timeout of ${diagnostics.display.user(memberUser)} has been cleared by: ${diagnostics.display.user(
 			by,
 		)}`;
-	},
-	filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
-	color: constants.colors.blue,
-} satisfies MessageGenerators<GuildEvents>["memberTimeoutRemove"];
+	}
+}
+
+export { MemberTimeoutRemoveEventLogger };

@@ -1,13 +1,35 @@
 import diagnostics from "../../../../diagnostics";
 import { mention } from "../../../../formatting";
-import { GuildEvents, MessageGenerators } from "../generator";
+import { Client } from "../../../client";
+import { EventLogger } from "../logger";
 
-export default {
-	title: `${constants.symbols.events.purging.begin} Purging started`,
-	message: (client, member, channel, messageCount, author) => {
-		const user = client.entities.users.get(member.id);
+class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
+	constructor(client: Client) {
+		super(client, {
+			title: `${constants.symbols.events.purging.begin} Purging started`,
+			colour: constants.colors.yellow,
+		});
+	}
+
+	filter(
+		originGuildId: bigint,
+		member: Logos.Member,
+		_: Logos.Channel,
+		__: number,
+		___?: Logos.User | undefined,
+	): boolean {
+		return originGuildId === member.guildId;
+	}
+
+	message(
+		member: Logos.Member,
+		channel: Logos.Channel,
+		messageCount: number,
+		author?: Logos.User | undefined,
+	): string | undefined {
+		const user = this.client.entities.users.get(member.id);
 		if (user === undefined) {
-			return;
+			return undefined;
 		}
 
 		const userMention = diagnostics.display.user(user);
@@ -17,7 +39,7 @@ export default {
 		return `${userMention} has initiated a purging of ${messageCount} messages${
 			author !== undefined ? `sent by ${authorMention}` : ""
 		} in ${channelMention}.`;
-	},
-	filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
-	color: constants.colors.yellow,
-} satisfies MessageGenerators<GuildEvents>["purgeBegin"];
+	}
+}
+
+export { PurgeBeginEventLogger };

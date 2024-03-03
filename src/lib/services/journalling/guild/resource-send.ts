@@ -1,18 +1,30 @@
 import diagnostics from "../../../../diagnostics";
-import { GuildEvents, MessageGenerators } from "../generator";
+import { Client } from "../../../client";
+import { Resource } from "../../../database/resource";
+import { EventLogger } from "../logger";
 
-export default {
-	title: `${constants.symbols.events.resource} Resource submitted`,
-	message: (client, member, resource) => {
-		const memberUser = client.entities.users.get(member.id);
+class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
+	constructor(client: Client) {
+		super(client, {
+			title: `${constants.symbols.events.resource} Resource submitted`,
+			colour: constants.colors.darkGreen,
+		});
+	}
+
+	filter(originGuildId: bigint, member: Logos.Member, _: Resource): boolean {
+		return originGuildId === member.guildId;
+	}
+
+	message(member: Logos.Member, resource: Resource): string | undefined {
+		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {
-			return;
+			return undefined;
 		}
 
 		return `${diagnostics.display.user(memberUser)} has submitted a resource.\n\nResource: *${
 			resource.answers.resource
 		}*`;
-	},
-	filter: (_, originGuildId, member, __) => originGuildId === member.guildId,
-	color: constants.colors.darkGreen,
-} satisfies MessageGenerators<GuildEvents>["resourceSend"];
+	}
+}
+
+export { ResourceSendEventLogger };

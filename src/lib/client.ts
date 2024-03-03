@@ -1,6 +1,7 @@
 import { Locale } from "../constants/languages";
 import diagnostics from "../diagnostics";
 import { timestamp, trim } from "../formatting";
+import { Cache } from "./cache";
 import { Collector, InteractionCollector } from "./collectors";
 import { CommandStore } from "./commands";
 import commandTemplates from "./commands/commands";
@@ -17,7 +18,6 @@ import { InteractionRepetitionService } from "./services/interaction-repetition/
 import { LavalinkService } from "./services/music/lavalink";
 import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { StatusService } from "./services/status/service";
-import { Cache } from "./cache";
 
 interface Environment {
 	readonly isDebug: boolean;

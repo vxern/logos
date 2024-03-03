@@ -1,11 +1,22 @@
 import diagnostics from "../../../../diagnostics";
-import { GuildEvents, MessageGenerators } from "../generator";
+import { Client } from "../../../client";
+import { EventLogger } from "../logger";
 
-export default {
-	title: `${constants.symbols.events.slowmode.disabled} Slowmode disabled`,
-	message: (_, user, channel) => {
+class SlowmodeDisableEventLogger extends EventLogger<"slowmodeDisable"> {
+	constructor(client: Client) {
+		super(client, {
+			title: `${constants.symbols.events.slowmode.disabled} Slowmode disabled`,
+			colour: constants.colors.dullYellow,
+		});
+	}
+
+	filter(originGuildId: bigint, _: Logos.User, channel: Logos.Channel): boolean {
+		return originGuildId === channel.guildId;
+	}
+
+	message(user: Logos.User, channel: Logos.Channel): string {
 		return `${diagnostics.display.user(user)} has disabled slowmode in ${diagnostics.display.channel(channel)}.`;
-	},
-	filter: (_, originGuildId, __, channel) => originGuildId === channel.guildId,
-	color: constants.colors.dullYellow,
-} satisfies MessageGenerators<GuildEvents>["slowmodeDisable"];
+	}
+}
+
+export { SlowmodeDisableEventLogger };

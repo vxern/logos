@@ -306,13 +306,13 @@ class Database extends ravendb.DocumentStore {
 		return session;
 	}
 
-async withSession(callback: (session: DocumentSession) => Promise<void>): Promise<void> {
-  const session = this.openSession();
+	async withSession(callback: (session: DocumentSession) => Promise<void>): Promise<void> {
+		const session = this.openSession();
 
-  await callback(session);
+		await callback(session);
 
-  session.dispose();
-}
+		session.dispose();
+	}
 }
 
 export { Database };

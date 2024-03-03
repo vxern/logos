@@ -19,6 +19,7 @@ export default {
 	MAXIMUM_CORRECTION_MESSAGE_LENGTH: 3072,
 	MAXIMUM_USERNAME_LENGTH: 32,
 	acknowledgements,
+	// TODO(vxern): Rename to 'colours'.
 	colors,
 	components,
 	contributions,
