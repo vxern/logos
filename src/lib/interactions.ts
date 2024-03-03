@@ -1,5 +1,5 @@
 import { Locale, LocalisationLanguage } from "../constants/languages";
-import time from "../constants/time";
+import { TimeUnit } from "../constants/time";
 import { Client, InteractionCollector } from "./client";
 import { Logger } from "./logger";
 
@@ -190,17 +190,6 @@ function parseConciseTimeExpression(
 	return [`${conciseExpression} (${verboseExpressionCorrected})`, period];
 }
 
-type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
-const timeUnitToPeriod: Required<Record<TimeUnit, number>> = {
-	second: time.second,
-	minute: time.minute,
-	hour: time.hour,
-	day: time.day,
-	week: time.week,
-	month: time.month,
-	year: time.year,
-};
-
 const timeUnitsWithAliasesLocalised = new Map<string, Record<TimeUnit, string[]>>();
 
 function parseVerboseTimeExpressionPhrase(
@@ -209,7 +198,7 @@ function parseVerboseTimeExpressionPhrase(
 	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): ReturnType<typeof parseTimeExpression> {
 	if (!timeUnitsWithAliasesLocalised.has(locale)) {
-		const timeUnits = Object.keys(timeUnitToPeriod) as TimeUnit[];
+		const timeUnits = Object.keys(constants.time) as TimeUnit[];
 		const timeUnitAliasTuples: [TimeUnit, string[]][] = [];
 
 		for (const timeUnit of timeUnits) {
@@ -291,7 +280,7 @@ function parseVerboseTimeExpressionPhrase(
 
 		timeUnitQuantifierTuples.push([timeUnit, quantifier]);
 	}
-	timeUnitQuantifierTuples.sort(([previous], [next]) => timeUnitToPeriod[next] - timeUnitToPeriod[previous]);
+	timeUnitQuantifierTuples.sort(([previous], [next]) => constants.time[next] - constants.time[previous]);
 
 	const timeExpressions = [];
 	let total = 0;
@@ -302,7 +291,7 @@ function parseVerboseTimeExpressionPhrase(
 
 		timeExpressions.push(strings.unit);
 
-		total += quantifier * timeUnitToPeriod[timeUnit];
+		total += quantifier * constants.time[timeUnit];
 	}
 	const correctedExpression = timeExpressions.join(", ");
 

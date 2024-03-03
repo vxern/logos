@@ -1,5 +1,5 @@
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
-import time from "../../constants/time";
+import { TimeUnit } from "../../constants/time";
 import { Client } from "../client";
 import { IdentifierData, MetadataOrIdentifierData, Model } from "./model";
 
@@ -248,21 +248,10 @@ interface GuildFeatures {
 	}>;
 }
 
-type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
 type TimeStruct = [number: number, unit: TimeUnit];
 
-const durationByTimeUnit = {
-	second: time.second,
-	minute: time.minute,
-	hour: time.hour,
-	day: time.day,
-	week: time.week,
-	month: time.month,
-	year: time.year,
-} satisfies Record<TimeUnit, number>;
-
 function timeStructToMilliseconds([number, unit]: TimeStruct): number {
-	const duration = durationByTimeUnit[unit];
+	const duration = constants.time[unit];
 	return duration * number;
 }
 

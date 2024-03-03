@@ -11,6 +11,7 @@ import patterns from "./patterns";
 import properties from "./properties";
 import statuses from "./statuses";
 import symbols from "./symbols";
+import time from "./time";
 
 export default {
 	INTERACTION_TOKEN_EXPIRY: 1000 * 60 * 15 - 1000 * 10, // 14 minutes, 50 seconds in milliseconds.
@@ -30,4 +31,5 @@ export default {
 	properties,
 	statuses,
 	symbols,
+	time,
 };

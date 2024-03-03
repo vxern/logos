@@ -1,5 +1,4 @@
 import { Locale } from "../../../../constants/languages";
-import time from "../../../../constants/time";
 import diagnostics from "../../../../diagnostics";
 import { mention, timestamp, trim } from "../../../../formatting";
 import { chunk } from "../../../../utils";
@@ -576,7 +575,7 @@ async function handlePurgeMessages(
 		journallingService?.logEvent("purgeBegin", { args: [member, channel, messages.length] });
 	}
 
-	const twoWeeksAgo = now - time.week * 2 + time.hour;
+	const twoWeeksAgo = now - constants.time.week * 2 + constants.time.hour;
 
 	const firstBulkDeletableIndex = messages.findIndex((message) => Date.parse(message.timestamp) > twoWeeksAgo);
 	const bulkDeletable = firstBulkDeletableIndex !== -1 ? messages.slice(firstBulkDeletableIndex, messages.length) : [];
@@ -590,7 +589,7 @@ async function handlePurgeMessages(
 	const responseDeletionTimeoutId = setTimeout(async () => {
 		responseDeleted = true;
 		client.deleteReply(interaction);
-	}, time.minute * 1);
+	}, constants.time.minute * 1);
 
 	let deletedCount = 0;
 

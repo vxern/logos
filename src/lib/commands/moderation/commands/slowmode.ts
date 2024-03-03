@@ -1,4 +1,3 @@
-import time from "../../../../constants/time";
 import diagnostics from "../../../../diagnostics";
 import { timestamp } from "../../../../formatting";
 import { Client } from "../../../client";
@@ -26,14 +25,14 @@ const levels = ["lowest", "low", "medium", "high", "highest", "emergency", "lock
 
 // In milliseconds
 const rateLimitDurationByLevel: Record<(typeof levels)[number], number> = {
-	lowest: time.second * 5,
-	low: time.second * 10,
-	medium: time.second * 30,
-	high: time.minute * 1,
-	highest: time.minute * 5,
-	emergency: time.minute * 20,
-	lockdown: time.hour * 1,
-	beyond: time.day * 1,
+	lowest: constants.time.second * 5,
+	low: constants.time.second * 10,
+	medium: constants.time.second * 30,
+	high: constants.time.minute * 1,
+	highest: constants.time.minute * 5,
+	emergency: constants.time.minute * 20,
+	lockdown: constants.time.hour * 1,
+	beyond: constants.time.day * 1,
 };
 type SlowmodeLevel = keyof typeof rateLimitDurationByLevel | "unknown";
 

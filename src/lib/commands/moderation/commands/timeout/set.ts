@@ -1,5 +1,4 @@
 import { Locale } from "../../../../../constants/languages";
-import time from "../../../../../constants/time";
 import diagnostics from "../../../../../diagnostics";
 import { mention, timestamp, trim } from "../../../../../formatting";
 import { Client } from "../../../../client";
@@ -86,12 +85,12 @@ async function handleSetTimeout(
 		durationParsed = timestamp[1];
 	}
 
-	if (durationParsed < time.minute) {
+	if (durationParsed < constants.time.minute) {
 		displayTooShortWarning(client, interaction, { locale });
 		return;
 	}
 
-	if (durationParsed > time.week) {
+	if (durationParsed > constants.time.week) {
 		displayTooLongWarning(client, interaction, { locale });
 		return;
 	}

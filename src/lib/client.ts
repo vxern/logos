@@ -1,5 +1,4 @@
 import { Locale } from "../constants/languages";
-import time from "../constants/time";
 import diagnostics from "../diagnostics";
 import { timestamp, trim } from "../formatting";
 import { Collector, InteractionCollector } from "./collectors";
@@ -411,7 +410,10 @@ class Client {
 					},
 				};
 
-				setTimeout(() => this.deleteReply(interaction), rateLimit.nextAllowedUsageTimestamp - executedAt - time.second);
+				setTimeout(
+					() => this.deleteReply(interaction),
+					rateLimit.nextAllowedUsageTimestamp - executedAt - constants.time.second,
+				);
 
 				this.reply(interaction, {
 					embeds: [
