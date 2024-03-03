@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants";
 import time from "../../../../constants/time";
-import { TimestampFormat, timestamp } from "../../../../formatting";
+import { timestamp } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
@@ -218,7 +218,7 @@ async function handleToggleSlowmode(
 						canDisableIn: client.localise(
 							"slowmode.strings.tooSoon.description.canDisableIn",
 							locale,
-						)({ relative_timestamp: timestamp(canDisableIn, TimestampFormat.Relative) }),
+						)({ relative_timestamp: timestamp(canDisableIn) }),
 					},
 				};
 

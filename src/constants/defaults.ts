@@ -1,5 +1,5 @@
-import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage, TranslationLanguage } from "./languages";
 import { RateLimit, TimeStruct } from "../lib/database/guild";
+import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage, TranslationLanguage } from "./languages";
 
 const PROJECT_NAME = "Logos";
 const USER_AGENT = "Logos (https://logos.wordcollector.co.uk)";

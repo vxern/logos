@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
-import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../constants/defaults";
-import { MentionTypes, mention } from "../../../../formatting";
+import { Locale } from "../../../../constants/languages";
+import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Warning } from "../../../database/warning";
@@ -165,7 +165,7 @@ async function handlePardonUser(
 			"pardon.strings.pardoned.description",
 			locale,
 		)({
-			user_mention: mention(member.id, MentionTypes.User),
+			user_mention: mention(member.id, "user"),
 			reason: warning.reason,
 		}),
 	};

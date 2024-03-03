@@ -3,10 +3,10 @@ import * as stream from "stream";
 import eventStream from "event-stream";
 import * as fs from "fs/promises";
 import Redis from "ioredis";
-import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../constants/languages";
 import defaults from "../constants/defaults";
-import { capitalise } from "../formatting";
+import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../constants/languages";
 import { locales } from "../constants/languages/localisation";
+import { capitalise } from "../formatting";
 
 const RECORD_DELIMETER = "	";
 const MAX_BUFFER_SIZE = 1024 * 128;

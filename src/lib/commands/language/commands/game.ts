@@ -1,8 +1,8 @@
 import * as levenshtein from "fastest-levenshtein";
 import constants from "../../../../constants/constants";
+import defaults from "../../../../constants/defaults";
 import { Locale, getLocaleByLearningLanguage } from "../../../../constants/languages";
 import licences from "../../../../constants/licences";
-import defaults from "../../../../constants/defaults";
 import { capitalise } from "../../../../formatting";
 import { Client, InteractionCollector } from "../../../client";
 import { GuildStats } from "../../../database/guild-stats";

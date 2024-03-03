@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants";
-import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../constants/defaults";
+import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import { Client, InteractionCollector } from "../../../client";
 import { Guild } from "../../../database/guild";

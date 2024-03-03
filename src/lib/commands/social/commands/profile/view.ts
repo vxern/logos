@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { MentionTypes, mention } from "../../../../../formatting";
+import { mention } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
 import { Warning } from "../../../../database/warning";
@@ -96,7 +96,7 @@ async function handleDisplayProfile(
 					fields: [
 						{
 							name: `${constants.symbols.profile.roles} ${strings.roles}`,
-							value: member.roles.map((roleId) => mention(roleId, MentionTypes.Role)).join(" "),
+							value: member.roles.map((roleId) => mention(roleId, "role")).join(" "),
 							inline: false,
 						},
 						{

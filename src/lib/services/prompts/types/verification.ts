@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants";
 import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/languages";
-import { MentionTypes, TimestampFormat, mention, timestamp } from "../../../../formatting";
+import { mention, timestamp } from "../../../../formatting";
 import { Client, InteractionCollector } from "../../../client";
 import { openTicket } from "../../../commands/server/commands/ticket/open";
 import { EntryRequest } from "../../../database/entry-request";
@@ -165,13 +165,11 @@ class VerificationService extends PromptService<{
 			open: this.client.localise("entry.verification.inquiry.open", guildLocale)(),
 		};
 
-		const accountCreatedRelativeTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), TimestampFormat.Relative);
-		const accountCreatedLongDateTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), TimestampFormat.LongDate);
+		const accountCreatedRelativeTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id));
+		const accountCreatedLongDateTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), "long-date");
 
-		const votedForFormatted = entryRequestDocument.votedFor?.map((userId) => mention(userId, MentionTypes.User));
-		const votedAgainstFormatted = entryRequestDocument.votedAgainst?.map((userId) =>
-			mention(userId, MentionTypes.User),
-		);
+		const votedForFormatted = entryRequestDocument.votedFor?.map((userId) => mention(userId, "user"));
+		const votedAgainstFormatted = entryRequestDocument.votedAgainst?.map((userId) => mention(userId, "user"));
 
 		return {
 			embeds: [
@@ -200,12 +198,12 @@ class VerificationService extends PromptService<{
 						},
 						{
 							name: strings.requestedRoles,
-							value: mention(BigInt(entryRequestDocument.requestedRoleId), MentionTypes.Role),
+							value: mention(BigInt(entryRequestDocument.requestedRoleId), "role"),
 							inline: true,
 						},
 						{
 							name: strings.answersSubmitted,
-							value: timestamp(entryRequestDocument.createdAt, TimestampFormat.Relative),
+							value: timestamp(entryRequestDocument.createdAt),
 							inline: true,
 						},
 						{

@@ -1,7 +1,7 @@
 import constants from "../../../../../constants/constants";
-import { Locale } from "../../../../../constants/languages";
 import defaults from "../../../../../constants/defaults";
-import { MentionTypes, mention, trim } from "../../../../../formatting";
+import { Locale } from "../../../../../constants/languages";
+import { mention, trim } from "../../../../../formatting";
 import { Client, InteractionCollector } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import { Ticket, TicketType } from "../../../../database/ticket";
@@ -150,7 +150,7 @@ async function openTicket(
 		return "failure";
 	}
 
-	const mentions = [mention(member.id, MentionTypes.User), mention(user.id, MentionTypes.User)];
+	const mentions = [mention(member.id, "user"), mention(user.id, "user")];
 	const mentionsFormatted = mentions.join(" ");
 
 	client.bot.helpers.sendMessage(channel.id, { content: mentionsFormatted }).catch(() => {
@@ -162,7 +162,7 @@ async function openTicket(
 		.sendMessage(channel.id, {
 			embeds: [
 				{
-					description: `${mention(user.id, MentionTypes.User)}: *${answers.topic}*`,
+					description: `${mention(user.id, "user")}: *${answers.topic}*`,
 					color: constants.colors.husky,
 				},
 			],

@@ -1,8 +1,8 @@
 import constants from "../../../../constants/constants";
+import defaults from "../../../../constants/defaults";
 import { Locale } from "../../../../constants/languages";
 import time from "../../../../constants/time";
-import defaults from "../../../../constants/defaults";
-import { MentionTypes, mention, timestamp, trim } from "../../../../formatting";
+import { mention, timestamp, trim } from "../../../../formatting";
 import { Client, InteractionCollector, isValidSnowflake } from "../../../client";
 import { Guild } from "../../../database/guild";
 import diagnostics from "../../../diagnostics";
@@ -156,7 +156,7 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	const channelMention = mention(channelId, MentionTypes.Channel);
+	const channelMention = mention(channelId, "channel");
 
 	const [startMessageContent, endMessageContent] = [
 		getMessageContent(client, startMessage, { locale }),
@@ -172,14 +172,14 @@ async function handlePurgeMessages(
 				? client.localise("purge.strings.posted", locale)
 				: client.localise("purge.strings.embedPosted", locale))({
 				relative_timestamp: timestamp(Date.parse(startMessage.timestamp)),
-				user_mention: mention(BigInt(startMessage.author.id), MentionTypes.User),
+				user_mention: mention(BigInt(startMessage.author.id), "user"),
 			}),
 			end: client.localise("purge.strings.end", locale)(),
 			postedEnd: (endMessageContent !== undefined
 				? client.localise("purge.strings.posted", locale)
 				: client.localise("purge.strings.embedPosted", locale))({
 				relative_timestamp: timestamp(Date.parse(endMessage.timestamp)),
-				user_mention: mention(BigInt(endMessage.author.id), MentionTypes.User),
+				user_mention: mention(BigInt(endMessage.author.id), "user"),
 			}),
 			messagesFound: client.localise("purge.strings.messagesFound", locale)(),
 		};

@@ -1,7 +1,7 @@
 import constants from "../../../../constants/constants";
-import { Locale } from "../../../../constants/languages";
 import defaults from "../../../../constants/defaults";
-import { MentionTypes, mention } from "../../../../formatting";
+import { Locale } from "../../../../constants/languages";
+import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { Praise } from "../../../database/praise";
@@ -120,7 +120,7 @@ async function handlePraiseUser(
 		description: client.localise(
 			"praise.strings.praised.description",
 			locale,
-		)({ user_mention: mention(member.id, MentionTypes.User) }),
+		)({ user_mention: mention(member.id, "user") }),
 	};
 
 	client.editReply(interaction, {

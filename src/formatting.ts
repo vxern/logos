@@ -15,6 +15,12 @@ function capitalise(target: string): string {
 	return first.toUpperCase() + rest.join("");
 }
 
+/**
+ * Makes the first letter of the given text lowercase, opposite of capitalising.
+ *
+ * @param target - String of text to format.
+ * @returns The formatted string of text.
+ */
 function decapitalise(target: string): string {
 	const [first, ...rest] = target;
 	if (first === undefined) {
@@ -132,4 +138,4 @@ function trim(string: string, length: number): string {
 	);
 }
 
-export { capitalise, decapitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };
+export { capitalise, decapitalise, code, codeMultiline, list, mention, timestamp, trim };

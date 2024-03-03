@@ -1,7 +1,7 @@
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import localisations from "../../../../../constants/localisations";
-import { MentionTypes, mention, timestamp } from "../../../../../formatting";
+import { mention, timestamp } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
@@ -114,7 +114,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 						: [
 								{
 									name: `${constants.symbols.guild.owner} ${strings.description.owner}`,
-									value: mention(owner.id, MentionTypes.User),
+									value: mention(owner.id, "user"),
 									inline: true,
 								},
 						  ]),
@@ -230,7 +230,7 @@ function formatDistribution(
 	];
 	for (const [roleId, frequency] of roleFrequencies) {
 		const percentage = getPercentageComposition(frequency, total);
-		const roleMention = mention(roleId, MentionTypes.Role);
+		const roleMention = mention(roleId, "role");
 
 		stringParts.unshift(`${frequency} (${percentage}%) ${roleMention}`);
 	}

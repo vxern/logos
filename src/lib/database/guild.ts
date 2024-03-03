@@ -1,6 +1,6 @@
+import defaults from "../../constants/defaults";
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
 import time from "../../constants/time";
-import defaults from "../../constants/defaults";
 import { Client } from "../client";
 import { IdentifierData, MetadataOrIdentifierData, Model } from "./model";
 

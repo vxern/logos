@@ -1,11 +1,11 @@
 import constants from "../../../../constants/constants";
-import { MentionTypes, mention, timestamp } from "../../../../formatting";
+import { mention, timestamp } from "../../../../formatting";
 import { Client } from "../../../client";
+import { PaginatedSongCollectionViewComponent } from "../../../components/paginated-view";
 import { isCollection } from "../../../services/music/music";
 import { OptionTemplate } from "../../command";
 import { collection, show } from "../../parameters";
 import { Song, SongCollection, SongStream } from "../data/types";
-import { PaginatedSongCollectionViewComponent } from "../../../components/paginated-view";
 
 const command: OptionTemplate = {
 	id: "now",
@@ -166,7 +166,7 @@ async function handleDisplayCurrentlyPlaying(
 						},
 						{
 							name: strings.requestedBy,
-							value: mention(current.requestedBy, MentionTypes.User),
+							value: mention(current.requestedBy, "user"),
 							inline: false,
 						},
 						{

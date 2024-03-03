@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { MentionTypes, codeMultiline, mention } from "../../../../formatting";
+import { codeMultiline, mention } from "../../../../formatting";
 import diagnostics from "../../../diagnostics";
 import { ClientEvents, MessageGenerators } from "../generator";
 
@@ -18,10 +18,7 @@ export default {
 
 		const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : "*No message*";
 
-		return `${diagnostics.display.user(author)} updated their message in ${mention(
-			message.channelId,
-			MentionTypes.Channel,
-		)}.
+		return `${diagnostics.display.user(author)} updated their message in ${mention(message.channelId, "channel")}.
 
 **BEFORE**
 ${before}

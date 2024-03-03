@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 import * as Lavaclient from "lavaclient";
 import constants from "../../../constants/constants";
 import defaults from "../../../constants/defaults";
-import { MentionTypes, mention } from "../../../formatting";
+import { mention } from "../../../formatting";
 import { Client } from "../../client";
 import {
 	Song,
@@ -643,7 +643,7 @@ class MusicService extends LocalService {
 					guildLocale,
 				)({
 					title: listing.content.title,
-					user_mention: mention(listing.requestedBy, MentionTypes.User),
+					user_mention: mention(listing.requestedBy, "user"),
 				}),
 			};
 
@@ -903,7 +903,7 @@ class MusicService extends LocalService {
 								song_information: strings.description.track,
 								title: song.title,
 								url: song.url,
-								user_mention: mention(session.listings.current.requestedBy, MentionTypes.User),
+								user_mention: mention(session.listings.current.requestedBy, "user"),
 							}),
 							color: constants.colors.blue,
 						},

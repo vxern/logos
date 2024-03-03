@@ -1,7 +1,7 @@
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import time from "../../../../../constants/time";
-import { MentionTypes, mention, timestamp, trim } from "../../../../../formatting";
+import { mention, timestamp, trim } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
@@ -121,7 +121,7 @@ async function handleSetTimeout(
 			"timeout.strings.timedOut.description",
 			locale,
 		)({
-			user_mention: mention(member.id, MentionTypes.User),
+			user_mention: mention(member.id, "user"),
 			relative_timestamp: timestamp(until),
 		}),
 	};

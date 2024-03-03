@@ -1,5 +1,5 @@
-import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
 import defaults from "../../constants/defaults";
+import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
 import { Client, Logger } from "../client";
 import { Guild } from "../database/guild";
 

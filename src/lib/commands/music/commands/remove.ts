@@ -1,8 +1,8 @@
 import constants from "../../../../constants/constants";
+import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
-import { OptionTemplate } from "../../command";
 import { PaginatedRemoveSongListingViewComponent } from "../../../components/paginated-view";
-import { MentionTypes, mention } from "../../../../formatting";
+import { OptionTemplate } from "../../command";
 
 const command: OptionTemplate = {
 	id: "remove",
@@ -95,7 +95,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 				guildLocale,
 			)({
 				title: songListing.content.title,
-				user_mention: mention(buttonPress.user.id, MentionTypes.User),
+				user_mention: mention(buttonPress.user.id, "user"),
 			}),
 		};
 

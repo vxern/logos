@@ -1,6 +1,6 @@
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
-import { MentionTypes, mention } from "../../../../formatting";
+import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
@@ -161,7 +161,8 @@ async function handleWarnUser(
 			authorId: interaction.user.id.toString(),
 			targetId: member.id.toString(),
 			reason: interaction.parameters.reason,
-			rule: interaction.parameters.rule === components.none ? undefined : (interaction.parameters.rule as Rule),
+			rule:
+				interaction.parameters.rule === constants.components.none ? undefined : (interaction.parameters.rule as Rule),
 		}),
 	]);
 
@@ -180,7 +181,7 @@ async function handleWarnUser(
 			"warn.strings.warned.description",
 			locale,
 		)({
-			user_mention: mention(member.id, MentionTypes.User),
+			user_mention: mention(member.id, "user"),
 			warnings: client.pluralise("warn.strings.warned.description.warnings", language, relevantWarnings.length),
 		}),
 	};
@@ -209,7 +210,7 @@ async function handleWarnUser(
 					"warn.strings.limitSurpassedTimedOut.description",
 					locale,
 				)({
-					user_mention: mention(user.id, MentionTypes.User),
+					user_mention: mention(user.id, "user"),
 					limit: configuration.limit,
 					number: relevantWarnings.length,
 					period: client.pluralise(`units.${timeout[1]}.word`, language, timeout[0]),
@@ -231,7 +232,7 @@ async function handleWarnUser(
 					"warn.strings.limitSurpassed.description",
 					locale,
 				)({
-					user_mention: mention(user.id, MentionTypes.User),
+					user_mention: mention(user.id, "user"),
 					limit: configuration.limit,
 					number: relevantWarnings.length,
 				}),
@@ -262,7 +263,7 @@ async function handleWarnUser(
 			description: client.localise(
 				"warn.strings.limitReached.description",
 				locale,
-			)({ user_mention: mention(user.id, MentionTypes.User), limit: constants.defaults.WARN_LIMIT }),
+			)({ user_mention: mention(user.id, "user"), limit: constants.defaults.WARN_LIMIT }),
 		};
 
 		if (guildDocument.areEnabled("alerts")) {

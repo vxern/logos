@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { MentionTypes, mention } from "../../../../formatting";
+import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
 
@@ -23,7 +23,7 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 				toEnter: this.client.localise(
 					"entry.welcome.description.toEnter",
 					guildLocale,
-				)({ information_channel_mention: mention(ruleChannelId, MentionTypes.Channel) }),
+				)({ information_channel_mention: mention(ruleChannelId, "channel") }),
 				acceptedRules: this.client.localise("entry.welcome.description.acceptedRules", guildLocale)(),
 			},
 		};

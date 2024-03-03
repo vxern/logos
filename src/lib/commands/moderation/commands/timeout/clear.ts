@@ -1,5 +1,5 @@
 import constants from "../../../../../constants/constants";
-import { MentionTypes, mention } from "../../../../../formatting";
+import { mention } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
 import diagnostics from "../../../../diagnostics";
@@ -59,7 +59,7 @@ async function handleClearTimeout(
 			description: client.localise(
 				"timeout.strings.notTimedOut.description",
 				locale,
-			)({ user_mention: mention(user.id, MentionTypes.User) }),
+			)({ user_mention: mention(user.id, "user") }),
 		};
 
 		client.reply(interaction, {
@@ -93,7 +93,7 @@ async function handleClearTimeout(
 		description: client.localise(
 			"timeout.strings.timeoutCleared.description",
 			locale,
-		)({ user_mention: mention(user.id, MentionTypes.User) }),
+		)({ user_mention: mention(user.id, "user") }),
 	};
 
 	client.reply(interaction, {

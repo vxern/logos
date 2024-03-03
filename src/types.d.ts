@@ -1,6 +1,6 @@
 import * as Discord from "@discordeno/bot";
-import { Properties } from "./constants/properties";
 import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
+import { Properties } from "./constants/properties";
 
 declare global {
 	interface PromiseConstructor {

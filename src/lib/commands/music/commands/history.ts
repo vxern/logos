@@ -1,8 +1,8 @@
 import constants from "../../../../constants/constants";
 import { Client } from "../../../client";
+import { PaginatedSongListingViewComponent } from "../../../components/paginated-view";
 import { OptionTemplate } from "../../command";
 import { show } from "../../parameters";
-import { PaginatedSongListingViewComponent } from "../../../components/paginated-view";
 
 const command: OptionTemplate = {
 	id: "history",

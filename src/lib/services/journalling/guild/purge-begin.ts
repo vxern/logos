@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { MentionTypes, mention } from "../../../../formatting";
+import { mention } from "../../../../formatting";
 import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
@@ -13,7 +13,7 @@ export default {
 
 		const userMention = diagnostics.display.user(user);
 		const authorMention = author !== undefined ? diagnostics.display.user(author) : undefined;
-		const channelMention = mention(channel.id, MentionTypes.Channel);
+		const channelMention = mention(channel.id, "channel");
 
 		return `${userMention} has initiated a purging of ${messageCount} messages${
 			author !== undefined ? `sent by ${authorMention}` : ""

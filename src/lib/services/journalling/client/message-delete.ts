@@ -1,5 +1,5 @@
 import constants from "../../../../constants/constants";
-import { MentionTypes, codeMultiline, mention } from "../../../../formatting";
+import { codeMultiline, mention } from "../../../../formatting";
 import diagnostics from "../../../diagnostics";
 import { ClientEvents, MessageGenerators } from "../generator";
 
@@ -16,10 +16,7 @@ export default {
 			return;
 		}
 
-		return `${diagnostics.display.user(author)} deleted their message in ${mention(
-			message.channelId,
-			MentionTypes.Channel,
-		)}.
+		return `${diagnostics.display.user(author)} deleted their message in ${mention(message.channelId, "channel")}.
 
 **CONTENT**
 ${codeMultiline(message.content)}`;

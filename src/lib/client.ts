@@ -4,6 +4,7 @@ import log from "loglevel";
 import { nanoid } from "nanoid";
 import * as ravendb from "ravendb";
 import constants from "../constants/constants";
+import defaults from "../constants/defaults";
 import languages, {
 	LearningLanguage,
 	Locale,
@@ -16,7 +17,6 @@ import languages, {
 } from "../constants/languages";
 import { getDiscordLanguageByLocale } from "../constants/languages/localisation";
 import time from "../constants/time";
-import defaults from "../constants/defaults";
 import { capitalise, timestamp, trim } from "../formatting";
 import {
 	Command,

@@ -3,8 +3,8 @@ import { Locale } from "../../../../../constants/languages";
 import licences from "../../../../../constants/licences";
 import { code } from "../../../../../formatting";
 import { Client } from "../../../../client";
-import { OptionTemplate } from "../../../command";
 import { PaginatedSoftwareLicenceViewComponent } from "../../../../components/paginated-view";
+import { OptionTemplate } from "../../../command";
 
 const command: OptionTemplate = {
 	id: "software",

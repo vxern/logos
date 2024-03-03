@@ -1,10 +1,10 @@
 import constants from "../../constants/constants";
-import { Client, InteractionCollector } from "../client";
-import { chunk } from "../utils";
 import defaults from "../../constants/defaults";
-import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../commands/music/data/types";
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";
+import { Client, InteractionCollector } from "../client";
+import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../commands/music/data/types";
+import { chunk } from "../utils";
 
 type PageView = { embed: Discord.CamelizedDiscordEmbed; components?: Discord.MessageComponents };
 type PageAction = "previous" | "next";

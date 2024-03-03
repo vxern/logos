@@ -1,4 +1,5 @@
 import constants from "../../../../../constants/constants";
+import defaults from "../../../../../constants/defaults";
 import {
 	GoogleTranslateLanguage,
 	Languages,
@@ -9,7 +10,6 @@ import {
 	getGoogleTranslateLanguageByLocale,
 	isGoogleTranslateLocale,
 } from "../../../../../constants/languages/translation";
-import defaults from "../../../../../constants/defaults";
 import { Client } from "../../../../client";
 import { Translation, TranslationAdapter } from "../adapter";
 
