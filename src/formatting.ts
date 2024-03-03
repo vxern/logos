@@ -54,15 +54,24 @@ function list(items: string[]): string {
 	return items.map((item) => `${constants.symbols.bullet} ${item}`).join("\n");
 }
 
-enum TimestampFormat {
-	ShortTime = "t",
-	LongTime = "T",
-	ShortDate = "d",
-	LongDate = "D",
-	ShortDateTime = "f",
-	LongDateTime = "F",
-	Relative = "R",
-}
+type TimestampFormat =
+	| "short-time"
+	| "long-time"
+	| "short-date"
+	| "long-date"
+	| "short-datetime"
+	| "long-datetime"
+	| "relative";
+
+const _timestampFormatToSigil = Object.freeze({
+	"short-time": "t",
+	"long-time": "T",
+	"short-date": "d",
+	"long-date": "D",
+	"short-datetime": "f",
+	"long-datetime": "F",
+	relative: "R",
+} as const satisfies Record<TimestampFormat, string>);
 
 /**
  * Taking a unix timestamp, returns a formatted, human-readable time expression.
@@ -71,16 +80,19 @@ enum TimestampFormat {
  * @param format - The format to use for displaying the timestamp.
  * @returns The formatted, human-readable time expression.
  */
-function timestamp(timestamp: number, format = TimestampFormat.Relative): string {
-	return `<t:${Math.floor(timestamp / 1000)}:${format}>`;
+function timestamp(timestamp: number, format: TimestampFormat = "relative"): string {
+	const timestampSeconds = Math.floor(timestamp / 1000);
+	const formatSigil = _timestampFormatToSigil[format];
+	return `<t:${timestampSeconds}:${formatSigil}>`;
 }
 
-/** Defines the type of Discord mention. */
-enum MentionTypes {
-	Channel = "#",
-	Role = "@&",
-	User = "@",
-}
+type MentionType = "channel" | "role" | "user";
+
+const _mentionTypeToSigil = Object.freeze({
+	channel: "#",
+	role: "@&",
+	user: "@",
+} as const satisfies Record<MentionType, string>);
 
 /**
  * Creates a Discord mention by formatting an ID using the appropriate symbol.
@@ -89,8 +101,9 @@ enum MentionTypes {
  * @param type - What the mention mentions.
  * @returns The formatted string of text.
  */
-function mention(id: bigint | string, type: MentionTypes): string {
-	return `<${type}${id}>`;
+function mention(id: bigint | string, type: MentionType = "user"): string {
+	const typeSigil = _mentionTypeToSigil[type];
+	return `<${typeSigil}${id}>`;
 }
 
 /**
