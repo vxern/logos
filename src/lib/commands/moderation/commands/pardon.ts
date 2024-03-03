@@ -165,7 +165,7 @@ async function handlePardonUser(
 			"pardon.strings.pardoned.description",
 			locale,
 		)({
-			user_mention: mention(member.id, "user"),
+			user_mention: mention(member.id, { type: "user" }),
 			reason: warning.reason,
 		}),
 	};

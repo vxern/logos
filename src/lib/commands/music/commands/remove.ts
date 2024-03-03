@@ -95,7 +95,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 				guildLocale,
 			)({
 				title: songListing.content.title,
-				user_mention: mention(buttonPress.user.id, "user"),
+				user_mention: mention(buttonPress.user.id, { type: "user" }),
 			}),
 		};
 

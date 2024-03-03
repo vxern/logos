@@ -218,7 +218,7 @@ async function handleToggleSlowmode(
 						canDisableIn: client.localise(
 							"slowmode.strings.tooSoon.description.canDisableIn",
 							locale,
-						)({ relative_timestamp: timestamp(canDisableIn) }),
+						)({ relative_timestamp: timestamp(canDisableIn, { format: "relative" }) }),
 					},
 				};
 

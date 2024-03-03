@@ -13,7 +13,7 @@ export default {
 
 		const userMention = diagnostics.display.user(user);
 		const authorMention = author !== undefined ? diagnostics.display.user(author) : undefined;
-		const channelMention = mention(channel.id, "channel");
+		const channelMention = mention(channel.id, { type: "channel" });
 
 		return `${userMention} has initiated a purging of ${messageCount} messages${
 			author !== undefined ? `sent by ${authorMention}` : ""

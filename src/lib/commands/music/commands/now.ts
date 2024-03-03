@@ -141,7 +141,7 @@ async function handleDisplayCurrentlyPlaying(
 		playingSince: client.localise(
 			"music.options.now.strings.playingSince",
 			locale,
-		)({ relative_timestamp: timestamp(playingSince ?? 0) }),
+		)({ relative_timestamp: timestamp(playingSince ?? 0, { format: "relative" }) }),
 		startTimeUnknown: client.localise("music.options.now.strings.startTimeUnknown", locale)(),
 		sourcedFrom: client.localise(
 			"music.options.now.strings.sourcedFrom",
@@ -166,7 +166,7 @@ async function handleDisplayCurrentlyPlaying(
 						},
 						{
 							name: strings.requestedBy,
-							value: mention(current.requestedBy, "user"),
+							value: mention(current.requestedBy, { type: "user" }),
 							inline: false,
 						},
 						{

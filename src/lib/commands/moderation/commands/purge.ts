@@ -156,7 +156,7 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	const channelMention = mention(channelId, "channel");
+	const channelMention = mention(channelId, { type: "channel" });
 
 	const [startMessageContent, endMessageContent] = [
 		getMessageContent(client, startMessage, { locale }),
@@ -171,15 +171,15 @@ async function handlePurgeMessages(
 			postedStart: (startMessageContent !== undefined
 				? client.localise("purge.strings.posted", locale)
 				: client.localise("purge.strings.embedPosted", locale))({
-				relative_timestamp: timestamp(Date.parse(startMessage.timestamp)),
-				user_mention: mention(BigInt(startMessage.author.id), "user"),
+				relative_timestamp: timestamp(Date.parse(startMessage.timestamp), { format: "relative" }),
+				user_mention: mention(BigInt(startMessage.author.id), { type: "user" }),
 			}),
 			end: client.localise("purge.strings.end", locale)(),
 			postedEnd: (endMessageContent !== undefined
 				? client.localise("purge.strings.posted", locale)
 				: client.localise("purge.strings.embedPosted", locale))({
-				relative_timestamp: timestamp(Date.parse(endMessage.timestamp)),
-				user_mention: mention(BigInt(endMessage.author.id), "user"),
+				relative_timestamp: timestamp(Date.parse(endMessage.timestamp), { format: "relative" }),
+				user_mention: mention(BigInt(endMessage.author.id), { type: "user" }),
 			}),
 			messagesFound: client.localise("purge.strings.messagesFound", locale)(),
 		};

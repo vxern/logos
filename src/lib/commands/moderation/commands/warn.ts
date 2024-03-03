@@ -181,7 +181,7 @@ async function handleWarnUser(
 			"warn.strings.warned.description",
 			locale,
 		)({
-			user_mention: mention(member.id, "user"),
+			user_mention: mention(member.id, { type: "user" }),
 			warnings: client.pluralise("warn.strings.warned.description.warnings", language, relevantWarnings.length),
 		}),
 	};
@@ -210,7 +210,7 @@ async function handleWarnUser(
 					"warn.strings.limitSurpassedTimedOut.description",
 					locale,
 				)({
-					user_mention: mention(user.id, "user"),
+					user_mention: mention(user.id, { type: "user" }),
 					limit: configuration.limit,
 					number: relevantWarnings.length,
 					period: client.pluralise(`units.${timeout[1]}.word`, language, timeout[0]),
@@ -232,7 +232,7 @@ async function handleWarnUser(
 					"warn.strings.limitSurpassed.description",
 					locale,
 				)({
-					user_mention: mention(user.id, "user"),
+					user_mention: mention(user.id, { type: "user" }),
 					limit: configuration.limit,
 					number: relevantWarnings.length,
 				}),
@@ -263,7 +263,7 @@ async function handleWarnUser(
 			description: client.localise(
 				"warn.strings.limitReached.description",
 				locale,
-			)({ user_mention: mention(user.id, "user"), limit: constants.defaults.WARN_LIMIT }),
+			)({ user_mention: mention(user.id, { type: "user" }), limit: constants.defaults.WARN_LIMIT }),
 		};
 
 		if (guildDocument.areEnabled("alerts")) {

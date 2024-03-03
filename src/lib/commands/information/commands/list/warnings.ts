@@ -139,7 +139,7 @@ function getWarningPage(
 		fields: warnings.map((warning, index) => {
 			const warningString = strings.warning({
 				index: index + 1,
-				relative_timestamp: timestamp(warning.createdAt),
+				relative_timestamp: timestamp(warning.createdAt, { format: "relative" }),
 			});
 
 			const ruleIndex = rules.findIndex((rule) => rule === warning.rule);

@@ -59,7 +59,7 @@ async function handleClearTimeout(
 			description: client.localise(
 				"timeout.strings.notTimedOut.description",
 				locale,
-			)({ user_mention: mention(user.id, "user") }),
+			)({ user_mention: mention(user.id, { type: "user" }) }),
 		};
 
 		client.reply(interaction, {
@@ -93,7 +93,7 @@ async function handleClearTimeout(
 		description: client.localise(
 			"timeout.strings.timeoutCleared.description",
 			locale,
-		)({ user_mention: mention(user.id, "user") }),
+		)({ user_mention: mention(user.id, { type: "user" }) }),
 	};
 
 	client.reply(interaction, {

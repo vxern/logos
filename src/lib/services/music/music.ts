@@ -643,7 +643,7 @@ class MusicService extends LocalService {
 					guildLocale,
 				)({
 					title: listing.content.title,
-					user_mention: mention(listing.requestedBy, "user"),
+					user_mention: mention(listing.requestedBy, { type: "user" }),
 				}),
 			};
 
@@ -903,7 +903,7 @@ class MusicService extends LocalService {
 								song_information: strings.description.track,
 								title: song.title,
 								url: song.url,
-								user_mention: mention(session.listings.current.requestedBy, "user"),
+								user_mention: mention(session.listings.current.requestedBy, { type: "user" }),
 							}),
 							color: constants.colors.blue,
 						},

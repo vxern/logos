@@ -150,7 +150,7 @@ async function openTicket(
 		return "failure";
 	}
 
-	const mentions = [mention(member.id, "user"), mention(user.id, "user")];
+	const mentions = [mention(member.id, { type: "user" }), mention(user.id, { type: "user" })];
 	const mentionsFormatted = mentions.join(" ");
 
 	client.bot.helpers.sendMessage(channel.id, { content: mentionsFormatted }).catch(() => {
@@ -162,7 +162,7 @@ async function openTicket(
 		.sendMessage(channel.id, {
 			embeds: [
 				{
-					description: `${mention(user.id, "user")}: *${answers.topic}*`,
+					description: `${mention(user.id, { type: "user" })}: *${answers.topic}*`,
 					color: constants.colors.husky,
 				},
 			],

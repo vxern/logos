@@ -85,7 +85,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 					},
 					{
 						name: `${constants.symbols.guild.created} ${strings.description.created}`,
-						value: timestamp(Discord.snowflakeToTimestamp(guild.id)),
+						value: timestamp(Discord.snowflakeToTimestamp(guild.id), { format: "relative" }),
 						inline: true,
 					},
 					{
@@ -114,7 +114,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 						: [
 								{
 									name: `${constants.symbols.guild.owner} ${strings.description.owner}`,
-									value: mention(owner.id, "user"),
+									value: mention(owner.id, { type: "user" }),
 									inline: true,
 								},
 						  ]),
@@ -230,7 +230,7 @@ function formatDistribution(
 	];
 	for (const [roleId, frequency] of roleFrequencies) {
 		const percentage = getPercentageComposition(frequency, total);
-		const roleMention = mention(roleId, "role");
+		const roleMention = mention(roleId, { type: "role" });
 
 		stringParts.unshift(`${frequency} (${percentage}%) ${roleMention}`);
 	}

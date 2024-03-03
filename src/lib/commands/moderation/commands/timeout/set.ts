@@ -121,8 +121,8 @@ async function handleSetTimeout(
 			"timeout.strings.timedOut.description",
 			locale,
 		)({
-			user_mention: mention(member.id, "user"),
-			relative_timestamp: timestamp(until),
+			user_mention: mention(member.id, { type: "user" }),
+			relative_timestamp: timestamp(until, { format: "relative" }),
 		}),
 	};
 

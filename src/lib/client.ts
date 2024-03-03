@@ -2675,7 +2675,9 @@ class Client {
 		if (this.#commands.hasRateLimit(interaction)) {
 			const rateLimit = this.#commands.getRateLimit(this, interaction, { executedAt });
 			if (rateLimit !== undefined) {
-				const nextAllowedUsageTimestampFormatted = timestamp(rateLimit.nextAllowedUsageTimestamp);
+				const nextAllowedUsageTimestampFormatted = timestamp(rateLimit.nextAllowedUsageTimestamp, {
+					format: "relative",
+				});
 
 				const locale = interaction.locale;
 

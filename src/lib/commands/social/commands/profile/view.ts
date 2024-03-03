@@ -96,7 +96,7 @@ async function handleDisplayProfile(
 					fields: [
 						{
 							name: `${constants.symbols.profile.roles} ${strings.roles}`,
-							value: member.roles.map((roleId) => mention(roleId, "role")).join(" "),
+							value: member.roles.map((roleId) => mention(roleId, { type: "role" })).join(" "),
 							inline: false,
 						},
 						{

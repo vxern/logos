@@ -16,7 +16,9 @@ export default {
 			return;
 		}
 
-		return `${diagnostics.display.user(author)} deleted their message in ${mention(message.channelId, "channel")}.
+		return `${diagnostics.display.user(author)} deleted their message in ${mention(message.channelId, {
+			type: "channel",
+		})}.
 
 **CONTENT**
 ${codeMultiline(message.content)}`;

@@ -86,7 +86,7 @@ const _timestampFormatToSigil = Object.freeze({
  * @param format - The format to use for displaying the timestamp.
  * @returns The formatted, human-readable time expression.
  */
-function timestamp(timestamp: number, format: TimestampFormat = "relative"): string {
+function timestamp(timestamp: number, { format }: { format: TimestampFormat }): string {
 	const timestampSeconds = Math.floor(timestamp / 1000);
 	const formatSigil = _timestampFormatToSigil[format];
 	return `<t:${timestampSeconds}:${formatSigil}>`;
@@ -107,7 +107,7 @@ const _mentionTypeToSigil = Object.freeze({
  * @param type - What the mention mentions.
  * @returns The formatted string of text.
  */
-function mention(id: bigint | string, type: MentionType = "user"): string {
+function mention(id: bigint | string, { type }: { type: MentionType }): string {
 	const typeSigil = _mentionTypeToSigil[type];
 	return `<${typeSigil}${id}>`;
 }

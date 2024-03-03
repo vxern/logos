@@ -23,7 +23,7 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 				toEnter: this.client.localise(
 					"entry.welcome.description.toEnter",
 					guildLocale,
-				)({ information_channel_mention: mention(ruleChannelId, "channel") }),
+				)({ information_channel_mention: mention(ruleChannelId, { type: "channel" }) }),
 				acceptedRules: this.client.localise("entry.welcome.description.acceptedRules", guildLocale)(),
 			},
 		};

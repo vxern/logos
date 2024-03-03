@@ -18,7 +18,9 @@ export default {
 
 		const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : "*No message*";
 
-		return `${diagnostics.display.user(author)} updated their message in ${mention(message.channelId, "channel")}.
+		return `${diagnostics.display.user(author)} updated their message in ${mention(message.channelId, {
+			type: "channel",
+		})}.
 
 **BEFORE**
 ${before}

@@ -165,11 +165,11 @@ class VerificationService extends PromptService<{
 			open: this.client.localise("entry.verification.inquiry.open", guildLocale)(),
 		};
 
-		const accountCreatedRelativeTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id));
-		const accountCreatedLongDateTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), "long-date");
+		const accountCreatedRelativeTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), { format: "relative" });
+		const accountCreatedLongDateTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), { format: "long-date" });
 
-		const votedForFormatted = entryRequestDocument.votedFor?.map((userId) => mention(userId, "user"));
-		const votedAgainstFormatted = entryRequestDocument.votedAgainst?.map((userId) => mention(userId, "user"));
+		const votedForFormatted = entryRequestDocument.votedFor?.map((userId) => mention(userId, { type: "user" }));
+		const votedAgainstFormatted = entryRequestDocument.votedAgainst?.map((userId) => mention(userId, { type: "user" }));
 
 		return {
 			embeds: [
@@ -198,12 +198,12 @@ class VerificationService extends PromptService<{
 						},
 						{
 							name: strings.requestedRoles,
-							value: mention(BigInt(entryRequestDocument.requestedRoleId), "role"),
+							value: mention(BigInt(entryRequestDocument.requestedRoleId), { type: "role" }),
 							inline: true,
 						},
 						{
 							name: strings.answersSubmitted,
-							value: timestamp(entryRequestDocument.createdAt),
+							value: timestamp(entryRequestDocument.createdAt, { format: "relative" }),
 							inline: true,
 						},
 						{

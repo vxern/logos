@@ -13,7 +13,7 @@ export default {
 
 		return `${diagnostics.display.user(memberUser)} has been timed out by ${diagnostics.display.user(
 			by,
-		)} until ${timestamp(until)} for: ${reason}`;
+		)} until ${timestamp(until, { format: "relative" })} for: ${reason}`;
 	},
 	filter: (_, originGuildId, member, __, ___, ____) => originGuildId === member.guildId,
 	color: constants.colors.dullYellow,

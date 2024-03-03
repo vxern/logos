@@ -120,7 +120,7 @@ async function handlePraiseUser(
 		description: client.localise(
 			"praise.strings.praised.description",
 			locale,
-		)({ user_mention: mention(member.id, "user") }),
+		)({ user_mention: mention(member.id, { type: "user" }) }),
 	};
 
 	client.editReply(interaction, {
