@@ -20,4 +20,4 @@ abstract class EventLogger<Event extends keyof Events> {
 	abstract message(...args: Events[Event]): Promise<string | undefined> | string | undefined;
 }
 
-export { EventLogger };
+export { EventLogger, Events };

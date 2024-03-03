@@ -1,6 +1,6 @@
-import diagnostics from "../../../../diagnostics";
-import { Client } from "../../../client";
-import { EventLogger } from "../logger";
+import diagnostics from "../../../diagnostics";
+import { Client } from "../../client";
+import { EventLogger } from "../../services/journalling/logger";
 
 class GuildBanRemoveEventLogger extends EventLogger<"guildBanRemove"> {
 	constructor(client: Client) {

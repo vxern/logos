@@ -1,7 +1,7 @@
-import diagnostics from "../../../../diagnostics";
-import { Client } from "../../../client";
-import { Warning } from "../../../database/warning";
-import { EventLogger } from "../logger";
+import diagnostics from "../../../diagnostics";
+import { Client } from "../../client";
+import { Warning } from "../../database/warning";
+import { EventLogger } from "../../services/journalling/logger";
 
 class MemberWarnRemoveEventLogger extends EventLogger<"memberWarnRemove"> {
 	constructor(client: Client) {

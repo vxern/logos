@@ -1,13 +1,13 @@
-import diagnostics from "../../../../diagnostics";
-import { mention } from "../../../../formatting";
-import { Client } from "../../../client";
-import { EventLogger } from "../logger";
+import diagnostics from "../../../diagnostics";
+import { mention } from "../../../formatting";
+import { Client } from "../../client";
+import { EventLogger } from "../../services/journalling/logger";
 
-class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
+class PurgeEndEventLogger extends EventLogger<"purgeEnd"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.purging.begin} Purging started`,
-			colour: constants.colors.yellow,
+			title: `${constants.symbols.events.purging.end} Purging complete`,
+			colour: constants.colors.lightGreen,
 		});
 	}
 
@@ -36,10 +36,10 @@ class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
 		const authorMention = author !== undefined ? diagnostics.display.user(author) : undefined;
 		const channelMention = mention(channel.id, { type: "channel" });
 
-		return `${userMention} has initiated a purging of ${messageCount} messages${
+		return `The purging of ${messageCount} messages${
 			author !== undefined ? `sent by ${authorMention}` : ""
-		} in ${channelMention}.`;
+		} in ${channelMention} initiated by ${userMention} is complete.`;
 	}
 }
 
-export { PurgeBeginEventLogger };
+export { PurgeEndEventLogger };

@@ -1,11 +1,8 @@
+import { Events } from "@discordeno/bot";
 import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
 import { Guild } from "../../database/guild";
 import { LocalService } from "../service";
-import { Events, MessageGenerators } from "./generator";
-import generators from "./generators";
-
-const messageGenerators: MessageGenerators<Events> = { ...generators.client, ...generators.guild };
 
 class JournallingService extends LocalService {
 	get configuration(): Guild["journalling"] {
