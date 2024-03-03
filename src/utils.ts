@@ -1,6 +1,3 @@
-import { Client } from "./client";
-import diagnostics from "./diagnostics";
-
 /**
  * Taking an array, splits it into parts of equal sizes.
  *
@@ -28,39 +25,6 @@ function* chunked<T>(array: T[], size: number): Generator<T[], void, void> {
 		const end = start + size;
 		yield array.slice(start, end);
 	}
-}
-
-async function getAllMessages(
-	client: Client,
-	channelId: bigint,
-): Promise<Discord.CamelizedDiscordMessage[] | undefined> {
-	const messages: Discord.CamelizedDiscordMessage[] = [];
-	let isFinished = false;
-
-	while (!isFinished) {
-		const bufferUnoptimised = await client.bot.rest
-			.getMessages(channelId, {
-				limit: 100,
-				before: messages.length === 0 ? undefined : messages.at(-1)?.id,
-			})
-			.catch(() => {
-				client.log.warn(`Failed to get all messages from ${diagnostics.display.channel(channelId)}.`);
-				return undefined;
-			});
-		if (bufferUnoptimised === undefined) {
-			return undefined;
-		}
-
-		if (bufferUnoptimised.length < 100) {
-			isFinished = true;
-		}
-
-		const buffer = bufferUnoptimised;
-
-		messages.push(...buffer);
-	}
-
-	return messages;
 }
 
 type Reverse<O extends Record<string, string>> = {
@@ -112,4 +76,4 @@ function isDefined<T>(element: T | undefined): element is T {
 	return element !== undefined;
 }
 
-export { chunk, chunked, getAllMessages, reverseObject, asStream, isDefined };
+export { chunk, chunked, reverseObject, asStream, isDefined };

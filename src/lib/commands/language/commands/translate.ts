@@ -8,8 +8,8 @@ import languages, {
 } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
+import { asStream } from "../../../../utils";
 import { Client } from "../../../client";
-import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";
 import { Translation } from "../translators/adapter";

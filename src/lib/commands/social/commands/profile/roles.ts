@@ -1,8 +1,8 @@
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
+import diagnostics from "../../../../../diagnostics";
 import { trim } from "../../../../../formatting";
 import { Client, InteractionCollector } from "../../../../client";
-import diagnostics from "../../../../diagnostics";
 import { OptionTemplate } from "../../../command";
 import roles, { getRoleCategories, getRoles } from "../../roles/roles";
 import {

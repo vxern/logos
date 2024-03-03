@@ -2,9 +2,9 @@ import constants from "../../constants/constants";
 import defaults from "../../constants/defaults";
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";
+import { chunk } from "../../utils";
 import { Client, InteractionCollector } from "../client";
 import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../commands/music/data/types";
-import { chunk } from "../utils";
 
 type PageView = { embed: Discord.CamelizedDiscordEmbed; components?: Discord.MessageComponents };
 type PageAction = "previous" | "next";

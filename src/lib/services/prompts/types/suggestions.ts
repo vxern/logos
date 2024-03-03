@@ -1,8 +1,8 @@
 import constants from "../../../../constants/constants";
+import diagnostics from "../../../../diagnostics";
 import { Client } from "../../../client";
 import { Suggestion } from "../../../database/suggestion";
 import { User } from "../../../database/user";
-import diagnostics from "../../../diagnostics";
 import { PromptService } from "../service";
 
 class SuggestionService extends PromptService<{

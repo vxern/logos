@@ -1,6 +1,6 @@
 import * as Lavaclient from "lavaclient";
+import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
-import diagnostics from "../../diagnostics";
 import { GlobalService } from "../service";
 
 class LavalinkService extends GlobalService {

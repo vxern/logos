@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 import * as Lavaclient from "lavaclient";
 import constants from "../../../constants/constants";
 import defaults from "../../../constants/defaults";
+import diagnostics from "../../../diagnostics";
 import { mention } from "../../../formatting";
 import { Client } from "../../client";
 import {
@@ -13,7 +14,6 @@ import {
 	listingTypeToEmoji,
 } from "../../commands/music/data/types";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
-import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
 
 interface PositionControls {

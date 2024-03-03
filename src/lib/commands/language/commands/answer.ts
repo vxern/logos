@@ -1,8 +1,8 @@
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
+import diagnostics from "../../../../diagnostics";
 import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
-import diagnostics from "../../../diagnostics";
 import { Modal, createModalComposer } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 

@@ -2,11 +2,11 @@ import constants from "../../../../constants/constants";
 import defaults from "../../../../constants/defaults";
 import { Locale } from "../../../../constants/languages";
 import time from "../../../../constants/time";
+import diagnostics from "../../../../diagnostics";
 import { mention, timestamp, trim } from "../../../../formatting";
+import { chunk } from "../../../../utils";
 import { Client, InteractionCollector, isValidSnowflake } from "../../../client";
 import { Guild } from "../../../database/guild";
-import diagnostics from "../../../diagnostics";
-import { chunk } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
 

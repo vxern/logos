@@ -1,5 +1,6 @@
 import defaults from "../../constants/defaults";
 import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
+import diagnostics from "../../diagnostics";
 import { Client, Logger } from "../client";
 import { Guild } from "../database/guild";
 
@@ -126,4 +127,37 @@ abstract class LocalService extends Service {
 	abstract stop(): Promise<void>;
 }
 
-export { Service, GlobalService, LocalService, ServiceBase };
+async function getAllMessages(
+	client: Client,
+	channelId: bigint,
+): Promise<Discord.CamelizedDiscordMessage[] | undefined> {
+	const messages: Discord.CamelizedDiscordMessage[] = [];
+	let isFinished = false;
+
+	while (!isFinished) {
+		const bufferUnoptimised = await client.bot.rest
+			.getMessages(channelId, {
+				limit: 100,
+				before: messages.length === 0 ? undefined : messages.at(-1)?.id,
+			})
+			.catch(() => {
+				client.log.warn(`Failed to get all messages from ${diagnostics.display.channel(channelId)}.`);
+				return undefined;
+			});
+		if (bufferUnoptimised === undefined) {
+			return undefined;
+		}
+
+		if (bufferUnoptimised.length < 100) {
+			isFinished = true;
+		}
+
+		const buffer = bufferUnoptimised;
+
+		messages.push(...buffer);
+	}
+
+	return messages;
+}
+
+export { Service, GlobalService, LocalService, ServiceBase, getAllMessages };

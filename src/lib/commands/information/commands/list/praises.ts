@@ -1,8 +1,8 @@
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
+import diagnostics from "../../../../../diagnostics";
 import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
-import diagnostics from "../../../../diagnostics";
 import { OptionTemplate } from "../../../command";
 import author from "./praises/author";
 import target from "./praises/target";

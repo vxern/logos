@@ -17,7 +17,9 @@ import languages, {
 } from "../constants/languages";
 import { getDiscordLanguageByLocale } from "../constants/languages/localisation";
 import time from "../constants/time";
+import diagnostics from "../diagnostics";
 import { capitalise, timestamp, trim } from "../formatting";
+import { isDefined } from "../utils";
 import {
 	Command,
 	CommandMetadata,
@@ -38,7 +40,6 @@ import { Suggestion } from "./database/suggestion";
 import { Ticket } from "./database/ticket";
 import { User } from "./database/user";
 import { Warning } from "./database/warning";
-import diagnostics from "./diagnostics";
 import transformers from "./localisation/transformers";
 import { AlertService } from "./services/alert/alert";
 import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
@@ -62,7 +63,6 @@ import { RealtimeUpdateService } from "./services/realtime-updates/service";
 import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
 import { Service } from "./services/service";
 import { StatusService } from "./services/status/service";
-import { isDefined } from "./utils";
 
 interface Environment {
 	readonly isDebug: boolean;

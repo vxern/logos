@@ -1,6 +1,6 @@
+import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
 import { Guild } from "../../database/guild";
-import diagnostics from "../../diagnostics";
 import { LocalService } from "../service";
 import { Events, MessageGenerators } from "./generator";
 import generators from "./generators";

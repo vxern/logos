@@ -1,7 +1,7 @@
 import * as ravendb from "ravendb";
+import diagnostics from "../../../diagnostics";
 import { Client } from "../../client";
 import { Guild } from "../../database/guild";
-import diagnostics from "../../diagnostics";
 import { GlobalService } from "../service";
 
 type DocumentChangeHandler = (data: ravendb.DocumentChange) => Promise<void>;

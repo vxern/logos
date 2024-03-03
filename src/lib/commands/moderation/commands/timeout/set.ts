@@ -1,10 +1,10 @@
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import time from "../../../../../constants/time";
+import diagnostics from "../../../../../diagnostics";
 import { mention, timestamp, trim } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
-import diagnostics from "../../../../diagnostics";
 import { parseTimeExpression } from "../../../../interactions";
 
 async function handleSetTimeoutAutocomplete(

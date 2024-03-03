@@ -1,8 +1,8 @@
 import constants from "../../../../constants/constants";
+import diagnostics from "../../../../diagnostics";
 import { Client } from "../../../client";
 import { Ticket } from "../../../database/ticket";
 import { User } from "../../../database/user";
-import diagnostics from "../../../diagnostics";
 import { PromptService } from "../service";
 
 class TicketService extends PromptService<{

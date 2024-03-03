@@ -2,8 +2,8 @@ import constants from "../../../../constants/constants";
 import { DetectionLanguage, Locale } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import { list } from "../../../../formatting";
+import { asStream } from "../../../../utils";
 import { Client } from "../../../client";
-import { asStream } from "../../../utils";
 import { CommandTemplate } from "../../command";
 import { getAdapters } from "../detectors/adapters";
 

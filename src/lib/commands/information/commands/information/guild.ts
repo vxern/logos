@@ -1,10 +1,10 @@
 import constants from "../../../../../constants/constants";
 import { Locale } from "../../../../../constants/languages";
 import localisations from "../../../../../constants/localisations";
+import diagnostics from "../../../../../diagnostics";
 import { mention, timestamp } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
-import diagnostics from "../../../../diagnostics";
 import { OptionTemplate } from "../../../command";
 import { proficiency } from "../../../social/roles/categories/language";
 

@@ -1,8 +1,8 @@
 import constants from "../../../../constants/constants";
 import { getLocaleByLocalisationLanguage } from "../../../../constants/languages";
+import diagnostics from "../../../../diagnostics";
 import { codeMultiline } from "../../../../formatting";
 import { Guild } from "../../../database/guild";
-import diagnostics from "../../../diagnostics";
 import { GuildEvents, MessageGenerators } from "../generator";
 
 export default {

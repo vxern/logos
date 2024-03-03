@@ -1,4 +1,4 @@
-import { reverseObject } from "../../lib/utils";
+import { reverseObject } from "../../utils";
 
 const languages = Object.freeze({
 	cld: [

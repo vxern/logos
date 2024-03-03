@@ -1,11 +1,10 @@
 import constants from "../../../constants/constants";
+import diagnostics from "../../../diagnostics";
 import { Client, InteractionCollector, ServiceStore } from "../../client";
 import { Guild } from "../../database/guild";
 import { Model } from "../../database/model";
 import { User } from "../../database/user";
-import diagnostics from "../../diagnostics";
-import { getAllMessages } from "../../utils";
-import { LocalService } from "../service";
+import { LocalService, getAllMessages } from "../service";
 
 interface Configurations {
 	verification: Guild["verification"];

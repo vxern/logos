@@ -1,9 +1,9 @@
 import constants from "../../../../constants/constants";
 import time from "../../../../constants/time";
+import diagnostics from "../../../../diagnostics";
 import { timestamp } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import diagnostics from "../../../diagnostics";
 import { CommandTemplate } from "../../command";
 
 const command: CommandTemplate = {

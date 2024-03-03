@@ -1,11 +1,11 @@
 import constants from "../../../../constants/constants";
 import { Locale } from "../../../../constants/languages";
+import diagnostics from "../../../../diagnostics";
 import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Rule, Warning } from "../../../database/warning";
-import diagnostics from "../../../diagnostics";
 import { CommandTemplate } from "../../command";
 import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";

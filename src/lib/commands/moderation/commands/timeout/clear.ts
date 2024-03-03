@@ -1,8 +1,8 @@
 import constants from "../../../../../constants/constants";
+import diagnostics from "../../../../../diagnostics";
 import { mention } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
-import diagnostics from "../../../../diagnostics";
 
 async function handleClearTimeoutAutocomplete(
 	client: Client,

@@ -37,10 +37,10 @@
     }
   ],
   "scripts": {
-    "logos:setup:install": "npm install && npm audit fix",
-    "logos:setup:provision": "tsx src/scripts/provision-sentence-pairs.ts",
-    "logos:setup": "npm run logos:setup:install && npm run logos:setup:provision",
-    "logos:format": "biome check src/ --apply-unsafe --organize-imports-enabled true",
+    "setup:install": "npm install && npm audit fix",
+    "setup:provision": "tsx src/scripts/provision-sentence-pairs.ts",
+    "setup": "npm run logos:setup:install && npm run logos:setup:provision",
+    "format": "biome check src/ --apply-unsafe --organize-imports-enabled true",
     "dev": "npx tsx ./src/index.ts",
     "start": "pm2 start ecosystem.config.cjs --instances 1 --exp-backoff-restart-delay=500"
   },
