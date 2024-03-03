@@ -1,7 +1,7 @@
 import defaults from "../../constants/defaults";
 import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
 import diagnostics from "../../diagnostics";
-import { Client, Logger } from "../client";
+import { Client } from "../client";
 import { Guild } from "../database/guild";
 
 type ServiceBase = {

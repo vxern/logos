@@ -1,6 +1,7 @@
 import { Locale, LocalisationLanguage } from "../constants/languages";
 import time from "../constants/time";
 import { Client, InteractionCollector } from "./client";
+import { Logger } from "./logger";
 
 type ComposerActionRow<ComposerContent, SectionNames = keyof ComposerContent> = {
 	type: Discord.MessageComponentTypes.ActionRow;
@@ -119,21 +120,16 @@ function parseComposerContent<ComposerContent, SectionNames extends keyof Compos
 	return content as ComposerContent;
 }
 
-// Expression to detect HH:MM:SS, MM:SS and SS timestamps.
-const conciseTimeExpression = new RegExp(
-	/^(?:(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):))?(0?[0-9]|[1-5][0-9]|60)$/,
-);
-
 function parseTimeExpression(
 	client: Client,
 	expression: string,
 	{ language, locale }: { language: LocalisationLanguage; locale: Locale },
 ): [correctedExpression: string, period: number] | undefined {
-	const conciseMatch = conciseTimeExpression.exec(expression) ?? undefined;
+	const conciseMatch = constants.patterns.conciseTimeExpression.exec(expression) ?? undefined;
 	if (conciseMatch !== undefined) {
 		const [_, hours, minutes, seconds] = conciseMatch;
 		if (seconds === undefined) {
-			throw `StateError: The expression '${conciseTimeExpression}' was matched to the concise timestamp regular expression, but the seconds part was \`undefined\`.`;
+			throw `StateError: The expression '${expression}' was matched to the concise timestamp regular expression, but the seconds part was \`undefined\`.`;
 		}
 
 		return parseConciseTimeExpression(client, [hours, minutes, seconds], { language, locale });
@@ -313,5 +309,110 @@ function parseVerboseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
-export { createModalComposer, parseTimeExpression };
+class InteractionStore {
+	readonly log: Logger;
+
+	readonly #bot: Discord.Bot;
+	readonly #interactions: Map<bigint, Logos.Interaction>;
+
+	constructor({ bot, isDebug }: { bot: Discord.Bot; isDebug: boolean }) {
+		this.log = Logger.create({ identifier: "Interactions", isDebug });
+
+		this.#bot = bot;
+		this.#interactions = new Map();
+	}
+
+	static spoofInteraction<Interaction extends Logos.Interaction>(
+		interaction: Interaction,
+		{ using, parameters }: { using: Logos.Interaction; parameters?: Interaction["parameters"] },
+	): Interaction {
+		return {
+			...interaction,
+			parameters: { ...interaction.parameters, ...parameters },
+			type: Discord.InteractionTypes.ApplicationCommand,
+			token: using.token,
+			id: using.id,
+		};
+	}
+
+	registerInteraction(interaction: Logos.Interaction): void {
+		this.#interactions.set(interaction.id, interaction);
+	}
+
+	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
+		const interaction = this.#interactions.get(interactionId);
+		if (interaction === undefined) {
+			return undefined;
+		}
+
+		this.#interactions.delete(interactionId);
+
+		return interaction;
+	}
+
+	async acknowledge(interaction: Logos.Interaction): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
+			})
+			.catch((reason) => this.log.warn("Failed to acknowledge interaction:", reason));
+	}
+
+	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
+				data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
+			})
+			.catch((reason) => this.log.warn("Failed to postpone reply to interaction:", reason));
+	}
+
+	async reply(
+		interaction: Logos.Interaction,
+		data: Omit<Discord.InteractionCallbackData, "flags">,
+		{ visible = false } = {},
+	): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
+				data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
+			})
+			.catch((reason) => this.log.warn("Failed to reply to interaction:", reason));
+	}
+
+	async editReply(interaction: Logos.Interaction, data: Omit<Discord.InteractionCallbackData, "flags">): Promise<void> {
+		await this.#bot.rest
+			.editOriginalInteractionResponse(interaction.token, data)
+			.catch((reason) => this.log.warn("Failed to edit reply to interaction:", reason));
+	}
+
+	async deleteReply(interaction: Logos.Interaction): Promise<void> {
+		await this.#bot.rest
+			.deleteOriginalInteractionResponse(interaction.token)
+			.catch((reason) => this.log.warn("Failed to delete reply to interaction:", reason));
+	}
+
+	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
+		return this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: { choices },
+			})
+			.catch((reason) => this.log.warn("Failed to respond to autocomplete interaction:", reason));
+	}
+
+	async displayModal(
+		interaction: Logos.Interaction,
+		data: Omit<Discord.InteractionCallbackData, "flags">,
+	): Promise<void> {
+		return this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.Modal,
+				data,
+			})
+			.catch((reason) => this.log.warn("Failed to show modal:", reason));
+	}
+}
+
+export { createModalComposer, parseTimeExpression, InteractionStore };
 export type { Modal };

@@ -17,5 +17,6 @@ export default Object.freeze({
 	roleIndicators: new RegExp(
 		`^(.+)${symbols.sigils.divider}([^${symbols.sigils.separator}]{2,4}(?:${symbols.sigils.separator}[^${symbols.sigils.separator}]{2,4})*)$`,
 	),
+	conciseTimeExpression: /^(?:(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):))?(0?[0-9]|[1-5][0-9]|60)$/,
 	wholeWord: (word: string) => new RegExp(`(?<=^|\\p{Z}|\\p{P})${word}(?=\\p{Z}|\\p{P}|$)`, "giu"),
 } as const);
