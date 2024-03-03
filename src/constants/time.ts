@@ -1,4 +1,4 @@
-export default {
+export default Object.freeze({
 	second: 1000,
 	minute: 1000 * 60,
 	hour: 1000 * 60 * 60,
@@ -6,4 +6,4 @@ export default {
 	week: 1000 * 60 * 60 * 24 * 7,
 	month: 1000 * 60 * 60 * 24 * 30,
 	year: 1000 * 60 * 60 * 24 * 365,
-};
+});

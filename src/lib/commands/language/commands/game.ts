@@ -163,9 +163,9 @@ async function getGameView(
 		next: client.localise("game.strings.next", locale)(),
 	};
 
-	const sentenceSource = constants.links.generateTatoebaSentenceLink(data.sentenceSelection.sentencePair.sentenceId);
-	const translationSource = constants.links.generateTatoebaSentenceLink(
-		data.sentenceSelection.sentencePair.translationId,
+	const sentenceSource = constants.links.tatoebaSentence(data.sentenceSelection.sentencePair.sentenceId.toString());
+	const translationSource = constants.links.tatoebaSentence(
+		data.sentenceSelection.sentencePair.translationId.toString(),
 	);
 
 	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]);

@@ -97,5 +97,5 @@ const properties = {
 } as const satisfies Discord.DesiredProperties;
 type Properties = typeof properties;
 
-export default properties;
+export default Object.freeze(properties);
 export type { Properties };

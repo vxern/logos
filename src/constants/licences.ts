@@ -2,7 +2,17 @@ import apache from "./licences/apache";
 import bsd from "./licences/bsd";
 import mit from "./licences/mit";
 
-const licences = {
+interface DictionaryLicence {
+	readonly name: string;
+	readonly link: string;
+	readonly faviconLink?: string;
+	readonly notices: {
+		readonly licence: string;
+		readonly copyright?: string;
+	};
+}
+
+const licences = Object.freeze({
 	dictionaries: {
 		dexonline: {
 			name: "dexonline.ro",
@@ -50,7 +60,7 @@ const licences = {
 					"You may cache and thus store API Data on your system for up to 24 hours, after which such cached API Data must be purged. Subject to that exception, you will not copy, store, archive, distribute to any third party (other than to End Users as contemplated in this Agreement) any API Data, any metadata or any Link. You agree that any cached API Data will be used by you only for the purpose of populating the Developer Application.",
 			},
 		},
-	},
+	} satisfies Record<string, DictionaryLicence>,
 	software: {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
 		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
@@ -69,9 +79,7 @@ const licences = {
 		tinyld: mit("Copyright (c) 2021 Komodo"),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
-};
-
-type DictionaryLicence = (typeof licences.dictionaries)[keyof typeof licences.dictionaries];
+} as const);
 
 export default licences;
 export type { DictionaryLicence };

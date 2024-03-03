@@ -47,62 +47,47 @@ import {
 	languages as translationLanguages,
 } from "./languages/translation";
 
-const languages = {
+const languages = Object.freeze({
 	languages: {
 		localisation: [
-			...new Set([...localisationLanguages.discord, ...localisationLanguages.logos]),
-		].sort() satisfies LocalisationLanguage[] as LocalisationLanguage[],
+			...new Set<LocalisationLanguage>([...localisationLanguages.discord, ...localisationLanguages.logos]),
+		].sort(),
 		translation: [
-			...new Set([...translationLanguages.deepl, ...translationLanguages.google]),
-		].sort() satisfies TranslationLanguage[] as TranslationLanguage[],
+			...new Set<TranslationLanguage>([...translationLanguages.deepl, ...translationLanguages.google]),
+		].sort(),
 	},
 	locales: {
-		discord: Object.values(localisationLanguageToLocale.discord) satisfies DiscordLocale[] as DiscordLocale[],
+		discord: Object.values(localisationLanguageToLocale.discord) as DiscordLocale[],
 	},
-};
+});
 
-const translationLanguagesByBaseLanguage = languages.languages.translation.reduce<
-	Record<string, TranslationLanguage[]>
->((languages, language) => {
-	const baseLanguage = getBaseLanguage(language);
+const translationLanguagesByBaseLanguage = Object.freeze(
+	languages.languages.translation.reduce<Record<string, TranslationLanguage[]>>((languages, language) => {
+		const baseLanguage = getBaseLanguage(language);
 
-	if (baseLanguage === language) {
+		if (baseLanguage === language) {
+			return languages;
+		}
+
+		if (baseLanguage in languages) {
+			languages[baseLanguage]?.push(language);
+		} else {
+			languages[baseLanguage] = [language];
+		}
+
 		return languages;
-	}
-
-	if (baseLanguage in languages) {
-		languages[baseLanguage]?.push(language);
-	} else {
-		languages[baseLanguage] = [language];
-	}
-
-	return languages;
-}, {});
+	}, {}),
+);
 
 type Language = DetectionLanguage | FeatureLanguage | LearningLanguage | LocalisationLanguage | TranslationLanguage;
+type Base<Language> = Language extends `${infer Base}/${string}` ? Base : Language;
 
-type HasVariants<T> = T extends `${string}/${string}` ? T : never;
-
-function getBaseLanguage(language: string): string {
-	const baseLanguage = language.split("/").at(0);
-	if (baseLanguage === undefined) {
-		throw "StateError: Base language unexpectedly undefined when getting feature language.";
-	}
-
-	return baseLanguage;
+function getBaseLanguage<L extends Language>(language: L): Base<L> {
+	const baseLanguage = language.split("/").at(0)!;
+	return baseLanguage as Base<L>;
 }
 
-function getFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
-	const baseLanguage = getBaseLanguage(language);
-
-	if (isFeatureLanguage(baseLanguage)) {
-		return baseLanguage;
-	}
-
-	return undefined;
-}
-
-function getTranslationLanguage(language: string): TranslationLanguage | undefined {
+function getTranslationLanguage(language: Language): TranslationLanguage | undefined {
 	if (isTranslationLanguage(language)) {
 		return language;
 	}
@@ -137,7 +122,6 @@ export {
 	getLocaleByLearningLanguage,
 	isLearningLanguage,
 	isLearningLocale,
-	getFeatureLanguage,
 	isTranslationLanguage,
 	getDeepLLocaleByTranslationLanguage,
 	getGoogleTranslateLocaleByTranslationLanguage,
@@ -145,6 +129,7 @@ export {
 	getGoogleTranslateTranslationLanguageByLocale,
 	isGoogleTranslateLocale,
 	isDeepLLocale,
+	isFeatureLanguage,
 	getTinyLDDetectionLanguageByLocale,
 	isTinyLDLocale,
 	getCLDDetectionLanguageByLocale,
@@ -159,7 +144,6 @@ export type {
 	TranslationLanguage,
 	Language,
 	Locale,
-	HasVariants,
 	GoogleTranslateLanguage,
 	DeepLLanguage,
 	Languages,

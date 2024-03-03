@@ -1,4 +1,5 @@
-export default {
+// TODO(vxern): Extract emojis into an emojis constants file.
+export default Object.freeze({
 	meta: {
 		// ! Responsible for inserting whitespace where a standard space would get filtered out.
 		// ! Changing this would break:
@@ -250,4 +251,4 @@ export default {
 			warnings: "😖",
 		},
 	},
-};
+});

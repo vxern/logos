@@ -1,1 +1,10 @@
-export default ["/cefr", "/recognise", "/game", "/resources", "/translate", "/word", "/settings", "/information"];
+export default Object.freeze([
+	"/cefr",
+	"/recognise",
+	"/game",
+	"/resources",
+	"/translate",
+	"/word",
+	"/settings",
+	"/information",
+]);

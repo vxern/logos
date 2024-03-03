@@ -1,6 +1,6 @@
 import { Language } from "./languages";
 
-export default {
+export default Object.freeze({
 	languages: {
 		Abkhazian: "languages.abkhazian",
 		Afar: "languages.afar",
@@ -195,5 +195,5 @@ export default {
 		Yoruba: "languages.yoruba",
 		Zhuang: "languages.zhuang",
 		Zulu: "languages.zulu",
-	} as const satisfies Record<Language, string>,
-};
+	} satisfies Record<Language, string>,
+} as const);
