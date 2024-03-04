@@ -570,7 +570,11 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	client.tryLog("purgeBegin", { guildId: guild.id, args: [member, channel, messages.length] });
+	client.tryLog("purgeBegin", {
+		guildId: guild.id,
+		journalling: configuration.journaling,
+		args: [member, channel, messages.length],
+	});
 
 	const twoWeeksAgo = now - constants.time.week * 2 + constants.time.hour;
 
@@ -626,7 +630,11 @@ async function handlePurgeMessages(
 		} message(s) in channel ID ${channelId} as requested by ${diagnostics.display.user(interaction.user)}.`,
 	);
 
-	client.tryLog("purgeEnd", { guildId: guild.id, args: [member, channel, deletedCount] });
+	client.tryLog("purgeEnd", {
+		guildId: guild.id,
+		journalling: configuration.journaling,
+		args: [member, channel, deletedCount],
+	});
 
 	clearTimeout(responseDeletionTimeoutId);
 

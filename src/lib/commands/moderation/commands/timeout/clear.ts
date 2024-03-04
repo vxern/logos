@@ -84,6 +84,7 @@ async function handleClearTimeout(
 
 	client.tryLog("memberTimeoutRemove", {
 		guildId: guild.id,
+		journalling: configuration.journaling,
 		args: [member, interaction.user],
 	});
 

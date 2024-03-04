@@ -98,9 +98,18 @@ class JournallingStore {
 
 	async tryLog<Event extends keyof Logos.Events>(
 		event: Event,
-		// TODO(vxern): Take the configuration for the particular feature and override the guild journalling setting with it.
-		{ guildId, args }: { guildId: bigint; args: Logos.Events[Event] },
+		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean; args: Logos.Events[Event] },
 	): Promise<void> {
+		// If explicitly defined as `false`, do not log.
+		if (journalling === false) {
+			this.#client.log.info(
+				`Event '${event}' happened on ${diagnostics.display.guild(
+					guildId,
+				)}, but journalling for that feature is explicitly turned off. Ignoring...`,
+			);
+			return;
+		}
+
 		const guildDocument = this.#client.documents.guilds.get(guildId.toString());
 		if (guildDocument === undefined) {
 			return;
@@ -108,12 +117,12 @@ class JournallingStore {
 
 		const configuration = guildDocument.journalling;
 		if (configuration === undefined) {
-			return undefined;
+			return;
 		}
 
 		const channelId = BigInt(configuration.channelId);
 		if (channelId === undefined) {
-			return undefined;
+			return;
 		}
 
 		const logger = this.#logos[event];

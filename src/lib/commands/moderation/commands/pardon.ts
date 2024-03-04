@@ -152,7 +152,11 @@ async function handlePardonUser(
 		return;
 	}
 
-	client.tryLog("memberWarnRemove", { guildId: guild.id, args: [member, warning, interaction.user] });
+	client.tryLog("memberWarnRemove", {
+		guildId: guild.id,
+		journalling: configuration.journaling,
+		args: [member, warning, interaction.user],
+	});
 
 	const strings = {
 		title: client.localise("pardon.strings.pardoned.title", locale)(),

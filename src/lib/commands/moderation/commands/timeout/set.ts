@@ -108,6 +108,7 @@ async function handleSetTimeout(
 
 	client.tryLog("memberTimeoutAdd", {
 		guildId: guild.id,
+		journalling: configuration.journaling,
 		args: [member, until, interaction.parameters.reason, interaction.user],
 	});
 

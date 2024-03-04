@@ -167,6 +167,7 @@ async function handleWarnUser(
 
 	client.tryLog("memberWarnAdd", {
 		guildId: guild.id,
+		journalling: configuration.journaling,
 		args: [member, warningDocument, interaction.user],
 	});
 

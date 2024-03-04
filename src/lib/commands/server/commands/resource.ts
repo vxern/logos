@@ -78,7 +78,11 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 				answers,
 			});
 
-			client.tryLog("resourceSend", { guildId: guild.id, args: [member, resourceDocument] });
+			client.tryLog("resourceSend", {
+				guildId: guild.id,
+				journalling: configuration.journaling,
+				args: [member, resourceDocument],
+			});
 
 			const user = client.entities.users.get(interaction.user.id);
 			if (user === undefined) {

@@ -78,7 +78,11 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 				answers,
 			});
 
-			client.tryLog("reportSubmit", { guildId: guild.id, args: [member, reportDocument] });
+			client.tryLog("reportSubmit", {
+				guildId: guild.id,
+				journalling: configuration.journaling,
+				args: [member, reportDocument],
+			});
 
 			const user = client.entities.users.get(interaction.user.id);
 			if (user === undefined) {

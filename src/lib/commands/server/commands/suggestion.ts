@@ -78,7 +78,11 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 				answers,
 			});
 
-			client.tryLog("suggestionSend", { guildId: guild.id, args: [member, suggestionDocument] });
+			client.tryLog("suggestionSend", {
+				guildId: guild.id,
+				journalling: configuration.journaling,
+				args: [member, suggestionDocument],
+			});
 
 			const user = client.entities.users.get(interaction.user.id);
 			if (user === undefined) {

@@ -108,7 +108,11 @@ async function handlePraiseUser(
 		comment: interaction.parameters.comment,
 	});
 
-	client.tryLog("praiseAdd", { guildId: guild.id, args: [member, praiseDocument, interaction.user] });
+	client.tryLog("praiseAdd", {
+		guildId: guild.id,
+		journalling: configuration.journaling,
+		args: [member, praiseDocument, interaction.user],
+	});
 
 	const strings = {
 		title: client.localise("praise.strings.praised.title", locale)(),

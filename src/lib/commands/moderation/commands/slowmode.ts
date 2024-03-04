@@ -121,6 +121,7 @@ async function handleToggleSlowmode(
 
 				client.tryLog("slowmodeDowngrade", {
 					guildId: guild.id,
+					journalling: configuration.journaling,
 					args: [interaction.user, channel, previousLevel, level],
 				});
 
@@ -152,6 +153,7 @@ async function handleToggleSlowmode(
 
 				client.tryLog("slowmodeUpgrade", {
 					guildId: guild.id,
+					journalling: configuration.journaling,
 					args: [interaction.user, channel, previousLevel, level],
 				});
 
@@ -237,6 +239,7 @@ async function handleToggleSlowmode(
 
 		client.tryLog("slowmodeDisable", {
 			guildId: guild.id,
+			journalling: configuration.journaling,
 			args: [interaction.user, channel],
 		});
 
@@ -312,6 +315,7 @@ async function handleToggleSlowmode(
 
 	client.tryLog("slowmodeEnable", {
 		guildId: guild.id,
+		journalling: configuration.journaling,
 		args: [interaction.user, channel, level],
 	});
 
