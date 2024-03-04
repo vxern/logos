@@ -108,10 +108,7 @@ async function handlePraiseUser(
 		comment: interaction.parameters.comment,
 	});
 
-	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
-		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.logEvent("praiseAdd", { args: [member, praiseDocument, interaction.user] });
-	}
+	client.tryLog("praiseAdd", { guildId: guild.id, args: [member, praiseDocument, interaction.user] });
 
 	const strings = {
 		title: client.localise("praise.strings.praised.title", locale)(),

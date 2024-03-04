@@ -563,7 +563,7 @@ class VerificationService extends PromptService<{
 	// TODO(vxern): Improve how authorised.
 	async #finalise(
 		entryRequestDocument: EntryRequest,
-		configuration: Configuration,
+		_configuration: Configuration,
 		[author, voter, guild]: [Logos.User, Logos.Member, Logos.Guild],
 		[isAccepted, isRejected]: [boolean, boolean],
 	): Promise<void> {
@@ -575,14 +575,10 @@ class VerificationService extends PromptService<{
 			isFinalised = true;
 
 			// TODO(vxern): Check against the global journalling setting.
-			if (configuration.journaling) {
-				const journallingService = this.client.getJournallingService(this.guildId);
-
-				if (isAccepted) {
-					journallingService?.logEvent("entryRequestAccept", { args: [author, voter] });
-				} else {
-					journallingService?.logEvent("entryRequestReject", { args: [author, voter] });
-				}
+			if (isAccepted) {
+				this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
+			} else {
+				this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
 			}
 		}
 

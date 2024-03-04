@@ -82,10 +82,10 @@ async function handleClearTimeout(
 		.editMember(guildId, member.id, { communicationDisabledUntil: null })
 		.catch(() => client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`));
 
-	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
-		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.logEvent("memberTimeoutRemove", { args: [member, interaction.user] });
-	}
+	client.tryLog("memberTimeoutRemove", {
+		guildId: guild.id,
+		args: [member, interaction.user],
+	});
 
 	const strings = {
 		title: client.localise("timeout.strings.timeoutCleared.title", locale)(),

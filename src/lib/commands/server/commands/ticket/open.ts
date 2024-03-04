@@ -104,7 +104,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 
 async function openTicket(
 	client: Client,
-	configuration: NonNullable<Configurations["tickets"] | Configurations["verification"]>,
+	_configuration: NonNullable<Configurations["tickets"] | Configurations["verification"]>,
 	answers: Ticket["answers"],
 	[guild, user, member]: [Logos.Guild, Logos.User, Logos.Member],
 	categoryId: string,
@@ -179,18 +179,14 @@ async function openTicket(
 	});
 
 	// TODO(vxern): Check against the global journalling setting.
-	if (configuration.journaling) {
-		const journallingService = client.getJournallingService(guild.id);
-
-		switch (type) {
-			case "standalone": {
-				journallingService?.logEvent("ticketOpen", { args: [member, ticketDocument] });
-				break;
-			}
-			case "inquiry": {
-				journallingService?.logEvent("inquiryOpen", { args: [member, ticketDocument] });
-				break;
-			}
+	switch (type) {
+		case "standalone": {
+			client.tryLog("ticketOpen", { guildId: guild.id, args: [member, ticketDocument] });
+			break;
+		}
+		case "inquiry": {
+			client.tryLog("inquiryOpen", { guildId: guild.id, args: [member, ticketDocument] });
+			break;
 		}
 	}
 

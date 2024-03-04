@@ -60,7 +60,7 @@ class ServiceStore {
 		readonly local: Map<bigint, Service[]>;
 	};
 
-	constructor({ client, isDebug }: { client: Client; isDebug?: boolean }) {
+	constructor(client: Client, { isDebug }: { isDebug?: boolean }) {
 		this.global = {
 			lavalink: new LavalinkService(client),
 			interactionRepetition: new InteractionRepetitionService(client),

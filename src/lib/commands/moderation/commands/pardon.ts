@@ -152,10 +152,7 @@ async function handlePardonUser(
 		return;
 	}
 
-	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
-		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.logEvent("memberWarnRemove", { args: [member, warning, interaction.user] });
-	}
+	client.tryLog("memberWarnRemove", { guildId: guild.id, args: [member, warning, interaction.user] });
 
 	const strings = {
 		title: client.localise("pardon.strings.pardoned.title", locale)(),

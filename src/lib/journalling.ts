@@ -6,7 +6,6 @@ import { GuildMemberAddEventLogger } from "./journalling/discord/guild-member-ad
 import { GuildMemberRemoveEventLogger } from "./journalling/discord/guild-member-remove";
 import { MessageDeleteEventLogger } from "./journalling/discord/message-delete";
 import { MessageUpdateEventLogger } from "./journalling/discord/message-update";
-import { Events } from "./journalling/logger";
 import { EntryRequestAcceptEventLogger } from "./journalling/logos/entry-request-accept";
 import { EntryRequestRejectEventLogger } from "./journalling/logos/entry-request-reject";
 import { EntryRequestSubmitEventLogger } from "./journalling/logos/entry-request-submit";
@@ -29,7 +28,7 @@ import { TicketOpenEventLogger } from "./journalling/logos/ticket-open";
 import { Logger } from "./logger";
 
 class JournallingStore {
-	readonly discord: {
+	readonly #discord: {
 		readonly guildBanAdd: GuildBanAddEventLogger;
 		readonly guildBanRemove: GuildBanRemoveEventLogger;
 		readonly guildMemberAdd: GuildMemberAddEventLogger;
@@ -37,7 +36,7 @@ class JournallingStore {
 		readonly messageDelete: MessageDeleteEventLogger;
 		readonly messageUpdate: MessageUpdateEventLogger;
 	};
-	readonly logos: {
+	readonly #logos: {
 		readonly entryRequestSubmit: EntryRequestSubmitEventLogger;
 		readonly entryRequestAccept: EntryRequestAcceptEventLogger;
 		readonly entryRequestReject: EntryRequestRejectEventLogger;
@@ -63,7 +62,7 @@ class JournallingStore {
 	readonly #log: Logger;
 
 	constructor(client: Client, { isDebug }: { isDebug?: boolean }) {
-		this.discord = {
+		this.#discord = {
 			guildBanAdd: new GuildBanAddEventLogger(client),
 			guildBanRemove: new GuildBanRemoveEventLogger(client),
 			guildMemberAdd: new GuildMemberAddEventLogger(client),
@@ -71,7 +70,7 @@ class JournallingStore {
 			messageDelete: new MessageDeleteEventLogger(client),
 			messageUpdate: new MessageUpdateEventLogger(client),
 		};
-		this.logos = {
+		this.#logos = {
 			entryRequestSubmit: new EntryRequestSubmitEventLogger(client),
 			entryRequestAccept: new EntryRequestAcceptEventLogger(client),
 			entryRequestReject: new EntryRequestRejectEventLogger(client),
@@ -97,23 +96,39 @@ class JournallingStore {
 		this.#log = Logger.create({ identifier: "JournallingStore", isDebug });
 	}
 
-	async tryLog<Event extends keyof Logos.Events>(event: Event, { args }: { args: Logos.Events[Event] }): Promise<void> {
-		const logger = this.logos[event];
+	async tryLog<Event extends keyof Logos.Events>(
+		event: Event,
+		// TODO(vxern): Take the configuration for the particular feature and override the guild journalling setting with it.
+		{ guildId, args }: { guildId: bigint; args: Logos.Events[Event] },
+	): Promise<void> {
+		const guildDocument = this.#client.documents.guilds.get(guildId.toString());
+		if (guildDocument === undefined) {
+			return;
+		}
+
+		const configuration = guildDocument.journalling;
+		if (configuration === undefined) {
+			return undefined;
+		}
+
+		const channelId = BigInt(configuration.channelId);
+		if (channelId === undefined) {
+			return undefined;
+		}
+
+		const logger = this.#logos[event];
 		if (logger === undefined) {
 			return;
 		}
 
-		const channelId = this.channelId;
-		if (channelId === undefined) {
+		// @ts-ignore: This is fine.
+		if (!logger.filter(guildId, ...args)) {
 			return;
 		}
 
-		if (!journalEntryGenerator.filter(this.guildId, ...args)) {
-			return;
-		}
-
-		const journalEntry = await journalEntryGenerator.message(...args);
-		if (journalEntry === undefined) {
+		// @ts-ignore: This is fine.
+		const contents = await logger.message(...args);
+		if (contents === undefined) {
 			return;
 		}
 
@@ -121,13 +136,13 @@ class JournallingStore {
 			.sendMessage(channelId, {
 				embeds: [
 					{
-						title: journalEntryGenerator.title,
-						description: journalEntry,
-						color: journalEntryGenerator.color,
+						title: logger.title,
+						description: contents,
+						color: logger.colour,
 					},
 				],
 			})
-			.catch(() => this.#log.warn(`Failed to log '${event}' event on ${diagnostics.display.guild(this.guildId)}.`));
+			.catch(() => this.#log.warn(`Failed to log '${event}' event on ${diagnostics.display.guild(guildId)}.`));
 	}
 }
 

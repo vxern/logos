@@ -55,23 +55,24 @@ class CommandStore {
 
 	readonly #_defaultCommands: Command[];
 
-	private constructor({
-		log,
-		client,
-		commands,
-		showable,
-		withRateLimit,
-		executeHandlers,
-		autocompleteHandlers,
-	}: {
-		log: Logger;
-		client: Client;
-		commands: Partial<Record<CommandName, Command>>;
-		showable: Set<string>;
-		withRateLimit: Set<string>;
-		executeHandlers: Map<string, InteractionHandler>;
-		autocompleteHandlers: Map<string, InteractionHandler>;
-	}) {
+	private constructor(
+		client: Client,
+		{
+			log,
+			commands,
+			showable,
+			withRateLimit,
+			executeHandlers,
+			autocompleteHandlers,
+		}: {
+			log: Logger;
+			commands: Partial<Record<CommandName, Command>>;
+			showable: Set<string>;
+			withRateLimit: Set<string>;
+			executeHandlers: Map<string, InteractionHandler>;
+			autocompleteHandlers: Map<string, InteractionHandler>;
+		},
+	) {
 		this.commands = commands;
 
 		this.#log = log;
@@ -91,17 +92,18 @@ class CommandStore {
 		].filter(isDefined);
 	}
 
-	static create({
-		client,
-		localisations,
-		templates,
-		isDebug,
-	}: {
-		client: Client;
-		localisations: LocalisationStore;
-		templates: CommandTemplate[];
-		isDebug?: boolean;
-	}): CommandStore {
+	static create(
+		client: Client,
+		{
+			localisations,
+			templates,
+			isDebug,
+		}: {
+			localisations: LocalisationStore;
+			templates: CommandTemplate[];
+			isDebug?: boolean;
+		},
+	): CommandStore {
 		const log = Logger.create({ identifier: "Client/InteractionStore", isDebug });
 
 		// Build commands from templates.
@@ -189,9 +191,8 @@ class CommandStore {
 			}
 		}
 
-		return new CommandStore({
+		return new CommandStore(client, {
 			log,
-			client,
 			commands: commandsByName,
 			showable,
 			withRateLimit,

@@ -309,8 +309,7 @@ class EntryService extends LocalService {
 					answers,
 				});
 
-				const journallingService = this.client.getJournallingService(this.guildId);
-				journallingService?.logEvent("entryRequestSubmit", { args: [buttonPress.user, entryRequestDocument] });
+				this.client.tryLog("entryRequestSubmit", { guildId: guild.id, args: [buttonPress.user, entryRequestDocument] });
 
 				const user = this.client.entities.users.get(buttonPress.user.id);
 				if (user === undefined) {

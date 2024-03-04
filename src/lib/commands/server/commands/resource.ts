@@ -78,10 +78,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 				answers,
 			});
 
-			if (configuration.journaling && guildDocument.isEnabled("journalling")) {
-				const journallingService = client.getJournallingService(guild.id);
-				journallingService?.logEvent("resourceSend", { args: [member, resourceDocument] });
-			}
+			client.tryLog("resourceSend", { guildId: guild.id, args: [member, resourceDocument] });
 
 			const user = client.entities.users.get(interaction.user.id);
 			if (user === undefined) {

@@ -11,6 +11,7 @@ import { Guild } from "./database/guild";
 import { GuildStats } from "./database/guild-stats";
 import { EventStore } from "./events";
 import { InteractionStore } from "./interactions";
+import { JournallingStore } from "./journalling";
 import { LocalisationBuilder, LocalisationStore, RawLocalisations } from "./localisations";
 import { Logger } from "./logger";
 import { ServiceStore } from "./services";
@@ -45,12 +46,13 @@ class Client {
 	readonly database: Database;
 	readonly cache: Cache;
 
-	readonly #connection: DiscordConnection;
 	readonly #localisations: LocalisationStore;
 	readonly #commands: CommandStore;
 	readonly #interactions: InteractionStore;
 	readonly #services: ServiceStore;
 	readonly #events: EventStore;
+	readonly #connection: DiscordConnection;
+	readonly #journalling: JournallingStore;
 
 	readonly #_guildCreateCollector: Collector<"guildCreate">;
 	readonly #_guildDeleteCollector: Collector<"guildDelete">;
@@ -121,6 +123,14 @@ class Client {
 		return this.#interactions.displayModal.bind(this.#interactions);
 	}
 
+	get registerCollector(): EventStore["registerCollector"] {
+		return this.#events.registerCollector.bind(this.#events);
+	}
+
+	get tryLog(): JournallingStore["tryLog"] {
+		return this.#journalling.tryLog.bind(this);
+	}
+
 	get lavalinkService(): LavalinkService {
 		return this.#services.global.lavalink;
 	}
@@ -165,8 +175,12 @@ class Client {
 		return this.#services.getPromptService.bind(this.#services);
 	}
 
-	get registerCollector(): EventStore["registerCollector"] {
-		return this.#events.registerCollector.bind(this.#events);
+	get registerInteractionCollector(): <Metadata extends string[]>(
+		collector: InteractionCollector<Metadata>,
+	) => Promise<void> {
+		// TODO(vxern): Find a way to get rid of ts-ignore?
+		// @ts-ignore: This is fine.
+		return (collector) => this.#events.registerCollector("interactionCreate", collector);
 	}
 
 	get bot(): DiscordConnection["bot"] {
@@ -175,14 +189,6 @@ class Client {
 
 	get entities(): DiscordConnection["cache"] {
 		return this.#connection.cache;
-	}
-
-	get registerInteractionCollector(): <Metadata extends string[]>(
-		collector: InteractionCollector<Metadata>,
-	) => Promise<void> {
-		// TODO(vxern): Find a way to get rid of ts-ignore?
-		// @ts-ignore: This is fine.
-		return (collector) => this.#events.registerCollector("interactionCreate", collector);
 	}
 
 	private constructor({
@@ -206,16 +212,16 @@ class Client {
 		this.cache = new Cache();
 
 		this.#localisations = new LocalisationStore({ localisations, isDebug });
-		this.#commands = CommandStore.create({
-			client: this,
+		this.#commands = CommandStore.create(this, {
 			localisations: this.#localisations,
 			templates: Array.from(Object.values(commandTemplates)),
 			isDebug,
 		});
 		this.#interactions = new InteractionStore({ bot, isDebug });
-		this.#services = new ServiceStore({ client: this, isDebug });
+		this.#services = new ServiceStore(this, { isDebug });
 		this.#events = new EventStore({ services: this.#services, isDebug });
 		this.#connection = new DiscordConnection({ bot, events: this.#events.buildEventHandlers(), isDebug });
+		this.#journalling = new JournallingStore(this, { isDebug });
 
 		this.#_guildCreateCollector = new Collector<"guildCreate">();
 		this.#_guildDeleteCollector = new Collector<"guildDelete">();

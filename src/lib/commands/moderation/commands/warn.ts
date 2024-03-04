@@ -165,10 +165,10 @@ async function handleWarnUser(
 		}),
 	]);
 
-	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
-		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.logEvent("memberWarnAdd", { args: [member, warningDocument, interaction.user] });
-	}
+	client.tryLog("memberWarnAdd", {
+		guildId: guild.id,
+		args: [member, warningDocument, interaction.user],
+	});
 
 	const expirationMilliseconds = timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY);
 

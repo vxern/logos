@@ -106,12 +106,10 @@ async function handleSetTimeout(
 		.editMember(guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
 		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
 
-	if (configuration.journaling && guildDocument.isEnabled("journalling")) {
-		const journallingService = client.getJournallingService(guild.id);
-		journallingService?.logEvent("memberTimeoutAdd", {
-			args: [member, until, interaction.parameters.reason, interaction.user],
-		});
-	}
+	client.tryLog("memberTimeoutAdd", {
+		guildId: guild.id,
+		args: [member, until, interaction.parameters.reason, interaction.user],
+	});
 
 	const strings = {
 		title: client.localise("timeout.strings.timedOut.title", locale)(),
