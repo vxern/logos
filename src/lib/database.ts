@@ -172,7 +172,7 @@ class Database extends ravendb.DocumentStore {
 		}
 	}
 
-	cacheDocument<M extends Model>(document: M): void {
+	cacheDocument(document: any): void {
 		switch (true) {
 			case document instanceof EntryRequest: {
 				this.cache.entryRequests.set(document.partialId, document);
@@ -232,7 +232,7 @@ class Database extends ravendb.DocumentStore {
 		}
 	}
 
-	unloadDocument<M extends Model>(document: M): void {
+	unloadDocument(document: any): void {
 		switch (true) {
 			case document instanceof EntryRequest: {
 				this.cache.entryRequests.delete(document.partialId);
