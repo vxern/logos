@@ -50,9 +50,9 @@ class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> 
 
 	static async create(
 		client: Client,
-		data: IdentifierData<Resource> & { answers: ResourceFormData },
+		data: Omit<IdentifierData<Resource>, "createdAt"> & { answers: ResourceFormData },
 	): Promise<Resource> {
-		const resourceDocument = new Resource(data);
+		const resourceDocument = new Resource({ ...data, createdAt: Date.now().toString() });
 
 		await resourceDocument.create(client);
 

@@ -45,9 +45,9 @@ class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> 
 
 	static async create(
 		client: Client,
-		data: IdentifierData<Warning> & { reason: string; rule?: Rule },
+		data: Omit<IdentifierData<Warning>, "createdAt"> & { reason: string; rule?: Rule },
 	): Promise<Warning> {
-		const warningDocument = new Warning(data);
+		const warningDocument = new Warning({ ...data, createdAt: Date.now().toString() });
 
 		await warningDocument.create(client);
 

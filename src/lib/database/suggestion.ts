@@ -50,9 +50,9 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }
 
 	static async create(
 		client: Client,
-		data: IdentifierData<Suggestion> & { answers: SuggestionFormData },
+		data: Omit<IdentifierData<Suggestion>, "createdAt"> & { answers: SuggestionFormData },
 	): Promise<Suggestion> {
-		const suggestionDocument = new Suggestion(data);
+		const suggestionDocument = new Suggestion({ ...data, createdAt: Date.now().toString() });
 
 		await suggestionDocument.create(client);
 

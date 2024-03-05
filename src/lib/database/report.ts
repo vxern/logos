@@ -50,8 +50,11 @@ class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 		return result;
 	}
 
-	static async create(client: Client, data: IdentifierData<Report> & { answers: ReportFormData }): Promise<Report> {
-		const reportDocument = new Report(data);
+	static async create(
+		client: Client,
+		data: Omit<IdentifierData<Report>, "createdAt"> & { answers: ReportFormData },
+	): Promise<Report> {
+		const reportDocument = new Report({ ...data, createdAt: Date.now().toString() });
 
 		await reportDocument.create(client);
 

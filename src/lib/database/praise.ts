@@ -38,8 +38,11 @@ class Praise extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> {
 		return result;
 	}
 
-	static async create(client: Client, data: IdentifierData<Praise> & { comment?: string }): Promise<Praise> {
-		const praiseDocument = new Praise(data);
+	static async create(
+		client: Client,
+		data: Omit<IdentifierData<Praise>, "createdAt"> & { comment?: string },
+	): Promise<Praise> {
+		const praiseDocument = new Praise({ ...data, createdAt: Date.now().toString() });
 
 		await praiseDocument.create(client);
 
