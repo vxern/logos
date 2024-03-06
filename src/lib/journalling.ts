@@ -1,5 +1,6 @@
 import diagnostics from "../diagnostics";
 import { Client } from "./client";
+import { Collector } from "./collectors";
 import { GuildBanAddEventLogger } from "./journalling/discord/guild-ban-add";
 import { GuildBanRemoveEventLogger } from "./journalling/discord/guild-ban-remove";
 import { GuildMemberAddEventLogger } from "./journalling/discord/guild-member-add";
@@ -61,6 +62,13 @@ class JournallingStore {
 	readonly #client: Client;
 	readonly #log: Logger;
 
+	readonly #_guildBanAddCollector: Collector<"guildBanAdd">;
+	readonly #_guildBanRemoveCollector: Collector<"guildBanRemove">;
+	readonly #_guildMemberAddCollector: Collector<"guildMemberAdd">;
+	readonly #_guildMemberRemoveCollector: Collector<"guildMemberRemove">;
+	readonly #_messageDeleteCollector: Collector<"messageDelete">;
+	readonly #_messageUpdateCollector: Collector<"messageUpdate">;
+
 	constructor(client: Client, { isDebug }: { isDebug?: boolean }) {
 		this.#discord = {
 			guildBanAdd: new GuildBanAddEventLogger(client),
@@ -94,6 +102,31 @@ class JournallingStore {
 
 		this.#client = client;
 		this.#log = Logger.create({ identifier: "JournallingStore", isDebug });
+
+		this.#_guildBanAddCollector = new Collector();
+		this.#_guildBanRemoveCollector = new Collector();
+		this.#_guildMemberAddCollector = new Collector();
+		this.#_guildMemberRemoveCollector = new Collector();
+		this.#_messageDeleteCollector = new Collector();
+		this.#_messageUpdateCollector = new Collector();
+	}
+
+	async start(): Promise<void> {
+		await this.#client.registerCollector("guildBanAdd", this.#_guildBanAddCollector);
+		await this.#client.registerCollector("guildBanRemove", this.#_guildBanRemoveCollector);
+		await this.#client.registerCollector("guildMemberAdd", this.#_guildMemberAddCollector);
+		await this.#client.registerCollector("guildMemberRemove", this.#_guildMemberRemoveCollector);
+		await this.#client.registerCollector("messageDelete", this.#_messageDeleteCollector);
+		await this.#client.registerCollector("messageUpdate", this.#_messageUpdateCollector);
+	}
+
+	stop(): void {
+		this.#_guildBanAddCollector.close();
+		this.#_guildBanRemoveCollector.close();
+		this.#_guildMemberAddCollector.close();
+		this.#_guildMemberRemoveCollector.close();
+		this.#_messageDeleteCollector.close();
+		this.#_messageUpdateCollector.close();
 	}
 
 	async tryLog<Event extends keyof Logos.Events>(

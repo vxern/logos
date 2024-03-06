@@ -354,12 +354,14 @@ class Client {
 
 	async start(): Promise<void> {
 		await this.#services.start();
+		await this.#journalling.start();
 		await this.#setupCollectors();
 		await this.#connection.open();
 	}
 
 	async stop(): Promise<void> {
 		await this.#services.stop();
+		this.#journalling.stop();
 		this.#teardownCollectors();
 		await this.#connection.close();
 	}
