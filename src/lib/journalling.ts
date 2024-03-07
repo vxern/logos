@@ -59,8 +59,8 @@ class JournallingStore {
 		readonly slowmodeDowngrade: SlowmodeDowngradeEventLogger;
 	};
 
-	readonly #client: Client;
 	readonly #log: Logger;
+	readonly #client: Client;
 
 	readonly #_guildBanAddCollector: Collector<"guildBanAdd">;
 	readonly #_guildBanRemoveCollector: Collector<"guildBanRemove">;
@@ -100,8 +100,8 @@ class JournallingStore {
 			slowmodeDowngrade: new SlowmodeDowngradeEventLogger(client),
 		};
 
-		this.#client = client;
 		this.#log = Logger.create({ identifier: "JournallingStore", isDebug });
+		this.#client = client;
 
 		this.#_guildBanAddCollector = new Collector();
 		this.#_guildBanRemoveCollector = new Collector();
@@ -112,6 +112,35 @@ class JournallingStore {
 	}
 
 	async start(): Promise<void> {
+		this.#_guildBanAddCollector.onCollect((user, guildId) =>
+			this.tryLog("guildBanAdd", { guildId, args: [user, guildId] }),
+		);
+		this.#_guildBanRemoveCollector.onCollect((user, guildId) =>
+			this.tryLog("guildBanRemove", { guildId, args: [user, guildId] }),
+		);
+		this.#_guildMemberAddCollector.onCollect((member, user) =>
+			this.tryLog("guildMemberAdd", { guildId: member.guildId, args: [member, user] }),
+		);
+		this.#_guildMemberRemoveCollector.onCollect((user, guildId) =>
+			this.tryLog("guildMemberRemove", { guildId, args: [user, guildId] }),
+		);
+		this.#_messageDeleteCollector.onCollect((payload, message) => {
+			const guildId = payload.guildId;
+			if (guildId === undefined) {
+				return;
+			}
+
+			this.tryLog("messageDelete", { guildId, args: [payload, message] });
+		});
+		this.#_messageUpdateCollector.onCollect((message, oldMessage) => {
+			const guildId = message.guildId;
+			if (guildId === undefined) {
+				return;
+			}
+
+			this.tryLog("messageUpdate", { guildId, args: [message, oldMessage] });
+		});
+
 		await this.#client.registerCollector("guildBanAdd", this.#_guildBanAddCollector);
 		await this.#client.registerCollector("guildBanRemove", this.#_guildBanRemoveCollector);
 		await this.#client.registerCollector("guildMemberAdd", this.#_guildMemberAddCollector);
@@ -129,9 +158,9 @@ class JournallingStore {
 		this.#_messageUpdateCollector.close();
 	}
 
-	async tryLog<Event extends keyof Logos.Events>(
+	async tryLog<Event extends keyof Events>(
 		event: Event,
-		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean; args: Logos.Events[Event] },
+		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean; args: Events[Event] },
 	): Promise<void> {
 		// If explicitly defined as `false`, do not log.
 		if (journalling === false) {
@@ -158,18 +187,19 @@ class JournallingStore {
 			return;
 		}
 
-		const logger = this.#logos[event];
+		// @ts-ignore: This is fine.
+		const logger = this.#discord[event] ?? this.#logos[event];
 		if (logger === undefined) {
 			return;
 		}
 
 		// @ts-ignore: This is fine.
-		if (!logger.filter(guildId, ...args)) {
+		if (!this.filter(guildId, ...args)) {
 			return;
 		}
 
 		// @ts-ignore: This is fine.
-		const contents = await logger.message(...args);
+		const contents = await this.message(...args);
 		if (contents === undefined) {
 			return;
 		}

@@ -1,7 +1,5 @@
 import { Client } from "../client";
 
-type Events = Logos.Events & Discord.Events;
-
 abstract class EventLogger<Event extends keyof Events> {
 	readonly client: Client;
 
@@ -20,4 +18,4 @@ abstract class EventLogger<Event extends keyof Events> {
 	abstract message(...args: Events[Event]): Promise<string | undefined> | string | undefined;
 }
 
-export { EventLogger, Events };
+export { EventLogger };

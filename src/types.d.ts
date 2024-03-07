@@ -139,6 +139,8 @@ declare global {
 
 	const constants: typeof constants_;
 	const defaults: typeof defaults_;
+
+	type Events = Logos.Events & Discord.Events;
 }
 
 declare global {
