@@ -14,7 +14,7 @@ class GuildMemberRemoveEventLogger extends EventLogger<"guildMemberRemove"> {
 		return originGuildId === guildId && !user.toggles?.has("bot");
 	}
 
-	message(user: Discord.User, _: bigint): string {
+	buildMessage(user: Discord.User, _: bigint): string {
 		return `${diagnostics.display.user(user)} has left the server.`;
 	}
 }

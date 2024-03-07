@@ -15,7 +15,7 @@ class SuggestionSendEventLogger extends EventLogger<"suggestionSend"> {
 		return originGuildId === member.guildId;
 	}
 
-	message(member: Logos.Member, suggestion: Suggestion): string | undefined {
+	buildMessage(member: Logos.Member, suggestion: Suggestion): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {
 			return undefined;

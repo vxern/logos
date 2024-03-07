@@ -15,7 +15,7 @@ class TicketOpenEventLogger extends EventLogger<"ticketOpen"> {
 		return originGuildId === member.guildId;
 	}
 
-	message(member: Logos.Member, ticket: Ticket): string | undefined {
+	buildMessage(member: Logos.Member, ticket: Ticket): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {
 			return undefined;

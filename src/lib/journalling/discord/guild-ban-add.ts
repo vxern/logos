@@ -11,7 +11,7 @@ class GuildBanAddEventLogger extends EventLogger<"guildBanAdd"> {
 		return originGuildId === guildId && !user.toggles?.has("bot");
 	}
 
-	message(user: Discord.User, _: bigint): string {
+	buildMessage(user: Discord.User, _: bigint): string {
 		return `${diagnostics.display.user(user)} has been banned.`;
 	}
 }

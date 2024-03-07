@@ -14,7 +14,7 @@ class GuildMemberAddEventLogger extends EventLogger<"guildMemberAdd"> {
 		return originGuildId === member.guildId && !user.toggles?.has("bot");
 	}
 
-	message(_: Discord.Member, user: Discord.User): string {
+	buildMessage(_: Discord.Member, user: Discord.User): string {
 		return `${diagnostics.display.user(user)} has joined the server.`;
 	}
 }

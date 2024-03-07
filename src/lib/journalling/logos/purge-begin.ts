@@ -21,7 +21,7 @@ class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
 		return originGuildId === member.guildId;
 	}
 
-	message(
+	buildMessage(
 		member: Logos.Member,
 		channel: Logos.Channel,
 		messageCount: number,

@@ -15,7 +15,12 @@ class SlowmodeDowngradeEventLogger extends EventLogger<"slowmodeDowngrade"> {
 		return originGuildId === channel.guildId;
 	}
 
-	message(user: Logos.User, channel: Logos.Channel, previousLevel: SlowmodeLevel, currentLevel: SlowmodeLevel): string {
+	buildMessage(
+		user: Logos.User,
+		channel: Logos.Channel,
+		previousLevel: SlowmodeLevel,
+		currentLevel: SlowmodeLevel,
+	): string {
 		return `${diagnostics.display.user(user)} has downgraded the slowmode level in ${diagnostics.display.channel(
 			channel,
 		)} from "${previousLevel}" to "${currentLevel}".`;

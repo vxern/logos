@@ -15,7 +15,7 @@ class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
 		return originGuildId === author.guildId;
 	}
 
-	message(author: Logos.Member, report: Report): string | undefined {
+	buildMessage(author: Logos.Member, report: Report): string | undefined {
 		const authorUser = this.client.entities.users.get(author.id);
 		if (authorUser === undefined) {
 			return;

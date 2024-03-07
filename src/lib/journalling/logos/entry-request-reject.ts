@@ -14,7 +14,7 @@ class EntryRequestRejectEventLogger extends EventLogger<"entryRequestReject"> {
 		return originGuildId === by.guildId;
 	}
 
-	message(user: Logos.User, by: Logos.Member): string | undefined {
+	buildMessage(user: Logos.User, by: Logos.Member): string | undefined {
 		const byUser = this.client.entities.users.get(by.id);
 		if (byUser === undefined) {
 			return undefined;

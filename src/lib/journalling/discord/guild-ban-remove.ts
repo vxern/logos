@@ -14,7 +14,7 @@ class GuildBanRemoveEventLogger extends EventLogger<"guildBanRemove"> {
 		return originGuildId === guildId && !user.toggles?.has("bot");
 	}
 
-	message(user: Discord.User, _: bigint): string {
+	buildMessage(user: Discord.User, _: bigint): string {
 		return `${diagnostics.display.user(user)} has been unbanned.`;
 	}
 }

@@ -14,7 +14,7 @@ class SlowmodeDisableEventLogger extends EventLogger<"slowmodeDisable"> {
 		return originGuildId === channel.guildId;
 	}
 
-	message(user: Logos.User, channel: Logos.Channel): string {
+	buildMessage(user: Logos.User, channel: Logos.Channel): string {
 		return `${diagnostics.display.user(user)} has disabled slowmode in ${diagnostics.display.channel(channel)}.`;
 	}
 }

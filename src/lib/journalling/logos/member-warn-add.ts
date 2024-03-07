@@ -15,7 +15,7 @@ class MemberWarnAddEventLogger extends EventLogger<"memberWarnAdd"> {
 		return originGuildId === member.guildId;
 	}
 
-	message(member: Logos.Member, warning: Warning, by: Logos.User): string | undefined {
+	buildMessage(member: Logos.Member, warning: Warning, by: Logos.User): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {
 			return undefined;

@@ -29,7 +29,7 @@ class MessageDeleteEventLogger extends EventLogger<"messageDelete"> {
 		return originGuildId === message.guildId && !author.bot;
 	}
 
-	message(
+	buildMessage(
 		payload: { id: bigint; channelId: bigint; guildId?: bigint | undefined },
 		_?: Discord.Message | undefined,
 	): string | undefined {

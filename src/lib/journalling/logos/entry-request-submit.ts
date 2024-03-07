@@ -23,7 +23,7 @@ class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 		return originGuildId === guild.id;
 	}
 
-	async message(user: Logos.User, entryRequest: EntryRequest): Promise<string> {
+	async buildMessage(user: Logos.User, entryRequest: EntryRequest): Promise<string> {
 		const guildDocument = await Guild.getOrCreate(this.client, { guildId: entryRequest.guildId });
 
 		const guildLanguage = guildDocument.localisationLanguage;

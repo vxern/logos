@@ -20,7 +20,7 @@ class MessageUpdateEventLogger extends EventLogger<"messageUpdate"> {
 		return originGuildId === message.guildId && !author.bot && message.content !== oldMessage?.content;
 	}
 
-	message(message: Discord.Message, _?: Discord.Message | undefined): string | undefined {
+	buildMessage(message: Discord.Message, _?: Discord.Message | undefined): string | undefined {
 		const oldMessage = this.client.entities.messages.previous.get(message.id);
 		if (oldMessage === undefined) {
 			return undefined;

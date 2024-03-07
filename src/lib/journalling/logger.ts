@@ -15,7 +15,7 @@ abstract class EventLogger<Event extends keyof Events> {
 
 	abstract filter(originGuildId: bigint, ...args: Events[Event]): boolean;
 
-	abstract message(...args: Events[Event]): Promise<string | undefined> | string | undefined;
+	abstract buildMessage(...args: Events[Event]): Promise<string | undefined> | string | undefined;
 }
 
 export { EventLogger };

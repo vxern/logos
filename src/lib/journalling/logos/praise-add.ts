@@ -15,7 +15,7 @@ class PraiseAddEventLogger extends EventLogger<"praiseAdd"> {
 		return originGuildId === member.guildId;
 	}
 
-	message(member: Logos.Member, praise: Praise, by: Logos.User): string | undefined {
+	buildMessage(member: Logos.Member, praise: Praise, by: Logos.User): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {
 			return undefined;
