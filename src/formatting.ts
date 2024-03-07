@@ -49,7 +49,7 @@ function codeMultiline(target: string): string {
 }
 
 /**
- * Taking a list of items, puts them in a list format.
+ * Taking a list of items, formats them as a Discord list.
  *
  * @param items - Items in the list.
  * @returns The formatted string of text.
