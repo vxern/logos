@@ -30,14 +30,14 @@ describe("isTinyLDLocale()", () => {
 
 describe("getCLDLanguageByLocale()", () => {
 	it("returns the detection language corresponding to the passed locale.", () => {
-		expect(getCLDLanguageByLocale("pl")).to.be("Polish");
-		expect(getCLDLanguageByLocale("ro")).to.be("Romanian");
+		expect(getCLDLanguageByLocale("pl")).to.equal("Polish");
+		expect(getCLDLanguageByLocale("ro")).to.equal("Romanian");
 	});
 });
 
 describe("getTinyLDLanguageByLocale()", () => {
 	it("returns the detection language corresponding to the passed locale.", () => {
-		expect(getTinyLDLanguageByLocale("pol")).to.be("Polish");
-		expect(getTinyLDLanguageByLocale("ron")).to.be("Romanian");
+		expect(getTinyLDLanguageByLocale("pol")).to.equal("Polish");
+		expect(getTinyLDLanguageByLocale("ron")).to.equal("Romanian");
 	});
 });

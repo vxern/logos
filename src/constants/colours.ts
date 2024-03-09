@@ -27,7 +27,7 @@ export default Object.freeze({
 	peach: fromHex("#ff9a76"),
 	husky: fromHex("#d6e3f8"),
 	murrey: fromHex("#87255b"),
-	black: fromHex("1c1c1c"), // Eerie black
+	black: fromHex("#1c1c1c"), // Eerie black
 	yellow: fromHex("#ffe548"), // Gargoyle gas
 	orangeRed: fromHex("#ff4b3e"), // Dusk orange
 	lightGray: fromHex("#daddd8"),

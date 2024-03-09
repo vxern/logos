@@ -43,22 +43,22 @@ describe("isLogosLocale()", () => {
 
 describe("getDiscordLocaleByLanguage()", () => {
 	it("returns the language corresponding to the passed locale.", () => {
-		expect(getDiscordLocaleByLanguage("English/American")).to.be("en-US");
-		expect(getDiscordLocaleByLanguage("German")).to.be("de");
+		expect(getDiscordLocaleByLanguage("English/American")).to.equal("en-US");
+		expect(getDiscordLocaleByLanguage("German")).to.equal("de");
 	});
 });
 
 describe("getLogosLocaleByLanguage()", () => {
 	it("returns the language corresponding to the passed locale.", () => {
-		expect(getLogosLocaleByLanguage("English/American")).to.be("eng");
-		expect(getLogosLocaleByLanguage("German")).to.be("deu");
+		expect(getLogosLocaleByLanguage("English/American")).to.equal("eng-US");
+		expect(getLogosLocaleByLanguage("German")).to.equal("deu");
 	});
 });
 
 describe("getDiscordLanguageByLocale()", () => {
 	it("returns the language corresponding to the passed locale if the locale is valid.", () => {
-		expect(getDiscordLanguageByLocale("en")).to.be("English");
-		expect(getDiscordLanguageByLocale("ro")).to.be("Romanian");
+		expect(getDiscordLanguageByLocale("en-US")).to.equal("English/American");
+		expect(getDiscordLanguageByLocale("ro")).to.equal("Romanian");
 	});
 
 	it("returns undefined if the locale is unsupported or undefined.", () => {
@@ -69,7 +69,7 @@ describe("getDiscordLanguageByLocale()", () => {
 
 describe("getLogosLanguageByLocale()", () => {
 	it("returns the language corresponding to the passed locale.", () => {
-		expect(getLogosLanguageByLocale("eng-US")).to.be("English");
-		expect(getLogosLanguageByLocale("ron")).to.be("Romanian");
+		expect(getLogosLanguageByLocale("eng-US")).to.equal("English/American");
+		expect(getLogosLanguageByLocale("ron")).to.equal("Romanian");
 	});
 });

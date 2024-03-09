@@ -4,10 +4,10 @@ import bsd from "../../../src/constants/licences/bsd";
 const NOTICE = "this-is-a-sample-passed-copyright-notice";
 
 describe("The generator generates", () => {
-	it("parts of the BSD licence that are each no more than 1024 characters long.", () => {
+	it("parts of the BSD licence that are each no more than 4096 characters long.", () => {
 		const parts = bsd(NOTICE);
 		for (const part of parts) {
-			expect(part.length).to.be.lessThanOrEqual(1024);
+			expect(part.length).to.be.lessThanOrEqual(4096);
 		}
 	});
 

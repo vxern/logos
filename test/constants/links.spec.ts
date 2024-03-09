@@ -10,12 +10,12 @@ describe("The links object", () => {
 	});
 
 	it("generates links that are URI-encoded.", () => {
-		expect(links.tatoebaSentence(STRING_UNENCODED)).to.be(`https://tatoeba.org/en/sentences/show/${STRING_ENCODED}`);
-		expect(links.dexonlineDefinition(STRING_UNENCODED)).to.be(`https://dexonline.ro/definitie/${STRING_ENCODED}`);
-		expect(links.wiktionaryDefinition(STRING_UNENCODED, STRING_UNENCODED)).to.be(
-			`https://en.wiktionary.org/wiki/${STRING_UNENCODED}#${STRING_UNENCODED}`,
+		expect(links.tatoebaSentence(STRING_UNENCODED)).to.equal(`https://tatoeba.org/en/sentences/show/${STRING_ENCODED}`);
+		expect(links.dexonlineDefinition(STRING_UNENCODED)).to.equal(`https://dexonline.ro/definitie/${STRING_ENCODED}`);
+		expect(links.wiktionaryDefinition(STRING_UNENCODED, STRING_UNENCODED)).to.equal(
+			`https://en.wiktionary.org/wiki/${STRING_ENCODED}#${STRING_ENCODED}`,
 		);
-		expect(links.wordsAPIDefinition()).to.be("https://wordsapi.com");
-		expect(links.dicolinkDefinition(STRING_UNENCODED)).to.be(`https://dicolink.com/mots/${STRING_ENCODED}`);
+		expect(links.wordsAPIDefinition()).to.equal("https://wordsapi.com");
+		expect(links.dicolinkDefinition(STRING_UNENCODED)).to.equal(`https://dicolink.com/mots/${STRING_ENCODED}`);
 	});
 });

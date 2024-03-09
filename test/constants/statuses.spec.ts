@@ -1,8 +1,7 @@
 import { expect } from "chai";
 import statuses from "../../src/constants/statuses";
 
-// https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-naming
-const DISCORD_COMMAND = /^\/[-_\p{L}\p{N}\p{sc=Deva}\p{sc=Thai}]{1,32}$/;
+const DISCORD_COMMAND_PATTERN = /^\/[-_a-zA-Z]{1,32}$/;
 
 describe("The statuses object", () => {
 	it("is immutable.", () => {
@@ -11,7 +10,7 @@ describe("The statuses object", () => {
 
 	it("contains valid command names.", () => {
 		for (const command of statuses) {
-			expect(command).to.match(DISCORD_COMMAND);
+			expect(command).to.match(DISCORD_COMMAND_PATTERN);
 		}
 	});
 });

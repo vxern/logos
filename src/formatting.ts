@@ -35,6 +35,10 @@ function decapitalise(target: string): string {
  * @returns The formatted string of text.
  */
 function code(target: string): string {
+	if (target.length === 0) {
+		return `\`${constants.special.missingString}\``;
+	}
+
 	return `\`${target}\``;
 }
 
@@ -45,6 +49,10 @@ function code(target: string): string {
  * @param target - String of text to format.
  */
 function codeMultiline(target: string): string {
+	if (target.length === 0) {
+		return `\`\`\`${constants.special.missingString}\`\`\``;
+	}
+
 	return `\`\`\`${target}\`\`\``;
 }
 
@@ -126,7 +134,7 @@ function trim(string: string, length: number): string {
 
 	// If the string does not have any whitespacing, make the string trail off.
 	if (!string.includes(" ")) {
-		return `${string.slice(0, -3)} ${constants.special.strings.trail}`;
+		return `${string.slice(0, length).slice(0, -3)}${constants.special.strings.trail}`;
 	}
 
 	// Keep trying to make space for the continuation indicator until successful.

@@ -26,6 +26,7 @@ export default Object.freeze({
 		trail: "...",
 		continued: "(...)",
 	},
+	missingString: "?",
 	game: {
 		mask: "░",
 	},
