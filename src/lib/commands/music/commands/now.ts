@@ -52,7 +52,7 @@ async function handleDisplayCurrentlyPlaying(
 				{
 					title: strings.title,
 					description: strings.description.toCheck,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -83,7 +83,7 @@ async function handleDisplayCurrentlyPlaying(
 					{
 						title: strings.title,
 						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -101,7 +101,7 @@ async function handleDisplayCurrentlyPlaying(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -156,7 +156,7 @@ async function handleDisplayCurrentlyPlaying(
 			embeds: [
 				{
 					title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 					fields: [
 						{
 							name: strings.title,

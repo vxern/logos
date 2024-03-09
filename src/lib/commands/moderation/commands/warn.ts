@@ -114,7 +114,7 @@ async function handleWarnUser(
 		};
 
 		client.reply(interaction, {
-			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
+			embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
 		});
 
 		return;
@@ -191,7 +191,7 @@ async function handleWarnUser(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 			},
 		],
 	});
@@ -246,7 +246,7 @@ async function handleWarnUser(
 					{
 						title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
 						description: strings.description,
-						color: constants.colors.red,
+						color: constants.colours.red,
 					},
 				],
 			});
@@ -273,7 +273,7 @@ async function handleWarnUser(
 					{
 						title: `${constants.emojis.indicators.warning} ${strings.title}`,
 						description: strings.description,
-						color: constants.colors.yellow,
+						color: constants.colours.yellow,
 					},
 				],
 			});
@@ -298,7 +298,7 @@ async function displayError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});

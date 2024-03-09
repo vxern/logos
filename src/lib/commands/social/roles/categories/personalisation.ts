@@ -3,13 +3,13 @@ import { RoleCategory } from "../types";
 const category: RoleCategory = {
 	type: "group",
 	id: "roles.personalisation",
-	color: constants.colors.yellow,
+	color: constants.colours.yellow,
 	emoji: constants.emojis.roles.categories.personalisation.category,
 	categories: [
 		{
 			type: "single",
 			id: "roles.personalisation.categories.orthography",
-			color: constants.colors.husky,
+			color: constants.colours.husky,
 			emoji: constants.emojis.roles.categories.personalisation.orthography.category,
 			maximum: 1,
 			collection: {
@@ -28,7 +28,7 @@ const category: RoleCategory = {
 		{
 			type: "single",
 			id: "roles.personalisation.categories.gender",
-			color: constants.colors.orangeRed,
+			color: constants.colours.orangeRed,
 			emoji: constants.emojis.roles.categories.personalisation.gender.category,
 			maximum: 1,
 			collection: {
@@ -70,7 +70,7 @@ const category: RoleCategory = {
 		{
 			type: "single",
 			id: "roles.personalisation.categories.abroad",
-			color: constants.colors.husky,
+			color: constants.colours.husky,
 			emoji: constants.emojis.roles.categories.personalisation.abroad.category,
 			collection: {
 				type: "implicit",

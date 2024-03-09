@@ -32,7 +32,7 @@ function getPraisePage(
 			return {
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 			};
 		}
 		const strings = {
@@ -46,7 +46,7 @@ function getPraisePage(
 		return {
 			title: strings.title,
 			description: strings.description,
-			color: constants.colors.blue,
+			color: constants.colours.blue,
 		};
 	}
 
@@ -69,7 +69,7 @@ function getPraisePage(
 				return `${commentFormatted}\n${userFormatted}`;
 			})
 			.join("\n"),
-		color: constants.colors.blue,
+		color: constants.colours.blue,
 	};
 }
 

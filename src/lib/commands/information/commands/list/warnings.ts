@@ -91,7 +91,7 @@ async function displayError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});
@@ -113,7 +113,7 @@ function getWarningPage(
 			return {
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 			};
 		}
 		const strings = {
@@ -124,7 +124,7 @@ function getWarningPage(
 		return {
 			title: strings.title,
 			description: strings.description,
-			color: constants.colors.blue,
+			color: constants.colours.blue,
 		};
 	}
 
@@ -146,7 +146,7 @@ function getWarningPage(
 
 			return { name: warningString, value: `${ruleTitle}\n> *${warning.reason}*` };
 		}),
-		color: constants.colors.blue,
+		color: constants.colours.blue,
 	};
 }
 

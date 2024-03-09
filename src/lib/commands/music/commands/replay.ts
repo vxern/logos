@@ -46,7 +46,7 @@ async function handleReplayAction(
 				{
 					title: strings.title,
 					description: strings.description.toManage,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -75,7 +75,7 @@ async function handleReplayAction(
 					{
 						title: strings.title,
 						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -93,7 +93,7 @@ async function handleReplayAction(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -112,7 +112,7 @@ async function handleReplayAction(
 				{
 					title: `${constants.emojis.music.replaying} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		},

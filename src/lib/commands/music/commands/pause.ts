@@ -41,7 +41,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 				{
 					title: strings.title,
 					description: strings.description.toManage,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -71,7 +71,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 				{
 					title: `${constants.emojis.music.paused} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		},

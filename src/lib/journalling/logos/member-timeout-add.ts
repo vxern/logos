@@ -7,7 +7,7 @@ class MemberTimeoutAddEventLogger extends EventLogger<"memberTimeoutAdd"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.timeout.added} Member timed out`,
-			colour: constants.colors.dullYellow,
+			colour: constants.colours.dullYellow,
 		});
 	}
 

@@ -7,7 +7,7 @@ class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.purging.begin} Purging started`,
-			colour: constants.colors.yellow,
+			colour: constants.colours.yellow,
 		});
 	}
 

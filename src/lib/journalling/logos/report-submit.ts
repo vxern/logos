@@ -7,7 +7,7 @@ class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.report} Report submitted`,
-			colour: constants.colors.darkRed,
+			colour: constants.colours.darkRed,
 		});
 	}
 

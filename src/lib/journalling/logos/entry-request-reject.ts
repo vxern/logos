@@ -6,7 +6,7 @@ class EntryRequestRejectEventLogger extends EventLogger<"entryRequestReject"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.entryRequest.rejected} Entry request rejected`,
-			colour: constants.colors.red,
+			colour: constants.colours.red,
 		});
 	}
 

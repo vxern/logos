@@ -62,7 +62,7 @@ async function handleStartCorrecting(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -80,7 +80,7 @@ async function handleStartCorrecting(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -113,7 +113,7 @@ async function handleStartCorrecting(
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colors.dullYellow,
+							color: constants.colours.dullYellow,
 						},
 					],
 				});
@@ -139,7 +139,7 @@ async function handleStartCorrecting(
 				{
 					title: strings.title,
 					description: `${strings.description.tooLong} ${strings.description.maximumLength}`,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -174,7 +174,7 @@ async function handleStartCorrecting(
 					embeds: [
 						{
 							description: data.corrected,
-							color: constants.colors.lightGreen,
+							color: constants.colours.lightGreen,
 							footer: {
 								text: `${constants.emojis.correction} ${strings.suggestedBy}`,
 								iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
@@ -290,7 +290,7 @@ async function handleSubmittedInvalidCorrection(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 			components: [
@@ -331,7 +331,7 @@ async function handleSubmittedInvalidCorrection(
 			embed = {
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.dullYellow,
+				color: constants.colours.dullYellow,
 			};
 
 			break;
@@ -347,7 +347,7 @@ async function handleSubmittedInvalidCorrection(
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});

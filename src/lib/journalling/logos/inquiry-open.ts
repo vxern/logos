@@ -5,7 +5,7 @@ import { EventLogger } from "../logger";
 
 class InquiryOpenEventLogger extends EventLogger<"inquiryOpen"> {
 	constructor(client: Client) {
-		super(client, { title: `${constants.emojis.events.ticket} Inquiry opened`, colour: constants.colors.husky });
+		super(client, { title: `${constants.emojis.events.ticket} Inquiry opened`, colour: constants.colours.husky });
 	}
 
 	filter(originGuildId: bigint, member: Logos.Member, _: Ticket): boolean {

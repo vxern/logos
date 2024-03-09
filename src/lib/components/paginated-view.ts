@@ -195,7 +195,7 @@ class PaginatedSongListingViewComponent extends PaginatedViewComponent<SongListi
 				listEmpty: this.client.localise("music.strings.listEmpty", locale)(),
 			};
 
-			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colors.blue } };
+			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colours.blue } };
 		}
 
 		const listingsFormatted = page
@@ -207,7 +207,7 @@ class PaginatedSongListingViewComponent extends PaginatedViewComponent<SongListi
 			})
 			.join("\n");
 
-		return { embed: { title: this.#title, description: listingsFormatted, color: constants.colors.blue } };
+		return { embed: { title: this.#title, description: listingsFormatted, color: constants.colours.blue } };
 	}
 }
 
@@ -231,7 +231,7 @@ class PaginatedSongCollectionViewComponent extends PaginatedViewComponent<Song> 
 				listEmpty: this.client.localise("music.strings.listEmpty", locale)(),
 			};
 
-			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colors.blue } };
+			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colours.blue } };
 		}
 
 		const songsFormatted = page
@@ -249,7 +249,7 @@ class PaginatedSongCollectionViewComponent extends PaginatedViewComponent<Song> 
 			})
 			.join("\n");
 
-		return { embed: { title: this.#title, description: songsFormatted, color: constants.colors.blue } };
+		return { embed: { title: this.#title, description: songsFormatted, color: constants.colours.blue } };
 	}
 }
 
@@ -290,7 +290,7 @@ class PaginatedRemoveSongListingViewComponent extends PaginatedViewComponent<Son
 				description: this.client.localise("music.options.remove.strings.queueEmpty.description", locale)(),
 			};
 
-			return { embed: { title: strings.title, description: strings.description, color: constants.colors.blue } };
+			return { embed: { title: strings.title, description: strings.description, color: constants.colours.blue } };
 		}
 
 		const selectMenu = this.#buildSelectMenu(page, pageIndex);
@@ -301,7 +301,7 @@ class PaginatedRemoveSongListingViewComponent extends PaginatedViewComponent<Son
 		};
 
 		return {
-			embed: { title: strings.title, description: strings.description, color: constants.colors.blue },
+			embed: { title: strings.title, description: strings.description, color: constants.colours.blue },
 			components: [selectMenu],
 		};
 	}

@@ -128,7 +128,7 @@ async function handleSetTimeout(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 			},
 		],
 	});
@@ -145,7 +145,7 @@ async function displayDurationInvalidError(
 	};
 
 	client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.darkRed }],
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.darkRed }],
 	});
 }
 
@@ -160,7 +160,7 @@ async function displayTooShortWarning(
 	};
 
 	client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.yellow }],
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.yellow }],
 	});
 }
 
@@ -175,7 +175,7 @@ async function displayTooLongWarning(
 	};
 
 	client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.yellow }],
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.yellow }],
 	});
 }
 

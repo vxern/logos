@@ -46,7 +46,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -64,7 +64,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -95,7 +95,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 					embeds: [
 						{
 							description: `– *${data.answer}*`,
-							color: constants.colors.lightGreen,
+							color: constants.colours.lightGreen,
 							footer: {
 								text: `${constants.emojis.answer} ${strings.submittedBy}`,
 								iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {

@@ -173,7 +173,7 @@ class VerificationService extends PromptService<{
 		return {
 			embeds: [
 				{
-					color: constants.colors.murrey,
+					color: constants.colours.murrey,
 					thumbnail: (() => {
 						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
 							avatar: user.avatar,
@@ -370,7 +370,7 @@ class VerificationService extends PromptService<{
 					this.client.registerInteractionCollector(cancelButton);
 
 					this.client.reply(interaction, {
-						embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
+						embeds: [{ title: strings.title, description: strings.description, color: constants.colours.peach }],
 						components: [
 							{
 								type: Discord.MessageComponentTypes.ActionRow,
@@ -405,7 +405,7 @@ class VerificationService extends PromptService<{
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colors.dullYellow,
+							color: constants.colours.dullYellow,
 						},
 					],
 				});
@@ -455,7 +455,7 @@ class VerificationService extends PromptService<{
 					this.client.registerInteractionCollector(cancelButton);
 
 					this.client.reply(interaction, {
-						embeds: [{ title: strings.title, description: strings.description, color: constants.colors.peach }],
+						embeds: [{ title: strings.title, description: strings.description, color: constants.colours.peach }],
 						components: [
 							{
 								type: Discord.MessageComponentTypes.ActionRow,
@@ -490,7 +490,7 @@ class VerificationService extends PromptService<{
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colors.dullYellow,
+							color: constants.colours.dullYellow,
 						},
 					],
 				});
@@ -520,7 +520,7 @@ class VerificationService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.lightGreen,
+						color: constants.colours.lightGreen,
 					},
 				],
 			});
@@ -699,7 +699,7 @@ class VerificationService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.peach,
+						color: constants.colours.peach,
 					},
 				],
 			});
@@ -736,7 +736,7 @@ class VerificationService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.lightGreen,
+						color: constants.colours.lightGreen,
 					},
 				],
 			});
@@ -797,7 +797,7 @@ class VerificationService extends PromptService<{
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.red,
+					color: constants.colours.red,
 				},
 			],
 		});

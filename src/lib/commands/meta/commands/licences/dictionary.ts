@@ -71,7 +71,7 @@ async function handleDisplayDictionaryLicence(
 					url: licenceInformation.link,
 				},
 				description: `*${licenceInformation.notices.licence}*`,
-				color: constants.colors.greenishLightGray,
+				color: constants.colours.greenishLightGray,
 				fields: [
 					{
 						name: strings.fields.source,
@@ -106,7 +106,7 @@ async function displayError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});

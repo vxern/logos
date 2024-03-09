@@ -6,7 +6,7 @@ class GuildBanRemoveEventLogger extends EventLogger<"guildBanRemove"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.user.unbanned} User unbanned`,
-			colour: constants.colors.dullYellow,
+			colour: constants.colours.dullYellow,
 		});
 	}
 

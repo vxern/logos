@@ -6,7 +6,7 @@ class SlowmodeDisableEventLogger extends EventLogger<"slowmodeDisable"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.slowmode.disabled} Slowmode disabled`,
-			colour: constants.colors.dullYellow,
+			colour: constants.colours.dullYellow,
 		});
 	}
 

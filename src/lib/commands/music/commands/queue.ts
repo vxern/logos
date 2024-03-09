@@ -46,7 +46,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 				{
 					title: strings.title,
 					description: strings.description.toCheck,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});

@@ -83,7 +83,7 @@ async function displayError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});

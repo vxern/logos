@@ -70,7 +70,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 					iconUrl: Discord.guildIconUrl(guild.id, guild.icon, { size: 4096, format: "png" }),
 					name: strings.title,
 				},
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 				fields: [
 					{
 						name: `${constants.emojis.guild.description} ${strings.description.description.title}`,

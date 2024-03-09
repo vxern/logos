@@ -6,7 +6,7 @@ class GuildMemberAddEventLogger extends EventLogger<"guildMemberAdd"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.user.joined} User joined`,
-			colour: constants.colors.lightGreen,
+			colour: constants.colours.lightGreen,
 		});
 	}
 

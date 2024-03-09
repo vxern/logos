@@ -67,7 +67,7 @@ async function handleSkipToTimestamp(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -94,7 +94,7 @@ async function handleSkipToTimestamp(
 				{
 					title: `${constants.emojis.music.skippedTo} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		},
@@ -113,7 +113,7 @@ async function displayInvalidTimestampError(
 	};
 
 	client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
 	});
 }
 

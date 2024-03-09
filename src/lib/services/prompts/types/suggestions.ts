@@ -49,7 +49,7 @@ class SuggestionService extends PromptService<{
 		return {
 			embeds: [
 				{
-					color: suggestionDocument.isResolved ? constants.colors.green : constants.colors.dullYellow,
+					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
 					description: `*${suggestionDocument.answers.suggestion}*`,
 					footer: {
 						text: diagnostics.display.user(user),
@@ -122,7 +122,7 @@ class SuggestionService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -140,7 +140,7 @@ class SuggestionService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});

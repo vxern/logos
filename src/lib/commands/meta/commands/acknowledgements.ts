@@ -30,7 +30,7 @@ async function handleDisplayAcknowledgements(client: Client, interaction: Logos.
 			{
 				title: strings.acknowledgements,
 				fields,
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 			},
 		],
 	});

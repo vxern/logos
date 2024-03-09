@@ -6,7 +6,7 @@ class MemberTimeoutRemoveEventLogger extends EventLogger<"memberTimeoutRemove"> 
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.timeout.removed} Member's timeout cleared`,
-			colour: constants.colors.blue,
+			colour: constants.colours.blue,
 		});
 	}
 

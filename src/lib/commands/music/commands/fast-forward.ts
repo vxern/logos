@@ -67,7 +67,7 @@ async function handleFastForward(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -98,7 +98,7 @@ async function handleFastForward(
 				{
 					title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		},
@@ -117,7 +117,7 @@ async function displayInvalidTimestampError(
 	};
 
 	client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colors.red }],
+		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
 	});
 }
 

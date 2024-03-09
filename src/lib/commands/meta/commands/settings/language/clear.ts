@@ -25,7 +25,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.yellow,
+					color: constants.colours.yellow,
 				},
 			],
 		});
@@ -47,7 +47,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.lightGreen,
+					color: constants.colours.lightGreen,
 				},
 			],
 		});

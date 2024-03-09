@@ -60,7 +60,7 @@ class ReportService extends PromptService<{
 		return {
 			embeds: [
 				{
-					color: reportDocument.isResolved ? constants.colors.green : constants.colors.peach,
+					color: reportDocument.isResolved ? constants.colours.green : constants.colours.peach,
 					thumbnail: (() => {
 						const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
 							avatar: user.avatar,
@@ -155,7 +155,7 @@ class ReportService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -173,7 +173,7 @@ class ReportService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});

@@ -96,7 +96,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 			},
 		],
 		components: [

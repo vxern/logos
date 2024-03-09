@@ -51,7 +51,7 @@ async function handleRequestPlayback(
 				{
 					title: strings.title,
 					description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});

@@ -61,7 +61,7 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 					}),
 					name: botUser.username,
 				},
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 				fields: [
 					{
 						name: `${constants.emojis.information.bot} ${strings.concept.title}`,

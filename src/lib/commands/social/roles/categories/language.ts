@@ -3,7 +3,7 @@ import { RoleCategory, RoleCategorySingle, RoleCollectionImplicit } from "../typ
 const proficiency: RoleCategorySingle & { collection: RoleCollectionImplicit } = {
 	type: "single",
 	id: "roles.language.categories.proficiency",
-	color: constants.colors.gray,
+	color: constants.colours.gray,
 	emoji: constants.emojis.roles.categories.language.proficiency.category,
 	minimum: 1,
 	maximum: 1,
@@ -57,14 +57,14 @@ const proficiency: RoleCategorySingle & { collection: RoleCollectionImplicit } =
 const category: RoleCategory = {
 	type: "group",
 	id: "roles.language",
-	color: constants.colors.gray,
+	color: constants.colours.gray,
 	emoji: constants.emojis.roles.categories.language.category,
 	categories: [
 		proficiency,
 		{
 			type: "single",
 			id: "roles.language.categories.cefr",
-			color: constants.colors.blue,
+			color: constants.colours.blue,
 			emoji: constants.emojis.roles.categories.language.cefr.category,
 			maximum: 1,
 			collection: {

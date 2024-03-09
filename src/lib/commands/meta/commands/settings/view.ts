@@ -36,7 +36,7 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 		embeds: [
 			{
 				title: strings.title,
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 				fields: [
 					{
 						name: strings.description.language.title,

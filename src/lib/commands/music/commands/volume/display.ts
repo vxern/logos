@@ -36,7 +36,7 @@ async function handleDisplayVolume(
 				{
 					title: strings.title,
 					description: strings.description.toCheck,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -66,7 +66,7 @@ async function handleDisplayVolume(
 				{
 					title: `${constants.emojis.music.volume} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 			components,

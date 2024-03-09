@@ -66,7 +66,7 @@ async function handleClearTimeout(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -101,7 +101,7 @@ async function handleClearTimeout(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.lightGreen,
+				color: constants.colours.lightGreen,
 			},
 		],
 	});

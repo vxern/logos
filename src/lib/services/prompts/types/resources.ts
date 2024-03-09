@@ -49,7 +49,7 @@ class ResourceService extends PromptService<{
 		return {
 			embeds: [
 				{
-					color: resourceDocument.isResolved ? constants.colors.green : constants.colors.gray,
+					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					description: `*${resourceDocument.answers.resource}*`,
 					footer: {
 						text: diagnostics.display.user(user),
@@ -122,7 +122,7 @@ class ResourceService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -140,7 +140,7 @@ class ResourceService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});

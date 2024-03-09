@@ -253,7 +253,7 @@ abstract class PromptService<
 							{
 								title: strings.title,
 								description: strings.description,
-								color: constants.colors.peach,
+								color: constants.colours.peach,
 							},
 						],
 					});
@@ -268,7 +268,7 @@ abstract class PromptService<
 							{
 								title: strings.title,
 								description: strings.description,
-								color: constants.colors.peach,
+								color: constants.colours.peach,
 							},
 						],
 					});

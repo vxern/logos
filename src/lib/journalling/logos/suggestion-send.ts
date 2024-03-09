@@ -7,7 +7,7 @@ class SuggestionSendEventLogger extends EventLogger<"suggestionSend"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.suggestion} Suggestion made`,
-			colour: constants.colors.darkGreen,
+			colour: constants.colours.darkGreen,
 		});
 	}
 

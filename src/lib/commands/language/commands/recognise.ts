@@ -57,7 +57,7 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -87,7 +87,7 @@ async function handleRecogniseLanguage(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -112,7 +112,7 @@ async function handleRecogniseLanguage(
 				{
 					title: strings.title,
 					description: isMessage ? strings.description.message : strings.description.text,
-					color: constants.colors.peach,
+					color: constants.colours.peach,
 				},
 			],
 		});
@@ -136,7 +136,7 @@ async function handleRecogniseLanguage(
 
 		embeds.push({
 			description: strings.description,
-			color: constants.colors.blue,
+			color: constants.colours.blue,
 		});
 
 		client.editReply(interaction, { embeds });
@@ -145,7 +145,7 @@ async function handleRecogniseLanguage(
 
 	{
 		const embed: Discord.CamelizedDiscordEmbed = {
-			color: constants.colors.blue,
+			color: constants.colours.blue,
 		};
 
 		const fields: Discord.CamelizedDiscordEmbedField[] = [];

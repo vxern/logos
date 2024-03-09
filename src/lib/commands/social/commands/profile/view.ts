@@ -91,7 +91,7 @@ async function handleDisplayProfile(
 
 						return { url: iconURL };
 					})(),
-					color: constants.colors.peach,
+					color: constants.colours.peach,
 					fields: [
 						{
 							name: `${constants.emojis.profile.roles} ${strings.roles}`,

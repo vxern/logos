@@ -7,7 +7,7 @@ class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.resource} Resource submitted`,
-			colour: constants.colors.darkGreen,
+			colour: constants.colours.darkGreen,
 		});
 	}
 

@@ -89,7 +89,7 @@ async function handleSetLanguage(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		});
@@ -118,7 +118,7 @@ async function handleSetLanguage(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.lightGreen,
+				color: constants.colours.lightGreen,
 			},
 		],
 	});
@@ -139,7 +139,7 @@ async function displayError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});

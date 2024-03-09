@@ -55,7 +55,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -90,7 +90,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.lightGreen,
+						color: constants.colours.lightGreen,
 					},
 				],
 			});
@@ -161,7 +161,7 @@ async function openTicket(
 			embeds: [
 				{
 					description: `${mention(user.id, { type: "user" })}: *${answers.topic}*`,
-					color: constants.colors.husky,
+					color: constants.colours.husky,
 				},
 			],
 		})
@@ -266,7 +266,7 @@ async function handleCouldNotOpenTicket(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 			components: [
@@ -309,7 +309,7 @@ async function handleCouldNotOpenTicket(
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});

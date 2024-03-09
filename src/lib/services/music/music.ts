@@ -253,7 +253,7 @@ class MusicService extends LocalService {
 					{
 						title: `${constants.emojis.music.stopped} ${strings.title}`,
 						description: strings.description,
-						color: constants.colors.blue,
+						color: constants.colours.blue,
 					},
 				],
 			})
@@ -348,7 +348,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: `${strings.description.outage}\n\n${strings.description.noLoss}`,
-						color: constants.colors.peach,
+						color: constants.colours.peach,
 					},
 				],
 			})
@@ -411,7 +411,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.lightGreen,
+						color: constants.colours.lightGreen,
 					},
 				],
 			})
@@ -440,7 +440,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
-						color: constants.colors.peach,
+						color: constants.colours.peach,
 					},
 				],
 			});
@@ -465,7 +465,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: action === "manage" ? strings.description.toManage : strings.description.toCheck,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -485,7 +485,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -516,7 +516,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -551,7 +551,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -648,7 +648,7 @@ class MusicService extends LocalService {
 			const embed: Discord.CamelizedDiscordEmbed = {
 				title: `${constants.emojis.music.queued} ${strings.title}`,
 				description: strings.description,
-				color: constants.colors.lightGreen,
+				color: constants.colours.lightGreen,
 			};
 
 			await this.client.bot.rest
@@ -747,7 +747,7 @@ class MusicService extends LocalService {
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colors.peach,
+							color: constants.colours.peach,
 						},
 					],
 				})
@@ -804,7 +804,7 @@ class MusicService extends LocalService {
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colors.peach,
+							color: constants.colours.peach,
 						},
 					],
 				})
@@ -903,7 +903,7 @@ class MusicService extends LocalService {
 								url: song.url,
 								user_mention: mention(session.listings.current.requestedBy, { type: "user" }),
 							}),
-							color: constants.colors.blue,
+							color: constants.colours.blue,
 						},
 					],
 				})

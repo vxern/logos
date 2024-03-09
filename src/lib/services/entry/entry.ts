@@ -171,7 +171,7 @@ class EntryService extends LocalService {
 						{
 							title: strings.title,
 							description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
-							color: constants.colors.blue,
+							color: constants.colours.blue,
 						},
 					],
 					components: [
@@ -212,7 +212,7 @@ class EntryService extends LocalService {
 					title: strings.title,
 					description: `${constants.emojis.responses.celebration} ${strings.description.nowMember}\n\n${strings.description.toStart}`,
 					image: { url: constants.gifs.welcome },
-					color: constants.colors.lightGreen,
+					color: constants.colours.lightGreen,
 				},
 			],
 		});
@@ -260,7 +260,7 @@ class EntryService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -292,7 +292,7 @@ class EntryService extends LocalService {
 							{
 								title: strings.title,
 								description: strings.description,
-								color: constants.colors.darkRed,
+								color: constants.colours.darkRed,
 							},
 						],
 					});
@@ -341,7 +341,7 @@ class EntryService extends LocalService {
 						{
 							title: strings.title,
 							description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
-							color: constants.colors.lightGreen,
+							color: constants.colours.lightGreen,
 						},
 					],
 				});
@@ -361,7 +361,7 @@ class EntryService extends LocalService {
 								{
 									title: strings.title,
 									description: strings.description,
-									color: constants.colors.red,
+									color: constants.colours.red,
 								},
 							],
 						});
@@ -450,7 +450,7 @@ class EntryService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -473,7 +473,7 @@ class EntryService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.red,
+						color: constants.colours.red,
 					},
 				],
 			});

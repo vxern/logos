@@ -6,7 +6,7 @@ class GuildMemberRemoveEventLogger extends EventLogger<"guildMemberRemove"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.user.left} User left`,
-			colour: constants.colors.dullYellow,
+			colour: constants.colours.dullYellow,
 		});
 	}
 

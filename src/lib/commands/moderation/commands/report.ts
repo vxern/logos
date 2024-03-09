@@ -55,7 +55,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -108,7 +108,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.lightGreen,
+						color: constants.colours.lightGreen,
 					},
 				],
 			});
@@ -172,7 +172,7 @@ async function handleSubmittedInvalidReport(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 			components: [
@@ -213,7 +213,7 @@ async function handleSubmittedInvalidReport(
 			embed = {
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.dullYellow,
+				color: constants.colours.dullYellow,
 			};
 			break;
 		}
@@ -228,7 +228,7 @@ async function handleSubmittedInvalidReport(
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});

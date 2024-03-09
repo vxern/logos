@@ -7,7 +7,7 @@ class MemberWarnAddEventLogger extends EventLogger<"memberWarnAdd"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.warned} Member warned`,
-			colour: constants.colors.dullYellow,
+			colour: constants.colours.dullYellow,
 		});
 	}
 

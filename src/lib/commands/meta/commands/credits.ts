@@ -49,7 +49,7 @@ function getTranslationView(client: Client, { locale }: { locale: Locale }): Dis
 		translation: client.localise("credits.strings.translation", locale)(),
 	};
 
-	return { title: strings.translation, fields, color: constants.colors.blue };
+	return { title: strings.translation, fields, color: constants.colours.blue };
 }
 
 export default command;

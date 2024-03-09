@@ -174,7 +174,7 @@ async function handlePardonUser(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.lightGreen,
+				color: constants.colours.lightGreen,
 			},
 		],
 	});
@@ -206,7 +206,7 @@ async function displayInvalidWarningError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});
@@ -227,7 +227,7 @@ async function displayFailedError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});

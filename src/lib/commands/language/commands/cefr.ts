@@ -249,7 +249,7 @@ function getBracketGuide(
 	return {
 		a: {
 			title: strings.brackets.a,
-			color: constants.colors.green,
+			color: constants.colours.green,
 			fields: [
 				...(options.isExtended
 					? [
@@ -271,7 +271,7 @@ function getBracketGuide(
 		},
 		b: {
 			title: strings.brackets.b,
-			color: constants.colors.yellow,
+			color: constants.colours.yellow,
 			fields: [
 				{
 					name: strings.levels.b1.title,
@@ -285,7 +285,7 @@ function getBracketGuide(
 		},
 		c: {
 			title: strings.brackets.c,
-			color: constants.colors.red,
+			color: constants.colours.red,
 			fields: [
 				{
 					name: strings.levels.c1.title,
@@ -351,7 +351,7 @@ function getBracketExamples(
 	return {
 		a: {
 			title: strings.brackets.a,
-			color: constants.colors.green,
+			color: constants.colours.green,
 			fields: [
 				...(options.isExtended
 					? [
@@ -373,7 +373,7 @@ function getBracketExamples(
 		},
 		b: {
 			title: strings.brackets.b,
-			color: constants.colors.yellow,
+			color: constants.colours.yellow,
 			fields: [
 				{
 					name: strings.levels.b1.title,
@@ -387,7 +387,7 @@ function getBracketExamples(
 		},
 		c: {
 			title: strings.brackets.c,
-			color: constants.colors.red,
+			color: constants.colours.red,
 			fields: [
 				{
 					name: strings.levels.c1.title,

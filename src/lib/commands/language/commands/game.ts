@@ -50,7 +50,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -105,12 +105,12 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 		if (isCorrect) {
 			data.sessionScore++;
-			data.embedColour = constants.colors.lightGreen;
+			data.embedColour = constants.colours.lightGreen;
 			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
 			client.editReply(interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
 		} else {
-			data.embedColour = constants.colors.red;
+			data.embedColour = constants.colours.red;
 
 			client.editReply(
 				interaction,
@@ -122,7 +122,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	skipButton.onCollect(async (buttonPress) => {
 		client.acknowledge(buttonPress);
 
-		data.embedColour = constants.colors.blue;
+		data.embedColour = constants.colours.blue;
 		data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
 		client.editReply(interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
@@ -133,7 +133,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 	const data: GameData = {
 		sentenceSelection: await getSentenceSelection(client, learningLocale),
-		embedColour: constants.colors.blue,
+		embedColour: constants.colours.blue,
 		guessButton: guessButton,
 		skipButton: skipButton,
 		sessionScore: 0,
@@ -173,7 +173,7 @@ async function getGameView(
 		embeds: [
 			{
 				description: `${constants.emojis.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
-				color: constants.colors.peach,
+				color: constants.colours.peach,
 				footer: { text: strings.sourcedFrom },
 			},
 			{

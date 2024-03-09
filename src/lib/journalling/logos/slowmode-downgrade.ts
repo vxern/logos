@@ -7,7 +7,7 @@ class SlowmodeDowngradeEventLogger extends EventLogger<"slowmodeDowngrade"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.slowmode.downgraded} Slowmode level downgraded`,
-			colour: constants.colors.dullYellow,
+			colour: constants.colours.dullYellow,
 		});
 	}
 

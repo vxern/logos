@@ -10,7 +10,7 @@ class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.entryRequest.submitted} Entry request submitted`,
-			colour: constants.colors.lightGreen,
+			colour: constants.colours.lightGreen,
 		});
 	}
 

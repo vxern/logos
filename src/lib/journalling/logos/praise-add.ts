@@ -7,7 +7,7 @@ class PraiseAddEventLogger extends EventLogger<"praiseAdd"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.praised} Member praised`,
-			colour: constants.colors.lightGreen,
+			colour: constants.colours.lightGreen,
 		});
 	}
 

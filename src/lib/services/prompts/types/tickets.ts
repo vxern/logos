@@ -59,7 +59,7 @@ class TicketService extends PromptService<{
 		return {
 			embeds: [
 				{
-					color: ticketDocument.isResolved ? constants.colors.green : constants.colors.husky,
+					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					description: `*${ticketDocument.answers.topic}*`,
 					footer: {
 						text: diagnostics.display.user(user),
@@ -132,7 +132,7 @@ class TicketService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -150,7 +150,7 @@ class TicketService extends PromptService<{
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});

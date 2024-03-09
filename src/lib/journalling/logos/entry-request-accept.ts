@@ -6,7 +6,7 @@ class EntryRequestAcceptEventLogger extends EventLogger<"entryRequestAccept"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.entryRequest.accepted} Entry request accepted`,
-			colour: constants.colors.lightGreen,
+			colour: constants.colours.lightGreen,
 		});
 	}
 

@@ -90,7 +90,7 @@ class InteractionRepetitionService extends GlobalService {
 		};
 
 		this.client.editReply(buttonPress, {
-			embeds: [{ title: strings.title, description: strings.description, color: constants.colors.dullYellow }],
+			embeds: [{ title: strings.title, description: strings.description, color: constants.colours.dullYellow }],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,

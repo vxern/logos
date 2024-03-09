@@ -144,7 +144,7 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -176,7 +176,7 @@ async function handleTranslate(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -205,7 +205,7 @@ async function handleTranslate(
 					{
 						title: strings.both.title,
 						description: strings.both.description,
-						color: constants.colors.red,
+						color: constants.colours.red,
 					},
 				],
 			});
@@ -226,7 +226,7 @@ async function handleTranslate(
 					{
 						title: strings.source.title,
 						description: strings.source.description,
-						color: constants.colors.red,
+						color: constants.colours.red,
 					},
 				],
 			});
@@ -247,7 +247,7 @@ async function handleTranslate(
 					{
 						title: strings.target.title,
 						description: strings.target.description,
-						color: constants.colors.red,
+						color: constants.colours.red,
 					},
 				],
 			});
@@ -269,7 +269,7 @@ async function handleTranslate(
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colors.dullYellow,
+							color: constants.colours.dullYellow,
 						},
 					],
 				});
@@ -339,7 +339,7 @@ async function handleTranslate(
 				{
 					title: strings.title,
 					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-					color: constants.colors.peach,
+					color: constants.colours.peach,
 				},
 			],
 		});
@@ -366,7 +366,7 @@ async function handleTranslate(
 				{
 					title: strings.title,
 					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-					color: constants.colors.peach,
+					color: constants.colours.peach,
 				},
 			],
 		});
@@ -400,7 +400,7 @@ async function translateText(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.yellow,
+					color: constants.colours.yellow,
 				},
 			],
 		});
@@ -431,7 +431,7 @@ async function translateText(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.red,
+					color: constants.colours.red,
 				},
 			],
 		});
@@ -456,12 +456,12 @@ async function translateText(
 	if (isLong) {
 		embeds = [
 			{
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 				title: strings.sourceText,
 				description: text,
 			},
 			{
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 				title: strings.translation,
 				description: translatedText,
 				footer: {
@@ -472,7 +472,7 @@ async function translateText(
 	} else {
 		embeds = [
 			{
-				color: constants.colors.blue,
+				color: constants.colours.blue,
 				fields: [
 					{
 						name: strings.sourceText,
@@ -529,7 +529,7 @@ async function detectLanguage(
 				{
 					title: strings.title,
 					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-					color: constants.colors.peach,
+					color: constants.colours.peach,
 				},
 			],
 		});
@@ -551,7 +551,7 @@ async function detectLanguage(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});

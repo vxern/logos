@@ -38,11 +38,11 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 		return {
 			embeds: [
 				{
-					color: constants.colors.peach,
+					color: constants.colours.peach,
 					fields: informationFields,
 				},
 				{
-					color: constants.colors.gray,
+					color: constants.colours.gray,
 					fields: [
 						{
 							name: `${constants.emojis.information.inviteLink}  ${strings.invite}`,

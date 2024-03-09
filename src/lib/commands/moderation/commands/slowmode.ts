@@ -102,7 +102,7 @@ async function handleToggleSlowmode(
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colors.red,
+							color: constants.colours.red,
 						},
 					],
 				});
@@ -137,7 +137,7 @@ async function handleToggleSlowmode(
 							{
 								title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
 								description: strings.description,
-								color: constants.colors.lightGreen,
+								color: constants.colours.lightGreen,
 							},
 						],
 					},
@@ -169,7 +169,7 @@ async function handleToggleSlowmode(
 							{
 								title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
 								description: strings.description,
-								color: constants.colors.lightGreen,
+								color: constants.colours.lightGreen,
 							},
 						],
 					},
@@ -193,7 +193,7 @@ async function handleToggleSlowmode(
 						{
 							title: strings.title,
 							description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
-							color: constants.colors.dullYellow,
+							color: constants.colours.dullYellow,
 						},
 					],
 				});
@@ -225,7 +225,7 @@ async function handleToggleSlowmode(
 						{
 							title: strings.title,
 							description: `${strings.description.justEnabled} ${strings.description.canDisableIn}`,
-							color: constants.colors.peach,
+							color: constants.colours.peach,
 						},
 					],
 				});
@@ -255,7 +255,7 @@ async function handleToggleSlowmode(
 					{
 						title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			},
@@ -276,7 +276,7 @@ async function handleToggleSlowmode(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -296,7 +296,7 @@ async function handleToggleSlowmode(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.red,
+					color: constants.colours.red,
 				},
 			],
 		});
@@ -331,7 +331,7 @@ async function handleToggleSlowmode(
 				{
 					title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.lightGreen,
+					color: constants.colours.lightGreen,
 				},
 			],
 		},

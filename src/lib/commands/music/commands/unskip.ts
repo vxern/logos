@@ -57,7 +57,7 @@ async function handleUnskipAction(
 				{
 					title: strings.title,
 					description: strings.description.toManage,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -102,7 +102,7 @@ async function handleUnskipAction(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -133,7 +133,7 @@ async function handleUnskipAction(
 				{
 					title: strings.title,
 					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -152,7 +152,7 @@ async function handleUnskipAction(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -172,7 +172,7 @@ async function handleUnskipAction(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.yellow,
+					color: constants.colours.yellow,
 				},
 			],
 		});
@@ -195,7 +195,7 @@ async function handleUnskipAction(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.red,
+					color: constants.colours.red,
 				},
 			],
 		});
@@ -214,7 +214,7 @@ async function handleUnskipAction(
 				{
 					title: `${constants.emojis.music.unskipped} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		},

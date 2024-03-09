@@ -55,7 +55,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -108,7 +108,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.lightGreen,
+						color: constants.colours.lightGreen,
 					},
 				],
 			});
@@ -171,7 +171,7 @@ async function handleSubmittedInvalidResource(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 			components: [
@@ -214,7 +214,7 @@ async function handleSubmittedInvalidResource(
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});

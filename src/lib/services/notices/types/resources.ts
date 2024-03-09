@@ -66,7 +66,7 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 						`1. ${strings.description.contributable.usingCommand}\n` +
 						`2. ${strings.description.contributable.openingIssue}\n` +
 						`3. ${strings.description.contributable.pullRequest}\n`,
-					color: constants.colors.gray,
+					color: constants.colours.gray,
 				},
 			],
 			components: [

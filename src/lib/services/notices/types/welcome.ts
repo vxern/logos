@@ -33,7 +33,7 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 					title: strings.title,
 					description: strings.description.toEnter,
 					image: { url: constants.gifs.followRules },
-					color: constants.colors.orange,
+					color: constants.colours.orange,
 				},
 			],
 			components: [

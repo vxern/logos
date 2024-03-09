@@ -43,7 +43,7 @@ async function handleOpenRoleSelectionMenu(client: Client, interaction: Logos.In
 			root: {
 				type: "group",
 				id: "roles.noCategory",
-				color: constants.colors.invisible,
+				color: constants.colours.invisible,
 				emoji: constants.emojis.roles.noCategory,
 				categories: rootCategories,
 			},

@@ -7,7 +7,7 @@ class MessageUpdateEventLogger extends EventLogger<"messageUpdate"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.message.updated} Message updated`,
-			colour: constants.colors.blue,
+			colour: constants.colours.blue,
 		});
 	}
 

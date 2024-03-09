@@ -33,7 +33,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 				{
 					title: strings.title,
 					description: strings.description.toManage,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -59,7 +59,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.red,
+					color: constants.colours.red,
 				},
 			],
 		});
@@ -83,7 +83,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 				{
 					title: `${constants.emojis.music.volume} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		},

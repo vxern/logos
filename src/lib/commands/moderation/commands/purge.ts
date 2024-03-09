@@ -212,7 +212,7 @@ async function handlePurgeMessages(
 					title: strings.indexing.title,
 					description: strings.indexing.description,
 					fields: getMessageFields(),
-					color: constants.colors.peach,
+					color: constants.colours.peach,
 				},
 			],
 		};
@@ -249,7 +249,7 @@ async function handlePurgeMessages(
 					{
 						title: strings.title,
 						description: `${strings.description.rangeTooBig}\n\n${strings.description.trySmaller}`,
-						color: constants.colors.yellow,
+						color: constants.colours.yellow,
 					},
 				],
 			});
@@ -323,7 +323,7 @@ async function handlePurgeMessages(
 					title: strings.indexed.title,
 					description: `${strings.indexed.description.none}\n\n${strings.indexed.description.tryDifferentQuery}`,
 					fields: getMessageFields(),
-					color: constants.colors.husky,
+					color: constants.colours.husky,
 				},
 			],
 		});
@@ -399,12 +399,12 @@ async function handlePurgeMessages(
 					title: strings.indexed.title,
 					description: `${strings.indexed.description.tooMany}\n\n${strings.indexed.description.limited}`,
 					fields: getMessageFields(),
-					color: constants.colors.yellow,
+					color: constants.colours.yellow,
 				},
 				{
 					title: strings.continue.title,
 					description: strings.continue.description,
-					color: constants.colors.husky,
+					color: constants.colours.husky,
 				},
 			],
 			components: [
@@ -489,12 +489,12 @@ async function handlePurgeMessages(
 					title: strings.indexed.title,
 					description: strings.indexed.description.some,
 					fields: getMessageFields(),
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 				{
 					title: strings.sureToPurge.title,
 					description: strings.sureToPurge.description,
-					color: constants.colors.husky,
+					color: constants.colours.husky,
 				},
 			],
 			components: [
@@ -548,7 +548,7 @@ async function handlePurgeMessages(
 				{
 					title: strings.purging.title,
 					description: `${strings.purging.description.purging} ${strings.purging.description.mayTakeTime}\n\n${strings.purging.description.onceComplete}`,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 			components: [],
@@ -661,7 +661,7 @@ async function handlePurgeMessages(
 				{
 					title: strings.purged.title,
 					description: strings.purged.description,
-					color: constants.colors.lightGreen,
+					color: constants.colours.lightGreen,
 					image: { url: constants.gifs.done },
 				},
 			],
@@ -709,7 +709,7 @@ async function displaySnowflakesInvalidError(
 								title: strings.end.title,
 								description: strings.end.description,
 						  }),
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});
@@ -730,7 +730,7 @@ async function displayIdsNotDifferentError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});
@@ -751,7 +751,7 @@ async function displayFailedError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});

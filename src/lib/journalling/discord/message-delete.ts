@@ -7,7 +7,7 @@ class MessageDeleteEventLogger extends EventLogger<"messageDelete"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.message.deleted} Message deleted`,
-			colour: constants.colors.red,
+			colour: constants.colours.red,
 		});
 	}
 

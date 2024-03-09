@@ -46,7 +46,7 @@ async function handleLoopPlayback(
 				{
 					title: strings.title,
 					description: strings.description.toManage,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -75,7 +75,7 @@ async function handleLoopPlayback(
 					{
 						title: strings.title,
 						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -93,7 +93,7 @@ async function handleLoopPlayback(
 				{
 					title: strings.title,
 					description: strings.description,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -119,7 +119,7 @@ async function handleLoopPlayback(
 						{
 							title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
 							description: strings.description,
-							color: constants.colors.blue,
+							color: constants.colours.blue,
 						},
 					],
 				},
@@ -140,7 +140,7 @@ async function handleLoopPlayback(
 					{
 						title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
 						description: strings.description,
-						color: constants.colors.blue,
+						color: constants.colours.blue,
 					},
 				],
 			},
@@ -167,7 +167,7 @@ async function handleLoopPlayback(
 					{
 						title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
 						description: strings.description,
-						color: constants.colors.blue,
+						color: constants.colours.blue,
 					},
 				],
 			},
@@ -188,7 +188,7 @@ async function handleLoopPlayback(
 				{
 					title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		},

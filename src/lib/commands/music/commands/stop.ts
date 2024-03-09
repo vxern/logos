@@ -40,7 +40,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 				{
 					title: strings.title,
 					description: strings.description.toManage,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -61,7 +61,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 				{
 					title: `${constants.emojis.music.stopped} ${strings.title}`,
 					description: strings.description,
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 		},

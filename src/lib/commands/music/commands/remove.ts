@@ -42,7 +42,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 				{
 					title: strings.title,
 					description: strings.description.toManage,
-					color: constants.colors.dullYellow,
+					color: constants.colours.dullYellow,
 				},
 			],
 		});
@@ -80,7 +80,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colors.dullYellow,
+						color: constants.colours.dullYellow,
 					},
 				],
 			});
@@ -105,7 +105,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 					{
 						title: `${constants.emojis.music.removed} ${strings.title}`,
 						description: strings.description,
-						color: constants.colors.blue,
+						color: constants.colours.blue,
 					},
 				],
 			},

@@ -3,7 +3,7 @@ import { RoleCategory } from "../types";
 const category: RoleCategory = {
 	type: "single",
 	id: "roles.regions",
-	color: constants.colors.greenishLightGray,
+	color: constants.colours.greenishLightGray,
 	emoji: constants.emojis.roles.categories.regions.category,
 	maximum: 2,
 	collection: {

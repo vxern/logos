@@ -422,7 +422,7 @@ class Client {
 						{
 							title: strings.title,
 							description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
-							color: constants.colors.dullYellow,
+							color: constants.colours.dullYellow,
 						},
 					],
 				});
@@ -590,7 +590,7 @@ class Client {
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colors.red,
+							color: constants.colours.red,
 						},
 					],
 				});

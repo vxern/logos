@@ -7,7 +7,7 @@ class TicketOpenEventLogger extends EventLogger<"ticketOpen"> {
 	constructor(client: Client) {
 		super(client, {
 			title: `${constants.emojis.events.ticket} Ticket opened`,
-			colour: constants.colors.husky,
+			colour: constants.colours.husky,
 		});
 	}
 

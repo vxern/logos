@@ -106,7 +106,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 					description: strings.content,
 					footer: { text: `${strings.tldr}: ${strings.summary}` },
 					image: { url: constants.gifs.chaosWithoutRules },
-					color: constants.colors.blue,
+					color: constants.colours.blue,
 				},
 			],
 			components,
@@ -150,7 +150,7 @@ async function displayError(
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colors.red,
+				color: constants.colours.red,
 			},
 		],
 	});
