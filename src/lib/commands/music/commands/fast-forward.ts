@@ -96,7 +96,7 @@ async function handleFastForward(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.fastForwarded} ${strings.title}`,
+					title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

@@ -1,3 +1,4 @@
+import { Client } from "./client";
 import { Logger } from "./logger";
 
 class DiscordConnection {
@@ -15,11 +16,7 @@ class DiscordConnection {
 
 	readonly #log: Logger;
 
-	constructor({
-		bot,
-		events,
-		isDebug,
-	}: { bot: Discord.Bot; events: Partial<Discord.EventHandlers>; isDebug?: boolean }) {
+	constructor(client: Client, { bot, events }: { bot: Discord.Bot; events: Partial<Discord.EventHandlers> }) {
 		this.bot = bot;
 		this.cache = {
 			guilds: new Map(),
@@ -32,7 +29,7 @@ class DiscordConnection {
 			},
 		};
 
-		this.#log = Logger.create({ identifier: "Client/DiscordConnection", isDebug });
+		this.#log = Logger.create({ identifier: "Client/DiscordConnection", isDebug: client.environment.isDebug });
 
 		// TODO(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
 		this.bot.handlers.MESSAGE_UPDATE = (bot, data) => {

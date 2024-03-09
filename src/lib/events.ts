@@ -1,4 +1,4 @@
-import { ServiceStore } from "./client";
+import { Client, ServiceStore } from "./client";
 import { Collector } from "./collectors";
 import { Logger } from "./logger";
 
@@ -8,8 +8,8 @@ class EventStore {
 	readonly #services: ServiceStore;
 	readonly #collectors: Map<Event, Set<Collector<Event>>>;
 
-	constructor({ services, isDebug }: { services: ServiceStore; isDebug?: boolean }) {
-		this.#log = Logger.create({ identifier: "Client/EventStore", isDebug });
+	constructor(client: Client, { services }: { services: ServiceStore }) {
+		this.#log = Logger.create({ identifier: "Client/EventStore", isDebug: client.environment.isDebug });
 		this.#services = services;
 		this.#collectors = new Map();
 	}

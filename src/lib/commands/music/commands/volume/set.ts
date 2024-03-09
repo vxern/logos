@@ -81,7 +81,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.volume} ${strings.title}`,
+					title: `${constants.emojis.music.volume} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

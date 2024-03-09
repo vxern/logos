@@ -94,7 +94,7 @@ class RoleIndicatorService extends LocalService {
 			return;
 		}
 
-		const indicators = indicatorsFormatted.split(constants.symbols.sigils.separator);
+		const indicators = indicatorsFormatted.split(constants.special.sigils.separator);
 		const hasNoChange =
 			indicators.length === applicableIndicators.length &&
 			applicableIndicators.every((applicableIndicator, index) => indicators[index] === applicableIndicator);
@@ -110,7 +110,7 @@ class RoleIndicatorService extends LocalService {
 }
 
 function applyIndicators(username: string, sigils: string[]): string {
-	const modification = `${constants.symbols.sigils.divider}${sigils.join(constants.symbols.sigils.separator)}`;
+	const modification = `${constants.special.sigils.divider}${sigils.join(constants.special.sigils.separator)}`;
 	const usernameSlice = username.slice(0, constants.MAXIMUM_USERNAME_LENGTH - modification.length);
 
 	return `${usernameSlice}${modification}`;

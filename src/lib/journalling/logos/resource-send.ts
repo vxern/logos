@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.resource} Resource submitted`,
+			title: `${constants.emojis.events.resource} Resource submitted`,
 			colour: constants.colors.darkGreen,
 		});
 	}

@@ -5,7 +5,7 @@ import { EventLogger } from "../logger";
 class GuildBanRemoveEventLogger extends EventLogger<"guildBanRemove"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.user.unbanned} User unbanned`,
+			title: `${constants.emojis.events.user.unbanned} User unbanned`,
 			colour: constants.colors.dullYellow,
 		});
 	}

@@ -69,7 +69,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.paused} ${strings.title}`,
+					title: `${constants.emojis.music.paused} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

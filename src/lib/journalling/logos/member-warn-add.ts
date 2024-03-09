@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class MemberWarnAddEventLogger extends EventLogger<"memberWarnAdd"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.warned} Member warned`,
+			title: `${constants.emojis.events.warned} Member warned`,
 			colour: constants.colors.dullYellow,
 		});
 	}

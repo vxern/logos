@@ -4,7 +4,7 @@ const category: RoleCategory = {
 	type: "single",
 	id: "roles.regions",
 	color: constants.colors.greenishLightGray,
-	emoji: constants.symbols.roles.categories.regions.category,
+	emoji: constants.emojis.roles.categories.regions.category,
 	maximum: 2,
 	collection: {
 		type: "custom",

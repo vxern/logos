@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class SlowmodeDowngradeEventLogger extends EventLogger<"slowmodeDowngrade"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.slowmode.downgraded} Slowmode level downgraded`,
+			title: `${constants.emojis.events.slowmode.downgraded} Slowmode level downgraded`,
 			colour: constants.colors.dullYellow,
 		});
 	}

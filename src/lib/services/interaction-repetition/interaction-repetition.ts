@@ -122,7 +122,7 @@ class InteractionRepetitionService extends GlobalService {
 			type: Discord.MessageComponentTypes.Button,
 			style: Discord.ButtonStyles.Primary,
 			label: strings.show,
-			emoji: { name: constants.symbols.showInChat },
+			emoji: { name: constants.emojis.showInChat },
 			customId: this.#_showInChatButtons.encodeId([interaction.id.toString()]),
 		};
 	}

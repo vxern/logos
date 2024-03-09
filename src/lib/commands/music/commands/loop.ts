@@ -117,7 +117,7 @@ async function handleLoopPlayback(
 				{
 					embeds: [
 						{
-							title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
+							title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
 							description: strings.description,
 							color: constants.colors.blue,
 						},
@@ -138,7 +138,7 @@ async function handleLoopPlayback(
 			{
 				embeds: [
 					{
-						title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
+						title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
 						description: strings.description,
 						color: constants.colors.blue,
 					},
@@ -165,7 +165,7 @@ async function handleLoopPlayback(
 			{
 				embeds: [
 					{
-						title: `${constants.symbols.music.loopDisabled} ${strings.title}`,
+						title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
 						description: strings.description,
 						color: constants.colors.blue,
 					},
@@ -186,7 +186,7 @@ async function handleLoopPlayback(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.loopEnabled} ${strings.title}`,
+					title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

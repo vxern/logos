@@ -97,14 +97,12 @@ class CommandStore {
 		{
 			localisations,
 			templates,
-			isDebug,
 		}: {
 			localisations: LocalisationStore;
 			templates: CommandTemplate[];
-			isDebug?: boolean;
 		},
 	): CommandStore {
-		const log = Logger.create({ identifier: "Client/InteractionStore", isDebug });
+		const log = Logger.create({ identifier: "Client/InteractionStore", isDebug: client.environment.isDebug });
 
 		// Build commands from templates.
 		const commandsByName: Partial<Record<CommandName, Command>> = {};

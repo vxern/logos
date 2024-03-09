@@ -97,7 +97,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 							description: `– *${data.answer}*`,
 							color: constants.colors.lightGreen,
 							footer: {
-								text: `${constants.symbols.answer} ${strings.submittedBy}`,
+								text: `${constants.emojis.answer} ${strings.submittedBy}`,
 								iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
 									avatar: interaction.user.avatar,
 								}),

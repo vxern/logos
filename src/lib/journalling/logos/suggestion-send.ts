@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class SuggestionSendEventLogger extends EventLogger<"suggestionSend"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.suggestion} Suggestion made`,
+			title: `${constants.emojis.events.suggestion} Suggestion made`,
 			colour: constants.colors.darkGreen,
 		});
 	}

@@ -5,7 +5,7 @@ import { EventLogger } from "../logger";
 class MemberTimeoutRemoveEventLogger extends EventLogger<"memberTimeoutRemove"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.timeout.removed} Member's timeout cleared`,
+			title: `${constants.emojis.events.timeout.removed} Member's timeout cleared`,
 			colour: constants.colors.blue,
 		});
 	}

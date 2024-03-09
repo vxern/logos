@@ -69,7 +69,7 @@ class JournallingStore {
 	readonly #_messageDeleteCollector: Collector<"messageDelete">;
 	readonly #_messageUpdateCollector: Collector<"messageUpdate">;
 
-	constructor(client: Client, { isDebug }: { isDebug?: boolean }) {
+	constructor(client: Client) {
 		this.#discord = {
 			guildBanAdd: new GuildBanAddEventLogger(client),
 			guildBanRemove: new GuildBanRemoveEventLogger(client),
@@ -100,7 +100,7 @@ class JournallingStore {
 			slowmodeDowngrade: new SlowmodeDowngradeEventLogger(client),
 		};
 
-		this.#log = Logger.create({ identifier: "JournallingStore", isDebug });
+		this.#log = Logger.create({ identifier: "JournallingStore", isDebug: client.environment.isDebug });
 		this.#client = client;
 
 		this.#_guildBanAddCollector = new Collector();

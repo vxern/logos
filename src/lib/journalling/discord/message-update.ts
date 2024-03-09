@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class MessageUpdateEventLogger extends EventLogger<"messageUpdate"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.message.updated} Message updated`,
+			title: `${constants.emojis.events.message.updated} Message updated`,
 			colour: constants.colors.blue,
 		});
 	}

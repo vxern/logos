@@ -23,7 +23,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 			};
 
 			return {
-				name: `${constants.symbols.ruleBullet}  #${index + 1} ~ **${strings.title.toUpperCase()}**  ~  ${
+				name: `${constants.emojis.ruleBullet}  #${index + 1} ~ **${strings.title.toUpperCase()}**  ~  ${
 					strings.tldr
 				}: *${strings.summary}*`,
 				value: strings.content,
@@ -45,7 +45,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 					color: constants.colors.gray,
 					fields: [
 						{
-							name: `${constants.symbols.information.inviteLink}  ${strings.invite}`,
+							name: `${constants.emojis.information.inviteLink}  ${strings.invite}`,
 							value: `**${configuration.inviteLink}**`,
 						},
 					],

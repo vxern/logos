@@ -135,7 +135,7 @@ async function handleToggleSlowmode(
 					{
 						embeds: [
 							{
-								title: `${constants.symbols.events.slowmode.downgraded}  ${strings.title}`,
+								title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
 								description: strings.description,
 								color: constants.colors.lightGreen,
 							},
@@ -167,7 +167,7 @@ async function handleToggleSlowmode(
 					{
 						embeds: [
 							{
-								title: `${constants.symbols.events.slowmode.upgraded}  ${strings.title}`,
+								title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
 								description: strings.description,
 								color: constants.colors.lightGreen,
 							},
@@ -253,7 +253,7 @@ async function handleToggleSlowmode(
 			{
 				embeds: [
 					{
-						title: `${constants.symbols.events.slowmode.disabled}  ${strings.title}`,
+						title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
 						description: strings.description,
 						color: constants.colors.dullYellow,
 					},
@@ -329,7 +329,7 @@ async function handleToggleSlowmode(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.events.slowmode.enabled}  ${strings.title}`,
+					title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.lightGreen,
 				},

@@ -73,46 +73,46 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 				color: constants.colors.blue,
 				fields: [
 					{
-						name: `${constants.symbols.guild.description} ${strings.description.description.title}`,
+						name: `${constants.emojis.guild.description} ${strings.description.description.title}`,
 						value: guild.description ?? strings.description.description.noDescription,
 						inline: true,
 					},
 					{
-						name: `${constants.symbols.guild.members} ${strings.description.members}`,
+						name: `${constants.emojis.guild.members} ${strings.description.members}`,
 						value: guild.memberCount.toString(),
 						inline: true,
 					},
 					{
-						name: `${constants.symbols.guild.created} ${strings.description.created}`,
+						name: `${constants.emojis.guild.created} ${strings.description.created}`,
 						value: timestamp(Discord.snowflakeToTimestamp(guild.id), { format: "relative" }),
 						inline: true,
 					},
 					{
-						name: `${constants.symbols.guild.channels.channels} ${strings.description.channels}`,
+						name: `${constants.emojis.guild.channels.channels} ${strings.description.channels}`,
 						value: getChannelInformationSection(client, guild, { locale }),
 						inline: true,
 					},
 					{
-						name: `${constants.symbols.guild.languages.languages} ${strings.description.languages}`,
+						name: `${constants.emojis.guild.languages.languages} ${strings.description.languages}`,
 						value: getLanguageInformationSection(client, guildDocument, { locale }),
 						inline: true,
 					},
 					...(guildDocument.isNative
 						? [
 								{
-									name: `${constants.symbols.guild.moderators} ${strings.description.moderators.title}`,
+									name: `${constants.emojis.guild.moderators} ${strings.description.moderators.title}`,
 									value: strings.description.moderators.overseenByModerators,
 									inline: false,
 								},
 								{
-									name: `${constants.symbols.guild.proficiencyDistribution} ${strings.description.distribution}`,
+									name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
 									value: formatDistribution(client, getProficiencyRoleDistribution(client, guild), { locale }),
 									inline: false,
 								},
 						  ]
 						: [
 								{
-									name: `${constants.symbols.guild.owner} ${strings.description.owner}`,
+									name: `${constants.emojis.guild.owner} ${strings.description.owner}`,
 									value: mention(owner.id, { type: "user" }),
 									inline: true,
 								},
@@ -137,7 +137,7 @@ function getChannelInformationSection(client: Client, guild: Logos.Guild, { loca
 		voice: client.localise("information.options.server.strings.channelTypes.voice", locale)(),
 	};
 
-	return `${constants.symbols.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.symbols.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
+	return `${constants.emojis.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.emojis.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
 function getLanguageInformationSection(client: Client, guildDocument: Guild, { locale }: { locale: Locale }): string {
@@ -148,7 +148,7 @@ function getLanguageInformationSection(client: Client, guildDocument: Guild, { l
 		featureLanguage: client.localise(localisations.languages[guildDocument.featureLanguage], locale)(),
 	};
 
-	return `${constants.symbols.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage}\n${constants.symbols.guild.languages.feature} ${strings.target} – ${strings.featureLanguage}`;
+	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${strings.featureLanguage}`;
 }
 
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];

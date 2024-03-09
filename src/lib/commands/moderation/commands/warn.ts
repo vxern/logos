@@ -244,7 +244,7 @@ async function handleWarnUser(
 			alertService?.alert({
 				embeds: [
 					{
-						title: `${constants.symbols.indicators.exclamation} ${strings.title}`,
+						title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
 						description: strings.description,
 						color: constants.colors.red,
 					},
@@ -271,7 +271,7 @@ async function handleWarnUser(
 			alertService?.alert({
 				embeds: [
 					{
-						title: `${constants.symbols.indicators.warning} ${strings.title}`,
+						title: `${constants.emojis.indicators.warning} ${strings.title}`,
 						description: strings.description,
 						color: constants.colors.yellow,
 					},

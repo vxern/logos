@@ -167,7 +167,7 @@ async function handleRecogniseLanguage(
 			};
 
 			fields.push({
-				name: `${constants.symbols.detect.likely} ${strings.title}`,
+				name: `${constants.emojis.detect.likely} ${strings.title}`,
 				value: strings.description,
 				inline: false,
 			});
@@ -183,7 +183,7 @@ async function handleRecogniseLanguage(
 			};
 
 			fields.push({
-				name: `${constants.symbols.detect.likely} ${strings.title}`,
+				name: `${constants.emojis.detect.likely} ${strings.title}`,
 				value: `${strings.description}\n${languageNamesFormatted}`,
 				inline: false,
 			});
@@ -206,7 +206,7 @@ async function handleRecogniseLanguage(
 			};
 
 			fields.push({
-				name: `${constants.symbols.detect.possible} ${strings.title}`,
+				name: `${constants.emojis.detect.possible} ${strings.title}`,
 				value: strings.description,
 				inline: false,
 			});
@@ -222,7 +222,7 @@ async function handleRecogniseLanguage(
 			};
 
 			fields.push({
-				name: `${constants.symbols.detect.possible} ${strings.title}`,
+				name: `${constants.emojis.detect.possible} ${strings.title}`,
 				value: `${strings.description}\n${languageNamesFormatted}`,
 				inline: false,
 			});

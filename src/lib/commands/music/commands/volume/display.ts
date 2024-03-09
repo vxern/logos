@@ -64,7 +64,7 @@ async function handleDisplayVolume(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.volume} ${strings.title}`,
+					title: `${constants.emojis.music.volume} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

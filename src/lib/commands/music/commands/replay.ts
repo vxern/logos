@@ -110,7 +110,7 @@ async function handleReplayAction(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.replaying} ${strings.title}`,
+					title: `${constants.emojis.music.replaying} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

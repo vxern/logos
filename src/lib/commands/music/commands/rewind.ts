@@ -93,7 +93,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.rewound} ${strings.title}`,
+					title: `${constants.emojis.music.rewound} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

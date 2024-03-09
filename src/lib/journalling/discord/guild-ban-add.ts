@@ -4,7 +4,7 @@ import { EventLogger } from "../logger";
 
 class GuildBanAddEventLogger extends EventLogger<"guildBanAdd"> {
 	constructor(client: Client) {
-		super(client, { title: `${constants.symbols.events.user.banned} User banned`, colour: constants.colors.red });
+		super(client, { title: `${constants.emojis.events.user.banned} User banned`, colour: constants.colors.red });
 	}
 
 	filter(originGuildId: bigint, user: Discord.User, guildId: bigint): boolean {

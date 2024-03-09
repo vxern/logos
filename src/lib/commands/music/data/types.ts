@@ -65,9 +65,9 @@ interface SongStream {
 }
 
 const listingTypeToEmoji = {
-	song: constants.symbols.music.song,
-	collection: constants.symbols.music.collection,
-	file: constants.symbols.music.file,
+	song: constants.emojis.music.song,
+	collection: constants.emojis.music.collection,
+	file: constants.emojis.music.file,
 } satisfies Record<SongListingType, string>;
 
 export { listingTypeToEmoji, SongListingType };

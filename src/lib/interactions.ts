@@ -304,8 +304,8 @@ class InteractionStore {
 	readonly #bot: Discord.Bot;
 	readonly #interactions: Map<bigint, Logos.Interaction>;
 
-	constructor({ bot, isDebug }: { bot: Discord.Bot; isDebug: boolean }) {
-		this.log = Logger.create({ identifier: "Interactions", isDebug });
+	constructor(client: Client, { bot }: { bot: Discord.Bot }) {
+		this.log = Logger.create({ identifier: "Interactions", isDebug: client.environment.isDebug });
 
 		this.#bot = bot;
 		this.#interactions = new Map();

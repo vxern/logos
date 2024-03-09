@@ -45,7 +45,7 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 							style: Discord.ButtonStyles.Secondary,
 							label: strings.description.acceptedRules,
 							customId: constants.components.acceptedRules,
-							emoji: { name: constants.symbols.understood },
+							emoji: { name: constants.emojis.understood },
 						},
 					],
 				},

@@ -59,7 +59,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.stopped} ${strings.title}`,
+					title: `${constants.emojis.music.stopped} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

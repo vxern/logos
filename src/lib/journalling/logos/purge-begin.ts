@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.purging.begin} Purging started`,
+			title: `${constants.emojis.events.purging.begin} Purging started`,
 			colour: constants.colors.yellow,
 		});
 	}

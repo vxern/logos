@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.report} Report submitted`,
+			title: `${constants.emojis.events.report} Report submitted`,
 			colour: constants.colors.darkRed,
 		});
 	}

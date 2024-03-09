@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class MemberTimeoutAddEventLogger extends EventLogger<"memberTimeoutAdd"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.timeout.added} Member timed out`,
+			title: `${constants.emojis.events.timeout.added} Member timed out`,
 			colour: constants.colors.dullYellow,
 		});
 	}

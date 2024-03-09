@@ -6,7 +6,7 @@ import { EventLogger } from "../logger";
 class SlowmodeEnableEventLogger extends EventLogger<"slowmodeEnable"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.slowmode.enabled} Slowmode enabled`,
+			title: `${constants.emojis.events.slowmode.enabled} Slowmode enabled`,
 			colour: constants.colors.dullYellow,
 		});
 	}

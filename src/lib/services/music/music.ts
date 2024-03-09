@@ -251,7 +251,7 @@ class MusicService extends LocalService {
 			.sendMessage(session.channelId, {
 				embeds: [
 					{
-						title: `${constants.symbols.music.stopped} ${strings.title}`,
+						title: `${constants.emojis.music.stopped} ${strings.title}`,
 						description: strings.description,
 						color: constants.colors.blue,
 					},
@@ -646,7 +646,7 @@ class MusicService extends LocalService {
 			};
 
 			const embed: Discord.CamelizedDiscordEmbed = {
-				title: `${constants.symbols.music.queued} ${strings.title}`,
+				title: `${constants.emojis.music.queued} ${strings.title}`,
 				description: strings.description,
 				color: constants.colors.lightGreen,
 			};

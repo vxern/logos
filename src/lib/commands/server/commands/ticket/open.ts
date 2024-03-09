@@ -129,7 +129,7 @@ async function openTicket(
 		.createChannel(guild.id, {
 			parentId: categoryId,
 			name: trim(
-				`${user.username}${constants.symbols.sigils.channelSeparator}${
+				`${user.username}${constants.special.sigils.channelSeparator}${
 					type === "standalone" ? answers.topic : strings.inquiry
 				}`,
 				100,

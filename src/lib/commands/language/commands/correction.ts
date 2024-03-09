@@ -176,7 +176,7 @@ async function handleStartCorrecting(
 							description: data.corrected,
 							color: constants.colors.lightGreen,
 							footer: {
-								text: `${constants.symbols.correction} ${strings.suggestedBy}`,
+								text: `${constants.emojis.correction} ${strings.suggestedBy}`,
 								iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
 									avatar: interaction.user.avatar,
 								}),

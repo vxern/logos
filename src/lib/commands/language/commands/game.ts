@@ -167,12 +167,12 @@ async function getGameView(
 	);
 
 	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]);
-	const mask = constants.symbols.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
+	const mask = constants.special.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
 
 	return {
 		embeds: [
 			{
-				description: `${constants.symbols.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
+				description: `${constants.emojis.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
 				color: constants.colors.peach,
 				footer: { text: strings.sourcedFrom },
 			},
@@ -229,13 +229,13 @@ async function getGameView(
 						? {
 								type: Discord.MessageComponentTypes.Button,
 								style: Discord.ButtonStyles.Primary,
-								label: `${constants.symbols.interactions.menu.controls.forward} ${strings.next}`,
+								label: `${constants.emojis.interactions.menu.controls.forward} ${strings.next}`,
 								customId: data.skipButton.encodeId([]),
 						  }
 						: {
 								type: Discord.MessageComponentTypes.Button,
 								style: Discord.ButtonStyles.Secondary,
-								label: `${constants.symbols.interactions.menu.controls.forward} ${strings.skip}`,
+								label: `${constants.emojis.interactions.menu.controls.forward} ${strings.skip}`,
 								customId: data.skipButton.encodeId([]),
 						  },
 				] as [Discord.ButtonComponent],

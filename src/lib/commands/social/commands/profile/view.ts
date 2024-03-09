@@ -94,14 +94,14 @@ async function handleDisplayProfile(
 					color: constants.colors.peach,
 					fields: [
 						{
-							name: `${constants.symbols.profile.roles} ${strings.roles}`,
+							name: `${constants.emojis.profile.roles} ${strings.roles}`,
 							value: member.roles.map((roleId) => mention(roleId, { type: "role" })).join(" "),
 							inline: false,
 						},
 						{
-							name: `${constants.symbols.profile.statistics.statistics} ${strings.statistics}`,
-							value: `${constants.symbols.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praiseDocumentsByTarget.length} • ${strings.sent} – ${praiseDocumentsByAuthor.length}
-  ${constants.symbols.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningDocuments.length}`,
+							name: `${constants.emojis.profile.statistics.statistics} ${strings.statistics}`,
+							value: `${constants.emojis.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praiseDocumentsByTarget.length} • ${strings.sent} – ${praiseDocumentsByAuthor.length}
+  ${constants.emojis.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningDocuments.length}`,
 							inline: false,
 						},
 					],

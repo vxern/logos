@@ -439,7 +439,7 @@ async function translateText(
 	}
 
 	// Ensures that an empty translation string does not result in embed failure.
-	const translatedText = translation.text.trim().length !== 0 ? translation.text : constants.symbols.meta.whitespace;
+	const translatedText = translation.text.trim().length !== 0 ? translation.text : constants.special.meta.whitespace;
 
 	const strings = {
 		languages: {
@@ -465,7 +465,7 @@ async function translateText(
 				title: strings.translation,
 				description: translatedText,
 				footer: {
-					text: `${strings.languages.source} ${constants.symbols.indicators.arrowRight} ${strings.languages.target}`,
+					text: `${strings.languages.source} ${constants.emojis.indicators.arrowRight} ${strings.languages.target}`,
 				},
 			},
 		];
@@ -486,7 +486,7 @@ async function translateText(
 					},
 				],
 				footer: {
-					text: `${strings.languages.source} ${constants.symbols.indicators.arrowRight} ${strings.languages.target}`,
+					text: `${strings.languages.source} ${constants.emojis.indicators.arrowRight} ${strings.languages.target}`,
 				},
 			},
 		];

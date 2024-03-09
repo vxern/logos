@@ -139,7 +139,12 @@ class Database extends ravendb.DocumentStore {
 		this.#log = Logger.create({ identifier: "Client/Database", isDebug });
 	}
 
-	static async create(options: { host: string; database: string; certificate?: Buffer }): Promise<Database> {
+	static async create(options: {
+		host: string;
+		database: string;
+		certificate?: Buffer;
+		isDebug?: boolean;
+	}): Promise<Database> {
 		const database = new Database(options);
 
 		database.initialize();

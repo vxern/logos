@@ -65,7 +65,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 	// TODO(vxern): This will not display the updated listings on history change.
 	const viewComponent = new PaginatedSongListingViewComponent(client, {
 		interaction,
-		title: `${constants.symbols.music.list} ${strings.title}`,
+		title: `${constants.emojis.music.list} ${strings.title}`,
 		listings: structuredClone(historyReversed).reverse(),
 	});
 

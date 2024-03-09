@@ -82,7 +82,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.resumed} ${strings.title}`,
+					title: `${constants.emojis.music.resumed} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

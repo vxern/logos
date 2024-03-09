@@ -3,14 +3,15 @@ import colors from "./colors";
 import components from "./components";
 import contributions from "./contributions";
 import defaults from "./defaults";
+import emojis from "./emojis";
 import endpoints from "./endpoints";
 import gifs from "./gifs";
 import languages from "./languages";
 import links from "./links";
 import patterns from "./patterns";
 import properties from "./properties";
+import special from "./special";
 import statuses from "./statuses";
-import symbols from "./symbols";
 import time from "./time";
 
 export default {
@@ -24,13 +25,14 @@ export default {
 	components,
 	contributions,
 	defaults,
+	emojis,
 	endpoints,
 	gifs,
 	languages,
 	links,
 	patterns,
 	properties,
+	special,
 	statuses,
-	symbols,
 	time,
 };

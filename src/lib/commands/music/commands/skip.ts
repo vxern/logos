@@ -170,7 +170,7 @@ async function handleSkipAction(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.skipped} ${strings.title}`,
+					title: `${constants.emojis.music.skipped} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

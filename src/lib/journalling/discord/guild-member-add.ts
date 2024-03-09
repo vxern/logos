@@ -5,7 +5,7 @@ import { EventLogger } from "../logger";
 class GuildMemberAddEventLogger extends EventLogger<"guildMemberAdd"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.user.joined} User joined`,
+			title: `${constants.emojis.events.user.joined} User joined`,
 			colour: constants.colors.lightGreen,
 		});
 	}

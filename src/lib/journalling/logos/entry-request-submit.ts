@@ -9,7 +9,7 @@ import { EventLogger } from "../logger";
 class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.symbols.events.entryRequest.submitted} Entry request submitted`,
+			title: `${constants.emojis.events.entryRequest.submitted} Entry request submitted`,
 			colour: constants.colors.lightGreen,
 		});
 	}

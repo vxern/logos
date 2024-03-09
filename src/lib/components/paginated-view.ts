@@ -69,14 +69,14 @@ abstract class PaginatedViewComponent<T> {
 				customId: this.#_pageButtons.encodeId(["previous"]),
 				disabled: this.#isOnFirstPage,
 				style: Discord.ButtonStyles.Secondary,
-				label: constants.symbols.interactions.menu.controls.back,
+				label: constants.emojis.interactions.menu.controls.back,
 			},
 			{
 				type: Discord.MessageComponentTypes.Button,
 				customId: this.#_pageButtons.encodeId(["next"]),
 				disabled: this.#isOnLastPage,
 				style: Discord.ButtonStyles.Secondary,
-				label: constants.symbols.interactions.menu.controls.forward,
+				label: constants.emojis.interactions.menu.controls.forward,
 			},
 		];
 

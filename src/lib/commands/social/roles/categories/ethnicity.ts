@@ -4,7 +4,7 @@ const category: RoleCategory = {
 	type: "single",
 	id: "roles.ethnicity",
 	color: constants.colors.turquoise,
-	emoji: constants.symbols.roles.categories.ethnicity.category,
+	emoji: constants.emojis.roles.categories.ethnicity.category,
 	maximum: 2,
 	collection: {
 		type: "custom",

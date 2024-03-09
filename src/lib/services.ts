@@ -60,7 +60,7 @@ class ServiceStore {
 		readonly local: Map<bigint, Service[]>;
 	};
 
-	constructor(client: Client, { isDebug }: { isDebug?: boolean }) {
+	constructor(client: Client) {
 		this.global = {
 			lavalink: new LavalinkService(client),
 			interactionRepetition: new InteractionRepetitionService(client),
@@ -88,7 +88,7 @@ class ServiceStore {
 			roleIndicators: new Map(),
 		};
 
-		this.#log = Logger.create({ identifier: "Client/ServiceStore", isDebug });
+		this.#log = Logger.create({ identifier: "Client/ServiceStore", isDebug: client.environment.isDebug });
 		this.#collection = { global: [], local: new Map() };
 	}
 

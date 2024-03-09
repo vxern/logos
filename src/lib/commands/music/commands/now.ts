@@ -119,7 +119,7 @@ async function handleDisplayCurrentlyPlaying(
 
 		const viewComponent = new PaginatedSongCollectionViewComponent(client, {
 			interaction,
-			title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
+			title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
 			collection,
 		});
 
@@ -155,7 +155,7 @@ async function handleDisplayCurrentlyPlaying(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.nowPlaying} ${strings.nowPlaying}`,
+					title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
 					color: constants.colors.blue,
 					fields: [
 						{

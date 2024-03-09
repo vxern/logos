@@ -65,7 +65,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	// TODO(vxern): This may not display the updated listings on history change.
 	const viewComponent = new PaginatedSongListingViewComponent(client, {
 		interaction,
-		title: `${constants.symbols.music.list} ${strings.queue}`,
+		title: `${constants.emojis.music.list} ${strings.queue}`,
 		listings: queue,
 	});
 

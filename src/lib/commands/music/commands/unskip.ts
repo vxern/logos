@@ -212,7 +212,7 @@ async function handleUnskipAction(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.unskipped} ${strings.title}`,
+					title: `${constants.emojis.music.unskipped} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

@@ -44,11 +44,11 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 	};
 
 	const featuresFormatted = list([
-		`${constants.symbols.bot.features.definitions} ${strings.function.features.definitions}`,
-		`${constants.symbols.bot.features.translations} ${strings.function.features.translations}`,
-		`${constants.symbols.bot.features.games} ${strings.function.features.games}`,
-		`${constants.symbols.bot.features.messages} ${strings.function.features.messages}`,
-		`${constants.symbols.bot.features.guides} ${strings.function.features.guides}`,
+		`${constants.emojis.bot.features.definitions} ${strings.function.features.definitions}`,
+		`${constants.emojis.bot.features.translations} ${strings.function.features.translations}`,
+		`${constants.emojis.bot.features.games} ${strings.function.features.games}`,
+		`${constants.emojis.bot.features.messages} ${strings.function.features.messages}`,
+		`${constants.emojis.bot.features.guides} ${strings.function.features.guides}`,
 	]);
 
 	client.reply(interaction, {
@@ -64,15 +64,15 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 				color: constants.colors.blue,
 				fields: [
 					{
-						name: `${constants.symbols.information.bot} ${strings.concept.title}`,
+						name: `${constants.emojis.information.bot} ${strings.concept.title}`,
 						value: strings.concept.description,
 					},
 					{
-						name: `${constants.symbols.information.function} ${strings.function.title}`,
+						name: `${constants.emojis.information.function} ${strings.function.title}`,
 						value: `${strings.function.description}\n${featuresFormatted}`,
 					},
 					{
-						name: `${constants.symbols.information.languages} ${strings.languages.title}`,
+						name: `${constants.emojis.information.languages} ${strings.languages.title}`,
 						value: strings.languages.description,
 					},
 				],

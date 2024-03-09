@@ -55,7 +55,7 @@ function codeMultiline(target: string): string {
  * @returns The formatted string of text.
  */
 function list(items: string[]): string {
-	return items.map((item) => `${constants.symbols.bullet} ${item}`).join("\n");
+	return items.map((item) => `${constants.special.bullet} ${item}`).join("\n");
 }
 
 type TimestampFormat =
@@ -126,17 +126,17 @@ function trim(string: string, length: number): string {
 
 	// If the string does not have any whitespacing, make the string trail off.
 	if (!string.includes(" ")) {
-		return `${string.slice(0, -3)} ${constants.symbols.strings.trail}`;
+		return `${string.slice(0, -3)} ${constants.special.strings.trail}`;
 	}
 
 	// Keep trying to make space for the continuation indicator until successful.
 	let trimmed = string.slice(0, length);
-	while (length - trimmed.length < constants.symbols.strings.continued.length + 1) {
+	while (length - trimmed.length < constants.special.strings.continued.length + 1) {
 		const indexOfLastSpace = trimmed.lastIndexOf(" ");
 		trimmed = trimmed.slice(0, indexOfLastSpace);
 	}
 
-	return `${trimmed} ${constants.symbols.strings.continued}`;
+	return `${trimmed} ${constants.special.strings.continued}`;
 }
 
 export { capitalise, decapitalise, code, codeMultiline, list, mention, timestamp, trim };

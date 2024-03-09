@@ -44,7 +44,7 @@ async function handleOpenRoleSelectionMenu(client: Client, interaction: Logos.In
 				type: "group",
 				id: "roles.noCategory",
 				color: constants.colors.invisible,
-				emoji: constants.symbols.roles.noCategory,
+				emoji: constants.emojis.roles.noCategory,
 				categories: rootCategories,
 			},
 			indexesAccessed: [],
@@ -446,7 +446,7 @@ async function displaySelectMenu(
 
 			return `${category.emoji}  ${strings.categoryName}`;
 		})
-		.join(` ${constants.symbols.indicators.arrowRight}  `);
+		.join(` ${constants.emojis.indicators.arrowRight}  `);
 
 	const strings = {
 		description: client.localise(`${category.id}.description`, locale)(),
@@ -497,7 +497,7 @@ function createSelectOptionsFromCategories(
 			label: trim(`${category.emoji} ${strings.name}`, 25),
 			value: index.toString(),
 			description: trim(strings.description, 100),
-			emoji: { name: constants.symbols.roles.folder },
+			emoji: { name: constants.emojis.roles.folder },
 		});
 	}
 
@@ -547,7 +547,7 @@ function createSelectOptionsFromCollection(
 
 				const id = data.roleData.emojiIdsByName.get(role.emoji);
 				if (id === undefined) {
-					return { name: constants.symbols.roles.noCategory };
+					return { name: constants.emojis.roles.noCategory };
 				}
 
 				return { name: role.emoji, id };

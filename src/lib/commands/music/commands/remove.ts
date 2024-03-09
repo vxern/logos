@@ -103,7 +103,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			{
 				embeds: [
 					{
-						title: `${constants.symbols.music.removed} ${strings.title}`,
+						title: `${constants.emojis.music.removed} ${strings.title}`,
 						description: strings.description,
 						color: constants.colors.blue,
 					},

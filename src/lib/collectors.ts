@@ -188,7 +188,7 @@ class InteractionCollector<
 	}
 
 	static encodeCustomId<Parts extends string[] = []>(parts: Parts): string {
-		return parts.join(constants.symbols.interaction.divider);
+		return parts.join(constants.special.interaction.divider);
 	}
 
 	filter(interaction: Discord.Interaction): boolean {
@@ -357,11 +357,11 @@ class InteractionCollector<
 	}
 
 	encodeId<Metadata extends string[] = []>(metadata: Metadata): string {
-		return [this.customId, ...metadata].join(constants.symbols.interaction.separator);
+		return [this.customId, ...metadata].join(constants.special.interaction.separator);
 	}
 
 	static decodeId<Metadata extends string[] = []>(idEncoded: string): [customId: string, ...metadata: Metadata] {
-		return idEncoded.split(constants.symbols.interaction.separator) as [customId: string, ...metadata: Metadata];
+		return idEncoded.split(constants.special.interaction.separator) as [customId: string, ...metadata: Metadata];
 	}
 }
 

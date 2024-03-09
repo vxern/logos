@@ -1,21 +1,4 @@
-// TODO(vxern): Extract emojis into an emojis constants file.
 export default Object.freeze({
-	meta: {
-		// ! Responsible for inserting whitespace where a standard space would get filtered out.
-		// ! Changing this would break:
-		// ! - Empty translations.
-		// ! - Indentation on the /word command.
-		whitespace: "⠀",
-	},
-	interaction: {
-		// ! Responsible for separating pieces of data in component custom IDs.
-		// ! Changing this would break button interactions on all existing prompts/notices.
-		separator: "|",
-		divider: "/",
-	},
-	database: {
-		separator: "/",
-	},
 	ruleBullet: "💠",
 	understood: "✅",
 	information: {
@@ -26,16 +9,10 @@ export default Object.freeze({
 		languages: "🌍",
 		add: "🤝",
 	},
-	sigils: {
-		divider: "﹘",
-		separator: "・",
-		channelSeparator: "︲",
-	},
 	squares: {
 		green: "🟩",
 		white: "⬜",
 	},
-	divider: "—",
 	link: "🔗",
 	events: {
 		user: {
@@ -163,11 +140,6 @@ export default Object.freeze({
 			},
 		},
 	},
-	bullet: "-",
-	strings: {
-		trail: "...",
-		continued: "(...)",
-	},
 	cefr: {
 		a: "🟩",
 		b: "🟨",
@@ -239,9 +211,6 @@ export default Object.freeze({
 				category: "🤷‍♂️",
 			},
 		},
-	},
-	game: {
-		mask: "░",
 	},
 	profile: {
 		roles: "💼",

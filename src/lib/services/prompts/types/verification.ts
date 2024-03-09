@@ -211,7 +211,7 @@ class VerificationService extends PromptService<{
 							inline: true,
 						},
 						{
-							name: `${constants.symbols.verification.for} ${strings.votesFor}`,
+							name: `${constants.emojis.verification.for} ${strings.votesFor}`,
 							value:
 								votedForFormatted !== undefined && votedForFormatted.length !== 0
 									? votedForFormatted.join("\n")
@@ -219,7 +219,7 @@ class VerificationService extends PromptService<{
 							inline: true,
 						},
 						{
-							name: `${constants.symbols.verification.against} ${strings.votesAgainst}`,
+							name: `${constants.emojis.verification.against} ${strings.votesAgainst}`,
 							value:
 								votedAgainstFormatted !== undefined && votedAgainstFormatted.length !== 0
 									? votedAgainstFormatted.join("\n")

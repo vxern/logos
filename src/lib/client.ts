@@ -204,24 +204,21 @@ class Client {
 		database: Database;
 		localisations: RawLocalisations;
 	}) {
-		const isDebug = environment.isDebug;
-
 		this.environment = environment;
 		this.log = log;
 		this.database = database;
 		this.cache = new Cache();
 
-		this.#localisations = new LocalisationStore({ localisations, isDebug });
+		this.#localisations = new LocalisationStore(this, { localisations });
 		this.#commands = CommandStore.create(this, {
 			localisations: this.#localisations,
 			templates: Array.from(Object.values(commandTemplates)),
-			isDebug,
 		});
-		this.#interactions = new InteractionStore({ bot, isDebug });
-		this.#services = new ServiceStore(this, { isDebug });
-		this.#events = new EventStore({ services: this.#services, isDebug });
-		this.#connection = new DiscordConnection({ bot, events: this.#events.buildEventHandlers(), isDebug });
-		this.#journalling = new JournallingStore(this, { isDebug });
+		this.#interactions = new InteractionStore(this, { bot });
+		this.#services = new ServiceStore(this);
+		this.#events = new EventStore(this, { services: this.#services });
+		this.#connection = new DiscordConnection(this, { bot, events: this.#events.buildEventHandlers() });
+		this.#journalling = new JournallingStore(this);
 
 		this.#_guildCreateCollector = new Collector<"guildCreate">();
 		this.#_guildDeleteCollector = new Collector<"guildDelete">();
@@ -254,6 +251,7 @@ class Client {
 			host: environment.ravendbHost,
 			database: environment.ravendbDatabase,
 			certificate,
+			isDebug: environment.isDebug,
 		});
 
 		const bot = Discord.createBot({

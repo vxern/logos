@@ -92,7 +92,7 @@ async function handleSkipToTimestamp(
 		{
 			embeds: [
 				{
-					title: `${constants.symbols.music.skippedTo} ${strings.title}`,
+					title: `${constants.emojis.music.skippedTo} ${strings.title}`,
 					description: strings.description,
 					color: constants.colors.blue,
 				},

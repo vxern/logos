@@ -53,7 +53,7 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	}
 
 	get partialId(): string {
-		return this.#_idParts.join(constants.symbols.database.separator);
+		return this.#_idParts.join(constants.special.database.separator);
 	}
 
 	constructor({ "@metadata": metadata }: { "@metadata": DocumentMetadata }) {
@@ -87,18 +87,18 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 			parts.push(data[part as keyof typeof data]);
 		}
 
-		return parts.join(constants.symbols.database.separator);
+		return parts.join(constants.special.database.separator);
 	}
 
 	static buildId<M extends Model>(data: IdentifierData<M>, { collection }: { collection: Collection }): string {
 		const collectionCamelcase = decapitalise(collection);
 		const partialId = Model.buildPartialId(data);
 
-		return `${collectionCamelcase}${constants.symbols.database.separator}${partialId}`;
+		return `${collectionCamelcase}${constants.special.database.separator}${partialId}`;
 	}
 
 	static getDataFromId<M extends Model>(id: string): [collection: Collection, data: IdentifierParts<M>] {
-		const [collectionCamelcase, ...data] = id.split(constants.symbols.database.separator);
+		const [collectionCamelcase, ...data] = id.split(constants.special.database.separator);
 		const collection = capitalise(collectionCamelcase!);
 		if (!isSupportedCollection(collection)) {
 			throw `Collection "${collection}" encoded in ID "${id}" is unknown.`;
