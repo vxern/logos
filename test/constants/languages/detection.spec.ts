@@ -1,3 +1,4 @@
+import { expect } from "chai";
 import {
 	getCLDLanguageByLocale,
 	getTinyLDLanguageByLocale,
@@ -7,36 +8,36 @@ import {
 
 describe("isCLDLocale()", () => {
 	it("returns true if the passed locale is supported by CLD.", () => {
-		expect(isCLDLocale("pl")).toBe(true);
-		expect(isCLDLocale("ro")).toBe(true);
+		expect(isCLDLocale("pl")).to.be.true;
+		expect(isCLDLocale("ro")).to.be.true;
 	});
 
 	it("returns false if the passed locale is not supported by CLD.", () => {
-		expect(isCLDLocale("this-is-not-a-supported")).toBe(false);
+		expect(isCLDLocale("this-is-not-a-supported")).to.be.false;
 	});
 });
 
 describe("isTinyLDLocale()", () => {
 	it("returns true if the passed locale is supported by TinyLD.", () => {
-		expect(isTinyLDLocale("pol")).toBe(true);
-		expect(isTinyLDLocale("ron")).toBe(true);
+		expect(isTinyLDLocale("pol")).to.be.true;
+		expect(isTinyLDLocale("ron")).to.be.true;
 	});
 
 	it("returns false if the passed locale is not supported by TinyLD.", () => {
-		expect(isTinyLDLocale("this-is-not-supported")).toBe(false);
+		expect(isTinyLDLocale("this-is-not-supported")).to.be.false;
 	});
 });
 
 describe("getCLDLanguageByLocale()", () => {
 	it("returns the detection language corresponding to the passed locale.", () => {
-		expect(getCLDLanguageByLocale("pl")).toEqual("Polish");
-		expect(getCLDLanguageByLocale("ro")).toEqual("Romanian");
+		expect(getCLDLanguageByLocale("pl")).to.be("Polish");
+		expect(getCLDLanguageByLocale("ro")).to.be("Romanian");
 	});
 });
 
 describe("getTinyLDLanguageByLocale()", () => {
 	it("returns the detection language corresponding to the passed locale.", () => {
-		expect(getTinyLDLanguageByLocale("pol")).toEqual("Polish");
-		expect(getTinyLDLanguageByLocale("ron")).toEqual("Romanian");
+		expect(getTinyLDLanguageByLocale("pol")).to.be("Polish");
+		expect(getTinyLDLanguageByLocale("ron")).to.be("Romanian");
 	});
 });
