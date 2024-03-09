@@ -1,6 +1,6 @@
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";
-import { chunk } from "../../utils";
+import { toChunked } from "../../utils";
 import { Client, InteractionCollector } from "../client";
 import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../commands/music/data/types";
 
@@ -106,7 +106,7 @@ abstract class PaginatedViewComponent<T> {
 		{ interaction, elements, showable }: { interaction: Logos.Interaction; elements: T[]; showable?: boolean },
 	) {
 		this.client = client;
-		this.#pages = chunk(elements, defaults.RESULTS_PER_PAGE);
+		this.#pages = toChunked(elements, defaults.RESULTS_PER_PAGE);
 		this.#showable = showable ?? false;
 		this.#index = 0;
 

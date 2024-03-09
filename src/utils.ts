@@ -5,18 +5,18 @@
  * @param size - The size of each chunk.
  * @returns The chunked array.
  */
-function chunk<T>(array: T[], size: number): T[][] {
-	return Array.from(chunked(array, size));
+function toChunked<T>(array: T[], size: number): T[][] {
+	return Array.from(chunk(array, size));
 }
 
-function* chunked<T>(array: T[], size: number): Generator<T[], void, void> {
+function* chunk<T>(array: T[], size: number): Generator<T[], void, void> {
 	if (array.length === 0) {
 		yield [];
 		return;
 	}
 
 	if (size === 0) {
-		throw "The size of a chunk cannot be zero.";
+		throw "ArgumentError: The size of a chunk cannot be zero.";
 	}
 
 	const chunks = array.length <= size ? 1 : Math.ceil(array.length / size);
@@ -76,4 +76,4 @@ function isDefined<T>(element: T | undefined): element is T {
 	return element !== undefined;
 }
 
-export { chunk, chunked, reverseObject, asStream, isDefined };
+export { toChunked, chunk, reverseObject, asStream, isDefined };
