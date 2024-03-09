@@ -110,6 +110,7 @@ function mention(id: bigint | string, { type }: { type: MentionType }): string {
 	return `<${typeSigil}${id}>`;
 }
 
+// TODO(vxern): What does this function do with multiple whitespaces?
 /**
  * Taking a string, trims it to the desired length and returns it.
  *
@@ -118,22 +119,24 @@ function mention(id: bigint | string, { type }: { type: MentionType }): string {
  * @returns The trimmed string.
  */
 function trim(string: string, length: number): string {
+	// If the string does not need to be trimmed, return.
 	if (string.length <= length) {
 		return string;
 	}
 
+	// If the string does not have any whitespacing, make the string trail off.
 	if (!string.includes(" ")) {
-		return string.slice(0, Math.max(length - constants.symbols.strings.trail.length)) + constants.symbols.strings.trail;
+		return `${string.slice(0, -3)} ${constants.symbols.strings.trail}`;
 	}
 
-	const slice = string.slice(0, length);
-	const indexOfLastSpace = slice.lastIndexOf(" ");
-	const gap = slice.length - (indexOfLastSpace + 1);
+	// Keep trying to make space for the continuation indicator until successful.
+	let trimmed = string.slice(0, length);
+	while (length - trimmed.length < constants.symbols.strings.continued.length + 1) {
+		const indexOfLastSpace = trimmed.lastIndexOf(" ");
+		trimmed = trimmed.slice(0, indexOfLastSpace);
+	}
 
-	return (
-		slice.slice(0, slice.length - Math.max(gap, constants.symbols.strings.continued.length)) +
-		constants.symbols.strings.continued
-	);
+	return `${trimmed} ${constants.symbols.strings.continued}`;
 }
 
 export { capitalise, decapitalise, code, codeMultiline, list, mention, timestamp, trim };

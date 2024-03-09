@@ -1,4 +1,4 @@
-import { capitalise, code, codeMultiline, decapitalise, list, mention, timestamp } from "../src/formatting";
+import { capitalise, code, codeMultiline, decapitalise, list, mention, timestamp, trim } from "../src/formatting";
 
 describe("capitalise()", () => {
 	it("turns the first letter of the passed string uppercase.", () => {
@@ -97,5 +97,30 @@ describe("mention()", () => {
 		it("as a user mention.", () => {
 			expect(mention(7031n, { type: "user" })).toBe("<@7031>");
 		});
+	});
+});
+
+describe("trim()", () => {
+	it("returns an empty string if an empty string was passed, regardless of the desired length.", () => {
+		expect(trim("", 0)).toBe("");
+		expect(trim("", 3)).toBe("");
+		expect(trim("", 64)).toBe("");
+	});
+
+	it("does not trim the string if it's shorter than or of the specified length.", () => {
+		const STRING = "This is a sample sentence.";
+
+		expect(trim(STRING, STRING.length + 1)).toBe(STRING);
+		expect(trim(STRING, STRING.length)).toBe(STRING);
+	});
+
+	it("makes the passed string trail off if it's not composed of words.", () => {
+		expect(trim("qwertyuiopasdfghjklzxcvbnm", 20)).toBe("qwertyuiopasdfghj...");
+	});
+
+	it("trims the passed sentence, replacing the last trimmed word with a continuation indicator.", () => {
+		expect(trim("This is a sample sentence that's too long to be displayed in full.", 50)).toBe(
+			"This is a sample sentence that's too long to (...)",
+		);
 	});
 });
