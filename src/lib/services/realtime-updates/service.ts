@@ -84,7 +84,6 @@ class RealtimeUpdateService extends GlobalService {
 		}
 
 		await this.client.database.withSession(async (session) => {
-			// TODO(vxern): What does this do again?
 			await session.advanced.refresh(oldGuildDocument);
 		});
 

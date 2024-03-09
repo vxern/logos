@@ -315,7 +315,6 @@ class InteractionCollector<
 	): Partial<Parameters> {
 		const result: Partial<Record<string, string | number | boolean | undefined>> = {};
 
-		// TODO(vxern): Do something with the focused option.
 		for (const option of options) {
 			if (option.focused) {
 				result.focused = option.name;

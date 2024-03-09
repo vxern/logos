@@ -178,7 +178,6 @@ async function openTicket(
 		answers,
 	});
 
-	// TODO(vxern): Check against the global journalling setting.
 	switch (type) {
 		case "standalone": {
 			client.tryLog("ticketOpen", {

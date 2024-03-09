@@ -116,7 +116,7 @@ class ReportService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.close,
-									customId: this.removeButton!.encodeId([reportDocument.partialId]),
+									customId: this.removeButton.encodeId([reportDocument.partialId]),
 								},
 						  ]
 						: [

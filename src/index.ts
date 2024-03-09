@@ -4,7 +4,6 @@ import defaults_ from "./constants/defaults";
 // ! Polyfill + override area - It's absolutely key that these are synchronised with `types.d.ts`.
 // #region
 
-// TODO(vxern): Remove this once it's available in the runtime.
 Promise.withResolvers = <T>() => {
 	let resolve!: (value: T) => void;
 	let reject!: () => void;

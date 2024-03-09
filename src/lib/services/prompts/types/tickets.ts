@@ -93,7 +93,7 @@ class TicketService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.close,
-									customId: this.removeButton!.encodeId([ticketDocument.partialId]),
+									customId: this.removeButton.encodeId([ticketDocument.partialId]),
 								},
 						  ]
 						: [

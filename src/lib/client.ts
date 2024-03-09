@@ -263,16 +263,13 @@ class Client {
 				Discord.Intents.GuildVoiceStates |
 				Discord.Intents.GuildMessages |
 				Discord.Intents.MessageContent,
-			// TODO(vxern): Unnecessary.
 			events: {},
 			gateway: {
-				// TODO(vxern): This is unnecessary since it can just be inferred from the top token
 				token: environment.discordSecret,
 				events: {},
 				cache: {
 					requestMembers: {
 						enabled: true,
-						// TODO(vxern): Again, unnecessary.
 						pending: new Discord.Collection(),
 					},
 				},

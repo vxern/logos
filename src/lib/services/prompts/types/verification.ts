@@ -574,7 +574,6 @@ class VerificationService extends PromptService<{
 		if (isAccepted || isRejected) {
 			isFinalised = true;
 
-			// TODO(vxern): Check against the global journalling setting.
 			if (isAccepted) {
 				this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
 			} else {

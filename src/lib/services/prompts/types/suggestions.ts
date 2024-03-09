@@ -83,7 +83,7 @@ class SuggestionService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.remove,
-									customId: this.removeButton!.encodeId([suggestionDocument.partialId]),
+									customId: this.removeButton.encodeId([suggestionDocument.partialId]),
 								},
 						  ]
 						: [
