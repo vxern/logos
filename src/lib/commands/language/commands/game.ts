@@ -38,7 +38,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		return;
 	}
 
-	const sentencePairCount = await client.cache.database.scard(`${learningLocale}:index`);
+	const sentencePairCount = await client.cache.redis.scard(`${learningLocale}:index`);
 	if (sentencePairCount === 0) {
 		const strings = {
 			title: client.localise("game.strings.noSentencesAvailable.title", locale)(),
@@ -245,7 +245,7 @@ async function getGameView(
 }
 
 async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
-	const pipeline = client.cache.database.pipeline();
+	const pipeline = client.cache.redis.pipeline();
 	for (const _ of Array(defaults.GAME_WORD_SELECTION).keys()) {
 		pipeline.srandmember(`${locale}:index`);
 	}
@@ -281,7 +281,7 @@ interface SentencePair {
 }
 
 async function getSentencePairById(client: Client, locale: Locale, id: string): Promise<SentencePair> {
-	const pairRaw = await client.cache.database.get(`${locale}:${id}`).then((sentencePair) => sentencePair ?? undefined);
+	const pairRaw = await client.cache.redis.get(`${locale}:${id}`).then((sentencePair) => sentencePair ?? undefined);
 	if (pairRaw === undefined) {
 		throw `StateError: Failed to get sentence pair for locale ${locale} and index ${id}.`;
 	}

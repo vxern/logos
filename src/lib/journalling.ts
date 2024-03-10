@@ -162,7 +162,7 @@ class JournallingStore {
 		event: Event,
 		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean; args: Events[Event] },
 	): Promise<void> {
-		// If explicitly defined as `false`, do not log.
+		// If explicitly defined as false, do not log.
 		if (journalling === false) {
 			this.#client.log.info(
 				`Event '${event}' happened on ${diagnostics.display.guild(

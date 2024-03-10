@@ -219,12 +219,12 @@ class CommandStore {
 			key = template.id;
 		}
 
-		const nameLocalisations = localisations.getNameLocalisations({ key });
+		const nameLocalisations = localisations.buildNameLocalisations({ key });
 		if (nameLocalisations === undefined) {
 			return undefined;
 		}
 
-		const descriptionLocalisations = localisations.getDescriptionLocalisations({ key });
+		const descriptionLocalisations = localisations.buildDescriptionLocalisations({ key });
 		if (descriptionLocalisations === undefined) {
 			return undefined;
 		}

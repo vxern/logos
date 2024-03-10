@@ -110,7 +110,7 @@ class Database extends ravendb.DocumentStore {
 
 	readonly #log: Logger;
 
-	private constructor({
+	constructor({
 		host,
 		database,
 		certificate,
@@ -139,19 +139,14 @@ class Database extends ravendb.DocumentStore {
 		this.#log = Logger.create({ identifier: "Client/Database", isDebug });
 	}
 
-	static async create(options: {
-		host: string;
-		database: string;
-		certificate?: Buffer;
-		isDebug?: boolean;
-	}): Promise<Database> {
-		const database = new Database(options);
+	async start(): Promise<void> {
+		this.initialize();
 
-		database.initialize();
+		await this.#prefetchDocuments();
+	}
 
-		await database.#prefetchDocuments();
-
-		return database;
+	stop(): void {
+		this.dispose();
 	}
 
 	async #prefetchDocuments(): Promise<void> {

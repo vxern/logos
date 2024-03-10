@@ -94,4 +94,4 @@ const diagnostics = {
 	},
 };
 
-export default diagnostics;
+export default Object.freeze(diagnostics);

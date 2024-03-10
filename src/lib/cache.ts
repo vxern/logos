@@ -1,10 +1,18 @@
 import Redis from "ioredis";
 
 class Cache {
-	readonly database: Redis;
+	readonly redis: Redis;
 
 	constructor() {
-		this.database = new Redis();
+		this.redis = new Redis({ lazyConnect: true });
+	}
+
+	async start(): Promise<void> {
+		await this.redis.connect();
+	}
+
+	stop(): void {
+		this.redis.disconnect();
 	}
 }
 

@@ -1,4 +1,4 @@
-import languages, {
+import {
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
@@ -68,8 +68,8 @@ class LocalisationStore {
 	}
 
 	getOptionName({ key }: { key: string }): string | undefined {
-		const optionName = key.split(".")?.at(-1);
-		if (optionName === undefined) {
+		const optionName = key.split(".").at(-1)!;
+		if (optionName.length === 0) {
 			this.#log.warn(`Failed to get option name from localisation key '${key}'.`);
 			return undefined;
 		}
@@ -77,7 +77,7 @@ class LocalisationStore {
 		return optionName;
 	}
 
-	getNameLocalisations({ key }: { key: string }): NameLocalisations | undefined {
+	buildNameLocalisations({ key }: { key: string }): NameLocalisations | undefined {
 		const optionName = this.getOptionName({ key });
 		if (optionName === undefined) {
 			return undefined;
@@ -101,41 +101,34 @@ class LocalisationStore {
 		}
 
 		const nameLocalisations = LocalisationStore.#toDiscordLocalisations(localisation);
-		for (const locale of languages.locales.discord) {
-			if (locale in nameLocalisations) {
-				continue;
-			}
-
-			nameLocalisations[locale] = name;
-		}
 
 		return { name, nameLocalizations: nameLocalisations };
 	}
 
-	getDescriptionLocalisations({ key }: { key: string }): DescriptionLocalisations | undefined {
+	buildDescriptionLocalisations({ key }: { key: string }): DescriptionLocalisations | undefined {
 		const optionName = this.getOptionName({ key });
 		if (optionName === undefined) {
 			return undefined;
 		}
 
-		let stringLocalisations: Map<LocalisationLanguage, LocalisationBuilder> | undefined;
+		let localisation: Map<LocalisationLanguage, LocalisationBuilder> | undefined;
 		if (this.#localisations.has(`${key}.description`)) {
-			stringLocalisations = this.#localisations.get(`${key}.description`)!;
+			localisation = this.#localisations.get(`${key}.description`)!;
 		} else if (this.#localisations.has(`parameters.${optionName}.description`)) {
-			stringLocalisations = this.#localisations.get(`parameters.${optionName}.description`)!;
+			localisation = this.#localisations.get(`parameters.${optionName}.description`)!;
 		}
 
-		const description = stringLocalisations?.get(defaults.LOCALISATION_LANGUAGE)?.({});
+		const description = localisation?.get(defaults.LOCALISATION_LANGUAGE)?.({});
 		if (description === undefined) {
 			this.#log.warn(`Could not get command description from string with key '${key}'.`);
 			return undefined;
 		}
 
-		if (stringLocalisations === undefined) {
+		if (localisation === undefined) {
 			return { description };
 		}
 
-		const descriptionLocalisations = LocalisationStore.#toDiscordLocalisations(stringLocalisations);
+		const descriptionLocalisations = LocalisationStore.#toDiscordLocalisations(localisation);
 
 		return { description, descriptionLocalizations: descriptionLocalisations };
 	}

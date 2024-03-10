@@ -247,7 +247,7 @@ class Client {
 
 		log.info("Bootstrapping the client...");
 
-		const database = await Database.create({
+		const database = new Database({
 			host: environment.ravendbHost,
 			database: environment.ravendbDatabase,
 			certificate,
@@ -348,6 +348,8 @@ class Client {
 	}
 
 	async start(): Promise<void> {
+		await this.cache.start();
+		await this.database.start();
 		await this.#services.start();
 		await this.#journalling.start();
 		await this.#setupCollectors();
@@ -355,6 +357,8 @@ class Client {
 	}
 
 	async stop(): Promise<void> {
+		this.cache.stop();
+		this.database.stop();
 		await this.#services.stop();
 		this.#journalling.stop();
 		this.#teardownCollectors();
@@ -681,4 +685,4 @@ function isValidIdentifier(identifier: string): boolean {
 	);
 }
 
-export { Client, InteractionCollector, isValidIdentifier, isValidSnowflake, ServiceStore };
+export { Client, Environment, InteractionCollector, isValidIdentifier, isValidSnowflake, ServiceStore };

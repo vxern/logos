@@ -16,23 +16,31 @@ class Logger {
 			return Logger.#_instances.get(identifier)!;
 		}
 
-		return new Logger({ identifier, isDebug });
+		const instance = new Logger({ identifier, isDebug });
+
+		Logger.#_instances.set(identifier, instance);
+
+		return instance;
 	}
 
-	debug(...args: unknown[]) {
-		this.#isDebug && log.info(this.#identifierDisplayed, ...args);
+	debug(...args: unknown[]): void {
+		if (!this.#isDebug) {
+			return;
+		}
+
+		log.debug(this.#identifierDisplayed, ...args);
 	}
 
-	info(...args: unknown[]) {
+	info(...args: unknown[]): void {
 		log.info(this.#identifierDisplayed, ...args);
 	}
 
-	error(...args: unknown[]) {
-		log.error(this.#identifierDisplayed, ...args);
+	warn(...args: unknown[]): void {
+		log.warn(this.#identifierDisplayed, ...args);
 	}
 
-	warn(...args: unknown[]) {
-		log.warn(this.#identifierDisplayed, ...args);
+	error(...args: unknown[]): void {
+		log.error(this.#identifierDisplayed, ...args);
 	}
 }
 
