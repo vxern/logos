@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import constants_ from "./constants/constants";
 import defaults_ from "./constants/defaults";
 
@@ -17,6 +18,7 @@ function registerPolyfills(): void {
 		return { promise, resolve, reject };
 	};
 
+	(globalThis as any).Discord = Discord;
 	(globalThis as any).constants = constants_;
 	(globalThis as any).defaults = defaults_;
 
