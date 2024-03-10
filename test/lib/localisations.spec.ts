@@ -1,21 +1,7 @@
 import constants from "../../src/constants/constants";
-import { Client, Environment } from "../../src/lib/client";
 import { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "../../src/lib/localisations";
 import { expect } from "chai";
-
-const mockEnvironment: Environment = {
-	deeplSecret: "DEEPL_SECRET",
-	discordSecret: "MTIxNjQ2Njk1NjQ1OTE4NDE0OA.GAQb1m.RnwgsOMPEKyOm7QF5NPkIaq4X93bTL6rV-KrsU",
-	isDebug: false,
-	lavalinkHost: "127.0.0.1",
-	lavalinkPassword: "password123",
-	lavalinkPort: "7031",
-	rapidApiSecret: "SECRET_RAPID_API",
-	ravendbDatabase: "logos",
-	ravendbHost: "http://127.0.0.1",
-	ravendbSecure: false,
-};
-const mockClient = await Client.create({ environment: mockEnvironment, localisations: new Map() });
+import { mockClient } from "../mocks";
 
 describe("LocalisationStore", () => {
 	describe("constructor()", () => {
