@@ -17,10 +17,9 @@ async function handleFastForwardAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { timestamp: string }>,
 ): Promise<void> {
-	const language = interaction.language;
 	const locale = interaction.locale;
 
-	const timestamp = parseTimeExpression(client, interaction.parameters.timestamp, { language, locale });
+	const timestamp = parseTimeExpression(client, interaction.parameters.timestamp, { locale });
 	if (timestamp === undefined) {
 		const strings = {
 			autocomplete: client.localise("autocomplete.timestamp", locale)(),

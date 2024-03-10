@@ -25,7 +25,7 @@ async function handleSetTimeoutAutocomplete(
 			return;
 		}
 		case "duration": {
-			const timestamp = parseTimeExpression(client, interaction.parameters.duration, { language, locale });
+			const timestamp = parseTimeExpression(client, interaction.parameters.duration, { locale });
 			if (timestamp === undefined) {
 				const strings = {
 					autocomplete: client.localise("autocomplete.timestamp", locale)(),
@@ -76,7 +76,7 @@ async function handleSetTimeout(
 
 	let durationParsed = Number(interaction.parameters.duration);
 	if (!Number.isSafeInteger(durationParsed)) {
-		const timestamp = parseTimeExpression(client, interaction.parameters.duration, { language, locale });
+		const timestamp = parseTimeExpression(client, interaction.parameters.duration, { locale });
 		if (timestamp === undefined) {
 			displayDurationInvalidError(client, interaction, { locale });
 			return;
