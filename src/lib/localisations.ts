@@ -2,7 +2,6 @@ import {
 	Locale,
 	LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
-	getLocaleByLocalisationLanguage,
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 } from "../constants/languages";
@@ -164,6 +163,12 @@ class LocalisationStore {
 
 	localise(key: string, locale?: Locale): LocalisationBuilder {
 		return (data) => {
+			const localisation = this.#localisations.get(key);
+			if (localisation === undefined) {
+				this.#log.error(`Attempted to localise string with unregistered key '${key}'.`);
+				return constants.special.missingString;
+			}
+
 			let language: LocalisationLanguage;
 			if (locale !== undefined) {
 				language = getLocalisationLanguageByLocale(locale);
@@ -171,33 +176,29 @@ class LocalisationStore {
 				language = defaults.LOCALISATION_LANGUAGE;
 			}
 
-			const localisation = this.#localisations.get(key)!;
 			const buildLocalisation = localisation.get(language) ?? localisation.get(defaults.LOCALISATION_LANGUAGE);
 			if (buildLocalisation === undefined) {
-				this.#log.warn(`Attempted to localise string with unknown key '${key}'.`);
-				return key;
+				this.#log.error(`Missing localisations for string with key '${key}'.`);
+				return constants.special.missingString;
 			}
 
 			const string = buildLocalisation(data);
-			if (language !== defaults.LOCALISATION_LANGUAGE && string.trim().length === 0) {
-				return this.localise(key)(data);
-			}
 
 			return string;
 		};
 	}
 
-	pluralise(key: string, language: LocalisationLanguage, number: number): string {
-		const locale = getLocaleByLocalisationLanguage(language);
+	pluralise(key: string, locale: Locale, { quantity }: { quantity: number }): string {
+		const language = getLocalisationLanguageByLocale(locale);
 
 		const pluralise = transformers[language].pluralise;
 		const { one, two, many } = {
-			one: this.localise(`${key}.one`, locale)?.({ one: number }),
-			two: this.localise(`${key}.two`, locale)?.({ two: number }),
-			many: this.localise(`${key}.many`, locale)?.({ many: number }),
+			one: this.localise(`${key}.one`, locale)?.({ one: quantity }),
+			two: this.localise(`${key}.two`, locale)?.({ two: quantity }),
+			many: this.localise(`${key}.many`, locale)?.({ many: quantity }),
 		};
 
-		const pluralised = pluralise(`${number}`, { one, two, many });
+		const pluralised = pluralise(`${quantity}`, { one, two, many });
 		if (pluralised === undefined) {
 			this.#log.warn(`Could not pluralise string with key '${key}' in ${language}.`);
 			return key;
