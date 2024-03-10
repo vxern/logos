@@ -685,4 +685,4 @@ function isValidIdentifier(identifier: string): boolean {
 	);
 }
 
-export { Client, Environment, InteractionCollector, isValidIdentifier, isValidSnowflake, ServiceStore };
+export { Client, Environment, isValidIdentifier, isValidSnowflake };

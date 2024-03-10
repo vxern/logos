@@ -1,7 +1,8 @@
 import Hash from "object-hash";
 import diagnostics from "../../../diagnostics";
-import { Client, ServiceStore } from "../../client";
+import { Client } from "../../client";
 import { Guild } from "../../database/guild";
+import { ServiceStore } from "../../services";
 import { LocalService, getAllMessages } from "../service";
 
 type HashableProperties = "embeds" | "components";

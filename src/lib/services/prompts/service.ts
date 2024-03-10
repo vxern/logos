@@ -1,8 +1,10 @@
 import diagnostics from "../../../diagnostics";
-import { Client, InteractionCollector, ServiceStore } from "../../client";
+import { Client } from "../../client";
+import { InteractionCollector } from "../../collectors";
 import { Guild } from "../../database/guild";
 import { Model } from "../../database/model";
 import { User } from "../../database/user";
+import { ServiceStore } from "../../services";
 import { LocalService, getAllMessages } from "../service";
 
 interface Configurations {

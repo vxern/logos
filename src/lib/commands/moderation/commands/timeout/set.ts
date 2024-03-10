@@ -9,7 +9,6 @@ async function handleSetTimeoutAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; duration: string }>,
 ): Promise<void> {
-	const language = interaction.language;
 	const locale = interaction.locale;
 
 	if (interaction.parameters.focused === undefined) {
@@ -44,7 +43,6 @@ async function handleSetTimeout(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; duration: string; reason: string }>,
 ): Promise<void> {
-	const language = interaction.language;
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;

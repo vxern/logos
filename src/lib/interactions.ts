@@ -1,6 +1,7 @@
 import { Locale } from "../constants/languages";
 import { TimeUnit } from "../constants/time";
-import { Client, InteractionCollector } from "./client";
+import { Client } from "./client";
+import { InteractionCollector } from "./collectors";
 import { Logger } from "./logger";
 
 type ComposerActionRow<ComposerContent, SectionNames = keyof ComposerContent> = {

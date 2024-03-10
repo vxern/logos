@@ -1,6 +1,7 @@
-import { Client, ServiceStore } from "./client";
+import { Client } from "./client";
 import { Collector } from "./collectors";
 import { Logger } from "./logger";
+import { ServiceStore } from "./services";
 
 type Event = keyof Discord.EventHandlers;
 class EventStore {
