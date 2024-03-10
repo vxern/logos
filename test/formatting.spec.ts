@@ -22,12 +22,12 @@ describe("decapitalise()", () => {
 });
 
 describe("code()", () => {
-	it("wraps the passed string in a markdown code block.", () => {
-		expect(code("this-is-a-sample-string")).to.equal("`this-is-a-sample-string`");
+	it("throws when an empty string is passed.", () => {
+		expect(() => code("")).to.throw("ArgumentError: The string cannot be empty.");
 	});
 
-	it("returns a formatted placeholder when an empty string is inputted.", () => {
-		expect(code("")).to.equal("`?`");
+	it("wraps the passed string in a markdown code block.", () => {
+		expect(code("this-is-a-sample-string")).to.equal("`this-is-a-sample-string`");
 	});
 });
 
@@ -39,17 +39,17 @@ describe("codeMultiline()", () => {
 	});
 
 	it("returns a formatted placeholder when an empty string is inputted.", () => {
-		expect(codeMultiline("")).to.equal("```?```");
+		expect(() => code("")).to.throw("ArgumentError: The string cannot be empty.");
 	});
 });
 
 describe("list()", () => {
-	it("formats the passed array of strings as a markdown list.", () => {
-		expect(list(["one", "two", "three", "four"])).to.equal("- one\n- two\n- three\n- four");
+	it("throws when an empty array is inputted.", () => {
+		expect(() => list([])).to.throw("ArgumentError: The array cannot be empty.");
 	});
 
-	it("returns an empty string when an empty array is inputted.", () => {
-		expect(list([])).to.equal("");
+	it("formats the passed array of strings as a markdown list.", () => {
+		expect(list(["one", "two", "three", "four"])).to.equal("- one\n- two\n- three\n- four");
 	});
 });
 
@@ -122,7 +122,7 @@ describe("trim()", () => {
 		expect(trim("qwertyuiopasdfghjklzxcvbnm", 20)).to.equal("qwertyuiopasdfghj...");
 	});
 
-	it("trims the passed sentence, replacing the last trimmed word with a continuation indicator.", () => {
+	it("trims the passed sentence, replacing trimmed words with a continuation indicator.", () => {
 		expect(trim("This is a sample sentence that's too long to be displayed in full.", 50)).to.equal(
 			"This is a sample sentence that's too long to (...)",
 		);

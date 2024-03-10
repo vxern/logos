@@ -13,8 +13,9 @@ import { Ticket } from "./lib/database/ticket";
 import { Warning } from "./lib/database/warning";
 
 declare global {
+	type PromiseWithResolver<T> = { promise: Promise<T>; resolve: (value: T) => void; reject: () => void };
 	interface PromiseConstructor {
-		withResolvers<T>(): { promise: Promise<T>; resolve: (value: T) => void; reject: () => void };
+		withResolvers<T>(): PromiseWithResolver<T>;
 	}
 }
 

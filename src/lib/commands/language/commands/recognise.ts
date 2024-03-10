@@ -1,7 +1,7 @@
 import { DetectionLanguage, Locale } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import { list } from "../../../../formatting";
-import { asStream } from "../../../../utils";
+import { race } from "../../../../utils";
 import { Client } from "../../../client";
 import { CommandTemplate } from "../../command";
 import { getAdapters } from "../detectors/adapters";
@@ -240,7 +240,7 @@ async function detectLanguages({ text }: { text: string }): Promise<DetectedLang
 	const adapters = getAdapters();
 
 	const detectionFrequencies: Partial<Record<DetectionLanguage, number>> = {};
-	for await (const element of asStream(adapters, (adapter) => adapter.detect(text))) {
+	for await (const element of race(adapters, (adapter) => adapter.detect(text))) {
 		if (element.result === undefined) {
 			continue;
 		}

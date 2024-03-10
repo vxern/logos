@@ -1,13 +1,13 @@
 /**
  * Capitalises the first letter of the given text.
  *
- * @param target - String of text to format.
+ * @param string - String of text to format.
  * @returns The formatted string of text.
  */
-function capitalise(target: string): string {
-	const [first, ...rest] = target;
+function capitalise(string: string): string {
+	const [first, ...rest] = string;
 	if (first === undefined) {
-		return target;
+		return string;
 	}
 
 	return first.toUpperCase() + rest.join("");
@@ -16,13 +16,13 @@ function capitalise(target: string): string {
 /**
  * Makes the first letter of the given text lowercase, opposite of capitalising.
  *
- * @param target - String of text to format.
+ * @param string - String of text to format.
  * @returns The formatted string of text.
  */
-function decapitalise(target: string): string {
-	const [first, ...rest] = target;
+function decapitalise(string: string): string {
+	const [first, ...rest] = string;
 	if (first === undefined) {
-		return target;
+		return string;
 	}
 
 	return first.toLowerCase() + rest.join("");
@@ -31,29 +31,29 @@ function decapitalise(target: string): string {
 /**
  * Modifies a string of text to appear within Discord as an embedded code block.
  *
- * @param target - String of text to format.
+ * @param string - String of text to format.
  * @returns The formatted string of text.
  */
-function code(target: string): string {
-	if (target.length === 0) {
-		return `\`${constants.special.missingString}\``;
+function code(string: string): string {
+	if (string.length === 0) {
+		throw "ArgumentError: The string cannot be empty.";
 	}
 
-	return `\`${target}\``;
+	return `\`${string}\``;
 }
 
 /**
  * Modifies a string of text to appear within Discord as a multi-line code block
  * which expands to fill up entire rows and columns within a text box.
  *
- * @param target - String of text to format.
+ * @param string - String of text to format.
  */
-function codeMultiline(target: string): string {
-	if (target.length === 0) {
-		return `\`\`\`${constants.special.missingString}\`\`\``;
+function codeMultiline(string: string): string {
+	if (string.length === 0) {
+		throw "ArgumentError: The string cannot be empty.";
 	}
 
-	return `\`\`\`${target}\`\`\``;
+	return `\`\`\`${string}\`\`\``;
 }
 
 /**
@@ -63,6 +63,10 @@ function codeMultiline(target: string): string {
  * @returns The formatted string of text.
  */
 function list(items: string[]): string {
+	if (items.length === 0) {
+		throw "ArgumentError: The array cannot be empty.";
+	}
+
 	return items.map((item) => `${constants.special.bullet} ${item}`).join("\n");
 }
 

@@ -1,14 +1,3 @@
-/**
- * Taking an array, splits it into parts of equal sizes.
- *
- * @param array - The array to chunk.
- * @param size - The size of each chunk.
- * @returns The chunked array.
- */
-function toChunked<T>(array: T[], size: number): T[][] {
-	return Array.from(chunk(array, size));
-}
-
 function* chunk<T>(array: T[], size: number): Generator<T[], void, void> {
 	if (array.length === 0) {
 		yield [];
@@ -27,6 +16,17 @@ function* chunk<T>(array: T[], size: number): Generator<T[], void, void> {
 	}
 }
 
+/**
+ * Taking an array, splits it into parts of equal sizes.
+ *
+ * @param array - The array to chunk.
+ * @param size - The size of each chunk.
+ * @returns The chunked array.
+ */
+function toChunked<T>(array: T[], size: number): T[][] {
+	return Array.from(chunk(array, size));
+}
+
 type Reverse<O extends Record<string, string>> = {
 	[K in keyof O as O[K]]: K;
 };
@@ -39,35 +39,27 @@ function reverseObject<O extends Record<string, string>>(object: O): Reverse<O> 
 	return reversed as unknown as Reverse<O>;
 }
 
-type ElementResultTuple<ElementType, ResultType> = {
-	element: ElementType;
-	result?: ResultType;
-};
-async function* asStream<ElementType, ResultType>(
-	elements: ElementType[],
-	action: (element: ElementType) => Promise<ResultType | undefined>,
-): AsyncGenerator<ElementResultTuple<ElementType, ResultType>, void, void> {
-	const promises: Promise<ElementResultTuple<ElementType, ResultType>>[] = [];
-	const resolvers: ((_: ElementResultTuple<ElementType, ResultType>) => void)[] = [];
-	const getResolver = () => resolvers.shift() ?? (() => {});
+type ElementResultTuple<T, R> = { element: T; result?: R };
+async function* race<T, R>(
+	elements: T[],
+	doAction: (element: T) => Promise<R | undefined>,
+): AsyncGenerator<ElementResultTuple<T, R>, void, void> {
+	const promisesWithResolver = elements.map(() => Promise.withResolvers<ElementResultTuple<T, R>>());
 
-	for (const _ of Array(elements.length).keys()) {
-		promises.push(new Promise((resolve) => resolvers.push(resolve)));
-	}
-
+	const resolvers = [...promisesWithResolver];
 	for (const element of elements) {
-		action(element).then((result) => {
-			const yieldResult = getResolver();
+		doAction(element).then((result) => {
+			const { resolve } = resolvers.shift()!;
 
 			if (result === undefined) {
-				yieldResult({ element });
+				resolve({ element });
 			} else {
-				yieldResult({ element, result });
+				resolve({ element, result });
 			}
 		});
 	}
 
-	for (const promise of promises) {
+	for (const { promise } of promisesWithResolver) {
 		yield promise;
 	}
 }
@@ -76,4 +68,4 @@ function isDefined<T>(element: T | undefined): element is T {
 	return element !== undefined;
 }
 
-export { toChunked, chunk, reverseObject, asStream, isDefined };
+export { toChunked, chunk, reverseObject, race, isDefined };
