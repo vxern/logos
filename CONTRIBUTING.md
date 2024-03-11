@@ -1,6 +1,18 @@
 ## Contribute to Logos
 
-> Before you start, make sure you have the latest version of Node.js and NPM installed on your system.
+> Before you start, make sure you have the latest versions of the following software installed on your system:
+> - Node.js + NPM - running the program & managing dependencies
+> - RavenDB - storing permanent data
+> - Redis - storing temporary/external data
+> - Lavalink - playing audio
+>
+> Additionally, to make full use of Logos' capabilities, you will also need to obtain API keys from the following services:
+> - Discord - running the bot
+> - DeepL - translation
+> - RapidAPI - querying various API servers
+>   - [Google Translate](https://rapidapi.com/IRCTCAPI/api/google-translator9/) - translation
+>   - [WordsAPI](https://rapidapi.com/dpventures/api/wordsapi/) - English dictionary
+>   - [Dicolink](https://rapidapi.com/dicolink/api/dicolink/) - French dictionary
 
 To start contributing, first create your own working copy of `logos` that you can freely make changes to. You can do this by going to https://github.com/vxern/logos and forking the repository.
 
@@ -9,9 +21,9 @@ Once you have forked the repository, `git clone` it to download it locally:
 git clone https://github.com/your-username-here/logos.git
 ```
 
-Once you have your local copy of `logos` ready, run the following command to download all the necessary dependencies:
+Once you have your local copy of `logos` ready, run the following command to install all the necessary dependencies, and run all the necessary scripts to set the bot up:
 ```
-npm run setup
+npm install
 ```
 
 Afterwards, just to ensure the setup ran smoothly and the repository is ready to go, run the test suite:
@@ -23,7 +35,7 @@ And just like that, you're ready to develop! However, before you start contribut
 
 Once you've made your changes, create a pull request to merge them into `logos`, but before you do that, make sure of the following:
 - Run the formatter.
-  - Ideally, you should have your IDE set up in such a way where it would re-format the file on every change. However, just to make sure it complies with Biome and the linter ruleset in `biome.json`, run `npm run format` before you commit your changes.
+  - Ideally, you should have your IDE set up in such a way where it would re-format the file on every change. However, just to make sure it complies with Biome and the linter ruleset in `biome.json`, run `npm run lint` before you commit your changes.
 - Write tests for your changes, using the existing tests as a guideline for how they should look.
   - If you can't write a test and the reason for that isn't immediately obvious, state why they couldn't be written.
 - Keep your pull requests small, ideally up to 200 lines of code, or 400 at the maximum. This makes it easier for potential reviewers of your PR to not get discouraged reading a massive PR with tons of changes, and increases your chances of having your PR merged quickly.
