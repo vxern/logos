@@ -39,7 +39,7 @@
   "scripts": {
     "setup:install": "npm install && npm audit fix",
     "setup:provision": "tsx src/scripts/provision-sentence-pairs.ts",
-    "setup": "npm run logos:setup:install && npm run logos:setup:provision",
+    "setup": "npm run setup:install && npm run setup:provision",
     "format": "biome check src/ --apply-unsafe --organize-imports-enabled true",
     "test": "npx mocha --require ./test/setup.ts",
     "dev": "npx tsx ./src/index.ts",
