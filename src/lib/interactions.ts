@@ -4,6 +4,111 @@ import { Client } from "./client";
 import { InteractionCollector } from "./collectors";
 import { Logger } from "./logger";
 
+class InteractionStore {
+	readonly log: Logger;
+
+	readonly #bot: Discord.Bot;
+	readonly #interactions: Map<bigint, Logos.Interaction>;
+
+	constructor(client: Client, { bot }: { bot: Discord.Bot }) {
+		this.log = Logger.create({ identifier: "Interactions", isDebug: client.environment.isDebug });
+
+		this.#bot = bot;
+		this.#interactions = new Map();
+	}
+
+	static spoofInteraction<Interaction extends Logos.Interaction>(
+		interaction: Interaction,
+		{ using, parameters }: { using: Logos.Interaction; parameters?: Interaction["parameters"] },
+	): Interaction {
+		return {
+			...interaction,
+			parameters: { ...interaction.parameters, ...parameters },
+			type: Discord.InteractionTypes.ApplicationCommand,
+			token: using.token,
+			id: using.id,
+		};
+	}
+
+	registerInteraction(interaction: Logos.Interaction): void {
+		this.#interactions.set(interaction.id, interaction);
+	}
+
+	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
+		const interaction = this.#interactions.get(interactionId);
+		if (interaction === undefined) {
+			return undefined;
+		}
+
+		this.#interactions.delete(interactionId);
+
+		return interaction;
+	}
+
+	async acknowledge(interaction: Logos.Interaction): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
+			})
+			.catch((reason) => this.log.warn("Failed to acknowledge interaction:", reason));
+	}
+
+	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
+				data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
+			})
+			.catch((reason) => this.log.warn("Failed to postpone reply to interaction:", reason));
+	}
+
+	async reply(
+		interaction: Logos.Interaction,
+		data: Omit<Discord.InteractionCallbackData, "flags">,
+		{ visible = false } = {},
+	): Promise<void> {
+		await this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
+				data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
+			})
+			.catch((reason) => this.log.warn("Failed to reply to interaction:", reason));
+	}
+
+	async editReply(interaction: Logos.Interaction, data: Omit<Discord.InteractionCallbackData, "flags">): Promise<void> {
+		await this.#bot.rest
+			.editOriginalInteractionResponse(interaction.token, data)
+			.catch((reason) => this.log.warn("Failed to edit reply to interaction:", reason));
+	}
+
+	async deleteReply(interaction: Logos.Interaction): Promise<void> {
+		await this.#bot.rest
+			.deleteOriginalInteractionResponse(interaction.token)
+			.catch((reason) => this.log.warn("Failed to delete reply to interaction:", reason));
+	}
+
+	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
+		return this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
+				data: { choices },
+			})
+			.catch((reason) => this.log.warn("Failed to respond to autocomplete interaction:", reason));
+	}
+
+	async displayModal(
+		interaction: Logos.Interaction,
+		data: Omit<Discord.InteractionCallbackData, "flags">,
+	): Promise<void> {
+		return this.#bot.rest
+			.sendInteractionResponse(interaction.id, interaction.token, {
+				type: Discord.InteractionResponseTypes.Modal,
+				data,
+			})
+			.catch((reason) => this.log.warn("Failed to show modal:", reason));
+	}
+}
+
 type ComposerActionRow<ComposerContent, SectionNames = keyof ComposerContent> = {
 	type: Discord.MessageComponentTypes.ActionRow;
 	components: [
@@ -297,111 +402,6 @@ function parseVerboseTimeExpressionPhrase(
 	const correctedExpression = timeExpressions.join(", ");
 
 	return [correctedExpression, total];
-}
-
-class InteractionStore {
-	readonly log: Logger;
-
-	readonly #bot: Discord.Bot;
-	readonly #interactions: Map<bigint, Logos.Interaction>;
-
-	constructor(client: Client, { bot }: { bot: Discord.Bot }) {
-		this.log = Logger.create({ identifier: "Interactions", isDebug: client.environment.isDebug });
-
-		this.#bot = bot;
-		this.#interactions = new Map();
-	}
-
-	static spoofInteraction<Interaction extends Logos.Interaction>(
-		interaction: Interaction,
-		{ using, parameters }: { using: Logos.Interaction; parameters?: Interaction["parameters"] },
-	): Interaction {
-		return {
-			...interaction,
-			parameters: { ...interaction.parameters, ...parameters },
-			type: Discord.InteractionTypes.ApplicationCommand,
-			token: using.token,
-			id: using.id,
-		};
-	}
-
-	registerInteraction(interaction: Logos.Interaction): void {
-		this.#interactions.set(interaction.id, interaction);
-	}
-
-	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
-		const interaction = this.#interactions.get(interactionId);
-		if (interaction === undefined) {
-			return undefined;
-		}
-
-		this.#interactions.delete(interactionId);
-
-		return interaction;
-	}
-
-	async acknowledge(interaction: Logos.Interaction): Promise<void> {
-		await this.#bot.rest
-			.sendInteractionResponse(interaction.id, interaction.token, {
-				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
-			})
-			.catch((reason) => this.log.warn("Failed to acknowledge interaction:", reason));
-	}
-
-	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
-		await this.#bot.rest
-			.sendInteractionResponse(interaction.id, interaction.token, {
-				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
-				data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
-			})
-			.catch((reason) => this.log.warn("Failed to postpone reply to interaction:", reason));
-	}
-
-	async reply(
-		interaction: Logos.Interaction,
-		data: Omit<Discord.InteractionCallbackData, "flags">,
-		{ visible = false } = {},
-	): Promise<void> {
-		await this.#bot.rest
-			.sendInteractionResponse(interaction.id, interaction.token, {
-				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
-				data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
-			})
-			.catch((reason) => this.log.warn("Failed to reply to interaction:", reason));
-	}
-
-	async editReply(interaction: Logos.Interaction, data: Omit<Discord.InteractionCallbackData, "flags">): Promise<void> {
-		await this.#bot.rest
-			.editOriginalInteractionResponse(interaction.token, data)
-			.catch((reason) => this.log.warn("Failed to edit reply to interaction:", reason));
-	}
-
-	async deleteReply(interaction: Logos.Interaction): Promise<void> {
-		await this.#bot.rest
-			.deleteOriginalInteractionResponse(interaction.token)
-			.catch((reason) => this.log.warn("Failed to delete reply to interaction:", reason));
-	}
-
-	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
-		return this.#bot.rest
-			.sendInteractionResponse(interaction.id, interaction.token, {
-				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
-				data: { choices },
-			})
-			.catch((reason) => this.log.warn("Failed to respond to autocomplete interaction:", reason));
-	}
-
-	async displayModal(
-		interaction: Logos.Interaction,
-		data: Omit<Discord.InteractionCallbackData, "flags">,
-	): Promise<void> {
-		return this.#bot.rest
-			.sendInteractionResponse(interaction.id, interaction.token, {
-				type: Discord.InteractionResponseTypes.Modal,
-				data,
-			})
-			.catch((reason) => this.log.warn("Failed to show modal:", reason));
-	}
 }
 
 export { createModalComposer, parseTimeExpression, InteractionStore };
