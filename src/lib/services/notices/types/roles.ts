@@ -1,4 +1,5 @@
-import { Client, InteractionCollector } from "../../../client";
+import { Client } from "../../../client";
+import { InteractionCollector } from "../../../collectors";
 import { handleOpenRoleSelectionMenu } from "../../../commands/social/commands/profile/roles";
 import { HashableMessageContents, NoticeService } from "../service";
 

@@ -44,14 +44,14 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 		return;
 	}
 
-	if (interaction.parameters.volume < 0 || interaction.parameters.volume > defaults.MAX_VOLUME) {
+	if (interaction.parameters.volume < 0 || interaction.parameters.volume > constants.MAXIMUM_VOLUME) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.volume.options.set.strings.invalid.title", locale)(),
 			description: client.localise(
 				"music.options.volume.options.set.strings.invalid.description",
 				locale,
-			)({ volume: defaults.MAX_VOLUME }),
+			)({ volume: constants.MAXIMUM_VOLUME }),
 		};
 
 		client.reply(interaction, {

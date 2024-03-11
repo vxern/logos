@@ -1,6 +1,7 @@
 import * as YouTubeSearch from "youtube-sr";
 import { trim } from "../../../../../formatting";
-import { Client, InteractionCollector } from "../../../../client";
+import { Client } from "../../../../client";
+import { InteractionCollector } from "../../../../collectors";
 import { Song, SongListing } from "../types";
 import { ListingResolver } from "./sources";
 

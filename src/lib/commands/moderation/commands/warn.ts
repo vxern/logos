@@ -89,7 +89,6 @@ async function handleWarnUser(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
 ): Promise<void> {
-	const language = interaction.language;
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -182,7 +181,9 @@ async function handleWarnUser(
 			locale,
 		)({
 			user_mention: mention(member.id, { type: "user" }),
-			warnings: client.pluralise("warn.strings.warned.description.warnings", language, relevantWarnings.length),
+			warnings: client.pluralise("warn.strings.warned.description.warnings", locale, {
+				quantity: relevantWarnings.length,
+			}),
 		}),
 	};
 
@@ -202,7 +203,6 @@ async function handleWarnUser(
 		if (configuration.autoTimeout?.enabled) {
 			const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
 
-			const language = interaction.guildLanguage;
 			const locale = interaction.guildLocale;
 			strings = {
 				title: client.localise("warn.strings.limitSurpassedTimedOut.title", locale)(),
@@ -213,7 +213,7 @@ async function handleWarnUser(
 					user_mention: mention(user.id, { type: "user" }),
 					limit: configuration.limit,
 					number: relevantWarnings.length,
-					period: client.pluralise(`units.${timeout[1]}.word`, language, timeout[0]),
+					period: client.pluralise(`units.${timeout[1]}.word`, locale, { quantity: timeout[0] }),
 				}),
 			};
 

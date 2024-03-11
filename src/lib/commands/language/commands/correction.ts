@@ -1,7 +1,8 @@
 import { Locale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { trim } from "../../../../formatting";
-import { Client, InteractionCollector } from "../../../client";
+import { Client } from "../../../client";
+import { InteractionCollector } from "../../../collectors";
 import { Modal, createModalComposer } from "../../../interactions";
 import { CommandTemplate } from "../../command";
 import categories from "../../social/roles/roles";

@@ -40,7 +40,7 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 			response = await fetch(constants.endpoints.googleTranslate.translate, {
 				method: "POST",
 				headers: {
-					"User-Agent": defaults.USER_AGENT,
+					"User-Agent": constants.USER_AGENT,
 					"Content-Type": "application/x-www-form-urlencoded",
 					"X-RapidAPI-Key": client.environment.rapidApiSecret,
 					"X-RapidAPI-Host": constants.endpoints.googleTranslate.host,

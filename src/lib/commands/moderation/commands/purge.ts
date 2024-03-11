@@ -2,7 +2,8 @@ import { Locale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { mention, timestamp, trim } from "../../../../formatting";
 import { toChunked } from "../../../../utils";
-import { Client, InteractionCollector, isValidSnowflake } from "../../../client";
+import { Client, isValidSnowflake } from "../../../client";
+import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
 import { CommandTemplate } from "../../command";
 import { user } from "../../parameters";
@@ -45,7 +46,6 @@ async function handlePurgeMessages(
 	client: Client,
 	interaction: Logos.Interaction<any, { start: string; end: string; author: string | undefined }>,
 ): Promise<void> {
-	const language = interaction.language;
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -224,7 +224,7 @@ async function handlePurgeMessages(
 
 	let isFinished = false;
 	while (!isFinished) {
-		if (messages.length >= defaults.MAX_INDEXABLE_MESSAGES) {
+		if (messages.length >= constants.MAXIMUM_INDEXABLE_MESSAGES) {
 			clearInterval(indexProgressIntervalId);
 
 			const strings = {
@@ -234,11 +234,9 @@ async function handlePurgeMessages(
 						"purge.strings.rangeTooBig.description.rangeTooBig",
 						locale,
 					)({
-						messages: client.pluralise(
-							"purge.strings.rangeTooBig.description.rangeTooBig.messages",
-							language,
-							defaults.MAX_INDEXABLE_MESSAGES,
-						),
+						messages: client.pluralise("purge.strings.rangeTooBig.description.rangeTooBig.messages", locale, {
+							quantity: constants.MAXIMUM_INDEXABLE_MESSAGES,
+						}),
 					}),
 					trySmaller: client.localise("purge.strings.rangeTooBig.description.trySmaller", locale)(),
 				},
@@ -332,7 +330,7 @@ async function handlePurgeMessages(
 
 	let shouldContinue = false;
 
-	if (messages.length >= defaults.MAX_DELETABLE_MESSAGES) {
+	if (messages.length >= constants.MAXIMUM_DELETABLE_MESSAGES) {
 		const { promise, resolve } = Promise.withResolvers<boolean>();
 
 		const continueButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
@@ -359,18 +357,18 @@ async function handlePurgeMessages(
 						"purge.strings.indexed.description.tooMany",
 						locale,
 					)({
-						messages: client.pluralise("purge.strings.indexed.description.tooMany.messages", language, messages.length),
-						maximum_deletable: defaults.MAX_DELETABLE_MESSAGES,
+						messages: client.pluralise("purge.strings.indexed.description.tooMany.messages", locale, {
+							quantity: messages.length,
+						}),
+						maximum_deletable: constants.MAXIMUM_DELETABLE_MESSAGES,
 					}),
 					limited: client.localise(
 						"purge.strings.indexed.description.limited",
 						locale,
 					)({
-						messages: client.pluralise(
-							"purge.strings.indexed.description.limited.messages",
-							language,
-							defaults.MAX_DELETABLE_MESSAGES,
-						),
+						messages: client.pluralise("purge.strings.indexed.description.limited.messages", locale, {
+							quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
+						}),
 					}),
 				},
 			},
@@ -380,12 +378,12 @@ async function handlePurgeMessages(
 					"purge.strings.continue.description",
 					locale,
 				)({
-					messages: client.pluralise(
-						"purge.strings.continue.description.messages",
-						language,
-						defaults.MAX_DELETABLE_MESSAGES,
-					),
-					allMessages: client.pluralise("purge.strings.continue.description.allMessages", language, messages.length),
+					messages: client.pluralise("purge.strings.continue.description.messages", locale, {
+						quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
+					}),
+					allMessages: client.pluralise("purge.strings.continue.description.allMessages", locale, {
+						quantity: messages.length,
+					}),
 					channel_mention: channelMention,
 				}),
 			},
@@ -435,7 +433,7 @@ async function handlePurgeMessages(
 			return;
 		}
 
-		messages = messages.slice(0, defaults.MAX_DELETABLE_MESSAGES);
+		messages = messages.slice(0, constants.MAXIMUM_DELETABLE_MESSAGES);
 	}
 
 	if (!shouldContinue) {
@@ -465,7 +463,9 @@ async function handlePurgeMessages(
 						"purge.strings.indexed.description.some",
 						locale,
 					)({
-						messages: client.pluralise("purge.strings.indexed.description.some.messages", language, messages.length),
+						messages: client.pluralise("purge.strings.indexed.description.some.messages", locale, {
+							quantity: messages.length,
+						}),
 					}),
 				},
 			},
@@ -475,7 +475,9 @@ async function handlePurgeMessages(
 					"purge.strings.sureToPurge.description",
 					locale,
 				)({
-					messages: client.pluralise("purge.strings.sureToPurge.description.messages", language, messages.length),
+					messages: client.pluralise("purge.strings.sureToPurge.description.messages", locale, {
+						quantity: messages.length,
+					}),
 					channel_mention: channelMention,
 				}),
 			},
@@ -534,7 +536,9 @@ async function handlePurgeMessages(
 						"purge.strings.purging.description.purging",
 						locale,
 					)({
-						messages: client.pluralise("purge.strings.purging.description.purging.messages", language, messages.length),
+						messages: client.pluralise("purge.strings.purging.description.purging.messages", locale, {
+							quantity: messages.length,
+						}),
 						channel_mention: channelMention,
 					}),
 					mayTakeTime: client.localise("purge.strings.purging.description.mayTakeTime", locale)(),
@@ -650,7 +654,7 @@ async function handlePurgeMessages(
 					"purge.strings.purged.description",
 					locale,
 				)({
-					messages: client.pluralise("purge.strings.purged.description.messages", language, deletedCount),
+					messages: client.pluralise("purge.strings.purged.description.messages", locale, { quantity: deletedCount }),
 					channel_mention: channelMention,
 				}),
 			},

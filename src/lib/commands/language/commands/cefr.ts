@@ -1,5 +1,6 @@
 import { Locale } from "../../../../constants/languages";
-import { Client, InteractionCollector } from "../../../client";
+import { Client } from "../../../client";
+import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";

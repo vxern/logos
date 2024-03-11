@@ -27,7 +27,7 @@ class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 			response = await fetch(constants.endpoints.deepl.translate, {
 				method: "POST",
 				headers: {
-					"User-Agent": defaults.USER_AGENT,
+					"User-Agent": constants.USER_AGENT,
 					"Content-Type": "application/json",
 					Authorization: `DeepL-Auth-Key ${client.environment.deeplSecret}`,
 				},

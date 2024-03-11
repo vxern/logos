@@ -2,7 +2,8 @@ import * as levenshtein from "fastest-levenshtein";
 import { Locale, getLocaleByLearningLanguage } from "../../../../constants/languages";
 import licences from "../../../../constants/licences";
 import { capitalise } from "../../../../formatting";
-import { Client, InteractionCollector } from "../../../client";
+import { Client } from "../../../client";
+import { InteractionCollector } from "../../../collectors";
 import { GuildStats } from "../../../database/guild-stats";
 import { User } from "../../../database/user";
 import { CommandTemplate } from "../../command";
@@ -246,7 +247,7 @@ async function getGameView(
 
 async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
 	const pipeline = client.cache.redis.pipeline();
-	for (const _ of Array(defaults.GAME_WORD_SELECTION).keys()) {
+	for (const _ of Array(constants.PICK_MISSING_WORD_CHOICES).keys()) {
 		pipeline.srandmember(`${locale}:index`);
 	}
 
@@ -418,9 +419,9 @@ async function getSentenceSelection(client: Client, locale: Locale): Promise<Sen
 		.map((word) => ({ word, sort: Math.random() }))
 		.sort((a, b) => a.sort - b.sort)
 		.map(({ word }) => word);
-	if (wordsUnordered.length < defaults.GAME_WORD_SELECTION - 1) {
-		for (const _ of Array(defaults.GAME_WORD_SELECTION - 1 - wordsUnordered.length).keys()) {
-			wordsUnordered.push("?");
+	if (wordsUnordered.length < constants.PICK_MISSING_WORD_CHOICES - 1) {
+		for (const _ of Array(constants.PICK_MISSING_WORD_CHOICES - 1 - wordsUnordered.length).keys()) {
+			wordsUnordered.push(constants.special.missingString);
 		}
 	}
 
@@ -430,7 +431,7 @@ async function getSentenceSelection(client: Client, locale: Locale): Promise<Sen
 		.map(({ word }) => word);
 
 	const decoysExposed: string[] = [];
-	while (decoysExposed.length < defaults.GAME_WORD_SELECTION - 1) {
+	while (decoysExposed.length < constants.PICK_MISSING_WORD_CHOICES - 1) {
 		const word = words.pop();
 		if (word === undefined) {
 			continue;

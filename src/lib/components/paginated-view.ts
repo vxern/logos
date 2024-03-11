@@ -1,7 +1,8 @@
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";
 import { toChunked } from "../../utils";
-import { Client, InteractionCollector } from "../client";
+import { Client } from "../client";
+import { InteractionCollector } from "../collectors";
 import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../commands/music/data/types";
 
 type PageView = { embed: Discord.CamelizedDiscordEmbed; components?: Discord.MessageComponents };
@@ -106,7 +107,7 @@ abstract class PaginatedViewComponent<T> {
 		{ interaction, elements, showable }: { interaction: Logos.Interaction; elements: T[]; showable?: boolean },
 	) {
 		this.client = client;
-		this.#pages = toChunked(elements, defaults.RESULTS_PER_PAGE);
+		this.#pages = toChunked(elements, constants.RESULTS_PER_PAGE);
 		this.#showable = showable ?? false;
 		this.#index = 0;
 
@@ -266,7 +267,7 @@ class PaginatedRemoveSongListingViewComponent extends PaginatedViewComponent<Son
 		const options = page.map<Discord.SelectOption>((songListing, index) => ({
 			emoji: { name: listingTypeToEmoji[songListing.content.type] },
 			label: trim(songListing.content.title, 100),
-			value: (pageIndex * defaults.RESULTS_PER_PAGE + index).toString(),
+			value: (pageIndex * constants.RESULTS_PER_PAGE + index).toString(),
 		}));
 
 		return {

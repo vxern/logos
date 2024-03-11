@@ -133,7 +133,7 @@ class MusicService extends LocalService {
 			return undefined;
 		}
 
-		return session.listings.queue.length < defaults.MAX_QUEUE_ENTRIES;
+		return session.listings.queue.length < constants.MAXIMUM_QUEUE_ENTRIES;
 	}
 
 	get isQueueEmpty(): boolean | undefined {
@@ -151,7 +151,7 @@ class MusicService extends LocalService {
 			return undefined;
 		}
 
-		return session.listings.history.length < defaults.MAX_HISTORY_ENTRIES;
+		return session.listings.history.length < constants.MAXIMUM_HISTORY_ENTRIES;
 	}
 
 	get isHistoryEmpty(): boolean | undefined {

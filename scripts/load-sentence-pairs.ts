@@ -6,7 +6,7 @@ import Redis from "ioredis";
 import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../src/constants/languages";
 import { locales } from "../src/constants/languages/localisation";
 import { capitalise } from "../src/formatting";
-import defaults from "../src/constants/defaults";
+import constants from "../src/constants/constants";
 
 const RECORD_DELIMETER = "	";
 const MAX_BUFFER_SIZE = 1024 * 128;
@@ -144,7 +144,7 @@ function addPolyfills(): void {
 addPolyfills();
 
 const promises = [];
-for (const file of await getFiles(defaults.SENTENCE_PAIRS_DIRECTORY)) {
+for (const file of await getFiles(constants.SENTENCE_PAIRS_DIRECTORY)) {
 	promises.push(subscribeToReadStream(readStream, file));
 }
 await Promise.all(promises);

@@ -52,7 +52,7 @@ class StatusService extends GlobalService {
 			})
 			.catch(() => this.log.warn("Unable to edit bot status."));
 
-		setTimeout(() => this.#cycleStatus(), defaults.STATUS_CYCLE);
+		setTimeout(() => this.#cycleStatus(), constants.STATUS_CYCLE_PERIOD);
 	}
 }
 

@@ -1,7 +1,8 @@
-import { Locale, getLocalisationLanguageByLocale } from "../../../../constants/languages";
+import { Locale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { mention, timestamp } from "../../../../formatting";
-import { Client, InteractionCollector } from "../../../client";
+import { Client } from "../../../client";
+import { InteractionCollector } from "../../../collectors";
 import { openTicket } from "../../../commands/server/commands/ticket/open";
 import { EntryRequest } from "../../../database/entry-request";
 import { Model } from "../../../database/model";
@@ -129,7 +130,6 @@ class VerificationService extends PromptService<{
 		}
 
 		const guildLocale = this.guildLocale;
-		const guildLanguage = getLocalisationLanguageByLocale(guildLocale);
 
 		const strings = {
 			requestedRoles: this.client.localise("entry.verification.requestedRoles", guildLocale)(),
@@ -143,22 +143,18 @@ class VerificationService extends PromptService<{
 				"entry.verification.vote.acceptMultiple",
 				guildLocale,
 			)({
-				votes: this.client.pluralise(
-					"entry.verification.vote.acceptMultiple.votes",
-					guildLanguage,
-					voteInformation.acceptance.remaining,
-				),
+				votes: this.client.pluralise("entry.verification.vote.acceptMultiple.votes", guildLocale, {
+					quantity: voteInformation.acceptance.remaining,
+				}),
 			}),
 			reject: this.client.localise("entry.verification.vote.reject", guildLocale)(),
 			rejectMultiple: this.client.localise(
 				"entry.verification.vote.rejectMultiple",
 				guildLocale,
 			)({
-				votes: this.client.pluralise(
-					"entry.verification.vote.rejectMultiple.votes",
-					guildLanguage,
-					voteInformation.rejection.remaining,
-				),
+				votes: this.client.pluralise("entry.verification.vote.rejectMultiple.votes", guildLocale, {
+					quantity: voteInformation.rejection.remaining,
+				}),
 			}),
 			inquiry: this.client.localise("entry.verification.inquiry.inquiry", guildLocale)(),
 			open: this.client.localise("entry.verification.inquiry.open", guildLocale)(),

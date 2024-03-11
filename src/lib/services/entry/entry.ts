@@ -1,7 +1,8 @@
 import { FeatureLanguage, Locale } from "../../../constants/languages";
 import diagnostics from "../../../diagnostics";
 import { trim } from "../../../formatting";
-import { Client, InteractionCollector } from "../../client";
+import { Client } from "../../client";
+import { InteractionCollector } from "../../collectors";
 import { proficiency } from "../../commands/social/roles/categories/language";
 import { EntryRequest } from "../../database/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
