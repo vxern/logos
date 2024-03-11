@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/package",
   "name": "logos",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "version": "3.42.1",
   "type": "module",
   "keywords": [
@@ -37,12 +37,10 @@
     }
   ],
   "scripts": {
-    "setup:install": "npm install && npm audit fix",
-    "setup:provision": "tsx src/scripts/provision-sentence-pairs.ts",
-    "setup": "npm run setup:install && npm run setup:provision",
-    "format": "biome check src/ --apply-unsafe --organize-imports-enabled true",
+    "postinstall": "npm audit fix && tsx ./scripts/load-sentence-pairs.ts",
+    "lint": "biome check ./src/ --apply-unsafe --organize-imports-enabled true",
     "test": "npx mocha --require ./test/setup.ts",
-    "dev": "npx tsx ./src/index.ts",
+    "serve": "npx tsx ./src/index.ts",
     "start": "pm2 start ecosystem.config.cjs --instances 1 --exp-backoff-restart-delay=500"
   },
   "dependencies": {

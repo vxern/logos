@@ -27,5 +27,5 @@
   },
   "compileOnSave": true,
   "exclude": ["dist/", "node_modules/", "test/"],
-  "include": ["src/", "test/"]
+  "include": ["src/", "scripts/", "test/"]
 }

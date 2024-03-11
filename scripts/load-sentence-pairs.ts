@@ -3,9 +3,10 @@ import * as stream from "stream";
 import eventStream from "event-stream";
 import * as fs from "fs/promises";
 import Redis from "ioredis";
-import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../constants/languages";
-import { locales } from "../constants/languages/localisation";
-import { capitalise } from "../formatting";
+import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../src/constants/languages";
+import { locales } from "../src/constants/languages/localisation";
+import { capitalise } from "../src/formatting";
+import defaults from "../src/constants/defaults";
 
 const RECORD_DELIMETER = "	";
 const MAX_BUFFER_SIZE = 1024 * 128;
@@ -80,7 +81,7 @@ async function subscribeToReadStream(readStream: stream.Writable, file: Sentence
 	return promise;
 }
 
-console.time("provision-sentence-pairs");
+console.time("load-sentence-pairs");
 
 const indexes: Record<Locale, number[]> = Object.fromEntries(
 	locales.map<[Locale, number[]]>((locale) => [locale, []]),
@@ -168,6 +169,6 @@ readStream.end();
 	await pipeline.exec();
 }
 
-console.timeEnd("provision-sentence-pairs");
+console.timeEnd("load-sentence-pairs");
 
 await client.quit();
