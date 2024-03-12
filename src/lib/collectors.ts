@@ -50,7 +50,7 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 
 	initialise(): void {
 		if (this.#removeAfter !== undefined) {
-			setTimeout(() => this.close());
+			setTimeout(() => this.close(), this.#removeAfter);
 		}
 
 		if (this.#dependsOn !== undefined) {
