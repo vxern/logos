@@ -18,7 +18,7 @@ type Option = Discord.ApplicationCommandOption;
 interface CommandTemplate extends OptionMetadata {
 	readonly type: Discord.ApplicationCommandTypes;
 	readonly defaultMemberPermissions: Discord.PermissionStrings[];
-	readonly options: OptionTemplate[];
+	readonly options?: OptionTemplate[];
 }
 
 interface OptionTemplate extends OptionMetadata {
@@ -31,7 +31,7 @@ interface OptionTemplate extends OptionMetadata {
 	readonly minLength?: number;
 	readonly maxLength?: number;
 	readonly autocomplete?: boolean;
-	readonly options: OptionTemplate[];
+	readonly options?: OptionTemplate[];
 }
 
 export type { Command, CommandTemplate, OptionMetadata, InteractionHandler, Option, OptionTemplate };
