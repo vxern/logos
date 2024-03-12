@@ -1,6 +1,6 @@
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";
-import { toChunked } from "../../utils";
+import { toChunked } from "../../utilities";
 import { Client } from "../client";
 import { InteractionCollector } from "../collectors";
 import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../commands/music/data/types";

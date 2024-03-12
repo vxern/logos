@@ -1,7 +1,7 @@
 import { Locale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { mention, timestamp, trim } from "../../../../formatting";
-import { toChunked } from "../../../../utils";
+import { toChunked } from "../../../../utilities";
 import { Client, isValidSnowflake } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";

@@ -7,7 +7,7 @@ import languages, {
 } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
-import { race } from "../../../../utils";
+import { race } from "../../../../utilities";
 import { Client } from "../../../client";
 import { CommandTemplate } from "../../command";
 import { show } from "../../parameters";

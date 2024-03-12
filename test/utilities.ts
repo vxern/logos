@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { chunk, isDefined, race, reverseObject, toChunked } from "../src/utils";
+import { chunk, isDefined, race, reverseObject, toChunked } from "../src/utilities";
 
 describe("chunk()", () => {
 	it("yields an empty array if the array is empty, returning.", () => {

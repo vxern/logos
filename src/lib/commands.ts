@@ -1,6 +1,6 @@
 import { getDiscordLanguageByLocale } from "../constants/languages/localisation";
 import { capitalise } from "../formatting";
-import { isDefined } from "../utils";
+import { isDefined } from "../utilities";
 import { Client } from "./client";
 import {
 	Command,

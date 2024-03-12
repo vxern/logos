@@ -1,4 +1,4 @@
-import { reverseObject } from "../../utils";
+import { reverseObject } from "../../utilities";
 
 const languages = Object.freeze({
 	discord: [

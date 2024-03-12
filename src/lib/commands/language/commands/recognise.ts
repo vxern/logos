@@ -1,7 +1,7 @@
 import { DetectionLanguage, Locale } from "../../../../constants/languages";
 import localisations from "../../../../constants/localisations";
 import { list } from "../../../../formatting";
-import { race } from "../../../../utils";
+import { race } from "../../../../utilities";
 import { Client } from "../../../client";
 import { CommandTemplate } from "../../command";
 import { getAdapters } from "../detectors/adapters";
