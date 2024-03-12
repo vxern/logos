@@ -34,10 +34,10 @@ interface Environment {
 }
 
 interface MemberNarrowingOptions {
-	includeBots: boolean;
-	restrictToSelf: boolean;
-	restrictToNonSelf: boolean;
-	excludeModerators: boolean;
+	readonly includeBots: boolean;
+	readonly restrictToSelf: boolean;
+	readonly restrictToNonSelf: boolean;
+	readonly excludeModerators: boolean;
 }
 
 class Client {
