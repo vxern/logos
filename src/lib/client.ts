@@ -458,7 +458,7 @@ class Client {
 			return [[], false];
 		}
 
-		const seeker = this.#connection.cache.members.get(Discord.snowflakeToBigint(`${seekerUserId}${guildId}`));
+		const seeker = this.#connection.cache.members.get(guildId)?.get(seekerUserId);
 		if (seeker === undefined) {
 			return undefined;
 		}
@@ -475,7 +475,7 @@ class Client {
 
 		const id = extractIDFromIdentifier(identifier);
 		if (id !== undefined) {
-			const member = this.#connection.cache.members.get(Discord.snowflakeToBigint(`${id}${guildId}`));
+			const member = this.#connection.cache.members.get(guildId)?.get(BigInt(id));
 			if (member === undefined) {
 				return undefined;
 			}

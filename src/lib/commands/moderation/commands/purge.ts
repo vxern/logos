@@ -567,7 +567,7 @@ async function handlePurgeMessages(
 
 	const [guild, member, channel] = [
 		client.entities.guilds.get(guildId),
-		client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`)),
+		client.entities.members.get(guildId)?.get(interaction.user.id),
 		client.entities.channels.get(channelId),
 	];
 	if (guild === undefined || member === undefined || channel === undefined) {

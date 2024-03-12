@@ -42,7 +42,7 @@ async function handleStartCorrecting(
 		return;
 	}
 
-	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
+	const member = client.entities.members.get(guildId)?.get(interaction.user.id);
 	if (member === undefined) {
 		return;
 	}
@@ -88,7 +88,7 @@ async function handleStartCorrecting(
 		return;
 	}
 
-	const correctedMember = client.entities.members.get(Discord.snowflakeToBigint(`${message.author.id}${guildId}`));
+	const correctedMember = client.entities.members.get(guildId)?.get(message.author.id);
 	if (correctedMember === undefined) {
 		return;
 	}

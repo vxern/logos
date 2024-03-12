@@ -25,7 +25,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guildId}`));
+	const member = client.entities.members.get(guildId)?.get(interaction.user.id);
 	if (member === undefined) {
 		return;
 	}

@@ -6,7 +6,7 @@ class DiscordConnection {
 	readonly cache: {
 		readonly guilds: Map<bigint, Logos.Guild>;
 		readonly users: Map<bigint, Logos.User>;
-		readonly members: Map<bigint, Logos.Member>;
+		readonly members: Map</* guildId: */ bigint, Map</* userId: */ bigint, Logos.Member>>;
 		readonly channels: Map<bigint, Logos.Channel>;
 		readonly messages: {
 			readonly latest: Map<bigint, Logos.Message>;
@@ -99,9 +99,12 @@ class DiscordConnection {
 	): Discord.Member {
 		const result = Discord.transformMember(this.bot, payload, guildId, userId);
 
-		const memberSnowflake = this.bot.transformers.snowflake(`${userId}${guildId}`);
-
-		this.cache.members.set(memberSnowflake, result);
+		const guildIdBigInt = BigInt(guildId);
+		if (this.cache.members.has(guildIdBigInt)) {
+			this.cache.members.get(guildIdBigInt)!.set(BigInt(userId), result);
+		} else {
+			this.cache.members.set(guildIdBigInt, new Map([[BigInt(userId), result]]));
+		}
 
 		this.cache.guilds.get(BigInt(guildId))?.members.set(BigInt(userId), result);
 
@@ -132,9 +135,12 @@ class DiscordConnection {
 				user.id,
 			);
 
-			const memberSnowflake = this.bot.transformers.snowflake(`${member.id}${member.guildId}`);
-
-			this.cache.members.set(memberSnowflake, member);
+			const guildIdBigInt = BigInt(member.guildId);
+			if (this.cache.members.has(guildIdBigInt)) {
+				this.cache.members.get(guildIdBigInt)!.set(BigInt(member.id), member);
+			} else {
+				this.cache.members.set(guildIdBigInt, new Map([[BigInt(member.id), member]]));
+			}
 		}
 
 		return result;

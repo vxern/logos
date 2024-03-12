@@ -143,7 +143,7 @@ async function createRoleSelectionMenu(
 		emojiIdsByName.set(name, id);
 	}
 
-	const member = client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guild.id}`));
+	const member = client.entities.members.get(guild.id)?.get(interaction.user.id);
 	if (member === undefined) {
 		return;
 	}

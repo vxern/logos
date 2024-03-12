@@ -56,10 +56,7 @@ class VerificationService extends PromptService<{
 			return new Map();
 		}
 
-		// TODO(vxern): Find less error-prone way of querying for members.
-		const member = this.client.entities.members.get(
-			Discord.snowflakeToBigint(`${this.client.bot.id}${this.guildIdString}`),
-		);
+		const member = this.client.entities.members.get(this.guildId)?.get(this.client.bot.id);
 		if (member === undefined) {
 			return new Map();
 		}
@@ -662,7 +659,7 @@ class VerificationService extends PromptService<{
 			return;
 		}
 
-		const member = this.client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${guild.id}`));
+		const member = this.client.entities.members.get(guild.id)?.get(interaction.user.id);
 		if (member === undefined) {
 			return;
 		}

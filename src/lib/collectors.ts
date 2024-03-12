@@ -244,7 +244,9 @@ class InteractionCollector<
 		const [guildId, channelId, member] = [
 			interaction.guildId,
 			interaction.channelId,
-			this.#client.entities.members.get(Discord.snowflakeToBigint(`${interaction.user.id}${interaction.guildId}`)),
+			interaction.guildId !== undefined
+				? this.#client.entities.members.get(interaction.guildId)?.get(interaction.user.id)
+				: undefined,
 		];
 		if (guildId === undefined || channelId === undefined || member === undefined) {
 			return {
