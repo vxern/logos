@@ -51,3 +51,4 @@ Once you've made your changes, create a pull request to merge them into `logos`,
 - Use `#` for declaring private API members. Do not use TypeScript's `public`, `protected` and `private` keywords.
   - `private` is permitted for hiding constructors.
 - Use `return undefined;` over `return;` when the return type can be `undefined`.
+- Use union types with a clearly defined key->value mapping object over `enum`s.
