@@ -279,7 +279,7 @@ class Client {
 		const client = new Client({ environment, log, bot, database, localisations });
 
 		Client.#client = client;
-		
+
 		return client;
 	}
 
