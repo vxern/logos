@@ -23,7 +23,7 @@
     "strictNullChecks": true,
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
-    "types": []
+    "types": ["mocha"]
   },
   "compileOnSave": true,
   "exclude": ["dist/", "node_modules/", "test/"],
