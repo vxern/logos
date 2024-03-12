@@ -27,7 +27,7 @@ const MAXIMUM_VOICE_CHANNELS = 5;
 
 const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 
-export default {
+export default Object.freeze({
 	LOCALISATION_LANGUAGE,
 	LOCALISATION_LOCALE,
 	LEARNING_LANGUAGE,
@@ -48,4 +48,4 @@ export default {
 	MINIMUM_VOICE_CHANNELS,
 	MAXIMUM_VOICE_CHANNELS,
 	WARN_MESSAGE_DELETE_TIMEOUT,
-};
+});
