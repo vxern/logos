@@ -1,5 +1,5 @@
-import { Cache } from "../../src/lib/cache";
 import { expect } from "chai";
+import { Cache } from "../../src/lib/cache";
 
 describe("Cache", () => {
 	describe("constructor()", () => {

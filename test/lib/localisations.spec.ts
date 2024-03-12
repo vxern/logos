@@ -1,6 +1,6 @@
+import { expect } from "chai";
 import constants from "../../src/constants/constants";
 import { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "../../src/lib/localisations";
-import { expect } from "chai";
 import { mockClient } from "../mocks";
 
 describe("LocalisationStore", () => {

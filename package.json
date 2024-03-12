@@ -38,7 +38,7 @@
   ],
   "scripts": {
     "postinstall": "npm audit fix && tsx ./scripts/load-sentence-pairs.ts",
-    "lint": "biome check ./src/ --apply-unsafe --organize-imports-enabled true",
+    "lint": "biome check ./src/ --apply-unsafe --organize-imports-enabled true && biome check ./test/ --apply-unsafe --organize-imports-enabled true",
     "test": "npx mocha --require ./test/setup.ts",
     "serve": "npx tsx ./src/index.ts",
     "start": "pm2 start ecosystem.config.cjs --instances 1 --exp-backoff-restart-delay=500"

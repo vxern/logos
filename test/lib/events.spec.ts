@@ -1,6 +1,6 @@
+import { expect } from "chai";
 // import { mockClient, mockServices } from "../mocks";
 import { EventStore } from "../../src/lib/events";
-import { expect } from "chai";
 
 describe("EventStore", () => {
 	describe("constructor()", () => {
