@@ -1,4 +1,5 @@
 import { Client, Environment } from "../src/lib/client";
+import { ServiceStore } from "../src/lib/services";
 
 const mockEnvironment: Environment = {
 	deeplSecret: "DEEPL_SECRET",
@@ -14,4 +15,13 @@ const mockEnvironment: Environment = {
 };
 const mockClient = await Client.create({ environment: mockEnvironment, localisations: new Map() });
 
-export { mockEnvironment, mockClient };
+// TODO(vxern): Implement.
+const mockBot = {} as Discord.Bot;
+
+// TODO(vxern): Implement.
+const mockServices = {} as ServiceStore;
+
+// TODO(vxern): Implement.
+const mockEventHandlers = {} as Partial<Discord.EventHandlers>;
+
+export { mockBot, mockClient, mockEnvironment, mockEventHandlers, mockServices };
