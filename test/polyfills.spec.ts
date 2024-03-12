@@ -1,21 +1,17 @@
-import {expect} from "chai";
-import {registerPolyfills} from "../src/polyfills";
+import { expect } from "chai";
+import { registerPolyfills } from "../src/polyfills";
+import "../src/types.d.ts";
 
-// TODO(vxern): Is checking for throws really the best way to do it?
 describe("registerPolyfills()", () => {
-    it("implements Promise.withResolvers().", () => {
-        expect(() => Promise.withResolvers()).to.throw;
-        registerPolyfills();
-        expect(() => Promise.withResolvers()).to.not.throw;
-    });
+	it("registers polyfills.", () => {
+		registerPolyfills();
+		expect(typeof Promise.withResolvers).to.not.equal("undefined");
+	});
 
-    describe("exposes globals.", () => {
-        expect(() => Discord).to.throw;
-        expect(() => constants).to.throw;
-        expect(() => defaults).to.throw;
-        registerPolyfills();
-        expect(() => Discord).to.not.throw;
-        expect(() => constants).to.not.throw;
-        expect(() => defaults).to.not.throw;
-    });
+	it("registers globals.", () => {
+		registerPolyfills();
+		expect(typeof Discord).to.not.equal("undefined");
+		expect(typeof constants).to.not.equal("undefined");
+		expect(typeof defaults).to.not.equal("undefined");
+	});
 });
