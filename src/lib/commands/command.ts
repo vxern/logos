@@ -1,48 +1,37 @@
 import { Client } from "../client";
 
-// TODO(vxern): This whole file could be improved.
-
-type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
-
-/** Describes the handler of an interaction. */
 type InteractionHandler = (client: Client, interaction: Logos.Interaction<any, any>) => Promise<void>;
+interface OptionFlags {
+	readonly hasRateLimit?: boolean;
+	readonly isShowable?: boolean;
+}
+interface OptionMetadata {
+	readonly id: string;
+	readonly handle?: InteractionHandler;
+	readonly handleAutocomplete?: InteractionHandler;
+	readonly flags?: OptionFlags;
+}
 
 type Command = Discord.CreateApplicationCommand;
-
 type Option = Discord.ApplicationCommandOption;
 
-interface CommandOptionFlags {
-	hasRateLimit?: boolean;
-	isShowable?: boolean;
+interface CommandTemplate extends OptionMetadata {
+	readonly type: Discord.ApplicationCommandTypes;
+	readonly defaultMemberPermissions: Discord.PermissionStrings[];
+	readonly options: OptionTemplate[];
 }
 
-interface CommandMetadata {
-	id: string;
-	handle?: InteractionHandler;
-	handleAutocomplete?: InteractionHandler;
-	flags?: CommandOptionFlags;
+interface OptionTemplate extends OptionMetadata {
+	readonly type: Discord.ApplicationCommandOptionTypes;
+	readonly required?: boolean;
+	readonly choices?: Discord.ApplicationCommandOptionChoice[];
+	readonly channelTypes?: Discord.ChannelTypes[];
+	readonly minValue?: number;
+	readonly maxValue?: number;
+	readonly minLength?: number;
+	readonly maxLength?: number;
+	readonly autocomplete?: boolean;
+	readonly options: OptionTemplate[];
 }
 
-type LocalisationProperties = "name" | "nameLocalizations" | "description" | "descriptionLocalizations";
-
-// TODO(vxern): Rename to builder.
-type CommandTemplate = WithRequired<
-	Omit<Command, "options" | LocalisationProperties>,
-	"defaultMemberPermissions" | "type"
-> & {
-	options?: OptionTemplate[];
-} & CommandMetadata;
-
-type OptionTemplate = Omit<Option, "options" | LocalisationProperties> & {
-	options?: OptionTemplate[];
-} & CommandMetadata;
-
-export type {
-	Command,
-	CommandTemplate,
-	CommandMetadata,
-	InteractionHandler,
-	LocalisationProperties,
-	Option,
-	OptionTemplate,
-};
+export type { Command, CommandTemplate, OptionMetadata, InteractionHandler, Option, OptionTemplate };

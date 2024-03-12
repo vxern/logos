@@ -1,5 +1,3 @@
-// TODO(vxern): Rename this file to utilities.ts.
-
 function* chunk<T>(array: T[], size: number): Generator<T[], void, void> {
 	if (array.length === 0) {
 		yield [];

@@ -4,7 +4,7 @@ import { isDefined } from "../utilities";
 import { Client } from "./client";
 import {
 	Command,
-	CommandMetadata,
+	OptionMetadata,
 	CommandTemplate,
 	InteractionHandler,
 	Option,
@@ -19,7 +19,7 @@ interface RateLimit {
 	nextAllowedUsageTimestamp: number;
 }
 type CommandName = keyof typeof commandTemplates;
-type LocalisedNamesWithMetadata = [names: NameLocalisations, metadata: CommandMetadata];
+type LocalisedNamesWithMetadata = [names: NameLocalisations, metadata: OptionMetadata];
 type BuildResult<Object extends Command | Option> = [object: Object, namesWithFlags: LocalisedNamesWithMetadata[]];
 class CommandStore {
 	readonly commands: Partial<Record<CommandName, Command>>;
@@ -113,7 +113,7 @@ class CommandStore {
 
 		// Check for duplicates.
 		const nameBuffers: Partial<Record<Discord.Locales, Set<string>>> = {};
-		const commandMetadataByDisplayName = new Map<string, CommandMetadata>();
+		const commandMetadataByDisplayName = new Map<string, OptionMetadata>();
 		for (const [nameLocalisations, metadata] of namesWithMetadata) {
 			const { name, nameLocalizations } = nameLocalisations;
 
@@ -325,8 +325,6 @@ class CommandStore {
 				...descriptionLocalisations,
 				type: template.type,
 				defaultMemberPermissions: template.defaultMemberPermissions,
-				dmPermission: template.dmPermission,
-				nsfw: template.nsfw,
 				options,
 			};
 		}
@@ -335,8 +333,6 @@ class CommandStore {
 			...nameLocalisations,
 			type: template.type,
 			defaultMemberPermissions: template.defaultMemberPermissions,
-			dmPermission: template.dmPermission,
-			nsfw: template.nsfw,
 			options,
 		};
 	}

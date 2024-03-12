@@ -621,7 +621,6 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return serverFeatures.suggestions;
 	}
 
-	// TODO(vxern): Naming?
 	get resourceSubmissions(): Enabled<NonNullable<Guild["serverFeatures"]>["resources"]> | undefined {
 		const serverFeatures = this.serverFeatures;
 		if (!serverFeatures?.resources?.enabled) {

@@ -17,6 +17,8 @@ declare global {
 	interface PromiseConstructor {
 		withResolvers<T>(): PromiseWithResolver<T>;
 	}
+
+	type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 }
 
 declare global {
