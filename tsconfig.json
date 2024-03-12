@@ -26,6 +26,6 @@
     "types": ["mocha"]
   },
   "compileOnSave": true,
-  "exclude": ["dist/", "node_modules/", "test/"],
+  "exclude": ["dist/", "node_modules/"],
   "include": ["src/", "scripts/", "test/"]
 }
