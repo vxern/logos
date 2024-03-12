@@ -13,86 +13,6 @@ import { User } from "./database/user";
 import { Warning } from "./database/warning";
 import { Logger } from "./logger";
 
-class DocumentSession extends ravendb.DocumentSession {
-	static readonly #_classes: Record<Collection, { new (data: any): Model }> = {
-		EntryRequests: EntryRequest,
-		GuildStats: GuildStats,
-		Guilds: Guild,
-		Praises: Praise,
-		Reports: Report,
-		Resources: Resource,
-		Suggestions: Suggestion,
-		Tickets: Ticket,
-		Users: User,
-		Warnings: Warning,
-	};
-
-	readonly #database: Database;
-
-	constructor({ database, id, options }: { database: Database; id: string; options: ravendb.SessionOptions }) {
-		super(database, id, options);
-
-		this.#database = database;
-	}
-
-	static instantiateModel<M extends Model>(payload: RawDocument): M {
-		if (payload["@metadata"]["@collection"] === "@empty") {
-			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
-		}
-
-		if (!(payload["@metadata"]["@collection"] in DocumentSession.#_classes)) {
-			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
-		}
-
-		const Class = DocumentSession.#_classes[payload["@metadata"]["@collection"] as Collection];
-
-		return new Class(payload) as M;
-	}
-
-	async get<M extends Model>(id: string): Promise<M | undefined>;
-	async get<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
-	async get<M extends Model>(idOrIds: string | string[]): Promise<M | undefined | (M | undefined)[]> {
-		const result = (await this.load(Array.isArray(idOrIds) ? idOrIds : [idOrIds])) as Record<
-			string,
-			RawDocument | null
-		>;
-		if (result === null) {
-			return undefined;
-		}
-
-		const documentsRaw = Object.values(result).map((documentRaw) => documentRaw ?? undefined);
-
-		const documents: (M | undefined)[] = [];
-		for (const documentRaw of documentsRaw) {
-			if ((documentRaw ?? undefined) === undefined) {
-				documents.push(undefined);
-				continue;
-			}
-
-			const document = DocumentSession.instantiateModel(documentRaw!) as M;
-			documents.push(document);
-		}
-
-		if (Array.isArray(idOrIds)) {
-			return documents;
-		}
-
-		return documents.at(0)!;
-	}
-
-	async set<M extends Model>(document: M): Promise<void> {
-		await this.store<M>(document, document["@metadata"]["@id"]);
-
-		this.#database.cacheDocument(document);
-	}
-
-	async remove<M extends Model>(document: M): Promise<void> {
-		// We don't call `delete()` here because we don't actually delete from the database.
-
-		this.#database.unloadDocument(document);
-	}
-}
-
 class Database extends ravendb.DocumentStore {
 	readonly cache: {
 		readonly entryRequests: Map<string, EntryRequest>;
@@ -312,6 +232,86 @@ class Database extends ravendb.DocumentStore {
 		await callback(session);
 
 		session.dispose();
+	}
+}
+
+class DocumentSession extends ravendb.DocumentSession {
+	static readonly #_classes: Record<Collection, { new (data: any): Model }> = {
+		EntryRequests: EntryRequest,
+		GuildStats: GuildStats,
+		Guilds: Guild,
+		Praises: Praise,
+		Reports: Report,
+		Resources: Resource,
+		Suggestions: Suggestion,
+		Tickets: Ticket,
+		Users: User,
+		Warnings: Warning,
+	};
+
+	readonly #database: Database;
+
+	constructor({ database, id, options }: { database: Database; id: string; options: ravendb.SessionOptions }) {
+		super(database, id, options);
+
+		this.#database = database;
+	}
+
+	static instantiateModel<M extends Model>(payload: RawDocument): M {
+		if (payload["@metadata"]["@collection"] === "@empty") {
+			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
+		}
+
+		if (!(payload["@metadata"]["@collection"] in DocumentSession.#_classes)) {
+			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
+		}
+
+		const Class = DocumentSession.#_classes[payload["@metadata"]["@collection"] as Collection];
+
+		return new Class(payload) as M;
+	}
+
+	async get<M extends Model>(id: string): Promise<M | undefined>;
+	async get<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
+	async get<M extends Model>(idOrIds: string | string[]): Promise<M | undefined | (M | undefined)[]> {
+		const result = (await this.load(Array.isArray(idOrIds) ? idOrIds : [idOrIds])) as Record<
+			string,
+			RawDocument | null
+		>;
+		if (result === null) {
+			return undefined;
+		}
+
+		const documentsRaw = Object.values(result).map((documentRaw) => documentRaw ?? undefined);
+
+		const documents: (M | undefined)[] = [];
+		for (const documentRaw of documentsRaw) {
+			if ((documentRaw ?? undefined) === undefined) {
+				documents.push(undefined);
+				continue;
+			}
+
+			const document = DocumentSession.instantiateModel(documentRaw!) as M;
+			documents.push(document);
+		}
+
+		if (Array.isArray(idOrIds)) {
+			return documents;
+		}
+
+		return documents.at(0)!;
+	}
+
+	async set<M extends Model>(document: M): Promise<void> {
+		await this.store<M>(document, document["@metadata"]["@id"]);
+
+		this.#database.cacheDocument(document);
+	}
+
+	async remove<M extends Model>(document: M): Promise<void> {
+		// We don't call `delete()` here because we don't actually delete from the database.
+
+		this.#database.unloadDocument(document);
 	}
 }
 
