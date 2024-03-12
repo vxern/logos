@@ -9,13 +9,12 @@ const LOCALISATION_LOCALE: Locale = "eng-US";
 const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/American";
 const TRANSLATION_LANGUAGE: TranslationLanguage = "English/American";
 
-// TODO(vxern): Loosen these way up.
-const COMMAND_RATE_LIMIT: RateLimit = { uses: 3, within: [30, "second"] };
-const REPORT_RATE_LIMIT: RateLimit = { uses: 2, within: [30, "minute"] };
-const RESOURCE_RATE_LIMIT: RateLimit = { uses: 2, within: [30, "second"] };
-const SUGGESTION_RATE_LIMIT: RateLimit = { uses: 3, within: [2, "hour"] };
-const TICKET_RATE_LIMIT: RateLimit = { uses: 2, within: [1, "day"] };
-const PRAISE_RATE_LIMIT: RateLimit = { uses: 3, within: [6, "hour"] };
+const COMMAND_RATE_LIMIT: RateLimit = { uses: 5, within: [10, "second"] };
+const REPORT_RATE_LIMIT: RateLimit = { uses: 50, within: [1, "day"] };
+const RESOURCE_RATE_LIMIT: RateLimit = { uses: 500, within: [1, "day"] };
+const SUGGESTION_RATE_LIMIT: RateLimit = { uses: 50, within: [1, "day"] };
+const TICKET_RATE_LIMIT: RateLimit = { uses: 10, within: [1, "day"] };
+const PRAISE_RATE_LIMIT: RateLimit = { uses: 10, within: [1, "day"] };
 
 const WARN_LIMIT = 3;
 const WARN_EXPIRY: TimeStruct = [2, "month"];
