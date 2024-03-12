@@ -276,7 +276,11 @@ class Client {
 			},
 		});
 
-		return new Client({ environment, log, bot, database, localisations });
+		const client = new Client({ environment, log, bot, database, localisations });
+
+		Client.#client = client;
+		
+		return client;
 	}
 
 	async #setupCollectors(): Promise<void> {
