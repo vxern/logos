@@ -6,7 +6,6 @@ import {
 	isDiscordLocalisationLanguage,
 } from "../constants/languages";
 import { Client } from "./client";
-import transformers from "./localisation/transformers";
 import { Logger } from "./logger";
 
 type LocalisationBuilder = (data?: Record<string, unknown>) => string;
@@ -191,7 +190,7 @@ class LocalisationStore {
 	pluralise(key: string, locale: Locale, { quantity }: { quantity: number }): string {
 		const language = getLocalisationLanguageByLocale(locale);
 
-		const pluralise = transformers[language].pluralise;
+		const pluralise = constants.localisations.transformers[language].pluralise;
 		const { one, two, many } = {
 			one: this.localise(`${key}.one`, locale)?.({ one: quantity }),
 			two: this.localise(`${key}.two`, locale)?.({ two: quantity }),
