@@ -5,7 +5,6 @@ import languages, {
 	getTranslationLanguage,
 	isTranslationLanguage,
 } from "../../../../constants/languages";
-import localisations from "../../../../constants/localisations";
 import { trim } from "../../../../formatting";
 import { race } from "../../../../utilities";
 import { Client } from "../../../client";
@@ -92,7 +91,7 @@ async function handleTranslateChatInputAutocomplete(
 	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
 	const choices = languages.languages.translation
 		.map((language) => {
-			const languageStringKey = localisations.languages[language];
+			const languageStringKey = constants.localisations.languages[language];
 
 			if (languageStringKey === undefined) {
 				return {
@@ -443,8 +442,8 @@ async function translateText(
 
 	const strings = {
 		languages: {
-			source: client.localise(localisations.languages[languages.source], locale)(),
-			target: client.localise(localisations.languages[languages.target], locale)(),
+			source: client.localise(constants.localisations.languages[languages.source], locale)(),
+			target: client.localise(constants.localisations.languages[languages.target], locale)(),
 		},
 		sourceText: client.localise("translate.strings.sourceText", locale)(),
 		translation: client.localise("translate.strings.translation", locale)(),

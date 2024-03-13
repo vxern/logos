@@ -1,5 +1,4 @@
 import { DetectionLanguage, Locale } from "../../../../constants/languages";
-import localisations from "../../../../constants/localisations";
 import { list } from "../../../../formatting";
 import { race } from "../../../../utilities";
 import { Client } from "../../../client";
@@ -131,7 +130,7 @@ async function handleRecogniseLanguage(
 			description: client.localise(
 				"recognize.strings.fields.likelyMatches.description.single",
 				locale,
-			)({ language: client.localise(localisations.languages[language], locale)() }),
+			)({ language: client.localise(constants.localisations.languages[language], locale)() }),
 		};
 
 		embeds.push({
@@ -156,7 +155,7 @@ async function handleRecogniseLanguage(
 				throw "StateError: Likely detected language unexpectedly undefined.";
 			}
 
-			const languageNameLocalised = client.localise(localisations.languages[language], locale)();
+			const languageNameLocalised = client.localise(constants.localisations.languages[language], locale)();
 
 			const strings = {
 				title: client.localise("recognize.strings.fields.likelyMatches.title", locale)(),
@@ -173,7 +172,7 @@ async function handleRecogniseLanguage(
 			});
 		} else {
 			const languageNamesLocalised = detectedLanguages.likely.map((language) =>
-				client.localise(localisations.languages[language], locale)(),
+				client.localise(constants.localisations.languages[language], locale)(),
 			);
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
@@ -195,7 +194,7 @@ async function handleRecogniseLanguage(
 				throw "StateError: Possible detected language unexpectedly undefined.";
 			}
 
-			const languageNameLocalised = client.localise(localisations.languages[language], locale)();
+			const languageNameLocalised = client.localise(constants.localisations.languages[language], locale)();
 
 			const strings = {
 				title: client.localise("recognize.strings.fields.possibleMatches.title", locale)(),
@@ -212,7 +211,7 @@ async function handleRecogniseLanguage(
 			});
 		} else {
 			const languageNamesLocalised = detectedLanguages.possible.map((language) =>
-				client.localise(localisations.languages[language], locale)(),
+				client.localise(constants.localisations.languages[language], locale)(),
 			);
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 

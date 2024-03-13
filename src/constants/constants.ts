@@ -13,6 +13,8 @@ import properties from "./properties";
 import special from "./special";
 import statuses from "./statuses";
 import time from "./time";
+import licences from "./licences";
+import localisations from "./localisations";
 
 const constants = Object.freeze({
 	PROJECT_NAME: "Logos",
@@ -44,7 +46,9 @@ export default Object.freeze({
 	endpoints,
 	gifs,
 	languages,
+	licences,
 	links,
+	localisations,
 	patterns,
 	properties,
 	special,

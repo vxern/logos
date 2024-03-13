@@ -1,4 +1,3 @@
-import localisations from "../../../../../constants/localisations";
 import { Client } from "../../../../client";
 import { User } from "../../../../database/user";
 import { OptionTemplate } from "../../../command";
@@ -27,7 +26,10 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 					"settings.strings.settings.fields.language.description.noLanguageSet.defaultShown",
 					locale,
 				)(),
-				language: client.localise(localisations.languages[userDocument.preferredLanguage ?? language], locale)(),
+				language: client.localise(
+					constants.localisations.languages[userDocument.preferredLanguage ?? language],
+					locale,
+				)(),
 			},
 		},
 	};

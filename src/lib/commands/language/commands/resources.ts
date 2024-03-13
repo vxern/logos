@@ -1,4 +1,3 @@
-import localisations from "../../../../constants/localisations";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { CommandTemplate } from "../../command";
@@ -36,7 +35,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 			"resources.strings.redirect",
 			locale,
 		)({
-			language: client.localise(localisations.languages[interaction.featureLanguage], locale)(),
+			language: client.localise(constants.localisations.languages[interaction.featureLanguage], locale)(),
 		}),
 	};
 

@@ -1,6 +1,5 @@
 import * as levenshtein from "fastest-levenshtein";
 import { Locale, getLocaleByLearningLanguage } from "../../../../constants/languages";
-import licences from "../../../../constants/licences";
 import { capitalise } from "../../../../formatting";
 import { Client } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
@@ -156,7 +155,10 @@ async function getGameView(
 		sentence: client.localise("game.strings.sentence", locale)(),
 		translation: client.localise("game.strings.translation", locale)(),
 		skip: client.localise("game.strings.skip", locale)(),
-		sourcedFrom: client.localise("game.strings.sourcedFrom", locale)({ source: licences.dictionaries.tatoeba.name }),
+		sourcedFrom: client.localise(
+			"game.strings.sourcedFrom",
+			locale,
+		)({ source: constants.licences.dictionaries.tatoeba.name }),
 		correctGuesses: client.localise("game.strings.correctGuesses", locale)({ number: data.sessionScore }),
 		allTime: client.localise("game.strings.allTime", locale)({ number: totalScore }),
 		next: client.localise("game.strings.next", locale)(),

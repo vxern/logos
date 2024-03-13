@@ -1,5 +1,4 @@
 import { Locale } from "../../../../../constants/languages";
-import licences from "../../../../../constants/licences";
 import { code } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { PaginatedSoftwareLicenceViewComponent } from "../../../../components/paginated-view";
@@ -30,7 +29,7 @@ async function handleDisplaySoftwareLicenceAutocomplete(
 	}
 
 	const packageLowercase = interaction.parameters.package.trim().toLowerCase();
-	const choices = Object.keys(licences.software)
+	const choices = Object.keys(constants.licences.software)
 		.map((packageName) => {
 			return {
 				name: packageName,
@@ -48,12 +47,12 @@ async function handleDisplaySoftwareLicence(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	if (!(interaction.parameters.package in licences.software)) {
+	if (!(interaction.parameters.package in constants.licences.software)) {
 		displayError(client, interaction, { locale: locale });
 		return;
 	}
 
-	const packageName = interaction.parameters.package as keyof typeof licences.software;
+	const packageName = interaction.parameters.package as keyof typeof constants.licences.software;
 
 	const strings = {
 		license: client.localise("license.strings.license", locale)({ entity: code(packageName) }),
@@ -62,7 +61,7 @@ async function handleDisplaySoftwareLicence(
 	const viewComponent = new PaginatedSoftwareLicenceViewComponent(client, {
 		interaction,
 		title: strings.license,
-		sections: Array.from(licences.software[packageName]),
+		sections: Array.from(constants.licences.software[packageName]),
 	});
 
 	await viewComponent.open();

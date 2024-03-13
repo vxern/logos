@@ -1,5 +1,4 @@
 import { Locale } from "../../../../../constants/languages";
-import licences from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 import { OptionTemplate } from "../../../command";
 
@@ -28,7 +27,7 @@ async function handleDisplayDictionaryLicenceAutocomplete(
 	}
 
 	const dictionaryLowercase = interaction.parameters.dictionary.trim().toLowerCase();
-	const choices = Object.entries(licences.dictionaries)
+	const choices = Object.entries(constants.licences.dictionaries)
 		.map(([dictionaryKey, dictionary]) => {
 			return {
 				name: dictionary.name,
@@ -46,13 +45,14 @@ async function handleDisplayDictionaryLicence(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	if (!(interaction.parameters.dictionary in licences.dictionaries)) {
+	if (!(interaction.parameters.dictionary in constants.licences.dictionaries)) {
 		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
-	const dictionaryName = interaction.parameters.dictionary as keyof typeof licences.dictionaries;
-	const licenceInformation = licences.dictionaries[dictionaryName];
+	// TODO(vxern): Use distinct type instead of keyof typeof.
+	const dictionaryName = interaction.parameters.dictionary as keyof typeof constants.licences.dictionaries;
+	const licenceInformation = constants.licences.dictionaries[dictionaryName];
 
 	const strings = {
 		title: client.localise("license.strings.license", locale)({ entity: licenceInformation.name }),

@@ -1,5 +1,4 @@
 import { Locale } from "../../../../../constants/languages";
-import localisations from "../../../../../constants/localisations";
 import diagnostics from "../../../../../diagnostics";
 import { mention, timestamp } from "../../../../../formatting";
 import { Client } from "../../../../client";
@@ -144,8 +143,11 @@ function getLanguageInformationSection(client: Client, guildDocument: Guild, { l
 	const strings = {
 		home: client.localise("information.options.server.strings.languageTypes.home", locale)(),
 		target: client.localise("information.options.server.strings.languageTypes.target", locale)(),
-		localisationLanguage: client.localise(localisations.languages[guildDocument.localisationLanguage], locale)(),
-		featureLanguage: client.localise(localisations.languages[guildDocument.featureLanguage], locale)(),
+		localisationLanguage: client.localise(
+			constants.localisations.languages[guildDocument.localisationLanguage],
+			locale,
+		)(),
+		featureLanguage: client.localise(constants.localisations.languages[guildDocument.featureLanguage], locale)(),
 	};
 
 	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${strings.featureLanguage}`;

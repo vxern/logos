@@ -1,6 +1,5 @@
 import { Translation } from "../../../../constants/contributions";
 import { Locale, LocalisationLanguage } from "../../../../constants/languages";
-import localisations from "../../../../constants/localisations";
 import { Client } from "../../../client";
 import { CommandTemplate } from "../../command";
 
@@ -35,7 +34,7 @@ function getTranslationView(client: Client, { locale }: { locale: Locale }): Dis
 			.join("\n");
 
 		const strings = {
-			language: client.localise(localisations.languages[language], locale)(),
+			language: client.localise(constants.localisations.languages[language], locale)(),
 		};
 
 		fields.push({

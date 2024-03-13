@@ -1,4 +1,3 @@
-import localisations from "../../../../constants/localisations";
 import { Client } from "../../../client";
 import { HashableMessageContents, NoticeService } from "../service";
 
@@ -51,7 +50,7 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 				"resources.strings.redirect",
 				guildLocale,
 			)({
-				language: this.client.localise(localisations.languages[featureLanguage], guildLocale)(),
+				language: this.client.localise(constants.localisations.languages[featureLanguage], guildLocale)(),
 			}),
 		};
 

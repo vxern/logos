@@ -3,7 +3,6 @@ import languages, {
 	getLocaleByLocalisationLanguage,
 	isLocalisationLanguage,
 } from "../../../../../../constants/languages";
-import localisations from "../../../../../../constants/localisations";
 import { trim } from "../../../../../../formatting";
 import { Client } from "../../../../../client";
 import { User } from "../../../../../database/user";
@@ -48,7 +47,7 @@ async function handleSetLanguageAutocomplete(
 	const choices = languages.languages.localisation
 		.map((language) => {
 			return {
-				name: client.localise(localisations.languages[language], locale)(),
+				name: client.localise(constants.localisations.languages[language], locale)(),
 				value: language,
 			};
 		})
@@ -80,7 +79,7 @@ async function handleSetLanguage(
 				"settings.strings.alreadySet.description",
 				localeBefore,
 			)({
-				language: client.localise(localisations.languages[language], localeBefore)(),
+				language: client.localise(constants.localisations.languages[language], localeBefore)(),
 			}),
 		};
 
@@ -109,7 +108,7 @@ async function handleSetLanguage(
 			"settings.strings.languageUpdated.description",
 			localeAfter,
 		)({
-			language: client.localise(localisations.languages[language], localeAfter)(),
+			language: client.localise(constants.localisations.languages[language], localeAfter)(),
 		}),
 	};
 
