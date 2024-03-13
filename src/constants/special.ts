@@ -30,4 +30,4 @@ export default Object.freeze({
 	game: {
 		mask: "░",
 	},
-});
+} as const);

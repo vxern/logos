@@ -220,4 +220,4 @@ export default Object.freeze({
 			warnings: "😖",
 		},
 	},
-});
+} as const);

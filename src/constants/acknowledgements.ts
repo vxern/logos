@@ -31,4 +31,4 @@ export default Object.freeze([
 		reason:
 			"Without them and the time and effort they put into the translations, the bot would not be accessible to as large an audience as it is today and will be in the future.",
 	},
-] satisfies Acknowledgement[]);
+] satisfies Acknowledgement[] as Acknowledgement[]);

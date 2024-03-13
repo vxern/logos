@@ -35,5 +35,5 @@ export default Object.freeze({
 	green: fromHex("#00cc66"), // Alienated
 	greenishLightGray: fromHex("#c5e0d8"), // Ulthuan gray
 	orange: fromHex("#f28123"), // Beer
-});
+} as const);
 export { fromHex };
