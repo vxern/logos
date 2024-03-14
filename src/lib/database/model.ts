@@ -14,7 +14,7 @@ interface RawDocument {
 	"@metadata": Omit<DocumentMetadata, "@collection"> & { "@collection": string };
 }
 
-const collections = [
+const COLLECTIONS = Object.freeze([
 	"EntryRequests",
 	"GuildStats",
 	"Guilds",
@@ -25,12 +25,8 @@ const collections = [
 	"Tickets",
 	"Users",
 	"Warnings",
-] as const;
-type Collection = (typeof collections)[number];
-
-function isSupportedCollection(collection: string): collection is Collection {
-	return (collections as unknown as string[]).includes(collection);
-}
+] as const);
+type Collection = (typeof COLLECTIONS)[number];
 
 type IdentifierParts<M extends Model> = M["idParts"];
 type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: string };
@@ -184,6 +180,10 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 			await session.saveChanges();
 		});
 	}
+}
+
+function isSupportedCollection(collection: string): collection is Collection {
+	return (COLLECTIONS as unknown as string[]).includes(collection);
 }
 
 function getDatabase(clientOrDatabase: ClientOrDatabase): Database {
