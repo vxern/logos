@@ -14,6 +14,7 @@ interface RawDocument {
 	"@metadata": Omit<DocumentMetadata, "@collection"> & { "@collection": string };
 }
 
+// TODO(vxern): Move to constants.
 const COLLECTIONS = Object.freeze([
 	"EntryRequests",
 	"GuildStats",
@@ -35,7 +36,8 @@ type MetadataOrIdentifierData<M extends Model> = { "@metadata": DocumentMetadata
 
 type ClientOrDatabase = Client | Database;
 
-const IDENTIFIER_PARTS_ORDERED: string[] = ["guildId", "userId", "authorId", "targetId", "createdAt"];
+// TODO(vxern): Move to constants.
+const IDENTIFIER_PARTS_ORDERED: string[] = ["guildId", "userId", "authorId", "targetId", "channelId", "createdAt"];
 
 abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	readonly "@metadata": DocumentMetadata;
@@ -94,10 +96,10 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	}
 
 	static getDataFromId<M extends Model>(id: string): [collection: Collection, data: IdentifierParts<M>] {
-		const [collectionCamelcase, ...data] = id.split(constants.special.database.separator);
-		const collection = capitalise(collectionCamelcase!);
+		const [collectionCamelcase, ...data] = id.split(constants.special.database.separator) as [string, string[]];
+		const collection = capitalise(collectionCamelcase);
 		if (!isSupportedCollection(collection)) {
-			throw `Collection "${collection}" encoded in ID "${id}" is unknown.`;
+			throw `Collection "${collectionCamelcase}" encoded in ID "${id}" is unknown.`;
 		}
 
 		return [collection as Collection, data as IdentifierParts<M>];
@@ -140,19 +142,14 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 
 		// Has not reached the limit, regardless of the limiting time period.
 		if (relevantTimestamps.length < rateLimit.uses) {
-			return true;
+			return false;
 		}
 
 		const now = Date.now();
 		const interval = timeStructToMilliseconds(rateLimit.within);
-		for (const timestamp of relevantTimestamps) {
-			if (now - timestamp < interval) {
-				continue;
-			}
-			return true;
-		}
+		const crossesRateLimit = relevantTimestamps.some((timestamp) => now - timestamp < interval);
 
-		return false;
+		return crossesRateLimit;
 	}
 
 	async create(clientOrDatabase: ClientOrDatabase): Promise<void> {
