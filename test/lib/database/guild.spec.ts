@@ -1,18 +1,49 @@
+import { expect } from "chai";
+import { TimeUnit } from "../../../src/constants/time";
+import { Guild, timeStructToMilliseconds } from "../../../src/lib/database/guild";
+
 describe("Guild", () => {
 	describe("guildId()", () => {
-		// TODO(vxern): Add tests.
+		it("returns the ID of the guild the document is for.", () => {
+			const model = new Guild({ guildId: `${123}` });
+			expect(model.guildId).to.equal(`${123}`);
+		});
 	});
 
 	describe("localisationLanguage()", () => {
-		// TODO(vxern): Add tests.
+		it("returns the configured localisation language.", () => {
+			const model = new Guild({ guildId: `${123}`, languages: { localisation: "Polish" } });
+			expect(model.localisationLanguage).to.equal("Polish");
+		});
+
+		it("returns the default localisation language if a custom localisation language is not configured.", () => {
+			const model = new Guild({ guildId: `${123}` });
+			expect(model.localisationLanguage).to.equal(constants.defaults.LOCALISATION_LANGUAGE);
+		});
 	});
 
 	describe("targetLanguage()", () => {
-		// TODO(vxern): Add tests.
+		it("returns the configured target language.", () => {
+			const model = new Guild({ guildId: `${123}`, languages: { target: "Romanian" } });
+			expect(model.targetLanguage).to.equal("Romanian");
+		});
+
+		it("returns the localisation language if a custom target language is not configured.", () => {
+			const model = new Guild({ guildId: `${123}` });
+			expect(model.targetLanguage).to.equal(model.localisationLanguage);
+		});
 	});
 
 	describe("featureLanguage()", () => {
-		// TODO(vxern): Add tests.
+		it("returns the configured feature language.", () => {
+			const model = new Guild({ guildId: `${123}`, languages: { feature: "Hungarian" } });
+			expect(model.featureLanguage).to.equal("Hungarian");
+		});
+
+		it("returns the default feature language if a custom feature language is not configured.", () => {
+			const model = new Guild({ guildId: `${123}` });
+			expect(model.featureLanguage).to.equal(constants.defaults.FEATURE_LANGUAGE);
+		});
 	});
 
 	describe("informationFeatures()", () => {
@@ -167,9 +198,13 @@ describe("Guild", () => {
 		// TODO(vxern): Add tests.
 	});
 
+	describe("areEnabled()", () => {
+		// TODO(vxern): Add tests.
+	});
+
 	describe("constructor()", () => {
 		it("creates an object.", () => {
-			// TODO(vxern): Test.
+			expect(() => new Guild({ guildId: `${123}` })).to.not.throw;
 		});
 	});
 
@@ -182,18 +217,51 @@ describe("Guild", () => {
 	});
 
 	describe("isEnabled()", () => {
-		// TODO(vxern): Add tests.
-	});
+		it("returns true when the specified feature is enabled.", () => {
+			const model = new Guild({
+				guildId: `${123}`,
+				features: { information: { enabled: true, features: { journaling: { enabled: true, channelId: `${123}` } } } },
+			});
+			expect(model.isEnabled("journalling")).to.be.true;
+		});
 
-	describe("areEnabled()", () => {
-		// TODO(vxern): Add tests.
+		it("returns false when the specified feature is not configured.", () => {
+			const model = new Guild({ guildId: `${123}` });
+			expect(model.isEnabled("journalling")).to.be.false;
+		});
+
+		it("returns false when the specified feature is disabled.", () => {
+			const model = new Guild({
+				guildId: `${123}`,
+				features: { information: { enabled: true, features: { journaling: { enabled: false } } } },
+			});
+			expect(model.isEnabled("journalling")).to.be.false;
+		});
 	});
 
 	describe("isTargetLanguageOnly()", () => {
-		// TODO(vxern): Add tests.
+		it("returns true when target-only channels are configured and the passed channel ID is defined as one.", () => {
+			const model = new Guild({
+				guildId: `${123}`,
+				features: { language: { enabled: true, features: { targetOnly: { enabled: true, channelIds: [`${456}`] } } } },
+			});
+			expect(model.isTargetLanguageOnly(`${456}`)).to.be.true;
+		});
+
+		it("returns false when target-only channels are not configured or the passed channel ID is not defined as one.", () => {
+			const model = new Guild({ guildId: `${123}` });
+			expect(model.isTargetLanguageOnly(`${456}`)).to.be.false;
+		});
 	});
 });
 
 describe("timeStructToMilliseconds", () => {
-	// TODO(vxern): Add tests.
+	it("gets the number of milliseconds the time struct represents.", () => {
+		for (const [unit, duration] of Object.entries(constants.time) as [TimeUnit, number][]) {
+			expect(timeStructToMilliseconds([1, unit])).to.equal(duration);
+		}
+
+		// Verify the quantity is taken into account.
+		expect(timeStructToMilliseconds([10, "second"])).to.equal(10 * constants.time.second);
+	});
 });
