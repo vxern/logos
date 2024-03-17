@@ -1,12 +1,5 @@
 import { Client } from "../../../../../client";
 import { User } from "../../../../../database/user";
-import { OptionTemplate } from "../../../../command";
-
-const command: OptionTemplate = {
-	id: "clear",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleClearLanguage,
-};
 
 async function handleClearLanguage(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -54,4 +47,4 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 	}
 }
 
-export default command;
+export { handleClearLanguage };

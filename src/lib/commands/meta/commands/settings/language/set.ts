@@ -6,22 +6,6 @@ import languages, {
 import { trim } from "../../../../../../formatting";
 import { Client } from "../../../../../client";
 import { User } from "../../../../../database/user";
-import { OptionTemplate } from "../../../../command";
-
-const command: OptionTemplate = {
-	id: "set",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleSetLanguage,
-	handleAutocomplete: handleSetLanguageAutocomplete,
-	options: [
-		{
-			id: "language",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-			autocomplete: true,
-		},
-	],
-};
 
 async function handleSetLanguageAutocomplete(
 	client: Client,
@@ -144,4 +128,4 @@ async function displayError(
 	});
 }
 
-export default command;
+export { handleSetLanguage, handleSetLanguageAutocomplete };

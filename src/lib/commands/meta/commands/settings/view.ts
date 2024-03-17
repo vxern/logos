@@ -1,12 +1,5 @@
 import { Client } from "../../../../client";
 import { User } from "../../../../database/user";
-import { OptionTemplate } from "../../../command";
-
-const command: OptionTemplate = {
-	id: "view",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplaySettings,
-};
 
 async function handleDisplaySettings(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const { locale, language } = interaction;
@@ -54,4 +47,4 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 	});
 }
 
-export default command;
+export { handleDisplaySettings };

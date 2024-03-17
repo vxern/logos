@@ -32,8 +32,9 @@ import {
 	handleDisplaySoftwareLicence,
 	handleDisplaySoftwareLicenceAutocomplete,
 } from "./meta/commands/licence/software";
-import language from "./meta/commands/settings/language";
-import view from "./meta/commands/settings/view";
+import { handleClearLanguage } from "./meta/commands/settings/language/clear";
+import { handleSetLanguage, handleSetLanguageAutocomplete } from "./meta/commands/settings/language/set";
+import { handleDisplaySettings } from "./meta/commands/settings/view";
 import { handlePardonUser, handlePardonUserAutocomplete } from "./moderation/commands/pardon";
 import { handleDisplayModerationPolicy } from "./moderation/commands/policy";
 import { handlePurgeMessages, handlePurgeMessagesAutocomplete } from "./moderation/commands/purge";
@@ -282,7 +283,38 @@ export default Object.freeze({
 		id: "settings",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: [language, view],
+		options: [
+			{
+				id: "language",
+				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
+				options: [
+					{
+						id: "clear",
+						type: Discord.ApplicationCommandOptionTypes.SubCommand,
+						handle: handleClearLanguage,
+					},
+					{
+						id: "set",
+						type: Discord.ApplicationCommandOptionTypes.SubCommand,
+						handle: handleSetLanguage,
+						handleAutocomplete: handleSetLanguageAutocomplete,
+						options: [
+							{
+								id: "language",
+								type: Discord.ApplicationCommandOptionTypes.String,
+								required: true,
+								autocomplete: true,
+							},
+						],
+					},
+				],
+			},
+			{
+				id: "view",
+				type: Discord.ApplicationCommandOptionTypes.SubCommand,
+				handle: handleDisplaySettings,
+			},
+		],
 	},
 	// Moderation
 	pardon: {
