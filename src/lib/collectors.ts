@@ -224,9 +224,18 @@ class InteractionCollector<
 	onCollect(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => Promise<void>): void {
 		super.onCollect(async (interactionRaw) => {
 			const locales = await this.#getLocaleData(interactionRaw);
-			const name = InteractionCollector.getCommandName(interactionRaw);
 			const metadata = this.#getMetadata(interactionRaw);
 			const parameters = this.#getParameters<Parameters>(interactionRaw);
+
+			let name: string;
+			if (
+				interactionRaw.type === Discord.InteractionTypes.ApplicationCommand ||
+				interactionRaw.type === Discord.InteractionTypes.ApplicationCommandAutocomplete
+			) {
+				name = InteractionCollector.getCommandName(interactionRaw);
+			} else {
+				name = constants.components.none;
+			}
 
 			const interaction: Logos.Interaction<Metadata, Parameters> = {
 				...interactionRaw,

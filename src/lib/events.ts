@@ -114,7 +114,7 @@ class EventStore {
 	}
 
 	#registerCollector(event: Event, collector: Collector<Event>): void {
-		this.#log.info(`Registering collector for event '${event}'...`);
+		this.#log.debug(`Registering collector for '${event}'...`);
 
 		const collectors = this.#collectors.get(event);
 		if (collectors === undefined) {
