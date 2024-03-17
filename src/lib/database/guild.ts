@@ -10,8 +10,8 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 	}
 
 	readonly createdAt: number;
-	readonly languages: GuildLanguages;
-	readonly features: GuildFeatures;
+	readonly languages?: GuildLanguages;
+	readonly features?: GuildFeatures;
 	/**
 	 * Whether the guild is native to Logos.
 	 *
@@ -31,8 +31,8 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return this.languages?.feature ?? constants.defaults.FEATURE_LANGUAGE;
 	}
 
-	get informationFeatures(): GuildFeatures["information"]["features"] | undefined {
-		if (!this.features.information.enabled) {
+	get informationFeatures(): NonNullable<GuildFeatures["information"]>["features"] | undefined {
+		if (!this.features?.information?.enabled) {
 			return undefined;
 		}
 
@@ -93,8 +93,8 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return noticeFeatures.welcome;
 	}
 
-	get languageFeatures(): GuildFeatures["language"]["features"] | undefined {
-		if (!this.features.language.enabled) {
+	get languageFeatures(): NonNullable<GuildFeatures["language"]>["features"] | undefined {
+		if (!this.features?.language?.enabled) {
 			return undefined;
 		}
 
@@ -182,8 +182,8 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return languageFeatures.roleLanguages;
 	}
 
-	get moderationFeatures(): GuildFeatures["moderation"]["features"] | undefined {
-		if (!this.features.moderation.enabled) {
+	get moderationFeatures(): NonNullable<GuildFeatures["moderation"]>["features"] | undefined {
+		if (!this.features?.moderation?.enabled) {
 			return undefined;
 		}
 
@@ -272,8 +272,8 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return moderationFeatures.verification;
 	}
 
-	get serverFeatures(): GuildFeatures["server"]["features"] | undefined {
-		if (!this.features.server.enabled) {
+	get serverFeatures(): NonNullable<GuildFeatures["server"]>["features"] | undefined {
+		if (!this.features?.server?.enabled) {
 			return undefined;
 		}
 
@@ -334,8 +334,8 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return serverFeatures.tickets;
 	}
 
-	get socialFeatures(): GuildFeatures["social"]["features"] | undefined {
-		if (!this.features.social.enabled) {
+	get socialFeatures(): NonNullable<GuildFeatures["social"]>["features"] | undefined {
+		if (!this.features?.social?.enabled) {
 			return undefined;
 		}
 
@@ -369,6 +369,10 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return socialFeatures.profile;
 	}
 
+	get areEnabled(): Guild["isEnabled"] {
+		return this.isEnabled.bind(this);
+	}
+
 	constructor({
 		createdAt,
 		languages,
@@ -386,14 +390,8 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		});
 
 		this.createdAt = createdAt ?? Date.now();
-		this.languages = languages ?? { localisation: "English/American", feature: "English" };
-		this.features = features ?? {
-			information: { enabled: false },
-			moderation: { enabled: false },
-			language: { enabled: false },
-			server: { enabled: false },
-			social: { enabled: false },
-		};
+		this.languages = languages;
+		this.features = features;
 		this.isNative = isNative ?? false;
 	}
 
@@ -441,10 +439,6 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return this[feature] !== undefined;
 	}
 
-	areEnabled(feature: keyof Guild) {
-		return this[feature] !== undefined;
-	}
-
 	isTargetLanguageOnly(channelId: string): boolean {
 		return this.targetOnly?.channelIds?.includes(channelId) ?? false;
 	}
@@ -464,7 +458,7 @@ interface GuildLanguages {
 /** @since v3.0.0 */
 interface GuildFeatures {
 	/** Information section of features. */
-	information: Activatable<{
+	information?: Activatable<{
 		/** Features part of the information section. */
 		features: {
 			/** Logging events on the server. */
@@ -501,7 +495,7 @@ interface GuildFeatures {
 	}>;
 
 	/** Language section of features. */
-	language: Activatable<{
+	language?: Activatable<{
 		features: {
 			/** @since v3.3.0 */
 			answers?: Activatable;
@@ -535,7 +529,7 @@ interface GuildFeatures {
 	}>;
 
 	/** Moderation section of features. */
-	moderation: Activatable<{
+	moderation?: Activatable<{
 		/** Features part of the moderation section. */
 		features: {
 			alerts?: Activatable<{
@@ -625,7 +619,7 @@ interface GuildFeatures {
 	}>;
 
 	/** Server section of features. */
-	server: Activatable<{
+	server?: Activatable<{
 		features: {
 			/** Automatic channel creation/deletion. */
 			dynamicVoiceChannels?: Activatable<{
@@ -679,7 +673,7 @@ interface GuildFeatures {
 	}>;
 
 	/** Social section of features. */
-	social: Activatable<{
+	social?: Activatable<{
 		features: {
 			music?: Activatable<{
 				implicitVolume: number; // Increments of 5, 50 - 100.
@@ -695,11 +689,11 @@ interface GuildFeatures {
 	}>;
 }
 
-type TimeStruct = [number: number, unit: TimeUnit];
+type TimeStruct = [quantity: number, unit: TimeUnit];
 
-function timeStructToMilliseconds([number, unit]: TimeStruct): number {
+function timeStructToMilliseconds([quantity, unit]: TimeStruct): number {
 	const duration = constants.time[unit];
-	return duration * number;
+	return duration * quantity;
 }
 
 type Activatable<T extends Record<string, unknown> = Record<string, unknown>> = { enabled: boolean } & (
