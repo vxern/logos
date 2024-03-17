@@ -35,7 +35,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 
 	const crossesRateLimit = Guild.crossesRateLimit(
 		await Suggestion.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
-		configuration.rateLimit ?? defaults.SUGGESTION_RATE_LIMIT,
+		configuration.rateLimit ?? constants.defaults.SUGGESTION_RATE_LIMIT,
 	);
 	if (!crossesRateLimit) {
 		const strings = {

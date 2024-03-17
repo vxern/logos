@@ -499,7 +499,7 @@ class CommandStore {
 			return undefined;
 		}
 
-		const intervalMilliseconds = timeStructToMilliseconds(defaults.COMMAND_RATE_LIMIT.within);
+		const intervalMilliseconds = timeStructToMilliseconds(constants.defaults.COMMAND_RATE_LIMIT.within);
 
 		const memberId = this.#client.bot.transformers.snowflake(`${interaction.user.id}${interaction.guildId}`);
 
@@ -510,7 +510,7 @@ class CommandStore {
 			intervalMilliseconds,
 		});
 
-		if (timestamps.length + 1 > defaults.COMMAND_RATE_LIMIT.uses) {
+		if (timestamps.length + 1 > constants.defaults.COMMAND_RATE_LIMIT.uses) {
 			const lastTimestamp = timestamps.at(0);
 			if (lastTimestamp === undefined) {
 				throw "StateError: Unexpectedly undefined initial timestamp.";

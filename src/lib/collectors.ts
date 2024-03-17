@@ -250,12 +250,12 @@ class InteractionCollector<
 		];
 		if (guildId === undefined || channelId === undefined || member === undefined) {
 			return {
-				language: defaults.LOCALISATION_LANGUAGE,
-				locale: defaults.LOCALISATION_LOCALE,
-				guildLanguage: defaults.LOCALISATION_LANGUAGE,
-				guildLocale: defaults.LOCALISATION_LOCALE,
-				learningLanguage: defaults.LEARNING_LANGUAGE,
-				featureLanguage: defaults.FEATURE_LANGUAGE,
+				language: constants.defaults.LOCALISATION_LANGUAGE,
+				locale: constants.defaults.LOCALISATION_LOCALE,
+				guildLanguage: constants.defaults.LOCALISATION_LANGUAGE,
+				guildLocale: constants.defaults.LOCALISATION_LOCALE,
+				learningLanguage: constants.defaults.LEARNING_LANGUAGE,
+				featureLanguage: constants.defaults.FEATURE_LANGUAGE,
 			};
 		}
 
@@ -284,7 +284,7 @@ class InteractionCollector<
 
 		// Otherwise default to the user's app language.
 		const appLocale = interaction.locale;
-		const language = getDiscordLocalisationLanguageByLocale(appLocale) ?? defaults.LOCALISATION_LANGUAGE;
+		const language = getDiscordLocalisationLanguageByLocale(appLocale) ?? constants.defaults.LOCALISATION_LANGUAGE;
 		const locale = getLocaleByLocalisationLanguage(language);
 		return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
 	}

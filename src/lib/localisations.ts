@@ -88,7 +88,7 @@ class LocalisationStore {
 			localisation = this.#localisations.get(`parameters.${optionName}.name`)!;
 		}
 
-		const name = localisation?.get(defaults.LOCALISATION_LANGUAGE)?.();
+		const name = localisation?.get(constants.defaults.LOCALISATION_LANGUAGE)?.();
 		if (name === undefined) {
 			this.#log.warn(`Could not get command name from string with key '${key}'.`);
 			return undefined;
@@ -116,7 +116,7 @@ class LocalisationStore {
 			localisation = this.#localisations.get(`parameters.${optionName}.description`)!;
 		}
 
-		const description = localisation?.get(defaults.LOCALISATION_LANGUAGE)?.({});
+		const description = localisation?.get(constants.defaults.LOCALISATION_LANGUAGE)?.({});
 		if (description === undefined) {
 			this.#log.warn(`Could not get command description from string with key '${key}'.`);
 			return undefined;
@@ -172,10 +172,11 @@ class LocalisationStore {
 			if (locale !== undefined) {
 				language = getLocalisationLanguageByLocale(locale);
 			} else {
-				language = defaults.LOCALISATION_LANGUAGE;
+				language = constants.defaults.LOCALISATION_LANGUAGE;
 			}
 
-			const buildLocalisation = localisation.get(language) ?? localisation.get(defaults.LOCALISATION_LANGUAGE);
+			const buildLocalisation =
+				localisation.get(language) ?? localisation.get(constants.defaults.LOCALISATION_LANGUAGE);
 			if (buildLocalisation === undefined) {
 				this.#log.error(`Missing localisations for string with key '${key}'.`);
 				return constants.special.missingString;

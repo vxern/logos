@@ -107,7 +107,7 @@ abstract class LocalService extends Service {
 	get guildLocale(): Locale {
 		const guildDocument = this.guildDocument;
 		if (guildDocument === undefined) {
-			return defaults.LOCALISATION_LOCALE;
+			return constants.defaults.LOCALISATION_LOCALE;
 		}
 
 		const guildLanguage = guildDocument.localisationLanguage;

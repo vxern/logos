@@ -601,7 +601,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		const timeoutMilliseconds = timeStructToMilliseconds(defaults.MUSIC_DISCONNECT_TIMEOUT);
+		const timeoutMilliseconds = timeStructToMilliseconds(constants.defaults.MUSIC_DISCONNECT_TIMEOUT);
 
 		session.disconnectTimeout = setTimeout(() => this.destroySession(), timeoutMilliseconds);
 	}

@@ -52,7 +52,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 				client.deleteReply(interaction).catch(() => {
 					client.log.warn(`Failed to delete "no results for word" message.`);
 				}),
-			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+			constants.defaults.WARN_MESSAGE_DELETE_TIMEOUT,
 		);
 
 		return;

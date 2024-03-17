@@ -35,7 +35,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 
 	const crossesRateLimit = Guild.crossesRateLimit(
 		await Report.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
-		configuration.rateLimit ?? defaults.REPORT_RATE_LIMIT,
+		configuration.rateLimit ?? constants.defaults.REPORT_RATE_LIMIT,
 	);
 	if (!crossesRateLimit) {
 		const strings = {

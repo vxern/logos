@@ -1,6 +1,5 @@
 import * as Discord from "@discordeno/bot";
 import constants_ from "./constants/constants";
-import defaults_ from "./constants/defaults";
 import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import { Properties } from "./constants/properties";
 import { SlowmodeLevel } from "./lib/commands/moderation/commands/slowmode";
@@ -141,7 +140,6 @@ declare global {
 	}
 
 	const constants: typeof constants_;
-	const defaults: typeof defaults_;
 
 	type Events = Logos.Events & Discord.Events;
 }

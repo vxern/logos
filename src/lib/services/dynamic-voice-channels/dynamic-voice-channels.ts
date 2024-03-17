@@ -121,15 +121,15 @@ class DynamicVoiceChannelService extends LocalService {
 			const groupChannelsCount = children.length + 1;
 			const surplusVacantChannels = Math.max(
 				0,
-				(configuration.maximum ?? defaults.MAXIMUM_VOICE_CHANNELS) - groupChannelsCount,
+				(configuration.maximum ?? constants.defaults.MAXIMUM_VOICE_CHANNELS) - groupChannelsCount,
 			);
 
 			const isParentVacant = parent.voiceStates.length === 0;
 			const vacantChannelIds = children.filter((channel) => channel.voiceStates.length === 0);
-			const minimumVoiceChannels = configuration.minimum ?? defaults.MINIMUM_VOICE_CHANNELS;
+			const minimumVoiceChannels = configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS;
 			if (
 				(isParentVacant ? 1 : 0) + vacantChannelIds.length ===
-				(configuration.minimum ?? defaults.MINIMUM_VOICE_CHANNELS) + 1
+				(configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS) + 1
 			) {
 				return;
 			}
@@ -197,13 +197,13 @@ class DynamicVoiceChannelService extends LocalService {
 		}
 
 		const vacantChannels = [parent, ...children].filter((channel) => channel.voiceStates.length === 0);
-		if (vacantChannels.length === (configuration.minimum ?? defaults.MINIMUM_VOICE_CHANNELS) + 1) {
+		if (vacantChannels.length === (configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS) + 1) {
 			return;
 		}
 
 		// If the channel limit has already been reached, do not process.
 		const groupChannels = children.length + 1;
-		if (groupChannels >= (configuration.maximum ?? defaults.MAXIMUM_VOICE_CHANNELS)) {
+		if (groupChannels >= (configuration.maximum ?? constants.defaults.MAXIMUM_VOICE_CHANNELS)) {
 			return;
 		}
 
@@ -253,7 +253,7 @@ class DynamicVoiceChannelService extends LocalService {
 		const vacantChannels = children.filter((channel) => channel.voiceStates.length === 0);
 		if (
 			(isParentVacant ? 1 : 0) + vacantChannels.length ===
-			(configuration.minimum ?? defaults.MINIMUM_VOICE_CHANNELS) + 1
+			(configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS) + 1
 		) {
 			return;
 		}

@@ -409,7 +409,7 @@ class Client {
 						tooManyUses: this.localise(
 							"interactions.rateLimited.description.tooManyUses",
 							locale,
-						)({ times: defaults.COMMAND_RATE_LIMIT.uses }),
+						)({ times: constants.defaults.COMMAND_RATE_LIMIT.uses }),
 						cannotUseUntil: this.localise(
 							"interactions.rateLimited.description.cannotUseAgainUntil",
 							locale,

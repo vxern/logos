@@ -55,7 +55,7 @@ async function handlePardonUserAutocomplete(
 				return;
 			}
 
-			const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
+			const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY);
 
 			const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 			if (relevantWarnings === undefined) {
@@ -110,7 +110,7 @@ async function handlePardonUser(
 		return;
 	}
 
-	const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? defaults.WARN_EXPIRY);
+	const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY);
 
 	const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 	if (relevantWarnings === undefined) {

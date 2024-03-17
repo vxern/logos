@@ -20,7 +20,7 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 	readonly isNative: boolean;
 
 	get localisationLanguage(): LocalisationLanguage {
-		return this.languages?.localisation ?? defaults.LOCALISATION_LANGUAGE;
+		return this.languages?.localisation ?? constants.defaults.LOCALISATION_LANGUAGE;
 	}
 
 	get targetLanguage(): LocalisationLanguage {
@@ -28,7 +28,7 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 	}
 
 	get featureLanguage(): FeatureLanguage {
-		return this.languages?.feature ?? defaults.LOCALISATION_LANGUAGE;
+		return this.languages?.feature ?? constants.defaults.FEATURE_LANGUAGE;
 	}
 
 	get informationFeatures(): GuildFeatures["information"]["features"] | undefined {
@@ -453,11 +453,11 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 /** @since v3.5.0 */
 interface GuildLanguages {
 	/** @since v3.5.0 */
-	readonly localisation: LocalisationLanguage;
+	readonly localisation?: LocalisationLanguage;
 	/** @since v3.8.0 */
 	readonly target?: LearningLanguage;
 	/** @since v3.5.0 */
-	readonly feature: FeatureLanguage;
+	readonly feature?: FeatureLanguage;
 }
 
 /** The bot's features configured for the guild. */

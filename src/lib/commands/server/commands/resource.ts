@@ -35,7 +35,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 
 	const crossesRateLimit = Guild.crossesRateLimit(
 		await Resource.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
-		configuration.rateLimit ?? defaults.RESOURCE_RATE_LIMIT,
+		configuration.rateLimit ?? constants.defaults.RESOURCE_RATE_LIMIT,
 	);
 	if (!crossesRateLimit) {
 		const strings = {
