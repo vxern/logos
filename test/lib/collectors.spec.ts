@@ -1,5 +1,5 @@
 //import { Collector } from "../../src/lib/collectors";
-import { expect } from "chai";
+//import { expect } from "chai";
 
 describe("Collector", () => {
 	describe("close()", () => {

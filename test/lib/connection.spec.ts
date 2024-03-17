@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { DiscordConnection } from "../../src/lib/connection";
-import { mockClient, mockBot, mockEventHandlers } from "../mocks";
+import { mockBot, mockClient, mockEventHandlers } from "../mocks";
 
 describe("DiscordConnection", () => {
 	describe("constructor()", () => {

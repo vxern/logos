@@ -1,5 +1,4 @@
 {
-  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "linter": {
     "enabled": true,
     "rules": {
@@ -8,7 +7,9 @@
         "useImportRestrictions": "off"
       },
       "style": {
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "useImportType": "off",
+        "useExportType": "off"
       },
       "suspicious": {
         "noExplicitAny": "off",

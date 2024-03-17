@@ -2,8 +2,8 @@ import { registerPolyfills } from "./polyfills";
 
 registerPolyfills();
 
+import * as fs from "node:fs/promises";
 import * as dotenv from "dotenv";
-import * as fs from "fs/promises";
 import log from "loglevel";
 import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "./constants/languages";
 import { Client } from "./lib/client";
