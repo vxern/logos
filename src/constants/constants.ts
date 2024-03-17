@@ -14,6 +14,7 @@ import patterns from "./patterns";
 import properties from "./properties";
 import roles from "./roles";
 import rules from "./rules";
+import slowmode from "./slowmode";
 import special from "./special";
 import statuses from "./statuses";
 import time from "./time";
@@ -55,6 +56,7 @@ export default Object.freeze({
 	properties,
 	roles,
 	rules,
+	slowmode,
 	special,
 	statuses,
 	time,

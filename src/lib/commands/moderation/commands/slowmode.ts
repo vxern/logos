@@ -1,25 +1,10 @@
+import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "../../../../constants/slowmode";
 import diagnostics from "../../../../diagnostics";
 import { timestamp } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 
 const lastUseByGuildId = new Map<bigint, number>();
-
-// TODO(vxern): Move to constants.
-const levels = ["lowest", "low", "medium", "high", "highest", "emergency", "lockdown", "beyond"] as const;
-
-// In milliseconds
-const rateLimitDurationByLevel: Record<(typeof levels)[number], number> = {
-	lowest: constants.time.second * 5,
-	low: constants.time.second * 10,
-	medium: constants.time.second * 30,
-	high: constants.time.minute * 1,
-	highest: constants.time.minute * 5,
-	emergency: constants.time.minute * 20,
-	lockdown: constants.time.hour * 1,
-	beyond: constants.time.day * 1,
-};
-type SlowmodeLevel = keyof typeof rateLimitDurationByLevel | "unknown";
 
 async function handleToggleSlowmodeAutocomplete(
 	client: Client,
@@ -28,7 +13,7 @@ async function handleToggleSlowmodeAutocomplete(
 	const locale = interaction.locale;
 
 	const levelLowercase = interaction.parameters.level.trim().toLowerCase();
-	const choices = levels
+	const choices = constants.slowmode.levels
 		.map((level, index) => {
 			return {
 				name: client.localise(`slowmode.strings.levels.${level}`, locale)(),
@@ -42,12 +27,25 @@ async function handleToggleSlowmodeAutocomplete(
 
 async function handleToggleSlowmode(
 	client: Client,
-	interaction: Logos.Interaction<any, { level: string }>,
+	interaction: Logos.Interaction<any, { level: string | undefined }>,
 ): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	const levelIndex = Number(interaction.parameters.level);
-	if (!Number.isSafeInteger(levelIndex)) {
+	if (interaction.parameters.level !== undefined && !isValidSlowmodeLevel(interaction.parameters.level)) {
+		const strings = {
+			title: client.localise("slowmode.strings.invalid.title", locale)(),
+			description: client.localise("slowmode.strings.invalid.description", locale)(),
+		};
+
+		client.reply(interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.red,
+				},
+			],
+		});
 		return;
 	}
 
@@ -70,32 +68,11 @@ async function handleToggleSlowmode(
 
 	const isEnabled = channel.rateLimitPerUser !== undefined && channel.rateLimitPerUser !== 0;
 	if (isEnabled) {
-		if (levelIndex !== undefined) {
-			const previousLevel = (Object.entries(rateLimitDurationByLevel).find(
-				([_, duration]) => duration === channel.rateLimitPerUser ?? 0,
-			)?.[0] ?? "unknown") as SlowmodeLevel;
-
-			const level = levels.at(levelIndex);
-			if (level === undefined) {
-				const strings = {
-					title: client.localise("slowmode.strings.invalid.title", locale)(),
-					description: client.localise("slowmode.strings.invalid.description", locale)(),
-				};
-
-				client.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.red,
-						},
-					],
-				});
-				return;
-			}
-
+		if (interaction.parameters.level !== undefined) {
 			const previousRateLimitDuration = channel.rateLimitPerUser ?? 0;
-			const newRateLimitDuration = Math.floor(rateLimitDurationByLevel[level] / 1000);
+			const newRateLimitDuration = Math.floor(getSlowmodeDelayByLevel(interaction.parameters.level) / 1000);
+
+			const previousLevel = getSlowmodeLevelByDelay(previousRateLimitDuration) ?? "lowest";
 
 			if (newRateLimitDuration < previousRateLimitDuration) {
 				client.bot.rest
@@ -107,7 +84,7 @@ async function handleToggleSlowmode(
 				client.tryLog("slowmodeDowngrade", {
 					guildId: guild.id,
 					journalling: configuration.journaling,
-					args: [interaction.user, channel, previousLevel, level],
+					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
 				});
 
 				const strings = {
@@ -139,7 +116,7 @@ async function handleToggleSlowmode(
 				client.tryLog("slowmodeUpgrade", {
 					guildId: guild.id,
 					journalling: configuration.journaling,
-					args: [interaction.user, channel, previousLevel, level],
+					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
 				});
 
 				const strings = {
@@ -249,51 +226,10 @@ async function handleToggleSlowmode(
 		return;
 	}
 
-	if (levelIndex === undefined) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("slowmode.strings.missing.title", locale)(),
-			description: client.localise("slowmode.strings.missing.description", locale)({ parameter: "level" }),
-		};
-
-		client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
-		});
-		return;
-	}
-
-	const level = levels.at(levelIndex);
-	if (level === undefined) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("slowmode.strings.invalid.title", locale)(),
-			description: client.localise("slowmode.strings.invalid.description", locale)(),
-		};
-
-		client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
-		});
-		return;
-	}
-
 	lastUseByGuildId.set(guild.id, Date.now());
 
-	const rateLimitDuration = Math.floor(rateLimitDurationByLevel[level] / 1000);
-
 	client.bot.rest
-		.editChannel(channel.id, { rateLimitPerUser: rateLimitDuration })
+		.editChannel(channel.id, { rateLimitPerUser: getSlowmodeDelayByLevel(interaction.parameters.level ?? "lowest") })
 		.catch((reason) =>
 			client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}: ${reason}`),
 		);
@@ -301,7 +237,7 @@ async function handleToggleSlowmode(
 	client.tryLog("slowmodeEnable", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
-		args: [interaction.user, channel, level],
+		args: [interaction.user, channel, interaction.parameters.level ?? "lowest"],
 	});
 
 	const strings = {
@@ -325,4 +261,3 @@ async function handleToggleSlowmode(
 }
 
 export { handleToggleSlowmode, handleToggleSlowmodeAutocomplete };
-export type { SlowmodeLevel };

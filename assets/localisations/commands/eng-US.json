@@ -368,8 +368,6 @@
   "slowmode.strings.tooSoon.title": "Cannot disable too soon",
   "slowmode.strings.tooSoon.description.justEnabled": "Slowmode has been enabled just a moment ago.",
   "slowmode.strings.tooSoon.description.canDisableIn": "You will be able to disable it {relative_timestamp}.",
-  "slowmode.strings.missing.title": "Need to specify level",
-  "slowmode.strings.missing.description": "To toggle slowdown in a channel, you must specify the level using the `{parameter}` parameter.",
   "slowmode.strings.invalid.title": "Invalid level",
   "slowmode.strings.invalid.description": "The level you specified is invalid.",
   "slowmode.strings.enabled.title": "Slowmode active",

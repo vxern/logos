@@ -2,7 +2,6 @@ import * as Discord from "@discordeno/bot";
 import constants_ from "./constants/constants";
 import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import { Properties } from "./constants/properties";
-import { SlowmodeLevel } from "./lib/commands/moderation/commands/slowmode";
 import { EntryRequest } from "./lib/database/entry-request";
 import { Praise } from "./lib/database/praise";
 import { Report } from "./lib/database/report";
@@ -10,6 +9,7 @@ import { Resource } from "./lib/database/resource";
 import { Suggestion } from "./lib/database/suggestion";
 import { Ticket } from "./lib/database/ticket";
 import { Warning } from "./lib/database/warning";
+import { SlowmodeLevel } from "./constants/slowmode";
 
 declare global {
 	type PromiseWithResolver<T> = { promise: Promise<T>; resolve: (value: T) => void; reject: () => void };
