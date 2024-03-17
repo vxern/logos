@@ -10,6 +10,7 @@ import languages from "./languages";
 import licences from "./licences";
 import links from "./links";
 import localisations from "./localisations";
+import parameters from "./parameters";
 import patterns from "./patterns";
 import properties from "./properties";
 import roles from "./roles";
@@ -52,6 +53,7 @@ export default Object.freeze({
 	licences,
 	links,
 	localisations,
+	parameters,
 	patterns,
 	properties,
 	roles,

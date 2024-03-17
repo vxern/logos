@@ -62,7 +62,6 @@ import { handleUnskipAction } from "./music/commands/unskip";
 import { handleDisplayVolume } from "./music/commands/volume/display";
 import { handleSetVolume } from "./music/commands/volume/set";
 import { sources } from "./music/data/sources/sources";
-import { by, collection, duration, query, reason, show, timestamp, to, user } from "./parameters";
 import { handleSubmitResource } from "./server/commands/resource";
 import { handleMakeSuggestion } from "./server/commands/suggestion";
 import { handleOpenTicket } from "./server/commands/ticket/open";
@@ -109,14 +108,14 @@ export default Object.freeze({
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayPraisesByAuthor,
 						handleAutocomplete: handleDisplayPraisesByAuthorAutocomplete,
-						options: [{ ...user, required: false }],
+						options: [{ ...constants.parameters.user, required: false }],
 					},
 					{
 						id: "target",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayPraisesByTarget,
 						handleAutocomplete: handleDisplayPraisesByTargetAutocomplete,
-						options: [{ ...user, required: false }],
+						options: [{ ...constants.parameters.user, required: false }],
 					},
 				],
 			},
@@ -125,7 +124,7 @@ export default Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayWarnings,
 				handleAutocomplete: handleDisplayWarningsAutocomplete,
-				options: [{ ...user, required: false }],
+				options: [{ ...constants.parameters.user, required: false }],
 			},
 		],
 	},
@@ -141,7 +140,7 @@ export default Object.freeze({
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayCefrGuide,
-		options: [show],
+		options: [constants.parameters.show],
 		flags: {
 			isShowable: true,
 		},
@@ -188,7 +187,7 @@ export default Object.freeze({
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayResources,
-		options: [show],
+		options: [constants.parameters.show],
 		flags: {
 			isShowable: true,
 		},
@@ -215,7 +214,7 @@ export default Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
-			show,
+			constants.parameters.show,
 		],
 		flags: {
 			hasRateLimit: true,
@@ -293,7 +292,7 @@ export default Object.freeze({
 		handle: handlePardonUser,
 		handleAutocomplete: handlePardonUserAutocomplete,
 		options: [
-			user,
+			constants.parameters.user,
 			{
 				id: "warning",
 				type: Discord.ApplicationCommandOptionTypes.String,
@@ -307,7 +306,7 @@ export default Object.freeze({
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayModerationPolicy,
-		options: [show],
+		options: [constants.parameters.show],
 		flags: {
 			isShowable: true,
 		},
@@ -328,7 +327,7 @@ export default Object.freeze({
 				id: "end",
 				type: Discord.ApplicationCommandOptionTypes.String,
 			},
-			{ ...user, id: "author", required: false },
+			{ ...constants.parameters.user, id: "author", required: false },
 		],
 	},
 	report: {
@@ -350,7 +349,7 @@ export default Object.freeze({
 				required: true,
 				autocomplete: true,
 			},
-			show,
+			constants.parameters.show,
 		],
 		flags: {
 			isShowable: true,
@@ -380,14 +379,14 @@ export default Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSetTimeout,
 				handleAutocomplete: handleSetTimeoutAutocomplete,
-				options: [user, duration, reason],
+				options: [constants.parameters.user, constants.parameters.duration, constants.parameters.reason],
 			},
 			{
 				id: "clear",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleClearTimeout,
 				handleAutocomplete: handleClearTimeoutAutocomplete,
-				options: [user],
+				options: [constants.parameters.user],
 			},
 		],
 	},
@@ -398,14 +397,14 @@ export default Object.freeze({
 		handle: handleWarnUser,
 		handleAutocomplete: handleWarnUserAutocomplete,
 		options: [
-			user,
+			constants.parameters.user,
 			{
 				id: "rule",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 				autocomplete: true,
 			},
-			reason,
+			constants.parameters.reason,
 		],
 	},
 	//Server
@@ -444,13 +443,13 @@ export default Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleFastForward,
 				handleAutocomplete: handleFastForwardAutocomplete,
-				options: [timestamp],
+				options: [constants.parameters.timestamp],
 			},
 			{
 				id: "history",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayPlaybackHistory,
-				options: [show],
+				options: [constants.parameters.show],
 				flags: {
 					isShowable: true,
 				},
@@ -459,13 +458,13 @@ export default Object.freeze({
 				id: "loop",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleLoopPlayback,
-				options: [collection],
+				options: [constants.parameters.collection],
 			},
 			{
 				id: "now",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayCurrentlyPlaying,
-				options: [collection, show],
+				options: [constants.parameters.collection, constants.parameters.show],
 				flags: {
 					isShowable: true,
 				},
@@ -496,7 +495,7 @@ export default Object.freeze({
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: async (client: Client, interaction: Logos.Interaction) =>
 							handleRequestQueryPlayback(client, interaction, sources.YouTube),
-						options: [query],
+						options: [constants.parameters.query],
 					},
 				],
 			},
@@ -504,7 +503,7 @@ export default Object.freeze({
 				id: "queue",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayPlaybackQueue,
-				options: [show],
+				options: [constants.parameters.show],
 				flags: {
 					isShowable: true,
 				},
@@ -518,7 +517,7 @@ export default Object.freeze({
 				id: "replay",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleReplayAction,
-				options: [collection],
+				options: [constants.parameters.collection],
 			},
 			{
 				id: "resume",
@@ -530,20 +529,20 @@ export default Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleRewind,
 				handleAutocomplete: handleRewindAutocomplete,
-				options: [timestamp],
+				options: [constants.parameters.timestamp],
 			},
 			{
 				id: "skip-to",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSkipToTimestamp,
 				handleAutocomplete: handleSkipToTimestampAutocomplete,
-				options: [timestamp],
+				options: [constants.parameters.timestamp],
 			},
 			{
 				id: "skip",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSkipAction,
-				options: [collection, by, to],
+				options: [constants.parameters.collection, constants.parameters.by, constants.parameters.to],
 			},
 			{
 				id: "stop",
@@ -554,7 +553,7 @@ export default Object.freeze({
 				id: "unskip",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleUnskipAction,
-				options: [collection, by, to],
+				options: [constants.parameters.collection, constants.parameters.by, constants.parameters.to],
 			},
 			{
 				id: "volume",
@@ -564,7 +563,7 @@ export default Object.freeze({
 						id: "display",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayVolume,
-						options: [show],
+						options: [constants.parameters.show],
 						flags: {
 							isShowable: true,
 						},
@@ -592,7 +591,7 @@ export default Object.freeze({
 		handle: handlePraiseUser,
 		handleAutocomplete: handlePraiseUserAutocomplete,
 		options: [
-			user,
+			constants.parameters.user,
 			{
 				id: "comment",
 				type: Discord.ApplicationCommandOptionTypes.String,
@@ -609,7 +608,7 @@ export default Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayProfile,
 				handleAutocomplete: handleDisplayProfileAutocomplete,
-				options: [{ ...user, required: false }, show],
+				options: [{ ...constants.parameters.user, required: false }, constants.parameters.show],
 				flags: {
 					isShowable: true,
 				},
