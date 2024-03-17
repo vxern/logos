@@ -5,14 +5,6 @@ import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
 import { Report, ReportFormData } from "../../../database/report";
 import { Modal, createModalComposer } from "../../../interactions";
-import { CommandTemplate } from "../../command";
-
-const command: CommandTemplate = {
-	id: "report",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleMakeReport,
-};
 
 type ReportError = "failure" | "cannot_report_self";
 
@@ -122,6 +114,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 }
 
 // TODO(vxern): This is repeated in several places. Refactor it.
+// TODO(vxern): Naming?
 async function handleSubmittedInvalidReport(
 	client: Client,
 	submission: Logos.Interaction,
@@ -324,4 +317,4 @@ function generateReportModal(client: Client, { locale }: { locale: Locale }): Mo
 	};
 }
 
-export default command;
+export { handleMakeReport };

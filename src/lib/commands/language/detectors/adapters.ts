@@ -1,8 +1,7 @@
 import { LanguageDetectorAdapter } from "./adapter";
-import tinyld from "./adapters/tinyld";
 
 // Arranged in order of priority; accuracy.
-const adapters: LanguageDetectorAdapter[] = [tinyld];
+const adapters: LanguageDetectorAdapter[] = [];
 
 function getAdapters(): LanguageDetectorAdapter[] {
 	return adapters;

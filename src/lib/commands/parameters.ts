@@ -1,5 +1,7 @@
 import { OptionTemplate } from "./command";
 
+// TODO(vxern): Move to constants.
+
 const user: OptionTemplate = {
 	id: "user",
 	type: Discord.ApplicationCommandOptionTypes.String,

@@ -6,6 +6,7 @@ import personalisation from "./categories/personalisation";
 import regions from "./categories/regions";
 import { Role, RoleCategory, RoleCollection, isCustom, isGroup, isImplicit } from "./types";
 
+// TODO(vxern): Move to constants along with all the categories.
 const categories: RoleCategory[] = [language, learning, dialects, personalisation, regions, ethnicity];
 
 function getRoleCategories(categories: RoleCategory[], guildId: bigint): [category: RoleCategory, index: number][] {

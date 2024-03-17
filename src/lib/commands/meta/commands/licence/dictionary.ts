@@ -1,21 +1,5 @@
 import { Locale } from "../../../../../constants/languages";
 import { Client } from "../../../../client";
-import { OptionTemplate } from "../../../command";
-
-const command: OptionTemplate = {
-	id: "dictionary",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplayDictionaryLicence,
-	handleAutocomplete: handleDisplayDictionaryLicenceAutocomplete,
-	options: [
-		{
-			id: "dictionary",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-			autocomplete: true,
-		},
-	],
-};
 
 async function handleDisplayDictionaryLicenceAutocomplete(
 	client: Client,
@@ -112,4 +96,4 @@ async function displayError(
 	});
 }
 
-export default command;
+export { handleDisplayDictionaryLicence, handleDisplayDictionaryLicenceAutocomplete };

@@ -2,22 +2,6 @@ import { Locale } from "../../../../../constants/languages";
 import { code } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { PaginatedSoftwareLicenceViewComponent } from "../../../../components/paginated-view";
-import { OptionTemplate } from "../../../command";
-
-const command: OptionTemplate = {
-	id: "software",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplaySoftwareLicence,
-	handleAutocomplete: handleDisplaySoftwareLicenceAutocomplete,
-	options: [
-		{
-			id: "package",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-			autocomplete: true,
-		},
-	],
-};
 
 async function handleDisplaySoftwareLicenceAutocomplete(
 	client: Client,
@@ -88,4 +72,4 @@ async function displayError(
 	});
 }
 
-export default command;
+export { handleDisplaySoftwareLicence, handleDisplaySoftwareLicenceAutocomplete };

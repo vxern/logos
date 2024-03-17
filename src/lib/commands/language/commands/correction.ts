@@ -4,24 +4,8 @@ import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
 import { Modal, createModalComposer } from "../../../interactions";
-import { CommandTemplate } from "../../command";
 import categories from "../../social/roles/roles";
 import { isImplicit, isSingle } from "../../social/roles/types";
-
-const commands = {
-	partial: {
-		id: "correction.options.partial.message",
-		type: Discord.ApplicationCommandTypes.Message,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: (...args) => handleStartCorrecting(...args, "partial"),
-	},
-	full: {
-		id: "correction.options.full.message",
-		type: Discord.ApplicationCommandTypes.Message,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: (...args) => handleStartCorrecting(...args, "full"),
-	},
-} satisfies Record<string, CommandTemplate>;
 
 interface CorrectionData extends Record<string, string> {
 	original: string;
@@ -30,6 +14,7 @@ interface CorrectionData extends Record<string, string> {
 
 type OpenMode = "partial" | "full";
 
+// TODO(vxern): Named parameters for `openMode`.
 async function handleStartCorrecting(
 	client: Client,
 	interaction: Logos.Interaction,
@@ -240,6 +225,7 @@ function generateCorrectionModal(
 	};
 }
 
+// TODO(vxern): Naming?
 async function handleSubmittedInvalidCorrection(
 	client: Client,
 	submission: Logos.Interaction,
@@ -388,4 +374,4 @@ async function handleSubmittedInvalidCorrection(
 	return promise;
 }
 
-export default commands;
+export { handleStartCorrecting };

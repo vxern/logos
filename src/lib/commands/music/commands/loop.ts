@@ -1,14 +1,5 @@
 import { Client } from "../../../client";
 import { isCollection } from "../../../services/music/music";
-import { OptionTemplate } from "../../command";
-import { collection } from "../../parameters";
-
-const command: OptionTemplate = {
-	id: "loop",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleLoopPlayback,
-	options: [collection],
-};
 
 async function handleLoopPlayback(
 	client: Client,
@@ -196,4 +187,4 @@ async function handleLoopPlayback(
 	);
 }
 
-export default command;
+export { handleLoopPlayback };

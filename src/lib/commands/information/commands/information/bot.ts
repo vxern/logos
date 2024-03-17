@@ -1,12 +1,5 @@
 import { list } from "../../../../../formatting";
 import { Client } from "../../../../client";
-import { OptionTemplate } from "../../../command";
-
-const option: OptionTemplate = {
-	id: "bot",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplayBotInformation,
-};
 
 async function handleDisplayBotInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -82,4 +75,3 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 }
 
 export { handleDisplayBotInformation };
-export default option;

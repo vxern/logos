@@ -1,17 +1,5 @@
 import { Client } from "../../../client";
 import { PaginatedSongListingViewComponent } from "../../../components/paginated-view";
-import { OptionTemplate } from "../../command";
-import { show } from "../../parameters";
-
-const command: OptionTemplate = {
-	id: "queue",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplayPlaybackQueue,
-	options: [show],
-	flags: {
-		isShowable: true,
-	},
-};
 
 async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
@@ -83,4 +71,4 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	await viewComponent.open();
 }
 
-export default command;
+export { handleDisplayPlaybackQueue };

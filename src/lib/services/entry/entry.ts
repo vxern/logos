@@ -116,7 +116,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const index = parseInt(buttonPress.metadata[1]);
+		const index = Number.parseInt(buttonPress.metadata[1]);
 		const snowflake = proficiency.collection.list[index]?.snowflakes[this.guildIdString];
 		if (snowflake === undefined) {
 			return;
@@ -237,7 +237,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const index = parseInt(buttonPress.metadata[1]);
+		const index = Number.parseInt(buttonPress.metadata[1]);
 		const snowflake = proficiency.collection.list[index]?.snowflakes[this.guildIdString];
 		if (snowflake === undefined) {
 			return;

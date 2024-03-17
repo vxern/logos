@@ -1,14 +1,5 @@
 import { Client } from "../../../client";
 import { isCollection } from "../../../services/music/music";
-import { OptionTemplate } from "../../command";
-import { by, collection, to } from "../../parameters";
-
-const command: OptionTemplate = {
-	id: "unskip",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleUnskipAction,
-	options: [collection, by, to],
-};
 
 async function handleUnskipAction(
 	client: Client,
@@ -258,4 +249,4 @@ async function handleUnskipAction(
 	}
 }
 
-export default command;
+export { handleUnskipAction };

@@ -8,52 +8,9 @@ import languages, {
 import { trim } from "../../../../formatting";
 import { race } from "../../../../utilities";
 import { Client } from "../../../client";
-import { CommandTemplate } from "../../command";
-import { show } from "../../parameters";
 import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
 import { detectLanguages } from "./recognise";
-
-const commands = {
-	chatInput: {
-		id: "translate",
-		type: Discord.ApplicationCommandTypes.ChatInput,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleTranslateChatInput,
-		handleAutocomplete: handleTranslateChatInputAutocomplete,
-		options: [
-			{
-				id: "text",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				required: true,
-			},
-			{
-				id: "to",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				autocomplete: true,
-			},
-			{
-				id: "from",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				autocomplete: true,
-			},
-			show,
-		],
-		flags: {
-			hasRateLimit: true,
-			isShowable: true,
-		},
-	},
-	message: {
-		id: "translate.message",
-		type: Discord.ApplicationCommandTypes.Message,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleTranslateMessage,
-		flags: {
-			isShowable: true,
-		},
-	},
-} satisfies Record<string, CommandTemplate>;
 
 async function handleTranslateChatInputAutocomplete(
 	client: Client,
@@ -561,4 +518,4 @@ async function detectLanguage(
 	return detectedLanguage;
 }
 
-export default commands;
+export { handleTranslateChatInput, handleTranslateChatInputAutocomplete, handleTranslateMessage };

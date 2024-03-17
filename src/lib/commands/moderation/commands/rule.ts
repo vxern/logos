@@ -2,29 +2,8 @@ import { Locale } from "../../../../constants/languages";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { Rule } from "../../../database/warning";
-import { CommandTemplate } from "../../command";
-import { show } from "../../parameters";
 
-const command: CommandTemplate = {
-	id: "rule",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleCiteRule,
-	handleAutocomplete: handleCiteRuleAutocomplete,
-	options: [
-		{
-			id: "rule",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-			autocomplete: true,
-		},
-		show,
-	],
-	flags: {
-		isShowable: true,
-	},
-};
-
+// TODO(vxern): Move into the constants file.
 const rules: Rule[] = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"];
 
 async function handleCiteRuleAutocomplete(
@@ -156,5 +135,4 @@ async function displayError(
 	});
 }
 
-export default command;
-export { rules, getRuleTitleFormatted };
+export { handleCiteRule, handleCiteRuleAutocomplete, rules, getRuleTitleFormatted };

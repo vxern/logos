@@ -5,14 +5,6 @@ import { Client } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
 import { GuildStats } from "../../../database/guild-stats";
 import { User } from "../../../database/user";
-import { CommandTemplate } from "../../command";
-
-const command: CommandTemplate = {
-	id: "game",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleStartGame,
-};
 
 function random(max: number): number {
 	return Math.floor(Math.random() * max);
@@ -404,7 +396,7 @@ async function getSentenceSelection(client: Client, locale: Locale): Promise<Sen
 	}
 	const mainId = ids
 		.splice(
-			ids.findIndex((id) => parseInt(id) === mainSentencePair.sentenceId),
+			ids.findIndex((id) => Number.parseInt(id) === mainSentencePair.sentenceId),
 			1,
 		)
 		.at(0);
@@ -462,4 +454,4 @@ async function getSentenceSelection(client: Client, locale: Locale): Promise<Sen
 	return { correctPick, allPicks, sentencePair: mainSentencePair };
 }
 
-export default command;
+export { handleStartGame };

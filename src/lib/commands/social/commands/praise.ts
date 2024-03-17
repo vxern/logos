@@ -1,25 +1,7 @@
-import { Locale } from "../../../../constants/languages";
 import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
 import { Praise } from "../../../database/praise";
-import { CommandTemplate } from "../../command";
-import { user } from "../../parameters";
-
-const command: CommandTemplate = {
-	id: "praise",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handlePraiseUser,
-	handleAutocomplete: handlePraiseUserAutocomplete,
-	options: [
-		user,
-		{
-			id: "comment",
-			type: Discord.ApplicationCommandOptionTypes.String,
-		},
-	],
-};
 
 async function handlePraiseUserAutocomplete(
 	client: Client,
@@ -133,26 +115,4 @@ async function handlePraiseUser(
 	});
 }
 
-// TODO(vxern): Will be used.
-async function displayError(
-	client: Client,
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Promise<void> {
-	const strings = {
-		title: client.localise("praise.strings.failed.title", locale)(),
-		description: client.localise("praise.strings.failed.description", locale)(),
-	};
-
-	client.editReply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
-	});
-}
-
-export default command;
+export { handlePraiseUser, handlePraiseUserAutocomplete };

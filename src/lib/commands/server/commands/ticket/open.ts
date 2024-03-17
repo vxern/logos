@@ -6,13 +6,6 @@ import { Guild } from "../../../../database/guild";
 import { Ticket, TicketType } from "../../../../database/ticket";
 import { Modal, createModalComposer } from "../../../../interactions";
 import { Configurations } from "../../../../services/prompts/service";
-import { OptionTemplate } from "../../../command";
-
-const option: OptionTemplate = {
-	id: "open",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleOpenTicket,
-};
 
 type TicketError = "failure";
 
@@ -376,5 +369,5 @@ function generateTicketModal(client: Client, { locale }: { locale: Locale }): Mo
 	};
 }
 
-export default option;
+export { handleOpenTicket };
 export { openTicket };

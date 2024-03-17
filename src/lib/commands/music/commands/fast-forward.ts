@@ -2,16 +2,6 @@ import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
 import { parseTimeExpression } from "../../../interactions";
-import { OptionTemplate } from "../../command";
-import { timestamp } from "../../parameters";
-
-const command: OptionTemplate = {
-	id: "fast-forward",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleFastForward,
-	handleAutocomplete: handleFastForwardAutocomplete,
-	options: [timestamp],
-};
 
 async function handleFastForwardAutocomplete(
 	client: Client,
@@ -120,4 +110,4 @@ async function displayInvalidTimestampError(
 	});
 }
 
-export default command;
+export { handleFastForward, handleFastForwardAutocomplete };

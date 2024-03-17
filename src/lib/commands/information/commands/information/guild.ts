@@ -3,14 +3,7 @@ import diagnostics from "../../../../../diagnostics";
 import { mention, timestamp } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
-import { OptionTemplate } from "../../../command";
 import { proficiency } from "../../../social/roles/categories/language";
-
-const option: OptionTemplate = {
-	id: "server",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplayGuildInformation,
-};
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -240,4 +233,3 @@ function formatDistribution(
 }
 
 export { handleDisplayGuildInformation };
-export default option;

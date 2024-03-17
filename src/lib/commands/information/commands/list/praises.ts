@@ -2,15 +2,6 @@ import { Locale } from "../../../../../constants/languages";
 import diagnostics from "../../../../../diagnostics";
 import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
-import { OptionTemplate } from "../../../command";
-import author from "./praises/author";
-import target from "./praises/target";
-
-const option: OptionTemplate = {
-	id: "praises",
-	type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
-	options: [author, target],
-};
 
 function getPraisePage(
 	client: Client,
@@ -74,4 +65,3 @@ function getPraisePage(
 }
 
 export { getPraisePage };
-export default option;

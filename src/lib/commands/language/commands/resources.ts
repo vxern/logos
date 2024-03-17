@@ -1,18 +1,5 @@
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { CommandTemplate } from "../../command";
-import { show } from "../../parameters";
-
-const command: CommandTemplate = {
-	id: "resources",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleDisplayResources,
-	options: [show],
-	flags: {
-		isShowable: true,
-	},
-};
 
 /** Displays a message with information on where to find the resources for a given language. */
 async function handleDisplayResources(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -66,4 +53,4 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 	);
 }
 
-export default command;
+export { handleDisplayResources };

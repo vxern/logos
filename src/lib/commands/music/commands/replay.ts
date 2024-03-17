@@ -1,14 +1,5 @@
 import { Client } from "../../../client";
 import { isCollection } from "../../../services/music/music";
-import { OptionTemplate } from "../../command";
-import { collection } from "../../parameters";
-
-const command: OptionTemplate = {
-	id: "replay",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleReplayAction,
-	options: [collection],
-};
 
 async function handleReplayAction(
 	client: Client,
@@ -122,4 +113,4 @@ async function handleReplayAction(
 	musicService.replay(interaction.parameters.collection ?? false);
 }
 
-export default command;
+export { handleReplayAction };

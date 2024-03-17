@@ -1,11 +1,4 @@
 import { Client } from "../../../client";
-import { OptionTemplate } from "../../command";
-
-const command: OptionTemplate = {
-	id: "stop",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleStopPlayback,
-};
 
 async function handleStopPlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
@@ -69,4 +62,4 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 	);
 }
 
-export default command;
+export { handleStopPlayback };

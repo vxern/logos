@@ -2,30 +2,7 @@ import { DetectionLanguage, Locale } from "../../../../constants/languages";
 import { list } from "../../../../formatting";
 import { race } from "../../../../utilities";
 import { Client } from "../../../client";
-import { CommandTemplate } from "../../command";
 import { getAdapters } from "../detectors/adapters";
-
-const commands = {
-	chatInput: {
-		id: "recognize",
-		type: Discord.ApplicationCommandTypes.ChatInput,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleRecogniseLanguageChatInput,
-		options: [
-			{
-				id: "text",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				required: true,
-			},
-		],
-	},
-	message: {
-		id: "recognize.message",
-		type: Discord.ApplicationCommandTypes.Message,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleRecogniseLanguageMessage,
-	},
-} satisfies Record<string, CommandTemplate>;
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,
@@ -275,5 +252,4 @@ function getLanguagesSorted(detectionFrequencies: Partial<Record<DetectionLangua
 	return { likely, possible };
 }
 
-export default commands;
-export { detectLanguages };
+export { handleRecogniseLanguageChatInput, handleRecogniseLanguageMessage, detectLanguages };

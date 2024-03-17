@@ -12,7 +12,7 @@ function fromHex(colour: string): number {
 		throw "The passed colour was not in the correct format (#ffffff).";
 	}
 
-	return parseInt(colour.replace("#", "0x"));
+	return Number.parseInt(colour.replace("#", "0x"));
 }
 
 export default Object.freeze({

@@ -4,10 +4,10 @@ import { isDefined } from "../utilities";
 import { Client } from "./client";
 import {
 	Command,
-	OptionMetadata,
 	CommandTemplate,
 	InteractionHandler,
 	Option,
+	OptionMetadata,
 	OptionTemplate,
 } from "./commands/command";
 import commandTemplates from "./commands/commands";
@@ -24,7 +24,6 @@ type BuildResult<Object extends Command | Option> = [object: Object, namesWithFl
 class CommandStore {
 	readonly commands: Partial<Record<CommandName, Command>>;
 
-	readonly #log: Logger;
 	readonly #client: Client;
 	readonly #collection: {
 		readonly showable: Set<string>;
@@ -42,14 +41,12 @@ class CommandStore {
 	private constructor(
 		client: Client,
 		{
-			log,
 			commands,
 			showable,
 			withRateLimit,
 			executeHandlers,
 			autocompleteHandlers,
 		}: {
-			log: Logger;
 			commands: Partial<Record<CommandName, Command>>;
 			showable: Set<string>;
 			withRateLimit: Set<string>;
@@ -59,7 +56,6 @@ class CommandStore {
 	) {
 		this.commands = commands;
 
-		this.#log = log;
 		this.#client = client;
 		this.#collection = { showable, withRateLimit };
 		this.#lastCommandUseTimestamps = new Map();
@@ -86,7 +82,7 @@ class CommandStore {
 			templates: CommandTemplate[];
 		},
 	): CommandStore {
-		const log = Logger.create({ identifier: "Client/InteractionStore", isDebug: client.environment.isDebug });
+		const log = Logger.create({ identifier: "Client/CommandStore", isDebug: client.environment.isDebug });
 
 		// Build commands from templates.
 		const commandsByName: Partial<Record<CommandName, Command>> = {};
@@ -174,7 +170,6 @@ class CommandStore {
 		}
 
 		return new CommandStore(client, {
-			log,
 			commands: commandsByName,
 			showable,
 			withRateLimit,

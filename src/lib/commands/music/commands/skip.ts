@@ -1,14 +1,5 @@
 import { Client } from "../../../client";
 import { isCollection } from "../../../services/music/music";
-import { OptionTemplate } from "../../command";
-import { by, collection, to } from "../../parameters";
-
-const command: OptionTemplate = {
-	id: "skip",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleSkipAction,
-	options: [collection, by, to],
-};
 
 async function handleSkipAction(
 	client: Client,
@@ -203,4 +194,4 @@ async function handleSkipAction(
 	}
 }
 
-export default command;
+export { handleSkipAction };

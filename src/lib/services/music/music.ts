@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
 import * as Lavaclient from "lavaclient";
 import diagnostics from "../../../diagnostics";
 import { mention } from "../../../formatting";
@@ -273,7 +273,7 @@ class MusicService extends LocalService {
 		player.setVolume(configuration.implicitVolume);
 
 		const session = {
-			events: oldSession?.events ?? new EventEmitter().setMaxListeners(Infinity),
+			events: oldSession?.events ?? new EventEmitter().setMaxListeners(Number.POSITIVE_INFINITY),
 			player,
 			disconnectTimeout: undefined,
 			channelId,

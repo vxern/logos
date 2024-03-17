@@ -2,25 +2,10 @@ import diagnostics from "../../../../diagnostics";
 import { timestamp } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { CommandTemplate } from "../../command";
-
-const command: CommandTemplate = {
-	id: "slowmode",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["MODERATE_MEMBERS"],
-	handle: handleToggleSlowmode,
-	handleAutocomplete: handleToggleSlowmodeAutocomplete,
-	options: [
-		{
-			id: "level",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			autocomplete: true,
-		},
-	],
-};
 
 const lastUseByGuildId = new Map<bigint, number>();
 
+// TODO(vxern): Move to constants.
 const levels = ["lowest", "low", "medium", "high", "highest", "emergency", "lockdown", "beyond"] as const;
 
 // In milliseconds
@@ -339,5 +324,5 @@ async function handleToggleSlowmode(
 	);
 }
 
-export default command;
+export { handleToggleSlowmode, handleToggleSlowmodeAutocomplete };
 export type { SlowmodeLevel };

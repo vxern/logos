@@ -2,19 +2,7 @@ import { mention, timestamp } from "../../../../formatting";
 import { Client } from "../../../client";
 import { PaginatedSongCollectionViewComponent } from "../../../components/paginated-view";
 import { isCollection } from "../../../services/music/music";
-import { OptionTemplate } from "../../command";
-import { collection, show } from "../../parameters";
 import { Song, SongCollection, SongStream } from "../data/types";
-
-const command: OptionTemplate = {
-	id: "now",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplayCurrentlyPlaying,
-	options: [collection, show],
-	flags: {
-		isShowable: true,
-	},
-};
 
 async function handleDisplayCurrentlyPlaying(
 	client: Client,
@@ -182,4 +170,4 @@ async function handleDisplayCurrentlyPlaying(
 	);
 }
 
-export default command;
+export { handleDisplayCurrentlyPlaying };

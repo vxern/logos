@@ -5,14 +5,6 @@ import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
 import { Suggestion } from "../../../database/suggestion";
 import { Modal, createModalComposer } from "../../../interactions";
-import { CommandTemplate } from "../../command";
-
-const command: CommandTemplate = {
-	id: "suggestion",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleMakeSuggestion,
-};
 
 type SuggestionError = "failure";
 
@@ -282,4 +274,4 @@ function generateSuggestionModal(client: Client, { locale }: { locale: Locale })
 	};
 }
 
-export default command;
+export { handleMakeSuggestion };

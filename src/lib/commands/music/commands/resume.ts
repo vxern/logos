@@ -1,11 +1,4 @@
 import { Client } from "../../../client";
-import { OptionTemplate } from "../../command";
-
-const command: OptionTemplate = {
-	id: "resume",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleResumePlayback,
-};
 
 async function handleResumePlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
@@ -92,5 +85,4 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 	);
 }
 
-export default command;
 export { handleResumePlayback };

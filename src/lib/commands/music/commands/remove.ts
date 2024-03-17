@@ -1,13 +1,6 @@
 import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { PaginatedRemoveSongListingViewComponent } from "../../../components/paginated-view";
-import { OptionTemplate } from "../../command";
-
-const command: OptionTemplate = {
-	id: "remove",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleRemoveSongListing,
-};
 
 async function handleRemoveSongListing(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -127,4 +120,4 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 	await viewComponent.open();
 }
 
-export default command;
+export { handleRemoveSongListing };

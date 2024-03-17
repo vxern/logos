@@ -66,7 +66,7 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 
 		let result: TranslationResult;
 		try {
-			result = await response.json();
+			result = (await response.json()) as TranslationResult;
 		} catch (exception) {
 			client.log.error(`Reading response data for text translation to ${this.identifier} failed:`, exception);
 			return undefined;

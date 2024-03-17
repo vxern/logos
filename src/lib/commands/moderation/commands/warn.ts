@@ -1,32 +1,11 @@
-import { Locale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Rule, Warning } from "../../../database/warning";
-import { CommandTemplate } from "../../command";
-import { reason, user } from "../../parameters";
 import { getActiveWarnings } from "../module";
 import { getRuleTitleFormatted, rules } from "./rule";
-
-const command: CommandTemplate = {
-	id: "warn",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["MODERATE_MEMBERS"],
-	handle: handleWarnUser,
-	handleAutocomplete: handleWarnUserAutocomplete,
-	options: [
-		user,
-		{
-			id: "rule",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-			autocomplete: true,
-		},
-		reason,
-	],
-};
 
 async function handleWarnUserAutocomplete(
 	client: Client,
@@ -283,25 +262,4 @@ async function handleWarnUser(
 	}
 }
 
-async function displayError(
-	client: Client,
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Promise<void> {
-	const strings = {
-		title: client.localise("warn.strings.failed.title", locale)(),
-		description: client.localise("warn.strings.failed.description", locale)(),
-	};
-
-	client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
-	});
-}
-
-export default command;
+export { handleWarnUser, handleWarnUserAutocomplete };

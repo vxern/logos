@@ -3,26 +3,7 @@ import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Warning } from "../../../database/warning";
-import { CommandTemplate } from "../../command";
-import { user } from "../../parameters";
 import { getActiveWarnings } from "../module";
-
-const command: CommandTemplate = {
-	id: "pardon",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["MODERATE_MEMBERS"],
-	handle: handlePardonUser,
-	handleAutocomplete: handlePardonUserAutocomplete,
-	options: [
-		user,
-		{
-			id: "warning",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-			autocomplete: true,
-		},
-	],
-};
 
 async function handlePardonUserAutocomplete(
 	client: Client,
@@ -233,4 +214,4 @@ async function displayFailedError(
 	});
 }
 
-export default command;
+export { handlePardonUser, handlePardonUserAutocomplete };

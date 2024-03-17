@@ -5,14 +5,6 @@ import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
 import { Resource } from "../../../database/resource";
 import { Modal, createModalComposer } from "../../../interactions";
-import { CommandTemplate } from "../../command";
-
-const command: CommandTemplate = {
-	id: "resource",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleSubmitResource,
-};
 
 type ResourceError = "failure";
 
@@ -282,4 +274,4 @@ function generateResourceModal(client: Client, { locale }: { locale: Locale }): 
 	};
 }
 
-export default command;
+export { handleSubmitResource };

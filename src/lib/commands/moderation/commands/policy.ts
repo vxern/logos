@@ -1,19 +1,6 @@
 import { Locale } from "../../../../constants/languages";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { CommandTemplate } from "../../command";
-import { show } from "../../parameters";
-
-const command: CommandTemplate = {
-	id: "policy",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleDisplayModerationPolicy,
-	options: [show],
-	flags: {
-		isShowable: true,
-	},
-};
 
 async function handleDisplayModerationPolicy(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -106,4 +93,4 @@ function getModerationPolicyPoints(
 	];
 }
 
-export default command;
+export { handleDisplayModerationPolicy };

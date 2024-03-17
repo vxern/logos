@@ -1,14 +1,6 @@
 import { Translation } from "../../../../constants/contributions";
 import { Locale, LocalisationLanguage } from "../../../../constants/languages";
 import { Client } from "../../../client";
-import { CommandTemplate } from "../../command";
-
-const command: CommandTemplate = {
-	id: "credits",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	handle: handleDisplayCredits,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-};
 
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -51,4 +43,4 @@ function getTranslationView(client: Client, { locale }: { locale: Locale }): Dis
 	return { title: strings.translation, fields, color: constants.colours.blue };
 }
 
-export default command;
+export { handleDisplayCredits };

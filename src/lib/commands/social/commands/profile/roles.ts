@@ -3,7 +3,6 @@ import diagnostics from "../../../../../diagnostics";
 import { trim } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { InteractionCollector } from "../../../../collectors";
-import { OptionTemplate } from "../../../command";
 import roles, { getRoleCategories, getRoles } from "../../roles/roles";
 import {
 	Role,
@@ -15,12 +14,6 @@ import {
 	isGroup,
 	isSingle,
 } from "../../roles/types";
-
-const command: OptionTemplate = {
-	id: "roles",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleOpenRoleSelectionMenu,
-};
 
 /**
  * Displays a role selection menu to the user and allows them to assign or unassign roles
@@ -559,5 +552,4 @@ function createSelectOptionsFromCollection(
 	return selectOptions;
 }
 
-export default command;
 export { handleOpenRoleSelectionMenu };

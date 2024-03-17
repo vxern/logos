@@ -2,19 +2,6 @@ import { Locale } from "../../../../constants/languages";
 import { Client } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
-import { CommandTemplate } from "../../command";
-import { show } from "../../parameters";
-
-const command: CommandTemplate = {
-	id: "cefr",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleDisplayCefrGuide,
-	options: [show],
-	flags: {
-		isShowable: true,
-	},
-};
 
 type Bracket = "a" | "b" | "c";
 type Tab = "guide" | "examples";
@@ -411,4 +398,4 @@ function getBracketExamples(
 	};
 }
 
-export default command;
+export { handleDisplayCefrGuide };

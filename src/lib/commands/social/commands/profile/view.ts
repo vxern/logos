@@ -2,19 +2,6 @@ import { mention } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Praise } from "../../../../database/praise";
 import { Warning } from "../../../../database/warning";
-import { OptionTemplate } from "../../../command";
-import { show, user } from "../../../parameters";
-
-const command: OptionTemplate = {
-	id: "view",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplayProfile,
-	handleAutocomplete: handleDisplayProfileAutocomplete,
-	options: [{ ...user, required: false }, show],
-	flags: {
-		isShowable: true,
-	},
-};
 
 async function handleDisplayProfileAutocomplete(
 	client: Client,
@@ -113,4 +100,4 @@ async function handleDisplayProfile(
 	);
 }
 
-export default command;
+export { handleDisplayProfile, handleDisplayProfileAutocomplete };

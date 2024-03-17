@@ -2,17 +2,7 @@ import { Locale } from "../../../../../constants/languages";
 import { timestamp } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Warning } from "../../../../database/warning";
-import { OptionTemplate } from "../../../command";
 import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule";
-import { user } from "../../../parameters";
-
-const option: OptionTemplate = {
-	id: "warnings",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleDisplayWarnings,
-	handleAutocomplete: handleDisplayWarningsAutocomplete,
-	options: [{ ...user, required: false }],
-};
 
 async function handleDisplayWarningsAutocomplete(
 	client: Client,
@@ -75,28 +65,6 @@ async function handleDisplayWarnings(
 	});
 }
 
-// TODO(vxern): Will be used.
-async function displayError(
-	client: Client,
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Promise<void> {
-	const strings = {
-		title: client.localise("list.options.warnings.strings.failed.title", locale)(),
-		description: client.localise("list.options.warnings.strings.failed.description", locale)(),
-	};
-
-	client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
-	});
-}
-
 function getWarningPage(
 	client: Client,
 	warnings: Warning[],
@@ -151,4 +119,3 @@ function getWarningPage(
 }
 
 export { getWarningPage, handleDisplayWarnings, handleDisplayWarningsAutocomplete };
-export default option;

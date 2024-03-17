@@ -2,16 +2,6 @@ import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
 import { parseTimeExpression } from "../../../interactions";
-import { OptionTemplate } from "../../command";
-import { timestamp } from "../../parameters";
-
-const command: OptionTemplate = {
-	id: "skip-to",
-	type: Discord.ApplicationCommandOptionTypes.SubCommand,
-	handle: handleSkipToTimestamp,
-	handleAutocomplete: handleSkipToTimestampAutocomplete,
-	options: [timestamp],
-};
 
 async function handleSkipToTimestampAutocomplete(
 	client: Client,
@@ -116,4 +106,4 @@ async function displayInvalidTimestampError(
 	});
 }
 
-export default command;
+export { handleSkipToTimestamp, handleSkipToTimestampAutocomplete };

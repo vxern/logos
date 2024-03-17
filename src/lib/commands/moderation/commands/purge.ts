@@ -5,28 +5,6 @@ import { toChunked } from "../../../../utilities";
 import { Client, isValidSnowflake } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
-import { CommandTemplate } from "../../command";
-import { user } from "../../parameters";
-
-const command: CommandTemplate = {
-	id: "purge",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	defaultMemberPermissions: ["MODERATE_MEMBERS"],
-	handle: handlePurgeMessages,
-	handleAutocomplete: handlePurgeMessagesAutocomplete,
-	options: [
-		{
-			id: "start",
-			type: Discord.ApplicationCommandOptionTypes.String,
-			required: true,
-		},
-		{
-			id: "end",
-			type: Discord.ApplicationCommandOptionTypes.String,
-		},
-		{ ...user, id: "author", required: false },
-	],
-};
 
 async function handlePurgeMessagesAutocomplete(
 	client: Client,
@@ -782,4 +760,4 @@ function getMessageContent(
 	return `> ${content}`;
 }
 
-export default command;
+export { handlePurgeMessages, handlePurgeMessagesAutocomplete };

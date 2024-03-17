@@ -3,14 +3,6 @@ import diagnostics from "../../../../diagnostics";
 import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Modal, createModalComposer } from "../../../interactions";
-import { CommandTemplate } from "../../command";
-
-const command: CommandTemplate = {
-	id: "answer.message",
-	type: Discord.ApplicationCommandTypes.Message,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-	handle: handleStartAnswering,
-};
 
 interface AnswerData extends Record<string, string> {
 	question: string;
@@ -153,4 +145,4 @@ function generateAnswerModal(client: Client, data: AnswerData, { locale }: { loc
 	};
 }
 
-export default command;
+export { handleStartAnswering };

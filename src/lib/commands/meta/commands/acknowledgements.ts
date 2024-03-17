@@ -1,12 +1,4 @@
 import { Client } from "../../../client";
-import { CommandTemplate } from "../../command";
-
-const command: CommandTemplate = {
-	id: "acknowledgements",
-	type: Discord.ApplicationCommandTypes.ChatInput,
-	handle: handleDisplayAcknowledgements,
-	defaultMemberPermissions: ["VIEW_CHANNEL"],
-};
 
 async function handleDisplayAcknowledgements(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -36,4 +28,4 @@ async function handleDisplayAcknowledgements(client: Client, interaction: Logos.
 	});
 }
 
-export default command;
+export { handleDisplayAcknowledgements };

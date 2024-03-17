@@ -7,14 +7,14 @@ import emojis from "./emojis";
 import endpoints from "./endpoints";
 import gifs from "./gifs";
 import languages from "./languages";
+import licences from "./licences";
 import links from "./links";
+import localisations from "./localisations";
 import patterns from "./patterns";
 import properties from "./properties";
 import special from "./special";
 import statuses from "./statuses";
 import time from "./time";
-import licences from "./licences";
-import localisations from "./localisations";
 
 const constants = Object.freeze({
 	PROJECT_NAME: "Logos",
