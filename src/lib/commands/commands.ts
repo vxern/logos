@@ -621,4 +621,4 @@ export default Object.freeze({
 			},
 		],
 	},
-} as const satisfies Record<string, CommandTemplate>);
+} satisfies Record<string, CommandTemplate>);
