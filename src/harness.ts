@@ -7,15 +7,15 @@ import defaults_ from "./constants/defaults";
 // #region
 
 Promise.withResolvers = <T>() => {
-  let resolve!: (value: T) => void;
-  let reject!: () => void;
+	let resolve!: (value: T) => void;
+	let reject!: () => void;
 
-  const promise = new Promise<T>((resolve_, reject_) => {
-    resolve = resolve_;
-    reject = reject_;
-  });
+	const promise = new Promise<T>((resolve_, reject_) => {
+		resolve = resolve_;
+		reject = reject_;
+	});
 
-  return { promise, resolve, reject };
+	return { promise, resolve, reject };
 };
 
 (globalThis as any).Discord = Discord;
