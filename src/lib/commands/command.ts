@@ -6,7 +6,7 @@ interface OptionFlags {
 	readonly isShowable?: boolean;
 }
 interface OptionMetadata {
-	readonly id: string;
+	readonly identifier: string;
 	readonly handle?: InteractionHandler;
 	readonly handleAutocomplete?: InteractionHandler;
 	readonly flags?: OptionFlags;

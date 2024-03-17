@@ -79,40 +79,40 @@ import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "./social
 export default Object.freeze({
 	// Information
 	information: {
-		id: "information",
+		identifier: "information",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: [
 			{
-				id: "bot",
+				identifier: "bot",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayBotInformation,
 			},
 			{
-				id: "server",
+				identifier: "server",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayGuildInformation,
 			},
 		],
 	},
 	list: {
-		id: "list",
+		identifier: "list",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: [
 			{
-				id: "praises",
+				identifier: "praises",
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 				options: [
 					{
-						id: "author",
+						identifier: "author",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayPraisesByAuthor,
 						handleAutocomplete: handleDisplayPraisesByAuthorAutocomplete,
 						options: [{ ...constants.parameters.user, required: false }],
 					},
 					{
-						id: "target",
+						identifier: "target",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayPraisesByTarget,
 						handleAutocomplete: handleDisplayPraisesByTargetAutocomplete,
@@ -121,7 +121,7 @@ export default Object.freeze({
 				],
 			},
 			{
-				id: "warnings",
+				identifier: "warnings",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayWarnings,
 				handleAutocomplete: handleDisplayWarningsAutocomplete,
@@ -131,13 +131,13 @@ export default Object.freeze({
 	},
 	// Language
 	answerMessage: {
-		id: "answer.message",
+		identifier: "answer.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleStartAnswering,
 	},
 	cefr: {
-		id: "cefr",
+		identifier: "cefr",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayCefrGuide,
@@ -147,44 +147,44 @@ export default Object.freeze({
 		},
 	},
 	correctionPartialMessage: {
-		id: "correction.options.partial.message",
+		identifier: "correction.options.partial.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: (client: Client, interaction: Logos.Interaction) => handleStartCorrecting(client, interaction, "partial"),
 	},
 	correctionFullMessage: {
-		id: "correction.options.full.message",
+		identifier: "correction.options.full.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: (client: Client, interaction: Logos.Interaction) => handleStartCorrecting(client, interaction, "full"),
 	},
 	game: {
-		id: "game",
+		identifier: "game",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleStartGame,
 	},
 	recognise: {
-		id: "recognize",
+		identifier: "recognize",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleRecogniseLanguageChatInput,
 		options: [
 			{
-				id: "text",
+				identifier: "text",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 			},
 		],
 	},
 	recogniseMessage: {
-		id: "recognize.message",
+		identifier: "recognize.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleRecogniseLanguageMessage,
 	},
 	resources: {
-		id: "resources",
+		identifier: "resources",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayResources,
@@ -194,24 +194,24 @@ export default Object.freeze({
 		},
 	},
 	translate: {
-		id: "translate",
+		identifier: "translate",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleTranslateChatInput,
 		handleAutocomplete: handleTranslateChatInputAutocomplete,
 		options: [
 			{
-				id: "text",
+				identifier: "text",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 			},
 			{
-				id: "to",
+				identifier: "to",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
 			{
-				id: "from",
+				identifier: "from",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
@@ -223,7 +223,7 @@ export default Object.freeze({
 		},
 	},
 	translateMessage: {
-		id: "translate.message",
+		identifier: "translate.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleTranslateMessage,
@@ -233,30 +233,30 @@ export default Object.freeze({
 	},
 	// Meta
 	acknowledgements: {
-		id: "acknowledgements",
+		identifier: "acknowledgements",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		handle: handleDisplayAcknowledgements,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 	},
 	credits: {
-		id: "credits",
+		identifier: "credits",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		handle: handleDisplayCredits,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 	},
 	licence: {
-		id: "license",
+		identifier: "license",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: [
 			{
-				id: "dictionary",
+				identifier: "dictionary",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayDictionaryLicence,
 				handleAutocomplete: handleDisplayDictionaryLicenceAutocomplete,
 				options: [
 					{
-						id: "dictionary",
+						identifier: "dictionary",
 						type: Discord.ApplicationCommandOptionTypes.String,
 						required: true,
 						autocomplete: true,
@@ -264,13 +264,13 @@ export default Object.freeze({
 				],
 			},
 			{
-				id: "software",
+				identifier: "software",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplaySoftwareLicence,
 				handleAutocomplete: handleDisplaySoftwareLicenceAutocomplete,
 				options: [
 					{
-						id: "package",
+						identifier: "package",
 						type: Discord.ApplicationCommandOptionTypes.String,
 						required: true,
 						autocomplete: true,
@@ -280,27 +280,27 @@ export default Object.freeze({
 		],
 	},
 	settings: {
-		id: "settings",
+		identifier: "settings",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: [
 			{
-				id: "language",
+				identifier: "language",
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 				options: [
 					{
-						id: "clear",
+						identifier: "clear",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleClearLanguage,
 					},
 					{
-						id: "set",
+						identifier: "set",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleSetLanguage,
 						handleAutocomplete: handleSetLanguageAutocomplete,
 						options: [
 							{
-								id: "language",
+								identifier: "language",
 								type: Discord.ApplicationCommandOptionTypes.String,
 								required: true,
 								autocomplete: true,
@@ -310,7 +310,7 @@ export default Object.freeze({
 				],
 			},
 			{
-				id: "view",
+				identifier: "view",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplaySettings,
 			},
@@ -318,7 +318,7 @@ export default Object.freeze({
 	},
 	// Moderation
 	pardon: {
-		id: "pardon",
+		identifier: "pardon",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		handle: handlePardonUser,
@@ -326,7 +326,7 @@ export default Object.freeze({
 		options: [
 			constants.parameters.user,
 			{
-				id: "warning",
+				identifier: "warning",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 				autocomplete: true,
@@ -334,7 +334,7 @@ export default Object.freeze({
 		],
 	},
 	policy: {
-		id: "policy",
+		identifier: "policy",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayModerationPolicy,
@@ -344,39 +344,39 @@ export default Object.freeze({
 		},
 	},
 	purge: {
-		id: "purge",
+		identifier: "purge",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		handle: handlePurgeMessages,
 		handleAutocomplete: handlePurgeMessagesAutocomplete,
 		options: [
 			{
-				id: "start",
+				identifier: "start",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 			},
 			{
-				id: "end",
+				identifier: "end",
 				type: Discord.ApplicationCommandOptionTypes.String,
 			},
-			{ ...constants.parameters.user, id: "author", required: false },
+			{ ...constants.parameters.user, identifier: "author", required: false },
 		],
 	},
 	report: {
-		id: "report",
+		identifier: "report",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleMakeReport,
 	},
 	rule: {
-		id: "rule",
+		identifier: "rule",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleCiteRule,
 		handleAutocomplete: handleCiteRuleAutocomplete,
 		options: [
 			{
-				id: "rule",
+				identifier: "rule",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 				autocomplete: true,
@@ -388,33 +388,33 @@ export default Object.freeze({
 		},
 	},
 	slowmode: {
-		id: "slowmode",
+		identifier: "slowmode",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		handle: handleToggleSlowmode,
 		handleAutocomplete: handleToggleSlowmodeAutocomplete,
 		options: [
 			{
-				id: "level",
+				identifier: "level",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
 		],
 	},
 	timeout: {
-		id: "timeout",
+		identifier: "timeout",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		options: [
 			{
-				id: "set",
+				identifier: "set",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSetTimeout,
 				handleAutocomplete: handleSetTimeoutAutocomplete,
 				options: [constants.parameters.user, constants.parameters.duration, constants.parameters.reason],
 			},
 			{
-				id: "clear",
+				identifier: "clear",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleClearTimeout,
 				handleAutocomplete: handleClearTimeoutAutocomplete,
@@ -423,7 +423,7 @@ export default Object.freeze({
 		],
 	},
 	warn: {
-		id: "warn",
+		identifier: "warn",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		handle: handleWarnUser,
@@ -431,7 +431,7 @@ export default Object.freeze({
 		options: [
 			constants.parameters.user,
 			{
-				id: "rule",
+				identifier: "rule",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 				autocomplete: true,
@@ -441,24 +441,24 @@ export default Object.freeze({
 	},
 	//Server
 	resource: {
-		id: "resource",
+		identifier: "resource",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleSubmitResource,
 	},
 	suggestion: {
-		id: "suggestion",
+		identifier: "suggestion",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleMakeSuggestion,
 	},
 	ticket: {
-		id: "ticket",
+		identifier: "ticket",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: [
 			{
-				id: "open",
+				identifier: "open",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleOpenTicket,
 			},
@@ -466,19 +466,19 @@ export default Object.freeze({
 	},
 	// Social
 	music: {
-		id: "music",
+		identifier: "music",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: [
 			{
-				id: "fast-forward",
+				identifier: "fast-forward",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleFastForward,
 				handleAutocomplete: handleFastForwardAutocomplete,
 				options: [constants.parameters.timestamp],
 			},
 			{
-				id: "history",
+				identifier: "history",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayPlaybackHistory,
 				options: [constants.parameters.show],
@@ -487,13 +487,13 @@ export default Object.freeze({
 				},
 			},
 			{
-				id: "loop",
+				identifier: "loop",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleLoopPlayback,
 				options: [constants.parameters.collection],
 			},
 			{
-				id: "now",
+				identifier: "now",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayCurrentlyPlaying,
 				options: [constants.parameters.collection, constants.parameters.show],
@@ -502,28 +502,28 @@ export default Object.freeze({
 				},
 			},
 			{
-				id: "pause",
+				identifier: "pause",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handlePausePlayback,
 			},
 			{
-				id: "play",
+				identifier: "play",
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 				options: [
 					{
-						id: "file",
+						identifier: "file",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleRequestFilePlayback,
 						options: [
 							{
-								id: "url",
+								identifier: "url",
 								type: Discord.ApplicationCommandOptionTypes.String,
 								required: true,
 							},
 						],
 					},
 					{
-						id: "youtube",
+						identifier: "youtube",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: async (client: Client, interaction: Logos.Interaction) =>
 							handleRequestQueryPlayback(client, interaction, sources.YouTube),
@@ -532,7 +532,7 @@ export default Object.freeze({
 				],
 			},
 			{
-				id: "queue",
+				identifier: "queue",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayPlaybackQueue,
 				options: [constants.parameters.show],
@@ -541,58 +541,58 @@ export default Object.freeze({
 				},
 			},
 			{
-				id: "remove",
+				identifier: "remove",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleRemoveSongListing,
 			},
 			{
-				id: "replay",
+				identifier: "replay",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleReplayAction,
 				options: [constants.parameters.collection],
 			},
 			{
-				id: "resume",
+				identifier: "resume",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleResumePlayback,
 			},
 			{
-				id: "rewind",
+				identifier: "rewind",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleRewind,
 				handleAutocomplete: handleRewindAutocomplete,
 				options: [constants.parameters.timestamp],
 			},
 			{
-				id: "skip-to",
+				identifier: "skip-to",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSkipToTimestamp,
 				handleAutocomplete: handleSkipToTimestampAutocomplete,
 				options: [constants.parameters.timestamp],
 			},
 			{
-				id: "skip",
+				identifier: "skip",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSkipAction,
 				options: [constants.parameters.collection, constants.parameters.by, constants.parameters.to],
 			},
 			{
-				id: "stop",
+				identifier: "stop",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleStopPlayback,
 			},
 			{
-				id: "unskip",
+				identifier: "unskip",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleUnskipAction,
 				options: [constants.parameters.collection, constants.parameters.by, constants.parameters.to],
 			},
 			{
-				id: "volume",
+				identifier: "volume",
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 				options: [
 					{
-						id: "display",
+						identifier: "display",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayVolume,
 						options: [constants.parameters.show],
@@ -601,12 +601,12 @@ export default Object.freeze({
 						},
 					},
 					{
-						id: "set",
+						identifier: "set",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleSetVolume,
 						options: [
 							{
-								id: "volume",
+								identifier: "volume",
 								type: Discord.ApplicationCommandOptionTypes.Integer,
 								required: true,
 							},
@@ -617,7 +617,7 @@ export default Object.freeze({
 		],
 	},
 	praise: {
-		id: "praise",
+		identifier: "praise",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handlePraiseUser,
@@ -625,18 +625,18 @@ export default Object.freeze({
 		options: [
 			constants.parameters.user,
 			{
-				id: "comment",
+				identifier: "comment",
 				type: Discord.ApplicationCommandOptionTypes.String,
 			},
 		],
 	},
 	profile: {
-		id: "profile",
+		identifier: "profile",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: [
 			{
-				id: "view",
+				identifier: "view",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayProfile,
 				handleAutocomplete: handleDisplayProfileAutocomplete,
@@ -646,7 +646,7 @@ export default Object.freeze({
 				},
 			},
 			{
-				id: "roles",
+				identifier: "roles",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleOpenRoleSelectionMenu,
 			},

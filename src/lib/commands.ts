@@ -97,7 +97,7 @@ class CommandStore {
 
 			// TODO(vxern): This needs to be documented somewhere.
 			// TODO(vxern): This could also be done better.
-			const nameParts = template.id.replace(".message", "Message").split(".options.");
+			const nameParts = template.identifier.replace(".message", "Message").split(".options.");
 			const commandName = [nameParts.at(0)!, ...nameParts.slice(1).map((part) => capitalise(part))]
 				.join("")
 				.replace("recognize", "recognise")
@@ -193,9 +193,9 @@ class CommandStore {
 		| undefined {
 		let key: string;
 		if (keyPrefix !== undefined) {
-			key = `${keyPrefix}.options.${template.id}`;
+			key = `${keyPrefix}.options.${template.identifier}`;
 		} else {
-			key = template.id;
+			key = template.identifier;
 		}
 
 		const nameLocalisations = localisations.buildNameLocalisations({ key });
