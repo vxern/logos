@@ -1,12 +1,12 @@
-import * as fsSync from "fs";
-import * as stream from "stream";
+import * as fsSync from "node:fs";
+import * as fs from "node:fs/promises";
+import * as stream from "node:stream";
 import eventStream from "event-stream";
-import * as fs from "fs/promises";
 import Redis from "ioredis";
+import constants from "../src/constants/constants";
 import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../src/constants/languages";
 import { locales } from "../src/constants/languages/localisation";
 import { capitalise } from "../src/formatting";
-import constants from "../src/constants/constants";
 
 const RECORD_DELIMETER = "	";
 const MAX_BUFFER_SIZE = 1024 * 128;
@@ -60,23 +60,25 @@ type RecordWithLanguage = [locale: Locale, record: SentencePairRecord];
 async function subscribeToReadStream(readStream: stream.Writable, file: SentencePairFile): Promise<void> {
 	const { promise, resolve, reject } = Promise.withResolvers<void>();
 
-	fsSync
-		.createReadStream(file.path, { encoding: "utf-8", autoClose: true, emitClose: true })
-		.once("close", () => {
-			console.info(`Finished reading sentence pairs for ${file.locale}.`);
-			resolve();
-		})
-		.once("error", () => reject())
-		.pipe(eventStream.split())
-		.pipe(
-			eventStream.map((line: string) => {
-				const record = line.split(RECORD_DELIMETER) as SentencePairRecord;
-				record[0] = parseInt(record[0] as string);
-				record[2] = parseInt(record[2] as string);
+	const stream = fsSync.createReadStream(file.path, { encoding: "utf-8", autoClose: true, emitClose: true });
 
-				line.length !== 0 && readStream.write([file.locale, record] satisfies RecordWithLanguage);
-			}),
-		);
+	stream.once("end", () => {
+		console.info(`Finished reading sentence pairs for ${file.locale}.`);
+		stream.close();
+		resolve();
+	});
+
+	stream.once("error", () => reject());
+
+	stream.pipe(eventStream.split()).pipe(
+		eventStream.map((line: string) => {
+			const record = line.split(RECORD_DELIMETER) as SentencePairRecord;
+			record[0] = Number.parseInt(record[0] as string);
+			record[2] = Number.parseInt(record[2] as string);
+
+			line.length !== 0 && readStream.write([file.locale, record] satisfies RecordWithLanguage);
+		}),
+	);
 
 	return promise;
 }
@@ -160,7 +162,7 @@ readStream.end();
 	await pipeline.exec();
 }
 
-// Save new entries to the index.
+// Save new entries to the indexes.
 {
 	const pipeline = client.pipeline();
 	for (const locale of locales) {
@@ -172,3 +174,5 @@ readStream.end();
 console.timeEnd("load-sentence-pairs");
 
 await client.quit();
+
+process.exit(0);
