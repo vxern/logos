@@ -2,7 +2,7 @@ import { Locale } from "../../../../../constants/languages";
 import { timestamp } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Warning } from "../../../../database/warning";
-import { getRuleTitleFormatted, rules } from "../../../moderation/commands/rule";
+import { getRuleTitleFormatted } from "../../../moderation/commands/rule";
 
 async function handleDisplayWarningsAutocomplete(
 	client: Client,
@@ -109,8 +109,7 @@ function getWarningPage(
 				relative_timestamp: timestamp(warning.createdAt, { format: "relative" }),
 			});
 
-			const ruleIndex = rules.findIndex((rule) => rule === warning.rule);
-			const ruleTitle = getRuleTitleFormatted(client, warning.rule ?? "other", ruleIndex, "option", { locale });
+			const ruleTitle = getRuleTitleFormatted(client, warning.rule ?? "other", "option", { locale });
 
 			return { name: warningString, value: `${ruleTitle}\n> *${warning.reason}*` };
 		}),

@@ -1,3 +1,4 @@
+import { isValidRule } from "../../../../constants/rules";
 import diagnostics from "../../../../diagnostics";
 import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
@@ -5,7 +6,7 @@ import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
 import { Rule, Warning } from "../../../database/warning";
 import { getActiveWarnings } from "../module";
-import { getRuleTitleFormatted, rules } from "./rule";
+import { getRuleTitleFormatted } from "./rule";
 
 async function handleWarnUserAutocomplete(
 	client: Client,
@@ -47,10 +48,10 @@ async function handleWarnUserAutocomplete(
 
 			const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
 			const choices = [
-				...rules
-					.map((rule, index) => {
+				...constants.rules
+					.map((rule) => {
 						return {
-							name: getRuleTitleFormatted(client, rule, index, "option", { locale }),
+							name: getRuleTitleFormatted(client, rule, "option", { locale }),
 							value: rule,
 						};
 					})
@@ -82,10 +83,7 @@ async function handleWarnUser(
 		return;
 	}
 
-	if (
-		interaction.parameters.rule !== constants.components.none &&
-		!(rules as string[]).includes(interaction.parameters.rule)
-	) {
+	if (interaction.parameters.rule !== constants.components.none && !isValidRule(interaction.parameters.rule)) {
 		const strings = {
 			title: client.localise("warn.strings.invalidRule.title", locale)(),
 			description: client.localise("warn.strings.invalidRule.description", locale)(),

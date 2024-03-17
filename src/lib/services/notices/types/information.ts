@@ -1,5 +1,4 @@
 import { Client } from "../../../client";
-import { rules } from "../../../commands/moderation/commands/rule";
 import { HashableMessageContents, NoticeService } from "../service";
 
 class InformationNoticeService extends NoticeService<{ type: "information" }> {
@@ -14,7 +13,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 		}
 
 		const guildLocale = this.guildLocale;
-		const informationFields = rules.map((rule, index) => {
+		const informationFields = constants.rules.map((rule, index) => {
 			const strings = {
 				title: this.client.localise(`rules.${rule}.title`, guildLocale)(),
 				tldr: this.client.localise("rules.tldr", guildLocale)(),

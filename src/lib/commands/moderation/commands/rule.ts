@@ -1,10 +1,7 @@
 import { Locale } from "../../../../constants/languages";
+import { Rule, isValidRule } from "../../../../constants/rules";
 import { Client } from "../../../client";
 import { Guild } from "../../../database/guild";
-import { Rule } from "../../../database/warning";
-
-// TODO(vxern): Move into the constants file.
-const rules: Rule[] = ["behaviour", "quality", "relevance", "suitability", "exclusivity", "adherence"];
 
 async function handleCiteRuleAutocomplete(
 	client: Client,
@@ -25,11 +22,11 @@ async function handleCiteRuleAutocomplete(
 	const locale = interaction.locale;
 
 	const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
-	const choices = rules
-		.map((ruleId, index) => {
+	const choices = constants.rules
+		.map((rule) => {
 			return {
-				name: getRuleTitleFormatted(client, ruleId, index, "option", { locale }),
-				value: index.toString(),
+				name: getRuleTitleFormatted(client, rule, "option", { locale }),
+				value: rule,
 			};
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase));
@@ -37,16 +34,10 @@ async function handleCiteRuleAutocomplete(
 	client.respond(interaction, choices);
 }
 
-async function handleCiteRule(client: Client, interaction: Logos.Interaction<any, { rule: string }>): Promise<void> {
+async function handleCiteRule(client: Client, interaction: Logos.Interaction<any, { rule: Rule }>): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
-	const ruleIndex = Number(interaction.parameters.rule);
-	if (!Number.isSafeInteger(ruleIndex)) {
-		return;
-	}
-
-	const ruleId = rules.at(ruleIndex);
-	if (ruleId === undefined) {
+	if (!isValidRule(interaction.parameters.rule)) {
 		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
@@ -63,8 +54,8 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 
 	const strings = {
 		tldr: client.localise("rules.tldr", locale)(),
-		summary: client.localise(`rules.${ruleId}.summary`, locale)(),
-		content: client.localise(`rules.${ruleId}.content`, locale)(),
+		summary: client.localise(`rules.${interaction.parameters.rule}.summary`, locale)(),
+		content: client.localise(`rules.${interaction.parameters.rule}.content`, locale)(),
 	};
 
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
@@ -81,7 +72,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		{
 			embeds: [
 				{
-					title: getRuleTitleFormatted(client, ruleId, ruleIndex, "display", { locale }),
+					title: getRuleTitleFormatted(client, interaction.parameters.rule, "display", { locale }),
 					description: strings.content,
 					footer: { text: `${strings.tldr}: ${strings.summary}` },
 					image: { url: constants.gifs.chaosWithoutRules },
@@ -96,21 +87,22 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 
 function getRuleTitleFormatted(
 	client: Client,
-	ruleId: string,
-	ruleIndex: number,
+	rule: Rule | "other",
 	mode: "option" | "display",
 	{ locale }: { locale: Locale },
 ): string {
+	const index = isValidRule(rule) ? constants.rules.indexOf(rule) : undefined;
+
 	const strings = {
-		title: client.localise(`rules.${ruleId}.title`, locale)(),
-		summary: client.localise(`rules.${ruleId}.summary`, locale)(),
+		title: client.localise(`rules.${rule}.title`, locale)(),
+		summary: client.localise(`rules.${rule}.summary`, locale)(),
 	};
 
 	switch (mode) {
 		case "option":
-			return `#${ruleIndex + 1} ${strings.title} ~ ${strings.summary}`;
+			return `#${index !== undefined ? index + 1 : "?"} ${strings.title} ~ ${strings.summary}`;
 		case "display":
-			return `${ruleIndex + 1} - ${strings.title}`;
+			return `${index !== undefined ? index + 1 : "?"} - ${strings.title}`;
 	}
 }
 
@@ -135,4 +127,4 @@ async function displayError(
 	});
 }
 
-export { handleCiteRule, handleCiteRuleAutocomplete, rules, getRuleTitleFormatted };
+export { handleCiteRule, handleCiteRuleAutocomplete, getRuleTitleFormatted };
