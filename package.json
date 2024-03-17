@@ -60,7 +60,6 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.6.1",
-    "@discordeno/types": "19.0.0-next.d81b28a",
     "@types/bun": "^1.0.8",
     "@types/chai": "^4.3.12",
     "@types/event-stream": "^4.0.5",
