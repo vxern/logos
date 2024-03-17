@@ -191,7 +191,7 @@ function getDatabase(clientOrDatabase: ClientOrDatabase): Database {
 	return clientOrDatabase;
 }
 
-export { Model };
+export { Model, isSupportedCollection };
 export type {
 	Collection,
 	RawDocument,

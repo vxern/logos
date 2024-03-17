@@ -3,7 +3,7 @@ import * as ravendb from "ravendb";
 import { EntryRequest } from "./database/entry-request";
 import { Guild } from "./database/guild";
 import { GuildStats } from "./database/guild-stats";
-import { Collection, Model, RawDocument } from "./database/model";
+import { Collection, Model, RawDocument, isSupportedCollection } from "./database/model";
 import { Praise } from "./database/praise";
 import { Report } from "./database/report";
 import { Resource } from "./database/resource";
@@ -29,6 +29,19 @@ class Database extends ravendb.DocumentStore {
 	};
 
 	readonly #log: Logger;
+
+	static readonly #_classes: Record<Collection, { new (data: any): Model }> = Object.freeze({
+		EntryRequests: EntryRequest,
+		GuildStats: GuildStats,
+		Guilds: Guild,
+		Praises: Praise,
+		Reports: Report,
+		Resources: Resource,
+		Suggestions: Suggestion,
+		Tickets: Ticket,
+		Users: User,
+		Warnings: Warning,
+	} as const);
 
 	constructor({
 		host,
@@ -57,6 +70,10 @@ class Database extends ravendb.DocumentStore {
 		};
 
 		this.#log = Logger.create({ identifier: "Client/Database", isDebug });
+	}
+
+	static getModelClassByCollection({ collection }: { collection: Collection }): { new (data: any): Model } {
+		return Database.#_classes[collection];
 	}
 
 	async start(): Promise<void> {
@@ -236,25 +253,16 @@ class Database extends ravendb.DocumentStore {
 }
 
 class DocumentSession extends ravendb.DocumentSession {
-	static readonly #_classes: Record<Collection, { new (data: any): Model }> = {
-		EntryRequests: EntryRequest,
-		GuildStats: GuildStats,
-		Guilds: Guild,
-		Praises: Praise,
-		Reports: Report,
-		Resources: Resource,
-		Suggestions: Suggestion,
-		Tickets: Ticket,
-		Users: User,
-		Warnings: Warning,
-	};
-
 	readonly #database: Database;
 
 	constructor({ database, id, options }: { database: Database; id: string; options: ravendb.SessionOptions }) {
 		super(database, id, options);
 
 		this.#database = database;
+
+		// ! This logic needs to be turned off as Logos performs model operations and conversions on its own.
+		// ! The following line prevents the RavenDB client from trying to convert raw documents to an entity.
+		this.entityToJson.convertToEntity = (_, __, document, ____) => document;
 	}
 
 	static instantiateModel<M extends Model>(payload: RawDocument): M {
@@ -262,11 +270,11 @@ class DocumentSession extends ravendb.DocumentSession {
 			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
 		}
 
-		if (!(payload["@metadata"]["@collection"] in DocumentSession.#_classes)) {
+		if (!isSupportedCollection(payload["@metadata"]["@collection"])) {
 			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
 		}
 
-		const Class = DocumentSession.#_classes[payload["@metadata"]["@collection"] as Collection];
+		const Class = Database.getModelClassByCollection({ collection: payload["@metadata"]["@collection"] as Collection });
 
 		return new Class(payload) as M;
 	}
