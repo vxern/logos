@@ -75,22 +75,19 @@ class User extends Model<{ idParts: ["userId"] }> {
 
 		const { promise, resolve } = Promise.withResolvers<User>();
 
-		await client.database.withSession(async (session) => {
+		client.database.withSession(async (session) => {
 			const userDocument = await session.get<User>(Model.buildId(data, { collection: "Users" }));
-			if (userDocument === undefined) {
+			if (userDocument !== undefined) {
+				resolve(userDocument);
 				return;
 			}
 
-			resolve(userDocument);
-		});
+			{
+				const userDocument = await session.set(new User(data));
+				await session.saveChanges();
 
-		await client.database.withSession(async (session) => {
-			const userDocument = new User(data);
-
-			await session.set(userDocument);
-			await session.saveChanges();
-
-			resolve(userDocument);
+				resolve(userDocument);
+			}
 		});
 
 		return promise;

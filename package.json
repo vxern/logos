@@ -39,7 +39,7 @@
   "scripts": {
     "setup": "bun run ./scripts/load-sentence-pairs.ts",
     "lint": "biome check --apply-unsafe --organize-imports-enabled true ./src/ && biome check --apply-unsafe --organize-imports-enabled true ./test/ && biome check --apply-unsafe --organize-imports-enabled true ./scripts/",
-    "serve": "bun --hot run ./src/index.ts",
+    "dev": "bun run --hot ./src/index.ts",
     "start": "bun run ./src/index.ts"
   },
   "dependencies": {

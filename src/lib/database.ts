@@ -310,10 +310,12 @@ class DocumentSession extends ravendb.DocumentSession {
 		return documents.at(0)!;
 	}
 
-	async set<M extends Model>(document: M): Promise<void> {
+	async set<M extends Model>(document: M): Promise<M> {
 		await this.store<M>(document, document["@metadata"]["@id"]);
 
 		this.#database.cacheDocument(document);
+
+		return document;
 	}
 
 	async remove<M extends Model>(document: M): Promise<void> {

@@ -403,9 +403,10 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 
 		const { promise, resolve } = Promise.withResolvers<Guild>();
 
-		await client.database.withSession(async (session) => {
+		client.database.withSession(async (session) => {
 			const guildDocument = await session.get<Guild>(Model.buildId(data, { collection: "Guilds" }));
 			if (guildDocument === undefined) {
+				resolve(undefined);
 				return;
 			}
 
@@ -423,10 +424,8 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 
 		const { promise, resolve } = Promise.withResolvers<Guild>();
 
-		await client.database.withSession(async (session) => {
-			const guildDocument = new Guild(data);
-
-			await session.set(guildDocument);
+		client.database.withSession(async (session) => {
+			const guildDocument = await session.set(new Guild(data));
 			await session.saveChanges();
 
 			resolve(guildDocument);
