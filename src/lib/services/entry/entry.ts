@@ -3,7 +3,6 @@ import diagnostics from "../../../diagnostics";
 import { trim } from "../../../formatting";
 import { Client } from "../../client";
 import { InteractionCollector } from "../../collectors";
-import { proficiency } from "../../commands/social/roles/categories/language";
 import { EntryRequest } from "../../database/entry-request";
 import { Guild, timeStructToMilliseconds } from "../../database/guild";
 import { User } from "../../database/user";
@@ -87,7 +86,9 @@ class EntryService extends LocalService {
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: proficiency.collection.list.map<Discord.ButtonComponent>((proficiencyRole, index) => {
+					components: Object.values(
+						constants.roles.language.categories.proficiency.collection.list,
+					).map<Discord.ButtonComponent>((proficiencyRole, index) => {
 						const strings = {
 							name: this.client.localise(`${proficiencyRole.id}.name`, buttonPress.locale)(),
 						};
@@ -117,7 +118,11 @@ class EntryService extends LocalService {
 		}
 
 		const index = Number.parseInt(buttonPress.metadata[1]);
-		const snowflake = proficiency.collection.list[index]?.snowflakes[this.guildIdString];
+		const snowflake = (
+			Object.values(constants.roles.language.categories.proficiency.collection.list)[index]?.snowflakes as
+				| Record<string, string>
+				| undefined
+		)?.[this.guildIdString];
 		if (snowflake === undefined) {
 			return;
 		}
@@ -238,7 +243,11 @@ class EntryService extends LocalService {
 		}
 
 		const index = Number.parseInt(buttonPress.metadata[1]);
-		const snowflake = proficiency.collection.list[index]?.snowflakes[this.guildIdString];
+		const snowflake = (
+			Object.values(constants.roles.language.categories.proficiency.collection.list)[index]?.snowflakes as
+				| Record<string, string>
+				| undefined
+		)?.[this.guildIdString];
 		if (snowflake === undefined) {
 			return;
 		}

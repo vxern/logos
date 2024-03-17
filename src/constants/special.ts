@@ -27,6 +27,9 @@ export default Object.freeze({
 		continued: "(...)",
 	},
 	missingString: "?",
+	roles: {
+		back: "..",
+	},
 	game: {
 		mask: "░",
 	},

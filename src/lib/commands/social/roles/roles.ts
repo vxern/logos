@@ -1,27 +1,13 @@
-import dialects from "./categories/dialects";
-import ethnicity from "./categories/ethnicity";
-import language from "./categories/language";
-import learning from "./categories/learning";
-import personalisation from "./categories/personalisation";
-import regions from "./categories/regions";
 import { Role, RoleCategory, RoleCollection, isCustom, isGroup, isImplicit } from "./types";
 
-// TODO(vxern): Move to constants along with all the categories.
-const categories: RoleCategory[] = [language, learning, dialects, personalisation, regions, ethnicity];
-
-function getRoleCategories(categories: RoleCategory[], guildId: bigint): [category: RoleCategory, index: number][] {
+function getRoleCategories(categories: Record<string, RoleCategory>, guildId: bigint): Record<string, RoleCategory> {
 	const guildIdString = guildId.toString();
 
-	const selectedRoleCategories: [category: RoleCategory, index: number][] = [];
+	const selectedRoleCategories: Record<string, RoleCategory> = {};
 
-	for (const index of Array(categories.length).keys()) {
-		const category = categories.at(index);
-		if (category === undefined) {
-			continue;
-		}
-
+	for (const [name, category] of Object.entries(categories)) {
 		if (isGroup(category)) {
-			selectedRoleCategories.push([category, index]);
+			selectedRoleCategories[name] = category;
 			continue;
 		}
 
@@ -31,22 +17,21 @@ function getRoleCategories(categories: RoleCategory[], guildId: bigint): [catego
 			}
 		}
 
-		selectedRoleCategories.push([category, index]);
+		selectedRoleCategories[name] = category;
 	}
 
 	return selectedRoleCategories;
 }
 
 /** Extracts the list of roles from within a role collection and returns it. */
-function getRoles(collection: RoleCollection, guildId: bigint): Role[] {
+function getRoles(collection: RoleCollection, guildId: bigint): Record<string, Role> {
 	if (isImplicit(collection)) {
 		return collection.list;
 	}
 
 	const guildIdString = guildId.toString();
 
-	return collection.lists[guildIdString] ?? [];
+	return collection.lists[guildIdString] ?? {};
 }
 
 export { getRoleCategories, getRoles };
-export default categories;

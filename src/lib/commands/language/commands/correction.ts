@@ -4,8 +4,6 @@ import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
 import { Modal, createModalComposer } from "../../../interactions";
-import categories from "../../social/roles/roles";
-import { isImplicit, isSingle } from "../../social/roles/types";
 
 interface CorrectionData extends Record<string, string> {
 	original: string;
@@ -78,33 +76,26 @@ async function handleStartCorrecting(
 		return;
 	}
 
-	const learningRoleCategory = categories.find((category) => category.id === "roles.learning");
-	if (
-		learningRoleCategory !== undefined &&
-		isSingle(learningRoleCategory) &&
-		isImplicit(learningRoleCategory.collection)
-	) {
-		const doNotCorrectMeRoleId = learningRoleCategory.collection.list.find(
-			(role) => role.id === "roles.learning.roles.doNotCorrectMe",
-		)?.snowflakes[guildId.toString()];
-		if (doNotCorrectMeRoleId !== undefined) {
-			if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
-				const strings = {
-					title: client.localise("correction.strings.userDoesNotWantCorrections.title", locale)(),
-					description: client.localise("correction.strings.userDoesNotWantCorrections.description", locale)(),
-				};
+	const doNotCorrectMeRoleId = (
+		constants.roles.learning.collection.list.doNotCorrectMe.snowflakes as Record<string, string>
+	)[guildId.toString()];
+	if (doNotCorrectMeRoleId !== undefined) {
+		if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
+			const strings = {
+				title: client.localise("correction.strings.userDoesNotWantCorrections.title", locale)(),
+				description: client.localise("correction.strings.userDoesNotWantCorrections.description", locale)(),
+			};
 
-				client.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.dullYellow,
-						},
-					],
-				});
-				return;
-			}
+			client.reply(interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colours.dullYellow,
+					},
+				],
+			});
+			return;
 		}
 	}
 

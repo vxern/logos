@@ -3,7 +3,6 @@ import diagnostics from "../../../../../diagnostics";
 import { mention, timestamp } from "../../../../../formatting";
 import { Client } from "../../../../client";
 import { Guild } from "../../../../database/guild";
-import { proficiency } from "../../../social/roles/categories/language";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -152,14 +151,16 @@ type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number
 function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): ProficiencyRoleDistribution {
 	const guildIdString = guild.id.toString();
 
-	const proficiencyRoleIdsUnsorted = proficiency.collection.list.map((role) => {
-		const snowflake = role.snowflakes[guildIdString];
-		if (snowflake === undefined) {
-			throw `StateError: Could not get the snowflake of ${diagnostics.display.role(role.id)}.`;
-		}
+	const proficiencyRoleIdsUnsorted = Object.values(constants.roles.language.categories.proficiency.collection.list).map(
+		(role) => {
+			const snowflake = (role.snowflakes as Record<string, string>)[guildIdString];
+			if (snowflake === undefined) {
+				throw `StateError: Could not get the snowflake of ${diagnostics.display.role(role.id)}.`;
+			}
 
-		return BigInt(snowflake);
-	});
+			return BigInt(snowflake);
+		},
+	);
 	const proficiencyRoleIds = proficiencyRoleIdsUnsorted
 		.map((roleId) => {
 			const role = guild.roles.get(roleId);

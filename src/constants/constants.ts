@@ -12,6 +12,7 @@ import links from "./links";
 import localisations from "./localisations";
 import patterns from "./patterns";
 import properties from "./properties";
+import roles from "./roles";
 import special from "./special";
 import statuses from "./statuses";
 import time from "./time";
@@ -51,6 +52,7 @@ export default Object.freeze({
 	localisations,
 	patterns,
 	properties,
+	roles,
 	special,
 	statuses,
 	time,

@@ -57,7 +57,7 @@ interface RoleCategoryGroup extends RoleCategoryBase {
 	type: "group";
 
 	/** The subcategories in this role category. */
-	categories: RoleCategory[];
+	categories: Record<string, RoleCategory>;
 }
 
 /** Represents a thematic selection of {@link Role}s. */
@@ -93,7 +93,7 @@ interface RoleCollectionImplicit extends RoleCollectionBase {
 	type: "implicit";
 
 	/** The roles in this role collection. */
-	list: RoleImplicit[];
+	list: Record<string, RoleImplicit>;
 }
 
 /** The base of a custom role collection. */
@@ -101,7 +101,7 @@ interface RoleCollectionCustom extends RoleCollectionBase {
 	type: "custom";
 
 	/** Groups of roles defined by guild ID in this role collection. */
-	lists: Record<string, RoleCustom[]>;
+	lists: Record<string, Record<string, RoleCustom>>;
 }
 
 /** Represents a grouping of roles. */
