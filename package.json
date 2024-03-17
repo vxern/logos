@@ -37,15 +37,14 @@
     }
   ],
   "scripts": {
-    "postinstall": "npm audit fix && tsx ./scripts/load-sentence-pairs.ts",
-    "lint": "biome check ./src/ --apply-unsafe --organize-imports-enabled true && biome check ./test/ --apply-unsafe --organize-imports-enabled true",
-    "test": "npx mocha --require ./test/setup.ts",
-    "serve": "npx tsx ./src/index.ts",
-    "start": "pm2 start ecosystem.config.cjs --instances 1 --exp-backoff-restart-delay=500"
+    "setup": "bun run ./scripts/load-sentence-pairs.ts",
+    "lint": "biome check --apply-unsafe --organize-imports-enabled true ./src/ && biome check --apply-unsafe --organize-imports-enabled true ./test/ && biome check --apply-unsafe --organize-imports-enabled true ./scripts/",
+    "serve": "bun --hot run ./src/index.ts",
+    "start": "bun run ./src/index.ts"
   },
   "dependencies": {
-    "@discordeno/bot": "^19.0.0-next",
-    "dexonline-scraper": "^0.1.1",
+    "@discordeno/bot": "19.0.0-next.d81b28a",
+    "dexonline-scraper": "^0.2.1",
     "dotenv": "^16.4.1",
     "event-stream": "^4.0.1",
     "fastest-levenshtein": "^1.0.16",
@@ -60,17 +59,12 @@
     "youtube-sr": "^4.3.10"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.5.3",
-    "@discordeno/types": "^19.0.0-next",
+    "@biomejs/biome": "1.6.1",
+    "@discordeno/types": "19.0.0-next.d81b28a",
+    "@types/bun": "^1.0.8",
     "@types/chai": "^4.3.12",
     "@types/event-stream": "^4.0.5",
-    "@types/mocha": "^10.0.6",
-    "@types/node": "^20.11.16",
     "@types/object-hash": "^3.0.6",
-    "chai": "^5.1.0",
-    "mocha": "^10.3.0",
-    "pm2": "^5.3.1",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "chai": "^5.1.0"
   }
 }

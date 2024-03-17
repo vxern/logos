@@ -1,8 +1,10 @@
 {
   "compilerOptions": {
-    "moduleResolution": "Node",
+    "lib": ["ESNext"],
     "target": "ESNext",
     "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "Bundler",
     "outDir": "dist/",
     "allowJs": true,
     "allowUnreachableCode": false,
@@ -22,8 +24,7 @@
     "strictPropertyInitialization": true,
     "strictNullChecks": true,
     "suppressExcessPropertyErrors": false,
-    "suppressImplicitAnyIndexErrors": false,
-    "types": ["mocha"]
+    "suppressImplicitAnyIndexErrors": false
   },
   "compileOnSave": true,
   "exclude": ["dist/", "node_modules/"],

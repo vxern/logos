@@ -1,14 +1,7 @@
-import { registerPolyfills } from "./polyfills";
-
-registerPolyfills();
-
 import * as fs from "node:fs/promises";
 import * as dotenv from "dotenv";
-import log from "loglevel";
 import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "./constants/languages";
 import { Client } from "./lib/client";
-
-log.enableAll();
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";
