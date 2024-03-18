@@ -3,16 +3,10 @@ import * as Lavaclient from "lavaclient";
 import diagnostics from "../../diagnostics";
 import { mention } from "../../formatting";
 import { Client } from "../client";
-import {
-	Song,
-	SongCollection,
-	SongListing,
-	SongListingType,
-	SongStream,
-	listingTypeToEmoji,
-} from "../commands/music/data/types";
+import { Song, SongCollection, SongListing, SongStream } from "../commands/music/data/types";
 import { Guild, timeStructToMilliseconds } from "../database/guild";
 import { LocalService } from "./service";
+import { getEmojiByListingType } from "../../constants/emojis";
 
 interface PositionControls {
 	by: number;
@@ -860,7 +854,7 @@ class MusicService extends LocalService {
 
 		session.player.play(track.track);
 
-		const emoji = listingTypeToEmoji[this.current?.content.type ?? song.type];
+		const emoji = getEmojiByListingType(this.current?.content.type ?? song.type);
 
 		const guildLocale = this.guildLocale;
 		const strings = {
@@ -1157,11 +1151,5 @@ function isFirstInCollection(collection: SongCollection): boolean {
 function isLastInCollection(collection: SongCollection): boolean {
 	return collection.position === collection.songs.length - 1;
 }
-
-const localisationsBySongListingType = {
-	song: "music.options.play.strings.nowPlaying.title.type.song",
-	collection: "music.options.play.strings.nowPlaying.title.type.songCollection",
-	file: "music.options.play.strings.nowPlaying.title.type.external",
-} satisfies Record<SongListingType, string>;
 
 export { isCollection, MusicService };

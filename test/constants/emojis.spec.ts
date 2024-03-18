@@ -6,3 +6,7 @@ describe("The emojis object", () => {
 		expect(Object.isFrozen(emojis)).to.be.true;
 	});
 });
+
+describe("getEmojiByListingType()", () => {
+	// TODO(vxern): Add tests.
+});

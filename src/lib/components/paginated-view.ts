@@ -1,8 +1,9 @@
+import { getEmojiByListingType } from "../../constants/emojis";
 import { Locale } from "../../constants/languages";
 import { trim } from "../../formatting";
 import { Client } from "../client";
 import { InteractionCollector } from "../collectors";
-import { Song, SongCollection, SongListing, listingTypeToEmoji } from "../commands/music/data/types";
+import { Song, SongCollection, SongListing } from "../commands/music/data/types";
 
 type PageView = { embed: Discord.CamelizedDiscordEmbed; components?: Discord.MessageComponents };
 type PageAction = "previous" | "next";
@@ -201,7 +202,7 @@ class PaginatedSongListingViewComponent extends PaginatedViewComponent<SongListi
 		const listingsFormatted = page
 			.map((listing, listingIndex) => {
 				const indexDisplayed = pageIndex * 10 + (listingIndex + 1);
-				const emoji = listingTypeToEmoji[listing.content.type];
+				const emoji = getEmojiByListingType(listing.content.type);
 
 				return `${indexDisplayed}. ${emoji} ~ ${listing.content.title}`;
 			})
@@ -264,7 +265,7 @@ class PaginatedRemoveSongListingViewComponent extends PaginatedViewComponent<Son
 
 	#buildSelectMenu(page: SongListing[], pageIndex: number): Discord.ActionRow {
 		const options = page.map<Discord.SelectOption>((songListing, index) => ({
-			emoji: { name: listingTypeToEmoji[songListing.content.type] },
+			emoji: { name: getEmojiByListingType(songListing.content.type) },
 			label: trim(songListing.content.title, 100),
 			value: (pageIndex * constants.RESULTS_PER_PAGE + index).toString(),
 		}));

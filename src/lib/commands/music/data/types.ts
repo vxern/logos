@@ -64,11 +64,5 @@ interface SongStream {
 	url: string;
 }
 
-const listingTypeToEmoji = {
-	song: constants.emojis.music.song,
-	collection: constants.emojis.music.collection,
-	file: constants.emojis.music.file,
-} satisfies Record<SongListingType, string>;
-
-export { listingTypeToEmoji, SongListingType };
+export { SongListingType };
 export type { Song, SongCollection, SongListing, SongStream };

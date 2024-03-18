@@ -1,4 +1,6 @@
-export default Object.freeze({
+import { SongListingType } from "../lib/commands/music/data/types";
+
+const emojis = Object.freeze({
 	ruleBullet: "💠",
 	understood: "✅",
 	information: {
@@ -221,3 +223,16 @@ export default Object.freeze({
 		},
 	},
 } as const);
+
+const emojiByListingType = Object.freeze({
+	song: constants.emojis.music.song,
+	collection: constants.emojis.music.collection,
+	file: constants.emojis.music.file,
+} as const satisfies Record<SongListingType, string>);
+
+function getEmojiByListingType(type: SongListingType): string {
+	return emojiByListingType[type];
+}
+
+export default emojis;
+export { getEmojiByListingType };
