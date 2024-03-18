@@ -159,10 +159,6 @@ describe("Model", () => {
 	});
 });
 
-describe("isSupportedCollection()", () => {
-	// TODO(vxern): Add tests.
-});
-
 describe("getDatabase()", () => {
 	// TODO(vxern): Add tests.
 });

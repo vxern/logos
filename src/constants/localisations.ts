@@ -1,3 +1,4 @@
+import { SongListingType } from "../lib/commands/music/data/types";
 import { Language, LocalisationLanguage } from "./languages";
 import armenian from "./transformers/armenian";
 import danish from "./transformers/danish";
@@ -20,7 +21,7 @@ import turkish from "./transformers/turkish";
 type TransformerType = "pluralise";
 type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;
 
-export default Object.freeze({
+const localisations = Object.freeze({
 	transformers: {
 		"Armenian/Western": armenian,
 		"Armenian/Eastern": armenian,
@@ -238,4 +239,17 @@ export default Object.freeze({
 		Zulu: "languages.zulu",
 	} satisfies Record<Language, string>,
 } as const);
+
+const localisationBySongListingType = Object.freeze({
+	song: "music.options.play.strings.nowPlaying.title.type.song",
+	collection: "music.options.play.strings.nowPlaying.title.type.songCollection",
+	file: "music.options.play.strings.nowPlaying.title.type.external",
+} as const satisfies Record<SongListingType, string>);
+
+function getLocalisationBySongListingType(type: SongListingType): string {
+	return localisationBySongListingType[type];
+}
+
+export default localisations;
+export { getLocalisationBySongListingType };
 export type { Transformer, TransformerType };

@@ -19,6 +19,7 @@ type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
+// TODO(vxern): Move to the class.
 const configurationLocators: ConfigurationLocators = {
 	verification: (guildDocument) => guildDocument.verification,
 	reports: (guildDocument) => guildDocument.reports,
@@ -29,6 +30,7 @@ const configurationLocators: ConfigurationLocators = {
 
 type CustomIDs = Record<keyof Configurations, string>;
 
+// TODO(vxern): Move to the class.
 const customIds: CustomIDs = {
 	verification: constants.components.verification,
 	reports: constants.components.reports,

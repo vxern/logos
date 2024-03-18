@@ -3,7 +3,7 @@ import * as ravendb from "ravendb";
 import { EntryRequest } from "./database/entry-request";
 import { Guild } from "./database/guild";
 import { GuildStats } from "./database/guild-stats";
-import { Collection, Model, RawDocument, isSupportedCollection } from "./database/model";
+import { Collection, Model, RawDocument } from "./database/model";
 import { Praise } from "./database/praise";
 import { Report } from "./database/report";
 import { Resource } from "./database/resource";
@@ -12,6 +12,7 @@ import { Ticket } from "./database/ticket";
 import { User } from "./database/user";
 import { Warning } from "./database/warning";
 import { Logger } from "./logger";
+import { isValidCollection } from "../constants/database";
 
 class Database extends ravendb.DocumentStore {
 	readonly cache: {
@@ -270,7 +271,7 @@ class DocumentSession extends ravendb.DocumentSession {
 			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
 		}
 
-		if (!isSupportedCollection(payload["@metadata"]["@collection"])) {
+		if (!isValidCollection(payload["@metadata"]["@collection"])) {
 			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
 		}
 

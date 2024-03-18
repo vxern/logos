@@ -224,15 +224,15 @@ const emojis = Object.freeze({
 	},
 } as const);
 
-const emojiByListingType = Object.freeze({
-	song: constants.emojis.music.song,
-	collection: constants.emojis.music.collection,
-	file: constants.emojis.music.file,
+const emojiBySongListingType = Object.freeze({
+	song: emojis.music.song,
+	collection: emojis.music.collection,
+	file: emojis.music.file,
 } as const satisfies Record<SongListingType, string>);
 
-function getEmojiByListingType(type: SongListingType): string {
-	return emojiByListingType[type];
+function getEmojiBySongListingType(type: SongListingType): string {
+	return emojiBySongListingType[type];
 }
 
 export default emojis;
-export { getEmojiByListingType };
+export { getEmojiBySongListingType };

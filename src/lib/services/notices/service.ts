@@ -24,6 +24,7 @@ type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
+// TODO(vxern): Move to the class.
 const configurationLocators: ConfigurationLocators = {
 	information: (guildDocument) => guildDocument.informationNotice,
 	resources: (guildDocument) => guildDocument.resourceNotice,

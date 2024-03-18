@@ -1,12 +1,13 @@
 import { EventEmitter } from "node:events";
 import * as Lavaclient from "lavaclient";
+import { getEmojiBySongListingType } from "../../constants/emojis";
+import { getLocalisationBySongListingType } from "../../constants/localisations";
 import diagnostics from "../../diagnostics";
 import { mention } from "../../formatting";
 import { Client } from "../client";
 import { Song, SongCollection, SongListing, SongStream } from "../commands/music/data/types";
 import { Guild, timeStructToMilliseconds } from "../database/guild";
 import { LocalService } from "./service";
-import { getEmojiByListingType } from "../../constants/emojis";
 
 interface PositionControls {
 	by: number;
@@ -854,7 +855,7 @@ class MusicService extends LocalService {
 
 		session.player.play(track.track);
 
-		const emoji = getEmojiByListingType(this.current?.content.type ?? song.type);
+		const emoji = getEmojiBySongListingType(this.current?.content.type ?? song.type);
 
 		const guildLocale = this.guildLocale;
 		const strings = {
@@ -863,7 +864,7 @@ class MusicService extends LocalService {
 				guildLocale,
 			)({
 				listing_type: this.client.localise(
-					localisationsBySongListingType[this.current?.content.type ?? song.type],
+					getLocalisationBySongListingType(this.current?.content.type ?? song.type),
 					guildLocale,
 				)(),
 			}),

@@ -7,6 +7,6 @@ describe("The emojis object", () => {
 	});
 });
 
-describe("getEmojiByListingType()", () => {
+describe("getEmojiBySongListingType()", () => {
 	// TODO(vxern): Add tests.
 });
