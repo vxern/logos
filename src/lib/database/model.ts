@@ -1,3 +1,4 @@
+import { Collection, isValidCollection } from "../../constants/database";
 import { capitalise, decapitalise } from "../../formatting";
 import { Client } from "../client";
 import { Database } from "../database";
@@ -14,30 +15,12 @@ interface RawDocument {
 	"@metadata": Omit<DocumentMetadata, "@collection"> & { "@collection": string };
 }
 
-// TODO(vxern): Move to constants.
-const COLLECTIONS = Object.freeze([
-	"EntryRequests",
-	"GuildStats",
-	"Guilds",
-	"Praises",
-	"Reports",
-	"Resources",
-	"Suggestions",
-	"Tickets",
-	"Users",
-	"Warnings",
-] as const);
-type Collection = (typeof COLLECTIONS)[number];
-
 type IdentifierParts<M extends Model> = M["idParts"];
 type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: string };
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
 type MetadataOrIdentifierData<M extends Model> = { "@metadata": DocumentMetadata } | IdentifierData<M>;
 
 type ClientOrDatabase = Client | Database;
-
-// TODO(vxern): Move to constants.
-const IDENTIFIER_PARTS_ORDERED: string[] = ["guildId", "userId", "authorId", "targetId", "channelId", "createdAt"];
 
 abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	readonly "@metadata": DocumentMetadata;
@@ -77,7 +60,7 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 
 	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {
 		const parts: string[] = [];
-		for (const part of IDENTIFIER_PARTS_ORDERED) {
+		for (const part of constants.database.identifierParts) {
 			if (!(part in data)) {
 				continue;
 			}
@@ -98,7 +81,7 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	static getDataFromId<M extends Model>(id: string): [collection: Collection, data: IdentifierParts<M>] {
 		const [collectionCamelcase, ...data] = id.split(constants.special.database.separator) as [string, string[]];
 		const collection = capitalise(collectionCamelcase);
-		if (!isSupportedCollection(collection)) {
+		if (!isValidCollection(collection)) {
 			throw `Collection "${collectionCamelcase}" encoded in ID "${id}" is unknown.`;
 		}
 
@@ -179,10 +162,6 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	}
 }
 
-function isSupportedCollection(collection: string): collection is Collection {
-	return (COLLECTIONS as unknown as string[]).includes(collection);
-}
-
 function getDatabase(clientOrDatabase: ClientOrDatabase): Database {
 	if (clientOrDatabase instanceof Client) {
 		return clientOrDatabase.database;
@@ -191,7 +170,7 @@ function getDatabase(clientOrDatabase: ClientOrDatabase): Database {
 	return clientOrDatabase;
 }
 
-export { Model, isSupportedCollection };
+export { Model };
 export type {
 	Collection,
 	RawDocument,

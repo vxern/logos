@@ -2,6 +2,7 @@ import acknowledgements from "./acknowledgements";
 import colours from "./colours";
 import components from "./components";
 import contributions from "./contributions";
+import database from "./database";
 import defaults from "./defaults";
 import emojis from "./emojis";
 import endpoints from "./endpoints";
@@ -45,6 +46,7 @@ export default Object.freeze({
 	colours,
 	components,
 	contributions,
+	database,
 	defaults,
 	emojis,
 	endpoints,
