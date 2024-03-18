@@ -4,7 +4,7 @@ import { Resource } from "../../database/resource";
 import { User } from "../../database/user";
 import { PromptService } from "./service";
 
-class ResourceService extends PromptService<{
+class ResourcePromptService extends PromptService<{
 	type: "resources";
 	model: Resource;
 	metadata: [partialId: string, isResolve: string];
@@ -155,4 +155,4 @@ class ResourceService extends PromptService<{
 	}
 }
 
-export { ResourceService };
+export { ResourcePromptService };

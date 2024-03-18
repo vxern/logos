@@ -13,11 +13,11 @@ import { ResourceNoticeService } from "./services/notices/resources";
 import { RoleNoticeService } from "./services/notices/roles";
 import { WelcomeNoticeService } from "./services/notices/welcome";
 import { PromptService } from "./services/prompts/service";
-import { ReportService } from "./services/prompts/reports";
-import { ResourceService } from "./services/prompts/resources";
-import { SuggestionService } from "./services/prompts/suggestions";
-import { TicketService } from "./services/prompts/tickets";
-import { VerificationService } from "./services/prompts/verification";
+import { ReportPromptService } from "./services/prompts/reports";
+import { ResourcePromptService } from "./services/prompts/resources";
+import { SuggestionPromptService } from "./services/prompts/suggestions";
+import { TicketPromptService } from "./services/prompts/tickets";
+import { VerificationPromptService } from "./services/prompts/verification";
 import { RealtimeUpdateService } from "./services/realtime-updates";
 import { RoleIndicatorService } from "./services/role-indicators";
 import { Service } from "./services/service";
@@ -42,11 +42,11 @@ class ServiceStore {
 			readonly welcome: Map<bigint, WelcomeNoticeService>;
 		};
 		readonly prompts: {
-			readonly verification: Map<bigint, VerificationService>;
-			readonly reports: Map<bigint, ReportService>;
-			readonly resources: Map<bigint, ResourceService>;
-			readonly suggestions: Map<bigint, SuggestionService>;
-			readonly tickets: Map<bigint, TicketService>;
+			readonly reports: Map<bigint, ReportPromptService>;
+			readonly resources: Map<bigint, ResourcePromptService>;
+			readonly suggestions: Map<bigint, SuggestionPromptService>;
+			readonly tickets: Map<bigint, TicketPromptService>;
+			readonly verification: Map<bigint, VerificationPromptService>;
 		};
 		readonly roleIndicators: Map<bigint, RoleIndicatorService>;
 	};
@@ -165,14 +165,14 @@ class ServiceStore {
 			}
 
 			if (guildDocument.areEnabled("reports")) {
-				const service = new ReportService(client, { guildId });
+				const service = new ReportPromptService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.reports.set(guildId, service);
 			}
 
 			if (guildDocument.isEnabled("verification")) {
-				const service = new VerificationService(client, { guildId });
+				const service = new VerificationPromptService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.verification.set(guildId, service);
@@ -202,21 +202,21 @@ class ServiceStore {
 			}
 
 			if (guildDocument.areEnabled("suggestions")) {
-				const service = new SuggestionService(client, { guildId });
+				const service = new SuggestionPromptService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.suggestions.set(guildId, service);
 			}
 
 			if (guildDocument.areEnabled("tickets")) {
-				const service = new TicketService(client, { guildId });
+				const service = new TicketPromptService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.tickets.set(guildId, service);
 			}
 
 			if (guildDocument.areEnabled("resources")) {
-				const service = new ResourceService(client, { guildId });
+				const service = new ResourcePromptService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.resources.set(guildId, service);
@@ -347,11 +347,11 @@ class ServiceStore {
 		}
 	}
 
-	getPromptService(guildId: bigint, { type }: { type: "verification" }): VerificationService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "reports" }): ReportService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "resources" }): ResourceService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "suggestions" }): SuggestionService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "tickets" }): TicketService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "verification" }): VerificationPromptService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "reports" }): ReportPromptService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "resources" }): ResourcePromptService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "suggestions" }): SuggestionPromptService | undefined;
+	getPromptService(guildId: bigint, { type }: { type: "tickets" }): TicketPromptService | undefined;
 	getPromptService(
 		guildId: bigint,
 		{ type }: { type: keyof ServiceStore["local"]["prompts"] },

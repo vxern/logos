@@ -18,7 +18,7 @@ type VoteInformation = {
 	};
 };
 
-class VerificationService extends PromptService<{
+class VerificationPromptService extends PromptService<{
 	type: "verification";
 	model: EntryRequest;
 	metadata: [partialId: string, isAccept: string];
@@ -796,4 +796,4 @@ class VerificationService extends PromptService<{
 	}
 }
 
-export { VerificationService };
+export { VerificationPromptService };

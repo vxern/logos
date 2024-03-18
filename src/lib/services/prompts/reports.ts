@@ -4,8 +4,7 @@ import { Report } from "../../database/report";
 import { User } from "../../database/user";
 import { PromptService } from "./service";
 
-// TODO(vxern): Rename prompt services to include "Prompt" in their name. For example: "ReportPromptService".
-class ReportService extends PromptService<{
+class ReportPromptService extends PromptService<{
 	type: "reports";
 	model: Report;
 	metadata: [partialId: string, isResolve: string];
@@ -189,4 +188,4 @@ class ReportService extends PromptService<{
 	}
 }
 
-export { ReportService };
+export { ReportPromptService };

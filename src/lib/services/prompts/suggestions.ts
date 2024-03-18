@@ -4,7 +4,7 @@ import { Suggestion } from "../../database/suggestion";
 import { User } from "../../database/user";
 import { PromptService } from "./service";
 
-class SuggestionService extends PromptService<{
+class SuggestionPromptService extends PromptService<{
 	type: "suggestions";
 	model: Suggestion;
 	metadata: [partialId: string, isResolve: string];
@@ -155,4 +155,4 @@ class SuggestionService extends PromptService<{
 	}
 }
 
-export { SuggestionService };
+export { SuggestionPromptService };

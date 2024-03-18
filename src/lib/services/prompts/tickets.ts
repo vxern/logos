@@ -4,7 +4,7 @@ import { Ticket } from "../../database/ticket";
 import { User } from "../../database/user";
 import { PromptService } from "./service";
 
-class TicketService extends PromptService<{
+class TicketPromptService extends PromptService<{
 	type: "tickets";
 	model: Ticket;
 	metadata: [partialId: string, isResolve: string];
@@ -173,4 +173,4 @@ class TicketService extends PromptService<{
 	}
 }
 
-export { TicketService };
+export { TicketPromptService };
