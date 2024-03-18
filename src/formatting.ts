@@ -1,3 +1,5 @@
+import { MentionType, TimestampFormat, getSigilByMentionType, getSigilByTimestampFormat } from "./constants/formatting";
+
 /**
  * Capitalises the first letter of the given text.
  *
@@ -70,25 +72,6 @@ function list(items: string[]): string {
 	return items.map((item) => `${constants.special.bullet} ${item}`).join("\n");
 }
 
-type TimestampFormat =
-	| "short-time"
-	| "long-time"
-	| "short-date"
-	| "long-date"
-	| "short-datetime"
-	| "long-datetime"
-	| "relative";
-
-const _timestampFormatToSigil = Object.freeze({
-	"short-time": "t",
-	"long-time": "T",
-	"short-date": "d",
-	"long-date": "D",
-	"short-datetime": "f",
-	"long-datetime": "F",
-	relative: "R",
-} as const satisfies Record<TimestampFormat, string>);
-
 /**
  * Taking a unix timestamp, returns a formatted, human-readable time expression.
  *
@@ -98,17 +81,9 @@ const _timestampFormatToSigil = Object.freeze({
  */
 function timestamp(timestamp: number, { format }: { format: TimestampFormat }): string {
 	const timestampSeconds = Math.floor(timestamp / 1000);
-	const formatSigil = _timestampFormatToSigil[format];
-	return `<t:${timestampSeconds}:${formatSigil}>`;
+	const sigil = getSigilByTimestampFormat(format);
+	return `<t:${timestampSeconds}:${sigil}>`;
 }
-
-type MentionType = "channel" | "role" | "user";
-
-const _mentionTypeToSigil = Object.freeze({
-	channel: "#",
-	role: "@&",
-	user: "@",
-} as const satisfies Record<MentionType, string>);
 
 /**
  * Creates a Discord mention by formatting an ID using the appropriate symbol.
@@ -118,8 +93,8 @@ const _mentionTypeToSigil = Object.freeze({
  * @returns The formatted string of text.
  */
 function mention(id: bigint | string, { type }: { type: MentionType }): string {
-	const typeSigil = _mentionTypeToSigil[type];
-	return `<${typeSigil}${id}>`;
+	const sigil = getSigilByMentionType(type);
+	return `<${sigil}${id}>`;
 }
 
 // TODO(vxern): What does this function do with multiple whitespaces?
