@@ -2,6 +2,7 @@ import * as Discord from "@discordeno/bot";
 import constants_ from "./constants/constants";
 import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
 import { Properties } from "./constants/properties";
+import { SlowmodeLevel } from "./constants/slowmode";
 import { EntryRequest } from "./lib/database/entry-request";
 import { Praise } from "./lib/database/praise";
 import { Report } from "./lib/database/report";
@@ -9,12 +10,32 @@ import { Resource } from "./lib/database/resource";
 import { Suggestion } from "./lib/database/suggestion";
 import { Ticket } from "./lib/database/ticket";
 import { Warning } from "./lib/database/warning";
-import { SlowmodeLevel } from "./constants/slowmode";
 
 declare global {
-	type PromiseWithResolver<T> = { promise: Promise<T>; resolve: (value: T) => void; reject: () => void };
 	interface PromiseConstructor {
-		withResolvers<T>(): PromiseWithResolver<T>;
+		createRace<T, R>(
+			elements: T[],
+			doAction: (element: T) => Promise<R | undefined>,
+		): AsyncGenerator<{ element: T; result?: R }, void, void>;
+	}
+
+	interface Array<T> {
+		/**
+		 * Taking an array, splits it into parts of equal sizes.
+		 *
+		 * @param array - The array to chunk.
+		 * @param size - The size of each chunk.
+		 * @returns The chunked array.
+		 */
+		toChunked(size: number): T[][];
+	}
+
+	interface ObjectConstructor {
+		mirror<O extends Record<string, string>>(
+			object: O,
+		): {
+			[K in keyof O as O[K]]: K;
+		};
 	}
 
 	type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;

@@ -1,5 +1,3 @@
-import { reverseObject } from "../../utilities";
-
 const languages = Object.freeze({
 	deepl: [
 		"Bulgarian",
@@ -357,8 +355,8 @@ type GoogleTranslateLocale = (typeof languageToLocale.google)[keyof typeof langu
 type Locale = DeepLLocale | GoogleTranslateLocale;
 
 const localeToLanguage = {
-	deepl: reverseObject(languageToLocale.deepl),
-	google: reverseObject(languageToLocale.google),
+	deepl: Object.mirror(languageToLocale.deepl),
+	google: Object.mirror(languageToLocale.google),
 };
 
 function isLanguage(language: string): language is Language {

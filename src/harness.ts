@@ -1,27 +1,44 @@
 import * as Discord from "@discordeno/bot";
 import log from "loglevel";
-import constants_ from "./constants/constants";
-import defaults_ from "./constants/defaults";
+import { chunk } from "./utilities";
 
-// ! Polyfill + override area - It's absolutely key that these are synchronised with `types.d.ts`.
-// #region
+Array.prototype.toChunked = function <T>(this, size: number) {
+	return Array.from<T[]>(chunk(this, size));
+};
 
-Promise.withResolvers = <T>() => {
-	let resolve!: (value: T) => void;
-	let reject!: () => void;
+Object.mirror = <T extends Record<string, string>>(object: T) => {
+	return Object.fromEntries(Object.entries(object).map(([key, value]) => [value, key])) as unknown as {
+		[K in keyof T as T[K]]: K;
+	};
+};
 
-	const promise = new Promise<T>((resolve_, reject_) => {
-		resolve = resolve_;
-		reject = reject_;
-	});
+Promise.createRace = async function* <T, R>(
+	this,
+	elements: T[],
+	doAction: (element: T) => Promise<R | undefined>,
+): AsyncGenerator<{ element: T; result?: R }, void, void> {
+	const promisesWithResolver = elements.map(() => Promise.withResolvers<{ element: T; result?: R }>());
 
-	return { promise, resolve, reject };
+	const resolvers = [...promisesWithResolver];
+	for (const element of elements) {
+		doAction(element).then((result) => {
+			const { resolve } = resolvers.shift()!;
+
+			if (result === undefined) {
+				resolve({ element });
+			} else {
+				resolve({ element, result });
+			}
+		});
+	}
+
+	for (const { promise } of promisesWithResolver) {
+		yield promise;
+	}
 };
 
 (globalThis as any).Discord = Discord;
-(globalThis as any).constants = constants_;
-(globalThis as any).defaults = defaults_;
-
-// #endregion
+(globalThis as any).constants = await import("./constants/constants").then((module) => module.default);
+(globalThis as any).defaults = await import("./constants/defaults").then((module) => module.default);
 
 log.enableAll();

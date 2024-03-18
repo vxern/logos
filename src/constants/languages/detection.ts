@@ -1,5 +1,3 @@
-import { reverseObject } from "../../utilities";
-
 const languages = Object.freeze({
 	cld: [
 		"Abkhazian",
@@ -493,8 +491,8 @@ type TinyLDLocale = (typeof languageToLocale.tinyld)[keyof typeof languageToLoca
 type Locale = CLDLocale | TinyLDLocale;
 
 const localeToLanguage = {
-	cld: reverseObject(languageToLocale.cld),
-	tinyld: reverseObject(languageToLocale.tinyld),
+	cld: Object.mirror(languageToLocale.cld),
+	tinyld: Object.mirror(languageToLocale.tinyld),
 };
 
 function isCLDLocale(locale: string): locale is CLDLocale {

@@ -6,7 +6,6 @@ import languages, {
 	isTranslationLanguage,
 } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
-import { race } from "../../../../utilities";
 import { Client } from "../../../client";
 import { Translation } from "../translators/adapter";
 import { resolveAdapters } from "../translators/adapters";
@@ -366,7 +365,7 @@ async function translateText(
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
 	let translation: Translation | undefined;
-	for await (const element of race(adapters, (adapter) => adapter.translate(client, text, languages))) {
+	for await (const element of Promise.createRace(adapters, (adapter) => adapter.translate(client, text, languages))) {
 		if (element.result === undefined) {
 			continue;
 		}

@@ -1,7 +1,6 @@
 import { Locale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { mention, timestamp, trim } from "../../../../formatting";
-import { toChunked } from "../../../../utilities";
 import { Client, isValidSnowflake } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
@@ -579,7 +578,7 @@ async function handlePurgeMessages(
 	if (bulkDeletable.length < 2) {
 		nonBulkDeletable.push(...bulkDeletable.splice(0));
 	} else {
-		const bulkDeletableChunks = toChunked(bulkDeletable, 100);
+		const bulkDeletableChunks = bulkDeletable.toChunked(100);
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 

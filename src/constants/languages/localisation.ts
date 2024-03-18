@@ -1,5 +1,3 @@
-import { reverseObject } from "../../utilities";
-
 const languages = Object.freeze({
 	discord: [
 		"Dutch",
@@ -85,8 +83,8 @@ const languageToLocale = Object.freeze({
 } as const);
 
 const localeToLanguage = Object.freeze({
-	discord: reverseObject(languageToLocale.discord),
-	logos: reverseObject(languageToLocale.logos),
+	discord: Object.mirror(languageToLocale.discord),
+	logos: Object.mirror(languageToLocale.logos),
 });
 
 const locales = Object.freeze(Object.keys(localeToLanguage.logos) as Locale[]);
