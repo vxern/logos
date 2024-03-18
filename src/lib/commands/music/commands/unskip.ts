@@ -1,5 +1,5 @@
 import { Client } from "../../../client";
-import { isCollection } from "../../../services/music/music";
+import { isCollection } from "../../../services/music";
 
 async function handleUnskipAction(
 	client: Client,

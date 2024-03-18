@@ -1,7 +1,7 @@
 import { mention, timestamp } from "../../../../formatting";
 import { Client } from "../../../client";
 import { PaginatedSongCollectionViewComponent } from "../../../components/paginated-view";
-import { isCollection } from "../../../services/music/music";
+import { isCollection } from "../../../services/music";
 import { Song, SongCollection, SongStream } from "../data/types";
 
 async function handleDisplayCurrentlyPlaying(

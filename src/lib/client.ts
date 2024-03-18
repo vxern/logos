@@ -15,10 +15,10 @@ import { JournallingStore } from "./journalling";
 import { LocalisationBuilder, LocalisationStore, RawLocalisations } from "./localisations";
 import { Logger } from "./logger";
 import { ServiceStore } from "./services";
-import { InteractionRepetitionService } from "./services/interaction-repetition/interaction-repetition";
-import { LavalinkService } from "./services/music/lavalink";
-import { RealtimeUpdateService } from "./services/realtime-updates/service";
-import { StatusService } from "./services/status/service";
+import { InteractionRepetitionService } from "./services/interaction-repetition";
+import { LavalinkService } from "./services/lavalink";
+import { RealtimeUpdateService } from "./services/realtime-updates";
+import { StatusService } from "./services/status";
 
 interface Environment {
 	readonly isDebug: boolean;
