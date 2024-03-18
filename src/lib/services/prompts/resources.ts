@@ -1,39 +1,39 @@
-import diagnostics from "../../../../diagnostics";
-import { Client } from "../../../client";
-import { Suggestion } from "../../../database/suggestion";
-import { User } from "../../../database/user";
-import { PromptService } from "../service";
+import diagnostics from "../../../diagnostics";
+import { Client } from "../../client";
+import { Resource } from "../../database/resource";
+import { User } from "../../database/user";
+import { PromptService } from "./service";
 
-class SuggestionService extends PromptService<{
-	type: "suggestions";
-	model: Suggestion;
+class ResourceService extends PromptService<{
+	type: "resources";
+	model: Resource;
 	metadata: [partialId: string, isResolve: string];
 }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
-		super(client, { identifier: "SuggestionPromptService", guildId }, { type: "suggestions", deleteMode: "delete" });
+		super(client, { identifier: "ResourcePromptService", guildId }, { type: "resources", deleteMode: "delete" });
 	}
 
-	getAllDocuments(): Map<string, Suggestion> {
-		const suggestions = new Map<string, Suggestion>();
+	getAllDocuments(): Map<string, Resource> {
+		const resources = new Map<string, Resource>();
 
-		for (const [partialId, suggestionDocument] of this.client.documents.suggestions) {
-			if (suggestionDocument.guildId !== this.guildIdString) {
+		for (const [partialId, resourceDocument] of this.client.documents.resources) {
+			if (resourceDocument.guildId !== this.guildIdString) {
 				continue;
 			}
 
-			suggestions.set(partialId, suggestionDocument);
+			resources.set(partialId, resourceDocument);
 		}
 
-		return suggestions;
+		return resources;
 	}
 
-	async getUserDocument(suggestionDocument: Suggestion): Promise<User> {
-		const userDocument = await User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
+	async getUserDocument(resourceDocument: Resource): Promise<User> {
+		const userDocument = await User.getOrCreate(this.client, { userId: resourceDocument.authorId });
 
 		return userDocument;
 	}
 
-	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
+	getPromptContent(user: Logos.User, resourceDocument: Resource): Discord.CreateMessageOptions | undefined {
 		const guild = this.guild;
 		if (guild === undefined) {
 			return undefined;
@@ -49,8 +49,8 @@ class SuggestionService extends PromptService<{
 		return {
 			embeds: [
 				{
-					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
-					description: `*${suggestionDocument.answers.suggestion}*`,
+					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
+					description: `*${resourceDocument.answers.resource}*`,
 					footer: {
 						text: diagnostics.display.user(user),
 						iconUrl: `${(() => {
@@ -64,26 +64,26 @@ class SuggestionService extends PromptService<{
 							}
 
 							return iconURL;
-						})()}&metadata=${suggestionDocument.partialId}`,
+						})()}&metadata=${resourceDocument.partialId}`,
 					},
 				},
 			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: suggestionDocument.isResolved
+					components: resourceDocument.isResolved
 						? [
 								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Success,
 									label: strings.markUnresolved,
-									customId: this.magicButton.encodeId([suggestionDocument.partialId, `${false}`]),
+									customId: this.magicButton.encodeId([resourceDocument.partialId, `${false}`]),
 								},
 								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Danger,
 									label: strings.remove,
-									customId: this.removeButton.encodeId([suggestionDocument.partialId]),
+									customId: this.removeButton.encodeId([resourceDocument.partialId]),
 								},
 						  ]
 						: [
@@ -91,7 +91,7 @@ class SuggestionService extends PromptService<{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: strings.markResolved,
-									customId: this.magicButton.encodeId([suggestionDocument.partialId, `${true}`]),
+									customId: this.magicButton.encodeId([resourceDocument.partialId, `${true}`]),
 								},
 						  ],
 				},
@@ -101,17 +101,17 @@ class SuggestionService extends PromptService<{
 
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
-	): Promise<Suggestion | null | undefined> {
+	): Promise<Resource | null | undefined> {
 		const locale = interaction.locale;
 
-		const suggestionDocument = this.documents.get(interaction.metadata[0]);
-		if (suggestionDocument === undefined) {
+		const resourceDocument = this.documents.get(interaction.metadata[0]);
+		if (resourceDocument === undefined) {
 			return undefined;
 		}
 
-		const isResolve = interaction.metadata[1] === "true";
+		const isResolved = interaction.metadata[1] === "true";
 
-		if (isResolve && suggestionDocument.isResolved) {
+		if (isResolved && resourceDocument.isResolved) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
@@ -129,7 +129,7 @@ class SuggestionService extends PromptService<{
 			return;
 		}
 
-		if (!(isResolve || suggestionDocument.isResolved)) {
+		if (!(isResolved || resourceDocument.isResolved)) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
@@ -147,12 +147,12 @@ class SuggestionService extends PromptService<{
 			return;
 		}
 
-		await suggestionDocument.update(this.client, () => {
-			suggestionDocument.isResolved = isResolve;
+		await resourceDocument.update(this.client, () => {
+			resourceDocument.isResolved = isResolved;
 		});
 
-		return suggestionDocument;
+		return resourceDocument;
 	}
 }
 
-export { SuggestionService };
+export { ResourceService };

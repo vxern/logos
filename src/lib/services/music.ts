@@ -1,8 +1,8 @@
 import { EventEmitter } from "node:events";
 import * as Lavaclient from "lavaclient";
-import diagnostics from "../../../diagnostics";
-import { mention } from "../../../formatting";
-import { Client } from "../../client";
+import diagnostics from "../../diagnostics";
+import { mention } from "../../formatting";
+import { Client } from "../client";
 import {
 	Song,
 	SongCollection,
@@ -10,9 +10,9 @@ import {
 	SongListingType,
 	SongStream,
 	listingTypeToEmoji,
-} from "../../commands/music/data/types";
-import { Guild, timeStructToMilliseconds } from "../../database/guild";
-import { LocalService } from "../service";
+} from "../commands/music/data/types";
+import { Guild, timeStructToMilliseconds } from "../database/guild";
+import { LocalService } from "./service";
 
 interface PositionControls {
 	by: number;

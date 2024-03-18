@@ -1,8 +1,8 @@
-import diagnostics from "../../../../diagnostics";
-import { Client } from "../../../client";
-import { Ticket } from "../../../database/ticket";
-import { User } from "../../../database/user";
-import { PromptService } from "../service";
+import diagnostics from "../../../diagnostics";
+import { Client } from "../../client";
+import { Ticket } from "../../database/ticket";
+import { User } from "../../database/user";
+import { PromptService } from "./service";
 
 class TicketService extends PromptService<{
 	type: "tickets";

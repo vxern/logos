@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { DynamicVoiceChannel, Guild } from "../../database/guild";
-import { LocalService } from "../service";
+import diagnostics from "../../diagnostics";
+import { Client } from "../client";
+import { DynamicVoiceChannel, Guild } from "../database/guild";
+import { LocalService } from "./service";
 
 type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
 

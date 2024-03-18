@@ -1,7 +1,7 @@
 import * as Lavaclient from "lavaclient";
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { GlobalService } from "../service";
+import diagnostics from "../../diagnostics";
+import { Client } from "../client";
+import { GlobalService } from "./service";
 
 class LavalinkService extends GlobalService {
 	readonly node: Lavaclient.Node;

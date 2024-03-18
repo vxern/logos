@@ -1,13 +1,13 @@
-import { FeatureLanguage, Locale } from "../../../constants/languages";
-import diagnostics from "../../../diagnostics";
-import { trim } from "../../../formatting";
-import { Client } from "../../client";
-import { InteractionCollector } from "../../collectors";
-import { EntryRequest } from "../../database/entry-request";
-import { Guild, timeStructToMilliseconds } from "../../database/guild";
-import { User } from "../../database/user";
-import { Modal, createModalComposer } from "../../interactions";
-import { LocalService } from "../service";
+import { FeatureLanguage, Locale } from "../../constants/languages";
+import diagnostics from "../../diagnostics";
+import { trim } from "../../formatting";
+import { Client } from "../client";
+import { InteractionCollector } from "../collectors";
+import { EntryRequest } from "../database/entry-request";
+import { Guild, timeStructToMilliseconds } from "../database/guild";
+import { User } from "../database/user";
+import { Modal, createModalComposer } from "../interactions";
+import { LocalService } from "./service";
 
 class EntryService extends LocalService {
 	readonly #_acceptedRulesButton: InteractionCollector;

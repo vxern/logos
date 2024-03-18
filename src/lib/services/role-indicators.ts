@@ -1,6 +1,6 @@
-import { Client } from "../../client";
-import { Guild, RoleWithIndicator } from "../../database/guild";
-import { LocalService } from "../service";
+import { Client } from "../client";
+import { Guild, RoleWithIndicator } from "../database/guild";
+import { LocalService } from "./service";
 
 class RoleIndicatorService extends LocalService {
 	get configuration(): Guild["roleIndicators"] {

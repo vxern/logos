@@ -1,14 +1,14 @@
-import { Locale } from "../../../../constants/languages";
-import diagnostics from "../../../../diagnostics";
-import { mention, timestamp } from "../../../../formatting";
-import { Client } from "../../../client";
-import { InteractionCollector } from "../../../collectors";
-import { openTicket } from "../../../commands/server/commands/ticket/open";
-import { EntryRequest } from "../../../database/entry-request";
-import { Model } from "../../../database/model";
-import { Ticket } from "../../../database/ticket";
-import { User } from "../../../database/user";
-import { Configurations, PromptService } from "../service";
+import { Locale } from "../../../constants/languages";
+import diagnostics from "../../../diagnostics";
+import { mention, timestamp } from "../../../formatting";
+import { Client } from "../../client";
+import { InteractionCollector } from "../../collectors";
+import { openTicket } from "../../commands/server/commands/ticket/open";
+import { EntryRequest } from "../../database/entry-request";
+import { Model } from "../../database/model";
+import { Ticket } from "../../database/ticket";
+import { User } from "../../database/user";
+import { Configurations, PromptService } from "./service";
 
 type Configuration = NonNullable<Configurations["verification"]>;
 type VoteInformation = {
