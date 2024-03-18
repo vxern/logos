@@ -1,27 +1,27 @@
 import { Client } from "./client";
 import { Guild } from "./database/guild";
 import { Logger } from "./logger";
-import { AlertService } from "./services/alert/alert";
-import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels/dynamic-voice-channels";
-import { EntryService } from "./services/entry/entry";
-import { InteractionRepetitionService } from "./services/interaction-repetition/interaction-repetition";
-import { LavalinkService } from "./services/music/lavalink";
-import { MusicService } from "./services/music/music";
+import { AlertService } from "./services/alert";
+import { DynamicVoiceChannelService } from "./services/dynamic-voice-channels";
+import { EntryService } from "./services/entry";
+import { InteractionRepetitionService } from "./services/interaction-repetition";
+import { LavalinkService } from "./services/lavalink";
+import { MusicService } from "./services/music";
 import { NoticeService } from "./services/notices/service";
-import { InformationNoticeService } from "./services/notices/types/information";
-import { ResourceNoticeService } from "./services/notices/types/resources";
-import { RoleNoticeService } from "./services/notices/types/roles";
-import { WelcomeNoticeService } from "./services/notices/types/welcome";
+import { InformationNoticeService } from "./services/notices/information";
+import { ResourceNoticeService } from "./services/notices/resources";
+import { RoleNoticeService } from "./services/notices/roles";
+import { WelcomeNoticeService } from "./services/notices/welcome";
 import { PromptService } from "./services/prompts/service";
-import { ReportService } from "./services/prompts/types/reports";
-import { ResourceService } from "./services/prompts/types/resources";
-import { SuggestionService } from "./services/prompts/types/suggestions";
-import { TicketService } from "./services/prompts/types/tickets";
-import { VerificationService } from "./services/prompts/types/verification";
-import { RealtimeUpdateService } from "./services/realtime-updates/service";
-import { RoleIndicatorService } from "./services/role-indicators/role-indicators";
+import { ReportService } from "./services/prompts/reports";
+import { ResourceService } from "./services/prompts/resources";
+import { SuggestionService } from "./services/prompts/suggestions";
+import { TicketService } from "./services/prompts/tickets";
+import { VerificationService } from "./services/prompts/verification";
+import { RealtimeUpdateService } from "./services/realtime-updates";
+import { RoleIndicatorService } from "./services/role-indicators";
 import { Service } from "./services/service";
-import { StatusService } from "./services/status/service";
+import { StatusService } from "./services/status";
 
 class ServiceStore {
 	readonly global: {
