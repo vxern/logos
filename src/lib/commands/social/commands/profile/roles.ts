@@ -505,8 +505,6 @@ function createSelectOptionsFromCategories(
 	return selections;
 }
 
-const emojiExpression = /\p{Extended_Pictographic}/u;
-
 function createSelectOptionsFromCollection(
 	client: Client,
 	data: RoleDisplayData,
@@ -542,7 +540,7 @@ function createSelectOptionsFromCollection(
 					return;
 				}
 
-				if (emojiExpression.test(role.emoji)) {
+				if (constants.patterns.emojiExpression.test(role.emoji)) {
 					return { name: role.emoji };
 				}
 

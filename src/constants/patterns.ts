@@ -19,4 +19,5 @@ export default Object.freeze({
 	),
 	conciseTimeExpression: /^(?:(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):))?(0?[0-9]|[1-5][0-9]|60)$/,
 	wholeWord: (word: string) => new RegExp(`(?<=^|\\p{Z}|\\p{P})${word}(?=\\p{Z}|\\p{P}|$)`, "giu"),
+	emojiExpression: /\p{Extended_Pictographic}/u,
 } as const);
