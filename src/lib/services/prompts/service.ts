@@ -313,6 +313,7 @@ abstract class PromptService<
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.
+	// TODO(vxern): Add a collector for this.
 	async messageDelete(message: Discord.Message): Promise<void> {
 		// If the message was deleted from a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {
@@ -350,6 +351,7 @@ abstract class PromptService<
 		this.#userIdByPromptId.delete(message.id.toString());
 	}
 
+	// TODO(vxern): Add a collector for this.
 	async messageUpdate(message: Discord.Message): Promise<void> {
 		// If the message was updated in a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {

@@ -26,6 +26,7 @@ type ConfigurationLocators = {
 
 type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
+// TODO(vxern): Extract message delete protection, etc., into a 'persistent message' service or something like that.
 abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
 	#noticeData: NoticeData | undefined;
 
@@ -146,6 +147,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 	}
 
 	// Anti-tampering feature; detects notices being deleted.
+	// TODO(vxern): Add a collector for this.
 	async messageDelete(message: Discord.Message): Promise<void> {
 		const [channelId, noticeData] = [this.channelId, this.#noticeData];
 		if (channelId === undefined || noticeData === undefined) {
@@ -176,6 +178,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		this.registerNotice(BigInt(notice.id), hash);
 	}
 
+	// TODO(vxern): Add a collector for this.
 	async messageUpdate(message: Discord.Message): Promise<void> {
 		// If the message was updated in a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {

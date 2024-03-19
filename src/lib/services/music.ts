@@ -218,6 +218,7 @@ class MusicService extends LocalService {
 		await this.destroySession();
 	}
 
+	// TODO(vxern): Add a collector for this.
 	async voiceStateUpdate(_: Discord.VoiceState): Promise<void> {
 		const [guild, session] = [this.guild, this.#session];
 		if (guild === undefined || session === undefined) {

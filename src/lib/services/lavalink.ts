@@ -15,6 +15,7 @@ class LavalinkService extends GlobalService {
 				port: Number(client.environment.lavalinkPort),
 				password: client.environment.lavalinkPassword,
 			},
+			// TODO(vxern): Extract to function.
 			sendGatewayPayload: async (guildIdString, payload) => {
 				const guildId = BigInt(guildIdString);
 				if (this.client.getMusicService(guildId) === undefined) {
@@ -71,6 +72,7 @@ class LavalinkService extends GlobalService {
 		}
 	}
 
+	// TODO(vxern): Add a collector for this.
 	async voiceStateUpdate(voiceState: Discord.VoiceState): Promise<void> {
 		return this.node.handleVoiceUpdate({
 			session_id: voiceState.sessionId,
@@ -80,6 +82,7 @@ class LavalinkService extends GlobalService {
 		});
 	}
 
+	// TODO(vxern): Add a collector for this.
 	async voiceServerUpdate(voiceServerUpdate: Discord.VoiceServerUpdate): Promise<void> {
 		if (voiceServerUpdate.endpoint === undefined) {
 			this.log.info(

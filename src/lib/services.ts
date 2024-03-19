@@ -261,48 +261,6 @@ class ServiceStore {
 		await Promise.all(promises);
 	}
 
-	async dispatchToGlobal<EventName extends keyof Discord.EventHandlers>(
-		eventName: EventName,
-		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
-	): Promise<void> {
-		for (const service of this.#collection.global) {
-			// @ts-ignore: This is fine.
-			service[eventName](...args);
-		}
-	}
-
-	async dispatchToLocal<EventName extends keyof Discord.EventHandlers>(
-		guildId: bigint | undefined,
-		eventName: EventName,
-		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
-	): Promise<void> {
-		if (guildId === undefined) {
-			return;
-		}
-
-		const services = this.#collection.local.get(guildId);
-		if (services === undefined) {
-			return;
-		}
-
-		for (const service of services) {
-			// @ts-ignore: This is fine.
-			service[eventName](...args);
-		}
-	}
-
-	async dispatchEvent<EventName extends keyof Discord.EventHandlers>(
-		guildId: bigint | undefined,
-		eventName: EventName,
-		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
-	): Promise<void> {
-		await this.dispatchToGlobal(eventName, { args });
-
-		if (guildId !== undefined) {
-			await this.dispatchToLocal(guildId, eventName, { args });
-		}
-	}
-
 	getAlertService(guildId: bigint): AlertService | undefined {
 		return this.local.alerts.get(guildId);
 	}

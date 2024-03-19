@@ -146,6 +146,7 @@ class DynamicVoiceChannelService extends LocalService {
 		this.oldVoiceStates.clear();
 	}
 
+	// TODO(vxern): Add a collector for this.
 	async voiceStateUpdate(newVoiceState: Logos.VoiceState): Promise<void> {
 		const [channels, configuration, guild] = [this.channels, this.configuration, this.guild];
 		if (channels === undefined || configuration === undefined || guild === undefined) {

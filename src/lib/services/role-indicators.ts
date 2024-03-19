@@ -1,17 +1,23 @@
 import { Client } from "../client";
+import { Collector } from "../collectors";
 import { Guild, RoleWithIndicator } from "../database/guild";
 import { LocalService } from "./service";
 
 class RoleIndicatorService extends LocalService {
+	readonly #_guildMemberUpdates: Collector<"guildMemberUpdate">;
+
 	get configuration(): Guild["roleIndicators"] {
 		return this.guildDocument?.roleIndicators;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "RoleIndicatorService", guildId });
+
+		this.#_guildMemberUpdates = new Collector();
 	}
 
 	async start(): Promise<void> {
+		// TODO(vxern): Get rid of all this nullability all over the place.
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
 			return;
@@ -24,6 +30,10 @@ class RoleIndicatorService extends LocalService {
 
 			await this.guildMemberUpdate(member, member.user);
 		}
+
+		this.#_guildMemberUpdates.onCollect(this.guildMemberUpdate.bind(this));
+
+		await this.client.registerCollector("guildMemberUpdate", this.#_guildMemberUpdates);
 	}
 
 	async stop(): Promise<void> {}
@@ -34,7 +44,7 @@ class RoleIndicatorService extends LocalService {
 			return;
 		}
 
-		// Owners cannot have their nicknames changed, for some reason.
+		// Bots cannot change the guild owner's nickname.
 		if (member.id === guild.ownerId) {
 			return;
 		}
@@ -58,7 +68,7 @@ class RoleIndicatorService extends LocalService {
 				return;
 			}
 
-			const nickname = applyIndicators(user.username, applicableIndicators);
+			const nickname = getNicknameWithRoleIndicators(user.username, applicableIndicators);
 			this.client.bot.rest
 				.editMember(member.guildId, user.id, { nick: nickname })
 				.catch(() => this.log.warn("Failed to set member's role indicators."));
@@ -73,7 +83,7 @@ class RoleIndicatorService extends LocalService {
 				return;
 			}
 
-			const nickname = applyIndicators(member.nick, applicableIndicators);
+			const nickname = getNicknameWithRoleIndicators(member.nick, applicableIndicators);
 			this.client.bot.rest
 				.editMember(member.guildId, user.id, { nick: nickname })
 				.catch(() => this.log.warn("Failed to set member's role indicators."));
@@ -102,15 +112,16 @@ class RoleIndicatorService extends LocalService {
 			return;
 		}
 
-		const nicknameModified = applyIndicators(username, applicableIndicators);
+		const nicknameModified = getNicknameWithRoleIndicators(username, applicableIndicators);
 		this.client.bot.rest
 			.editMember(member.guildId, user.id, { nick: nicknameModified })
 			.catch(() => this.log.warn("Failed to update member's role indicators."));
 	}
 }
 
-function applyIndicators(username: string, sigils: string[]): string {
-	const modification = `${constants.special.sigils.divider}${sigils.join(constants.special.sigils.separator)}`;
+function getNicknameWithRoleIndicators(username: string, indicators: string[]): string {
+	const indicatorsFormatted = indicators.join(constants.special.sigils.separator);
+	const modification = `${constants.special.sigils.divider}${indicatorsFormatted}`;
 	const usernameSlice = username.slice(0, constants.MAXIMUM_USERNAME_LENGTH - modification.length);
 
 	return `${usernameSlice}${modification}`;
