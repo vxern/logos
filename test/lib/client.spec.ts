@@ -153,15 +153,3 @@ describe("Client", () => {
 		// TODO(vxern): Add tests.
 	});
 });
-
-describe("isValidSnowflake()", () => {
-	// TODO(vxern): Test.
-});
-
-describe("extractIDFromIdentifier()", () => {
-	// TODO(vxern): Test.
-});
-
-describe("isValidIdentifier()", () => {
-	// TODO(vxern): Test.
-});

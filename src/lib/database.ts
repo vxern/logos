@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import * as ravendb from "ravendb";
+import { isValidCollection } from "../constants/database";
 import { EntryRequest } from "./database/entry-request";
 import { Guild } from "./database/guild";
 import { GuildStats } from "./database/guild-stats";
@@ -12,7 +13,6 @@ import { Ticket } from "./database/ticket";
 import { User } from "./database/user";
 import { Warning } from "./database/warning";
 import { Logger } from "./logger";
-import { isValidCollection } from "../constants/database";
 
 class Database extends ravendb.DocumentStore {
 	readonly cache: {

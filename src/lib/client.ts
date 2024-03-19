@@ -1,4 +1,5 @@
 import { Locale } from "../constants/languages";
+import { getSnowflakeFromIdentifier } from "../constants/patterns";
 import diagnostics from "../diagnostics";
 import { timestamp, trim } from "../formatting";
 import { Cache } from "./cache";
@@ -478,7 +479,7 @@ class Client {
 			.filter((role) => role.permissions.has("MODERATE_MEMBERS"))
 			.map((role) => role.id);
 
-		const id = extractIDFromIdentifier(identifier);
+		const id = getSnowflakeFromIdentifier(identifier);
 		if (id !== undefined) {
 			const member = this.#connection.cache.members.get(guildId)?.get(BigInt(id));
 			if (member === undefined) {
@@ -675,29 +676,4 @@ class Client {
 	}
 }
 
-// TODO(vxern): This should be in the pattern constants file.
-function isValidSnowflake(snowflake: string): boolean {
-	return constants.patterns.discord.snowflake.test(snowflake);
-}
-
-// TODO(vxern): This should be in the pattern constants file.
-function extractIDFromIdentifier(identifier: string): string | undefined {
-	return (
-		constants.patterns.discord.snowflake.exec(identifier)?.at(1) ??
-		constants.patterns.discord.userMention.exec(identifier)?.at(1) ??
-		constants.patterns.userDisplay.exec(identifier)?.at(1)
-	);
-}
-
-// TODO(vxern): This should be in the pattern constants file.
-function isValidIdentifier(identifier: string): boolean {
-	return (
-		constants.patterns.discord.snowflake.test(identifier) ||
-		constants.patterns.discord.userMention.test(identifier) ||
-		constants.patterns.userDisplay.test(identifier) ||
-		constants.patterns.discord.userHandle.new.test(identifier) ||
-		constants.patterns.discord.userHandle.old.test(identifier)
-	);
-}
-
-export { Client, Environment, isValidIdentifier, isValidSnowflake };
+export { Client, Environment };

@@ -1,6 +1,6 @@
 import special from "./special";
 
-export default Object.freeze({
+const patterns = Object.freeze({
 	rgbHex: /^#[0-9a-f]{6}$/,
 	discord: {
 		snowflake: /^(\d{16,20})$/,
@@ -21,3 +21,18 @@ export default Object.freeze({
 	wholeWord: (word: string) => new RegExp(`(?<=^|\\p{Z}|\\p{P})${word}(?=\\p{Z}|\\p{P}|$)`, "giu"),
 	emojiExpression: /\p{Extended_Pictographic}/u,
 } as const);
+
+function isValidSnowflake(snowflake: string): boolean {
+	return constants.patterns.discord.snowflake.test(snowflake);
+}
+
+function getSnowflakeFromIdentifier(identifier: string): string | undefined {
+	return (
+		constants.patterns.discord.snowflake.exec(identifier)?.at(1) ??
+		constants.patterns.discord.userMention.exec(identifier)?.at(1) ??
+		constants.patterns.userDisplay.exec(identifier)?.at(1)
+	);
+}
+
+export default patterns;
+export { isValidSnowflake, getSnowflakeFromIdentifier };

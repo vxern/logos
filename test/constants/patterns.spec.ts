@@ -6,3 +6,11 @@ describe("The patterns object", () => {
 		expect(Object.isFrozen(patterns)).to.be.true;
 	});
 });
+
+describe("isValidSnowflake()", () => {
+	// TODO(vxern): Test.
+});
+
+describe("getSnowflakeFromIdentifier()", () => {
+	// TODO(vxern): Test.
+});

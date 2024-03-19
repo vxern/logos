@@ -16,40 +16,36 @@ class EventStore {
 	}
 
 	buildEventHandlers(): Partial<Discord.EventHandlers> {
-		const events = this;
-
 		return {
-			ready: (...args) => events.#services.dispatchToGlobal("ready", { args }),
+			ready: (...args) => this.#services.dispatchToGlobal("ready", { args }),
 			interactionCreate: (interactionRaw) =>
-				events.dispatchEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] }),
-			guildMemberAdd: (member, user) =>
-				events.dispatchEvent(member.guildId, "guildMemberAdd", { args: [member, user] }),
-			guildMemberRemove: (user, guildId) =>
-				events.dispatchEvent(guildId, "guildMemberRemove", { args: [user, guildId] }),
+				this.dispatchEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] }),
+			guildMemberAdd: (member, user) => this.dispatchEvent(member.guildId, "guildMemberAdd", { args: [member, user] }),
+			guildMemberRemove: (user, guildId) => this.dispatchEvent(guildId, "guildMemberRemove", { args: [user, guildId] }),
 			guildMemberUpdate: (member, user) =>
-				events.dispatchEvent(member.guildId, "guildMemberUpdate", { args: [member, user] }),
-			messageCreate: (message) => events.dispatchEvent(message.guildId, "messageCreate", { args: [message] }),
+				this.dispatchEvent(member.guildId, "guildMemberUpdate", { args: [member, user] }),
+			messageCreate: (message) => this.dispatchEvent(message.guildId, "messageCreate", { args: [message] }),
 			messageDelete: (payload, message) =>
-				events.dispatchEvent(payload.guildId, "messageDelete", { args: [payload, message] }),
-			messageDeleteBulk: (payload) => events.dispatchEvent(payload.guildId, "messageDeleteBulk", { args: [payload] }),
+				this.dispatchEvent(payload.guildId, "messageDelete", { args: [payload, message] }),
+			messageDeleteBulk: (payload) => this.dispatchEvent(payload.guildId, "messageDeleteBulk", { args: [payload] }),
 			messageUpdate: (message, oldMessage) =>
-				events.dispatchEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] }),
-			voiceServerUpdate: (payload) => events.dispatchEvent(payload.guildId, "voiceServerUpdate", { args: [payload] }),
+				this.dispatchEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] }),
+			voiceServerUpdate: (payload) => this.dispatchEvent(payload.guildId, "voiceServerUpdate", { args: [payload] }),
 			voiceStateUpdate: (voiceState) =>
-				events.dispatchEvent(voiceState.guildId, "voiceStateUpdate", { args: [voiceState] }),
-			channelCreate: (channel) => events.dispatchEvent(channel.guildId, "channelCreate", { args: [channel] }),
-			channelDelete: (channel) => events.dispatchEvent(channel.guildId, "channelDelete", { args: [channel] }),
-			channelPinsUpdate: (data) => events.dispatchEvent(data.guildId, "channelPinsUpdate", { args: [data] }),
-			channelUpdate: (channel) => events.dispatchEvent(channel.guildId, "channelUpdate", { args: [channel] }),
-			guildEmojisUpdate: (payload) => events.dispatchEvent(payload.guildId, "guildEmojisUpdate", { args: [payload] }),
-			guildBanAdd: (user, guildId) => events.dispatchEvent(guildId, "guildBanAdd", { args: [user, guildId] }),
-			guildBanRemove: (user, guildId) => events.dispatchEvent(guildId, "guildBanRemove", { args: [user, guildId] }),
-			guildCreate: (guild) => events.dispatchEvent(guild.id, "guildCreate", { args: [guild] }),
-			guildDelete: (id, shardId) => events.dispatchEvent(id, "guildDelete", { args: [id, shardId] }),
-			guildUpdate: (guild) => events.dispatchEvent(guild.id, "guildUpdate", { args: [guild] }),
-			roleCreate: (role) => events.dispatchEvent(role.guildId, "roleCreate", { args: [role] }),
-			roleDelete: (role) => events.dispatchEvent(role.guildId, "roleDelete", { args: [role] }),
-			roleUpdate: (role) => events.dispatchEvent(role.guildId, "roleUpdate", { args: [role] }),
+				this.dispatchEvent(voiceState.guildId, "voiceStateUpdate", { args: [voiceState] }),
+			channelCreate: (channel) => this.dispatchEvent(channel.guildId, "channelCreate", { args: [channel] }),
+			channelDelete: (channel) => this.dispatchEvent(channel.guildId, "channelDelete", { args: [channel] }),
+			channelPinsUpdate: (data) => this.dispatchEvent(data.guildId, "channelPinsUpdate", { args: [data] }),
+			channelUpdate: (channel) => this.dispatchEvent(channel.guildId, "channelUpdate", { args: [channel] }),
+			guildEmojisUpdate: (payload) => this.dispatchEvent(payload.guildId, "guildEmojisUpdate", { args: [payload] }),
+			guildBanAdd: (user, guildId) => this.dispatchEvent(guildId, "guildBanAdd", { args: [user, guildId] }),
+			guildBanRemove: (user, guildId) => this.dispatchEvent(guildId, "guildBanRemove", { args: [user, guildId] }),
+			guildCreate: (guild) => this.dispatchEvent(guild.id, "guildCreate", { args: [guild] }),
+			guildDelete: (id, shardId) => this.dispatchEvent(id, "guildDelete", { args: [id, shardId] }),
+			guildUpdate: (guild) => this.dispatchEvent(guild.id, "guildUpdate", { args: [guild] }),
+			roleCreate: (role) => this.dispatchEvent(role.guildId, "roleCreate", { args: [role] }),
+			roleDelete: (role) => this.dispatchEvent(role.guildId, "roleDelete", { args: [role] }),
+			roleUpdate: (role) => this.dispatchEvent(role.guildId, "roleUpdate", { args: [role] }),
 		};
 	}
 

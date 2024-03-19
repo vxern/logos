@@ -1,7 +1,8 @@
 import { Locale } from "../../../../constants/languages";
+import { isValidSnowflake } from "../../../../constants/patterns";
 import diagnostics from "../../../../diagnostics";
 import { mention, timestamp, trim } from "../../../../formatting";
-import { Client, isValidSnowflake } from "../../../client";
+import { Client } from "../../../client";
 import { InteractionCollector } from "../../../collectors";
 import { Guild } from "../../../database/guild";
 
