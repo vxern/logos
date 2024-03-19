@@ -19,25 +19,7 @@ type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
-// TODO(vxern): Move to the class.
-const configurationLocators: ConfigurationLocators = {
-	verification: (guildDocument) => guildDocument.verification,
-	reports: (guildDocument) => guildDocument.reports,
-	resources: (guildDocument) => guildDocument.resourceSubmissions,
-	suggestions: (guildDocument) => guildDocument.suggestions,
-	tickets: (guildDocument) => guildDocument.tickets,
-};
-
 type CustomIDs = Record<keyof Configurations, string>;
-
-// TODO(vxern): Move to the class.
-const customIds: CustomIDs = {
-	verification: constants.components.verification,
-	reports: constants.components.reports,
-	resources: constants.components.resources,
-	suggestions: constants.components.suggestions,
-	tickets: constants.components.tickets,
-};
 
 type PromptType = keyof ServiceStore["local"]["prompts"];
 
@@ -64,13 +46,27 @@ abstract class PromptService<
 
 	readonly #type: Generic["type"];
 	readonly #deleteMode: PromptDeleteMode;
-
 	readonly #handlerByPartialId: Map<
 		/*partialId: */ string,
 		(interaction: Logos.Interaction<Generic["metadata"]>) => void
 	>;
 	readonly #documentByPromptId: Map</*promptId: */ string, Generic["model"]>;
 	readonly #userIdByPromptId: Map</*promptId: */ string, bigint>;
+
+	static readonly #_configurationLocators = Object.freeze({
+		verification: (guildDocument) => guildDocument.verification,
+		reports: (guildDocument) => guildDocument.reports,
+		resources: (guildDocument) => guildDocument.resourceSubmissions,
+		suggestions: (guildDocument) => guildDocument.suggestions,
+		tickets: (guildDocument) => guildDocument.tickets,
+	} as const satisfies ConfigurationLocators);
+	static readonly #_customIds = Object.freeze({
+		verification: constants.components.verification,
+		reports: constants.components.reports,
+		resources: constants.components.resources,
+		suggestions: constants.components.suggestions,
+		tickets: constants.components.tickets,
+	} as const satisfies CustomIDs);
 
 	readonly #_configuration: ConfigurationLocators[Generic["type"]];
 
@@ -108,7 +104,7 @@ abstract class PromptService<
 	) {
 		super(client, { identifier, guildId });
 
-		const customId = customIds[type];
+		const customId = PromptService.#_customIds[type];
 
 		this.magicButton = new InteractionCollector(client, { customId, isPermanent: true });
 		this.removeButton = new InteractionCollector(client, {
@@ -130,7 +126,7 @@ abstract class PromptService<
 		this.#documentByPromptId = new Map();
 		this.#userIdByPromptId = new Map();
 
-		this.#_configuration = configurationLocators[type];
+		this.#_configuration = PromptService.#_configurationLocators[type];
 	}
 
 	async start(): Promise<void> {

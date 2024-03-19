@@ -24,19 +24,17 @@ type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
-// TODO(vxern): Move to the class.
-const configurationLocators: ConfigurationLocators = {
-	information: (guildDocument) => guildDocument.informationNotice,
-	resources: (guildDocument) => guildDocument.resourceNotice,
-	roles: (guildDocument) => guildDocument.roleNotice,
-	welcome: (guildDocument) => guildDocument.welcomeNotice,
-};
-
 type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
 abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
 	#noticeData: NoticeData | undefined;
 
+	static readonly #_configurationLocators = Object.freeze({
+		information: (guildDocument) => guildDocument.informationNotice,
+		resources: (guildDocument) => guildDocument.resourceNotice,
+		roles: (guildDocument) => guildDocument.roleNotice,
+		welcome: (guildDocument) => guildDocument.welcomeNotice,
+	} as const satisfies ConfigurationLocators);
 	readonly #_configuration: ConfigurationLocators[Generic["type"]];
 
 	get configuration(): Configurations[Generic["type"]] | undefined {
@@ -69,7 +67,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 	) {
 		super(client, { identifier, guildId });
 
-		this.#_configuration = configurationLocators[type];
+		this.#_configuration = NoticeService.#_configurationLocators[type];
 	}
 
 	async start(): Promise<void> {
