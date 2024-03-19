@@ -40,12 +40,10 @@ class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> 
 		clientOrDatabase: ClientOrDatabase,
 		clauses?: { where?: Partial<IdentifierData<Resource>> },
 	): Promise<Resource[]> {
-		const result = await Model.all<Resource>(clientOrDatabase, {
+		return await Model.all<Resource>(clientOrDatabase, {
 			collection: "Resources",
 			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, createdAt: undefined }),
 		});
-
-		return result;
 	}
 
 	static async create(

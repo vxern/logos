@@ -31,7 +31,7 @@ class LavalinkService extends GlobalService {
 					return;
 				}
 
-				shard.send(payload, true);
+				await shard.send(payload, true);
 			},
 		});
 		this.node.setMaxListeners(0);

@@ -53,12 +53,10 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 		clientOrDatabase: ClientOrDatabase,
 		clauses?: { where?: Partial<IdentifierData<Ticket>> },
 	): Promise<Ticket[]> {
-		const result = await Model.all<Ticket>(clientOrDatabase, {
+		return await Model.all<Ticket>(clientOrDatabase, {
 			collection: "Tickets",
 			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, channelId: undefined }),
 		});
-
-		return result;
 	}
 
 	static async create(

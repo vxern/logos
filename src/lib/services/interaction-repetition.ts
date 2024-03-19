@@ -27,8 +27,8 @@ class InteractionRepetitionService extends GlobalService {
 		this.#_commandInteractions.onCollect(this.#handleCommandInteraction.bind(this));
 		this.#_showInChatButtons.onCollect(this.#handleShowInChat.bind(this));
 
-		this.client.registerInteractionCollector(this.#_commandInteractions);
-		this.client.registerInteractionCollector(this.#_showInChatButtons);
+		await this.client.registerInteractionCollector(this.#_commandInteractions);
+		await this.client.registerInteractionCollector(this.#_showInChatButtons);
 	}
 
 	async stop(): Promise<void> {
@@ -59,14 +59,14 @@ class InteractionRepetitionService extends GlobalService {
 		});
 
 		confirmButton.onCollect(async (confirmButtonPress) => {
-			this.client.deleteReply(buttonPress);
+			await this.client.deleteReply(buttonPress);
 
 			const originalInteraction = this.client.unregisterInteraction(BigInt(buttonPress.metadata[1]));
 			if (originalInteraction === undefined) {
 				return;
 			}
 
-			this.client.deleteReply(originalInteraction);
+			await this.client.deleteReply(originalInteraction);
 
 			const interactionSpoofed = InteractionStore.spoofInteraction(originalInteraction, {
 				using: confirmButtonPress,
@@ -78,8 +78,8 @@ class InteractionRepetitionService extends GlobalService {
 
 		cancelButton.onCollect(async (_) => this.client.deleteReply(buttonPress));
 
-		this.client.registerInteractionCollector(confirmButton);
-		this.client.registerInteractionCollector(cancelButton);
+		await this.client.registerInteractionCollector(confirmButton);
+		await this.client.registerInteractionCollector(cancelButton);
 
 		const locale = buttonPress.locale;
 
@@ -90,7 +90,7 @@ class InteractionRepetitionService extends GlobalService {
 			no: this.client.localise("interactions.show.sureToShow.no", locale)(),
 		};
 
-		this.client.editReply(buttonPress, {
+		await this.client.editReply(buttonPress, {
 			embeds: [{ title: strings.title, description: strings.description, color: constants.colours.dullYellow }],
 			components: [
 				{

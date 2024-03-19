@@ -23,7 +23,6 @@ declare global {
 		/**
 		 * Taking an array, splits it into parts of equal sizes.
 		 *
-		 * @param array - The array to chunk.
 		 * @param size - The size of each chunk.
 		 * @returns The chunked array.
 		 */

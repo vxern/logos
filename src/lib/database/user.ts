@@ -75,6 +75,7 @@ class User extends Model<{ idParts: ["userId"] }> {
 
 		const { promise, resolve } = Promise.withResolvers<User>();
 
+		// TODO(vxern): Do this better.
 		client.database.withSession(async (session) => {
 			const userDocument = await session.get<User>(Model.buildId(data, { collection: "Users" }));
 			if (userDocument !== undefined) {

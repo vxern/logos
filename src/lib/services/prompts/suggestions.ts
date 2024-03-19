@@ -28,9 +28,7 @@ class SuggestionPromptService extends PromptService<{
 	}
 
 	async getUserDocument(suggestionDocument: Suggestion): Promise<User> {
-		const userDocument = await User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
-
-		return userDocument;
+		return await User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
@@ -109,15 +107,15 @@ class SuggestionPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const isResolve = interaction.metadata[1] === "true";
+		const isResolved = interaction.metadata[1] === "true";
 
-		if (isResolve && suggestionDocument.isResolved) {
+		if (isResolved && suggestionDocument.isResolved) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -126,16 +124,17 @@ class SuggestionPromptService extends PromptService<{
 					},
 				],
 			});
+
 			return;
 		}
 
-		if (!(isResolve || suggestionDocument.isResolved)) {
+		if (!(isResolved || suggestionDocument.isResolved)) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -144,11 +143,12 @@ class SuggestionPromptService extends PromptService<{
 					},
 				],
 			});
+
 			return;
 		}
 
 		await suggestionDocument.update(this.client, () => {
-			suggestionDocument.isResolved = isResolve;
+			suggestionDocument.isResolved = isResolved;
 		});
 
 		return suggestionDocument;

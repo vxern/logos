@@ -160,7 +160,7 @@ class JournallingStore {
 
 	async tryLog<Event extends keyof Events>(
 		event: Event,
-		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean; args: Events[Event] },
+		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean | undefined; args: Events[Event] },
 	): Promise<void> {
 		// If explicitly defined as false, do not log.
 		if (journalling === false) {

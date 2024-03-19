@@ -150,7 +150,7 @@ class ReportPromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -159,6 +159,7 @@ class ReportPromptService extends PromptService<{
 					},
 				],
 			});
+
 			return;
 		}
 
@@ -168,7 +169,7 @@ class ReportPromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -177,6 +178,7 @@ class ReportPromptService extends PromptService<{
 					},
 				],
 			});
+
 			return;
 		}
 

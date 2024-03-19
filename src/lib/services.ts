@@ -296,10 +296,10 @@ class ServiceStore {
 		eventName: EventName,
 		{ args }: { args: Parameters<Discord.EventHandlers[EventName]> },
 	): Promise<void> {
-		this.dispatchToGlobal(eventName, { args });
+		await this.dispatchToGlobal(eventName, { args });
 
 		if (guildId !== undefined) {
-			this.dispatchToLocal(guildId, eventName, { args });
+			await this.dispatchToLocal(guildId, eventName, { args });
 		}
 	}
 

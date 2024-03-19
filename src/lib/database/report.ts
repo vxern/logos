@@ -42,12 +42,10 @@ class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 		clientOrDatabase: ClientOrDatabase,
 		clauses?: { where?: Partial<IdentifierData<Report>> },
 	): Promise<Report[]> {
-		const result = await Model.all<Report>(clientOrDatabase, {
+		return await Model.all<Report>(clientOrDatabase, {
 			collection: "Reports",
 			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, createdAt: undefined }),
 		});
-
-		return result;
 	}
 
 	static async create(

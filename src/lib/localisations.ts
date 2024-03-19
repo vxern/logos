@@ -182,9 +182,7 @@ class LocalisationStore {
 				return constants.special.missingString;
 			}
 
-			const string = buildLocalisation(data);
-
-			return string;
+			return buildLocalisation(data);
 		};
 	}
 

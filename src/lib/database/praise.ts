@@ -30,12 +30,10 @@ class Praise extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> {
 		clientOrDatabase: ClientOrDatabase,
 		clauses?: { where?: Partial<IdentifierData<Praise>> },
 	): Promise<Praise[]> {
-		const result = await Model.all<Praise>(clientOrDatabase, {
+		return await Model.all<Praise>(clientOrDatabase, {
 			collection: "Praises",
 			where: Object.assign({ ...clauses?.where }, { authorId: undefined, targetId: undefined, createdAt: undefined }),
 		});
-
-		return result;
 	}
 
 	static async create(

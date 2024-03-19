@@ -40,12 +40,10 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }
 		clientOrDatabase: ClientOrDatabase,
 		clauses?: { where?: Partial<IdentifierData<Suggestion>> },
 	): Promise<Suggestion[]> {
-		const result = await Model.all<Suggestion>(clientOrDatabase, {
+		return await Model.all<Suggestion>(clientOrDatabase, {
 			collection: "Suggestions",
 			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, createdAt: undefined }),
 		});
-
-		return result;
 	}
 
 	static async create(

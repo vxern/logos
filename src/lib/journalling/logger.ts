@@ -1,5 +1,6 @@
 import { Client } from "../client";
 
+// TODO(vxern): The loggers need to be localised.
 abstract class EventLogger<Event extends keyof Events> {
 	readonly client: Client;
 

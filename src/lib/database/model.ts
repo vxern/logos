@@ -130,9 +130,8 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 
 		const now = Date.now();
 		const interval = timeStructToMilliseconds(rateLimit.within);
-		const crossesRateLimit = relevantTimestamps.some((timestamp) => now - timestamp < interval);
 
-		return crossesRateLimit;
+		return relevantTimestamps.some((timestamp) => now - timestamp < interval);
 	}
 
 	async create(clientOrDatabase: ClientOrDatabase): Promise<void> {

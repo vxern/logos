@@ -387,7 +387,8 @@ class Client {
 			interaction.type === Discord.InteractionTypes.MessageComponent &&
 			interaction.metadata[0] === constants.components.none
 		) {
-			this.acknowledge(interaction);
+			await this.acknowledge(interaction);
+
 			return;
 		}
 
@@ -426,7 +427,7 @@ class Client {
 					rateLimit.nextAllowedUsageTimestamp - executedAt - constants.time.second,
 				);
 
-				this.reply(interaction, {
+				await this.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -603,6 +604,8 @@ class Client {
 						},
 					],
 				});
+
+				return undefined;
 			}
 
 			return undefined;
@@ -629,7 +632,8 @@ class Client {
 				autocomplete: this.localise("autocomplete.user", locale)(),
 			};
 
-			this.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+			await this.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+
 			return;
 		}
 
@@ -664,17 +668,19 @@ class Client {
 			users.push(user);
 		}
 
-		this.respond(
+		await this.respond(
 			interaction,
 			users.map((user) => ({ name: diagnostics.display.user(user, { prettify: true }), value: user.id.toString() })),
 		);
 	}
 }
 
+// TODO(vxern): This should be in the pattern constants file.
 function isValidSnowflake(snowflake: string): boolean {
 	return constants.patterns.discord.snowflake.test(snowflake);
 }
 
+// TODO(vxern): This should be in the pattern constants file.
 function extractIDFromIdentifier(identifier: string): string | undefined {
 	return (
 		constants.patterns.discord.snowflake.exec(identifier)?.at(1) ??
@@ -683,6 +689,7 @@ function extractIDFromIdentifier(identifier: string): string | undefined {
 	);
 }
 
+// TODO(vxern): This should be in the pattern constants file.
 function isValidIdentifier(identifier: string): boolean {
 	return (
 		constants.patterns.discord.snowflake.test(identifier) ||

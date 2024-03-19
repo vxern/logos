@@ -94,9 +94,8 @@ class DynamicVoiceChannelService extends LocalService {
 
 			parentChannelById.get(parentChannel.id)?.children.push({ id: channel.id, voiceStates });
 		}
-		const channels = Array.from(parentChannelById.values());
 
-		return channels;
+		return Array.from(parentChannelById.values());
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -114,7 +113,7 @@ class DynamicVoiceChannelService extends LocalService {
 			...channel.children.flatMap((channel) => channel.voiceStates),
 		]);
 		for (const voiceState of voiceStatesAll) {
-			this.voiceStateUpdate(voiceState);
+			await this.voiceStateUpdate(voiceState);
 		}
 
 		for (const { parent, children, configuration } of channels) {
@@ -157,12 +156,12 @@ class DynamicVoiceChannelService extends LocalService {
 		const oldVoiceState = this.oldVoiceStates.get(newVoiceState.userId);
 
 		if (oldVoiceState === undefined || oldVoiceState.channelId === undefined) {
-			this.#onConnect(newVoiceState);
+			await this.#onConnect(newVoiceState);
 		} else if (newVoiceState.channelId === undefined) {
-			this.#onDisconnect(oldVoiceState);
+			await this.#onDisconnect(oldVoiceState);
 		} else {
-			this.#onConnect(newVoiceState);
-			this.#onDisconnect(oldVoiceState);
+			await this.#onConnect(newVoiceState);
+			await this.#onDisconnect(oldVoiceState);
 		}
 
 		this.oldVoiceStates.set(newVoiceState.userId, newVoiceState);

@@ -245,7 +245,7 @@ class InteractionCollector<
 				parameters,
 			};
 
-			callback(interaction);
+			await callback(interaction);
 		});
 	}
 

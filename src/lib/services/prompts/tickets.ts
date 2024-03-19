@@ -32,9 +32,7 @@ class TicketPromptService extends PromptService<{
 	}
 
 	async getUserDocument(ticketDocument: Ticket): Promise<User> {
-		const userDocument = await User.getOrCreate(this.client, { userId: ticketDocument.authorId });
-
-		return userDocument;
+		return await User.getOrCreate(this.client, { userId: ticketDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, ticketDocument: Ticket): Discord.CreateMessageOptions | undefined {
@@ -119,15 +117,15 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const isResolve = interaction.metadata[1] === "true";
+		const isResolved = interaction.metadata[1] === "true";
 
-		if (isResolve && ticketDocument.isResolved) {
+		if (isResolved && ticketDocument.isResolved) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -136,16 +134,17 @@ class TicketPromptService extends PromptService<{
 					},
 				],
 			});
+
 			return;
 		}
 
-		if (!(isResolve || ticketDocument.isResolved)) {
+		if (!(isResolved || ticketDocument.isResolved)) {
 			const strings = {
 				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -154,11 +153,12 @@ class TicketPromptService extends PromptService<{
 					},
 				],
 			});
+
 			return;
 		}
 
 		await ticketDocument.update(this.client, () => {
-			ticketDocument.isResolved = isResolve;
+			ticketDocument.isResolved = isResolved;
 		});
 
 		return ticketDocument;

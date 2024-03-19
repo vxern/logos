@@ -32,7 +32,7 @@ class EntryService extends LocalService {
 	async start(): Promise<void> {
 		this.#_acceptedRulesButton.onCollect(this.#handleAcceptRules.bind(this));
 
-		this.client.registerInteractionCollector(this.#_acceptedRulesButton);
+		await this.client.registerInteractionCollector(this.#_acceptedRulesButton);
 	}
 
 	async stop(): Promise<void> {
@@ -55,7 +55,7 @@ class EntryService extends LocalService {
 			this.#handlePickLanguageProficiency(buttonPress, { collector: languageProficiencyButtons }),
 		);
 
-		this.client.registerInteractionCollector(languageProficiencyButtons);
+		await this.client.registerInteractionCollector(languageProficiencyButtons);
 
 		const strings = {
 			title: this.client.localise("entry.proficiency.title", buttonPress.locale)(),
@@ -76,7 +76,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		this.client.reply(buttonPress, {
+		await this.client.reply(buttonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -154,7 +154,7 @@ class EntryService extends LocalService {
 
 			requestVerificationButton.onCollect(this.#handleRequestVerification.bind(this));
 
-			this.client.registerInteractionCollector(requestVerificationButton);
+			await this.client.registerInteractionCollector(requestVerificationButton);
 
 			const isVerified = userDocument.isAuthorisedOn({ guildId: this.guildIdString });
 			if (!isVerified) {
@@ -172,7 +172,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				this.client.reply(buttonPress, {
+				await this.client.reply(buttonPress, {
 					embeds: [
 						{
 							title: strings.title,
@@ -195,6 +195,7 @@ class EntryService extends LocalService {
 						},
 					],
 				});
+
 				return;
 			}
 		}
@@ -265,7 +266,7 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			this.client.reply(buttonPress, {
+			await this.client.reply(buttonPress, {
 				embeds: [
 					{
 						title: strings.title,
@@ -288,7 +289,7 @@ class EntryService extends LocalService {
 			authorId: buttonPress.user.id.toString(),
 		});
 
-		createModalComposer<EntryRequest["answers"]>(this.client, buttonPress, {
+		await createModalComposer<EntryRequest["answers"]>(this.client, buttonPress, {
 			modal: this.#generateVerificationQuestionModal(buttonPress.featureLanguage, { locale }),
 			onSubmit: async (submission, answers) => {
 				if (entryRequest !== undefined) {
@@ -297,7 +298,7 @@ class EntryService extends LocalService {
 						description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 					};
 
-					this.client.reply(submission, {
+					await this.client.reply(submission, {
 						embeds: [
 							{
 								title: strings.title,
@@ -319,7 +320,10 @@ class EntryService extends LocalService {
 					answers,
 				});
 
-				this.client.tryLog("entryRequestSubmit", { guildId: guild.id, args: [buttonPress.user, entryRequestDocument] });
+				await this.client.tryLog("entryRequestSubmit", {
+					guildId: guild.id,
+					args: [buttonPress.user, entryRequestDocument],
+				});
 
 				const user = this.client.entities.users.get(buttonPress.user.id);
 				if (user === undefined) {
@@ -346,7 +350,7 @@ class EntryService extends LocalService {
 					},
 				};
 
-				this.client.editReply(submission, {
+				await this.client.editReply(submission, {
 					embeds: [
 						{
 							title: strings.title,
@@ -366,7 +370,7 @@ class EntryService extends LocalService {
 							description: this.client.localise("entry.verification.answers.failed.description", locale)(),
 						};
 
-						this.client.editReply(submission, {
+						await this.client.editReply(submission, {
 							embeds: [
 								{
 									title: strings.title,
@@ -455,7 +459,7 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -478,7 +482,7 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.rejectedBefore.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,

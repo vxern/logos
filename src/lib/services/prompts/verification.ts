@@ -38,10 +38,10 @@ class VerificationPromptService extends PromptService<{
 		await super.start();
 
 		this.#_openInquiry.onCollect(async (selection) => {
-			this.#handleOpenInquiry(selection, selection.metadata[1]);
+			await this.#handleOpenInquiry(selection, selection.metadata[1]);
 		});
 
-		this.client.registerInteractionCollector(this.#_openInquiry);
+		await this.client.registerInteractionCollector(this.#_openInquiry);
 	}
 
 	async stop(): Promise<void> {
@@ -110,9 +110,7 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User> {
-		const userDocument = await User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
-
-		return userDocument;
+		return await User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, entryRequestDocument: EntryRequest): Discord.CreateMessageOptions | undefined {
@@ -282,7 +280,7 @@ class VerificationPromptService extends PromptService<{
 
 		const guild = this.client.entities.guilds.get(BigInt(guildId));
 		if (guild === undefined) {
-			this.#displayVoteError(interaction, { locale });
+			await this.#displayVoteError(interaction, { locale });
 			return undefined;
 		}
 
@@ -290,7 +288,7 @@ class VerificationPromptService extends PromptService<{
 			Model.buildPartialId<EntryRequest>({ guildId, authorId: userId }),
 		);
 		if (entryRequestDocument === undefined) {
-			this.#displayVoteError(interaction, { locale });
+			await this.#displayVoteError(interaction, { locale });
 			return undefined;
 		}
 
@@ -341,7 +339,7 @@ class VerificationPromptService extends PromptService<{
 					const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
 
 					confirmButton.onCollect(async (_) => {
-						this.client.deleteReply(interaction);
+						await this.client.deleteReply(interaction);
 
 						if (entryRequestDocument.isFinalised) {
 							resolve(undefined);
@@ -354,15 +352,15 @@ class VerificationPromptService extends PromptService<{
 					});
 
 					cancelButton.onCollect(async (_) => {
-						this.client.deleteReply(interaction);
+						await this.client.deleteReply(interaction);
 
 						resolve(undefined);
 					});
 
-					this.client.registerInteractionCollector(confirmButton);
-					this.client.registerInteractionCollector(cancelButton);
+					await this.client.registerInteractionCollector(confirmButton);
+					await this.client.registerInteractionCollector(cancelButton);
 
-					this.client.reply(interaction, {
+					await this.client.reply(interaction, {
 						embeds: [{ title: strings.title, description: strings.description, color: constants.colours.peach }],
 						components: [
 							{
@@ -393,7 +391,7 @@ class VerificationPromptService extends PromptService<{
 					description: this.client.localise("entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
 				};
 
-				this.client.reply(interaction, {
+				await this.client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -426,7 +424,7 @@ class VerificationPromptService extends PromptService<{
 					const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
 
 					confirmButton.onCollect(async (_) => {
-						this.client.deleteReply(interaction);
+						await this.client.deleteReply(interaction);
 
 						if (entryRequestDocument.isFinalised) {
 							resolve(undefined);
@@ -439,15 +437,15 @@ class VerificationPromptService extends PromptService<{
 					});
 
 					cancelButton.onCollect(async (_) => {
-						this.client.deleteReply(interaction);
+						await this.client.deleteReply(interaction);
 
 						resolve(undefined);
 					});
 
-					this.client.registerInteractionCollector(confirmButton);
-					this.client.registerInteractionCollector(cancelButton);
+					await this.client.registerInteractionCollector(confirmButton);
+					await this.client.registerInteractionCollector(cancelButton);
 
-					this.client.reply(interaction, {
+					await this.client.reply(interaction, {
 						embeds: [{ title: strings.title, description: strings.description, color: constants.colours.peach }],
 						components: [
 							{
@@ -478,7 +476,7 @@ class VerificationPromptService extends PromptService<{
 					description: this.client.localise("entry.verification.vote.alreadyVoted.against.description", locale)(),
 				};
 
-				this.client.reply(interaction, {
+				await this.client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -508,7 +506,7 @@ class VerificationPromptService extends PromptService<{
 				description: this.client.localise("entry.verification.vote.stanceChanged.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -518,7 +516,7 @@ class VerificationPromptService extends PromptService<{
 				],
 			});
 		} else {
-			this.client.acknowledge(interaction);
+			await this.client.acknowledge(interaction);
 
 			if (isAccept) {
 				votedFor.push(interaction.user.id.toString());
@@ -568,9 +566,9 @@ class VerificationPromptService extends PromptService<{
 			isFinalised = true;
 
 			if (isAccepted) {
-				this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
+				await this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
 			} else {
-				this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
+				await this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
 			}
 		}
 
@@ -584,7 +582,7 @@ class VerificationPromptService extends PromptService<{
 					throw "StateError: Unable to find ticket document.";
 				}
 
-				ticketService.handleDelete(ticketDocument);
+				await ticketService.handleDelete(ticketDocument);
 			}
 		}
 
@@ -686,7 +684,7 @@ class VerificationPromptService extends PromptService<{
 				description: this.client.localise("entry.verification.inquiry.failed.description", this.guildLocale)(),
 			};
 
-			this.client.editReply(interaction, {
+			await this.client.editReply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -723,7 +721,7 @@ class VerificationPromptService extends PromptService<{
 				}),
 			};
 
-			this.client.editReply(interaction, {
+			await this.client.editReply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -784,7 +782,7 @@ class VerificationPromptService extends PromptService<{
 			description: this.client.localise("entry.verification.vote.failed.description", locale)(),
 		};
 
-		this.client.reply(interaction, {
+		await this.client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,

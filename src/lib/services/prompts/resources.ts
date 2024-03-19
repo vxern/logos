@@ -28,9 +28,7 @@ class ResourcePromptService extends PromptService<{
 	}
 
 	async getUserDocument(resourceDocument: Resource): Promise<User> {
-		const userDocument = await User.getOrCreate(this.client, { userId: resourceDocument.authorId });
-
-		return userDocument;
+		return await User.getOrCreate(this.client, { userId: resourceDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, resourceDocument: Resource): Discord.CreateMessageOptions | undefined {
@@ -117,7 +115,7 @@ class ResourcePromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -135,7 +133,7 @@ class ResourcePromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
+			await this.client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -144,6 +142,7 @@ class ResourcePromptService extends PromptService<{
 					},
 				],
 			});
+
 			return;
 		}
 

@@ -161,7 +161,7 @@ async function createModalComposer<ComposerContent, SectionNames extends keyof C
 			resolve([modalSubmit, result]);
 		});
 
-		client.registerInteractionCollector(modalSubmit);
+		await client.registerInteractionCollector(modalSubmit);
 
 		if (content !== undefined) {
 			const answers = Object.values(content) as (string | undefined)[];
@@ -175,7 +175,7 @@ async function createModalComposer<ComposerContent, SectionNames extends keyof C
 			}
 		}
 
-		client.displayModal(anchor, {
+		await client.displayModal(anchor, {
 			title: modal.title,
 			customId: modalSubmit.customId,
 			components: fields,

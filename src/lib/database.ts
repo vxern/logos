@@ -226,11 +226,9 @@ class Database extends ravendb.DocumentStore {
 
 	/**
 	 * @deprecated
-	 *
 	 * Do not use this because it doesn't auto-dispose the session. Use {@link Database.withSession()} instead.
 	 *
 	 * @privateRemarks
-	 *
 	 * This method was reconstructed from the original implementation of the RavenDB `DocumentStore.openSession()`.
 	 */
 	openSession(): DocumentSession {

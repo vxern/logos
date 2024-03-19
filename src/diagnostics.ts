@@ -5,6 +5,8 @@ function isId<T>(object: Indexable<T>): object is bigint | string {
 	return typeof object === "bigint" || typeof object === "string";
 }
 
+// TODO(vxern): This should probably be a class that is well-integrated with the cache to maximise informational
+//  capability.
 const diagnostics = {
 	display: {
 		user: (

@@ -212,12 +212,10 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 		lastEmbed.footer = { text: guild.name, iconUrl: `${Discord.guildIconUrl(guild.id, guild.icon)}&hash=${hash}` };
 
-		const message = await this.client.bot.rest.sendMessage(channelId, contents).catch(() => {
+		return await this.client.bot.rest.sendMessage(channelId, contents).catch(() => {
 			this.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
 			return undefined;
 		});
-
-		return message;
 	}
 
 	registerNotice(noticeId: bigint, hash: string): void {

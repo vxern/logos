@@ -83,12 +83,10 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 		clientOrDatabase: ClientOrDatabase,
 		clauses?: { where?: Partial<IdentifierData<EntryRequest>> },
 	): Promise<EntryRequest[]> {
-		const result = await Model.all<EntryRequest>(clientOrDatabase, {
+		return await Model.all<EntryRequest>(clientOrDatabase, {
 			collection: "EntryRequests",
 			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined }),
 		});
-
-		return result;
 	}
 
 	static async create(

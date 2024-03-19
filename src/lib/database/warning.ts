@@ -35,12 +35,10 @@ class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> 
 		clientOrDatabase: ClientOrDatabase,
 		clauses?: { where?: Partial<IdentifierData<Warning>> },
 	): Promise<Warning[]> {
-		const result = await Model.all<Warning>(clientOrDatabase, {
+		return await Model.all<Warning>(clientOrDatabase, {
 			collection: "Warnings",
 			where: Object.assign({ ...clauses?.where }, { authorId: undefined, targetId: undefined, createdAt: undefined }),
 		});
-
-		return result;
 	}
 
 	static async create(

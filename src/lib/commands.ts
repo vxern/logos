@@ -488,9 +488,8 @@ class CommandStore {
 		}
 
 		const lastUseTimestamps = lastCommandUseTimestamps.get(commandId)!;
-		const relevantTimestamps = lastUseTimestamps.filter((timestamp) => executedAt - timestamp <= intervalMilliseconds);
 
-		return relevantTimestamps;
+		return lastUseTimestamps.filter((timestamp) => executedAt - timestamp <= intervalMilliseconds);
 	}
 
 	getRateLimit(interaction: Logos.Interaction, { executedAt }: { executedAt: number }): RateLimit | undefined {

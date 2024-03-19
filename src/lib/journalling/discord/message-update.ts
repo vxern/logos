@@ -31,14 +31,12 @@ class MessageUpdateEventLogger extends EventLogger<"messageUpdate"> {
 			return undefined;
 		}
 
-		const before = oldMessage !== undefined ? codeMultiline(oldMessage.content) : "*No message*";
-
 		return `${diagnostics.display.user(author)} updated their message in ${mention(message.channelId, {
 			type: "channel",
 		})}.
 
 **BEFORE**
-${before}
+${codeMultiline(oldMessage.content)}
 **AFTER**
 ${codeMultiline(message.content)}`;
 	}

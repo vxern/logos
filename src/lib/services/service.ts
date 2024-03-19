@@ -20,6 +20,7 @@ abstract class Service implements ServiceBase {
 	abstract start(): Promise<void>;
 	abstract stop(): Promise<void>;
 
+	// TODO(vxern): These should be deprecated in favour of creating interaction collectors.
 	async debug(..._: Parameters<ServiceBase["debug"]>) {}
 	async applicationCommandPermissionsUpdate(..._: Parameters<ServiceBase["applicationCommandPermissionsUpdate"]>) {}
 	async guildAuditLogEntryCreate(..._: Parameters<ServiceBase["guildAuditLogEntryCreate"]>) {}

@@ -37,12 +37,10 @@ abstract class PromptService<
 		metadata: [partialId: string, isResolve: string];
 	},
 > extends LocalService {
-	readonly magicButton: InteractionCollector<Generic["metadata"]>;
-	readonly removeButton: InteractionCollector<[partialId: string]>;
-
-	// TODO(vxern): These were protected.
 	readonly documents: Map<string, Generic["model"]>;
 	readonly promptByPartialId: Map</*partialId: */ string, Discord.CamelizedDiscordMessage>;
+	readonly magicButton: InteractionCollector<Generic["metadata"]>;
+	readonly removeButton: InteractionCollector<[partialId: string]>;
 
 	readonly #type: Generic["type"];
 	readonly #deleteMode: PromptDeleteMode;
@@ -248,7 +246,7 @@ abstract class PromptService<
 						description: this.client.localise("cannotRemovePrompt.description", locale)(),
 					};
 
-					this.client.reply(buttonPress, {
+					await this.client.reply(buttonPress, {
 						embeds: [
 							{
 								title: strings.title,
@@ -257,13 +255,17 @@ abstract class PromptService<
 							},
 						],
 					});
-				} else if (this.#deleteMode === "close") {
+
+					return;
+				}
+
+				if (this.#deleteMode === "close") {
 					const strings = {
 						title: this.client.localise("cannotCloseIssue.title", locale)(),
 						description: this.client.localise("cannotCloseIssue.description", locale)(),
 					};
 
-					this.client.reply(buttonPress, {
+					await this.client.reply(buttonPress, {
 						embeds: [
 							{
 								title: strings.title,
@@ -272,12 +274,14 @@ abstract class PromptService<
 							},
 						],
 					});
+
+					return;
 				}
 
 				return;
 			}
 
-			this.client.acknowledge(buttonPress);
+			await this.client.acknowledge(buttonPress);
 
 			const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
 			if (prompt === undefined) {
@@ -289,11 +293,11 @@ abstract class PromptService<
 				return;
 			}
 
-			this.handleDelete(promptDocument);
+			await this.handleDelete(promptDocument);
 		});
 
-		this.client.registerInteractionCollector(this.magicButton);
-		this.client.registerInteractionCollector(this.removeButton);
+		await this.client.registerInteractionCollector(this.magicButton);
+		await this.client.registerInteractionCollector(this.removeButton);
 	}
 
 	async stop(): Promise<void> {
@@ -422,12 +426,11 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		const message = await this.client.bot.rest.sendMessage(channelId, content).catch(() => {
+		return await this.client.bot.rest.sendMessage(channelId, content).catch(() => {
 			this.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+
 			return undefined;
 		});
-
-		return message;
 	}
 
 	registerDocument(promptDocument: Generic["model"]): void {
