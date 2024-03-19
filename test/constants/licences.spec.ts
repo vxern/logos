@@ -6,3 +6,11 @@ describe("The licences object", () => {
 		expect(Object.isFrozen(licences)).to.be.true;
 	});
 });
+
+describe("isValidDictionary()", () => {
+	// TODO(vxern): Test.
+});
+
+describe("getDictionaryLicenceByDictionary()", () => {
+	// TODO(vxern): Test.
+});

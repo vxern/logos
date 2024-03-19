@@ -1,4 +1,5 @@
 import { Locale } from "../../../../../constants/languages";
+import { getDictionaryLicenceByDictionary, isValidDictionary } from "../../../../../constants/licences";
 import { Client } from "../../../../client";
 
 async function handleDisplayDictionaryLicenceAutocomplete(
@@ -29,17 +30,15 @@ async function handleDisplayDictionaryLicence(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	if (!(interaction.parameters.dictionary in constants.licences.dictionaries)) {
+	if (!isValidDictionary(interaction.parameters.dictionary)) {
 		displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
-	// TODO(vxern): Use distinct type instead of keyof typeof.
-	const dictionaryName = interaction.parameters.dictionary as keyof typeof constants.licences.dictionaries;
-	const licenceInformation = constants.licences.dictionaries[dictionaryName];
+	const licence = getDictionaryLicenceByDictionary(interaction.parameters.dictionary);
 
 	const strings = {
-		title: client.localise("license.strings.license", locale)({ entity: licenceInformation.name }),
+		title: client.localise("license.strings.license", locale)({ entity: licence.name }),
 		fields: {
 			source: client.localise("license.strings.source", locale)(),
 			copyright: client.localise("license.strings.copyright", locale)(),
@@ -51,21 +50,21 @@ async function handleDisplayDictionaryLicence(
 			{
 				author: {
 					name: strings.title,
-					iconUrl: "faviconLink" in licenceInformation ? licenceInformation.faviconLink : undefined,
-					url: licenceInformation.link,
+					iconUrl: licence.faviconLink,
+					url: licence.link,
 				},
-				description: `*${licenceInformation.notices.licence}*`,
+				description: `*${licence.notices.licence}*`,
 				color: constants.colours.greenishLightGray,
 				fields: [
 					{
 						name: strings.fields.source,
-						value: licenceInformation.link,
+						value: licence.link,
 					},
-					...("copyright" in licenceInformation.notices
+					...(licence.notices.copyright !== undefined
 						? [
 								{
 									name: strings.fields.copyright,
-									value: licenceInformation.notices.copyright,
+									value: licence.notices.copyright,
 								},
 						  ]
 						: []),

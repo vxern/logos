@@ -80,6 +80,16 @@ const licences = Object.freeze({
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
 } as const);
+type Dictionary = keyof (typeof licences)["dictionaries"];
+
+function isValidDictionary(dictionary: string): dictionary is Dictionary {
+	return dictionary in licences.dictionaries;
+}
+
+function getDictionaryLicenceByDictionary(dictionary: Dictionary): DictionaryLicence {
+	return licences.dictionaries[dictionary];
+}
 
 export default licences;
+export { isValidDictionary, getDictionaryLicenceByDictionary };
 export type { DictionaryLicence };
