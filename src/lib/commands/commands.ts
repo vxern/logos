@@ -70,7 +70,6 @@ import { handlePraiseUser, handlePraiseUserAutocomplete } from "./social/command
 import { handleOpenRoleSelectionMenu } from "./social/commands/profile/roles";
 import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "./social/commands/profile/view";
 
-// TODO(vxern): Type out all the identifiers explicitly.
 // TODO(vxern): Make options named so as to allow referencing specific subcommands.
 /**
  * @privateRemarks

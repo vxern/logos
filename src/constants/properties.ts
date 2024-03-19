@@ -94,6 +94,13 @@ const properties = {
 	},
 	entitlement: {},
 	sku: {},
+	// TODO(vxern): Remove once added in Discordeno.
+	// @ts-ignore: This is fine.
+	voiceState: {
+		guildId: true,
+		channelId: true,
+		userId: true,
+	},
 } as const satisfies Discord.DesiredProperties;
 type Properties = typeof properties;
 

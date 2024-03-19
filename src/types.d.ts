@@ -64,8 +64,7 @@ declare global {
 
 		type Role = Pick<Discord.Role, keyof Properties["role"]>;
 
-		// TODO(vxern): Should this be in the desired properties?
-		type VoiceState = Pick<Discord.VoiceState, "guildId" | "channelId" | "userId">;
+		type VoiceState = Pick<Discord.VoiceState, keyof Properties["voiceState"]>;
 
 		interface InteractionLocaleData {
 			locale: Locale;

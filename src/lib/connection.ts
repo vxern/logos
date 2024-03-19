@@ -54,7 +54,7 @@ class DiscordConnection {
 		});
 
 		// TODO(vxern): Move this to `createBot()` once it's supported.
-		transformers.desiredProperties = constants.properties as Discord.Transformers["desiredProperties"];
+		transformers.desiredProperties = constants.properties as unknown as Discord.Transformers["desiredProperties"];
 
 		return transformers;
 	}
