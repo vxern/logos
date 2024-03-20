@@ -29,7 +29,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -38,6 +38,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 				},
 			],
 		});
+
 		return;
 	}
 

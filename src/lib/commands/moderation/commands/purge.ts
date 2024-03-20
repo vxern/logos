@@ -14,7 +14,7 @@ async function handlePurgeMessagesAutocomplete(
 		return;
 	}
 
-	client.autocompleteMembers(interaction, {
+	await client.autocompleteMembers(interaction, {
 		identifier: interaction.parameters.author,
 		options: { includeBots: true },
 	});
@@ -38,7 +38,7 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	client.postponeReply(interaction);
+	await client.postponeReply(interaction);
 
 	let authorId: bigint | undefined;
 	if (interaction.parameters.author !== undefined) {
@@ -62,7 +62,7 @@ async function handlePurgeMessages(
 	const isStartValid = isValidSnowflake(interaction.parameters.start);
 	const isEndValid = interaction.parameters.end === undefined || isValidSnowflake(interaction.parameters.end);
 	if (!(isStartValid && isEndValid)) {
-		displaySnowflakesInvalidError(client, interaction, [!isStartValid, !isEndValid], { locale });
+		await displaySnowflakesInvalidError(client, interaction, [!isStartValid, !isEndValid], { locale });
 		return;
 	}
 
@@ -79,12 +79,12 @@ async function handlePurgeMessages(
 			.then((messages) => messages?.at(0)?.id?.toString()));
 
 	if (end === undefined) {
-		displayFailedError(client, interaction, { locale });
+		await displayFailedError(client, interaction, { locale });
 		return;
 	}
 
 	if (interaction.parameters.start === end) {
-		displayIdsNotDifferentError(client, interaction, { locale });
+		await displayIdsNotDifferentError(client, interaction, { locale });
 		return;
 	}
 
@@ -107,7 +107,7 @@ async function handlePurgeMessages(
 	const isStartInFuture = startTimestamp > now;
 	const isEndInFuture = endTimestamp > now;
 	if (isStartInFuture || isEndInFuture) {
-		displaySnowflakesInvalidError(client, interaction, [isStartInFuture, isEndInFuture], { locale });
+		await displaySnowflakesInvalidError(client, interaction, [isStartInFuture, isEndInFuture], { locale });
 		return;
 	}
 
@@ -127,7 +127,7 @@ async function handlePurgeMessages(
 	const notExistsStart = startMessage === undefined;
 	const notExistsEnd = endMessage === undefined;
 	if (notExistsStart || notExistsEnd) {
-		displaySnowflakesInvalidError(client, interaction, [notExistsStart, notExistsEnd], { locale });
+		await displaySnowflakesInvalidError(client, interaction, [notExistsStart, notExistsEnd], { locale });
 		return;
 	}
 
@@ -196,7 +196,7 @@ async function handlePurgeMessages(
 		};
 	};
 
-	client.editReply(interaction, getIndexingProgressResponse());
+	await client.editReply(interaction, getIndexingProgressResponse());
 
 	const indexProgressIntervalId = setInterval(() => client.editReply(interaction, getIndexingProgressResponse()), 1500);
 
@@ -220,7 +220,7 @@ async function handlePurgeMessages(
 				},
 			};
 
-			client.editReply(interaction, {
+			await client.editReply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -229,6 +229,7 @@ async function handlePurgeMessages(
 					},
 				],
 			});
+
 			return;
 		}
 
@@ -293,7 +294,7 @@ async function handlePurgeMessages(
 			},
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.indexed.title,
@@ -303,6 +304,7 @@ async function handlePurgeMessages(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -315,17 +317,17 @@ async function handlePurgeMessages(
 		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 		continueButton.onCollect(async (buttonPress) => {
-			client.acknowledge(buttonPress);
+			await client.acknowledge(buttonPress);
 			resolve(true);
 		});
 
 		cancelButton.onCollect(async (buttonPress) => {
-			client.acknowledge(buttonPress);
+			await client.acknowledge(buttonPress);
 			resolve(false);
 		});
 
-		client.registerInteractionCollector(continueButton);
-		client.registerInteractionCollector(cancelButton);
+		await client.registerInteractionCollector(continueButton);
+		await client.registerInteractionCollector(cancelButton);
 
 		const strings = {
 			indexed: {
@@ -369,7 +371,7 @@ async function handlePurgeMessages(
 			no: client.localise("purge.strings.no", locale)(),
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.indexed.title,
@@ -407,7 +409,7 @@ async function handlePurgeMessages(
 		// TODO(vxern): This is currently unsafe because it will hang indefinitely if the user never presses a button.
 		shouldContinue = await promise;
 		if (!shouldContinue) {
-			client.deleteReply(interaction);
+			await client.deleteReply(interaction);
 			return;
 		}
 
@@ -421,17 +423,17 @@ async function handlePurgeMessages(
 		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 		continueButton.onCollect(async (buttonPress) => {
-			client.acknowledge(buttonPress);
+			await client.acknowledge(buttonPress);
 			resolve(true);
 		});
 
 		cancelButton.onCollect(async (buttonPress) => {
-			client.acknowledge(buttonPress);
+			await client.acknowledge(buttonPress);
 			resolve(false);
 		});
 
-		client.registerInteractionCollector(continueButton);
-		client.registerInteractionCollector(cancelButton);
+		await client.registerInteractionCollector(continueButton);
+		await client.registerInteractionCollector(cancelButton);
 
 		const strings = {
 			indexed: {
@@ -463,7 +465,7 @@ async function handlePurgeMessages(
 			no: client.localise("purge.strings.no", locale)(),
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.indexed.title,
@@ -500,7 +502,7 @@ async function handlePurgeMessages(
 
 		const isShouldPurge = await promise;
 		if (!isShouldPurge) {
-			client.deleteReply(interaction);
+			await client.deleteReply(interaction);
 			return;
 		}
 	}
@@ -525,7 +527,7 @@ async function handlePurgeMessages(
 			},
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.purging.title,
@@ -552,7 +554,7 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	client.tryLog("purgeBegin", {
+	await client.tryLog("purgeBegin", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
 		args: [member, channel, messages.length],
@@ -571,8 +573,8 @@ async function handlePurgeMessages(
 
 	const responseDeletionTimeoutId = setTimeout(async () => {
 		responseDeleted = true;
-		client.deleteReply(interaction);
-	}, constants.time.minute * 1);
+		await client.deleteReply(interaction);
+	}, constants.time.minute);
 
 	let deletedCount = 0;
 
@@ -612,7 +614,7 @@ async function handlePurgeMessages(
 		} message(s) in channel ID ${channelId} as requested by ${diagnostics.display.user(interaction.user)}.`,
 	);
 
-	client.tryLog("purgeEnd", {
+	await client.tryLog("purgeEnd", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
 		args: [member, channel, deletedCount],
@@ -638,7 +640,7 @@ async function handlePurgeMessages(
 			},
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.purged.title,
@@ -674,7 +676,7 @@ async function displaySnowflakesInvalidError(
 
 	const areBothInvalid = isStartInvalid && isEndInvalid;
 
-	client.editReply(interaction, {
+	await client.editReply(interaction, {
 		embeds: [
 			{
 				...(areBothInvalid
@@ -707,7 +709,7 @@ async function displayIdsNotDifferentError(
 		description: client.localise("purge.strings.idsNotDifferent.description", locale)(),
 	};
 
-	client.editReply(interaction, {
+	await client.editReply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -728,7 +730,7 @@ async function displayFailedError(
 		description: client.localise("purge.strings.failed.description", locale)(),
 	};
 
-	client.editReply(interaction, {
+	await client.editReply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

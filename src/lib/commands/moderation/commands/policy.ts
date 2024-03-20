@@ -35,7 +35,7 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 				},
 		  ];
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{ embeds: [{ title: strings.title, fields: getModerationPolicyPoints(client, { locale }) }], components },
 		{ visible: interaction.parameters.show },

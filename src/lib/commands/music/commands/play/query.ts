@@ -24,7 +24,7 @@ async function handleRequestQueryPlayback(
 
 	const listing = await resolveToSongListing(client, interaction, interaction.parameters.query);
 
-	handleRequestPlayback(client, interaction, listing);
+	await handleRequestPlayback(client, interaction, listing);
 }
 
 async function handleRequestPlayback(
@@ -46,7 +46,7 @@ async function handleRequestPlayback(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -55,6 +55,7 @@ async function handleRequestPlayback(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -84,7 +85,7 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	musicService.receiveNewListing(listing, channelId);
+	await musicService.receiveNewListing(listing, channelId);
 }
 
 export { handleRequestPlayback, handleRequestQueryPlayback };

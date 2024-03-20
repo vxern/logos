@@ -15,11 +15,11 @@ async function handleSkipToTimestampAutocomplete(
 			autocomplete: client.localise("autocomplete.timestamp", locale)(),
 		};
 
-		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
-	client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+	await client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
 async function handleSkipToTimestamp(
@@ -51,7 +51,7 @@ async function handleSkipToTimestamp(
 			description: client.localise("music.options.skip-to.strings.noSong.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -60,12 +60,13 @@ async function handleSkipToTimestamp(
 				},
 			],
 		});
+
 		return;
 	}
 
 	const timestamp = Number(interaction.parameters.timestamp);
 	if (!Number.isSafeInteger(timestamp)) {
-		displayInvalidTimestampError(client, interaction, { locale });
+		await displayInvalidTimestampError(client, interaction, { locale });
 		return;
 	}
 
@@ -76,7 +77,7 @@ async function handleSkipToTimestamp(
 		description: client.localise("music.options.skip-to.strings.skippedTo.description", locale)(),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [
@@ -101,7 +102,7 @@ async function displayInvalidTimestampError(
 		description: client.localise("music.options.skip-to.strings.invalidTimestamp.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
 	});
 }

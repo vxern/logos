@@ -28,7 +28,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -37,6 +37,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -54,7 +55,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 			)({ volume: constants.MAXIMUM_VOLUME }),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -63,6 +64,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -76,7 +78,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 		)({ volume: interaction.parameters.volume }),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [

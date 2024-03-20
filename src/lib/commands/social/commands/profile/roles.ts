@@ -33,7 +33,7 @@ async function handleOpenRoleSelectionMenu(client: Client, interaction: Logos.In
 
 	const rootCategories = getRoleCategories(constants.roles, guild.id);
 
-	createRoleSelectionMenu(client, interaction, {
+	await createRoleSelectionMenu(client, interaction, {
 		navigationData: {
 			root: {
 				type: "group",
@@ -148,7 +148,7 @@ async function createRoleSelectionMenu(
 	const selectionMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
 
 	selectionMenuSelection.onCollect(async (selection) => {
-		client.acknowledge(selection);
+		await client.acknowledge(selection);
 
 		const identifier = selection.data?.values?.at(0);
 		if (identifier === undefined) {
@@ -242,7 +242,7 @@ async function createRoleSelectionMenu(
 					},
 				};
 
-				client.reply(interaction, {
+				await client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -258,6 +258,7 @@ async function createRoleSelectionMenu(
 					{ editResponse: true },
 					{ locale },
 				);
+
 				return;
 			}
 
@@ -303,7 +304,7 @@ async function createRoleSelectionMenu(
 		);
 	});
 
-	client.registerInteractionCollector(selectionMenuSelection);
+	await client.registerInteractionCollector(selectionMenuSelection);
 
 	let displayData = await traverseRoleTreeAndDisplay(
 		client,
@@ -408,12 +409,12 @@ async function traverseRoleTreeAndDisplay(
 	const menu = await displaySelectMenu(client, data, categories, selectOptions, { locale });
 
 	if (editResponse) {
-		client.editReply(interaction, menu);
+		await client.editReply(interaction, menu);
 
 		return data;
 	}
 
-	client.reply(interaction, menu);
+	await client.reply(interaction, menu);
 
 	return data;
 }

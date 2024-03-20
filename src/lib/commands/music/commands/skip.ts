@@ -43,7 +43,7 @@ async function handleSkipAction(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -52,6 +52,7 @@ async function handleSkipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -72,7 +73,7 @@ async function handleSkipAction(
 				},
 			};
 
-			client.reply(interaction, {
+			await client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -81,6 +82,7 @@ async function handleSkipAction(
 					},
 				],
 			});
+
 			return;
 		}
 	} else if (current?.content === undefined) {
@@ -90,7 +92,7 @@ async function handleSkipAction(
 			description: client.localise("music.options.skip.strings.noSong.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -99,6 +101,7 @@ async function handleSkipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -110,7 +113,7 @@ async function handleSkipAction(
 			description: client.localise("music.strings.skips.tooManyArguments.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -119,6 +122,7 @@ async function handleSkipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -133,7 +137,7 @@ async function handleSkipAction(
 			description: client.localise("music.strings.skips.invalid.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -142,6 +146,7 @@ async function handleSkipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -156,7 +161,7 @@ async function handleSkipAction(
 				description: client.localise("music.options.skip.strings.skippedSong.description", locale)(),
 		  };
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [
@@ -180,7 +185,7 @@ async function handleSkipAction(
 		} else {
 			listingsToSkip = Math.min(interaction.parameters.by, queue.length);
 		}
-		musicService.skip(isSkippingCollection, { by: listingsToSkip });
+		await musicService.skip(isSkippingCollection, { by: listingsToSkip });
 	} else if (interaction.parameters.to !== undefined) {
 		let listingToSkipTo!: number;
 		if (isCollection(current.content) && interaction.parameters.collection === undefined) {
@@ -188,9 +193,9 @@ async function handleSkipAction(
 		} else {
 			listingToSkipTo = Math.min(interaction.parameters.to, queue.length);
 		}
-		musicService.skip(isSkippingCollection, { to: listingToSkipTo });
+		await musicService.skip(isSkippingCollection, { to: listingToSkipTo });
 	} else {
-		musicService.skip(isSkippingCollection, {});
+		await musicService.skip(isSkippingCollection, {});
 	}
 }
 

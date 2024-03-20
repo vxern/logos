@@ -5,6 +5,7 @@ async function handleLoopPlayback(
 	client: Client,
 	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
 ): Promise<void> {
+	// TODO(vxern): Do something about having to declare things like these everywhere.
 	const locale = interaction.guildLocale;
 
 	const guildId = interaction.guildId;
@@ -32,7 +33,7 @@ async function handleLoopPlayback(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -41,6 +42,7 @@ async function handleLoopPlayback(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -61,7 +63,7 @@ async function handleLoopPlayback(
 				},
 			};
 
-			client.reply(interaction, {
+			await client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -70,6 +72,7 @@ async function handleLoopPlayback(
 					},
 				],
 			});
+
 			return;
 		}
 	} else if (current?.content === undefined) {
@@ -79,7 +82,7 @@ async function handleLoopPlayback(
 			description: client.localise("music.options.loop.strings.noSong.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -88,6 +91,7 @@ async function handleLoopPlayback(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -103,7 +107,7 @@ async function handleLoopPlayback(
 				description: client.localise("music.options.loop.strings.disabled.description.songCollection", locale)(),
 			};
 
-			client.reply(
+			await client.reply(
 				interaction,
 				{
 					embeds: [
@@ -116,6 +120,7 @@ async function handleLoopPlayback(
 				},
 				{ visible: true },
 			);
+
 			return;
 		}
 
@@ -124,7 +129,7 @@ async function handleLoopPlayback(
 			description: client.localise("music.options.loop.strings.enabled.description.songCollection", locale)(),
 		};
 
-		client.reply(
+		await client.reply(
 			interaction,
 			{
 				embeds: [
@@ -137,6 +142,7 @@ async function handleLoopPlayback(
 			},
 			{ visible: true },
 		);
+
 		return;
 	}
 
@@ -151,7 +157,7 @@ async function handleLoopPlayback(
 			description: client.localise("music.options.loop.strings.disabled.description.song", locale)(),
 		};
 
-		client.reply(
+		await client.reply(
 			interaction,
 			{
 				embeds: [
@@ -164,6 +170,7 @@ async function handleLoopPlayback(
 			},
 			{ visible: true },
 		);
+
 		return;
 	}
 
@@ -172,7 +179,7 @@ async function handleLoopPlayback(
 		description: client.localise("music.options.loop.strings.enabled.description.song", locale)(),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [

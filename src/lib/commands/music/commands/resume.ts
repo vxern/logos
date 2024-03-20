@@ -28,7 +28,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -37,6 +37,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -51,7 +52,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 			description: client.localise("music.options.resume.strings.notPaused.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -60,6 +61,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -70,7 +72,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		description: client.localise("music.options.resume.strings.resumed.description", locale)(),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [

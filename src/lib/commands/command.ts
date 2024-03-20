@@ -1,6 +1,6 @@
 import { Client } from "../client";
 
-type InteractionHandler = (client: Client, interaction: Logos.Interaction<any, any>) => Promise<void>;
+type InteractionHandler = (client: Client, interaction: Logos.Interaction) => Promise<void>;
 interface OptionFlags {
 	readonly hasRateLimit?: boolean;
 	readonly isShowable?: boolean;

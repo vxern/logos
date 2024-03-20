@@ -8,8 +8,8 @@ async function handleRequestFilePlayback(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	client.postponeReply(interaction);
-	client.deleteReply(interaction);
+	await client.postponeReply(interaction);
+	await client.deleteReply(interaction);
 
 	const strings = {
 		externalFile: client.localise("music.options.play.strings.externalFile", locale)(),
@@ -25,7 +25,7 @@ async function handleRequestFilePlayback(
 		},
 	};
 
-	handleRequestPlayback(client, interaction, listing);
+	await handleRequestPlayback(client, interaction, listing);
 }
 
 export { handleRequestFilePlayback };

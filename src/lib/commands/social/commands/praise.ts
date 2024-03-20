@@ -7,7 +7,7 @@ async function handlePraiseUserAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string }>,
 ): Promise<void> {
-	client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
+	await client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
 }
 
 async function handlePraiseUser(
@@ -43,7 +43,7 @@ async function handlePraiseUser(
 			description: client.localise("praise.strings.cannotPraiseSelf.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -52,6 +52,7 @@ async function handlePraiseUser(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -67,7 +68,7 @@ async function handlePraiseUser(
 			description: client.localise("praise.strings.tooMany.description", locale)(),
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -76,6 +77,7 @@ async function handlePraiseUser(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -90,7 +92,7 @@ async function handlePraiseUser(
 		comment: interaction.parameters.comment,
 	});
 
-	client.tryLog("praiseAdd", {
+	await client.tryLog("praiseAdd", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
 		args: [member, praiseDocument, interaction.user],
@@ -104,7 +106,7 @@ async function handlePraiseUser(
 		)({ user_mention: mention(member.id, { type: "user" }) }),
 	};
 
-	client.editReply(interaction, {
+	await client.editReply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

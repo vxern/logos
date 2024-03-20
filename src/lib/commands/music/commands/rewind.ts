@@ -15,11 +15,11 @@ async function handleRewindAutocomplete(
 			autocomplete: client.localise("autocomplete.timestamp", locale)(),
 		};
 
-		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
-	client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+	await client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 }
 
 async function handleRewind(client: Client, interaction: Logos.Interaction<any, { timestamp: string }>): Promise<void> {
@@ -48,7 +48,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 			description: client.localise("music.options.rewind.strings.noSong.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -57,6 +57,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -66,7 +67,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 
 	const timestamp = Number(interaction.parameters.timestamp);
 	if (!Number.isSafeInteger(timestamp)) {
-		displayInvalidTimestampError(client, interaction, { locale });
+		await displayInvalidTimestampError(client, interaction, { locale });
 		return;
 	}
 
@@ -77,7 +78,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		description: client.localise("music.options.rewind.strings.rewound.description", locale)(),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [
@@ -102,7 +103,7 @@ async function displayInvalidTimestampError(
 		description: client.localise("music.options.rewind.strings.invalidTimestamp.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
 	});
 }

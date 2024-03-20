@@ -1037,7 +1037,7 @@ class MusicService extends LocalService {
 		}
 	}
 
-	replay(replayCollection: boolean): void {
+	async replay(replayCollection: boolean): Promise<void> {
 		const session = this.#session;
 		if (session === undefined) {
 			return;

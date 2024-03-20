@@ -31,14 +31,14 @@ async function handleCiteRuleAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase));
 
-	client.respond(interaction, choices);
+	await client.respond(interaction, choices);
 }
 
 async function handleCiteRule(client: Client, interaction: Logos.Interaction<any, { rule: Rule }>): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	if (!isValidRule(interaction.parameters.rule)) {
-		displayError(client, interaction, { locale: interaction.locale });
+		await displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
@@ -67,7 +67,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 				},
 		  ];
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [
@@ -116,7 +116,7 @@ async function displayError(
 		description: client.localise("rule.strings.invalid.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

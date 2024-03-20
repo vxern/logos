@@ -10,8 +10,8 @@ const resolver: ListingResolver = async (client, interaction, query) => {
 		return search(client, interaction, query);
 	}
 
-	client.postponeReply(interaction);
-	client.deleteReply(interaction);
+	await client.postponeReply(interaction);
+	await client.deleteReply(interaction);
 
 	if (query.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
@@ -38,7 +38,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	const selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	selectMenuSelection.onCollect(async (selection) => {
-		client.deleteReply(interaction);
+		await client.deleteReply(interaction);
 
 		const indexString = selection.data?.values?.at(0) as string | undefined;
 		if (indexString === undefined) {

@@ -32,7 +32,7 @@ async function handleReplayAction(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -41,6 +41,7 @@ async function handleReplayAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -61,7 +62,7 @@ async function handleReplayAction(
 				},
 			};
 
-			client.reply(interaction, {
+			await client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -70,6 +71,7 @@ async function handleReplayAction(
 					},
 				],
 			});
+
 			return;
 		}
 	} else if (current?.content === undefined) {
@@ -79,7 +81,7 @@ async function handleReplayAction(
 			description: client.localise("music.options.replay.strings.noSong.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -88,6 +90,7 @@ async function handleReplayAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -96,7 +99,7 @@ async function handleReplayAction(
 		description: client.localise("music.options.replay.strings.replaying.description", locale)(),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [
@@ -110,7 +113,7 @@ async function handleReplayAction(
 		{ visible: true },
 	);
 
-	musicService.replay(interaction.parameters.collection ?? false);
+	await musicService.replay(interaction.parameters.collection ?? false);
 }
 
 export { handleReplayAction };

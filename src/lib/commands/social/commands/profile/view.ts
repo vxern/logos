@@ -60,7 +60,7 @@ async function handleDisplayProfile(
 				},
 		  ];
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [

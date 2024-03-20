@@ -88,7 +88,7 @@ async function handleUnskipAction(
 			description: client.localise("music.options.unskip.strings.historyEmpty.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -97,6 +97,7 @@ async function handleUnskipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -119,7 +120,7 @@ async function handleUnskipAction(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -128,6 +129,7 @@ async function handleUnskipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -138,7 +140,7 @@ async function handleUnskipAction(
 			description: client.localise("music.options.unskip.strings.queueFull.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -147,6 +149,7 @@ async function handleUnskipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -158,7 +161,7 @@ async function handleUnskipAction(
 			description: client.localise("music.strings.skips.tooManyArguments.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -167,6 +170,7 @@ async function handleUnskipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -181,7 +185,7 @@ async function handleUnskipAction(
 			description: client.localise("music.strings.skips.invalid.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -190,6 +194,7 @@ async function handleUnskipAction(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -198,7 +203,7 @@ async function handleUnskipAction(
 		description: client.localise("music.options.unskip.strings.unskipped.description", locale)(),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [
@@ -215,7 +220,7 @@ async function handleUnskipAction(
 	const isUnskippingCollection = interaction.parameters.collection ?? false;
 
 	if (isUnskippingListing) {
-		musicService.unskip(isUnskippingCollection, { by: interaction.parameters.by, to: interaction.parameters.to });
+		await musicService.unskip(isUnskippingCollection, { by: interaction.parameters.by, to: interaction.parameters.to });
 	} else {
 		if (interaction.parameters.by !== undefined) {
 			let listingsToUnskip!: number;
@@ -229,7 +234,7 @@ async function handleUnskipAction(
 			} else {
 				listingsToUnskip = Math.min(interaction.parameters.by, history.length);
 			}
-			musicService.unskip(isUnskippingCollection, { by: listingsToUnskip });
+			await musicService.unskip(isUnskippingCollection, { by: listingsToUnskip });
 		} else if (interaction.parameters.to !== undefined) {
 			let listingToSkipTo!: number;
 			if (
@@ -242,9 +247,9 @@ async function handleUnskipAction(
 			} else {
 				listingToSkipTo = Math.min(interaction.parameters.to, history.length);
 			}
-			musicService.unskip(isUnskippingCollection, { to: listingToSkipTo });
+			await musicService.unskip(isUnskippingCollection, { to: listingToSkipTo });
 		} else {
-			musicService.unskip(isUnskippingCollection, {});
+			await musicService.unskip(isUnskippingCollection, {});
 		}
 	}
 }

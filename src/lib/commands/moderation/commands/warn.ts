@@ -30,7 +30,7 @@ async function handleWarnUserAutocomplete(
 
 	switch (interaction.parameters.focused) {
 		case "user": {
-			client.autocompleteMembers(interaction, {
+			await client.autocompleteMembers(interaction, {
 				identifier: interaction.parameters.user,
 				options: {
 					restrictToNonSelf: true,
@@ -59,7 +59,7 @@ async function handleWarnUserAutocomplete(
 				{ name: strings.other, value: constants.components.none },
 			];
 
-			client.respond(interaction, choices);
+			await client.respond(interaction, choices);
 			break;
 		}
 	}
@@ -89,7 +89,7 @@ async function handleWarnUser(
 			description: client.localise("warn.strings.invalidRule.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
 		});
 
@@ -141,7 +141,7 @@ async function handleWarnUser(
 		}),
 	]);
 
-	client.tryLog("memberWarnAdd", {
+	await client.tryLog("memberWarnAdd", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
 		args: [member, warningDocument, interaction.user],
@@ -164,7 +164,7 @@ async function handleWarnUser(
 		}),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

@@ -30,7 +30,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -39,6 +39,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -68,7 +69,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 				description: client.localise("music.options.remove.strings.failed.description", locale)(),
 			};
 
-			client.reply(buttonPress, {
+			await client.reply(buttonPress, {
 				embeds: [
 					{
 						title: strings.title,
@@ -77,6 +78,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 					},
 				],
 			});
+
 			return;
 		}
 
@@ -91,7 +93,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			}),
 		};
 
-		client.reply(
+		await client.reply(
 			buttonPress,
 			{
 				embeds: [

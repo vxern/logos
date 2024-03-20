@@ -22,7 +22,7 @@ async function handleToggleSlowmodeAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(levelLowercase));
 
-	client.respond(interaction, choices);
+	await client.respond(interaction, choices);
 }
 
 async function handleToggleSlowmode(
@@ -37,7 +37,7 @@ async function handleToggleSlowmode(
 			description: client.localise("slowmode.strings.invalid.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -46,6 +46,7 @@ async function handleToggleSlowmode(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -81,7 +82,7 @@ async function handleToggleSlowmode(
 						client.log.warn(`Failed to downgrade slowmode level on ${diagnostics.display.channel(channel)}.`),
 					);
 
-				client.tryLog("slowmodeDowngrade", {
+				await client.tryLog("slowmodeDowngrade", {
 					guildId: guild.id,
 					journalling: configuration.journaling,
 					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
@@ -92,7 +93,7 @@ async function handleToggleSlowmode(
 					description: client.localise("slowmode.strings.downgraded.description", locale)(),
 				};
 
-				client.reply(
+				await client.reply(
 					interaction,
 					{
 						embeds: [
@@ -105,6 +106,7 @@ async function handleToggleSlowmode(
 					},
 					{ visible: true },
 				);
+
 				return;
 			}
 
@@ -113,7 +115,7 @@ async function handleToggleSlowmode(
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
 					.catch(() => client.log.warn(`Failed to upgrade slowmode level on ${diagnostics.display.channel(channel)}.`));
 
-				client.tryLog("slowmodeUpgrade", {
+				await client.tryLog("slowmodeUpgrade", {
 					guildId: guild.id,
 					journalling: configuration.journaling,
 					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
@@ -124,7 +126,7 @@ async function handleToggleSlowmode(
 					description: client.localise("slowmode.strings.upgraded.description", locale)(),
 				};
 
-				client.reply(
+				await client.reply(
 					interaction,
 					{
 						embeds: [
@@ -137,6 +139,7 @@ async function handleToggleSlowmode(
 					},
 					{ visible: true },
 				);
+
 				return;
 			}
 
@@ -150,7 +153,7 @@ async function handleToggleSlowmode(
 					},
 				};
 
-				client.reply(interaction, {
+				await client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -160,6 +163,7 @@ async function handleToggleSlowmode(
 					],
 				});
 			}
+
 			return;
 		}
 
@@ -182,7 +186,7 @@ async function handleToggleSlowmode(
 					},
 				};
 
-				client.reply(interaction, {
+				await client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -191,6 +195,7 @@ async function handleToggleSlowmode(
 						},
 					],
 				});
+
 				return;
 			}
 		}
@@ -199,7 +204,7 @@ async function handleToggleSlowmode(
 			.editChannel(channel.id, { rateLimitPerUser: null })
 			.catch(() => client.log.warn(`Failed to disable slowmode on ${diagnostics.display.channel(channel)}.`));
 
-		client.tryLog("slowmodeDisable", {
+		await client.tryLog("slowmodeDisable", {
 			guildId: guild.id,
 			journalling: configuration.journaling,
 			args: [interaction.user, channel],
@@ -210,7 +215,7 @@ async function handleToggleSlowmode(
 			description: client.localise("slowmode.strings.disabled.description", locale)(),
 		};
 
-		client.reply(
+		await client.reply(
 			interaction,
 			{
 				embeds: [
@@ -223,6 +228,7 @@ async function handleToggleSlowmode(
 			},
 			{ visible: true },
 		);
+
 		return;
 	}
 
@@ -234,7 +240,7 @@ async function handleToggleSlowmode(
 			client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}: ${reason}`),
 		);
 
-	client.tryLog("slowmodeEnable", {
+	await client.tryLog("slowmodeEnable", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
 		args: [interaction.user, channel, interaction.parameters.level ?? "lowest"],
@@ -245,7 +251,7 @@ async function handleToggleSlowmode(
 		description: client.localise("slowmode.strings.enabled.description", locale)(),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [

@@ -17,7 +17,7 @@ async function handleSetTimeoutAutocomplete(
 
 	switch (interaction.parameters.focused) {
 		case "user": {
-			client.autocompleteMembers(interaction, {
+			await client.autocompleteMembers(interaction, {
 				identifier: interaction.parameters.focused,
 				options: { restrictToNonSelf: true, excludeModerators: true },
 			});
@@ -30,11 +30,11 @@ async function handleSetTimeoutAutocomplete(
 					autocomplete: client.localise("autocomplete.timestamp", locale)(),
 				};
 
-				client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+				await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 				return;
 			}
 
-			client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+			await client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
 		}
 	}
 }
@@ -76,7 +76,7 @@ async function handleSetTimeout(
 	if (!Number.isSafeInteger(durationParsed)) {
 		const timestamp = parseTimeExpression(client, interaction.parameters.duration, { locale });
 		if (timestamp === undefined) {
-			displayDurationInvalidError(client, interaction, { locale });
+			await displayDurationInvalidError(client, interaction, { locale });
 			return;
 		}
 
@@ -84,12 +84,12 @@ async function handleSetTimeout(
 	}
 
 	if (durationParsed < constants.time.minute) {
-		displayTooShortWarning(client, interaction, { locale });
+		await displayTooShortWarning(client, interaction, { locale });
 		return;
 	}
 
 	if (durationParsed > constants.time.week) {
-		displayTooLongWarning(client, interaction, { locale });
+		await displayTooLongWarning(client, interaction, { locale });
 		return;
 	}
 
@@ -104,7 +104,7 @@ async function handleSetTimeout(
 		.editMember(guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
 		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
 
-	client.tryLog("memberTimeoutAdd", {
+	await client.tryLog("memberTimeoutAdd", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
 		args: [member, until, interaction.parameters.reason, interaction.user],
@@ -121,7 +121,7 @@ async function handleSetTimeout(
 		}),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -142,7 +142,7 @@ async function displayDurationInvalidError(
 		description: client.localise("timeout.strings.durationInvalid.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.darkRed }],
 	});
 }
@@ -157,7 +157,7 @@ async function displayTooShortWarning(
 		description: client.localise("timeout.strings.tooShort.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.yellow }],
 	});
 }
@@ -172,7 +172,7 @@ async function displayTooLongWarning(
 		description: client.localise("timeout.strings.tooLong.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.yellow }],
 	});
 }

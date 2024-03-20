@@ -28,7 +28,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -37,17 +37,18 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 				},
 			],
 		});
+
 		return;
 	}
 
-	musicService.stop();
+	await musicService.stop();
 
 	const strings = {
 		title: client.localise("music.options.stop.strings.stopped.title", locale)(),
 		description: client.localise("music.options.stop.strings.stopped.description", locale)(),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [

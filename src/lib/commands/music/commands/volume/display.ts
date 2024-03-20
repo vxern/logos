@@ -31,7 +31,7 @@ async function handleDisplayVolume(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -40,6 +40,7 @@ async function handleDisplayVolume(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -59,7 +60,7 @@ async function handleDisplayVolume(
 				},
 		  ];
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [

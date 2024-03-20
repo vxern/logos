@@ -150,7 +150,7 @@ abstract class PaginatedViewComponent<T> {
 
 	async open(): Promise<void> {
 		this.#_pageButtons.onCollect(async (buttonPress) => {
-			this.client.acknowledge(buttonPress);
+			await this.client.acknowledge(buttonPress);
 
 			switch (buttonPress.metadata[1]) {
 				case "previous": {
@@ -314,7 +314,7 @@ class PaginatedRemoveSongListingViewComponent extends PaginatedViewComponent<Son
 	async open(): Promise<void> {
 		await super.open();
 
-		this.client.registerInteractionCollector(this.#_selectMenuSelection);
+		await this.client.registerInteractionCollector(this.#_selectMenuSelection);
 	}
 
 	async close(): Promise<void> {

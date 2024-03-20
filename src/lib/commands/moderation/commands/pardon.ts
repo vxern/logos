@@ -29,7 +29,7 @@ async function handlePardonUserAutocomplete(
 
 	switch (interaction.parameters.focused) {
 		case "user": {
-			client.autocompleteMembers(interaction, {
+			await client.autocompleteMembers(interaction, {
 				identifier: interaction.parameters.user,
 				options: {
 					restrictToNonSelf: true,
@@ -51,7 +51,7 @@ async function handlePardonUserAutocomplete(
 				{ locale },
 			);
 			if (member === undefined) {
-				client.respond(interaction, []);
+				await client.respond(interaction, []);
 				return;
 			}
 
@@ -59,7 +59,7 @@ async function handlePardonUserAutocomplete(
 
 			const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 			if (relevantWarnings === undefined) {
-				client.respond(interaction, []);
+				await client.respond(interaction, []);
 				return;
 			}
 
@@ -71,7 +71,7 @@ async function handlePardonUserAutocomplete(
 				}))
 				.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
 
-			client.respond(interaction, choices);
+			await client.respond(interaction, choices);
 			break;
 		}
 	}
@@ -114,7 +114,7 @@ async function handlePardonUser(
 
 	const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
 	if (relevantWarnings === undefined) {
-		displayFailedError(client, interaction, { locale });
+		await displayFailedError(client, interaction, { locale });
 		return;
 	}
 
@@ -122,7 +122,7 @@ async function handlePardonUser(
 		(relevantWarning) => relevantWarning.partialId === interaction.parameters.warning,
 	);
 	if (warning === undefined) {
-		displayInvalidWarningError(client, interaction, { locale });
+		await displayInvalidWarningError(client, interaction, { locale });
 		return;
 	}
 
@@ -133,7 +133,7 @@ async function handlePardonUser(
 		return;
 	}
 
-	client.tryLog("memberWarnRemove", {
+	await client.tryLog("memberWarnRemove", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
 		args: [member, warning, interaction.user],
@@ -182,7 +182,7 @@ async function displayInvalidWarningError(
 		description: client.localise("pardon.strings.invalidWarning.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -203,7 +203,7 @@ async function displayFailedError(
 		description: client.localise("pardon.strings.failed.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

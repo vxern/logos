@@ -35,7 +35,7 @@ async function handleDisplayCurrentlyPlaying(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -44,6 +44,7 @@ async function handleDisplayCurrentlyPlaying(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -66,7 +67,7 @@ async function handleDisplayCurrentlyPlaying(
 				},
 			};
 
-			client.reply(interaction, {
+			await client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -75,6 +76,7 @@ async function handleDisplayCurrentlyPlaying(
 					},
 				],
 			});
+
 			return;
 		}
 	} else if (current?.content === undefined) {
@@ -84,7 +86,7 @@ async function handleDisplayCurrentlyPlaying(
 			description: client.localise("music.options.now.strings.noSong.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -93,6 +95,7 @@ async function handleDisplayCurrentlyPlaying(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -138,7 +141,7 @@ async function handleDisplayCurrentlyPlaying(
 		}),
 	};
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			embeds: [

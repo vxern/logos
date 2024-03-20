@@ -43,7 +43,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 			description: client.localise("suggestion.strings.tooMany.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -52,6 +52,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -60,7 +61,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	createModalComposer<Suggestion["answers"]>(client, interaction, {
+	await createModalComposer<Suggestion["answers"]>(client, interaction, {
 		modal: generateSuggestionModal(client, { locale }),
 		onSubmit: async (submission, answers) => {
 			await client.postponeReply(submission);
@@ -71,7 +72,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 				answers,
 			});
 
-			client.tryLog("suggestionSend", {
+			await client.tryLog("suggestionSend", {
 				guildId: guild.id,
 				journalling: configuration.journaling,
 				args: [member, suggestionDocument],
@@ -135,20 +136,20 @@ async function handleSubmittedInvalidSuggestion(
 	});
 
 	continueButton.onCollect(async (buttonPress) => {
-		client.deleteReply(submission);
+		await client.deleteReply(submission);
 		resolve(buttonPress);
 	});
 
 	cancelButton.onCollect(async (cancelButtonPress) => {
 		returnButton.onCollect(async (returnButtonPress) => {
-			client.deleteReply(submission);
-			client.deleteReply(cancelButtonPress);
+			await client.deleteReply(submission);
+			await client.deleteReply(cancelButtonPress);
 			resolve(returnButtonPress);
 		});
 
 		leaveButton.onCollect(async (_) => {
-			client.deleteReply(submission);
-			client.deleteReply(cancelButtonPress);
+			await client.deleteReply(submission);
+			await client.deleteReply(cancelButtonPress);
 			resolve(undefined);
 		});
 
@@ -159,7 +160,7 @@ async function handleSubmittedInvalidSuggestion(
 			leave: client.localise("prompts.leave", locale)(),
 		};
 
-		client.reply(cancelButtonPress, {
+		await client.reply(cancelButtonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -189,11 +190,12 @@ async function handleSubmittedInvalidSuggestion(
 		});
 	});
 
-	client.registerInteractionCollector(continueButton);
-	client.registerInteractionCollector(cancelButton);
-	client.registerInteractionCollector(returnButton);
-	client.registerInteractionCollector(leaveButton);
+	await client.registerInteractionCollector(continueButton);
+	await client.registerInteractionCollector(cancelButton);
+	await client.registerInteractionCollector(returnButton);
+	await client.registerInteractionCollector(leaveButton);
 
+	// TODO(vxern): Where is this initialised?
 	let embed!: Discord.CamelizedDiscordEmbed;
 	switch (error) {
 		default: {
@@ -202,7 +204,7 @@ async function handleSubmittedInvalidSuggestion(
 				description: client.localise("suggestion.strings.failed", locale)(),
 			};
 
-			client.editReply(submission, {
+			await client.editReply(submission, {
 				embeds: [
 					{
 						title: strings.title,
@@ -221,7 +223,7 @@ async function handleSubmittedInvalidSuggestion(
 		cancel: client.localise("prompts.cancel", locale)(),
 	};
 
-	client.editReply(submission, {
+	await client.editReply(submission, {
 		embeds: [embed],
 		components: [
 			{

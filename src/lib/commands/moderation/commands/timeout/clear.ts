@@ -7,7 +7,7 @@ async function handleClearTimeoutAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string }>,
 ): Promise<void> {
-	client.autocompleteMembers(interaction, {
+	await client.autocompleteMembers(interaction, {
 		identifier: interaction.parameters.user,
 		options: { restrictToNonSelf: true, excludeModerators: true },
 	});
@@ -61,7 +61,7 @@ async function handleClearTimeout(
 			)({ user_mention: mention(user.id, { type: "user" }) }),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -82,7 +82,7 @@ async function handleClearTimeout(
 		.editMember(guildId, member.id, { communicationDisabledUntil: null })
 		.catch(() => client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`));
 
-	client.tryLog("memberTimeoutRemove", {
+	await client.tryLog("memberTimeoutRemove", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
 		args: [member, interaction.user],
@@ -96,7 +96,7 @@ async function handleClearTimeout(
 		)({ user_mention: mention(user.id, { type: "user" }) }),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
