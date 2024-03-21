@@ -1,23 +1,20 @@
 import { Client } from "./client";
 import { Collector } from "./collectors";
 import { Logger } from "./logger";
-import { ServiceStore } from "./services";
 
 type Event = keyof Discord.EventHandlers;
 class EventStore {
 	readonly #log: Logger;
-	readonly #services: ServiceStore;
 	readonly #collectors: Map<Event, Set<Collector<Event>>>;
 
-	constructor(client: Client, { services }: { services: ServiceStore }) {
+	constructor(client: Client) {
 		this.#log = Logger.create({ identifier: "Client/EventStore", isDebug: client.environment.isDebug });
-		this.#services = services;
 		this.#collectors = new Map();
 	}
 
 	buildEventHandlers(): Partial<Discord.EventHandlers> {
 		return {
-			ready: (...args) => this.#services.dispatchToGlobal("ready", { args }),
+			ready: (..._) => {},
 			interactionCreate: (interactionRaw) =>
 				this.dispatchEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] }),
 			guildMemberAdd: (member, user) => this.dispatchEvent(member.guildId, "guildMemberAdd", { args: [member, user] }),
@@ -54,6 +51,7 @@ class EventStore {
 		event: Event,
 		{ args }: { args: Parameters<Discord.EventHandlers[Event]> },
 	): Promise<void> {
+		// TODO(vxern): Dispatch only to the correct guilds.
 		const collectors = this.#collectors.get(event);
 		if (collectors !== undefined) {
 			for (const collector of collectors) {
@@ -64,8 +62,6 @@ class EventStore {
 				collector.dispatchCollect?.(...args);
 			}
 		}
-
-		await this.#services.dispatchEvent(guildId, event, { args });
 	}
 
 	#registerCollector(event: Event, collector: Collector<Event>): void {
