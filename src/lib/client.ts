@@ -29,6 +29,8 @@ interface Environment {
 	readonly ravendbHost: string;
 	readonly ravendbDatabase: string;
 	readonly ravendbSecure: boolean;
+	readonly redisHost?: string;
+	readonly redisPort?: string;
 	readonly lavalinkHost: string;
 	readonly lavalinkPort: string;
 	readonly lavalinkPassword: string;
@@ -208,7 +210,7 @@ class Client {
 		this.environment = environment;
 		this.log = log;
 		this.database = database;
-		this.cache = new Cache();
+		this.cache = new Cache(this);
 
 		this.#localisations = new LocalisationStore(this, { localisations });
 		this.#commands = CommandStore.create(this, {

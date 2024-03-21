@@ -173,8 +173,11 @@ async function setup(): Promise<void> {
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
 		ravendbHost: process.env.RAVENDB_HOST,
+		// TODO(vxern): Add port here.
 		ravendbDatabase: process.env.RAVENDB_DATABASE,
 		ravendbSecure: process.env.RAVENDB_SECURE !== undefined && process.env.RAVENDB_SECURE === "true",
+		redisHost: process.env.REDIS_HOST,
+		redisPort: process.env.REDIS_PORT,
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,

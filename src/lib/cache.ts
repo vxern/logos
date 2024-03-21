@@ -1,10 +1,16 @@
 import Redis from "ioredis";
+import { Client } from "./client";
 
 class Cache {
 	readonly redis: Redis;
 
-	constructor() {
-		this.redis = new Redis({ lazyConnect: true });
+	constructor(client: Client) {
+		this.redis = new Redis({
+			host: client.environment.redisHost,
+			port: client.environment.redisPort !== undefined ? Number(client.environment.redisPort) : undefined,
+			reconnectOnError: (_) => true,
+			lazyConnect: true,
+		});
 	}
 
 	async start(): Promise<void> {
