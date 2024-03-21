@@ -1,7 +1,6 @@
+import { Rule } from "../../constants/rules";
 import { Client } from "../client";
 import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "./model";
-
-type Rule = "behaviour" | "quality" | "relevance" | "suitability" | "exclusivity" | "adherence";
 
 // TODO(vxern): This needs a guild in the ID as well.
 class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> {
@@ -50,6 +49,17 @@ class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> 
 		await warningDocument.create(client);
 
 		return warningDocument;
+	}
+
+	static async getActiveWarnings(
+		clientOrDatabase: ClientOrDatabase,
+		{ timeRangeMilliseconds }: { timeRangeMilliseconds: number },
+	): Promise<Warning[]> {
+		const warnings = await Warning.getAll(clientOrDatabase);
+
+		const now = Date.now();
+
+		return warnings.filter((warning) => now - warning.createdAt <= timeRangeMilliseconds);
 	}
 }
 

@@ -3,7 +3,6 @@ import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { Guild, timeStructToMilliseconds } from "../../../database/guild";
 import { Warning } from "../../../database/warning";
-import { getActiveWarnings } from "../module";
 
 async function handlePardonUserAutocomplete(
 	client: Client,
@@ -55,16 +54,12 @@ async function handlePardonUserAutocomplete(
 				return;
 			}
 
-			const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY);
-
-			const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
-			if (relevantWarnings === undefined) {
-				await client.respond(interaction, []);
-				return;
-			}
+			const warningDocumentsActive = await Warning.getActiveWarnings(client, {
+				timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
+			});
 
 			const warningLowercase = interaction.parameters.warning.toLowerCase();
-			const choices = relevantWarnings
+			const choices = warningDocumentsActive
 				.map<Discord.ApplicationCommandOptionChoice>((warning) => ({
 					name: warning.reason,
 					value: warning.partialId,
@@ -110,23 +105,20 @@ async function handlePardonUser(
 		return;
 	}
 
-	const expiryMilliseconds = timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY);
+	const warningDocumentsActive = await Warning.getActiveWarnings(client, {
+		timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
+	});
 
-	const relevantWarnings = await getRelevantWarnings(client, member, expiryMilliseconds);
-	if (relevantWarnings === undefined) {
-		await displayFailedError(client, interaction, { locale });
-		return;
-	}
-
-	const warning = relevantWarnings.find(
-		(relevantWarning) => relevantWarning.partialId === interaction.parameters.warning,
+	// TODO(vxern): Fetch the document directly.
+	const warningDocument = warningDocumentsActive.find(
+		(warningDocument) => warningDocument.partialId === interaction.parameters.warning,
 	);
-	if (warning === undefined) {
+	if (warningDocument === undefined) {
 		await displayInvalidWarningError(client, interaction, { locale });
 		return;
 	}
 
-	await warning.delete(client);
+	await warningDocument.delete(client);
 
 	const guild = client.entities.guilds.get(guildId);
 	if (guild === undefined) {
@@ -136,7 +128,7 @@ async function handlePardonUser(
 	await client.tryLog("memberWarnRemove", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
-		args: [member, warning, interaction.user],
+		args: [member, warningDocument, interaction.user],
 	});
 
 	const strings = {
@@ -146,11 +138,11 @@ async function handlePardonUser(
 			locale,
 		)({
 			user_mention: mention(member.id, { type: "user" }),
-			reason: warning.reason,
+			reason: warningDocument.reason,
 		}),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,
@@ -161,17 +153,6 @@ async function handlePardonUser(
 	});
 }
 
-async function getRelevantWarnings(
-	client: Client,
-	member: Logos.Member,
-	expirationMilliseconds: number,
-): Promise<Warning[] | undefined> {
-	const warningDocuments = await Warning.getAll(client, { where: { targetId: member.id.toString() } });
-
-	const relevantWarnings = getActiveWarnings(warningDocuments, expirationMilliseconds).reverse();
-	return relevantWarnings;
-}
-
 async function displayInvalidWarningError(
 	client: Client,
 	interaction: Logos.Interaction,
@@ -180,27 +161,6 @@ async function displayInvalidWarningError(
 	const strings = {
 		title: client.localise("pardon.strings.invalidWarning.title", locale)(),
 		description: client.localise("pardon.strings.invalidWarning.description", locale)(),
-	};
-
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
-	});
-}
-
-async function displayFailedError(
-	client: Client,
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Promise<void> {
-	const strings = {
-		title: client.localise("pardon.strings.failed.title", locale)(),
-		description: client.localise("pardon.strings.failed.description", locale)(),
 	};
 
 	await client.reply(interaction, {

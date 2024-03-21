@@ -4,8 +4,7 @@ import { mention } from "../../../../formatting";
 import { Client } from "../../../client";
 import { timeStructToMilliseconds } from "../../../database/guild";
 import { Guild } from "../../../database/guild";
-import { Rule, Warning } from "../../../database/warning";
-import { getActiveWarnings } from "../module";
+import { Warning } from "../../../database/warning";
 import { getRuleTitleFormatted } from "./rule";
 
 async function handleWarnUserAutocomplete(
@@ -130,16 +129,12 @@ async function handleWarnUser(
 	}
 
 	// TODO(vxern): Test this.
-	const [warningDocuments, warningDocument] = await Promise.all([
-		Warning.getAll(client, { where: { targetId: member.id.toString() } }),
-		Warning.create(client, {
-			authorId: interaction.user.id.toString(),
-			targetId: member.id.toString(),
-			reason: interaction.parameters.reason,
-			rule:
-				interaction.parameters.rule === constants.components.none ? undefined : (interaction.parameters.rule as Rule),
-		}),
-	]);
+	const warningDocument = await Warning.create(client, {
+		authorId: interaction.user.id.toString(),
+		targetId: member.id.toString(),
+		reason: interaction.parameters.reason,
+		rule: interaction.parameters.rule === constants.components.none ? undefined : interaction.parameters.rule,
+	});
 
 	await client.tryLog("memberWarnAdd", {
 		guildId: guild.id,
@@ -147,9 +142,9 @@ async function handleWarnUser(
 		args: [member, warningDocument, interaction.user],
 	});
 
-	const expirationMilliseconds = timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY);
-
-	const relevantWarnings = getActiveWarnings(warningDocuments, expirationMilliseconds);
+	const warningDocumentsActive = await Warning.getActiveWarnings(client, {
+		timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
+	});
 
 	const strings = {
 		title: client.localise("warn.strings.warned.title", locale)(),
@@ -159,7 +154,7 @@ async function handleWarnUser(
 		)({
 			user_mention: mention(member.id, { type: "user" }),
 			warnings: client.pluralise("warn.strings.warned.description.warnings", locale, {
-				quantity: relevantWarnings.length,
+				quantity: warningDocumentsActive.length,
 			}),
 		}),
 	};
@@ -174,7 +169,7 @@ async function handleWarnUser(
 		],
 	});
 
-	const surpassedLimit = relevantWarnings.length > configuration.limit;
+	const surpassedLimit = warningDocumentsActive.length > configuration.limit;
 	if (surpassedLimit) {
 		let strings: { title: string; description: string };
 		if (configuration.autoTimeout?.enabled) {
@@ -189,7 +184,7 @@ async function handleWarnUser(
 				)({
 					user_mention: mention(user.id, { type: "user" }),
 					limit: configuration.limit,
-					number: relevantWarnings.length,
+					number: warningDocumentsActive.length,
 					period: client.pluralise(`units.${timeout[1]}.word`, locale, { quantity: timeout[0] }),
 				}),
 			};
@@ -211,7 +206,7 @@ async function handleWarnUser(
 				)({
 					user_mention: mention(user.id, { type: "user" }),
 					limit: configuration.limit,
-					number: relevantWarnings.length,
+					number: warningDocumentsActive.length,
 				}),
 			};
 		}
@@ -232,7 +227,7 @@ async function handleWarnUser(
 		return;
 	}
 
-	const reachedLimit = relevantWarnings.length === constants.defaults.WARN_LIMIT;
+	const reachedLimit = warningDocumentsActive.length === constants.defaults.WARN_LIMIT;
 	if (reachedLimit) {
 		const locale = interaction.guildLocale;
 		const strings = {
