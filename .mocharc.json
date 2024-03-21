@@ -1,9 +1,0 @@
-{
-  "$schema": "https://json.schemastore.org/mocharc",
-  "spec": "test/**/*.spec.ts",
-  "node-option": [
-    "experimental-specifier-resolution=node",
-    "import=tsx/esm",
-    "trace-uncaught"
-  ]
-}
