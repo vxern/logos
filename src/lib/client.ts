@@ -219,7 +219,7 @@ class Client {
 		});
 		this.#interactions = new InteractionStore(this, { bot });
 		this.#services = new ServiceStore(this);
-		this.#events = new EventStore(this, { services: this.#services });
+		this.#events = new EventStore(this);
 		this.#connection = new DiscordConnection(this, { bot, events: this.#events.buildEventHandlers() });
 		this.#journalling = new JournallingStore(this);
 
