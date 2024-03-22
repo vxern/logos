@@ -19,7 +19,7 @@ async function handleDisplayWarningsAutocomplete(
 
 	const isModerator = permissions.has("MODERATE_MEMBERS");
 
-	client.autocompleteMembers(interaction, {
+	await client.autocompleteMembers(interaction, {
 		identifier: interaction.parameters.user,
 		options: {
 			// Stops normal members from viewing other people's warnings.
@@ -60,7 +60,7 @@ async function handleDisplayWarnings(
 
 	const warningDocuments = await Warning.getAll(client, { where: { targetId: member.id.toString() } });
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [getWarningPage(client, warningDocuments, isSelf, { locale })],
 	});
 }

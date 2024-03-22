@@ -5,7 +5,7 @@ import { Client } from "../../../client";
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
-	client.reply(interaction, { embeds: [getTranslationView(client, { locale })] });
+	await client.reply(interaction, { embeds: [getTranslationView(client, { locale })] });
 }
 
 function getTranslationView(client: Client, { locale }: { locale: Locale }): Discord.CamelizedDiscordEmbed {

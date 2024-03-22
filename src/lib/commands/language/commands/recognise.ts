@@ -9,7 +9,12 @@ async function handleRecogniseLanguageChatInput(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	handleRecogniseLanguage(client, interaction, { text: interaction.parameters.text, isMessage: false }, { locale });
+	await handleRecogniseLanguage(
+		client,
+		interaction,
+		{ text: interaction.parameters.text, isMessage: false },
+		{ locale },
+	);
 }
 
 async function handleRecogniseLanguageMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -27,7 +32,7 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 			description: client.localise("recognize.strings.cannotUse.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -36,12 +41,13 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 				},
 			],
 		});
+
 		return;
 	}
 
 	const text = message.content;
 
-	handleRecogniseLanguage(client, interaction, { text, isMessage: true }, { locale });
+	await handleRecogniseLanguage(client, interaction, { text, isMessage: true }, { locale });
 }
 
 async function handleRecogniseLanguage(
@@ -57,7 +63,7 @@ async function handleRecogniseLanguage(
 			description: client.localise("recognize.strings.textEmpty.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -66,6 +72,7 @@ async function handleRecogniseLanguage(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -82,7 +89,7 @@ async function handleRecogniseLanguage(
 			},
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -91,6 +98,7 @@ async function handleRecogniseLanguage(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -114,7 +122,7 @@ async function handleRecogniseLanguage(
 			color: constants.colours.blue,
 		});
 
-		client.editReply(interaction, { embeds });
+		await client.editReply(interaction, { embeds });
 		return;
 	}
 
@@ -208,7 +216,7 @@ async function handleRecogniseLanguage(
 		embeds.push(embed);
 	}
 
-	client.editReply(interaction, { embeds });
+	await client.editReply(interaction, { embeds });
 }
 
 async function detectLanguages({ text }: { text: string }): Promise<DetectedLanguagesSorted> {
@@ -226,9 +234,7 @@ async function detectLanguages({ text }: { text: string }): Promise<DetectedLang
 		detectionFrequencies[detectedLanguage] = (detectionFrequencies[detectedLanguage] ?? 1) + 1;
 	}
 
-	const languagesSorted = getLanguagesSorted(detectionFrequencies);
-
-	return languagesSorted;
+	return getLanguagesSorted(detectionFrequencies);
 }
 
 type DetectedLanguagesSorted = {

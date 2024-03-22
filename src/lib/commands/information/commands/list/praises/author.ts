@@ -10,7 +10,7 @@ async function handleDisplayPraisesByAuthorAutocomplete(
 		return;
 	}
 
-	client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
+	await client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
 }
 
 async function handleDisplayPraisesByAuthor(
@@ -37,7 +37,7 @@ async function handleDisplayPraisesByAuthor(
 
 	const praiseDocuments = await Praise.getAll(client, { where: { authorId: member.id.toString() } });
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [getPraisePage(client, praiseDocuments, isSelf, "author", { locale })],
 	});
 }

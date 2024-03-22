@@ -24,7 +24,7 @@ async function handleSetLanguageAutocomplete(
 			autocomplete: client.localise("autocomplete.language", locale)(),
 		};
 
-		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
@@ -37,7 +37,7 @@ async function handleSetLanguageAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(languageLowercase));
 
-	client.respond(interaction, choices);
+	await client.respond(interaction, choices);
 }
 
 async function handleSetLanguage(
@@ -47,7 +47,7 @@ async function handleSetLanguage(
 	const localeBefore = interaction.locale;
 
 	if (!isLocalisationLanguage(interaction.parameters.language)) {
-		displayError(client, interaction, { locale: interaction.locale });
+		await displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
@@ -67,7 +67,7 @@ async function handleSetLanguage(
 			}),
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -117,7 +117,7 @@ async function displayError(
 		description: client.localise("settings.strings.invalid.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

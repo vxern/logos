@@ -27,7 +27,7 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 		},
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

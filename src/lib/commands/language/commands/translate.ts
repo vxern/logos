@@ -40,7 +40,7 @@ async function handleTranslateChatInputAutocomplete(
 			autocomplete: client.localise("autocomplete.language", locale)(),
 		};
 
-		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
@@ -69,14 +69,14 @@ async function handleTranslateChatInputAutocomplete(
 		.slice(0, 25)
 		.sort((previous, next) => previous.name.localeCompare(next.name));
 
-	client.respond(interaction, choices);
+	await client.respond(interaction, choices);
 }
 
 async function handleTranslateChatInput(
 	client: Client,
 	interaction: Logos.Interaction<any, { text: string; from: string | undefined; to: string | undefined }>,
 ): Promise<void> {
-	handleTranslate(client, interaction, interaction.parameters);
+	await handleTranslate(client, interaction, interaction.parameters);
 }
 
 async function handleTranslateMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
@@ -94,7 +94,7 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 			description: client.localise("translate.strings.cannotUse.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -103,10 +103,11 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 				},
 			],
 		});
+
 		return;
 	}
 
-	handleTranslate(client, interaction, { text: message.content });
+	await handleTranslate(client, interaction, { text: message.content });
 }
 
 async function handleTranslate(
@@ -126,7 +127,7 @@ async function handleTranslate(
 			description: client.localise("translate.strings.textEmpty.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -155,7 +156,7 @@ async function handleTranslate(
 				},
 			};
 
-			client.reply(interaction, {
+			await client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.both.title,
@@ -176,7 +177,7 @@ async function handleTranslate(
 				},
 			};
 
-			client.reply(interaction, {
+			await client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.source.title,
@@ -197,7 +198,7 @@ async function handleTranslate(
 				},
 			};
 
-			client.reply(interaction, {
+			await client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.target.title,
@@ -219,7 +220,7 @@ async function handleTranslate(
 					description: client.localise("translate.strings.languagesNotDifferent.description", locale)(),
 				};
 
-				client.reply(interaction, {
+				await client.reply(interaction, {
 					embeds: [
 						{
 							title: strings.title,
@@ -228,10 +229,11 @@ async function handleTranslate(
 						},
 					],
 				});
+
 				return;
 			}
 
-			translateText(client, interaction, { text, languages: { source: from, target: to } }, { locale });
+			await translateText(client, interaction, { text, languages: { source: from, target: to } }, { locale });
 			return;
 		}
 
@@ -256,7 +258,7 @@ async function handleTranslate(
 
 	if (to !== undefined) {
 		if (to !== sourceLanguage) {
-			translateText(client, interaction, { text, languages: { source: sourceLanguage, target: to } }, { locale });
+			await translateText(client, interaction, { text, languages: { source: sourceLanguage, target: to } }, { locale });
 			return;
 		}
 	}
@@ -264,12 +266,13 @@ async function handleTranslate(
 	const learningTranslationLanguage = getTranslationLanguage(interaction.learningLanguage);
 	if (learningTranslationLanguage !== undefined) {
 		if (learningTranslationLanguage !== sourceLanguage) {
-			translateText(
+			await translateText(
 				client,
 				interaction,
 				{ text, languages: { source: sourceLanguage, target: learningTranslationLanguage } },
 				{ locale },
 			);
+
 			return;
 		}
 	}
@@ -289,7 +292,7 @@ async function handleTranslate(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -316,7 +319,7 @@ async function handleTranslate(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -329,7 +332,7 @@ async function handleTranslate(
 		return;
 	}
 
-	translateText(
+	await translateText(
 		client,
 		interaction,
 		{ text, languages: { source: sourceLanguage, target: translationLanguage } },
@@ -350,7 +353,7 @@ async function translateText(
 			description: client.localise("translate.strings.noTranslationAdapters.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -359,6 +362,7 @@ async function translateText(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -381,7 +385,7 @@ async function translateText(
 			description: client.localise("translate.strings.failed.description", locale)(),
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -407,7 +411,7 @@ async function translateText(
 
 	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
 
-	let embeds: Discord.CamelizedDiscordEmbed[] = [];
+	let embeds: Discord.CamelizedDiscordEmbed[];
 	if (isLong) {
 		embeds = [
 			{
@@ -456,7 +460,7 @@ async function translateText(
 				},
 		  ];
 
-	client.editReply(interaction, { embeds, components });
+	await client.editReply(interaction, { embeds, components });
 }
 
 async function detectLanguage(
@@ -479,7 +483,7 @@ async function detectLanguage(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -501,7 +505,7 @@ async function detectLanguage(
 			description: client.localise("translate.strings.languageNotSupported.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,

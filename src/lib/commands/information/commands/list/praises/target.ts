@@ -10,7 +10,7 @@ async function handleDisplayPraisesByTargetAutocomplete(
 		return;
 	}
 
-	client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
+	await client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
 }
 
 async function handleDisplayPraisesByTarget(
@@ -37,7 +37,7 @@ async function handleDisplayPraisesByTarget(
 
 	const praiseDocuments = await Praise.getAll(client, { where: { targetId: member.id.toString() } });
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [getPraisePage(client, praiseDocuments, isSelf, "target", { locale })],
 	});
 }

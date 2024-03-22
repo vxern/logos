@@ -41,7 +41,7 @@ async function handleStartCorrecting(
 			description: client.localise("correction.strings.cannotCorrect.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -50,6 +50,7 @@ async function handleStartCorrecting(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -59,7 +60,7 @@ async function handleStartCorrecting(
 			description: client.localise("correction.strings.cannotCorrectOwn.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -68,6 +69,7 @@ async function handleStartCorrecting(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -86,7 +88,7 @@ async function handleStartCorrecting(
 				description: client.localise("correction.strings.userDoesNotWantCorrections.description", locale)(),
 			};
 
-			client.reply(interaction, {
+			await client.reply(interaction, {
 				embeds: [
 					{
 						title: strings.title,
@@ -95,6 +97,7 @@ async function handleStartCorrecting(
 					},
 				],
 			});
+
 			return;
 		}
 	}
@@ -111,7 +114,7 @@ async function handleStartCorrecting(
 			},
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -120,6 +123,7 @@ async function handleStartCorrecting(
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -128,7 +132,7 @@ async function handleStartCorrecting(
 		corrected: "",
 	};
 
-	createModalComposer(client, interaction, {
+	await createModalComposer(client, interaction, {
 		modal: generateCorrectionModal(client, data, openMode, { locale }),
 		onSubmit: async (submission, data) => {
 			if (data.corrected === data.original) {
@@ -143,7 +147,7 @@ async function handleStartCorrecting(
 				)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
 			};
 
-			client.acknowledge(submission);
+			await client.acknowledge(submission);
 
 			client.bot.rest
 				.sendMessage(message.channelId, {

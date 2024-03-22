@@ -22,7 +22,7 @@ async function handleDisplaySoftwareLicenceAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(packageLowercase));
 
-	client.respond(interaction, choices);
+	await client.respond(interaction, choices);
 }
 
 async function handleDisplaySoftwareLicence(

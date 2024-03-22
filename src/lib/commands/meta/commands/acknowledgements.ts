@@ -17,7 +17,7 @@ async function handleDisplayAcknowledgements(client: Client, interaction: Logos.
 		};
 	});
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.acknowledgements,

@@ -39,7 +39,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 		buttons.push(client.interactionRepetitionService.getShowButton(interaction, { locale }));
 	}
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{
 			components: [

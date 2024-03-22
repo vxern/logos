@@ -13,7 +13,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 			description: client.localise("settings.strings.cannotClear.description", locale)(),
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -22,6 +22,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -35,7 +36,7 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 			description: client.localise("settings.strings.cleared.description", locale)(),
 		};
 
-		client.editReply(interaction, {
+		await client.editReply(interaction, {
 			embeds: [
 				{
 					title: strings.title,

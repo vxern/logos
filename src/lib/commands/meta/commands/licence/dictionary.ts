@@ -21,7 +21,7 @@ async function handleDisplayDictionaryLicenceAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(dictionaryLowercase));
 
-	client.respond(interaction, choices);
+	await client.respond(interaction, choices);
 }
 
 async function handleDisplayDictionaryLicence(
@@ -31,7 +31,7 @@ async function handleDisplayDictionaryLicence(
 	const locale = interaction.locale;
 
 	if (!isValidDictionary(interaction.parameters.dictionary)) {
-		displayError(client, interaction, { locale: interaction.locale });
+		await displayError(client, interaction, { locale: interaction.locale });
 		return;
 	}
 
@@ -45,7 +45,7 @@ async function handleDisplayDictionaryLicence(
 		},
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				author: {
@@ -84,7 +84,7 @@ async function displayError(
 		description: client.localise("licenses.strings.invalid.description", locale)(),
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				title: strings.title,

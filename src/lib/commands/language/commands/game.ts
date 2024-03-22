@@ -82,7 +82,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	const skipButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	guessButton.onCollect(async (buttonPress) => {
-		client.acknowledge(buttonPress);
+		await client.acknowledge(buttonPress);
 
 		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === buttonPress.metadata[1]);
 		const isCorrect = pick === data.sentenceSelection.correctPick;
@@ -100,11 +100,14 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 			data.embedColour = constants.colours.lightGreen;
 			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-			client.editReply(interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
+			await client.editReply(
+				interaction,
+				await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+			);
 		} else {
 			data.embedColour = constants.colours.red;
 
-			client.editReply(
+			await client.editReply(
 				interaction,
 				await getGameView(client, data, userDocument, "reveal", { locale, learningLocale }),
 			);
@@ -112,16 +115,19 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	});
 
 	skipButton.onCollect(async (buttonPress) => {
-		client.acknowledge(buttonPress);
+		await client.acknowledge(buttonPress);
 
 		data.embedColour = constants.colours.blue;
 		data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 
-		client.editReply(interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
+		await client.editReply(
+			interaction,
+			await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+		);
 	});
 
-	client.registerInteractionCollector(guessButton);
-	client.registerInteractionCollector(skipButton);
+	await client.registerInteractionCollector(guessButton);
+	await client.registerInteractionCollector(skipButton);
 
 	const data: GameData = {
 		sentenceSelection: await getSentenceSelection(client, learningLocale),
@@ -131,7 +137,10 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		sessionScore: 0,
 	};
 
-	client.editReply(interaction, await getGameView(client, data, userDocument, "hide", { locale, learningLocale }));
+	await client.editReply(
+		interaction,
+		await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+	);
 }
 
 async function getGameView(
@@ -250,7 +259,7 @@ async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
 		throw "StateError: Failed to get random indexes for sentence pairs.";
 	}
 
-	const indexes = results.map((result) => {
+	return results.map((result) => {
 		const [error, index] = result as [Error | null, string | null];
 		if ((error ?? undefined) !== undefined || (index ?? undefined) === undefined) {
 			throw `StateError: Failed to get random index for sentence pair: ${index}`;
@@ -258,8 +267,6 @@ async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
 
 		return index as string;
 	});
-
-	return indexes;
 }
 
 /** Represents a pair of a sentence and its translation. */
@@ -291,8 +298,7 @@ async function getSentencePairsByIds(client: Client, locale: Locale, ids: string
 		promises.push(getSentencePairById(client, locale, id));
 	}
 
-	const sentencePairs = await Promise.all(promises);
-	return sentencePairs;
+	return await Promise.all(promises);
 }
 
 function getWords(...sentences: string[]): string[] {

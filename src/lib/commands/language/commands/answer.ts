@@ -33,7 +33,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 			description: client.localise("answer.strings.cannotAnswer.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -42,6 +42,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -51,7 +52,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 			description: client.localise("answer.strings.cannotAnswerOwn.description", locale)(),
 		};
 
-		client.reply(interaction, {
+		await client.reply(interaction, {
 			embeds: [
 				{
 					title: strings.title,
@@ -60,6 +61,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 				},
 			],
 		});
+
 		return;
 	}
 
@@ -68,10 +70,10 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 		answer: "",
 	};
 
-	createModalComposer(client, interaction, {
+	await createModalComposer(client, interaction, {
 		modal: generateAnswerModal(client, data, { locale }),
 		onSubmit: async (submission, data) => {
-			client.acknowledge(submission);
+			await client.acknowledge(submission);
 
 			const strings = {
 				answer: client.localise("answer.strings.answer", locale)(),

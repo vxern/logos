@@ -44,7 +44,7 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 		`${constants.emojis.bot.features.guides} ${strings.function.features.guides}`,
 	]);
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				author: {

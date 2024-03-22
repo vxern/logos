@@ -54,7 +54,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 		},
 	};
 
-	client.reply(interaction, {
+	await client.reply(interaction, {
 		embeds: [
 			{
 				author: {

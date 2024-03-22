@@ -11,6 +11,7 @@ interface Data {
 	tab: Tab;
 }
 
+// TODO(vxern): Refactor the view stuff into a component.
 async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
@@ -51,9 +52,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 			}
 		}
 
-		const embed = tab[data.bracket];
-
-		return embed;
+		return tab[data.bracket];
 	};
 
 	const strings = {
@@ -149,38 +148,36 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 			tabButtonComponents.push(client.interactionRepetitionService.getShowButton(interaction, { locale }));
 		}
 
-		const rows: Discord.ActionRow[] = [
+		return [
 			{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtonComponents },
 			{ type: Discord.MessageComponentTypes.ActionRow, components: tabButtonComponents },
 		];
-
-		return rows;
 	};
 
 	const refreshView = async () => {
-		client.editReply(interaction, { embeds: [getEmbed()], components: getButtons() });
+		await client.editReply(interaction, { embeds: [getEmbed()], components: getButtons() });
 	};
 
 	bracketButtons.onCollect(async (buttonPress) => {
-		client.acknowledge(buttonPress);
+		await client.acknowledge(buttonPress);
 
 		data.bracket = buttonPress.metadata[1];
 
-		refreshView();
+		await refreshView();
 	});
 
 	tabButtons.onCollect(async (buttonPress) => {
-		client.acknowledge(buttonPress);
+		await client.acknowledge(buttonPress);
 
 		data.tab = buttonPress.metadata[1];
 
-		refreshView();
+		await refreshView();
 	});
 
-	client.registerInteractionCollector(bracketButtons);
-	client.registerInteractionCollector(tabButtons);
+	await client.registerInteractionCollector(bracketButtons);
+	await client.registerInteractionCollector(tabButtons);
 
-	client.reply(
+	await client.reply(
 		interaction,
 		{ embeds: [getEmbed()], components: getButtons() },
 		{ visible: interaction.parameters.show },
