@@ -445,7 +445,7 @@ class Client {
 		}
 
 		try {
-			await handle(this, interaction);
+			await handle(this, interaction, interaction);
 		} catch (exception) {
 			this.log.error(exception);
 		}
