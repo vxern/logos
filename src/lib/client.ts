@@ -4,22 +4,22 @@ import diagnostics from "logos:core/diagnostics";
 import { timestamp, trim } from "logos:core/formatting";
 import { Cache } from "logos/cache";
 import { Collector, InteractionCollector } from "logos/collectors";
-import { CommandStore } from "logos/commands";
 import commandTemplates from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
-import { Database } from "logos/database";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
-import { EventStore } from "logos/events";
-import { InteractionStore } from "logos/interactions";
-import { JournallingStore } from "logos/journalling";
-import { LocalisationBuilder, LocalisationStore, RawLocalisations } from "logos/localisations";
 import { Logger } from "logos/logger";
-import { ServiceStore } from "logos/services";
 import { InteractionRepetitionService } from "logos/services/interaction-repetition";
 import { LavalinkService } from "logos/services/lavalink";
 import { RealtimeUpdateService } from "logos/services/realtime-updates";
 import { StatusService } from "logos/services/status";
+import { CommandStore } from "logos/stores/commands";
+import { Database } from "logos/stores/database";
+import { EventStore } from "logos/stores/events";
+import { InteractionStore } from "logos/stores/interactions";
+import { JournallingStore } from "logos/stores/journalling";
+import { LocalisationBuilder, LocalisationStore, RawLocalisations } from "logos/stores/localisations";
+import { ServiceStore } from "logos/stores/services";
 
 interface Environment {
 	readonly isDebug: boolean;
@@ -54,8 +54,8 @@ class Client {
 	readonly #interactions: InteractionStore;
 	readonly #services: ServiceStore;
 	readonly #events: EventStore;
-	readonly #connection: DiscordConnection;
 	readonly #journalling: JournallingStore;
+	readonly #connection: DiscordConnection;
 
 	readonly #_guildCreateCollector: Collector<"guildCreate">;
 	readonly #_guildDeleteCollector: Collector<"guildDelete">;
@@ -220,8 +220,8 @@ class Client {
 		this.#interactions = new InteractionStore(this, { bot });
 		this.#services = new ServiceStore(this);
 		this.#events = new EventStore(this);
-		this.#connection = new DiscordConnection(this, { bot, events: this.#events.buildEventHandlers() });
 		this.#journalling = new JournallingStore(this);
+		this.#connection = new DiscordConnection(this, { bot, events: this.#events.buildEventHandlers() });
 
 		this.#_guildCreateCollector = new Collector<"guildCreate">();
 		this.#_guildDeleteCollector = new Collector<"guildDelete">();

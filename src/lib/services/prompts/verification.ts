@@ -3,7 +3,7 @@ import diagnostics from "logos:core/diagnostics";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { openTicket } from "logos/commands/server/commands/ticket/open";
+import { openTicket } from "logos/commands/handlers/ticket/open";
 import { EntryRequest } from "logos/database/entry-request";
 import { Model } from "logos/database/model";
 import { Ticket } from "logos/database/ticket";

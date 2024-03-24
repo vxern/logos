@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import {
 	getDeepLLanguageByLocale,
 	getDeepLLocaleByLanguage,
@@ -6,7 +5,8 @@ import {
 	isDeepLLocale,
 	isGoogleTranslateLocale,
 	isLanguage,
-} from "../../../src/constants/languages/translation";
+} from "logos:constants/languages/translation";
+import { expect } from "chai";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported translation language.", () => {

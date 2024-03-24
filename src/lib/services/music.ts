@@ -1,11 +1,11 @@
 import { EventEmitter } from "node:events";
 import { getEmojiBySongListingType } from "logos:constants/emojis";
 import { getLocalisationBySongListingType } from "logos:constants/localisations";
+import { Song, SongCollection, SongListing, SongStream } from "logos:constants/music";
 import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";
 import * as Lavaclient from "lavaclient";
 import { Client } from "logos/client";
-import { Song, SongCollection, SongListing, SongStream } from "logos/commands/music/data/types";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 
@@ -20,7 +20,7 @@ interface Session {
 	player: Lavaclient.Player;
 	channelId: bigint;
 
-	disconnectTimeout: NodeJS.Timeout | undefined;
+	disconnectTimeout: Timer | undefined;
 
 	listings: {
 		history: SongListing[];

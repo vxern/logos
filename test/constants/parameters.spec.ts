@@ -1,5 +1,5 @@
+import parameters from "logos:constants/parameters";
 import { expect } from "chai";
-import parameters from "../../src/constants/parameters";
 
 describe("The parameters object", () => {
 	it("is immutable.", () => {

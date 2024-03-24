@@ -1,5 +1,5 @@
+import slowmode from "logos:constants/slowmode";
 import { expect } from "chai";
-import slowmode from "../../src/constants/slowmode";
 
 describe("The slowmode object", () => {
 	it("is immutable.", () => {

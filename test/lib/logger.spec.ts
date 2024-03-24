@@ -1,5 +1,5 @@
 import { expect } from "chai";
-import { Logger } from "../../src/lib/logger";
+import { Logger } from "logos/logger";
 
 describe("Logger", () => {
 	describe("create()", () => {

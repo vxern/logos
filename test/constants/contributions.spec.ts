@@ -1,5 +1,5 @@
+import contributions, { contributors } from "logos:constants/contributions";
 import { expect } from "chai";
-import contributions, { contributors } from "../../src/constants/contributions";
 
 describe("The contributions object", () => {
 	it("is immutable.", () => {

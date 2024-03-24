@@ -1,5 +1,5 @@
+import { isLanguage, isLocale } from "logos:constants/languages/learning";
 import { expect } from "chai";
-import { isLanguage, isLocale } from "../../../src/constants/languages/learning";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported learning language.", () => {

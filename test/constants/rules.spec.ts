@@ -1,5 +1,5 @@
+import rules, { isValidRule } from "logos:constants/rules";
 import { expect } from "chai";
-import rules, { isValidRule } from "../../src/constants/rules";
 
 describe("The rules object", () => {
 	it("is immutable.", () => {

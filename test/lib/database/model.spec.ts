@@ -1,9 +1,9 @@
 import { expect } from "chai";
-import { MetadataOrIdentifierData, Model } from "../../../src/lib/database/model";
-import { Resource } from "../../../src/lib/database/resource";
-import { Suggestion } from "../../../src/lib/database/suggestion";
-import { User } from "../../../src/lib/database/user";
-import { Warning } from "../../../src/lib/database/warning";
+import { MetadataOrIdentifierData, Model } from "logos/database/model";
+import { Resource } from "logos/database/resource";
+import { Suggestion } from "logos/database/suggestion";
+import { User } from "logos/database/user";
+import { Warning } from "logos/database/warning";
 
 class TestModel extends Model<{ idParts: ["createdAt"] }> {
 	get createdAt(): number {

@@ -1,5 +1,5 @@
+import properties from "logos:constants/properties";
 import { expect } from "chai";
-import properties from "../../src/constants/properties";
 
 describe("The properties object", () => {
 	it("is immutable.", () => {

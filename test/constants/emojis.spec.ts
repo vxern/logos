@@ -1,5 +1,5 @@
+import emojis from "logos:constants/emojis";
 import { expect } from "chai";
-import emojis from "../../src/constants/emojis";
 
 describe("The emojis object", () => {
 	it("is immutable.", () => {

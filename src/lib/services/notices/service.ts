@@ -1,8 +1,8 @@
 import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
-import { ServiceStore } from "logos/services";
 import { LocalService, getAllMessages } from "logos/services/service";
+import { ServiceStore } from "logos/stores/services";
 import Hash from "object-hash";
 
 type HashableProperties = "embeds" | "components";

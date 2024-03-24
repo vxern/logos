@@ -1,10 +1,10 @@
-import { expect } from "chai";
 import {
 	getCLDLanguageByLocale,
 	getTinyLDLanguageByLocale,
 	isCLDLocale,
 	isTinyLDLocale,
-} from "../../../src/constants/languages/detection";
+} from "logos:constants/languages/detection";
+import { expect } from "chai";
 
 describe("isCLDLocale()", () => {
 	it("returns true if the passed locale is supported by CLD.", () => {

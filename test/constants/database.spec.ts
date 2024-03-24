@@ -1,5 +1,5 @@
+import database from "logos:constants/database";
 import { expect } from "chai";
-import database from "../../src/constants/database";
 
 describe("The database object", () => {
 	it("is immutable.", () => {

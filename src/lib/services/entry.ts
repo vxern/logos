@@ -3,7 +3,7 @@ import diagnostics from "logos:core/diagnostics";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { Modal, ModalComposer } from "logos/components/modal-composer";
+import { Modal, ModalComposer } from "logos/commands/components/modal-composer";
 import { EntryRequest, EntryRequestFormData } from "logos/database/entry-request";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { User } from "logos/database/user";

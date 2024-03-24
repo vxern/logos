@@ -1,5 +1,5 @@
+import { capitalise, code, codeMultiline, decapitalise, list, mention, timestamp, trim } from "logos:core/formatting";
 import { expect } from "chai";
-import { capitalise, code, codeMultiline, decapitalise, list, mention, timestamp, trim } from "../src/formatting";
 
 describe("capitalise()", () => {
 	it("turns the first letter of the passed string uppercase.", () => {

@@ -1,5 +1,5 @@
+import components from "logos:constants/components";
 import { expect } from "chai";
-import components from "../../src/constants/components";
 
 describe("The components object", () => {
 	it("is immutable.", () => {

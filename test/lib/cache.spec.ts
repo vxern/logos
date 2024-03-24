@@ -1,10 +1,11 @@
+import { mockClient } from "logos:test/mocks";
 import { expect } from "chai";
-import { Cache } from "../../src/lib/cache";
+import { Cache } from "logos/cache";
 
 describe("Cache", () => {
 	describe("constructor()", () => {
 		it("creates an object.", () => {
-			expect(() => new Cache()).to.not.throw;
+			expect(() => new Cache(mockClient)).to.not.throw;
 		});
 	});
 

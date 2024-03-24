@@ -1,5 +1,5 @@
+import acknowledgements from "logos:constants/acknowledgements";
 import { expect } from "chai";
-import acknowledgements from "../../src/constants/acknowledgements";
 
 describe("The acknowledgements object", () => {
 	it("is immutable.", () => {

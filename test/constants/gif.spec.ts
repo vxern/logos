@@ -1,5 +1,5 @@
+import gifs from "logos:constants/gifs";
 import { expect } from "chai";
-import gifs from "../../src/constants/gifs";
 
 describe("The GIF object", () => {
 	it("is immutable.", () => {

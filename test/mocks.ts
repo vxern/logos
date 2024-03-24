@@ -1,5 +1,5 @@
-import { Client, Environment } from "../src/lib/client";
-import { ServiceStore } from "../src/lib/services";
+import { Client, Environment } from "logos/client";
+import { ServiceStore } from "logos/stores/services";
 
 const mockEnvironment: Environment = {
 	deeplSecret: "DEEPL_SECRET",

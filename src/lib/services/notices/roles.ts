@@ -1,6 +1,6 @@
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { handleOpenRoleSelectionMenu } from "logos/commands/social/commands/profile/roles";
+import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/roles";
 import { HashableMessageContents, NoticeService } from "logos/services/notices/service";
 
 class RoleNoticeService extends NoticeService<{ type: "roles" }> {

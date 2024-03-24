@@ -1,5 +1,5 @@
+import { Language, getBaseLanguage, getTranslationLanguage } from "logos:constants/languages";
 import { expect } from "chai";
-import { Language, getBaseLanguage, getTranslationLanguage } from "../../src/constants/languages";
 
 describe("getBaseLanguage()", () => {
 	it("returns the base language for an simple language identifier.", () => {

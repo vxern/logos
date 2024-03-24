@@ -1,5 +1,5 @@
+import apache from "logos:constants/licences/apache";
 import { expect } from "chai";
-import apache from "../../../src/constants/licences/apache";
 
 const NOTICE = "this-is-a-sample-passed-copyright-notice";
 

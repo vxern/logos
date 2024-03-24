@@ -1,87 +1,82 @@
 import type { Client } from "logos/client";
-import { CommandTemplate } from "logos/commands/command";
-import { handleDisplayBotInformation } from "logos/commands/information/commands/information/bot";
-import { handleDisplayGuildInformation } from "logos/commands/information/commands/information/guild";
+import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
+import { handleStartAnswering } from "logos/commands/handlers/answer";
+import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
+import { handleStartCorrecting } from "logos/commands/handlers/correction";
+import { handleDisplayCredits } from "logos/commands/handlers/credits";
+import { handleStartGame } from "logos/commands/handlers/game";
+import { InteractionHandler } from "logos/commands/handlers/handler";
+import { handleDisplayBotInformation } from "logos/commands/handlers/information/bot";
+import { handleDisplayGuildInformation } from "logos/commands/handlers/information/guild";
+import {
+	handleDisplayDictionaryLicence,
+	handleDisplayDictionaryLicenceAutocomplete,
+} from "logos/commands/handlers/licence/dictionary";
+import {
+	handleDisplaySoftwareLicence,
+	handleDisplaySoftwareLicenceAutocomplete,
+} from "logos/commands/handlers/licence/software";
 import {
 	handleDisplayPraisesByAuthor,
 	handleDisplayPraisesByAuthorAutocomplete,
-} from "logos/commands/information/commands/list/praises/author";
+} from "logos/commands/handlers/list/praises/author";
 import {
 	handleDisplayPraisesByTarget,
 	handleDisplayPraisesByTargetAutocomplete,
-} from "logos/commands/information/commands/list/praises/target";
-import {
-	handleDisplayWarnings,
-	handleDisplayWarningsAutocomplete,
-} from "logos/commands/information/commands/list/warnings";
-import { handleStartAnswering } from "logos/commands/language/commands/answer";
-import { handleDisplayCefrGuide } from "logos/commands/language/commands/cefr";
-import { handleStartCorrecting } from "logos/commands/language/commands/correction";
-import { handleStartGame } from "logos/commands/language/commands/game";
-import {
-	handleRecogniseLanguageChatInput,
-	handleRecogniseLanguageMessage,
-} from "logos/commands/language/commands/recognise";
-import { handleDisplayResources } from "logos/commands/language/commands/resources";
+} from "logos/commands/handlers/list/praises/target";
+import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "logos/commands/handlers/list/warnings";
+import { handleFastForward, handleFastForwardAutocomplete } from "logos/commands/handlers/music/fast-forward";
+import { handleDisplayPlaybackHistory } from "logos/commands/handlers/music/history";
+import { handleLoopPlayback } from "logos/commands/handlers/music/loop";
+import { handleDisplayCurrentlyPlaying } from "logos/commands/handlers/music/now";
+import { handlePausePlayback } from "logos/commands/handlers/music/pause";
+import { handleRequestFilePlayback } from "logos/commands/handlers/music/play/file";
+import { handleRequestQueryPlayback } from "logos/commands/handlers/music/play/query";
+import { handleDisplayPlaybackQueue } from "logos/commands/handlers/music/queue";
+import { handleRemoveSongListing } from "logos/commands/handlers/music/remove";
+import { handleReplayAction } from "logos/commands/handlers/music/replay";
+import { handleResumePlayback } from "logos/commands/handlers/music/resume";
+import { handleRewind, handleRewindAutocomplete } from "logos/commands/handlers/music/rewind";
+import { handleSkipAction } from "logos/commands/handlers/music/skip";
+import { handleSkipToTimestamp, handleSkipToTimestampAutocomplete } from "logos/commands/handlers/music/skip-to";
+import { handleStopPlayback } from "logos/commands/handlers/music/stop";
+import { handleUnskipAction } from "logos/commands/handlers/music/unskip";
+import { handleDisplayVolume } from "logos/commands/handlers/music/volume/display";
+import { handleSetVolume } from "logos/commands/handlers/music/volume/set";
+import { handlePardonUser, handlePardonUserAutocomplete } from "logos/commands/handlers/pardon";
+import { handleDisplayModerationPolicy } from "logos/commands/handlers/policy";
+import { handlePraiseUser, handlePraiseUserAutocomplete } from "logos/commands/handlers/praise";
+import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/roles";
+import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "logos/commands/handlers/profile/view";
+import { handlePurgeMessages, handlePurgeMessagesAutocomplete } from "logos/commands/handlers/purge";
+import { handleRecogniseLanguageChatInput, handleRecogniseLanguageMessage } from "logos/commands/handlers/recognise";
+import { handleMakeReport } from "logos/commands/handlers/report";
+import { handleSubmitResource } from "logos/commands/handlers/resource";
+import { handleDisplayResources } from "logos/commands/handlers/resources";
+import { handleCiteRule, handleCiteRuleAutocomplete } from "logos/commands/handlers/rule";
+import { handleClearLanguage } from "logos/commands/handlers/settings/language/clear";
+import { handleSetLanguage, handleSetLanguageAutocomplete } from "logos/commands/handlers/settings/language/set";
+import { handleDisplaySettings } from "logos/commands/handlers/settings/view";
+import { handleToggleSlowmode, handleToggleSlowmodeAutocomplete } from "logos/commands/handlers/slowmode";
+import { handleMakeSuggestion } from "logos/commands/handlers/suggestion";
+import { handleOpenTicket } from "logos/commands/handlers/ticket/open";
+import { handleClearTimeout, handleClearTimeoutAutocomplete } from "logos/commands/handlers/timeout/clear";
+import { handleSetTimeout, handleSetTimeoutAutocomplete } from "logos/commands/handlers/timeout/set";
 import {
 	handleTranslateChatInput,
 	handleTranslateChatInputAutocomplete,
 	handleTranslateMessage,
-} from "logos/commands/language/commands/translate";
-import { handleDisplayAcknowledgements } from "logos/commands/meta/commands/acknowledgements";
-import { handleDisplayCredits } from "logos/commands/meta/commands/credits";
-import {
-	handleDisplayDictionaryLicence,
-	handleDisplayDictionaryLicenceAutocomplete,
-} from "logos/commands/meta/commands/licence/dictionary";
-import {
-	handleDisplaySoftwareLicence,
-	handleDisplaySoftwareLicenceAutocomplete,
-} from "logos/commands/meta/commands/licence/software";
-import { handleClearLanguage } from "logos/commands/meta/commands/settings/language/clear";
-import { handleSetLanguage, handleSetLanguageAutocomplete } from "logos/commands/meta/commands/settings/language/set";
-import { handleDisplaySettings } from "logos/commands/meta/commands/settings/view";
-import { handlePardonUser, handlePardonUserAutocomplete } from "logos/commands/moderation/commands/pardon";
-import { handleDisplayModerationPolicy } from "logos/commands/moderation/commands/policy";
-import { handlePurgeMessages, handlePurgeMessagesAutocomplete } from "logos/commands/moderation/commands/purge";
-import { handleMakeReport } from "logos/commands/moderation/commands/report";
-import { handleCiteRule, handleCiteRuleAutocomplete } from "logos/commands/moderation/commands/rule";
-import { handleToggleSlowmode, handleToggleSlowmodeAutocomplete } from "logos/commands/moderation/commands/slowmode";
-import { handleClearTimeout, handleClearTimeoutAutocomplete } from "logos/commands/moderation/commands/timeout/clear";
-import { handleSetTimeout, handleSetTimeoutAutocomplete } from "logos/commands/moderation/commands/timeout/set";
-import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/moderation/commands/warn";
-import { handleFastForward, handleFastForwardAutocomplete } from "logos/commands/music/commands/fast-forward";
-import { handleDisplayPlaybackHistory } from "logos/commands/music/commands/history";
-import { handleLoopPlayback } from "logos/commands/music/commands/loop";
-import { handleDisplayCurrentlyPlaying } from "logos/commands/music/commands/now";
-import { handlePausePlayback } from "logos/commands/music/commands/pause";
-import { handleRequestFilePlayback } from "logos/commands/music/commands/play/file";
-import { handleRequestQueryPlayback } from "logos/commands/music/commands/play/query";
-import { handleDisplayPlaybackQueue } from "logos/commands/music/commands/queue";
-import { handleRemoveSongListing } from "logos/commands/music/commands/remove";
-import { handleReplayAction } from "logos/commands/music/commands/replay";
-import { handleResumePlayback } from "logos/commands/music/commands/resume";
-import { handleRewind, handleRewindAutocomplete } from "logos/commands/music/commands/rewind";
-import { handleSkipAction } from "logos/commands/music/commands/skip";
-import { handleSkipToTimestamp, handleSkipToTimestampAutocomplete } from "logos/commands/music/commands/skip-to";
-import { handleStopPlayback } from "logos/commands/music/commands/stop";
-import { handleUnskipAction } from "logos/commands/music/commands/unskip";
-import { handleDisplayVolume } from "logos/commands/music/commands/volume/display";
-import { handleSetVolume } from "logos/commands/music/commands/volume/set";
-import { sources } from "logos/commands/music/data/sources/sources";
-import { handleSubmitResource } from "logos/commands/server/commands/resource";
-import { handleMakeSuggestion } from "logos/commands/server/commands/suggestion";
-import { handleOpenTicket } from "logos/commands/server/commands/ticket/open";
-import { handlePraiseUser, handlePraiseUserAutocomplete } from "logos/commands/social/commands/praise";
-import { handleOpenRoleSelectionMenu } from "logos/commands/social/commands/profile/roles";
-import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "logos/commands/social/commands/profile/view";
+} from "logos/commands/handlers/translate";
+import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
+// TODO(vxern): This shouldn't be here.
+import resolvers from "logos/commands/resolvers";
 
 // TODO(vxern): Make options named so as to allow referencing specific subcommands.
 /**
  * @privateRemarks
  * Commands, command groups and options are ordered alphabetically.
  */
-export default Object.freeze({
+const commands = Object.freeze({
 	// Information
 	information: {
 		identifier: "information",
@@ -533,7 +528,7 @@ export default Object.freeze({
 						identifier: "youtube",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: async (client: Client, interaction: Logos.Interaction) =>
-							handleRequestQueryPlayback(client, interaction, sources.YouTube),
+							handleRequestQueryPlayback(client, interaction, resolvers.youtube),
 						options: [constants.parameters.query],
 					},
 				],
@@ -660,3 +655,40 @@ export default Object.freeze({
 		],
 	},
 } satisfies Record<string, CommandTemplate>);
+type CommandName = keyof typeof commands;
+
+interface OptionFlags {
+	readonly hasRateLimit?: boolean;
+	readonly isShowable?: boolean;
+}
+interface OptionMetadata {
+	readonly identifier: string;
+	readonly handle?: InteractionHandler;
+	readonly handleAutocomplete?: InteractionHandler;
+	readonly flags?: OptionFlags;
+}
+
+type Command = Discord.CreateApplicationCommand;
+type Option = Discord.ApplicationCommandOption;
+
+interface CommandTemplate extends OptionMetadata {
+	readonly type: Discord.ApplicationCommandTypes;
+	readonly defaultMemberPermissions: Discord.PermissionStrings[];
+	readonly options?: OptionTemplate[];
+}
+
+interface OptionTemplate extends OptionMetadata {
+	readonly type: Discord.ApplicationCommandOptionTypes;
+	readonly required?: boolean;
+	readonly choices?: Discord.ApplicationCommandOptionChoice[];
+	readonly channelTypes?: Discord.ChannelTypes[];
+	readonly minValue?: number;
+	readonly maxValue?: number;
+	readonly minLength?: number;
+	readonly maxLength?: number;
+	readonly autocomplete?: boolean;
+	readonly options?: OptionTemplate[];
+}
+
+export default commands;
+export type { Command, CommandName, CommandTemplate, OptionMetadata, Option, OptionTemplate };

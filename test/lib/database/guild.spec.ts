@@ -1,6 +1,6 @@
+import { TimeUnit } from "logos:constants/time";
 import { expect } from "chai";
-import { TimeUnit } from "../../../src/constants/time";
-import { Guild, timeStructToMilliseconds } from "../../../src/lib/database/guild";
+import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 
 describe("Guild", () => {
 	describe("guildId()", () => {

@@ -1,5 +1,5 @@
+import bsd from "logos:constants/licences/bsd";
 import { expect } from "chai";
-import bsd from "../../../src/constants/licences/bsd";
 
 const NOTICE = "this-is-a-sample-passed-copyright-notice";
 

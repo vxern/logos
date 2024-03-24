@@ -1,4 +1,3 @@
-import { expect } from "chai";
 import {
 	getDiscordLanguageByLocale,
 	getDiscordLocaleByLanguage,
@@ -7,7 +6,8 @@ import {
 	isDiscordLanguage,
 	isLogosLanguage,
 	isLogosLocale,
-} from "../../../src/constants/languages/localisation";
+} from "logos:constants/languages/localisation";
+import { expect } from "chai";
 
 describe("isDiscordLanguage()", () => {
 	it("returns true if the passed language is a supported Discord language.", () => {

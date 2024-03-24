@@ -1,5 +1,5 @@
+import defaults from "logos:constants/defaults";
 import { expect } from "chai";
-import defaults from "../../src/constants/defaults";
 
 describe("The defaults object", () => {
 	it("is immutable.", () => {

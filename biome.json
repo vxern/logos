@@ -28,6 +28,6 @@
     "lineWidth": 120
   },
   "javascript": {
-    "globals": ["Discord", "Logos", "Events", "WithRequired", "describe", "it", "expect", "constants", "defaults"]
+    "globals": ["Discord", "Logos", "Events", "WithRequired", "Timer", "describe", "it", "expect", "constants", "defaults"]
   }
 }

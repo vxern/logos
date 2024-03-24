@@ -1,4 +1,4 @@
-//import { Collector } from "../../src/lib/collectors";
+//import { Collector } from "logos/collectors";
 //import { expect } from "chai";
 
 describe("Collector", () => {

@@ -1,5 +1,5 @@
+import statuses from "logos:constants/statuses";
 import { expect } from "chai";
-import statuses from "../../src/constants/statuses";
 
 const DISCORD_COMMAND_PATTERN = /^\/[-_a-zA-Z]{1,32}$/;
 

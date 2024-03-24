@@ -28,9 +28,11 @@
     "baseUrl": "",
     "paths": {
       "discordeno": ["@discordeno/bot"],
+      // The order here seems to matter given that the linter will pick up topmost entries first.
+      "logos/*": ["./src/lib/*"],
       "logos:constants/*": ["./src/constants/*"],
       "logos:core/*": ["./src/*"],
-      "logos/*": ["./src/lib/*"],
+      "logos:test/*": ["./test/*"],
       // The following should never be used, either because there is another import that covers them
       // or they should never be imported from in the first place.
       "logos:core/constants/*": ["./?"],
@@ -40,5 +42,5 @@
   },
   "compileOnSave": true,
   "exclude": ["dist/", "node_modules/"],
-  "include": ["src/", "scripts/", "test/"]
+  "include": ["bun-types", "src/", "scripts/", "test/"]
 }

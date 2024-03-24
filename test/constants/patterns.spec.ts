@@ -1,5 +1,5 @@
+import patterns from "logos:constants/patterns";
 import { expect } from "chai";
-import patterns from "../../src/constants/patterns";
 
 describe("The patterns object", () => {
 	it("is immutable.", () => {

@@ -1,5 +1,5 @@
+import time from "logos:constants/time";
 import { expect } from "chai";
-import time from "../../src/constants/time";
 
 describe("The time object", () => {
 	it("is immutable.", () => {

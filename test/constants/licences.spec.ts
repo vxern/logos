@@ -1,5 +1,5 @@
+import licences from "logos:constants/licences";
 import { expect } from "chai";
-import licences from "../../src/constants/licences";
 
 describe("The licences object", () => {
 	it("is immutable.", () => {

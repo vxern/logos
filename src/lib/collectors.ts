@@ -4,7 +4,7 @@ import {
 	getLocaleByLocalisationLanguage,
 } from "logos:constants/languages";
 import { Client } from "logos/client";
-import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos/commands";
+import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos/commands/interactions";
 import { Guild } from "logos/database/guild";
 import { User } from "logos/database/user";
 import { nanoid } from "nanoid";

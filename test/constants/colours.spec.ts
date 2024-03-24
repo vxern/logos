@@ -1,5 +1,5 @@
+import colours, { fromHex } from "logos:constants/colours";
 import { expect } from "chai";
-import colours, { fromHex } from "../../src/constants/colours";
 
 describe("fromHex()", () => {
 	it("throws an exception if the passed string is not in the correct format.", () => {

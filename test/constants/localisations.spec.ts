@@ -1,5 +1,5 @@
+import localisations from "logos:constants/localisations";
 import { expect } from "chai";
-import localisations from "../../src/constants/localisations";
 
 describe("The localisations object", () => {
 	it("is immutable.", () => {

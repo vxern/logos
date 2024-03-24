@@ -1,5 +1,5 @@
+import links from "logos:constants/links";
 import { expect } from "chai";
-import links from "../../src/constants/links";
 
 const STRING_UNENCODED = "1 2 3";
 const STRING_ENCODED = "1%202%203";

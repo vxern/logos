@@ -1,5 +1,5 @@
+import { chunk, isDefined } from "logos:core/utilities";
 import { expect } from "chai";
-import { chunk, isDefined } from "../src/utilities";
 
 describe("chunk()", () => {
 	it("yields an empty array if the array is empty, returning.", () => {

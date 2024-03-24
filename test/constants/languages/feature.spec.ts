@@ -1,5 +1,5 @@
+import { isLanguage } from "logos:constants/languages/feature";
 import { expect } from "chai";
-import { isLanguage } from "../../../src/constants/languages/feature";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported feature language.", () => {

@@ -1,5 +1,5 @@
+import mit from "logos:constants/licences/mit";
 import { expect } from "chai";
-import mit from "../../../src/constants/licences/mit";
 
 const NOTICE = "this-is-a-sample-passed-copyright-notice";
 
