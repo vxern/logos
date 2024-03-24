@@ -149,13 +149,15 @@ export default Object.freeze({
 		identifier: "correction.options.partial.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: (client: Client, interaction: Logos.Interaction) => handleStartCorrecting(client, interaction, "partial"),
+		handle: (client: Client, interaction: Logos.Interaction) =>
+			handleStartCorrecting(client, interaction, { mode: "partial" }),
 	},
 	correctionFullMessage: {
 		identifier: "correction.options.full.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: (client: Client, interaction: Logos.Interaction) => handleStartCorrecting(client, interaction, "full"),
+		handle: (client: Client, interaction: Logos.Interaction) =>
+			handleStartCorrecting(client, interaction, { mode: "full" }),
 	},
 	game: {
 		identifier: "game",

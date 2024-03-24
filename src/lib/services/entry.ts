@@ -1,12 +1,12 @@
-import { FeatureLanguage, Locale } from "../../constants/languages";
+import { Locale } from "../../constants/languages";
 import diagnostics from "../../diagnostics";
 import { trim } from "../../formatting";
 import { Client } from "../client";
 import { InteractionCollector } from "../collectors";
-import { EntryRequest } from "../database/entry-request";
+import { Modal, ModalComposer } from "../components/modal-composer";
+import { EntryRequest, EntryRequestFormData } from "../database/entry-request";
 import { Guild, timeStructToMilliseconds } from "../database/guild";
 import { User } from "../database/user";
-import { Modal, createModalComposer } from "../interactions";
 import { LocalService } from "./service";
 
 class EntryService extends LocalService {
@@ -289,9 +289,14 @@ class EntryService extends LocalService {
 			authorId: buttonPress.user.id.toString(),
 		});
 
-		await createModalComposer<EntryRequest["answers"]>(this.client, buttonPress, {
-			modal: this.#generateVerificationQuestionModal(buttonPress.featureLanguage, { locale }),
-			onSubmit: async (submission, answers) => {
+		const composer = new EntryRequestComposer(this.client, { interaction: buttonPress });
+
+		composer.onSubmit(
+			async (
+				submission: Logos.Interaction,
+				{ locale }: { locale: Locale },
+				{ formData }: { formData: EntryRequestFormData },
+			) => {
 				if (entryRequest !== undefined) {
 					const strings = {
 						title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
@@ -308,7 +313,7 @@ class EntryService extends LocalService {
 						],
 					});
 
-					return true;
+					return;
 				}
 
 				await this.client.postponeReply(submission);
@@ -317,7 +322,7 @@ class EntryService extends LocalService {
 					guildId: guild.id.toString(),
 					authorId: buttonPress.user.id.toString(),
 					requestedRoleId: requestedRoleId.toString(),
-					answers,
+					answers: formData,
 				});
 
 				await this.client.tryLog("entryRequestSubmit", {
@@ -327,12 +332,12 @@ class EntryService extends LocalService {
 
 				const user = this.client.entities.users.get(buttonPress.user.id);
 				if (user === undefined) {
-					return "failure";
+					return;
 				}
 
 				const prompt = await verificationService.savePrompt(user, entryRequestDocument);
 				if (prompt === undefined) {
-					return "failure";
+					return;
 				}
 
 				verificationService.registerDocument(entryRequestDocument);
@@ -359,92 +364,8 @@ class EntryService extends LocalService {
 						},
 					],
 				});
-
-				return true;
 			},
-			onInvalid: async (submission, error) => {
-				switch (error) {
-					default: {
-						const strings = {
-							title: this.client.localise("entry.verification.answers.failed.title", locale)(),
-							description: this.client.localise("entry.verification.answers.failed.description", locale)(),
-						};
-
-						await this.client.editReply(submission, {
-							embeds: [
-								{
-									title: strings.title,
-									description: strings.description,
-									color: constants.colours.red,
-								},
-							],
-						});
-
-						return undefined;
-					}
-				}
-			},
-		});
-	}
-
-	#generateVerificationQuestionModal(
-		language: FeatureLanguage,
-		{ locale }: { locale: Locale },
-	): Modal<EntryRequest["answers"]> {
-		const strings = {
-			title: this.client.localise("verification.title", locale)(),
-			reason: this.client.localise("verification.fields.reason", locale)({ language }),
-			aim: this.client.localise("verification.fields.aim", locale)(),
-			whereFound: this.client.localise("verification.fields.whereFound", locale)(),
-		};
-
-		return {
-			title: strings.title,
-			fields: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "reason",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.reason, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: true,
-							minLength: 20,
-							maxLength: 300,
-						},
-					],
-				},
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "aim",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.aim, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: true,
-							minLength: 20,
-							maxLength: 300,
-						},
-					],
-				},
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "whereFound",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.whereFound, 45),
-							style: Discord.TextStyles.Short,
-							required: true,
-							minLength: 5,
-							maxLength: 50,
-						},
-					],
-				},
-			],
-		};
+		);
 	}
 
 	async #vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
@@ -520,6 +441,68 @@ class EntryService extends LocalService {
 		}
 
 		return false;
+	}
+}
+
+class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
+	async buildModal(
+		_: Logos.Interaction,
+		{ featureLanguage, locale }: Logos.InteractionLocaleData,
+		{ formData }: { formData: EntryRequestFormData },
+	): Promise<Modal<EntryRequestFormData>> {
+		const strings = {
+			title: this.client.localise("verification.title", locale)(),
+			fields: {
+				reason: this.client.localise("verification.fields.reason", locale)({ language: featureLanguage }),
+				aim: this.client.localise("verification.fields.aim", locale)(),
+				whereFound: this.client.localise("verification.fields.whereFound", locale)(),
+			},
+		};
+
+		return {
+			title: strings.title,
+			elements: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							customId: "reason",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.fields.reason, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: true,
+							value: formData.reason,
+						},
+					],
+				},
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							customId: "aim",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.fields.aim, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: true,
+							value: formData.aim,
+						},
+					],
+				},
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							customId: "whereFound",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.fields.whereFound, 45),
+							style: Discord.TextStyles.Short,
+							required: true,
+							value: formData.whereFound,
+						},
+					],
+				},
+			],
+		};
 	}
 }
 

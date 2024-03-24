@@ -386,7 +386,6 @@ class Client {
 	async handleInteraction(interaction: Logos.Interaction): Promise<void> {
 		// If it's a "none" message interaction, just acknowledge and good to go.
 		if (
-			// TODO(vxern): Should it also auto-acknowledge modal submits?
 			interaction.type === Discord.InteractionTypes.MessageComponent &&
 			interaction.metadata[0] === constants.components.none
 		) {

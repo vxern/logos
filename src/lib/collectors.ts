@@ -11,8 +11,8 @@ import { User } from "./database/user";
 
 type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.EventHandlers> = (
 	...args: Parameters<Discord.EventHandlers[Event]>
-) => unknown;
-type DoneEvent = () => unknown;
+) => void | Promise<void>;
+type DoneEvent = () => void | Promise<void>;
 class Collector<Event extends keyof Discord.EventHandlers = any> {
 	readonly done: Promise<void>;
 
@@ -75,7 +75,7 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 		}
 	}
 
-	dispatchDone(): void {
+	async dispatchDone(): Promise<void> {
 		if (this.#isClosed) {
 			return;
 		}
@@ -86,7 +86,7 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 		this.#onCollect = undefined;
 		this.#onDone = undefined;
 
-		dispatchDone?.();
+		await dispatchDone?.();
 		this.#_resolveDone();
 	}
 

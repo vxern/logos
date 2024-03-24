@@ -47,7 +47,7 @@ class EventStore {
 	}
 
 	async dispatchEvent<Event extends keyof Discord.EventHandlers>(
-		guildId: bigint | undefined,
+		_guildId: bigint | undefined,
 		event: Event,
 		{ args }: { args: Parameters<Discord.EventHandlers[Event]> },
 	): Promise<void> {

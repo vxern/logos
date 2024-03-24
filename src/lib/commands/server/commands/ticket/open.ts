@@ -1,13 +1,10 @@
 import { Locale } from "../../../../../constants/languages";
 import { mention, trim } from "../../../../../formatting";
 import { Client } from "../../../../client";
-import { InteractionCollector } from "../../../../collectors";
+import { Modal, ModalComposer } from "../../../../components/modal-composer";
 import { Guild } from "../../../../database/guild";
-import { Ticket, TicketType } from "../../../../database/ticket";
-import { Modal, createModalComposer } from "../../../../interactions";
+import { Ticket, TicketFormData, TicketType } from "../../../../database/ticket";
 import { Configurations } from "../../../../services/prompts/service";
-
-type TicketError = "failure";
 
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const { locale, guildLocale } = interaction;
@@ -56,15 +53,20 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	createModalComposer<Ticket["answers"]>(client, interaction, {
-		modal: generateTicketModal(client, { locale }),
-		onSubmit: async (submission, answers) => {
+	const composer = new TicketComposer(client, { interaction });
+
+	composer.onSubmit(
+		async (
+			submission: Logos.Interaction,
+			{ locale }: Logos.InteractionLocaleData,
+			{ formData }: { formData: TicketFormData },
+		) => {
 			await client.postponeReply(submission);
 
 			const result = await openTicket(
 				client,
 				configuration,
-				answers,
+				formData,
 				[guild, submission.user, member],
 				configuration.categoryId,
 				"standalone",
@@ -88,14 +90,13 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 					},
 				],
 			});
-
-			return true;
 		},
-		onInvalid: async (submission, error) =>
-			handleCouldNotOpenTicket(client, submission, error as TicketError | undefined, { locale }),
-	});
+	);
+
+	await composer.open();
 }
 
+// TODO(vxern): This number of parameters is insanity, this function is way too large.
 async function openTicket(
 	client: Client,
 	configuration: NonNullable<Configurations["tickets"] | Configurations["verification"]>,
@@ -104,15 +105,15 @@ async function openTicket(
 	categoryId: string,
 	type: TicketType,
 	{ guildLocale }: { guildLocale: Locale },
-): Promise<Ticket | string> {
+): Promise<Ticket | undefined> {
 	const categoryChannel = client.entities.channels.get(BigInt(categoryId));
 	if (categoryChannel === undefined) {
-		return "failure";
+		return undefined;
 	}
 
 	const ticketService = client.getPromptService(guild.id, { type: "tickets" });
 	if (ticketService === undefined) {
-		return "failure";
+		return undefined;
 	}
 
 	const strings = {
@@ -139,7 +140,7 @@ async function openTicket(
 			return undefined;
 		});
 	if (channel === undefined) {
-		return "failure";
+		return undefined;
 	}
 
 	const mentions = [mention(member.id, { type: "user" }), mention(user.id, { type: "user" })];
@@ -200,7 +201,7 @@ async function openTicket(
 
 	const prompt = await ticketService.savePrompt(user, ticketDocument);
 	if (prompt === undefined) {
-		return "failure";
+		return undefined;
 	}
 
 	ticketService.registerPrompt(prompt, user.id, ticketDocument);
@@ -208,166 +209,37 @@ async function openTicket(
 	return ticketDocument;
 }
 
-async function handleCouldNotOpenTicket(
-	client: Client,
-	submission: Logos.Interaction,
-	error: TicketError | undefined,
-	{ locale }: { locale: Locale },
-): Promise<Logos.Interaction | undefined> {
-	const { promise, resolve } = Promise.withResolvers<Logos.Interaction | undefined>();
-
-	const continueButton = new InteractionCollector(client, { only: [submission.user.id], isSingle: true });
-	const cancelButton = new InteractionCollector(client, { only: [submission.user.id] });
-	const returnButton = new InteractionCollector(client, {
-		only: [submission.user.id],
-		isSingle: true,
-		dependsOn: cancelButton,
-	});
-	const leaveButton = new InteractionCollector(client, {
-		only: [submission.user.id],
-		isSingle: true,
-		dependsOn: cancelButton,
-	});
-
-	continueButton.onCollect(async (buttonPress) => {
-		client.deleteReply(submission);
-		resolve(buttonPress);
-	});
-
-	cancelButton.onCollect(async (cancelButtonPress) => {
-		returnButton.onCollect(async (returnButtonPress) => {
-			client.deleteReply(submission);
-			client.deleteReply(cancelButtonPress);
-			resolve(returnButtonPress);
-		});
-
-		leaveButton.onCollect(async (_) => {
-			client.deleteReply(submission);
-			client.deleteReply(cancelButtonPress);
-			resolve(undefined);
-		});
-
+class TicketComposer extends ModalComposer<TicketFormData, never> {
+	async buildModal(
+		_: Logos.Interaction<any, any>,
+		{ locale }: Logos.InteractionLocaleData,
+		{ formData }: { formData: TicketFormData },
+	): Promise<Modal<TicketFormData>> {
 		const strings = {
-			title: client.localise("ticket.strings.sureToCancel.title", locale)(),
-			description: client.localise("ticket.strings.sureToCancel.description", locale)(),
-			stay: client.localise("prompts.stay", locale)(),
-			leave: client.localise("prompts.leave", locale)(),
+			title: this.client.localise("ticket.title", locale)(),
+			topic: this.client.localise("ticket.fields.topic", locale)(),
 		};
 
-		client.reply(cancelButtonPress, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
-			components: [
+		return {
+			title: strings.title,
+			elements: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: returnButton.customId,
-							label: strings.stay,
-							style: Discord.ButtonStyles.Success,
-						},
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: leaveButton.customId,
-							label: strings.leave,
-							style: Discord.ButtonStyles.Danger,
+							customId: "topic",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.topic, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: true,
+							maxLength: 100,
+							value: formData.topic,
 						},
 					],
 				},
 			],
-		});
-	});
-
-	client.registerInteractionCollector(continueButton);
-	client.registerInteractionCollector(cancelButton);
-	client.registerInteractionCollector(returnButton);
-	client.registerInteractionCollector(leaveButton);
-
-	let embed!: Discord.CamelizedDiscordEmbed;
-	switch (error) {
-		default: {
-			const strings = {
-				title: client.localise("ticket.strings.failed", locale)(),
-				description: client.localise("ticket.strings.failed", locale)(),
-			};
-
-			client.editReply(submission, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
-			});
-
-			break;
-		}
+		};
 	}
-
-	const strings = {
-		continue: client.localise("prompts.continue", locale)(),
-		cancel: client.localise("prompts.cancel", locale)(),
-	};
-
-	client.editReply(submission, {
-		embeds: [embed],
-		components: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						type: Discord.MessageComponentTypes.Button,
-						customId: continueButton.customId,
-						label: strings.continue,
-						style: Discord.ButtonStyles.Success,
-					},
-					{
-						type: Discord.MessageComponentTypes.Button,
-						customId: cancelButton.customId,
-						label: strings.cancel,
-						style: Discord.ButtonStyles.Danger,
-					},
-				],
-			},
-		],
-	});
-
-	return promise;
 }
 
-function generateTicketModal(client: Client, { locale }: { locale: Locale }): Modal<Ticket["answers"]> {
-	const strings = {
-		title: client.localise("ticket.title", locale)(),
-		topic: client.localise("ticket.fields.topic", locale)(),
-	};
-
-	return {
-		title: strings.title,
-		fields: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						customId: "topic",
-						type: Discord.MessageComponentTypes.InputText,
-						label: trim(strings.topic, 45),
-						style: Discord.TextStyles.Paragraph,
-						required: true,
-						minLength: 16,
-						maxLength: 256,
-					},
-				],
-			},
-		],
-	};
-}
-
-export { handleOpenTicket };
-export { openTicket };
+export { handleOpenTicket, openTicket };

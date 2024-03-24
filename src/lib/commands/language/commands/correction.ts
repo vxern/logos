@@ -1,22 +1,14 @@
-import { Locale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
-import { InteractionCollector } from "../../../collectors";
-import { Modal, createModalComposer } from "../../../interactions";
+import { Modal, ModalComposer } from "../../../components/modal-composer";
 
-interface CorrectionData extends Record<string, string> {
-	original: string;
-	corrected: string;
-}
+type CorrectionMode = "partial" | "full";
 
-type OpenMode = "partial" | "full";
-
-// TODO(vxern): Named parameters for `openMode`.
 async function handleStartCorrecting(
 	client: Client,
 	interaction: Logos.Interaction,
-	openMode: OpenMode,
+	{ mode }: { mode: CorrectionMode },
 ): Promise<void> {
 	const locale = interaction.locale;
 
@@ -127,246 +119,128 @@ async function handleStartCorrecting(
 		return;
 	}
 
-	const data: CorrectionData = {
-		original: message.content,
-		corrected: "",
-	};
+	const composer = new CorrectionComposer(client, { interaction, text: message.content, mode: mode });
 
-	await createModalComposer(client, interaction, {
-		modal: generateCorrectionModal(client, data, openMode, { locale }),
-		onSubmit: async (submission, data) => {
-			if (data.corrected === data.original) {
-				return "texts_not_different";
-			}
-
-			const strings = {
-				correction: client.localise("correction.strings.correction", locale)(),
-				suggestedBy: client.localise(
-					"correction.strings.suggestedBy",
-					locale,
-				)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
-			};
-
-			await client.acknowledge(submission);
-
-			client.bot.rest
-				.sendMessage(message.channelId, {
-					messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
-					embeds: [
-						{
-							description: data.corrected,
-							color: constants.colours.lightGreen,
-							footer: {
-								text: `${constants.emojis.correction} ${strings.suggestedBy}`,
-								iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
-									avatar: interaction.user.avatar,
-								}),
-							},
-						},
-					],
-				})
-				.catch(() =>
-					client.log.warn(`Failed to send correction to ${diagnostics.display.channel(message.channelId)}.`),
-				);
-
-			return true;
-		},
-		onInvalid: async (submission, error) => handleSubmittedInvalidCorrection(client, submission, error, { locale }),
-	});
-}
-
-function generateCorrectionModal(
-	client: Client,
-	data: CorrectionData,
-	openMode: OpenMode,
-	{ locale }: { locale: Locale },
-): Modal<CorrectionData> {
-	const strings = {
-		title: client.localise("correction.title", locale)(),
-		original: client.localise("correction.fields.original", locale)(),
-		corrected: client.localise("correction.fields.corrected", locale)(),
-	};
-
-	return {
-		title: strings.title,
-		fields: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						customId: "original",
-						type: Discord.MessageComponentTypes.InputText,
-						label: trim(strings.original, 45),
-						value: data.original,
-						style: Discord.TextStyles.Paragraph,
-						required: false,
-					},
-				],
-			},
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						customId: "corrected",
-						type: Discord.MessageComponentTypes.InputText,
-						label: trim(strings.corrected, 45),
-						value: openMode === "full" ? data.original : undefined,
-						style: Discord.TextStyles.Paragraph,
-						required: true,
-					},
-				],
-			},
-		],
-	};
-}
-
-// TODO(vxern): Naming?
-async function handleSubmittedInvalidCorrection(
-	client: Client,
-	submission: Logos.Interaction,
-	error: string | undefined,
-	{ locale }: { locale: Locale },
-): Promise<Logos.Interaction | undefined> {
-	const { promise, resolve } = Promise.withResolvers<Logos.Interaction | undefined>();
-
-	const continueButton = new InteractionCollector(client, { only: [submission.user.id], isSingle: true });
-	const cancelButton = new InteractionCollector(client, { only: [submission.user.id] });
-	const returnButton = new InteractionCollector(client, {
-		only: [submission.user.id],
-		isSingle: true,
-		dependsOn: cancelButton,
-	});
-	const leaveButton = new InteractionCollector(client, {
-		only: [submission.user.id],
-		isSingle: true,
-		dependsOn: cancelButton,
-	});
-
-	continueButton.onCollect(async (buttonPress) => {
-		client.deleteReply(submission);
-		resolve(buttonPress);
-	});
-
-	cancelButton.onCollect(async (cancelButtonPress) => {
-		returnButton.onCollect(async (returnButtonPress) => {
-			client.deleteReply(submission);
-			client.deleteReply(cancelButtonPress);
-			resolve(returnButtonPress);
-		});
-
-		leaveButton.onCollect(async (_) => {
-			client.deleteReply(submission);
-			client.deleteReply(cancelButtonPress);
-			resolve(undefined);
-		});
+	composer.onSubmit(async (submission, { locale }, { formData }) => {
+		await client.acknowledge(submission);
 
 		const strings = {
-			title: client.localise("correction.strings.sureToCancel.title", locale)(),
-			description: client.localise("correction.strings.sureToCancel.description", locale)(),
-			stay: client.localise("prompts.stay", locale)(),
-			leave: client.localise("prompts.leave", locale)(),
+			correction: client.localise("correction.strings.correction", locale)(),
+			suggestedBy: client.localise(
+				"correction.strings.suggestedBy",
+				locale,
+			)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
 		};
 
-		client.reply(cancelButtonPress, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
-			components: [
+		client.bot.rest
+			.sendMessage(message.channelId, {
+				messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
+				embeds: [
+					{
+						description: formData.corrected,
+						color: constants.colours.lightGreen,
+						footer: {
+							text: `${constants.emojis.correction} ${strings.suggestedBy}`,
+							iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
+								avatar: interaction.user.avatar,
+							}),
+						},
+					},
+				],
+			})
+			.catch(() => client.log.warn(`Failed to send correction to ${diagnostics.display.channel(message.channelId)}.`));
+	});
+
+	await composer.open();
+}
+
+interface CorrectionFormData {
+	readonly original: string;
+	readonly corrected: string;
+}
+type ValidationError = "texts-not-different";
+class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationError> {
+	constructor(
+		client: Client,
+		{ interaction, text, mode }: { interaction: Logos.Interaction; text: string; mode: CorrectionMode },
+	) {
+		super(client, { interaction, initialFormData: { original: text, corrected: mode === "full" ? text : "" } });
+	}
+
+	async buildModal(
+		_: Logos.Interaction,
+		{ locale }: Logos.InteractionLocaleData,
+		{ formData }: { formData: CorrectionFormData },
+	): Promise<Modal<CorrectionFormData>> {
+		const strings = {
+			title: this.client.localise("correction.title", locale)(),
+			fields: {
+				original: this.client.localise("correction.fields.original", locale)(),
+				corrected: this.client.localise("correction.fields.corrected", locale)(),
+			},
+		};
+
+		return {
+			title: strings.title,
+			elements: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: returnButton.customId,
-							label: strings.stay,
-							style: Discord.ButtonStyles.Success,
+							customId: "original",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.fields.original, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: false,
+							value: formData.original,
 						},
+					],
+				},
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
 						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: leaveButton.customId,
-							label: strings.leave,
-							style: Discord.ButtonStyles.Danger,
+							customId: "corrected",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.fields.corrected, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: true,
+							value: formData.corrected,
 						},
 					],
 				},
 			],
-		});
-	});
-
-	client.registerInteractionCollector(continueButton);
-	client.registerInteractionCollector(cancelButton);
-	client.registerInteractionCollector(returnButton);
-	client.registerInteractionCollector(leaveButton);
-
-	let embed!: Discord.CamelizedDiscordEmbed;
-	switch (error) {
-		case "texts_not_different": {
-			const strings = {
-				title: client.localise("correction.strings.textsNotDifferent.title", locale)(),
-				description: client.localise("correction.strings.textsNotDifferent.description", locale)(),
-			};
-
-			embed = {
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.dullYellow,
-			};
-
-			break;
-		}
-		default: {
-			const strings = {
-				title: client.localise("correction.strings.failed.title", locale)(),
-				description: client.localise("correction.strings.failed.description", locale)(),
-			};
-
-			client.reply(submission, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
-			});
-
-			return;
-		}
+		};
 	}
 
-	const strings = {
-		continue: client.localise("prompts.continue", locale)(),
-		cancel: client.localise("prompts.cancel", locale)(),
-	};
+	async validate({ formData }: { formData: CorrectionFormData }): Promise<ValidationError | undefined> {
+		if (formData.corrected === formData.original) {
+			return "texts-not-different";
+		}
 
-	client.reply(submission, {
-		embeds: [embed],
-		components: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						type: Discord.MessageComponentTypes.Button,
-						customId: continueButton.customId,
-						label: strings.continue,
-						style: Discord.ButtonStyles.Success,
-					},
-					{
-						type: Discord.MessageComponentTypes.Button,
-						customId: cancelButton.customId,
-						label: strings.cancel,
-						style: Discord.ButtonStyles.Danger,
-					},
-				],
-			},
-		],
-	});
+		return undefined;
+	}
 
-	return promise;
+	getErrorMessage(
+		_: Logos.Interaction,
+		{ locale }: Logos.InteractionLocaleData,
+		{ error }: { error: ValidationError },
+	): globalThis.Discord.CamelizedDiscordEmbed | undefined {
+		switch (error) {
+			case "texts-not-different": {
+				const strings = {
+					title: this.client.localise("correction.strings.textsNotDifferent.title", locale)(),
+					description: this.client.localise("correction.strings.textsNotDifferent.description", locale)(),
+				};
+
+				return {
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.dullYellow,
+				};
+			}
+		}
+	}
 }
 
 export { handleStartCorrecting };

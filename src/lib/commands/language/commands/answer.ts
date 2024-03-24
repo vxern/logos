@@ -1,13 +1,7 @@
-import { Locale } from "../../../../constants/languages";
 import diagnostics from "../../../../diagnostics";
 import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
-import { Modal, createModalComposer } from "../../../interactions";
-
-interface AnswerData extends Record<string, string> {
-	question: string;
-	answer: string;
-}
+import { Modal, ModalComposer } from "../../../components/modal-composer";
 
 async function handleStartAnswering(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -65,14 +59,14 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const data: AnswerData = {
-		question: trim(message.content, 4000),
-		answer: "",
-	};
+	const composer = new AnswerComposer(client, { interaction, question: message.content });
 
-	await createModalComposer(client, interaction, {
-		modal: generateAnswerModal(client, data, { locale }),
-		onSubmit: async (submission, data) => {
+	composer.onSubmit(
+		async (
+			submission: Logos.Interaction,
+			{ locale }: Logos.InteractionLocaleData,
+			{ formData }: { formData: AnswerFormData },
+		) => {
 			await client.acknowledge(submission);
 
 			const strings = {
@@ -88,7 +82,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 					messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
 					embeds: [
 						{
-							description: `– *${data.answer}*`,
+							description: `– *${formData.answer}*`,
 							color: constants.colours.lightGreen,
 							footer: {
 								text: `${constants.emojis.answer} ${strings.submittedBy}`,
@@ -100,51 +94,66 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 					],
 				})
 				.catch(() => client.log.warn(`Failed to send answer to ${diagnostics.display.channel(message.channelId)}.`));
-
-			return true;
 		},
-		onInvalid: async (_, __) => undefined,
-	});
+	);
+
+	await composer.open();
 }
 
-function generateAnswerModal(client: Client, data: AnswerData, { locale }: { locale: Locale }): Modal<AnswerData> {
-	const strings = {
-		title: client.localise("answer.title", locale)(),
-		question: client.localise("answer.fields.question", locale)(),
-		answer: client.localise("answer.fields.answer", locale)(),
-	};
+interface AnswerFormData {
+	readonly question: string;
+	readonly answer: string;
+}
+class AnswerComposer extends ModalComposer<AnswerFormData, never> {
+	constructor(client: Client, { interaction, question }: { interaction: Logos.Interaction; question: string }) {
+		super(client, { interaction, initialFormData: { question: trim(question, 4000), answer: "" } });
+	}
 
-	return {
-		title: strings.title,
-		fields: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						customId: "question",
-						type: Discord.MessageComponentTypes.InputText,
-						label: trim(strings.question, 45),
-						value: data.question,
-						style: Discord.TextStyles.Paragraph,
-						required: false,
-					},
-				],
+	async buildModal(
+		_: Logos.Interaction<any, any>,
+		{ locale }: Logos.InteractionLocaleData,
+		{ formData }: { formData: AnswerFormData },
+	): Promise<Modal<AnswerFormData>> {
+		const strings = {
+			title: this.client.localise("answer.title", locale)(),
+			fields: {
+				question: this.client.localise("answer.fields.question", locale)(),
+				answer: this.client.localise("answer.fields.answer", locale)(),
 			},
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						customId: "answer",
-						type: Discord.MessageComponentTypes.InputText,
-						label: trim(strings.answer, 45),
-						value: data.answer,
-						style: Discord.TextStyles.Paragraph,
-						required: true,
-					},
-				],
-			},
-		],
-	};
+		};
+
+		return {
+			title: strings.title,
+			elements: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							customId: "question",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.fields.question, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: false,
+							value: formData.question,
+						},
+					],
+				},
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							customId: "answer",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.fields.answer, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: true,
+							value: formData.answer,
+						},
+					],
+				},
+			],
+		};
+	}
 }
 
 export { handleStartAnswering };

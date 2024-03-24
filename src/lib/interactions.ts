@@ -1,7 +1,6 @@
 import { Locale } from "../constants/languages";
 import { TimeUnit } from "../constants/time";
 import { Client } from "./client";
-import { InteractionCollector } from "./collectors";
 import { Logger } from "./logger";
 
 class InteractionStore {
@@ -107,123 +106,6 @@ class InteractionStore {
 			})
 			.catch((reason) => this.log.warn("Failed to show modal:", reason));
 	}
-}
-
-type ComposerActionRow<ComposerContent, SectionNames = keyof ComposerContent> = {
-	type: Discord.MessageComponentTypes.ActionRow;
-	components: [
-		Discord.ActionRow["components"][0] & { type: Discord.MessageComponentTypes.InputText; customId: SectionNames },
-	];
-};
-
-type Modal<ComposerContent, SectionNames = keyof ComposerContent> = {
-	title: string;
-	fields: ComposerActionRow<ComposerContent, SectionNames>[];
-};
-
-// TODO(vxern): This can absolutely be improved.
-async function createModalComposer<ComposerContent, SectionNames extends keyof ComposerContent = keyof ComposerContent>(
-	client: Client,
-	interaction: Logos.Interaction,
-	{
-		onSubmit,
-		onInvalid,
-		modal,
-	}: {
-		onSubmit: (submission: Logos.Interaction, data: ComposerContent) => Promise<true | string>;
-		onInvalid: (submission: Logos.Interaction, error?: string) => Promise<Logos.Interaction | undefined>;
-		modal: Modal<ComposerContent, SectionNames>;
-	},
-): Promise<void> {
-	const fields = structuredClone(modal.fields);
-
-	let anchor: Logos.Interaction = interaction;
-	let content: ComposerContent | undefined = undefined;
-
-	let isSubmitting = true;
-	while (isSubmitting) {
-		const { promise, resolve } = Promise.withResolvers<[Logos.Interaction, boolean | string]>();
-
-		const modalSubmit = new InteractionCollector(client, {
-			type: Discord.InteractionTypes.ModalSubmit,
-			only: [interaction.user.id],
-			isSingle: true,
-		});
-
-		modalSubmit.onCollect(async (modalSubmit) => {
-			content = parseComposerContent(modalSubmit);
-			if (content === undefined) {
-				return resolve([modalSubmit, false]);
-			}
-
-			const result = await onSubmit(modalSubmit, content);
-
-			resolve([modalSubmit, result]);
-		});
-
-		await client.registerInteractionCollector(modalSubmit);
-
-		if (content !== undefined) {
-			const answers = Object.values(content) as (string | undefined)[];
-			for (const [value, index] of answers.map<[string | undefined, number]>((v, i) => [v, i])) {
-				const field = fields[index];
-				if (field === undefined) {
-					throw `StateError: The number of modal fields (${fields.length}) does not correspond to the number of answers (${answers.length}).`;
-				}
-
-				field.components[0].value = value;
-			}
-		}
-
-		await client.displayModal(anchor, {
-			title: modal.title,
-			customId: modalSubmit.customId,
-			components: fields,
-		});
-
-		const [submission, result] = await promise;
-
-		if (typeof result === "boolean" && result) {
-			isSubmitting = false;
-			break;
-		}
-
-		const newAnchor = await (typeof result === "string" ? onInvalid(submission, result) : onInvalid(submission));
-		if (newAnchor === undefined) {
-			isSubmitting = false;
-			break;
-		}
-
-		anchor = newAnchor;
-	}
-}
-
-function parseComposerContent<ComposerContent, SectionNames extends keyof ComposerContent = keyof ComposerContent>(
-	submission: Logos.Interaction,
-): ComposerContent | undefined {
-	const content: Partial<ComposerContent> = {};
-
-	const fields = submission?.data?.components?.map((component) => component.components?.at(0));
-	if (fields === undefined) {
-		return;
-	}
-
-	for (const field of fields) {
-		if (field === undefined) {
-			continue;
-		}
-
-		const key = field.customId as SectionNames;
-		const value = field.value ?? "";
-
-		if (value.length === 0) {
-			content[key] = undefined;
-		} else {
-			content[key] = value as ComposerContent[SectionNames];
-		}
-	}
-
-	return content as ComposerContent;
 }
 
 function parseTimeExpression(
@@ -404,5 +286,4 @@ function parseVerboseTimeExpressionPhrase(
 	return [correctedExpression, total];
 }
 
-export { createModalComposer, parseTimeExpression, InteractionStore };
-export type { Modal };
+export { parseTimeExpression, InteractionStore };

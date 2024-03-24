@@ -1,12 +1,8 @@
-import { Locale } from "../../../../constants/languages";
 import { trim } from "../../../../formatting";
 import { Client } from "../../../client";
-import { InteractionCollector } from "../../../collectors";
+import { Modal, ModalComposer } from "../../../components/modal-composer";
 import { Guild } from "../../../database/guild";
-import { Resource } from "../../../database/resource";
-import { Modal, createModalComposer } from "../../../interactions";
-
-type ResourceError = "failure";
+import { Resource, ResourceFormData } from "../../../database/resource";
 
 async function handleSubmitResource(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -60,15 +56,20 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	createModalComposer<Resource["answers"]>(client, interaction, {
-		modal: generateResourceModal(client, { locale }),
-		onSubmit: async (submission, answers) => {
+	const composer = new ResourceComposer(client, { interaction });
+
+	composer.onSubmit(
+		async (
+			submission: Logos.Interaction,
+			{ locale }: Logos.InteractionLocaleData,
+			{ formData }: { formData: ResourceFormData },
+		) => {
 			await client.postponeReply(submission);
 
 			const resourceDocument = await Resource.create(client, {
 				guildId: guild.id.toString(),
 				authorId: interaction.user.id.toString(),
-				answers,
+				answers: formData,
 			});
 
 			client.tryLog("resourceSend", {
@@ -79,12 +80,12 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 
 			const user = client.entities.users.get(interaction.user.id);
 			if (user === undefined) {
-				return "failure";
+				return;
 			}
 
 			const prompt = await resourceService.savePrompt(user, resourceDocument);
 			if (prompt === undefined) {
-				return "failure";
+				return;
 			}
 
 			resourceService.registerDocument(resourceDocument);
@@ -105,173 +106,42 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 					},
 				],
 			});
-
-			return true;
 		},
-		onInvalid: async (submission, error) =>
-			handleSubmittedInvalidResource(client, submission, error as ResourceError | undefined, { locale }),
-	});
+	);
 }
 
-async function handleSubmittedInvalidResource(
-	client: Client,
-	submission: Logos.Interaction,
-	error: ResourceError | undefined,
-	{ locale }: { locale: Locale },
-): Promise<Logos.Interaction | undefined> {
-	const { promise, resolve } = Promise.withResolvers<Logos.Interaction | undefined>();
-
-	const continueButton = new InteractionCollector(client, { only: [submission.user.id], isSingle: true });
-	const cancelButton = new InteractionCollector(client, { only: [submission.user.id] });
-	const returnButton = new InteractionCollector(client, {
-		only: [submission.user.id],
-		isSingle: true,
-		dependsOn: cancelButton,
-	});
-	const leaveButton = new InteractionCollector(client, {
-		only: [submission.user.id],
-		isSingle: true,
-		dependsOn: cancelButton,
-	});
-
-	continueButton.onCollect(async (buttonPress) => {
-		client.deleteReply(submission);
-		resolve(buttonPress);
-	});
-
-	cancelButton.onCollect(async (cancelButtonPress) => {
-		returnButton.onCollect(async (returnButtonPress) => {
-			client.deleteReply(submission);
-			client.deleteReply(cancelButtonPress);
-			resolve(returnButtonPress);
-		});
-
-		leaveButton.onCollect(async (_) => {
-			client.deleteReply(submission);
-			client.deleteReply(cancelButtonPress);
-			resolve(undefined);
-		});
-
+class ResourceComposer extends ModalComposer<ResourceFormData, never> {
+	async buildModal(
+		_: Logos.Interaction,
+		{ locale }: Logos.InteractionLocaleData,
+		{ formData }: { formData: ResourceFormData },
+	): Promise<Modal<ResourceFormData>> {
 		const strings = {
-			title: client.localise("resource.strings.sureToCancel.title", locale)(),
-			description: client.localise("resource.strings.sureToCancel.description", locale)(),
-			stay: client.localise("prompts.stay", locale)(),
-			leave: client.localise("prompts.leave", locale)(),
+			title: this.client.localise("resource.title", locale)(),
+			fields: {
+				resource: this.client.localise("resource.fields.resource", locale)(),
+			},
 		};
 
-		client.reply(cancelButtonPress, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
-			components: [
+		return {
+			title: strings.title,
+			elements: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: returnButton.customId,
-							label: strings.stay,
-							style: Discord.ButtonStyles.Success,
-						},
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: leaveButton.customId,
-							label: strings.leave,
-							style: Discord.ButtonStyles.Danger,
+							customId: "resource",
+							type: Discord.MessageComponentTypes.InputText,
+							label: trim(strings.fields.resource, 45),
+							style: Discord.TextStyles.Paragraph,
+							required: true,
+							value: formData.resource,
 						},
 					],
 				},
 			],
-		});
-	});
-
-	client.registerInteractionCollector(continueButton);
-	client.registerInteractionCollector(cancelButton);
-	client.registerInteractionCollector(returnButton);
-	client.registerInteractionCollector(leaveButton);
-
-	let embed!: Discord.CamelizedDiscordEmbed;
-	switch (error) {
-		default: {
-			const strings = {
-				title: client.localise("resource.strings.failed", locale)(),
-				description: client.localise("resource.strings.failed", locale)(),
-			};
-
-			client.editReply(submission, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
-			});
-
-			break;
-		}
+		};
 	}
-
-	const strings = {
-		continue: client.localise("prompts.continue", locale)(),
-		cancel: client.localise("prompts.cancel", locale)(),
-	};
-
-	client.editReply(submission, {
-		embeds: [embed],
-		components: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						type: Discord.MessageComponentTypes.Button,
-						customId: continueButton.customId,
-						label: strings.continue,
-						style: Discord.ButtonStyles.Success,
-					},
-					{
-						type: Discord.MessageComponentTypes.Button,
-						customId: cancelButton.customId,
-						label: strings.cancel,
-						style: Discord.ButtonStyles.Danger,
-					},
-				],
-			},
-		],
-	});
-
-	return promise;
-}
-
-function generateResourceModal(client: Client, { locale }: { locale: Locale }): Modal<Resource["answers"]> {
-	const strings = {
-		title: client.localise("resource.title", locale)(),
-		resource: client.localise("resource.fields.resource", locale)(),
-	};
-
-	return {
-		title: strings.title,
-		fields: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						customId: "resource",
-						type: Discord.MessageComponentTypes.InputText,
-						label: trim(strings.resource, 45),
-						style: Discord.TextStyles.Paragraph,
-						required: true,
-						minLength: 16,
-						maxLength: 256,
-					},
-				],
-			},
-		],
-	};
 }
 
 export { handleSubmitResource };
