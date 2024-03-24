@@ -1,5 +1,5 @@
-import { Client } from "../../client";
-import { HashableMessageContents, NoticeService } from "./service";
+import { Client } from "logos/client";
+import { HashableMessageContents, NoticeService } from "logos/services/notices/service";
 
 class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {

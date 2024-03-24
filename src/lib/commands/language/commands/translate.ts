@@ -4,12 +4,12 @@ import languages, {
 	TranslationLanguage,
 	getTranslationLanguage,
 	isTranslationLanguage,
-} from "../../../../constants/languages";
-import { trim } from "../../../../formatting";
-import { Client } from "../../../client";
-import { Translation } from "../translators/adapter";
-import { resolveAdapters } from "../translators/adapters";
-import { detectLanguages } from "./recognise";
+} from "logos:constants/languages";
+import { trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { detectLanguages } from "logos/commands/language/commands/recognise";
+import { Translation } from "logos/commands/language/translators/adapter";
+import { resolveAdapters } from "logos/commands/language/translators/adapters";
 
 async function handleTranslateChatInputAutocomplete(
 	client: Client,

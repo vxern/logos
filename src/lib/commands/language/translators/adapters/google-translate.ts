@@ -3,13 +3,10 @@ import {
 	Languages,
 	TranslationLocale,
 	getGoogleTranslateLocaleByTranslationLanguage,
-} from "../../../../../constants/languages";
-import {
-	getGoogleTranslateLanguageByLocale,
-	isGoogleTranslateLocale,
-} from "../../../../../constants/languages/translation";
-import { Client } from "../../../../client";
-import { Translation, TranslationAdapter } from "../adapter";
+} from "logos:constants/languages";
+import { getGoogleTranslateLanguageByLocale, isGoogleTranslateLocale } from "logos:constants/languages/translation";
+import { Client } from "logos/client";
+import { Translation, TranslationAdapter } from "logos/commands/language/translators/adapter";
 
 interface TranslationResult {
 	data: {

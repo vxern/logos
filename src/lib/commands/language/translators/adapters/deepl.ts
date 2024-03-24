@@ -4,9 +4,9 @@ import {
 	getDeepLLocaleByTranslationLanguage,
 	getDeepLTranslationLanguageByLocale,
 	isDeepLLocale,
-} from "../../../../../constants/languages";
-import { Client } from "../../../../client";
-import { Translation, TranslationAdapter } from "../adapter";
+} from "logos:constants/languages";
+import { Client } from "logos/client";
+import { Translation, TranslationAdapter } from "logos/commands/language/translators/adapter";
 
 class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 	constructor() {

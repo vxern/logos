@@ -1,13 +1,13 @@
 import { EventEmitter } from "node:events";
+import { getEmojiBySongListingType } from "logos:constants/emojis";
+import { getLocalisationBySongListingType } from "logos:constants/localisations";
+import diagnostics from "logos:core/diagnostics";
+import { mention } from "logos:core/formatting";
 import * as Lavaclient from "lavaclient";
-import { getEmojiBySongListingType } from "../../constants/emojis";
-import { getLocalisationBySongListingType } from "../../constants/localisations";
-import diagnostics from "../../diagnostics";
-import { mention } from "../../formatting";
-import { Client } from "../client";
-import { Song, SongCollection, SongListing, SongStream } from "../commands/music/data/types";
-import { Guild, timeStructToMilliseconds } from "../database/guild";
-import { LocalService } from "./service";
+import { Client } from "logos/client";
+import { Song, SongCollection, SongListing, SongStream } from "logos/commands/music/data/types";
+import { Guild, timeStructToMilliseconds } from "logos/database/guild";
+import { LocalService } from "logos/services/service";
 
 interface PositionControls {
 	by: number;

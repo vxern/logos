@@ -1,5 +1,5 @@
-import { Client } from "../client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "./model";
+import { Client } from "logos/client";
+import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
 
 // TODO(vxern): This needs a guild in the ID as well.
 // TODO(vxern): Verify order of ID parts.

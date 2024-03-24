@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Resource } from "../../database/resource";
-import { EventLogger } from "../logger";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Resource } from "logos/database/resource";
+import { EventLogger } from "logos/journalling/logger";
 
 class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
 	constructor(client: Client) {

@@ -1,7 +1,7 @@
-import diagnostics from "../../diagnostics";
-import { Client } from "../client";
-import { Guild } from "../database/guild";
-import { LocalService } from "./service";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
+import { LocalService } from "logos/services/service";
 
 class AlertService extends LocalService {
 	get configuration(): Guild["alerts"] {

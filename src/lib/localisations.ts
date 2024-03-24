@@ -4,9 +4,9 @@ import {
 	getDiscordLocaleByLocalisationLanguage,
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
-} from "../constants/languages";
-import { Client } from "./client";
-import { Logger } from "./logger";
+} from "logos:constants/languages";
+import { Client } from "logos/client";
+import { Logger } from "logos/logger";
 
 type LocalisationBuilder = (data?: Record<string, unknown>) => string;
 type RawLocalisations = Map<string, Map<LocalisationLanguage, string>>;

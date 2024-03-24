@@ -24,7 +24,19 @@
     "strictPropertyInitialization": true,
     "strictNullChecks": true,
     "suppressExcessPropertyErrors": false,
-    "suppressImplicitAnyIndexErrors": false
+    "suppressImplicitAnyIndexErrors": false,
+    "baseUrl": "",
+    "paths": {
+      "discordeno": ["@discordeno/bot"],
+      "logos:constants/*": ["./src/constants/*"],
+      "logos:core/*": ["./src/*"],
+      "logos/*": ["./src/lib/*"],
+      // The following should never be used, either because there is another import that covers them
+      // or they should never be imported from in the first place.
+      "logos:core/constants/*": ["./?"],
+      "logos:core/lib/*": ["./?"],
+      "logos:core/index": ["./?"]
+    }
   },
   "compileOnSave": true,
   "exclude": ["dist/", "node_modules/"],

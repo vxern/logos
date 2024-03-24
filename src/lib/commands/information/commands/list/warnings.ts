@@ -1,8 +1,8 @@
-import { Locale } from "../../../../../constants/languages";
-import { timestamp } from "../../../../../formatting";
-import { Client } from "../../../../client";
-import { Warning } from "../../../../database/warning";
-import { getRuleTitleFormatted } from "../../../moderation/commands/rule";
+import { Locale } from "logos:constants/languages";
+import { timestamp } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { getRuleTitleFormatted } from "logos/commands/moderation/commands/rule";
+import { Warning } from "logos/database/warning";
 
 async function handleDisplayWarningsAutocomplete(
 	client: Client,

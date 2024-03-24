@@ -1,74 +1,80 @@
-import type { Client } from "../client";
-import { CommandTemplate } from "./command";
-import { handleDisplayBotInformation } from "./information/commands/information/bot";
-import { handleDisplayGuildInformation } from "./information/commands/information/guild";
+import type { Client } from "logos/client";
+import { CommandTemplate } from "logos/commands/command";
+import { handleDisplayBotInformation } from "logos/commands/information/commands/information/bot";
+import { handleDisplayGuildInformation } from "logos/commands/information/commands/information/guild";
 import {
 	handleDisplayPraisesByAuthor,
 	handleDisplayPraisesByAuthorAutocomplete,
-} from "./information/commands/list/praises/author";
+} from "logos/commands/information/commands/list/praises/author";
 import {
 	handleDisplayPraisesByTarget,
 	handleDisplayPraisesByTargetAutocomplete,
-} from "./information/commands/list/praises/target";
-import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "./information/commands/list/warnings";
-import { handleStartAnswering } from "./language/commands/answer";
-import { handleDisplayCefrGuide } from "./language/commands/cefr";
-import { handleStartCorrecting } from "./language/commands/correction";
-import { handleStartGame } from "./language/commands/game";
-import { handleRecogniseLanguageChatInput, handleRecogniseLanguageMessage } from "./language/commands/recognise";
-import { handleDisplayResources } from "./language/commands/resources";
+} from "logos/commands/information/commands/list/praises/target";
+import {
+	handleDisplayWarnings,
+	handleDisplayWarningsAutocomplete,
+} from "logos/commands/information/commands/list/warnings";
+import { handleStartAnswering } from "logos/commands/language/commands/answer";
+import { handleDisplayCefrGuide } from "logos/commands/language/commands/cefr";
+import { handleStartCorrecting } from "logos/commands/language/commands/correction";
+import { handleStartGame } from "logos/commands/language/commands/game";
+import {
+	handleRecogniseLanguageChatInput,
+	handleRecogniseLanguageMessage,
+} from "logos/commands/language/commands/recognise";
+import { handleDisplayResources } from "logos/commands/language/commands/resources";
 import {
 	handleTranslateChatInput,
 	handleTranslateChatInputAutocomplete,
 	handleTranslateMessage,
-} from "./language/commands/translate";
-import { handleDisplayAcknowledgements } from "./meta/commands/acknowledgements";
-import { handleDisplayCredits } from "./meta/commands/credits";
+} from "logos/commands/language/commands/translate";
+import { handleDisplayAcknowledgements } from "logos/commands/meta/commands/acknowledgements";
+import { handleDisplayCredits } from "logos/commands/meta/commands/credits";
 import {
 	handleDisplayDictionaryLicence,
 	handleDisplayDictionaryLicenceAutocomplete,
-} from "./meta/commands/licence/dictionary";
+} from "logos/commands/meta/commands/licence/dictionary";
 import {
 	handleDisplaySoftwareLicence,
 	handleDisplaySoftwareLicenceAutocomplete,
-} from "./meta/commands/licence/software";
-import { handleClearLanguage } from "./meta/commands/settings/language/clear";
-import { handleSetLanguage, handleSetLanguageAutocomplete } from "./meta/commands/settings/language/set";
-import { handleDisplaySettings } from "./meta/commands/settings/view";
-import { handlePardonUser, handlePardonUserAutocomplete } from "./moderation/commands/pardon";
-import { handleDisplayModerationPolicy } from "./moderation/commands/policy";
-import { handlePurgeMessages, handlePurgeMessagesAutocomplete } from "./moderation/commands/purge";
-import { handleMakeReport } from "./moderation/commands/report";
-import { handleCiteRule, handleCiteRuleAutocomplete } from "./moderation/commands/rule";
-import { handleToggleSlowmode, handleToggleSlowmodeAutocomplete } from "./moderation/commands/slowmode";
-import { handleClearTimeout, handleClearTimeoutAutocomplete } from "./moderation/commands/timeout/clear";
-import { handleSetTimeout, handleSetTimeoutAutocomplete } from "./moderation/commands/timeout/set";
-import { handleWarnUser, handleWarnUserAutocomplete } from "./moderation/commands/warn";
-import { handleFastForward, handleFastForwardAutocomplete } from "./music/commands/fast-forward";
-import { handleDisplayPlaybackHistory } from "./music/commands/history";
-import { handleLoopPlayback } from "./music/commands/loop";
-import { handleDisplayCurrentlyPlaying } from "./music/commands/now";
-import { handlePausePlayback } from "./music/commands/pause";
-import { handleRequestFilePlayback } from "./music/commands/play/file";
-import { handleRequestQueryPlayback } from "./music/commands/play/query";
-import { handleDisplayPlaybackQueue } from "./music/commands/queue";
-import { handleRemoveSongListing } from "./music/commands/remove";
-import { handleReplayAction } from "./music/commands/replay";
-import { handleResumePlayback } from "./music/commands/resume";
-import { handleRewind, handleRewindAutocomplete } from "./music/commands/rewind";
-import { handleSkipAction } from "./music/commands/skip";
-import { handleSkipToTimestamp, handleSkipToTimestampAutocomplete } from "./music/commands/skip-to";
-import { handleStopPlayback } from "./music/commands/stop";
-import { handleUnskipAction } from "./music/commands/unskip";
-import { handleDisplayVolume } from "./music/commands/volume/display";
-import { handleSetVolume } from "./music/commands/volume/set";
-import { sources } from "./music/data/sources/sources";
-import { handleSubmitResource } from "./server/commands/resource";
-import { handleMakeSuggestion } from "./server/commands/suggestion";
-import { handleOpenTicket } from "./server/commands/ticket/open";
-import { handlePraiseUser, handlePraiseUserAutocomplete } from "./social/commands/praise";
-import { handleOpenRoleSelectionMenu } from "./social/commands/profile/roles";
-import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "./social/commands/profile/view";
+} from "logos/commands/meta/commands/licence/software";
+import { handleClearLanguage } from "logos/commands/meta/commands/settings/language/clear";
+import { handleSetLanguage, handleSetLanguageAutocomplete } from "logos/commands/meta/commands/settings/language/set";
+import { handleDisplaySettings } from "logos/commands/meta/commands/settings/view";
+import { handlePardonUser, handlePardonUserAutocomplete } from "logos/commands/moderation/commands/pardon";
+import { handleDisplayModerationPolicy } from "logos/commands/moderation/commands/policy";
+import { handlePurgeMessages, handlePurgeMessagesAutocomplete } from "logos/commands/moderation/commands/purge";
+import { handleMakeReport } from "logos/commands/moderation/commands/report";
+import { handleCiteRule, handleCiteRuleAutocomplete } from "logos/commands/moderation/commands/rule";
+import { handleToggleSlowmode, handleToggleSlowmodeAutocomplete } from "logos/commands/moderation/commands/slowmode";
+import { handleClearTimeout, handleClearTimeoutAutocomplete } from "logos/commands/moderation/commands/timeout/clear";
+import { handleSetTimeout, handleSetTimeoutAutocomplete } from "logos/commands/moderation/commands/timeout/set";
+import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/moderation/commands/warn";
+import { handleFastForward, handleFastForwardAutocomplete } from "logos/commands/music/commands/fast-forward";
+import { handleDisplayPlaybackHistory } from "logos/commands/music/commands/history";
+import { handleLoopPlayback } from "logos/commands/music/commands/loop";
+import { handleDisplayCurrentlyPlaying } from "logos/commands/music/commands/now";
+import { handlePausePlayback } from "logos/commands/music/commands/pause";
+import { handleRequestFilePlayback } from "logos/commands/music/commands/play/file";
+import { handleRequestQueryPlayback } from "logos/commands/music/commands/play/query";
+import { handleDisplayPlaybackQueue } from "logos/commands/music/commands/queue";
+import { handleRemoveSongListing } from "logos/commands/music/commands/remove";
+import { handleReplayAction } from "logos/commands/music/commands/replay";
+import { handleResumePlayback } from "logos/commands/music/commands/resume";
+import { handleRewind, handleRewindAutocomplete } from "logos/commands/music/commands/rewind";
+import { handleSkipAction } from "logos/commands/music/commands/skip";
+import { handleSkipToTimestamp, handleSkipToTimestampAutocomplete } from "logos/commands/music/commands/skip-to";
+import { handleStopPlayback } from "logos/commands/music/commands/stop";
+import { handleUnskipAction } from "logos/commands/music/commands/unskip";
+import { handleDisplayVolume } from "logos/commands/music/commands/volume/display";
+import { handleSetVolume } from "logos/commands/music/commands/volume/set";
+import { sources } from "logos/commands/music/data/sources/sources";
+import { handleSubmitResource } from "logos/commands/server/commands/resource";
+import { handleMakeSuggestion } from "logos/commands/server/commands/suggestion";
+import { handleOpenTicket } from "logos/commands/server/commands/ticket/open";
+import { handlePraiseUser, handlePraiseUserAutocomplete } from "logos/commands/social/commands/praise";
+import { handleOpenRoleSelectionMenu } from "logos/commands/social/commands/profile/roles";
+import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "logos/commands/social/commands/profile/view";
 
 // TODO(vxern): Make options named so as to allow referencing specific subcommands.
 /**

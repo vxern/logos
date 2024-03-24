@@ -1,7 +1,7 @@
-import diagnostics from "../../../../diagnostics";
-import { trim } from "../../../../formatting";
-import { Client } from "../../../client";
-import { Modal, ModalComposer } from "../../../components/modal-composer";
+import diagnostics from "logos:core/diagnostics";
+import { trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Modal, ModalComposer } from "logos/components/modal-composer";
 
 type CorrectionMode = "partial" | "full";
 

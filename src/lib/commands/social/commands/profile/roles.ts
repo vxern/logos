@@ -1,10 +1,10 @@
-import { Locale } from "../../../../../constants/languages";
-import diagnostics from "../../../../../diagnostics";
-import { trim } from "../../../../../formatting";
-import { isDefined } from "../../../../../utilities";
-import { Client } from "../../../../client";
-import { InteractionCollector } from "../../../../collectors";
-import { getRoleCategories, getRoles } from "../../roles/roles";
+import { Locale } from "logos:constants/languages";
+import diagnostics from "logos:core/diagnostics";
+import { trim } from "logos:core/formatting";
+import { isDefined } from "logos:core/utilities";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { getRoleCategories, getRoles } from "logos/commands/social/roles/roles";
 import {
 	Role,
 	RoleCategory,
@@ -14,7 +14,7 @@ import {
 	isCustom,
 	isGroup,
 	isSingle,
-} from "../../roles/types";
+} from "logos/commands/social/roles/types";
 
 /**
  * Displays a role selection menu to the user and allows them to assign or unassign roles

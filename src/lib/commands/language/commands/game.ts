@@ -1,10 +1,10 @@
+import { Locale, getLocaleByLearningLanguage } from "logos:constants/languages";
+import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
-import { Locale, getLocaleByLearningLanguage } from "../../../../constants/languages";
-import { capitalise } from "../../../../formatting";
-import { Client } from "../../../client";
-import { InteractionCollector } from "../../../collectors";
-import { GuildStats } from "../../../database/guild-stats";
-import { User } from "../../../database/user";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { GuildStats } from "logos/database/guild-stats";
+import { User } from "logos/database/user";
 
 function random(max: number): number {
 	return Math.floor(Math.random() * max);

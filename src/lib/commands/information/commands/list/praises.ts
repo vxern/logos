@@ -1,7 +1,7 @@
-import { Locale } from "../../../../../constants/languages";
-import diagnostics from "../../../../../diagnostics";
-import { Client } from "../../../../client";
-import { Praise } from "../../../../database/praise";
+import { Locale } from "logos:constants/languages";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Praise } from "logos/database/praise";
 
 function getPraisePage(
 	client: Client,

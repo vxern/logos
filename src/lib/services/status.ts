@@ -1,5 +1,5 @@
-import { Client } from "../client";
-import { GlobalService } from "./service";
+import { Client } from "logos/client";
+import { GlobalService } from "logos/services/service";
 
 class StatusService extends GlobalService {
 	#currentIndex: number;

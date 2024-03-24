@@ -1,7 +1,7 @@
-import { Languages, TranslationLanguage } from "../../../../constants/languages";
-import { TranslationAdapter } from "./adapter";
-import deepl from "./adapters/deepl";
-import google from "./adapters/google-translate";
+import { Languages, TranslationLanguage } from "logos:constants/languages";
+import { TranslationAdapter } from "logos/commands/language/translators/adapter";
+import deepl from "logos/commands/language/translators/adapters/deepl";
+import google from "logos/commands/language/translators/adapters/google-translate";
 
 const adaptersLocalised: Record<TranslationLanguage, TranslationAdapter[]> = {
 	Afrikaans: [google],

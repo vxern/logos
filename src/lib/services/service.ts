@@ -1,8 +1,8 @@
-import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
-import diagnostics from "../../diagnostics";
-import { Client } from "../client";
-import { Guild } from "../database/guild";
-import { Logger } from "../logger";
+import { Locale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
+import { Logger } from "logos/logger";
 
 abstract class Service {
 	readonly log: Logger;

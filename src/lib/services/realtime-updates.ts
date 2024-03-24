@@ -1,8 +1,8 @@
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
+import { GlobalService } from "logos/services/service";
 import * as ravendb from "ravendb";
-import diagnostics from "../../diagnostics";
-import { Client } from "../client";
-import { Guild } from "../database/guild";
-import { GlobalService } from "./service";
 
 type DocumentChangeHandler = (data: ravendb.DocumentChange) => Promise<void>;
 

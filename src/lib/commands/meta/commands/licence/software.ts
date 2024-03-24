@@ -1,7 +1,7 @@
-import { Locale } from "../../../../../constants/languages";
-import { code } from "../../../../../formatting";
-import { Client } from "../../../../client";
-import { PaginatedSoftwareLicenceViewComponent } from "../../../../components/paginated-view";
+import { Locale } from "logos:constants/languages";
+import { code } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { PaginatedSoftwareLicenceViewComponent } from "logos/components/paginated-view";
 
 async function handleDisplaySoftwareLicenceAutocomplete(
 	client: Client,

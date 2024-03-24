@@ -1,5 +1,5 @@
-import { Client } from "../../../client";
-import { handleResumePlayback } from "./resume";
+import { Client } from "logos/client";
+import { handleResumePlayback } from "logos/commands/music/commands/resume";
 
 async function handlePausePlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;

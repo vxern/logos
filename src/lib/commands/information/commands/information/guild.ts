@@ -1,8 +1,8 @@
-import { Locale } from "../../../../../constants/languages";
-import diagnostics from "../../../../../diagnostics";
-import { mention, timestamp } from "../../../../../formatting";
-import { Client } from "../../../../client";
-import { Guild } from "../../../../database/guild";
+import { Locale } from "logos:constants/languages";
+import diagnostics from "logos:core/diagnostics";
+import { mention, timestamp } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(client: Client, interaction: Logos.Interaction): Promise<void> {

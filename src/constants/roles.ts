@@ -1,6 +1,6 @@
-import { RoleCategory } from "../lib/commands/social/roles/types";
-import colours from "./colours";
-import emojis from "./emojis";
+import colours from "logos:constants/colours";
+import emojis from "logos:constants/emojis";
+import { RoleCategory } from "logos/commands/social/roles/types";
 
 export default Object.freeze({
 	language: {

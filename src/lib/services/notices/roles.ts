@@ -1,7 +1,7 @@
-import { Client } from "../../client";
-import { InteractionCollector } from "../../collectors";
-import { handleOpenRoleSelectionMenu } from "../../commands/social/commands/profile/roles";
-import { HashableMessageContents, NoticeService } from "./service";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { handleOpenRoleSelectionMenu } from "logos/commands/social/commands/profile/roles";
+import { HashableMessageContents, NoticeService } from "logos/services/notices/service";
 
 class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	readonly #_selectRolesButton: InteractionCollector;

@@ -1,4 +1,4 @@
-import { SongListingType } from "../lib/commands/music/data/types";
+import { SongListingType } from "logos/commands/music/data/types";
 
 const emojis = Object.freeze({
 	ruleBullet: "💠",

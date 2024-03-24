@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Suggestion } from "../../database/suggestion";
-import { EventLogger } from "../logger";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Suggestion } from "logos/database/suggestion";
+import { EventLogger } from "logos/journalling/logger";
 
 class SuggestionSendEventLogger extends EventLogger<"suggestionSend"> {
 	constructor(client: Client) {

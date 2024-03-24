@@ -1,4 +1,4 @@
-import { Client } from "../client";
+import { Client } from "logos/client";
 
 type InteractionHandler = (
 	client: Client,

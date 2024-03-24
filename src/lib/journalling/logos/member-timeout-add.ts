@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { timestamp } from "../../../formatting";
-import { Client } from "../../client";
-import { EventLogger } from "../logger";
+import diagnostics from "logos:core/diagnostics";
+import { timestamp } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { EventLogger } from "logos/journalling/logger";
 
 class MemberTimeoutAddEventLogger extends EventLogger<"memberTimeoutAdd"> {
 	constructor(client: Client) {

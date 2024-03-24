@@ -1,7 +1,7 @@
-import { Locale } from "../constants/languages";
-import { TimeUnit } from "../constants/time";
-import { Client } from "./client";
-import { Logger } from "./logger";
+import { Locale } from "logos:constants/languages";
+import { TimeUnit } from "logos:constants/time";
+import { Client } from "logos/client";
+import { Logger } from "logos/logger";
 
 class InteractionStore {
 	readonly log: Logger;

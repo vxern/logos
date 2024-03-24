@@ -1,7 +1,7 @@
-import { mention } from "../../../../formatting";
-import { Client } from "../../../client";
-import { Guild } from "../../../database/guild";
-import { Praise } from "../../../database/praise";
+import { mention } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
+import { Praise } from "logos/database/praise";
 
 async function handlePraiseUserAutocomplete(
 	client: Client,

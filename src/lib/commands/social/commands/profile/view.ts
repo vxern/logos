@@ -1,7 +1,7 @@
-import { mention } from "../../../../../formatting";
-import { Client } from "../../../../client";
-import { Praise } from "../../../../database/praise";
-import { Warning } from "../../../../database/warning";
+import { mention } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Praise } from "logos/database/praise";
+import { Warning } from "logos/database/warning";
 
 async function handleDisplayProfileAutocomplete(
 	client: Client,

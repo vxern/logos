@@ -1,7 +1,7 @@
-import { Locale, LocalisationLanguage } from "../../constants/languages";
-import { Client } from "../client";
-import { GameType } from "./guild-stats";
-import { IdentifierData, MetadataOrIdentifierData, Model } from "./model";
+import { Locale, LocalisationLanguage } from "logos:constants/languages";
+import { Client } from "logos/client";
+import { GameType } from "logos/database/guild-stats";
+import { IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
 
 interface Account {
 	/** User's Discord ID. */

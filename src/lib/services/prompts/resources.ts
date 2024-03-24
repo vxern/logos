@@ -1,8 +1,8 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Resource } from "../../database/resource";
-import { User } from "../../database/user";
-import { PromptService } from "./service";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Resource } from "logos/database/resource";
+import { User } from "logos/database/user";
+import { PromptService } from "logos/services/prompts/service";
 
 class ResourcePromptService extends PromptService<{
 	type: "resources";

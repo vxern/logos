@@ -1,6 +1,6 @@
-import { Client } from "../../../../client";
-import { SongListing } from "../../data/types";
-import { handleRequestPlayback } from "./query";
+import { Client } from "logos/client";
+import { handleRequestPlayback } from "logos/commands/music/commands/play/query";
+import { SongListing } from "logos/commands/music/data/types";
 
 async function handleRequestFilePlayback(
 	client: Client,

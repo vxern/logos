@@ -1,4 +1,4 @@
-import { Client } from "../../../client";
+import { Client } from "logos/client";
 
 async function handleStopPlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;

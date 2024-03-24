@@ -1,4 +1,4 @@
-import time from "./time";
+import time from "logos:constants/time";
 
 const levels = ["lowest", "low", "medium", "high", "highest", "emergency", "lockdown", "beyond"] as const;
 type SlowmodeLevel = (typeof levels)[number];

@@ -1,8 +1,8 @@
-import { Locale } from "../../../../constants/languages";
-import { mention } from "../../../../formatting";
-import { Client } from "../../../client";
-import { Guild, timeStructToMilliseconds } from "../../../database/guild";
-import { Warning } from "../../../database/warning";
+import { Locale } from "logos:constants/languages";
+import { mention } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Guild, timeStructToMilliseconds } from "logos/database/guild";
+import { Warning } from "logos/database/warning";
 
 async function handlePardonUserAutocomplete(
 	client: Client,

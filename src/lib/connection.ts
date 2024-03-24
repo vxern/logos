@@ -1,5 +1,5 @@
-import { Client } from "./client";
-import { Logger } from "./logger";
+import { Client } from "logos/client";
+import { Logger } from "logos/logger";
 
 class DiscordConnection {
 	readonly bot: Discord.Bot;

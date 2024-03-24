@@ -1,4 +1,9 @@
-import { MentionType, TimestampFormat, getSigilByMentionType, getSigilByTimestampFormat } from "./constants/formatting";
+import {
+	MentionType,
+	TimestampFormat,
+	getSigilByMentionType,
+	getSigilByTimestampFormat,
+} from "logos:constants/formatting";
 
 /**
  * Capitalises the first letter of the given text.

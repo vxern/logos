@@ -1,5 +1,11 @@
-import { RateLimit, TimeStruct } from "../lib/database/guild";
-import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage, TranslationLanguage } from "./languages";
+import {
+	FeatureLanguage,
+	LearningLanguage,
+	Locale,
+	LocalisationLanguage,
+	TranslationLanguage,
+} from "logos:constants/languages";
+import { RateLimit, TimeStruct } from "logos/database/guild";
 
 const FEATURE_LOCALE: Locale = "eng-US";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";

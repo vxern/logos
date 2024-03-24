@@ -1,6 +1,6 @@
+import { chunk } from "logos:core/utilities";
 import * as Discord from "@discordeno/bot";
 import log from "loglevel";
-import { chunk } from "./utilities";
 
 Array.prototype.toChunked = function <T>(this, size: number) {
 	return Array.from<T[]>(chunk(this, size));

@@ -1,6 +1,6 @@
-import { Locale } from "../../../../../constants/languages";
-import { getDictionaryLicenceByDictionary, isValidDictionary } from "../../../../../constants/licences";
-import { Client } from "../../../../client";
+import { Locale } from "logos:constants/languages";
+import { getDictionaryLicenceByDictionary, isValidDictionary } from "logos:constants/licences";
+import { Client } from "logos/client";
 
 async function handleDisplayDictionaryLicenceAutocomplete(
 	client: Client,

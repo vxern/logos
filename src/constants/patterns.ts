@@ -1,4 +1,4 @@
-import special from "./special";
+import special from "logos:constants/special";
 
 const patterns = Object.freeze({
 	/** Used for matching hex colour representations, e.g. #ffffff */

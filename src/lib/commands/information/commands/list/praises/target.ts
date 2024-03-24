@@ -1,6 +1,6 @@
-import { Client } from "../../../../../client";
-import { Praise } from "../../../../../database/praise";
-import { getPraisePage } from "../praises";
+import { Client } from "logos/client";
+import { getPraisePage } from "logos/commands/information/commands/list/praises";
+import { Praise } from "logos/database/praise";
 
 async function handleDisplayPraisesByTargetAutocomplete(
 	client: Client,

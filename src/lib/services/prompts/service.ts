@@ -1,11 +1,11 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { InteractionCollector } from "../../collectors";
-import { Guild } from "../../database/guild";
-import { Model } from "../../database/model";
-import { User } from "../../database/user";
-import { ServiceStore } from "../../services";
-import { LocalService, getAllMessages } from "../service";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { Guild } from "logos/database/guild";
+import { Model } from "logos/database/model";
+import { User } from "logos/database/user";
+import { ServiceStore } from "logos/services";
+import { LocalService, getAllMessages } from "logos/services/service";
 
 interface Configurations {
 	verification: Guild["verification"];

@@ -1,4 +1,4 @@
-import { Client } from "../../../../client";
+import { Client } from "logos/client";
 
 async function handleDisplayVolume(
 	client: Client,

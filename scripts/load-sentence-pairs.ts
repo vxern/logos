@@ -1,12 +1,12 @@
 import * as fsSync from "node:fs";
 import * as fs from "node:fs/promises";
 import * as stream from "node:stream";
+import constants from "logos:constants/constants";
+import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "logos:constants/languages";
+import { locales } from "logos:constants/languages/localisation";
+import { capitalise } from "logos:core/formatting";
 import eventStream from "event-stream";
 import Redis from "ioredis";
-import constants from "../src/constants/constants";
-import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "../src/constants/languages";
-import { locales } from "../src/constants/languages/localisation";
-import { capitalise } from "../src/formatting";
 
 const RECORD_DELIMETER = "	";
 const MAX_BUFFER_SIZE = 1024 * 128;

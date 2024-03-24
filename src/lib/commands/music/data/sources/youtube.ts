@@ -1,9 +1,9 @@
+import { trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { ListingResolver } from "logos/commands/music/data/sources/sources";
+import { Song, SongListing } from "logos/commands/music/data/types";
 import * as YouTubeSearch from "youtube-sr";
-import { trim } from "../../../../../formatting";
-import { Client } from "../../../../client";
-import { InteractionCollector } from "../../../../collectors";
-import { Song, SongListing } from "../types";
-import { ListingResolver } from "./sources";
 
 const resolver: ListingResolver = async (client, interaction, query) => {
 	if (!constants.patterns.youtubeUrl.test(query)) {

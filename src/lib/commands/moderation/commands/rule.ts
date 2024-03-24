@@ -1,7 +1,7 @@
-import { Locale } from "../../../../constants/languages";
-import { Rule, isValidRule } from "../../../../constants/rules";
-import { Client } from "../../../client";
-import { Guild } from "../../../database/guild";
+import { Locale } from "logos:constants/languages";
+import { Rule, isValidRule } from "logos:constants/rules";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
 
 async function handleCiteRuleAutocomplete(
 	client: Client,

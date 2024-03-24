@@ -1,7 +1,7 @@
-import diagnostics from "../../../../../diagnostics";
-import { mention } from "../../../../../formatting";
-import { Client } from "../../../../client";
-import { Guild } from "../../../../database/guild";
+import diagnostics from "logos:core/diagnostics";
+import { mention } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
 
 async function handleClearTimeoutAutocomplete(
 	client: Client,

@@ -1,5 +1,5 @@
-import { Languages, TranslationLanguage } from "../../../../constants/languages";
-import { Client } from "../../../client";
+import { Languages, TranslationLanguage } from "logos:constants/languages";
+import { Client } from "logos/client";
 
 interface Translation {
 	/** The language detected from the text sent to be translated. */

@@ -1,14 +1,14 @@
-import { Locale } from "../../../constants/languages";
-import diagnostics from "../../../diagnostics";
-import { mention, timestamp } from "../../../formatting";
-import { Client } from "../../client";
-import { InteractionCollector } from "../../collectors";
-import { openTicket } from "../../commands/server/commands/ticket/open";
-import { EntryRequest } from "../../database/entry-request";
-import { Model } from "../../database/model";
-import { Ticket } from "../../database/ticket";
-import { User } from "../../database/user";
-import { Configurations, PromptService } from "./service";
+import { Locale } from "logos:constants/languages";
+import diagnostics from "logos:core/diagnostics";
+import { mention, timestamp } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { openTicket } from "logos/commands/server/commands/ticket/open";
+import { EntryRequest } from "logos/database/entry-request";
+import { Model } from "logos/database/model";
+import { Ticket } from "logos/database/ticket";
+import { User } from "logos/database/user";
+import { Configurations, PromptService } from "logos/services/prompts/service";
 
 type Configuration = NonNullable<Configurations["verification"]>;
 type VoteInformation = {
@@ -669,7 +669,7 @@ class VerificationPromptService extends PromptService<{
 			)({ user: user.username }),
 		};
 
-		const result = await openTicket(
+		const ticketDocument = await openTicket(
 			this.client,
 			configuration,
 			{ topic: strings.inquiryChannel },
@@ -678,7 +678,7 @@ class VerificationPromptService extends PromptService<{
 			"inquiry",
 			{ guildLocale: this.guildLocale },
 		);
-		if (typeof result === "string") {
+		if (ticketDocument === undefined) {
 			const strings = {
 				title: this.client.localise("entry.verification.inquiry.failed.title", this.guildLocale)(),
 				description: this.client.localise("entry.verification.inquiry.failed.description", this.guildLocale)(),
@@ -698,7 +698,7 @@ class VerificationPromptService extends PromptService<{
 		}
 
 		await entryRequestDocument.update(this.client, () => {
-			entryRequestDocument.ticketChannelId = result.channelId;
+			entryRequestDocument.ticketChannelId = ticketDocument.channelId;
 		});
 
 		const prompt = this.promptByPartialId.get(entryRequestDocument.partialId);

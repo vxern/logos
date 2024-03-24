@@ -1,6 +1,6 @@
-import { Rule } from "../../constants/rules";
-import { Client } from "../client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "./model";
+import { Rule } from "logos:constants/rules";
+import { Client } from "logos/client";
+import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
 
 // TODO(vxern): This needs a guild in the ID as well.
 class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> {

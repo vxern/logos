@@ -1,8 +1,8 @@
-import { Locale } from "../../constants/languages";
-import { Client } from "../client";
-import { InteractionCollector } from "../collectors";
-import { InteractionStore } from "../interactions";
-import { GlobalService } from "./service";
+import { Locale } from "logos:constants/languages";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { InteractionStore } from "logos/interactions";
+import { GlobalService } from "logos/services/service";
 
 // TODO(vxern): Improve this by getting rid of the "message could not be loaded" text.
 class InteractionRepetitionService extends GlobalService {

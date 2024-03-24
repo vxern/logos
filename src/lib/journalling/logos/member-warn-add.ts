@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Warning } from "../../database/warning";
-import { EventLogger } from "../logger";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Warning } from "logos/database/warning";
+import { EventLogger } from "logos/journalling/logger";
 
 class MemberWarnAddEventLogger extends EventLogger<"memberWarnAdd"> {
 	constructor(client: Client) {

@@ -1,8 +1,8 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Suggestion } from "../../database/suggestion";
-import { User } from "../../database/user";
-import { PromptService } from "./service";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Suggestion } from "logos/database/suggestion";
+import { User } from "logos/database/user";
+import { PromptService } from "logos/services/prompts/service";
 
 class SuggestionPromptService extends PromptService<{
 	type: "suggestions";

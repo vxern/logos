@@ -1,4 +1,4 @@
-import { Client } from "../../../../client";
+import { Client } from "logos/client";
 
 async function handleSetVolume(client: Client, interaction: Logos.Interaction<any, { volume: number }>): Promise<void> {
 	const locale = interaction.guildLocale;

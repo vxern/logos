@@ -1,5 +1,5 @@
-import { Client } from "../../../../../client";
-import { User } from "../../../../../database/user";
+import { Client } from "logos/client";
+import { User } from "logos/database/user";
 
 async function handleClearLanguage(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;

@@ -1,5 +1,5 @@
-import { Client } from "../../../client";
-import { isCollection } from "../../../services/music";
+import { Client } from "logos/client";
+import { isCollection } from "logos/services/music";
 
 async function handleLoopPlayback(
 	client: Client,

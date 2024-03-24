@@ -1,6 +1,6 @@
-import apache from "./licences/apache";
-import bsd from "./licences/bsd";
-import mit from "./licences/mit";
+import apache from "logos:constants/licences/apache";
+import bsd from "logos:constants/licences/bsd";
+import mit from "logos:constants/licences/mit";
 
 interface DictionaryLicence {
 	readonly name: string;

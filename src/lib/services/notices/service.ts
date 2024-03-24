@@ -1,9 +1,9 @@
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
+import { ServiceStore } from "logos/services";
+import { LocalService, getAllMessages } from "logos/services/service";
 import Hash from "object-hash";
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Guild } from "../../database/guild";
-import { ServiceStore } from "../../services";
-import { LocalService, getAllMessages } from "../service";
 
 type HashableProperties = "embeds" | "components";
 type HashableMessageContents = Pick<Discord.CreateMessageOptions, HashableProperties>;

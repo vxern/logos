@@ -9,14 +9,14 @@ import {
 	getTinyLDLanguageByLocale as getTinyLDDetectionLanguageByLocale,
 	isCLDLocale,
 	isTinyLDLocale,
-} from "./languages/detection";
-import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "./languages/feature";
+} from "logos:constants/languages/detection";
+import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "logos:constants/languages/feature";
 import {
 	Language as LearningLanguage,
 	getLocaleByLanguage as getLocaleByLearningLanguage,
 	isLanguage as isLearningLanguage,
 	isLocale as isLearningLocale,
-} from "./languages/learning";
+} from "logos:constants/languages/learning";
 import {
 	DiscordLocale,
 	Locale,
@@ -29,7 +29,7 @@ import {
 	isLogosLanguage as isLocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
-} from "./languages/localisation";
+} from "logos:constants/languages/localisation";
 import {
 	DeepLLanguage,
 	DeepLLocale,
@@ -45,7 +45,7 @@ import {
 	isGoogleTranslateLocale,
 	isLanguage as isTranslationLanguage,
 	languages as translationLanguages,
-} from "./languages/translation";
+} from "logos:constants/languages/translation";
 
 const languages = Object.freeze({
 	languages: {

@@ -1,5 +1,5 @@
 import Redis from "ioredis";
-import { Client } from "./client";
+import { Client } from "logos/client";
 
 class Cache {
 	readonly redis: Redis;

@@ -1,10 +1,10 @@
-import { getLocaleByLocalisationLanguage } from "../../../constants/languages";
-import diagnostics from "../../../diagnostics";
-import { codeMultiline } from "../../../formatting";
-import { Client } from "../../client";
-import { EntryRequest } from "../../database/entry-request";
-import { Guild } from "../../database/guild";
-import { EventLogger } from "../logger";
+import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
+import diagnostics from "logos:core/diagnostics";
+import { codeMultiline } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { EntryRequest } from "logos/database/entry-request";
+import { Guild } from "logos/database/guild";
+import { EventLogger } from "logos/journalling/logger";
 
 class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 	constructor(client: Client) {

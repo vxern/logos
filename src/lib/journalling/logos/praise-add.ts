@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Praise } from "../../database/praise";
-import { EventLogger } from "../logger";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Praise } from "logos/database/praise";
+import { EventLogger } from "logos/journalling/logger";
 
 class PraiseAddEventLogger extends EventLogger<"praiseAdd"> {
 	constructor(client: Client) {

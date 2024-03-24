@@ -1,8 +1,8 @@
-import { trim } from "../../../../formatting";
-import { Client } from "../../../client";
-import { Modal, ModalComposer } from "../../../components/modal-composer";
-import { Guild } from "../../../database/guild";
-import { Suggestion, SuggestionFormData } from "../../../database/suggestion";
+import { trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Modal, ModalComposer } from "logos/components/modal-composer";
+import { Guild } from "logos/database/guild";
+import { Suggestion, SuggestionFormData } from "logos/database/suggestion";
 
 async function handleMakeSuggestion(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;

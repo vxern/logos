@@ -1,4 +1,4 @@
-import { DetectionLanguage } from "../../../../constants/languages";
+import { DetectionLanguage } from "logos:constants/languages";
 
 interface Detection {
 	language: DetectionLanguage;

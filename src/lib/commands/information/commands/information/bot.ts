@@ -1,5 +1,5 @@
-import { list } from "../../../../../formatting";
-import { Client } from "../../../../client";
+import { list } from "logos:core/formatting";
+import { Client } from "logos/client";
 
 async function handleDisplayBotInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;

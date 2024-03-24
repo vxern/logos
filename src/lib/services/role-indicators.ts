@@ -1,7 +1,7 @@
-import { Client } from "../client";
-import { Collector } from "../collectors";
-import { Guild, RoleWithIndicator } from "../database/guild";
-import { LocalService } from "./service";
+import { Client } from "logos/client";
+import { Collector } from "logos/collectors";
+import { Guild, RoleWithIndicator } from "logos/database/guild";
+import { LocalService } from "logos/services/service";
 
 class RoleIndicatorService extends LocalService {
 	readonly #_guildMemberUpdates: Collector<"guildMemberUpdate">;

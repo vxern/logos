@@ -1,6 +1,6 @@
-import { Locale } from "../../../../constants/languages";
-import { Client } from "../../../client";
-import { Guild } from "../../../database/guild";
+import { Locale } from "logos:constants/languages";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
 
 async function handleDisplayModerationPolicy(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;

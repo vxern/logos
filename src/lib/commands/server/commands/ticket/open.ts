@@ -1,10 +1,10 @@
-import { Locale } from "../../../../../constants/languages";
-import { mention, trim } from "../../../../../formatting";
-import { Client } from "../../../../client";
-import { Modal, ModalComposer } from "../../../../components/modal-composer";
-import { Guild } from "../../../../database/guild";
-import { Ticket, TicketFormData, TicketType } from "../../../../database/ticket";
-import { Configurations } from "../../../../services/prompts/service";
+import { Locale } from "logos:constants/languages";
+import { mention, trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Modal, ModalComposer } from "logos/components/modal-composer";
+import { Guild } from "logos/database/guild";
+import { Ticket, TicketFormData, TicketType } from "logos/database/ticket";
+import { Configurations } from "logos/services/prompts/service";
 
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const { locale, guildLocale } = interaction;
@@ -63,7 +63,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		) => {
 			await client.postponeReply(submission);
 
-			const result = await openTicket(
+			const ticketDocument = await openTicket(
 				client,
 				configuration,
 				formData,
@@ -72,8 +72,8 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 				"standalone",
 				{ guildLocale },
 			);
-			if (typeof result === "string") {
-				return result;
+			if (ticketDocument === undefined) {
+				return;
 			}
 
 			const strings = {

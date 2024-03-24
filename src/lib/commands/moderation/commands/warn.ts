@@ -1,11 +1,11 @@
-import { isValidRule } from "../../../../constants/rules";
-import diagnostics from "../../../../diagnostics";
-import { mention } from "../../../../formatting";
-import { Client } from "../../../client";
-import { timeStructToMilliseconds } from "../../../database/guild";
-import { Guild } from "../../../database/guild";
-import { Warning } from "../../../database/warning";
-import { getRuleTitleFormatted } from "./rule";
+import { isValidRule } from "logos:constants/rules";
+import diagnostics from "logos:core/diagnostics";
+import { mention } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { getRuleTitleFormatted } from "logos/commands/moderation/commands/rule";
+import { timeStructToMilliseconds } from "logos/database/guild";
+import { Guild } from "logos/database/guild";
+import { Warning } from "logos/database/warning";
 
 async function handleWarnUserAutocomplete(
 	client: Client,

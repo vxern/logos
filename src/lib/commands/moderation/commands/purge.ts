@@ -1,10 +1,10 @@
-import { Locale } from "../../../../constants/languages";
-import { isValidSnowflake } from "../../../../constants/patterns";
-import diagnostics from "../../../../diagnostics";
-import { mention, timestamp, trim } from "../../../../formatting";
-import { Client } from "../../../client";
-import { InteractionCollector } from "../../../collectors";
-import { Guild } from "../../../database/guild";
+import { Locale } from "logos:constants/languages";
+import { isValidSnowflake } from "logos:constants/patterns";
+import diagnostics from "logos:core/diagnostics";
+import { mention, timestamp, trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { Guild } from "logos/database/guild";
 
 async function handlePurgeMessagesAutocomplete(
 	client: Client,

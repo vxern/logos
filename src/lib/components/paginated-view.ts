@@ -1,9 +1,9 @@
-import { getEmojiBySongListingType } from "../../constants/emojis";
-import { Locale } from "../../constants/languages";
-import { trim } from "../../formatting";
-import { Client } from "../client";
-import { InteractionCollector } from "../collectors";
-import { Song, SongCollection, SongListing } from "../commands/music/data/types";
+import { getEmojiBySongListingType } from "logos:constants/emojis";
+import { Locale } from "logos:constants/languages";
+import { trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { Song, SongCollection, SongListing } from "logos/commands/music/data/types";
 
 type PageView = { embed: Discord.CamelizedDiscordEmbed; components?: Discord.MessageComponents };
 type PageAction = "previous" | "next";

@@ -1,7 +1,7 @@
-import { Locale } from "../../../../constants/languages";
-import { Client } from "../../../client";
-import { InteractionCollector } from "../../../collectors";
-import { Guild } from "../../../database/guild";
+import { Locale } from "logos:constants/languages";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { Guild } from "logos/database/guild";
 
 type Bracket = "a" | "b" | "c";
 type Tab = "guide" | "examples";

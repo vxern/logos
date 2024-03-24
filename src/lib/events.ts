@@ -1,6 +1,6 @@
-import { Client } from "./client";
-import { Collector } from "./collectors";
-import { Logger } from "./logger";
+import { Client } from "logos/client";
+import { Collector } from "logos/collectors";
+import { Logger } from "logos/logger";
 
 type Event = keyof Discord.EventHandlers;
 class EventStore {

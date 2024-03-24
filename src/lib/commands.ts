@@ -1,7 +1,7 @@
-import { getDiscordLanguageByLocale } from "../constants/languages/localisation";
-import { capitalise } from "../formatting";
-import { isDefined } from "../utilities";
-import { Client } from "./client";
+import { getDiscordLanguageByLocale } from "logos:constants/languages/localisation";
+import { capitalise } from "logos:core/formatting";
+import { isDefined } from "logos:core/utilities";
+import { Client } from "logos/client";
 import {
 	Command,
 	CommandTemplate,
@@ -9,11 +9,11 @@ import {
 	Option,
 	OptionMetadata,
 	OptionTemplate,
-} from "./commands/command";
-import commandTemplates from "./commands/commands";
-import { Guild, timeStructToMilliseconds } from "./database/guild";
-import { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "./localisations";
-import { Logger } from "./logger";
+} from "logos/commands/command";
+import commandTemplates from "logos/commands/commands";
+import { Guild, timeStructToMilliseconds } from "logos/database/guild";
+import { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/localisations";
+import { Logger } from "logos/logger";
 
 interface RateLimit {
 	nextAllowedUsageTimestamp: number;

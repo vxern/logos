@@ -1,6 +1,6 @@
-import { Translation } from "../../../../constants/contributions";
-import { Locale, LocalisationLanguage } from "../../../../constants/languages";
-import { Client } from "../../../client";
+import { Translation } from "logos:constants/contributions";
+import { Locale, LocalisationLanguage } from "logos:constants/languages";
+import { Client } from "logos/client";
 
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;

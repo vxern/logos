@@ -1,5 +1,5 @@
-import { Client } from "../client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "./model";
+import { Client } from "logos/client";
+import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
 
 interface SuggestionFormData {
 	readonly suggestion: string;

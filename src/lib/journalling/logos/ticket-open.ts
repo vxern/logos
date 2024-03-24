@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Ticket } from "../../database/ticket";
-import { EventLogger } from "../logger";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Ticket } from "logos/database/ticket";
+import { EventLogger } from "logos/journalling/logger";
 
 class TicketOpenEventLogger extends EventLogger<"ticketOpen"> {
 	constructor(client: Client) {

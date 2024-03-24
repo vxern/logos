@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { Report } from "../../database/report";
-import { EventLogger } from "../logger";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { Report } from "logos/database/report";
+import { EventLogger } from "logos/journalling/logger";
 
 class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
 	constructor(client: Client) {

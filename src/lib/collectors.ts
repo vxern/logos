@@ -1,13 +1,13 @@
-import { nanoid } from "nanoid";
 import {
 	LearningLanguage,
 	getDiscordLocalisationLanguageByLocale,
 	getLocaleByLocalisationLanguage,
-} from "../constants/languages";
-import { Client } from "./client";
-import { isAutocomplete, isSubcommand, isSubcommandGroup } from "./commands";
-import { Guild } from "./database/guild";
-import { User } from "./database/user";
+} from "logos:constants/languages";
+import { Client } from "logos/client";
+import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos/commands";
+import { Guild } from "logos/database/guild";
+import { User } from "logos/database/user";
+import { nanoid } from "nanoid";
 
 type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.EventHandlers> = (
 	...args: Parameters<Discord.EventHandlers[Event]>

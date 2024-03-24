@@ -4,7 +4,7 @@ import {
 	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
 	isLogosLanguage as isLocalisationLanguage,
 	isLogosLocale as isLocalisationLocale,
-} from "./localisation";
+} from "logos:constants/languages/localisation";
 
 type Language = LocalisationLanguage;
 

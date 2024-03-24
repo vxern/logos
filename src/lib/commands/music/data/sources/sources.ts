@@ -1,6 +1,6 @@
-import { Client } from "../../../../client";
-import { SongListing } from "../types";
-import youtube from "./youtube";
+import { Client } from "logos/client";
+import youtube from "logos/commands/music/data/sources/youtube";
+import { SongListing } from "logos/commands/music/data/types";
 
 /** Obtains a song listing from a source. */
 type ListingResolver = (

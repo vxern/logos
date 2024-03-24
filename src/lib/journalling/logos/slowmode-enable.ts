@@ -1,7 +1,7 @@
-import { SlowmodeLevel } from "../../../constants/slowmode";
-import diagnostics from "../../../diagnostics";
-import { Client } from "../../client";
-import { EventLogger } from "../logger";
+import { SlowmodeLevel } from "logos:constants/slowmode";
+import diagnostics from "logos:core/diagnostics";
+import { Client } from "logos/client";
+import { EventLogger } from "logos/journalling/logger";
 
 class SlowmodeEnableEventLogger extends EventLogger<"slowmodeEnable"> {
 	constructor(client: Client) {

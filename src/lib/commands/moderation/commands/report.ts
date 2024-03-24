@@ -1,8 +1,8 @@
-import { trim } from "../../../../formatting";
-import { Client } from "../../../client";
-import { Modal, ModalComposer } from "../../../components/modal-composer";
-import { Guild } from "../../../database/guild";
-import { Report, ReportFormData } from "../../../database/report";
+import { trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Modal, ModalComposer } from "logos/components/modal-composer";
+import { Guild } from "logos/database/guild";
+import { Report, ReportFormData } from "logos/database/report";
 
 async function handleMakeReport(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;

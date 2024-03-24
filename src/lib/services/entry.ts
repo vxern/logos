@@ -1,13 +1,13 @@
-import { Locale } from "../../constants/languages";
-import diagnostics from "../../diagnostics";
-import { trim } from "../../formatting";
-import { Client } from "../client";
-import { InteractionCollector } from "../collectors";
-import { Modal, ModalComposer } from "../components/modal-composer";
-import { EntryRequest, EntryRequestFormData } from "../database/entry-request";
-import { Guild, timeStructToMilliseconds } from "../database/guild";
-import { User } from "../database/user";
-import { LocalService } from "./service";
+import { Locale } from "logos:constants/languages";
+import diagnostics from "logos:core/diagnostics";
+import { trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
+import { Modal, ModalComposer } from "logos/components/modal-composer";
+import { EntryRequest, EntryRequestFormData } from "logos/database/entry-request";
+import { Guild, timeStructToMilliseconds } from "logos/database/guild";
+import { User } from "logos/database/user";
+import { LocalService } from "logos/services/service";
 
 class EntryService extends LocalService {
 	readonly #_acceptedRulesButton: InteractionCollector;

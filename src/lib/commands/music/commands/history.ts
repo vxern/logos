@@ -1,5 +1,5 @@
-import { Client } from "../../../client";
-import { PaginatedSongListingViewComponent } from "../../../components/paginated-view";
+import { Client } from "logos/client";
+import { PaginatedSongListingViewComponent } from "logos/components/paginated-view";
 
 async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;

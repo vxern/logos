@@ -1,15 +1,15 @@
+import constants_ from "logos:constants/constants";
+import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
+import { Properties } from "logos:constants/properties";
+import { SlowmodeLevel } from "logos:constants/slowmode";
 import * as Discord from "@discordeno/bot";
-import constants_ from "./constants/constants";
-import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "./constants/languages";
-import { Properties } from "./constants/properties";
-import { SlowmodeLevel } from "./constants/slowmode";
-import { EntryRequest } from "./lib/database/entry-request";
-import { Praise } from "./lib/database/praise";
-import { Report } from "./lib/database/report";
-import { Resource } from "./lib/database/resource";
-import { Suggestion } from "./lib/database/suggestion";
-import { Ticket } from "./lib/database/ticket";
-import { Warning } from "./lib/database/warning";
+import { EntryRequest } from "logos/database/entry-request";
+import { Praise } from "logos/database/praise";
+import { Report } from "logos/database/report";
+import { Resource } from "logos/database/resource";
+import { Suggestion } from "logos/database/suggestion";
+import { Ticket } from "logos/database/ticket";
+import { Warning } from "logos/database/warning";
 
 declare global {
 	interface PromiseConstructor {

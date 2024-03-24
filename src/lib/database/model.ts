@@ -1,8 +1,8 @@
-import { Collection, isValidCollection } from "../../constants/database";
-import { capitalise, decapitalise } from "../../formatting";
-import { Client } from "../client";
-import { Database } from "../database";
-import { RateLimit, timeStructToMilliseconds } from "./guild";
+import { Collection, isValidCollection } from "logos:constants/database";
+import { capitalise, decapitalise } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Database } from "logos/database";
+import { RateLimit, timeStructToMilliseconds } from "logos/database/guild";
 
 interface DocumentMetadata {
 	readonly "@id": string;

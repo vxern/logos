@@ -1,4 +1,4 @@
-import patterns from "./patterns";
+import patterns from "logos:constants/patterns";
 
 /**
  * Parses a 6-digit hex value prefixed with a hashtag to a number.

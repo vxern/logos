@@ -1,5 +1,5 @@
-import { Client } from "../../../../client";
-import { User } from "../../../../database/user";
+import { Client } from "logos/client";
+import { User } from "logos/database/user";
 
 async function handleDisplaySettings(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const { locale, language } = interaction;

@@ -1,6 +1,6 @@
-import { mention } from "../../../../formatting";
-import { Client } from "../../../client";
-import { PaginatedRemoveSongListingViewComponent } from "../../../components/paginated-view";
+import { mention } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { PaginatedRemoveSongListingViewComponent } from "logos/components/paginated-view";
 
 async function handleRemoveSongListing(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;

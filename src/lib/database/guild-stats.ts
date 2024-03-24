@@ -1,6 +1,6 @@
-import { Locale } from "../../constants/languages";
-import { Client } from "../client";
-import { IdentifierData, MetadataOrIdentifierData, Model } from "./model";
+import { Locale } from "logos:constants/languages";
+import { Client } from "logos/client";
+import { IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
 
 type GameType =
 	/** @since v3.42.0 */

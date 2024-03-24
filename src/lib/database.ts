@@ -1,18 +1,18 @@
 import { randomUUID } from "node:crypto";
+import { isValidCollection } from "logos:constants/database";
+import { EntryRequest } from "logos/database/entry-request";
+import { Guild } from "logos/database/guild";
+import { GuildStats } from "logos/database/guild-stats";
+import { Collection, Model, RawDocument } from "logos/database/model";
+import { Praise } from "logos/database/praise";
+import { Report } from "logos/database/report";
+import { Resource } from "logos/database/resource";
+import { Suggestion } from "logos/database/suggestion";
+import { Ticket } from "logos/database/ticket";
+import { User } from "logos/database/user";
+import { Warning } from "logos/database/warning";
+import { Logger } from "logos/logger";
 import * as ravendb from "ravendb";
-import { isValidCollection } from "../constants/database";
-import { EntryRequest } from "./database/entry-request";
-import { Guild } from "./database/guild";
-import { GuildStats } from "./database/guild-stats";
-import { Collection, Model, RawDocument } from "./database/model";
-import { Praise } from "./database/praise";
-import { Report } from "./database/report";
-import { Resource } from "./database/resource";
-import { Suggestion } from "./database/suggestion";
-import { Ticket } from "./database/ticket";
-import { User } from "./database/user";
-import { Warning } from "./database/warning";
-import { Logger } from "./logger";
 
 class Database extends ravendb.DocumentStore {
 	readonly cache: {

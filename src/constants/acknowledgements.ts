@@ -1,9 +1,9 @@
-import { Contributor, contributors } from "./contributions";
+import { Contributor, contributors } from "logos:constants/contributions";
 
-type Acknowledgement = {
-	users: Contributor[];
-	reason: string;
-};
+interface Acknowledgement {
+	readonly users: Contributor[];
+	readonly reason: string;
+}
 
 export default Object.freeze([
 	{

@@ -1,6 +1,6 @@
 import { InputTextComponent } from "@discordeno/bot";
-import { Client } from "../client";
-import { InteractionCollector } from "../collectors";
+import { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors";
 
 type TypedInputTextComponent<CustomID> = WithRequired<InputTextComponent, "value"> & { customId: CustomID };
 interface ModalElement<FormData> {

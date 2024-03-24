@@ -1,4 +1,4 @@
-import { Role, RoleCategory, RoleCollection, isCustom, isGroup, isImplicit } from "./types";
+import { Role, RoleCategory, RoleCollection, isCustom, isGroup, isImplicit } from "logos/commands/social/roles/types";
 
 function getRoleCategories(categories: Record<string, RoleCategory>, guildId: bigint): Record<string, RoleCategory> {
 	const guildIdString = guildId.toString();

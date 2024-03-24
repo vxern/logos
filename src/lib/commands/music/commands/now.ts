@@ -1,8 +1,8 @@
-import { mention, timestamp } from "../../../../formatting";
-import { Client } from "../../../client";
-import { PaginatedSongCollectionViewComponent } from "../../../components/paginated-view";
-import { isCollection } from "../../../services/music";
-import { Song, SongCollection, SongStream } from "../data/types";
+import { mention, timestamp } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { Song, SongCollection, SongStream } from "logos/commands/music/data/types";
+import { PaginatedSongCollectionViewComponent } from "logos/components/paginated-view";
+import { isCollection } from "logos/services/music";
 
 async function handleDisplayCurrentlyPlaying(
 	client: Client,

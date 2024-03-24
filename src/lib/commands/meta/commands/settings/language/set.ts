@@ -1,11 +1,7 @@
-import languages, {
-	Locale,
-	getLocaleByLocalisationLanguage,
-	isLocalisationLanguage,
-} from "../../../../../../constants/languages";
-import { trim } from "../../../../../../formatting";
-import { Client } from "../../../../../client";
-import { User } from "../../../../../database/user";
+import languages, { Locale, getLocaleByLocalisationLanguage, isLocalisationLanguage } from "logos:constants/languages";
+import { trim } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { User } from "logos/database/user";
 
 async function handleSetLanguageAutocomplete(
 	client: Client,

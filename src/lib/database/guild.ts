@@ -1,7 +1,7 @@
-import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
-import { TimeUnit } from "../../constants/time";
-import { Client } from "../client";
-import { IdentifierData, MetadataOrIdentifierData, Model } from "./model";
+import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
+import { TimeUnit } from "logos:constants/time";
+import { Client } from "logos/client";
+import { IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
 
 /** @since v3.0.0 */
 class Guild extends Model<{ idParts: ["guildId"] }> {

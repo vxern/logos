@@ -1,7 +1,7 @@
-import diagnostics from "../../../diagnostics";
-import { codeMultiline, mention } from "../../../formatting";
-import { Client } from "../../client";
-import { EventLogger } from "../logger";
+import diagnostics from "logos:core/diagnostics";
+import { codeMultiline, mention } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { EventLogger } from "logos/journalling/logger";
 
 class MessageUpdateEventLogger extends EventLogger<"messageUpdate"> {
 	constructor(client: Client) {
