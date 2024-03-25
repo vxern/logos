@@ -1,7 +1,7 @@
 import { Locale } from "logos:constants/languages";
 import { mention, trim } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composer";
+import { TicketComposer } from "logos/commands/components/modal-composers/ticket-composer";
 import { Guild } from "logos/database/guild";
 import { Ticket, TicketFormData, TicketType } from "logos/database/ticket";
 import { Configurations } from "logos/services/prompts/service";
@@ -208,39 +208,6 @@ async function openTicket(
 	ticketService.registerPrompt(prompt, user.id, ticketDocument);
 
 	return ticketDocument;
-}
-
-class TicketComposer extends ModalComposer<TicketFormData, never> {
-	async buildModal(
-		_: Logos.Interaction<any, any>,
-		{ locale }: Logos.InteractionLocaleData,
-		{ formData }: { formData: TicketFormData },
-	): Promise<Modal<TicketFormData>> {
-		const strings = {
-			title: this.client.localise("ticket.title", locale)(),
-			topic: this.client.localise("ticket.fields.topic", locale)(),
-		};
-
-		return {
-			title: strings.title,
-			elements: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "topic",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.topic, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: true,
-							maxLength: 100,
-							value: formData.topic,
-						},
-					],
-				},
-			],
-		};
-	}
 }
 
 export { handleOpenTicket, openTicket };

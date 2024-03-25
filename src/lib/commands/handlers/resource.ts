@@ -1,8 +1,7 @@
-import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composer";
+import { ResourceComposer } from "logos/commands/components/modal-composers/resource-composer";
 import { Guild } from "logos/database/guild";
-import { Resource, ResourceFormData } from "logos/database/resource";
+import { Resource } from "logos/database/resource";
 
 async function handleSubmitResource(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -58,90 +57,50 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 
 	const composer = new ResourceComposer(client, { interaction });
 
-	composer.onSubmit(
-		async (
-			submission: Logos.Interaction,
-			{ locale }: Logos.InteractionLocaleData,
-			{ formData }: { formData: ResourceFormData },
-		) => {
-			await client.postponeReply(submission);
+	composer.onSubmit(async (submission, { locale }, { formData }) => {
+		await client.postponeReply(submission);
 
-			const resourceDocument = await Resource.create(client, {
-				guildId: guild.id.toString(),
-				authorId: interaction.user.id.toString(),
-				answers: formData,
-			});
+		const resourceDocument = await Resource.create(client, {
+			guildId: guild.id.toString(),
+			authorId: interaction.user.id.toString(),
+			answers: formData,
+		});
 
-			client.tryLog("resourceSend", {
-				guildId: guild.id,
-				journalling: configuration.journaling,
-				args: [member, resourceDocument],
-			});
+		client.tryLog("resourceSend", {
+			guildId: guild.id,
+			journalling: configuration.journaling,
+			args: [member, resourceDocument],
+		});
 
-			const user = client.entities.users.get(interaction.user.id);
-			if (user === undefined) {
-				return;
-			}
+		const user = client.entities.users.get(interaction.user.id);
+		if (user === undefined) {
+			return;
+		}
 
-			const prompt = await resourceService.savePrompt(user, resourceDocument);
-			if (prompt === undefined) {
-				return;
-			}
+		const prompt = await resourceService.savePrompt(user, resourceDocument);
+		if (prompt === undefined) {
+			return;
+		}
 
-			resourceService.registerDocument(resourceDocument);
-			resourceService.registerPrompt(prompt, interaction.user.id, resourceDocument);
-			resourceService.registerHandler(resourceDocument);
+		resourceService.registerDocument(resourceDocument);
+		resourceService.registerPrompt(prompt, interaction.user.id, resourceDocument);
+		resourceService.registerHandler(resourceDocument);
 
-			const strings = {
-				title: client.localise("resource.strings.sent.title", locale)(),
-				description: client.localise("resource.strings.sent.description", locale)(),
-			};
-
-			client.editReply(submission, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.lightGreen,
-					},
-				],
-			});
-		},
-	);
-}
-
-class ResourceComposer extends ModalComposer<ResourceFormData, never> {
-	async buildModal(
-		_: Logos.Interaction,
-		{ locale }: Logos.InteractionLocaleData,
-		{ formData }: { formData: ResourceFormData },
-	): Promise<Modal<ResourceFormData>> {
 		const strings = {
-			title: this.client.localise("resource.title", locale)(),
-			fields: {
-				resource: this.client.localise("resource.fields.resource", locale)(),
-			},
+			title: client.localise("resource.strings.sent.title", locale)(),
+			description: client.localise("resource.strings.sent.description", locale)(),
 		};
 
-		return {
-			title: strings.title,
-			elements: [
+		client.editReply(submission, {
+			embeds: [
 				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "resource",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.fields.resource, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: true,
-							value: formData.resource,
-						},
-					],
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.lightGreen,
 				},
 			],
-		};
-	}
+		});
+	});
 }
 
 export { handleSubmitResource };

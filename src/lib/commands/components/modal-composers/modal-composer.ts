@@ -21,8 +21,8 @@ type SubmitEvent<FormData> = (
 /**
  * @remarks
  * IMPORTANT: When creating a new modal composer and implementing {@link buildModal}, make sure to link all of the
- * properties of {@link formData} to all of the modal fields, otherwise data __will get lost__ if the user's initial
- * form data is rejected and they choose to return to the form.
+ * properties of {@link formData} to all the modal fields, otherwise data __will get lost__ if the user's initial
+ * form data is rejected, and they choose to return to the form.
  */
 abstract class ModalComposer<FormData, ValidationError extends string> {
 	readonly client: Client;
@@ -130,20 +130,20 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		});
 
 		continueButton.onCollect(async (buttonPress) => {
-			this.client.deleteReply(submission);
+			await this.client.deleteReply(submission);
 			resolve(buttonPress);
 		});
 
 		cancelButton.onCollect(async (cancelButtonPress) => {
 			returnButton.onCollect(async (returnButtonPress) => {
-				this.client.deleteReply(submission);
-				this.client.deleteReply(cancelButtonPress);
+				await this.client.deleteReply(submission);
+				await this.client.deleteReply(cancelButtonPress);
 				resolve(returnButtonPress);
 			});
 
 			leaveButton.onCollect(async (_) => {
-				this.client.deleteReply(submission);
-				this.client.deleteReply(cancelButtonPress);
+				await this.client.deleteReply(submission);
+				await this.client.deleteReply(cancelButtonPress);
 				resolve(undefined);
 			});
 
@@ -154,7 +154,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 				leave: this.client.localise("prompts.leave", locale)(),
 			};
 
-			this.client.reply(cancelButtonPress, {
+			await this.client.reply(cancelButtonPress, {
 				embeds: [
 					{
 						title: strings.title,
@@ -184,10 +184,10 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			});
 		});
 
-		this.client.registerInteractionCollector(continueButton);
-		this.client.registerInteractionCollector(cancelButton);
-		this.client.registerInteractionCollector(returnButton);
-		this.client.registerInteractionCollector(leaveButton);
+		await this.client.registerInteractionCollector(continueButton);
+		await this.client.registerInteractionCollector(cancelButton);
+		await this.client.registerInteractionCollector(returnButton);
+		await this.client.registerInteractionCollector(leaveButton);
 
 		// TODO(vxern): Localise this.
 		const embed: Discord.CamelizedDiscordEmbed = this.getErrorMessage(submission, submission, { error }) ?? {
@@ -200,7 +200,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			cancel: this.client.localise("prompts.cancel", locale)(),
 		};
 
-		this.client.editReply(submission, {
+		await this.client.editReply(submission, {
 			embeds: [embed],
 			components: [
 				{

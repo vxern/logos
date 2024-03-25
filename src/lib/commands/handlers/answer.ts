@@ -1,7 +1,6 @@
 import diagnostics from "logos:core/diagnostics";
-import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composer";
+import { AnswerComposer } from "logos/commands/components/modal-composers/answer-composer";
 
 async function handleStartAnswering(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -61,99 +60,37 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 
 	const composer = new AnswerComposer(client, { interaction, question: message.content });
 
-	composer.onSubmit(
-		async (
-			submission: Logos.Interaction,
-			{ locale }: Logos.InteractionLocaleData,
-			{ formData }: { formData: AnswerFormData },
-		) => {
-			await client.acknowledge(submission);
+	composer.onSubmit(async (submission, { locale }, { formData }) => {
+		await client.acknowledge(submission);
 
-			const strings = {
-				answer: client.localise("answer.strings.answer", locale)(),
-				submittedBy: client.localise(
-					"answer.strings.submittedBy",
-					locale,
-				)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
-			};
+		const strings = {
+			answer: client.localise("answer.strings.answer", locale)(),
+			submittedBy: client.localise(
+				"answer.strings.submittedBy",
+				locale,
+			)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
+		};
 
-			client.bot.rest
-				.sendMessage(message.channelId, {
-					messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
-					embeds: [
-						{
-							description: `– *${formData.answer}*`,
-							color: constants.colours.lightGreen,
-							footer: {
-								text: `${constants.emojis.answer} ${strings.submittedBy}`,
-								iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
-									avatar: interaction.user.avatar,
-								}),
-							},
+		client.bot.rest
+			.sendMessage(message.channelId, {
+				messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
+				embeds: [
+					{
+						description: `– *${formData.answer}*`,
+						color: constants.colours.lightGreen,
+						footer: {
+							text: `${constants.emojis.answer} ${strings.submittedBy}`,
+							iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
+								avatar: interaction.user.avatar,
+							}),
 						},
-					],
-				})
-				.catch(() => client.log.warn(`Failed to send answer to ${diagnostics.display.channel(message.channelId)}.`));
-		},
-	);
+					},
+				],
+			})
+			.catch(() => client.log.warn(`Failed to send answer to ${diagnostics.display.channel(message.channelId)}.`));
+	});
 
 	await composer.open();
-}
-
-interface AnswerFormData {
-	readonly question: string;
-	readonly answer: string;
-}
-class AnswerComposer extends ModalComposer<AnswerFormData, never> {
-	constructor(client: Client, { interaction, question }: { interaction: Logos.Interaction; question: string }) {
-		super(client, { interaction, initialFormData: { question: trim(question, 4000), answer: "" } });
-	}
-
-	async buildModal(
-		_: Logos.Interaction<any, any>,
-		{ locale }: Logos.InteractionLocaleData,
-		{ formData }: { formData: AnswerFormData },
-	): Promise<Modal<AnswerFormData>> {
-		const strings = {
-			title: this.client.localise("answer.title", locale)(),
-			fields: {
-				question: this.client.localise("answer.fields.question", locale)(),
-				answer: this.client.localise("answer.fields.answer", locale)(),
-			},
-		};
-
-		return {
-			title: strings.title,
-			elements: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "question",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.fields.question, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: false,
-							value: formData.question,
-						},
-					],
-				},
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "answer",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.fields.answer, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: true,
-							value: formData.answer,
-						},
-					],
-				},
-			],
-		};
-	}
 }
 
 export { handleStartAnswering };

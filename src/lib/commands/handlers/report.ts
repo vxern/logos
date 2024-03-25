@@ -1,8 +1,7 @@
-import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composer";
+import { ReportComposer } from "logos/commands/components/modal-composers/report-composer";
 import { Guild } from "logos/database/guild";
-import { Report, ReportFormData } from "logos/database/report";
+import { Report } from "logos/database/report";
 
 async function handleMakeReport(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -104,68 +103,6 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 	});
 
 	await composer.open();
-}
-
-class ReportComposer extends ModalComposer<ReportFormData, never> {
-	async buildModal(
-		_: Logos.Interaction,
-		{ locale }: Logos.InteractionLocaleData,
-		{ formData }: { formData: ReportFormData },
-	): Promise<Modal<ReportFormData>> {
-		const strings = {
-			title: this.client.localise("report.title", locale)(),
-			fields: {
-				reason: this.client.localise("report.fields.reason", locale)(),
-				users: this.client.localise("report.fields.users", locale)(),
-				link: this.client.localise("report.fields.link", locale)(),
-			},
-		};
-
-		return {
-			title: strings.title,
-			elements: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "reason",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.fields.reason, 45),
-							style: Discord.TextStyles.Paragraph,
-							required: true,
-							value: formData.reason,
-						},
-					],
-				},
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "users",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.fields.users, 45),
-							style: Discord.TextStyles.Short,
-							required: true,
-							value: formData.users,
-						},
-					],
-				},
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							customId: "messageLink",
-							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.fields.link, 45),
-							style: Discord.TextStyles.Short,
-							required: false,
-							value: formData.messageLink ?? "",
-						},
-					],
-				},
-			],
-		};
-	}
 }
 
 export { handleMakeReport };
