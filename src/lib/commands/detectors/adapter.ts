@@ -4,6 +4,7 @@ interface Detection {
 	language: DetectionLanguage;
 }
 
+// TODO(vxern): Deprecate this `identifier` property and create a logger instance instead.
 abstract class LanguageDetectorAdapter {
 	readonly identifier: string;
 

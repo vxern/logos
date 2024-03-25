@@ -9,6 +9,7 @@ interface Translation {
 	text: string;
 }
 
+// TODO(vxern): Deprecate this `identifier` property and create a logger instance instead.
 abstract class TranslationAdapter<Language extends string = TranslationLanguage> {
 	readonly identifier: string;
 
