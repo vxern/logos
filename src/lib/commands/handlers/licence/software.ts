@@ -1,7 +1,7 @@
 import { Locale } from "logos:constants/languages";
 import { code } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { PaginatedSoftwareLicenceViewComponent } from "logos/commands/components/paginated-view";
+import { SoftwareLicenceView } from "logos/commands/components/paginated-views/software-licence-view";
 
 async function handleDisplaySoftwareLicenceAutocomplete(
 	client: Client,
@@ -42,7 +42,7 @@ async function handleDisplaySoftwareLicence(
 		license: client.localise("license.strings.license", locale)({ entity: code(packageName) }),
 	};
 
-	const viewComponent = new PaginatedSoftwareLicenceViewComponent(client, {
+	const viewComponent = new SoftwareLicenceView(client, {
 		interaction,
 		title: strings.license,
 		sections: Array.from(constants.licences.software[packageName]),

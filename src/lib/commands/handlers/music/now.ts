@@ -1,7 +1,7 @@
 import { Song, SongCollection, SongStream } from "logos:constants/music";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { PaginatedSongCollectionViewComponent } from "logos/commands/components/paginated-view";
+import { SongCollectionView } from "logos/commands/components/paginated-views/song-collection-view";
 import { isCollection } from "logos/services/music";
 
 async function handleDisplayCurrentlyPlaying(
@@ -108,7 +108,7 @@ async function handleDisplayCurrentlyPlaying(
 			songs: client.localise("music.options.now.strings.songs", locale)(),
 		};
 
-		const viewComponent = new PaginatedSongCollectionViewComponent(client, {
+		const viewComponent = new SongCollectionView(client, {
 			interaction,
 			title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
 			collection,

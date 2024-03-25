@@ -1,5 +1,5 @@
 import { Client } from "logos/client";
-import { PaginatedSongListingViewComponent } from "logos/commands/components/paginated-view";
+import { SongListingView } from "logos/commands/components/paginated-views/song-listing-view";
 
 async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
@@ -52,7 +52,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	};
 
 	// TODO(vxern): This may not display the updated listings on history change.
-	const viewComponent = new PaginatedSongListingViewComponent(client, {
+	const viewComponent = new SongListingView(client, {
 		interaction,
 		title: `${constants.emojis.music.list} ${strings.queue}`,
 		listings: queue,

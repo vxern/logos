@@ -1,6 +1,6 @@
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { PaginatedRemoveSongListingViewComponent } from "logos/commands/components/paginated-view";
+import { RemoveSongListingView } from "logos/commands/components/paginated-views/remove-song-listing-view";
 
 async function handleRemoveSongListing(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -49,7 +49,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 	}
 
 	// TODO(vxern): This may not display the updated listings on queue change.
-	const viewComponent = new PaginatedRemoveSongListingViewComponent(client, { interaction, listings: queue });
+	const viewComponent = new RemoveSongListingView(client, { interaction, listings: queue });
 
 	viewComponent.onCollect(async (buttonPress) => {
 		const indexString = buttonPress.data?.values?.at(0) as string | undefined;
