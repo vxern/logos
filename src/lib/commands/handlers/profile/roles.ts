@@ -109,6 +109,7 @@ function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...Role
 	);
 }
 
+// TODO(vxern): Extract into a component.
 /**
  * Creates a browsing menu for selecting roles.
  */

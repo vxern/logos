@@ -2,6 +2,7 @@ import { Client } from "logos/client";
 import { getPraisePage } from "logos/commands/praises";
 import { Praise } from "logos/database/praise";
 
+// TODO(vxern): This file is identical to the author praise one.
 async function handleDisplayPraisesByTargetAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string | undefined }>,

@@ -97,7 +97,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 }
 
 // TODO(vxern): This number of parameters is insanity, this function is way too large.
-// TODO(vxern): Move this elsewhere.
+// TODO(vxern): Move this elsewhere. Turn into a service?
 async function openTicket(
 	client: Client,
 	configuration: NonNullable<Configurations["tickets"] | Configurations["verification"]>,

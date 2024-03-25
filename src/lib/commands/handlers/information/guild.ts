@@ -196,19 +196,19 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 	];
 }
 
+function getPercentageComposition(number: number, total: number): string {
+	return ((number / total) * 100).toPrecision(3);
+}
+
+function formatFrequency(frequency: number, percentage: string, roleMention: string): string {
+	return `${frequency} (${percentage}%) ${roleMention}`;
+}
+
 function formatDistribution(
 	client: Client,
 	distribution: ProficiencyRoleDistribution,
 	{ locale }: { locale: Locale },
 ): string {
-	function getPercentageComposition(number: number, total: number): string {
-		return ((number / total) * 100).toPrecision(3);
-	}
-
-	function formatFrequency(frequency: number, percentage: string, roleMention: string): string {
-		return `${frequency} (${percentage}%) ${roleMention}`;
-	}
-
 	const [roleFrequencies, withoutRole] = distribution;
 
 	const total = roleFrequencies.map(([_, value]) => value).reduce((a, b) => a + b, withoutRole);
