@@ -11,28 +11,92 @@ class InteractionStore {
 	readonly #bot: Discord.Bot;
 	readonly #interactions: Map<bigint, Logos.Interaction>;
 
-	get success(): InteractionStore["reply"] {
-		return this.#buildColouredReplier({ colour: constants.colours.success });
+	/** ⬜ The action should have succeeded if not for the bot's limitations. */
+	get unsupported(): InteractionStore["reply"] {
+		return this.#buildColouredReplier({ colour: constants.colours.unsupported });
 	}
 
+	/** 🟦 Informational message. */
 	get notice(): InteractionStore["reply"] {
 		return this.#buildColouredReplier({ colour: constants.colours.notice });
 	}
 
+	/** @see {@link notice()} */
+	get noticed(): InteractionStore["editReply"] {
+		return this.#buildColouredReplyEditor({ colour: constants.colours.notice });
+	}
+
+	/**
+	 * 🟩 The action intended to be performed with the interaction succeeded.
+	 *
+	 * @remarks
+	 * 🟦 Shows up as a notice if the reply is visible to.
+	 */
+	get success(): InteractionStore["reply"] {
+		return async (interaction, embedOrData, flags) => {
+			if (flags?.visible) {
+				return this.notice(interaction, embedOrData, flags);
+			}
+
+			return this.#buildColouredReplier({ colour: constants.colours.success })(interaction, embedOrData, flags);
+		};
+	}
+
+	// TODO(vxern): This is not aware of the visibility of the original postponed reply, and thus cannot decide
+	//  whether to show a success or a notice.
+	/** @see {@link success()} */
+	get succeeded(): InteractionStore["editReply"] {
+		return this.#buildColouredReplyEditor({ colour: constants.colours.success });
+	}
+
+	/** 🟧 The user tried to do something that isn't technically invalid, but which the bot will not allow for. */
+	get pushback(): InteractionStore["reply"] {
+		return this.#buildColouredReplier({ colour: constants.colours.pushback });
+	}
+
+	/** @see {@link pushback()} */
+	get pushedBack(): InteractionStore["editReply"] {
+		return this.#buildColouredReplyEditor({ colour: constants.colours.pushback });
+	}
+
+	/** 🟨 The user unintentionally did something wrong. */
 	get warning(): InteractionStore["reply"] {
 		return this.#buildColouredReplier({ colour: constants.colours.warning });
 	}
 
+	/** @see {@link warning()} */
+	get warned(): InteractionStore["editReply"] {
+		return this.#buildColouredReplyEditor({ colour: constants.colours.warning });
+	}
+
+	/** 🟥 The user (assumably) intentionally tried to do something wrong. */
 	get error(): InteractionStore["reply"] {
 		return this.#buildColouredReplier({ colour: constants.colours.error });
 	}
 
+	/** @see {@link error()} */
+	get errored(): InteractionStore["editReply"] {
+		return this.#buildColouredReplyEditor({ colour: constants.colours.error });
+	}
+
+	/** 🔺 The bot failed to do something that should have otherwise happened just fine. */
 	get failure(): InteractionStore["reply"] {
 		return this.#buildColouredReplier({ colour: constants.colours.failure });
 	}
 
+	/** @see {@link failure()} */
+	get failed(): InteractionStore["editReply"] {
+		return this.#buildColouredReplyEditor({ colour: constants.colours.failure });
+	}
+
+	/** ⬛ The bot had an outage or encountered a serious issue. */
 	get death(): InteractionStore["reply"] {
 		return this.#buildColouredReplier({ colour: constants.colours.death });
+	}
+
+	/** @see {@link death()} */
+	get died(): InteractionStore["editReply"] {
+		return this.#buildColouredReplyEditor({ colour: constants.colours.death });
 	}
 
 	constructor(client: Client, { bot }: { bot: Discord.Bot }) {
@@ -141,26 +205,40 @@ class InteractionStore {
 
 	#buildColouredReplier({ colour }: { colour: number }): InteractionStore["reply"] {
 		return async (interaction, embedOrData, flags) => {
-			if (isEmbed(embedOrData)) {
-				embedOrData.color = colour;
-			} else if (embedOrData.embeds !== undefined) {
-				for (const embed of embedOrData.embeds) {
-					embed.color = colour;
-				}
-			}
+			setCallbackColour(embedOrData, { colour });
 
 			await this.reply(interaction, embedOrData, flags);
+		};
+	}
+
+	#buildColouredReplyEditor({ colour }: { colour: number }): InteractionStore["editReply"] {
+		return async (interaction, embedOrData) => {
+			setCallbackColour(embedOrData, { colour });
+
+			await this.editReply(interaction, embedOrData);
 		};
 	}
 }
 
 function isEmbed(embedOrData: EmbedOrCallbackData): embedOrData is Discord.CamelizedDiscordEmbed {
-	return "title" in embedOrData || "description" in embedOrData;
+	return "title" in embedOrData || "description" in embedOrData || "fields" in embedOrData;
 }
 
 function getInteractionCallbackData(embedOrData: EmbedOrCallbackData): Discord.InteractionCallbackData {
 	if (isEmbed(embedOrData)) {
 		return { embeds: [embedOrData] };
+	}
+
+	return embedOrData;
+}
+
+function setCallbackColour(embedOrData: EmbedOrCallbackData, { colour }: { colour: number }): EmbedOrCallbackData {
+	if (isEmbed(embedOrData)) {
+		embedOrData.color = colour;
+	} else if (embedOrData.embeds !== undefined) {
+		for (const embed of embedOrData.embeds) {
+			embed.color = colour;
+		}
 	}
 
 	return embedOrData;

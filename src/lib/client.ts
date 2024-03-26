@@ -90,28 +90,64 @@ class Client {
 		return this.#commands.isShowable.bind(this.#commands);
 	}
 
-	get success(): InteractionStore["success"] {
-		return this.#interactions.success.bind(this.#interactions);
+	get unsupported(): InteractionStore["unsupported"] {
+		return this.#interactions.unsupported.bind(this.#interactions);
 	}
 
 	get notice(): InteractionStore["notice"] {
 		return this.#interactions.notice.bind(this.#interactions);
 	}
 
+	get noticed(): InteractionStore["noticed"] {
+		return this.#interactions.noticed.bind(this.#interactions);
+	}
+
+	get success(): InteractionStore["success"] {
+		return this.#interactions.success.bind(this.#interactions);
+	}
+
+	get succeeded(): InteractionStore["succeeded"] {
+		return this.#interactions.succeeded.bind(this.#interactions);
+	}
+
+	get pushback(): InteractionStore["pushback"] {
+		return this.#interactions.pushback.bind(this.#interactions);
+	}
+
+	get pushedBack(): InteractionStore["pushedBack"] {
+		return this.#interactions.pushedBack.bind(this.#interactions);
+	}
+
 	get warning(): InteractionStore["warning"] {
 		return this.#interactions.warning.bind(this.#interactions);
+	}
+
+	get warned(): InteractionStore["warned"] {
+		return this.#interactions.warned.bind(this.#interactions);
 	}
 
 	get error(): InteractionStore["error"] {
 		return this.#interactions.error.bind(this.#interactions);
 	}
 
+	get errored(): InteractionStore["errored"] {
+		return this.#interactions.errored.bind(this.#interactions);
+	}
+
 	get failure(): InteractionStore["failure"] {
 		return this.#interactions.failure.bind(this.#interactions);
 	}
 
+	get failed(): InteractionStore["failed"] {
+		return this.#interactions.failed.bind(this.#interactions);
+	}
+
 	get death(): InteractionStore["death"] {
 		return this.#interactions.death.bind(this.#interactions);
+	}
+
+	get died(): InteractionStore["died"] {
+		return this.#interactions.died.bind(this.#interactions);
 	}
 
 	get registerInteraction(): InteractionStore["registerInteraction"] {
@@ -148,10 +184,6 @@ class Client {
 
 	get displayModal(): InteractionStore["displayModal"] {
 		return this.#interactions.displayModal.bind(this.#interactions);
-	}
-
-	get replyColoured(): InteractionStore["replyColoured"] {
-		return this.#interactions.replyColoured.bind(this.#interactions);
 	}
 
 	get registerCollector(): EventStore["registerCollector"] {
@@ -457,14 +489,9 @@ class Client {
 					rateLimit.nextAllowedUsageTimestamp - executedAt - constants.time.second,
 				);
 
-				await this.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
-							color: constants.colours.dullYellow,
-						},
-					],
+				await this.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
 				});
 
 				return;
@@ -625,14 +652,9 @@ class Client {
 					description: this.localise("interactions.invalidUser.description", locale)(),
 				};
 
-				this.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.red,
-						},
-					],
+				this.error(interaction, {
+					title: strings.title,
+					description: strings.description,
 				});
 
 				return undefined;
