@@ -246,14 +246,9 @@ abstract class PromptService<
 						description: this.client.localise("cannotRemovePrompt.description", locale)(),
 					};
 
-					await this.client.reply(buttonPress, {
-						embeds: [
-							{
-								title: strings.title,
-								description: strings.description,
-								color: constants.colours.peach,
-							},
-						],
+					await this.client.warning(buttonPress, {
+						title: strings.title,
+						description: strings.description,
 					});
 
 					return;
@@ -265,14 +260,9 @@ abstract class PromptService<
 						description: this.client.localise("cannotCloseIssue.description", locale)(),
 					};
 
-					await this.client.reply(buttonPress, {
-						embeds: [
-							{
-								title: strings.title,
-								description: strings.description,
-								color: constants.colours.peach,
-							},
-						],
+					await this.client.warning(buttonPress, {
+						title: strings.title,
+						description: strings.description,
 					});
 
 					return;

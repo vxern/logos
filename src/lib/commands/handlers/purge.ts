@@ -189,8 +189,8 @@ async function handlePurgeMessages(
 				{
 					title: strings.indexing.title,
 					description: strings.indexing.description,
+					color: constants.colours.notice,
 					fields: getMessageFields(),
-					color: constants.colours.peach,
 				},
 			],
 		};
@@ -220,14 +220,9 @@ async function handlePurgeMessages(
 				},
 			};
 
-			await client.editReply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: `${strings.description.rangeTooBig}\n\n${strings.description.trySmaller}`,
-						color: constants.colours.yellow,
-					},
-				],
+			await client.warned(interaction, {
+				title: strings.title,
+				description: `${strings.description.rangeTooBig}\n\n${strings.description.trySmaller}`,
 			});
 
 			return;
@@ -294,15 +289,10 @@ async function handlePurgeMessages(
 			},
 		};
 
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.indexed.title,
-					description: `${strings.indexed.description.none}\n\n${strings.indexed.description.tryDifferentQuery}`,
-					fields: getMessageFields(),
-					color: constants.colours.husky,
-				},
-			],
+		await client.warned(interaction, {
+			title: strings.indexed.title,
+			description: `${strings.indexed.description.none}\n\n${strings.indexed.description.tryDifferentQuery}`,
+			fields: getMessageFields(),
 		});
 
 		return;
@@ -376,13 +366,13 @@ async function handlePurgeMessages(
 				{
 					title: strings.indexed.title,
 					description: `${strings.indexed.description.tooMany}\n\n${strings.indexed.description.limited}`,
+					color: constants.colours.pushback,
 					fields: getMessageFields(),
-					color: constants.colours.yellow,
 				},
 				{
 					title: strings.continue.title,
 					description: strings.continue.description,
-					color: constants.colours.husky,
+					color: constants.colours.pushback,
 				},
 			],
 			components: [
@@ -470,13 +460,13 @@ async function handlePurgeMessages(
 				{
 					title: strings.indexed.title,
 					description: strings.indexed.description.some,
+					color: constants.colours.notice,
 					fields: getMessageFields(),
-					color: constants.colours.blue,
 				},
 				{
 					title: strings.sureToPurge.title,
 					description: strings.sureToPurge.description,
-					color: constants.colours.husky,
+					color: constants.colours.pushback,
 				},
 			],
 			components: [
@@ -527,14 +517,14 @@ async function handlePurgeMessages(
 			},
 		};
 
-		await client.editReply(interaction, {
+		await client.noticed(interaction, {
 			embeds: [
 				{
 					title: strings.purging.title,
 					description: `${strings.purging.description.purging} ${strings.purging.description.mayTakeTime}\n\n${strings.purging.description.onceComplete}`,
-					color: constants.colours.blue,
 				},
 			],
+			// * This is intended: Components are to be removed off of the message here.
 			components: [],
 		});
 	}
@@ -640,15 +630,10 @@ async function handlePurgeMessages(
 			},
 		};
 
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.purged.title,
-					description: strings.purged.description,
-					color: constants.colours.lightGreen,
-					image: { url: constants.gifs.done },
-				},
-			],
+		await client.succeeded(interaction, {
+			title: strings.purged.title,
+			description: strings.purged.description,
+			image: { url: constants.gifs.done },
 		});
 	}
 }
@@ -676,27 +661,23 @@ async function displaySnowflakesInvalidError(
 
 	const areBothInvalid = isStartInvalid && isEndInvalid;
 
-	await client.editReply(interaction, {
-		embeds: [
-			{
-				...(areBothInvalid
-					? {
-							title: strings.both.title,
-							description: strings.both.description,
-					  }
-					: isStartInvalid
-					  ? {
-								title: strings.start.title,
-								description: strings.start.description,
-						  }
-					  : {
-								title: strings.end.title,
-								description: strings.end.description,
-						  }),
-				color: constants.colours.red,
-			},
-		],
-	});
+	await client.warned(
+		interaction,
+		areBothInvalid
+			? {
+					title: strings.both.title,
+					description: strings.both.description,
+			  }
+			: isStartInvalid
+			  ? {
+						title: strings.start.title,
+						description: strings.start.description,
+				  }
+			  : {
+						title: strings.end.title,
+						description: strings.end.description,
+				  },
+	);
 }
 
 async function displayIdsNotDifferentError(
@@ -709,14 +690,9 @@ async function displayIdsNotDifferentError(
 		description: client.localise("purge.strings.idsNotDifferent.description", locale)(),
 	};
 
-	await client.editReply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
+	await client.warned(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 
@@ -730,14 +706,9 @@ async function displayFailedError(
 		description: client.localise("purge.strings.failed.description", locale)(),
 	};
 
-	await client.editReply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
+	await client.failed(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

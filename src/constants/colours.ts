@@ -16,14 +16,17 @@ function fromHex(colour: string): number {
 }
 
 export default Object.freeze({
-	// Colours with set uses.
-	success: fromHex("#89ef59"),
+	// Special
+	invisible: fromHex("#36393f"), // Used to blend in with the rest of an embed.
+	// Reply methods
+	unsupported: fromHex("#d6e3f8"),
 	notice: fromHex("#6269ed"),
+	success: fromHex("#89ef59"),
+	pushback: fromHex("#ff9a76"),
 	warning: fromHex("#f2f277"),
 	error: fromHex("#ff4b3e"),
 	failure: fromHex("#820000"),
 	death: fromHex("#1c1c1c"),
-	invisible: fromHex("#36393f"), // Used to blend in with the rest of an embed.
 	// Random colours.
 	red: fromHex("#b42f2f"),
 	darkRed: fromHex("#820000"),

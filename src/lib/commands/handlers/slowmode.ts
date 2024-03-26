@@ -37,14 +37,9 @@ async function handleToggleSlowmode(
 			description: client.localise("slowmode.strings.invalid.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
+		await client.error(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -93,16 +88,11 @@ async function handleToggleSlowmode(
 					description: client.localise("slowmode.strings.downgraded.description", locale)(),
 				};
 
-				await client.reply(
+				await client.success(
 					interaction,
 					{
-						embeds: [
-							{
-								title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
-								description: strings.description,
-								color: constants.colours.lightGreen,
-							},
-						],
+						title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
+						description: strings.description,
 					},
 					{ visible: true },
 				);
@@ -126,16 +116,11 @@ async function handleToggleSlowmode(
 					description: client.localise("slowmode.strings.upgraded.description", locale)(),
 				};
 
-				await client.reply(
+				await client.success(
 					interaction,
 					{
-						embeds: [
-							{
-								title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
-								description: strings.description,
-								color: constants.colours.lightGreen,
-							},
-						],
+						title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
+						description: strings.description,
 					},
 					{ visible: true },
 				);
@@ -153,14 +138,9 @@ async function handleToggleSlowmode(
 					},
 				};
 
-				await client.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
-							color: constants.colours.dullYellow,
-						},
-					],
+				await client.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
 				});
 			}
 
@@ -186,14 +166,9 @@ async function handleToggleSlowmode(
 					},
 				};
 
-				await client.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: `${strings.description.justEnabled} ${strings.description.canDisableIn}`,
-							color: constants.colours.peach,
-						},
-					],
+				await client.pushback(interaction, {
+					title: strings.title,
+					description: `${strings.description.justEnabled} ${strings.description.canDisableIn}`,
 				});
 
 				return;
@@ -215,16 +190,11 @@ async function handleToggleSlowmode(
 			description: client.localise("slowmode.strings.disabled.description", locale)(),
 		};
 
-		await client.reply(
+		await client.notice(
 			interaction,
 			{
-				embeds: [
-					{
-						title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+				title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
+				description: strings.description,
 			},
 			{ visible: true },
 		);
@@ -251,16 +221,11 @@ async function handleToggleSlowmode(
 		description: client.localise("slowmode.strings.enabled.description", locale)(),
 	};
 
-	await client.reply(
+	await client.notice(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.lightGreen,
-				},
-			],
+			title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);

@@ -30,14 +30,9 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toManage,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toManage,
 		});
 
 		return;
@@ -69,14 +64,9 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 				description: client.localise("music.options.remove.strings.failed.description", locale)(),
 			};
 
-			await client.reply(buttonPress, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await client.failed(buttonPress, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;
@@ -93,16 +83,11 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			}),
 		};
 
-		await client.reply(
+		await client.success(
 			buttonPress,
 			{
-				embeds: [
-					{
-						title: `${constants.emojis.music.removed} ${strings.title}`,
-						description: strings.description,
-						color: constants.colours.blue,
-					},
-				],
+				title: `${constants.emojis.music.removed} ${strings.title}`,
+				description: strings.description,
 			},
 			{ visible: true },
 		);

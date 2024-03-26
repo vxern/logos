@@ -43,15 +43,11 @@ async function handleUnskipAction(
 			},
 		};
 
-		client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toManage,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toManage,
 		});
+
 		return;
 	}
 
@@ -88,14 +84,9 @@ async function handleUnskipAction(
 			description: client.localise("music.options.unskip.strings.historyEmpty.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -120,14 +111,9 @@ async function handleUnskipAction(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 		});
 
 		return;
@@ -140,14 +126,9 @@ async function handleUnskipAction(
 			description: client.localise("music.options.unskip.strings.queueFull.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -161,14 +142,9 @@ async function handleUnskipAction(
 			description: client.localise("music.strings.skips.tooManyArguments.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.yellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -185,14 +161,9 @@ async function handleUnskipAction(
 			description: client.localise("music.strings.skips.invalid.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
+		await client.error(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -203,16 +174,11 @@ async function handleUnskipAction(
 		description: client.localise("music.options.unskip.strings.unskipped.description", locale)(),
 	};
 
-	await client.reply(
+	await client.success(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.unskipped} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.unskipped} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);

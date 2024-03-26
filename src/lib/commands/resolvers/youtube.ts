@@ -95,12 +95,11 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		});
 	}
 
-	client.reply(interaction, {
+	await client.notice(interaction, {
 		embeds: [
 			{
 				title: strings.title,
 				description: strings.description,
-				color: constants.colours.blue,
 			},
 		],
 		components: [

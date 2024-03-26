@@ -94,14 +94,9 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 			description: client.localise("translate.strings.cannotUse.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -127,14 +122,9 @@ async function handleTranslate(
 			description: client.localise("translate.strings.textEmpty.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.error(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -156,14 +146,9 @@ async function handleTranslate(
 				},
 			};
 
-			await client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.both.title,
-						description: strings.both.description,
-						color: constants.colours.red,
-					},
-				],
+			await client.error(interaction, {
+				title: strings.both.title,
+				description: strings.both.description,
 			});
 
 			return;
@@ -177,14 +162,9 @@ async function handleTranslate(
 				},
 			};
 
-			await client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.source.title,
-						description: strings.source.description,
-						color: constants.colours.red,
-					},
-				],
+			await client.error(interaction, {
+				title: strings.source.title,
+				description: strings.source.description,
 			});
 
 			return;
@@ -198,14 +178,9 @@ async function handleTranslate(
 				},
 			};
 
-			await client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.target.title,
-						description: strings.target.description,
-						color: constants.colours.red,
-					},
-				],
+			await client.error(interaction, {
+				title: strings.target.title,
+				description: strings.target.description,
 			});
 
 			return;
@@ -220,14 +195,9 @@ async function handleTranslate(
 					description: client.localise("translate.strings.languagesNotDifferent.description", locale)(),
 				};
 
-				await client.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.dullYellow,
-						},
-					],
+				await client.pushback(interaction, {
+					title: strings.title,
+					description: strings.description,
 				});
 
 				return;
@@ -292,14 +262,9 @@ async function handleTranslate(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-					color: constants.colours.peach,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
 		});
 
 		return;
@@ -319,14 +284,9 @@ async function handleTranslate(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-					color: constants.colours.peach,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
 		});
 
 		return;
@@ -353,14 +313,9 @@ async function translateText(
 			description: client.localise("translate.strings.noTranslationAdapters.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.yellow,
-				},
-			],
+		await client.unsupported(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -385,15 +340,11 @@ async function translateText(
 			description: client.localise("translate.strings.failed.description", locale)(),
 		};
 
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
+		await client.failed(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
+
 		return;
 	}
 
@@ -415,12 +366,10 @@ async function translateText(
 	if (isLong) {
 		embeds = [
 			{
-				color: constants.colours.blue,
 				title: strings.sourceText,
 				description: text,
 			},
 			{
-				color: constants.colours.blue,
 				title: strings.translation,
 				description: translatedText,
 				footer: {
@@ -431,7 +380,6 @@ async function translateText(
 	} else {
 		embeds = [
 			{
-				color: constants.colours.blue,
 				fields: [
 					{
 						name: strings.sourceText,
@@ -460,7 +408,7 @@ async function translateText(
 				},
 		  ];
 
-	await client.editReply(interaction, { embeds, components });
+	await client.noticed(interaction, { embeds, components });
 }
 
 async function detectLanguage(
@@ -483,14 +431,9 @@ async function detectLanguage(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-					color: constants.colours.peach,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
 		});
 
 		return undefined;
@@ -505,14 +448,9 @@ async function detectLanguage(
 			description: client.localise("translate.strings.languageNotSupported.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.unsupported(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return undefined;

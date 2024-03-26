@@ -27,21 +27,16 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 		},
 	};
 
-	await client.reply(interaction, {
-		embeds: [
+	await client.notice(interaction, {
+		title: strings.title,
+		fields: [
 			{
-				title: strings.title,
-				color: constants.colours.blue,
-				fields: [
-					{
-						name: strings.description.language.title,
-						value:
-							userDocument.preferredLanguage !== undefined
-								? strings.description.language.language
-								: `${strings.description.language.noLanguageSet} ${strings.description.language.defaultShown}`,
-						inline: true,
-					},
-				],
+				name: strings.description.language.title,
+				value:
+					userDocument.preferredLanguage !== undefined
+						? strings.description.language.language
+						: `${strings.description.language.noLanguageSet} ${strings.description.language.defaultShown}`,
+				inline: true,
 			},
 		],
 	});

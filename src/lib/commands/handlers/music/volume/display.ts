@@ -31,14 +31,9 @@ async function handleDisplayVolume(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toCheck,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toCheck,
 		});
 
 		return;
@@ -60,14 +55,13 @@ async function handleDisplayVolume(
 				},
 		  ];
 
-	await client.reply(
+	await client.notice(
 		interaction,
 		{
 			embeds: [
 				{
 					title: `${constants.emojis.music.volume} ${strings.title}`,
 					description: strings.description,
-					color: constants.colours.blue,
 				},
 			],
 			components,

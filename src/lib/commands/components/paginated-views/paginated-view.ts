@@ -117,7 +117,10 @@ abstract class PaginatedView<T> {
 	abstract build(page: T[], index: number, { locale }: { locale: Locale }): Page;
 
 	async #display(): Promise<void> {
-		await this.client.reply(this.anchor, { embeds: [this.#view.embed], components: this.#paginationControls });
+		await this.client.reply(this.anchor, {
+			embeds: [this.#view.embed],
+			components: this.#paginationControls,
+		});
 	}
 
 	async refresh(): Promise<void> {

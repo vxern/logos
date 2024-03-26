@@ -60,9 +60,7 @@ async function handleDisplayWarnings(
 
 	const warningDocuments = await Warning.getAll(client, { where: { targetId: member.id.toString() } });
 
-	await client.reply(interaction, {
-		embeds: [getWarningPage(client, warningDocuments, isSelf, { locale })],
-	});
+	await client.notice(interaction, getWarningPage(client, warningDocuments, isSelf, { locale }));
 }
 
 function getWarningPage(
@@ -81,7 +79,6 @@ function getWarningPage(
 			return {
 				title: strings.title,
 				description: strings.description,
-				color: constants.colours.blue,
 			};
 		}
 		const strings = {
@@ -92,7 +89,6 @@ function getWarningPage(
 		return {
 			title: strings.title,
 			description: strings.description,
-			color: constants.colours.blue,
 		};
 	}
 
@@ -113,7 +109,6 @@ function getWarningPage(
 
 			return { name: warningString, value: `${ruleTitle}\n> *${warning.reason}*` };
 		}),
-		color: constants.colours.blue,
 	};
 }
 

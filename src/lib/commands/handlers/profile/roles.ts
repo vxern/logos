@@ -243,13 +243,9 @@ async function createRoleSelectionMenu(
 					},
 				};
 
-				await client.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
-						},
-					],
+				await client.notice(interaction, {
+					title: strings.title,
+					description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
 				});
 
 				displayData = await traverseRoleTreeAndDisplay(

@@ -249,7 +249,7 @@ class MusicService extends LocalService {
 					{
 						title: `${constants.emojis.music.stopped} ${strings.title}`,
 						description: strings.description,
-						color: constants.colours.blue,
+						color: constants.colours.notice,
 					},
 				],
 			})
@@ -344,7 +344,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: `${strings.description.outage}\n\n${strings.description.noLoss}`,
-						color: constants.colours.peach,
+						color: constants.colours.death,
 					},
 				],
 			})
@@ -407,7 +407,7 @@ class MusicService extends LocalService {
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colours.lightGreen,
+						color: constants.colours.success,
 					},
 				],
 			})
@@ -431,14 +431,9 @@ class MusicService extends LocalService {
 				},
 			};
 
-			this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
-						color: constants.colours.peach,
-					},
-				],
+			this.client.unsupported(interaction, {
+				title: strings.title,
+				description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
 			});
 
 			return false;
@@ -456,14 +451,9 @@ class MusicService extends LocalService {
 				},
 			};
 
-			this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: action === "manage" ? strings.description.toManage : strings.description.toCheck,
-						color: constants.colours.dullYellow,
-					},
-				],
+			this.client.warning(interaction, {
+				title: strings.title,
+				description: action === "manage" ? strings.description.toManage : strings.description.toCheck,
 			});
 
 			return false;
@@ -476,14 +466,9 @@ class MusicService extends LocalService {
 				description: this.client.localise("music.options.play.strings.inDifferentVc.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return false;
@@ -507,14 +492,9 @@ class MusicService extends LocalService {
 				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return false;
@@ -542,14 +522,9 @@ class MusicService extends LocalService {
 				description: this.client.localise("music.strings.cannotChange.description", locale)(),
 			};
 
-			this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			this.client.pushback(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return false;
@@ -641,15 +616,18 @@ class MusicService extends LocalService {
 				}),
 			};
 
-			const embed: Discord.CamelizedDiscordEmbed = {
-				title: `${constants.emojis.music.queued} ${strings.title}`,
-				description: strings.description,
-				color: constants.colours.lightGreen,
-			};
-
 			await this.client.bot.rest
-				.sendMessage(session.channelId, { embeds: [embed] })
+				.sendMessage(session.channelId, {
+					embeds: [
+						{
+							title: `${constants.emojis.music.queued} ${strings.title}`,
+							description: strings.description,
+							color: constants.colours.success,
+						},
+					],
+				})
 				.catch(() => this.log.warn("Failed to send music feedback message."));
+
 			return;
 		}
 
@@ -743,7 +721,7 @@ class MusicService extends LocalService {
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colours.peach,
+							color: constants.colours.failure,
 						},
 					],
 				})
@@ -800,7 +778,7 @@ class MusicService extends LocalService {
 						{
 							title: strings.title,
 							description: strings.description,
-							color: constants.colours.peach,
+							color: constants.colours.failure,
 						},
 					],
 				})
@@ -899,7 +877,7 @@ class MusicService extends LocalService {
 								url: song.url,
 								user_mention: mention(session.listings.current.requestedBy, { type: "user" }),
 							}),
-							color: constants.colours.blue,
+							color: constants.colours.notice,
 						},
 					],
 				})

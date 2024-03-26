@@ -38,15 +38,11 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 			description: client.localise("resource.strings.tooMany.description", locale)(),
 		};
 
-		client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
+
 		return;
 	}
 
@@ -91,16 +87,13 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 			description: client.localise("resource.strings.sent.description", locale)(),
 		};
 
-		client.editReply(submission, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.lightGreen,
-				},
-			],
+		await client.succeeded(submission, {
+			title: strings.title,
+			description: strings.description,
 		});
 	});
+
+	await composer.open();
 }
 
 export { handleSubmitResource };

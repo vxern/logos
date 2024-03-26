@@ -48,14 +48,9 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 			description: client.localise("music.options.rewind.strings.noSong.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -78,16 +73,11 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		description: client.localise("music.options.rewind.strings.rewound.description", locale)(),
 	};
 
-	await client.reply(
+	await client.success(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.rewound} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.rewound} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);
@@ -103,8 +93,9 @@ async function displayInvalidTimestampError(
 		description: client.localise("music.options.rewind.strings.invalidTimestamp.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
+	await client.error(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

@@ -121,14 +121,9 @@ async function handleSetTimeout(
 		}),
 	};
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.blue,
-			},
-		],
+	await client.notice(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 
@@ -142,8 +137,9 @@ async function displayDurationInvalidError(
 		description: client.localise("timeout.strings.durationInvalid.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.darkRed }],
+	await client.error(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 
@@ -157,8 +153,9 @@ async function displayTooShortWarning(
 		description: client.localise("timeout.strings.tooShort.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.yellow }],
+	await client.warning(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 
@@ -172,8 +169,9 @@ async function displayTooLongWarning(
 		description: client.localise("timeout.strings.tooLong.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.yellow }],
+	await client.warning(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

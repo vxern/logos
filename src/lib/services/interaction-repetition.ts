@@ -90,8 +90,13 @@ class InteractionRepetitionService extends GlobalService {
 			no: this.client.localise("interactions.show.sureToShow.no", locale)(),
 		};
 
-		await this.client.editReply(buttonPress, {
-			embeds: [{ title: strings.title, description: strings.description, color: constants.colours.dullYellow }],
+		await this.client.warned(buttonPress, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+				},
+			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,

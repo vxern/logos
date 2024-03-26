@@ -43,14 +43,9 @@ async function handlePraiseUser(
 			description: client.localise("praise.strings.cannotPraiseSelf.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -68,14 +63,9 @@ async function handlePraiseUser(
 			description: client.localise("praise.strings.tooMany.description", locale)(),
 		};
 
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.pushedBack(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -106,14 +96,9 @@ async function handlePraiseUser(
 		)({ user_mention: mention(member.id, { type: "user" }) }),
 	};
 
-	await client.editReply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.lightGreen,
-			},
-		],
+	await client.succeeded(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

@@ -88,7 +88,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 				return {
 					title: strings.title,
 					description: strings.description,
-					color: constants.colours.dullYellow,
+					color: constants.colours.warning,
 				};
 			}
 		}

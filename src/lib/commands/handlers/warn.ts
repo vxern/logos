@@ -88,8 +88,9 @@ async function handleWarnUser(
 			description: client.localise("warn.strings.invalidRule.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
+		await client.error(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -159,14 +160,9 @@ async function handleWarnUser(
 		}),
 	};
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.blue,
-			},
-		],
+	await client.success(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 
 	const surpassedLimit = warningDocumentsActive.length > configuration.limit;

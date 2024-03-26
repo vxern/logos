@@ -150,14 +150,9 @@ class ReportPromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;
@@ -169,14 +164,9 @@ class ReportPromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;

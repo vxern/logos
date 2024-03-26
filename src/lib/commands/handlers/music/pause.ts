@@ -29,14 +29,9 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toManage,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toManage,
 		});
 
 		return;
@@ -58,16 +53,11 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		description: client.localise("music.options.pause.strings.paused.description", locale)(),
 	};
 
-	await client.reply(
+	await client.notice(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.paused} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.paused} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);

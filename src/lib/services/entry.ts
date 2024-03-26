@@ -75,7 +75,7 @@ class EntryService extends LocalService {
 			},
 		};
 
-		await this.client.reply(buttonPress, {
+		await this.client.notice(buttonPress, {
 			embeds: [
 				{
 					title: strings.title,
@@ -171,12 +171,11 @@ class EntryService extends LocalService {
 					},
 				};
 
-				await this.client.reply(buttonPress, {
+				await this.client.notice(buttonPress, {
 					embeds: [
 						{
 							title: strings.title,
 							description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
-							color: constants.colours.blue,
 						},
 					],
 					components: [
@@ -212,15 +211,10 @@ class EntryService extends LocalService {
 			},
 		};
 
-		await this.client.reply(buttonPress, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${constants.emojis.responses.celebration} ${strings.description.nowMember}\n\n${strings.description.toStart}`,
-					image: { url: constants.gifs.welcome },
-					color: constants.colours.lightGreen,
-				},
-			],
+		await this.client.success(buttonPress, {
+			title: strings.title,
+			description: `${constants.emojis.responses.celebration} ${strings.description.nowMember}\n\n${strings.description.toStart}`,
+			image: { url: constants.gifs.welcome },
 		});
 
 		this.client.bot.rest
@@ -265,14 +259,9 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			await this.client.reply(buttonPress, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await this.client.pushback(buttonPress, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;
@@ -302,14 +291,9 @@ class EntryService extends LocalService {
 						description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 					};
 
-					await this.client.reply(submission, {
-						embeds: [
-							{
-								title: strings.title,
-								description: strings.description,
-								color: constants.colours.darkRed,
-							},
-						],
+					await this.client.pushback(submission, {
+						title: strings.title,
+						description: strings.description,
 					});
 
 					return;
@@ -354,14 +338,9 @@ class EntryService extends LocalService {
 					},
 				};
 
-				await this.client.editReply(submission, {
-					embeds: [
-						{
-							title: strings.title,
-							description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
-							color: constants.colours.lightGreen,
-						},
-					],
+				await this.client.succeeded(submission, {
+					title: strings.title,
+					description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
 				});
 			},
 		);
@@ -379,14 +358,9 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await this.client.pushback(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return false;
@@ -402,14 +376,9 @@ class EntryService extends LocalService {
 				description: this.client.localise("entry.verification.answers.rejectedBefore.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.red,
-					},
-				],
+			await this.client.error(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return false;

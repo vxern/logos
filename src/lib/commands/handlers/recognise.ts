@@ -32,14 +32,9 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 			description: client.localise("recognize.strings.cannotUse.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -63,14 +58,9 @@ async function handleRecogniseLanguage(
 			description: client.localise("recognize.strings.textEmpty.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -79,7 +69,6 @@ async function handleRecogniseLanguage(
 	await client.postponeReply(interaction);
 
 	const detectedLanguages = await detectLanguages({ text });
-
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
 		const strings = {
 			title: client.localise("recognize.strings.unknown.title", locale)(),
@@ -89,20 +78,13 @@ async function handleRecogniseLanguage(
 			},
 		};
 
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: isMessage ? strings.description.message : strings.description.text,
-					color: constants.colours.peach,
-				},
-			],
+		await client.unsupported(interaction, {
+			title: strings.title,
+			description: isMessage ? strings.description.message : strings.description.text,
 		});
 
 		return;
 	}
-
-	const embeds: Discord.CamelizedDiscordEmbed[] = [];
 
 	if (detectedLanguages.likely.length === 1 && detectedLanguages.possible.length === 0) {
 		const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
@@ -117,20 +99,11 @@ async function handleRecogniseLanguage(
 			)({ language: client.localise(constants.localisations.languages[language], locale)() }),
 		};
 
-		embeds.push({
-			description: strings.description,
-			color: constants.colours.blue,
-		});
-
-		await client.editReply(interaction, { embeds });
+		await client.noticed(interaction, { description: strings.description });
 		return;
 	}
 
 	{
-		const embed: Discord.CamelizedDiscordEmbed = {
-			color: constants.colours.blue,
-		};
-
 		const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 		if (detectedLanguages.likely.length === 1) {
@@ -211,12 +184,8 @@ async function handleRecogniseLanguage(
 			});
 		}
 
-		embed.fields = fields;
-
-		embeds.push(embed);
+		await client.noticed(interaction, { fields });
 	}
-
-	await client.editReply(interaction, { embeds });
 }
 
 // TODO(vxern): This should be elsewhere.

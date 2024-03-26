@@ -43,7 +43,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 				description: this.client.localise("music.options.remove.strings.queueEmpty.description", locale)(),
 			};
 
-			return { embed: { title: strings.title, description: strings.description, color: constants.colours.blue } };
+			return { embed: { title: strings.title, description: strings.description, color: constants.colours.notice } };
 		}
 
 		const selectMenu = this.#buildSelectMenu(page, pageIndex);
@@ -54,7 +54,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 		};
 
 		return {
-			embed: { title: strings.title, description: strings.description, color: constants.colours.blue },
+			embed: { title: strings.title, description: strings.description, color: constants.colours.notice },
 			components: [selectMenu],
 		};
 	}

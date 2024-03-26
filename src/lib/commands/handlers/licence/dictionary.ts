@@ -45,31 +45,26 @@ async function handleDisplayDictionaryLicence(
 		},
 	};
 
-	await client.reply(interaction, {
-		embeds: [
+	await client.notice(interaction, {
+		author: {
+			name: strings.title,
+			iconUrl: licence.faviconLink,
+			url: licence.link,
+		},
+		description: `*${licence.notices.licence}*`,
+		fields: [
 			{
-				author: {
-					name: strings.title,
-					iconUrl: licence.faviconLink,
-					url: licence.link,
-				},
-				description: `*${licence.notices.licence}*`,
-				color: constants.colours.greenishLightGray,
-				fields: [
-					{
-						name: strings.fields.source,
-						value: licence.link,
-					},
-					...(licence.notices.copyright !== undefined
-						? [
-								{
-									name: strings.fields.copyright,
-									value: licence.notices.copyright,
-								},
-						  ]
-						: []),
-				],
+				name: strings.fields.source,
+				value: licence.link,
 			},
+			...(licence.notices.copyright !== undefined
+				? [
+						{
+							name: strings.fields.copyright,
+							value: licence.notices.copyright,
+						},
+				  ]
+				: []),
 		],
 	});
 }
@@ -84,14 +79,9 @@ async function displayError(
 		description: client.localise("licenses.strings.invalid.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
+	await client.error(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

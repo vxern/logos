@@ -28,14 +28,9 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toManage,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toManage,
 		});
 
 		return;
@@ -52,14 +47,9 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 			description: client.localise("music.options.resume.strings.notPaused.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -72,16 +62,11 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		description: client.localise("music.options.resume.strings.resumed.description", locale)(),
 	};
 
-	await client.reply(
+	await client.success(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.resumed} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.resumed} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);

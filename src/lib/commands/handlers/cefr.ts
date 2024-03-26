@@ -155,7 +155,10 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 	};
 
 	const refreshView = async () => {
-		await client.editReply(interaction, { embeds: [getEmbed()], components: getButtons() });
+		await client.editReply(interaction, {
+			embeds: [getEmbed()],
+			components: getButtons(),
+		});
 	};
 
 	bracketButtons.onCollect(async (buttonPress) => {

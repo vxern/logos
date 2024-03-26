@@ -17,14 +17,9 @@ async function handleDisplayAcknowledgements(client: Client, interaction: Logos.
 		};
 	});
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.acknowledgements,
-				fields,
-				color: constants.colours.blue,
-			},
-		],
+	await client.notice(interaction, {
+		title: strings.acknowledgements,
+		fields,
 	});
 }
 

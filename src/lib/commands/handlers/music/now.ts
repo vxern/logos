@@ -35,14 +35,9 @@ async function handleDisplayCurrentlyPlaying(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toCheck,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toCheck,
 		});
 
 		return;
@@ -67,14 +62,9 @@ async function handleDisplayCurrentlyPlaying(
 				},
 			};
 
-			await client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await client.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 			});
 
 			return;
@@ -86,14 +76,9 @@ async function handleDisplayCurrentlyPlaying(
 			description: client.localise("music.options.now.strings.noSong.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -141,33 +126,28 @@ async function handleDisplayCurrentlyPlaying(
 		}),
 	};
 
-	await client.reply(
+	await client.notice(
 		interaction,
 		{
-			embeds: [
+			title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
+			fields: [
 				{
-					title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
-					color: constants.colours.blue,
-					fields: [
-						{
-							name: strings.title,
-							value: `[${song.title}](${song.url})`,
-							inline: false,
-						},
-						{
-							name: strings.requestedBy,
-							value: mention(current.requestedBy, { type: "user" }),
-							inline: false,
-						},
-						{
-							name: strings.runningTime,
-							value: playingSince !== undefined ? strings.playingSince : strings.startTimeUnknown,
-							inline: false,
-						},
-					],
-					footer: { text: strings.sourcedFrom },
+					name: strings.title,
+					value: `[${song.title}](${song.url})`,
+					inline: false,
+				},
+				{
+					name: strings.requestedBy,
+					value: mention(current.requestedBy, { type: "user" }),
+					inline: false,
+				},
+				{
+					name: strings.runningTime,
+					value: playingSince !== undefined ? strings.playingSince : strings.startTimeUnknown,
+					inline: false,
 				},
 			],
+			footer: { text: strings.sourcedFrom },
 		},
 		{ visible: interaction.parameters.show },
 	);

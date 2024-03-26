@@ -51,14 +51,9 @@ async function handleSkipToTimestamp(
 			description: client.localise("music.options.skip-to.strings.noSong.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -77,16 +72,11 @@ async function handleSkipToTimestamp(
 		description: client.localise("music.options.skip-to.strings.skippedTo.description", locale)(),
 	};
 
-	await client.reply(
+	await client.success(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.skippedTo} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.skippedTo} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);
@@ -102,8 +92,9 @@ async function displayInvalidTimestampError(
 		description: client.localise("music.options.skip-to.strings.invalidTimestamp.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [{ title: strings.title, description: strings.description, color: constants.colours.red }],
+	await client.error(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

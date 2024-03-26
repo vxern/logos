@@ -24,7 +24,7 @@ class SongCollectionView extends PaginatedView<Song> {
 				listEmpty: this.client.localise("music.strings.listEmpty", locale)(),
 			};
 
-			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colours.blue } };
+			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colours.notice } };
 		}
 
 		const songsFormatted = page
@@ -42,7 +42,7 @@ class SongCollectionView extends PaginatedView<Song> {
 			})
 			.join("\n");
 
-		return { embed: { title: this.#title, description: songsFormatted, color: constants.colours.blue } };
+		return { embed: { title: this.#title, description: songsFormatted, color: constants.colours.notice } };
 	}
 }
 

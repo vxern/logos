@@ -154,12 +154,11 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 				leave: this.client.localise("prompts.leave", locale)(),
 			};
 
-			await this.client.reply(cancelButtonPress, {
+			await this.client.warning(cancelButtonPress, {
 				embeds: [
 					{
 						title: strings.title,
 						description: strings.description,
-						color: constants.colours.dullYellow,
 					},
 				],
 				components: [

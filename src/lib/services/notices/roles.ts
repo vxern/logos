@@ -49,7 +49,7 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 				{
 					title: strings.title,
 					description: `${strings.description.usingCommand} ${strings.description.runAnywhere}\n\n${strings.description.pressButton}`,
-					color: constants.colours.turquoise,
+					color: constants.colours.murrey,
 				},
 			],
 			components: [

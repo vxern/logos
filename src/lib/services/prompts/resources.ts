@@ -47,8 +47,8 @@ class ResourcePromptService extends PromptService<{
 		return {
 			embeds: [
 				{
-					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					description: `*${resourceDocument.answers.resource}*`,
+					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					footer: {
 						text: diagnostics.display.user(user),
 						iconUrl: `${(() => {
@@ -115,14 +115,9 @@ class ResourcePromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 			return;
 		}
@@ -133,14 +128,9 @@ class ResourcePromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;

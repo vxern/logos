@@ -61,14 +61,9 @@ async function displayError(
 		description: client.localise("license.strings.invalid.description", locale)(),
 	};
 
-	client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
+	await client.error(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

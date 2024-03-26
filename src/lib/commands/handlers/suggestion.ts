@@ -38,14 +38,9 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 			description: client.localise("suggestion.strings.tooMany.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.pushback(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -92,14 +87,9 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 			description: client.localise("suggestion.strings.sent.description", locale)(),
 		};
 
-		client.editReply(submission, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.lightGreen,
-				},
-			],
+		await client.succeeded(submission, {
+			title: strings.title,
+			description: strings.description,
 		});
 	});
 

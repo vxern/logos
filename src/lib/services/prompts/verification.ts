@@ -360,8 +360,13 @@ class VerificationPromptService extends PromptService<{
 					await this.client.registerInteractionCollector(confirmButton);
 					await this.client.registerInteractionCollector(cancelButton);
 
-					await this.client.reply(interaction, {
-						embeds: [{ title: strings.title, description: strings.description, color: constants.colours.peach }],
+					await this.client.pushback(interaction, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+							},
+						],
 						components: [
 							{
 								type: Discord.MessageComponentTypes.ActionRow,
@@ -391,14 +396,9 @@ class VerificationPromptService extends PromptService<{
 					description: this.client.localise("entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
 				};
 
-				await this.client.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.dullYellow,
-						},
-					],
+				await this.client.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
 				});
 
 				return undefined;
@@ -445,8 +445,13 @@ class VerificationPromptService extends PromptService<{
 					await this.client.registerInteractionCollector(confirmButton);
 					await this.client.registerInteractionCollector(cancelButton);
 
-					await this.client.reply(interaction, {
-						embeds: [{ title: strings.title, description: strings.description, color: constants.colours.peach }],
+					await this.client.pushback(interaction, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+							},
+						],
 						components: [
 							{
 								type: Discord.MessageComponentTypes.ActionRow,
@@ -476,14 +481,9 @@ class VerificationPromptService extends PromptService<{
 					description: this.client.localise("entry.verification.vote.alreadyVoted.against.description", locale)(),
 				};
 
-				await this.client.reply(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.dullYellow,
-						},
-					],
+				await this.client.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
 				});
 
 				return undefined;
@@ -506,14 +506,9 @@ class VerificationPromptService extends PromptService<{
 				description: this.client.localise("entry.verification.vote.stanceChanged.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.lightGreen,
-					},
-				],
+			await this.client.notice(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 		} else {
 			await this.client.acknowledge(interaction);
@@ -684,14 +679,9 @@ class VerificationPromptService extends PromptService<{
 				description: this.client.localise("entry.verification.inquiry.failed.description", this.guildLocale)(),
 			};
 
-			await this.client.editReply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.peach,
-					},
-				],
+			await this.client.failed(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;
@@ -721,14 +711,9 @@ class VerificationPromptService extends PromptService<{
 				}),
 			};
 
-			await this.client.editReply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.lightGreen,
-					},
-				],
+			await this.client.succeeded(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 		}
 	}
@@ -782,14 +767,9 @@ class VerificationPromptService extends PromptService<{
 			description: this.client.localise("entry.verification.vote.failed.description", locale)(),
 		};
 
-		await this.client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
+		await this.client.failed(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 	}
 }

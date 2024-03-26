@@ -67,7 +67,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 				},
 		  ];
 
-	await client.reply(
+	await client.notice(
 		interaction,
 		{
 			embeds: [
@@ -76,7 +76,6 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 					description: strings.content,
 					footer: { text: `${strings.tldr}: ${strings.summary}` },
 					image: { url: constants.gifs.chaosWithoutRules },
-					color: constants.colours.blue,
 				},
 			],
 			components,
@@ -117,14 +116,9 @@ async function displayError(
 		description: client.localise("rule.strings.invalid.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
+	await client.error(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

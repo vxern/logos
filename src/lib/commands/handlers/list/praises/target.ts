@@ -38,9 +38,7 @@ async function handleDisplayPraisesByTarget(
 
 	const praiseDocuments = await Praise.getAll(client, { where: { targetId: member.id.toString() } });
 
-	await client.reply(interaction, {
-		embeds: [getPraisePage(client, praiseDocuments, isSelf, "target", { locale })],
-	});
+	await client.notice(interaction, getPraisePage(client, praiseDocuments, isSelf, "target", { locale }));
 }
 
 export { handleDisplayPraisesByTarget, handleDisplayPraisesByTargetAutocomplete };

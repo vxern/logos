@@ -51,7 +51,6 @@ async function handleClearTimeout(
 	const timedOutUntil = member.communicationDisabledUntil ?? undefined;
 
 	const notTimedOut = timedOutUntil === undefined || timedOutUntil < Date.now();
-
 	if (notTimedOut) {
 		const strings = {
 			title: client.localise("timeout.strings.notTimedOut.title", locale)(),
@@ -61,15 +60,11 @@ async function handleClearTimeout(
 			)({ user_mention: mention(user.id, { type: "user" }) }),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
+
 		return;
 	}
 
@@ -96,14 +91,9 @@ async function handleClearTimeout(
 		)({ user_mention: mention(user.id, { type: "user" }) }),
 	};
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.lightGreen,
-			},
-		],
+	await client.success(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

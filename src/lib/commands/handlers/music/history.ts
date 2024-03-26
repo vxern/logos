@@ -29,14 +29,9 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toCheck,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toCheck,
 		});
 
 		return;

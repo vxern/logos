@@ -37,14 +37,9 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 			description: client.localise("game.strings.noSentencesAvailable.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		setTimeout(
@@ -189,8 +184,8 @@ async function getGameView(
 						  )
 						: data.sentenceSelection.sentencePair.sentence.replaceAll(wholeWordPattern, mask),
 				description: data.sentenceSelection.sentencePair.translation,
-				footer: { text: `${strings.correctGuesses} · ${strings.allTime}` },
 				color: data.embedColour,
+				footer: { text: `${strings.correctGuesses} · ${strings.allTime}` },
 			},
 		],
 		components: [

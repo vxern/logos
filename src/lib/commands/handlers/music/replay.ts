@@ -32,14 +32,9 @@ async function handleReplayAction(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toManage,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toManage,
 		});
 
 		return;
@@ -62,14 +57,9 @@ async function handleReplayAction(
 				},
 			};
 
-			await client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await client.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 			});
 
 			return;
@@ -81,14 +71,9 @@ async function handleReplayAction(
 			description: client.localise("music.options.replay.strings.noSong.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -99,16 +84,11 @@ async function handleReplayAction(
 		description: client.localise("music.options.replay.strings.replaying.description", locale)(),
 	};
 
-	await client.reply(
+	await client.success(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.replaying} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.replaying} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);

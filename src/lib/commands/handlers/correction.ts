@@ -32,14 +32,9 @@ async function handleStartCorrecting(
 			description: client.localise("correction.strings.cannotCorrect.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -51,14 +46,9 @@ async function handleStartCorrecting(
 			description: client.localise("correction.strings.cannotCorrectOwn.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -79,14 +69,9 @@ async function handleStartCorrecting(
 				description: client.localise("correction.strings.userDoesNotWantCorrections.description", locale)(),
 			};
 
-			await client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;
@@ -105,14 +90,9 @@ async function handleStartCorrecting(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.tooLong} ${strings.description.maximumLength}`,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: `${strings.description.tooLong} ${strings.description.maximumLength}`,
 		});
 
 		return;
@@ -141,7 +121,7 @@ async function handleStartCorrecting(
 				embeds: [
 					{
 						description: formData.corrected,
-						color: constants.colours.lightGreen,
+						color: constants.colours.success,
 						footer: {
 							text: `${constants.emojis.correction} ${strings.suggestedBy}`,
 							iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {

@@ -142,14 +142,9 @@ async function handlePardonUser(
 		}),
 	};
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.lightGreen,
-			},
-		],
+	await client.success(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 
@@ -163,14 +158,9 @@ async function displayInvalidWarningError(
 		description: client.localise("pardon.strings.invalidWarning.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
+	await client.error(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

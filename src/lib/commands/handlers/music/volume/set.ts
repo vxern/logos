@@ -28,14 +28,9 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toManage,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toManage,
 		});
 
 		return;
@@ -55,14 +50,9 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 			)({ volume: constants.MAXIMUM_VOLUME }),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
+		await client.error(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -78,16 +68,11 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 		)({ volume: interaction.parameters.volume }),
 	};
 
-	await client.reply(
+	await client.success(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.volume} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.volume} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);

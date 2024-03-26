@@ -63,14 +63,9 @@ async function handleSetLanguage(
 			}),
 		};
 
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+		await client.warned(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -92,14 +87,9 @@ async function handleSetLanguage(
 		}),
 	};
 
-	client.editReply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.lightGreen,
-			},
-		],
+	await client.succeeded(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 
@@ -113,14 +103,9 @@ async function displayError(
 		description: client.localise("settings.strings.invalid.description", locale)(),
 	};
 
-	await client.reply(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.red,
-			},
-		],
+	await client.error(interaction, {
+		title: strings.title,
+		description: strings.description,
 	});
 }
 

@@ -26,14 +26,9 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 			description: client.localise("answer.strings.cannotAnswer.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -45,14 +40,9 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 			description: client.localise("answer.strings.cannotAnswerOwn.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -77,7 +67,7 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 				embeds: [
 					{
 						description: `– *${formData.answer}*`,
-						color: constants.colours.lightGreen,
+						color: constants.colours.success,
 						footer: {
 							text: `${constants.emojis.answer} ${strings.submittedBy}`,
 							iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {

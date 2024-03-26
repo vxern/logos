@@ -37,7 +37,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 		return {
 			embeds: [
 				{
-					color: constants.colours.peach,
+					color: constants.colours.blue,
 					fields: informationFields,
 				},
 				{

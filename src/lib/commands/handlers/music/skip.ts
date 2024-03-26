@@ -43,14 +43,9 @@ async function handleSkipAction(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toManage,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toManage,
 		});
 
 		return;
@@ -73,14 +68,9 @@ async function handleSkipAction(
 				},
 			};
 
-			await client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await client.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 			});
 
 			return;
@@ -92,14 +82,9 @@ async function handleSkipAction(
 			description: client.localise("music.options.skip.strings.noSong.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -113,14 +98,9 @@ async function handleSkipAction(
 			description: client.localise("music.strings.skips.tooManyArguments.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -137,14 +117,9 @@ async function handleSkipAction(
 			description: client.localise("music.strings.skips.invalid.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
+		await client.error(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -161,16 +136,11 @@ async function handleSkipAction(
 				description: client.localise("music.options.skip.strings.skippedSong.description", locale)(),
 		  };
 
-	await client.reply(
+	await client.success(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.skipped} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.skipped} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);

@@ -54,62 +54,57 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 		},
 	};
 
-	await client.reply(interaction, {
-		embeds: [
+	await client.notice(interaction, {
+		author: {
+			iconUrl: Discord.guildIconUrl(guild.id, guild.icon, { size: 4096, format: "png" }),
+			name: strings.title,
+		},
+		fields: [
 			{
-				author: {
-					iconUrl: Discord.guildIconUrl(guild.id, guild.icon, { size: 4096, format: "png" }),
-					name: strings.title,
-				},
-				color: constants.colours.blue,
-				fields: [
-					{
-						name: `${constants.emojis.guild.description} ${strings.description.description.title}`,
-						value: guild.description ?? strings.description.description.noDescription,
-						inline: true,
-					},
-					{
-						name: `${constants.emojis.guild.members} ${strings.description.members}`,
-						value: guild.memberCount.toString(),
-						inline: true,
-					},
-					{
-						name: `${constants.emojis.guild.created} ${strings.description.created}`,
-						value: timestamp(Discord.snowflakeToTimestamp(guild.id), { format: "relative" }),
-						inline: true,
-					},
-					{
-						name: `${constants.emojis.guild.channels.channels} ${strings.description.channels}`,
-						value: getChannelInformationSection(client, guild, { locale }),
-						inline: true,
-					},
-					{
-						name: `${constants.emojis.guild.languages.languages} ${strings.description.languages}`,
-						value: getLanguageInformationSection(client, guildDocument, { locale }),
-						inline: true,
-					},
-					...(guildDocument.isNative
-						? [
-								{
-									name: `${constants.emojis.guild.moderators} ${strings.description.moderators.title}`,
-									value: strings.description.moderators.overseenByModerators,
-									inline: false,
-								},
-								{
-									name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
-									value: formatDistribution(client, getProficiencyRoleDistribution(client, guild), { locale }),
-									inline: false,
-								},
-						  ]
-						: [
-								{
-									name: `${constants.emojis.guild.owner} ${strings.description.owner}`,
-									value: mention(owner.id, { type: "user" }),
-									inline: true,
-								},
-						  ]),
-				],
+				name: `${constants.emojis.guild.description} ${strings.description.description.title}`,
+				value: guild.description ?? strings.description.description.noDescription,
+				inline: true,
 			},
+			{
+				name: `${constants.emojis.guild.members} ${strings.description.members}`,
+				value: guild.memberCount.toString(),
+				inline: true,
+			},
+			{
+				name: `${constants.emojis.guild.created} ${strings.description.created}`,
+				value: timestamp(Discord.snowflakeToTimestamp(guild.id), { format: "relative" }),
+				inline: true,
+			},
+			{
+				name: `${constants.emojis.guild.channels.channels} ${strings.description.channels}`,
+				value: getChannelInformationSection(client, guild, { locale }),
+				inline: true,
+			},
+			{
+				name: `${constants.emojis.guild.languages.languages} ${strings.description.languages}`,
+				value: getLanguageInformationSection(client, guildDocument, { locale }),
+				inline: true,
+			},
+			...(guildDocument.isNative
+				? [
+						{
+							name: `${constants.emojis.guild.moderators} ${strings.description.moderators.title}`,
+							value: strings.description.moderators.overseenByModerators,
+							inline: false,
+						},
+						{
+							name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
+							value: formatDistribution(client, getProficiencyRoleDistribution(client, guild), { locale }),
+							inline: false,
+						},
+				  ]
+				: [
+						{
+							name: `${constants.emojis.guild.owner} ${strings.description.owner}`,
+							value: mention(owner.id, { type: "user" }),
+							inline: true,
+						},
+				  ]),
 		],
 	});
 }

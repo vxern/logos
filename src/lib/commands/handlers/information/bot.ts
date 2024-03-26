@@ -44,31 +44,26 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 		`${constants.emojis.bot.features.guides} ${strings.function.features.guides}`,
 	]);
 
-	await client.reply(interaction, {
-		embeds: [
+	await client.notice(interaction, {
+		author: {
+			iconUrl: Discord.avatarUrl(client.bot.id, botUser.discriminator, {
+				avatar: botUser.avatar ?? undefined,
+				format: "png",
+			}),
+			name: botUser.username,
+		},
+		fields: [
 			{
-				author: {
-					iconUrl: Discord.avatarUrl(client.bot.id, botUser.discriminator, {
-						avatar: botUser.avatar ?? undefined,
-						format: "png",
-					}),
-					name: botUser.username,
-				},
-				color: constants.colours.blue,
-				fields: [
-					{
-						name: `${constants.emojis.information.bot} ${strings.concept.title}`,
-						value: strings.concept.description,
-					},
-					{
-						name: `${constants.emojis.information.function} ${strings.function.title}`,
-						value: `${strings.function.description}\n${featuresFormatted}`,
-					},
-					{
-						name: `${constants.emojis.information.languages} ${strings.languages.title}`,
-						value: strings.languages.description,
-					},
-				],
+				name: `${constants.emojis.information.bot} ${strings.concept.title}`,
+				value: strings.concept.description,
+			},
+			{
+				name: `${constants.emojis.information.function} ${strings.function.title}`,
+				value: `${strings.function.description}\n${featuresFormatted}`,
+			},
+			{
+				name: `${constants.emojis.information.languages} ${strings.languages.title}`,
+				value: strings.languages.description,
 			},
 		],
 	});

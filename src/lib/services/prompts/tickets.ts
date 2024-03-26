@@ -57,8 +57,8 @@ class TicketPromptService extends PromptService<{
 		return {
 			embeds: [
 				{
-					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					description: `*${ticketDocument.answers.topic}*`,
+					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					footer: {
 						text: diagnostics.display.user(user),
 						iconUrl: `${(() => {
@@ -125,14 +125,9 @@ class TicketPromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;
@@ -144,14 +139,9 @@ class TicketPromptService extends PromptService<{
 				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
 			};
 
-			await this.client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
 			});
 
 			return;

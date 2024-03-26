@@ -33,14 +33,9 @@ async function handleLoopPlayback(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description.toManage,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description.toManage,
 		});
 
 		return;
@@ -63,14 +58,9 @@ async function handleLoopPlayback(
 				},
 			};
 
-			await client.reply(interaction, {
-				embeds: [
-					{
-						title: strings.title,
-						description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-						color: constants.colours.dullYellow,
-					},
-				],
+			await client.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 			});
 
 			return;
@@ -82,14 +72,9 @@ async function handleLoopPlayback(
 			description: client.localise("music.options.loop.strings.noSong.description", locale)(),
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
 
 		return;
@@ -107,16 +92,11 @@ async function handleLoopPlayback(
 				description: client.localise("music.options.loop.strings.disabled.description.songCollection", locale)(),
 			};
 
-			await client.reply(
+			await client.success(
 				interaction,
 				{
-					embeds: [
-						{
-							title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
-							description: strings.description,
-							color: constants.colours.blue,
-						},
-					],
+					title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
+					description: strings.description,
 				},
 				{ visible: true },
 			);
@@ -129,16 +109,11 @@ async function handleLoopPlayback(
 			description: client.localise("music.options.loop.strings.enabled.description.songCollection", locale)(),
 		};
 
-		await client.reply(
+		await client.success(
 			interaction,
 			{
-				embeds: [
-					{
-						title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
-						description: strings.description,
-						color: constants.colours.blue,
-					},
-				],
+				title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
+				description: strings.description,
 			},
 			{ visible: true },
 		);
@@ -157,16 +132,11 @@ async function handleLoopPlayback(
 			description: client.localise("music.options.loop.strings.disabled.description.song", locale)(),
 		};
 
-		await client.reply(
+		await client.success(
 			interaction,
 			{
-				embeds: [
-					{
-						title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
-						description: strings.description,
-						color: constants.colours.blue,
-					},
-				],
+				title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
+				description: strings.description,
 			},
 			{ visible: true },
 		);
@@ -179,16 +149,11 @@ async function handleLoopPlayback(
 		description: client.localise("music.options.loop.strings.enabled.description.song", locale)(),
 	};
 
-	await client.reply(
+	await client.success(
 		interaction,
 		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
-					description: strings.description,
-					color: constants.colours.blue,
-				},
-			],
+			title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
+			description: strings.description,
 		},
 		{ visible: true },
 	);

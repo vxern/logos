@@ -46,14 +46,9 @@ async function handleRequestPlayback(
 			},
 		};
 
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
-					color: constants.colours.dullYellow,
-				},
-			],
+		await client.warning(interaction, {
+			title: strings.title,
+			description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
 		});
 
 		return;

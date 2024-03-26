@@ -38,15 +38,11 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 			description: client.localise("report.strings.tooMany.description", locale)(),
 		};
 
-		client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
+		client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
 		});
+
 		return;
 	}
 
@@ -91,14 +87,9 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 			description: client.localise("report.strings.submitted.description", locale)(),
 		};
 
-		client.editReply(submission, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.lightGreen,
-				},
-			],
+		await client.succeeded(submission, {
+			title: strings.title,
+			description: strings.description,
 		});
 	});
 
