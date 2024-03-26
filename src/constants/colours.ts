@@ -16,7 +16,15 @@ function fromHex(colour: string): number {
 }
 
 export default Object.freeze({
-	invisible: fromHex("#36393f"),
+	// Colours with set uses.
+	success: fromHex("#89ef59"),
+	notice: fromHex("#6269ed"),
+	warning: fromHex("#f2f277"),
+	error: fromHex("#ff4b3e"),
+	failure: fromHex("#820000"),
+	death: fromHex("#1c1c1c"),
+	invisible: fromHex("#36393f"), // Used to blend in with the rest of an embed.
+	// Random colours.
 	red: fromHex("#b42f2f"),
 	darkRed: fromHex("#820000"),
 	lightGreen: fromHex("#89ef59"),
@@ -27,13 +35,13 @@ export default Object.freeze({
 	peach: fromHex("#ff9a76"),
 	husky: fromHex("#d6e3f8"),
 	murrey: fromHex("#87255b"),
-	black: fromHex("#1c1c1c"), // Eerie black
-	yellow: fromHex("#ffe548"), // Gargoyle gas
-	orangeRed: fromHex("#ff4b3e"), // Dusk orange
+	black: fromHex("#1c1c1c"),
+	yellow: fromHex("#ffe548"),
+	orangeRed: fromHex("#ff4b3e"),
 	lightGray: fromHex("#daddd8"),
-	turquoise: fromHex("#68d8d6"), // Hammam blue
-	green: fromHex("#00cc66"), // Alienated
-	greenishLightGray: fromHex("#c5e0d8"), // Ulthuan gray
-	orange: fromHex("#f28123"), // Beer
+	turquoise: fromHex("#68d8d6"),
+	green: fromHex("#00cc66"),
+	greenishLightGray: fromHex("#c5e0d8"),
+	orange: fromHex("#f28123"),
 } as const);
 export { fromHex };

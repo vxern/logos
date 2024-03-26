@@ -90,6 +90,30 @@ class Client {
 		return this.#commands.isShowable.bind(this.#commands);
 	}
 
+	get success(): InteractionStore["success"] {
+		return this.#interactions.success.bind(this.#interactions);
+	}
+
+	get notice(): InteractionStore["notice"] {
+		return this.#interactions.notice.bind(this.#interactions);
+	}
+
+	get warning(): InteractionStore["warning"] {
+		return this.#interactions.warning.bind(this.#interactions);
+	}
+
+	get error(): InteractionStore["error"] {
+		return this.#interactions.error.bind(this.#interactions);
+	}
+
+	get failure(): InteractionStore["failure"] {
+		return this.#interactions.failure.bind(this.#interactions);
+	}
+
+	get death(): InteractionStore["death"] {
+		return this.#interactions.death.bind(this.#interactions);
+	}
+
 	get registerInteraction(): InteractionStore["registerInteraction"] {
 		return this.#interactions.registerInteraction.bind(this.#interactions);
 	}
@@ -124,6 +148,10 @@ class Client {
 
 	get displayModal(): InteractionStore["displayModal"] {
 		return this.#interactions.displayModal.bind(this.#interactions);
+	}
+
+	get replyColoured(): InteractionStore["replyColoured"] {
+		return this.#interactions.replyColoured.bind(this.#interactions);
 	}
 
 	get registerCollector(): EventStore["registerCollector"] {

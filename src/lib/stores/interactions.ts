@@ -9,6 +9,30 @@ class InteractionStore {
 	readonly #bot: Discord.Bot;
 	readonly #interactions: Map<bigint, Logos.Interaction>;
 
+	get success(): InteractionStore["reply"] {
+		return this.replyColoured({ colour: constants.colours.success });
+	}
+
+	get notice(): InteractionStore["reply"] {
+		return this.replyColoured({ colour: constants.colours.notice });
+	}
+
+	get warning(): InteractionStore["reply"] {
+		return this.replyColoured({ colour: constants.colours.warning });
+	}
+
+	get error(): InteractionStore["reply"] {
+		return this.replyColoured({ colour: constants.colours.error });
+	}
+
+	get failure(): InteractionStore["reply"] {
+		return this.replyColoured({ colour: constants.colours.failure });
+	}
+
+	get death(): InteractionStore["reply"] {
+		return this.replyColoured({ colour: constants.colours.death });
+	}
+
 	constructor(client: Client, { bot }: { bot: Discord.Bot }) {
 		this.log = Logger.create({ identifier: "Interactions", isDebug: client.environment.isDebug });
 
@@ -105,6 +129,16 @@ class InteractionStore {
 				data,
 			})
 			.catch((reason) => this.log.warn("Failed to show modal:", reason));
+	}
+
+	replyColoured({ colour }: { colour: number }): InteractionStore["reply"] {
+		return async (interaction, data, flags) => {
+			for (const embed of data.embeds ?? []) {
+				embed.color = colour;
+			}
+
+			return await this.reply(interaction, data, flags);
+		};
 	}
 }
 
