@@ -3,6 +3,8 @@ import { TimeUnit } from "logos:constants/time";
 import { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
+type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
+type EmbedOrCallbackData = Discord.CamelizedDiscordEmbed | InteractionCallbackData;
 class InteractionStore {
 	readonly log: Logger;
 
@@ -10,27 +12,27 @@ class InteractionStore {
 	readonly #interactions: Map<bigint, Logos.Interaction>;
 
 	get success(): InteractionStore["reply"] {
-		return this.replyColoured({ colour: constants.colours.success });
+		return this.#buildColouredReplier({ colour: constants.colours.success });
 	}
 
 	get notice(): InteractionStore["reply"] {
-		return this.replyColoured({ colour: constants.colours.notice });
+		return this.#buildColouredReplier({ colour: constants.colours.notice });
 	}
 
 	get warning(): InteractionStore["reply"] {
-		return this.replyColoured({ colour: constants.colours.warning });
+		return this.#buildColouredReplier({ colour: constants.colours.warning });
 	}
 
 	get error(): InteractionStore["reply"] {
-		return this.replyColoured({ colour: constants.colours.error });
+		return this.#buildColouredReplier({ colour: constants.colours.error });
 	}
 
 	get failure(): InteractionStore["reply"] {
-		return this.replyColoured({ colour: constants.colours.failure });
+		return this.#buildColouredReplier({ colour: constants.colours.failure });
 	}
 
 	get death(): InteractionStore["reply"] {
-		return this.replyColoured({ colour: constants.colours.death });
+		return this.#buildColouredReplier({ colour: constants.colours.death });
 	}
 
 	constructor(client: Client, { bot }: { bot: Discord.Bot }) {
@@ -80,27 +82,33 @@ class InteractionStore {
 		await this.#bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
-				data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
+				data: !visible ? { flags: Discord.MessageFlags.Ephemeral } : {},
 			})
 			.catch((reason) => this.log.warn("Failed to postpone reply to interaction:", reason));
 	}
 
 	async reply(
 		interaction: Logos.Interaction,
-		data: Omit<Discord.InteractionCallbackData, "flags">,
+		embedOrData: EmbedOrCallbackData,
 		{ visible = false } = {},
 	): Promise<void> {
+		const data = getInteractionCallbackData(embedOrData);
+
+		if (!visible) {
+			data.flags = Discord.MessageFlags.Ephemeral;
+		}
+
 		await this.#bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
-				data: { ...data, flags: visible ? undefined : Discord.MessageFlags.Ephemeral },
+				data,
 			})
 			.catch((reason) => this.log.warn("Failed to reply to interaction:", reason));
 	}
 
-	async editReply(interaction: Logos.Interaction, data: Omit<Discord.InteractionCallbackData, "flags">): Promise<void> {
+	async editReply(interaction: Logos.Interaction, embedOrData: EmbedOrCallbackData): Promise<void> {
 		await this.#bot.rest
-			.editOriginalInteractionResponse(interaction.token, data)
+			.editOriginalInteractionResponse(interaction.token, getInteractionCallbackData(embedOrData))
 			.catch((reason) => this.log.warn("Failed to edit reply to interaction:", reason));
 	}
 
@@ -131,15 +139,31 @@ class InteractionStore {
 			.catch((reason) => this.log.warn("Failed to show modal:", reason));
 	}
 
-	replyColoured({ colour }: { colour: number }): InteractionStore["reply"] {
-		return async (interaction, data, flags) => {
-			for (const embed of data.embeds ?? []) {
-				embed.color = colour;
+	#buildColouredReplier({ colour }: { colour: number }): InteractionStore["reply"] {
+		return async (interaction, embedOrData, flags) => {
+			if (isEmbed(embedOrData)) {
+				embedOrData.color = colour;
+			} else if (embedOrData.embeds !== undefined) {
+				for (const embed of embedOrData.embeds) {
+					embed.color = colour;
+				}
 			}
 
-			return await this.reply(interaction, data, flags);
+			await this.reply(interaction, embedOrData, flags);
 		};
 	}
+}
+
+function isEmbed(embedOrData: EmbedOrCallbackData): embedOrData is Discord.CamelizedDiscordEmbed {
+	return "title" in embedOrData || "description" in embedOrData;
+}
+
+function getInteractionCallbackData(embedOrData: EmbedOrCallbackData): Discord.InteractionCallbackData {
+	if (isEmbed(embedOrData)) {
+		return { embeds: [embedOrData] };
+	}
+
+	return embedOrData;
 }
 
 // TODO(vxern): Move this to a more suitable place.
