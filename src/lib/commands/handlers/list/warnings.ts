@@ -1,7 +1,7 @@
 import { Locale } from "logos:constants/languages";
 import { timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { getRuleTitleFormatted } from "logos/commands/handlers/rule";
+import { getRuleTitleFormatted } from "logos/commands/rules";
 import { Warning } from "logos/database/warning";
 
 async function handleDisplayWarningsAutocomplete(
@@ -105,7 +105,7 @@ function getWarningPage(
 				relative_timestamp: timestamp(warning.createdAt, { format: "relative" }),
 			});
 
-			const ruleTitle = getRuleTitleFormatted(client, warning.rule ?? "other", "option", { locale });
+			const ruleTitle = getRuleTitleFormatted(client, { rule: warning.rule ?? "other", mode: "option" }, { locale });
 
 			return { name: warningString, value: `${ruleTitle}\n> *${warning.reason}*` };
 		}),

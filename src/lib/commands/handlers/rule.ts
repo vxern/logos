@@ -2,6 +2,7 @@ import { Locale } from "logos:constants/languages";
 import { Rule, isValidRule } from "logos:constants/rules";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
+import { getRuleTitleFormatted } from "logos/commands/rules";
 
 async function handleCiteRuleAutocomplete(
 	client: Client,
@@ -25,7 +26,7 @@ async function handleCiteRuleAutocomplete(
 	const choices = constants.rules
 		.map((rule) => {
 			return {
-				name: getRuleTitleFormatted(client, rule, "option", { locale }),
+				name: getRuleTitleFormatted(client, { rule, mode: "option" }, { locale }),
 				value: rule,
 			};
 		})
@@ -72,7 +73,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		{
 			embeds: [
 				{
-					title: getRuleTitleFormatted(client, interaction.parameters.rule, "display", { locale }),
+					title: getRuleTitleFormatted(client, { rule: interaction.parameters.rule, mode: "display" }, { locale }),
 					description: strings.content,
 					footer: { text: `${strings.tldr}: ${strings.summary}` },
 					image: { url: constants.gifs.chaosWithoutRules },
@@ -82,28 +83,6 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		},
 		{ visible: interaction.parameters.show },
 	);
-}
-
-// TODO(vxern): This shouldn't be in the handler file.
-function getRuleTitleFormatted(
-	client: Client,
-	rule: Rule | "other",
-	mode: "option" | "display",
-	{ locale }: { locale: Locale },
-): string {
-	const index = isValidRule(rule) ? constants.rules.indexOf(rule) : undefined;
-
-	const strings = {
-		title: client.localise(`rules.${rule}.title`, locale)(),
-		summary: client.localise(`rules.${rule}.summary`, locale)(),
-	};
-
-	switch (mode) {
-		case "option":
-			return `#${index !== undefined ? index + 1 : "?"} ${strings.title} ~ ${strings.summary}`;
-		case "display":
-			return `${index !== undefined ? index + 1 : "?"} - ${strings.title}`;
-	}
 }
 
 async function displayError(
@@ -122,4 +101,4 @@ async function displayError(
 	});
 }
 
-export { handleCiteRule, handleCiteRuleAutocomplete, getRuleTitleFormatted };
+export { handleCiteRule, handleCiteRuleAutocomplete };
