@@ -32,13 +32,13 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		await Report.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
 		configuration.rateLimit ?? constants.defaults.REPORT_RATE_LIMIT,
 	);
-	if (!crossesRateLimit) {
+	if (crossesRateLimit) {
 		const strings = {
 			title: client.localise("report.strings.tooMany.title", locale)(),
 			description: client.localise("report.strings.tooMany.description", locale)(),
 		};
 
-		client.warning(interaction, {
+		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
@@ -62,7 +62,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 			answers: formData,
 		});
 
-		client.tryLog("reportSubmit", {
+		await client.tryLog("reportSubmit", {
 			guildId: guild.id,
 			journalling: configuration.journaling,
 			args: [member, reportDocument],

@@ -32,13 +32,13 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		await Resource.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
 		configuration.rateLimit ?? constants.defaults.RESOURCE_RATE_LIMIT,
 	);
-	if (!crossesRateLimit) {
+	if (crossesRateLimit) {
 		const strings = {
 			title: client.localise("resource.strings.tooMany.title", locale)(),
 			description: client.localise("resource.strings.tooMany.description", locale)(),
 		};
 
-		client.warning(interaction, {
+		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
@@ -62,7 +62,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 			answers: formData,
 		});
 
-		client.tryLog("resourceSend", {
+		await client.tryLog("resourceSend", {
 			guildId: guild.id,
 			journalling: configuration.journaling,
 			args: [member, resourceDocument],

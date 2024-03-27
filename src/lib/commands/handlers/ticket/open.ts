@@ -35,13 +35,13 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		await Ticket.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
 		configuration.rateLimit ?? constants.defaults.TICKET_RATE_LIMIT,
 	);
-	if (!crossesRateLimit) {
+	if (crossesRateLimit) {
 		const strings = {
 			title: client.localise("ticket.strings.tooMany.title", locale)(),
 			description: client.localise("ticket.strings.tooMany.description", locale)(),
 		};
 
-		client.pushback(interaction, {
+		await client.pushback(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
@@ -167,7 +167,7 @@ async function openTicket(
 
 	switch (type) {
 		case "standalone": {
-			client.tryLog("ticketOpen", {
+			await client.tryLog("ticketOpen", {
 				guildId: guild.id,
 				journalling: configuration.journaling,
 				args: [member, ticketDocument],
@@ -175,7 +175,7 @@ async function openTicket(
 			break;
 		}
 		case "inquiry": {
-			client.tryLog("inquiryOpen", {
+			await client.tryLog("inquiryOpen", {
 				guildId: guild.id,
 				journalling: configuration.journaling,
 				args: [member, ticketDocument],

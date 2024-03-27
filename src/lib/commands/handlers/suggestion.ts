@@ -32,7 +32,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		await Suggestion.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
 		configuration.rateLimit ?? constants.defaults.SUGGESTION_RATE_LIMIT,
 	);
-	if (!crossesRateLimit) {
+	if (crossesRateLimit) {
 		const strings = {
 			title: client.localise("suggestion.strings.tooMany.title", locale)(),
 			description: client.localise("suggestion.strings.tooMany.description", locale)(),

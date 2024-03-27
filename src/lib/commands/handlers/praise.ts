@@ -57,7 +57,7 @@ async function handlePraiseUser(
 		await Praise.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
 		configuration.rateLimit ?? constants.defaults.PRAISE_RATE_LIMIT,
 	);
-	if (!crossesRateLimit) {
+	if (crossesRateLimit) {
 		const strings = {
 			title: client.localise("praise.strings.tooMany.title", locale)(),
 			description: client.localise("praise.strings.tooMany.description", locale)(),
