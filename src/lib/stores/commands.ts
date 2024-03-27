@@ -1,10 +1,10 @@
+import { isAutocomplete } from "logos:constants/interactions";
 import { getDiscordLanguageByLocale } from "logos:constants/languages/localisation";
 import { capitalise } from "logos:core/formatting";
 import { isDefined } from "logos:core/utilities";
 import { Client } from "logos/client";
 import { Command, CommandName, CommandTemplate, Option, OptionMetadata, OptionTemplate } from "logos/commands/commands";
 import { InteractionHandler } from "logos/commands/handlers/handler";
-import { isAutocomplete } from "logos/commands/interactions";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { Logger } from "logos/logger";
 import { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";

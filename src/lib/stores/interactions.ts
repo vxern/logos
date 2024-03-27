@@ -381,7 +381,6 @@ function parseVerboseTimeExpressionPhrase(
 	for (const timeUnitAlias of timeUnitAliases) {
 		const timeUnit = Object.entries(timeUnitsWithAliases).find(([_, aliases]) => aliases.includes(timeUnitAlias))?.[0];
 
-		// TODO(vxern): Convey to the user that a time unit is invalid.
 		if (timeUnit === undefined) {
 			return undefined;
 		}
