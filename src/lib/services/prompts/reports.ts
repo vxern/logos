@@ -95,8 +95,7 @@ class ReportPromptService extends PromptService<{
 					],
 					footer: {
 						text: guild.name,
-						// TODO(vxern): Create a function for this
-						iconUrl: `${Discord.guildIconUrl(guild.id, guild.icon)}&metadata=${reportDocument.partialId}`,
+						iconUrl: PromptService.encodePartialIdInGuildIcon({ guild, partialId: reportDocument.partialId }),
 					},
 				},
 			],

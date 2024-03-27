@@ -61,18 +61,7 @@ class TicketPromptService extends PromptService<{
 					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					footer: {
 						text: diagnostics.display.user(user),
-						iconUrl: `${(() => {
-							const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
-								avatar: user.avatar,
-								size: 64,
-								format: "png",
-							});
-							if (iconURL === undefined) {
-								return;
-							}
-
-							return iconURL;
-						})()}&metadata=${ticketDocument.partialId}`,
+						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: ticketDocument.partialId }),
 					},
 				},
 			],

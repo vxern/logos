@@ -199,7 +199,7 @@ class InteractionCollector<
 		return commandNameFull;
 	}
 
-	static encodeCustomId<Parts extends string[] = []>(parts: Parts): string {
+	static encodeCustomId<Parts extends string[] = string[]>(parts: Parts): string {
 		return parts.join(constants.special.interaction.divider);
 	}
 

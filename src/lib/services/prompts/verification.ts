@@ -221,7 +221,7 @@ class VerificationPromptService extends PromptService<{
 					],
 					footer: {
 						text: guild.name,
-						iconUrl: `${Discord.guildIconUrl(guild.id, guild.icon)}&metadata=${entryRequestDocument.partialId}`,
+						iconUrl: PromptService.encodePartialIdInGuildIcon({ guild, partialId: entryRequestDocument.partialId }),
 					},
 				},
 			],

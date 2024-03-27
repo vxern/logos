@@ -51,18 +51,7 @@ class SuggestionPromptService extends PromptService<{
 					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
 					footer: {
 						text: diagnostics.display.user(user),
-						iconUrl: `${(() => {
-							const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
-								avatar: user.avatar,
-								size: 64,
-								format: "png",
-							});
-							if (iconURL === undefined) {
-								return;
-							}
-
-							return iconURL;
-						})()}&metadata=${suggestionDocument.partialId}`,
+						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: suggestionDocument.partialId }),
 					},
 				},
 			],

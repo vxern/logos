@@ -127,6 +127,22 @@ abstract class PromptService<
 		this.#_messageDeletes = new Collector<"messageDelete">({ guildId });
 	}
 
+	static encodePartialIdInUserAvatar({ user, partialId }: { user: Logos.User; partialId: string }): string {
+		const iconUrl = Discord.avatarUrl(user.id, user.discriminator, {
+			avatar: user.avatar,
+			size: 64,
+			format: "png",
+		});
+
+		return `${iconUrl}&metadata=${partialId}`;
+	}
+
+	static encodePartialIdInGuildIcon({ guild, partialId }: { guild: Logos.Guild; partialId: string }): string {
+		const iconUrl = Discord.guildIconUrl(guild.id, guild.icon);
+
+		return `${iconUrl}&metadata=${partialId}`;
+	}
+
 	async start(): Promise<void> {
 		const [channelId, configuration, guild, guildDocument] = [
 			this.channelId,

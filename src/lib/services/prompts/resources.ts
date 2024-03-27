@@ -51,18 +51,7 @@ class ResourcePromptService extends PromptService<{
 					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					footer: {
 						text: diagnostics.display.user(user),
-						iconUrl: `${(() => {
-							const iconURL = Discord.avatarUrl(user.id, user.discriminator, {
-								avatar: user.avatar,
-								size: 64,
-								format: "png",
-							});
-							if (iconURL === undefined) {
-								return;
-							}
-
-							return iconURL;
-						})()}&metadata=${resourceDocument.partialId}`,
+						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: resourceDocument.partialId }),
 					},
 				},
 			],
