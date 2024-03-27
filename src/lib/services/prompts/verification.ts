@@ -29,7 +29,8 @@ class VerificationPromptService extends PromptService<{
 		super(client, { identifier: "VerificationPromptService", guildId }, { type: "verification", deleteMode: "none" });
 
 		this.#_openInquiry = new InteractionCollector(client, {
-			customId: InteractionCollector.encodeCustomId([constants.components.createInquiry, this.guildIdString]),
+			guildId,
+			customId: InteractionCollector.encodeCustomId([constants.components.createInquiry]),
 			isPermanent: true,
 		});
 	}

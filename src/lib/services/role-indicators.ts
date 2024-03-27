@@ -13,7 +13,7 @@ class RoleIndicatorService extends LocalService {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "RoleIndicatorService", guildId });
 
-		this.#_guildMemberUpdates = new Collector();
+		this.#_guildMemberUpdates = new Collector({ guildId });
 	}
 
 	async start(): Promise<void> {

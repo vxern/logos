@@ -106,11 +106,8 @@ abstract class PromptService<
 
 		this.magicButton = new InteractionCollector(client, { customId, isPermanent: true });
 		this.removeButton = new InteractionCollector(client, {
-			customId: InteractionCollector.encodeCustomId([
-				constants.components.removePrompt,
-				customId,
-				this.guildId.toString(),
-			]),
+			guildId,
+			customId: InteractionCollector.encodeCustomId([constants.components.removePrompt, customId]),
 			isPermanent: true,
 		});
 

@@ -10,6 +10,7 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 		super(client, { identifier: "InformationNoticeService", guildId }, { type: "roles" });
 
 		this.#_selectRolesButton = new InteractionCollector(client, {
+			guildId,
 			customId: constants.components.selectRoles,
 			isPermanent: true,
 		});
@@ -60,7 +61,7 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.description.clickHere,
 							style: Discord.ButtonStyles.Primary,
-							customId: constants.components.selectRoles,
+							customId: this.#_selectRolesButton.customId,
 						},
 					],
 				},

@@ -47,14 +47,17 @@ class EventStore {
 	}
 
 	async dispatchEvent<Event extends keyof Discord.EventHandlers>(
-		_guildId: bigint | undefined,
+		guildId: bigint | undefined,
 		event: Event,
 		{ args }: { args: Parameters<Discord.EventHandlers[Event]> },
 	): Promise<void> {
-		// TODO(vxern): Dispatch only to the correct guilds.
 		const collectors = this.#collectors.get(event);
 		if (collectors !== undefined) {
 			for (const collector of collectors) {
+				if (collector.guildId !== undefined && collector.guildId !== guildId) {
+					continue;
+				}
+
 				if (collector.filter !== undefined && !collector.filter(...args)) {
 					continue;
 				}

@@ -2,8 +2,8 @@ import { Locale } from "logos:constants/languages";
 import diagnostics from "logos:core/diagnostics";
 import { mention, timestamp, trim } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
 import { parseTimeExpression } from "logos/commands/interactions";
+import { Guild } from "logos/database/guild";
 
 async function handleSetTimeoutAutocomplete(
 	client: Client,

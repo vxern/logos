@@ -23,6 +23,7 @@ class EntryService extends LocalService {
 		super(client, { identifier: "EntryService", guildId });
 
 		this.#_acceptedRulesButton = new InteractionCollector(client, {
+			guildId,
 			customId: constants.components.acceptedRules,
 			isPermanent: true,
 		});

@@ -15,6 +15,7 @@ type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.Even
 type DoneEvent = () => void | Promise<void>;
 class Collector<Event extends keyof Discord.EventHandlers = any> {
 	readonly done: Promise<void>;
+	readonly guildId?: bigint;
 
 	readonly #isSingle: boolean;
 	readonly #removeAfter?: number;
@@ -31,21 +32,25 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	}
 
 	constructor({
+		guildId,
 		isSingle,
 		removeAfter,
 		dependsOn,
 	}: {
+		guildId?: bigint;
 		isSingle?: boolean;
 		removeAfter?: number;
 		dependsOn?: Collector;
 	} = {}) {
-		this.#isSingle = isSingle ?? false;
-		this.#removeAfter = removeAfter;
-		this.#dependsOn = dependsOn;
-
 		const done = Promise.withResolvers<void>();
 		this.done = done.promise;
 		this.#_resolveDone = done.resolve;
+
+		this.guildId = guildId;
+
+		this.#isSingle = isSingle ?? false;
+		this.#removeAfter = removeAfter;
+		this.#dependsOn = dependsOn;
 	}
 
 	initialise(): void {
@@ -125,6 +130,7 @@ class InteractionCollector<
 	constructor(
 		client: Client,
 		{
+			guildId,
 			anyType,
 			type,
 			anyCustomId,
@@ -134,6 +140,7 @@ class InteractionCollector<
 			isSingle,
 			isPermanent,
 		}: {
+			guildId?: bigint;
 			anyType?: boolean;
 			type?: Discord.InteractionTypes;
 			anyCustomId?: boolean;
@@ -142,9 +149,14 @@ class InteractionCollector<
 			dependsOn?: Collector;
 			isSingle?: boolean;
 			isPermanent?: boolean;
-		} = {},
+		},
 	) {
-		super({ isSingle, removeAfter: !isPermanent ? constants.INTERACTION_TOKEN_EXPIRY : undefined, dependsOn });
+		super({
+			guildId,
+			isSingle,
+			removeAfter: !isPermanent ? constants.INTERACTION_TOKEN_EXPIRY : undefined,
+			dependsOn,
+		});
 
 		this.anyType = anyType ?? false;
 		this.type = type ?? Discord.InteractionTypes.MessageComponent;

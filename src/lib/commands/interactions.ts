@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
 import { Locale } from "logos:constants/languages";
 import { TimeUnit } from "logos:constants/time";
+import { Client } from "logos/client";
 
 function parseTimeExpression(
 	client: Client,
