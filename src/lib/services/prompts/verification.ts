@@ -767,7 +767,7 @@ class VerificationPromptService extends PromptService<{
 			description: this.client.localise("entry.verification.vote.failed.description", locale)(),
 		};
 
-		await this.client.failed(interaction, {
+		await this.client.failure(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
