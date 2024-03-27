@@ -4,13 +4,14 @@ import { Guild } from "logos/database/guild";
 import { LocalService, getAllMessages } from "logos/services/service";
 import { ServiceStore } from "logos/stores/services";
 import Hash from "object-hash";
+import { Collector } from "logos/collectors";
 
 type HashableProperties = "embeds" | "components";
 type HashableMessageContents = Pick<Discord.CreateMessageOptions, HashableProperties>;
 
 interface NoticeData {
-	id: bigint;
-	hash: string;
+	readonly id: bigint;
+	readonly hash: string;
 }
 
 interface Configurations {
@@ -26,7 +27,6 @@ type ConfigurationLocators = {
 
 type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
-// TODO(vxern): Extract message delete protection, etc., into a 'persistent message' service or something like that.
 abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
 	#noticeData: NoticeData | undefined;
 
@@ -37,6 +37,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		welcome: (guildDocument) => guildDocument.welcomeNotice,
 	} as const satisfies ConfigurationLocators);
 	readonly #_configuration: ConfigurationLocators[Generic["type"]];
+	readonly #_messageUpdates: Collector<"messageUpdate">;
+	readonly #_messageDeletes: Collector<"messageDelete">;
 
 	get configuration(): Configurations[Generic["type"]] | undefined {
 		const guildDocument = this.guildDocument;
@@ -69,6 +71,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		super(client, { identifier, guildId });
 
 		this.#_configuration = NoticeService.#_configurationLocators[type];
+		this.#_messageUpdates = new Collector<"messageUpdate">({ guildId });
+		this.#_messageDeletes = new Collector<"messageDelete">({ guildId });
 	}
 
 	async start(): Promise<void> {
@@ -140,15 +144,48 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			this.registerNotice(BigInt(notice.id), hash);
 			return;
 		}
+
+		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
+		this.#_messageDeletes.onCollect(async (payload) => {
+			const message = this.client.entities.messages.latest.get(payload.id);
+			if (message === undefined) {
+				return;
+			}
+
+			this.#handleMessageDelete(message);
+		});
+
+		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
+		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
 	}
 
 	async stop(): Promise<void> {
 		this.#noticeData = undefined;
+		await this.#_messageUpdates.close();
+		await this.#_messageDeletes.close();
+	}
+
+	// Anti-tampering feature; detects notices being changed from the outside (embeds being deleted).
+	async #handleMessageUpdate(message: Discord.Message): Promise<void> {
+		// If the message was updated in a channel not managed by this notice manager.
+		if (message.channelId !== this.channelId) {
+			return;
+		}
+
+		// Delete the message and allow the bot to handle the deletion.
+		this.client.bot.rest
+			.deleteMessage(message.channelId, message.id)
+			.catch(() =>
+				this.log.warn(
+					`Failed to delete notice ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+						message.channelId,
+					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
+				),
+			);
 	}
 
 	// Anti-tampering feature; detects notices being deleted.
-	// TODO(vxern): Add a collector for this.
-	async messageDelete(message: Discord.Message): Promise<void> {
+	async #handleMessageDelete(message: Logos.Message): Promise<void> {
 		const [channelId, noticeData] = [this.channelId, this.#noticeData];
 		if (channelId === undefined || noticeData === undefined) {
 			return;
@@ -176,25 +213,6 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		}
 
 		this.registerNotice(BigInt(notice.id), hash);
-	}
-
-	// TODO(vxern): Add a collector for this.
-	async messageUpdate(message: Discord.Message): Promise<void> {
-		// If the message was updated in a channel not managed by this prompt manager.
-		if (message.channelId !== this.channelId) {
-			return;
-		}
-
-		// Delete the message and allow the bot to handle the deletion.
-		this.client.bot.rest
-			.deleteMessage(message.channelId, message.id)
-			.catch(() =>
-				this.log.warn(
-					`Failed to delete notice ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
-						message.channelId,
-					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
-				),
-			);
 	}
 
 	abstract generateNotice(): HashableMessageContents | undefined;

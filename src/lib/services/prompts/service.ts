@@ -1,6 +1,6 @@
 import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors";
+import { Collector, InteractionCollector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
 import { Model } from "logos/database/model";
 import { User } from "logos/database/user";
@@ -67,6 +67,8 @@ abstract class PromptService<
 	} as const satisfies CustomIDs);
 
 	readonly #_configuration: ConfigurationLocators[Generic["type"]];
+	readonly #_messageUpdates: Collector<"messageUpdate">;
+	readonly #_messageDeletes: Collector<"messageDelete">;
 
 	get configuration(): Configurations[Generic["type"]] | undefined {
 		const guildDocument = this.guildDocument;
@@ -103,7 +105,6 @@ abstract class PromptService<
 		super(client, { identifier, guildId });
 
 		const customId = PromptService.#_customIds[type];
-
 		this.magicButton = new InteractionCollector(client, { customId, isPermanent: true });
 		this.removeButton = new InteractionCollector(client, {
 			guildId,
@@ -122,6 +123,8 @@ abstract class PromptService<
 		this.#userIdByPromptId = new Map();
 
 		this.#_configuration = PromptService.#_configurationLocators[type];
+		this.#_messageUpdates = new Collector<"messageUpdate">({ guildId });
+		this.#_messageDeletes = new Collector<"messageDelete">({ guildId });
 	}
 
 	async start(): Promise<void> {
@@ -174,6 +177,16 @@ abstract class PromptService<
 				this.log.warn("Failed to delete invalid or expired prompt.");
 			});
 		}
+
+		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
+		this.#_messageDeletes.onCollect(async (payload) => {
+			const message = this.client.entities.messages.latest.get(payload.id);
+			if (message === undefined) {
+				return;
+			}
+
+			this.#handleMessageDelete(message);
+		});
 
 		this.magicButton.onCollect(async (buttonPress) => {
 			const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
@@ -283,11 +296,15 @@ abstract class PromptService<
 			await this.handleDelete(promptDocument);
 		});
 
+		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
+		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
 		await this.client.registerInteractionCollector(this.magicButton);
 		await this.client.registerInteractionCollector(this.removeButton);
 	}
 
 	async stop(): Promise<void> {
+		await this.#_messageUpdates.close();
+		await this.#_messageDeletes.close();
 		await this.magicButton.close();
 		await this.removeButton.close();
 
@@ -299,9 +316,32 @@ abstract class PromptService<
 		this.#userIdByPromptId.clear();
 	}
 
+	// Anti-tampering feature; detects prompts being changed from the outside (embeds being deleted).
+	async #handleMessageUpdate(message: Discord.Message): Promise<void> {
+		// If the message was updated in a channel not managed by this prompt manager.
+		if (message.channelId !== this.channelId) {
+			return;
+		}
+
+		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
+		if (message.embeds?.length === 1) {
+			return;
+		}
+
+		// Delete the message and allow the bot to handle the deletion.
+		this.client.bot.rest
+			.deleteMessage(message.channelId, message.id)
+			.catch(() =>
+				this.log.warn(
+					`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+						message.channelId,
+					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
+				),
+			);
+	}
+
 	// Anti-tampering feature; detects prompts being deleted.
-	// TODO(vxern): Add a collector for this.
-	async messageDelete(message: Discord.Message): Promise<void> {
+	async #handleMessageDelete(message: Logos.Message): Promise<void> {
 		// If the message was deleted from a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {
 			return;
@@ -336,30 +376,6 @@ abstract class PromptService<
 
 		this.#documentByPromptId.delete(message.id.toString());
 		this.#userIdByPromptId.delete(message.id.toString());
-	}
-
-	// TODO(vxern): Add a collector for this.
-	async messageUpdate(message: Discord.Message): Promise<void> {
-		// If the message was updated in a channel not managed by this prompt manager.
-		if (message.channelId !== this.channelId) {
-			return;
-		}
-
-		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
-		if (message.embeds?.length === 1) {
-			return;
-		}
-
-		// Delete the message and allow the bot to handle the deletion.
-		this.client.bot.rest
-			.deleteMessage(message.channelId, message.id)
-			.catch(() =>
-				this.log.warn(
-					`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
-						message.channelId,
-					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
-				),
-			);
 	}
 
 	abstract getAllDocuments(): Map<string, Generic["model"]>;
