@@ -93,13 +93,13 @@ async function handleDisplayCurrentlyPlaying(
 			songs: client.localise("music.options.now.strings.songs", locale)(),
 		};
 
-		const viewComponent = new SongCollectionView(client, {
+		const view = new SongCollectionView(client, {
 			interaction,
 			title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
 			collection,
 		});
 
-		await viewComponent.open();
+		await view.open();
 
 		return;
 	}

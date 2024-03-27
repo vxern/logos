@@ -44,9 +44,9 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 	}
 
 	// TODO(vxern): This may not display the updated listings on queue change.
-	const viewComponent = new RemoveSongListingView(client, { interaction, listings: queue });
+	const view = new RemoveSongListingView(client, { interaction, listings: queue });
 
-	viewComponent.onCollect(async (buttonPress) => {
+	view.onCollect(async (buttonPress) => {
 		const indexString = buttonPress.data?.values?.at(0) as string | undefined;
 		if (indexString === undefined) {
 			return;
@@ -93,18 +93,18 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		);
 	});
 
-	const refreshViewComponent = async () => viewComponent.refresh();
-	const closeViewComponent = async () => client.deleteReply(interaction);
+	const refreshView = async () => view.refresh();
+	const closeView = async () => client.deleteReply(interaction);
 
-	events.on("queueUpdate", refreshViewComponent);
-	events.on("stop", closeViewComponent);
+	events.on("queueUpdate", refreshView);
+	events.on("stop", closeView);
 
 	setTimeout(() => {
-		events.off("queueUpdate", refreshViewComponent);
-		events.off("stop", closeViewComponent);
+		events.off("queueUpdate", refreshView);
+		events.off("stop", closeView);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 
-	await viewComponent.open();
+	await view.open();
 }
 
 export { handleRemoveSongListing };

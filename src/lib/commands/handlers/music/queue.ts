@@ -47,24 +47,24 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	};
 
 	// TODO(vxern): This may not display the updated listings on history change.
-	const viewComponent = new SongListingView(client, {
+	const view = new SongListingView(client, {
 		interaction,
 		title: `${constants.emojis.music.list} ${strings.queue}`,
 		listings: queue,
 	});
 
-	const refreshViewComponent = async () => viewComponent.refresh();
-	const closeViewComponent = async () => viewComponent.close();
+	const refreshView = async () => view.refresh();
+	const closeView = async () => view.close();
 
-	events.on("queueUpdate", refreshViewComponent);
-	events.on("stop", closeViewComponent);
+	events.on("queueUpdate", refreshView);
+	events.on("stop", closeView);
 
 	setTimeout(() => {
-		events.off("queueUpdate", refreshViewComponent);
-		events.off("stop", closeViewComponent);
+		events.off("queueUpdate", refreshView);
+		events.off("stop", closeView);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 
-	await viewComponent.open();
+	await view.open();
 }
 
 export { handleDisplayPlaybackQueue };

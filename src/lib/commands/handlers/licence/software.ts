@@ -42,13 +42,13 @@ async function handleDisplaySoftwareLicence(
 		license: client.localise("license.strings.license", locale)({ entity: code(packageName) }),
 	};
 
-	const viewComponent = new SoftwareLicenceView(client, {
+	const view = new SoftwareLicenceView(client, {
 		interaction,
 		title: strings.license,
 		sections: Array.from(constants.licences.software[packageName]),
 	});
 
-	await viewComponent.open();
+	await view.open();
 }
 
 async function displayError(
