@@ -1,10 +1,14 @@
 import diagnostics from "logos:core/diagnostics";
 import * as Lavaclient from "lavaclient";
 import { Client } from "logos/client";
+import { Collector } from "logos/collectors";
 import { GlobalService } from "logos/services/service";
 
 class LavalinkService extends GlobalService {
 	readonly node: Lavaclient.Node;
+
+	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
+	readonly #_voiceServerUpdates: Collector<"voiceServerUpdate">;
 
 	constructor(client: Client) {
 		super(client, { identifier: "LavalinkService" });
@@ -36,9 +40,18 @@ class LavalinkService extends GlobalService {
 			},
 		});
 		this.node.setMaxListeners(0);
+
+		this.#_voiceStateUpdates = new Collector<"voiceStateUpdate">();
+		this.#_voiceServerUpdates = new Collector<"voiceServerUpdate">();
 	}
 
 	async start(): Promise<void> {
+		this.#_voiceStateUpdates.onCollect(this.#_handleVoiceStateUpdate.bind(this));
+		this.#_voiceServerUpdates.onCollect(this.#_handleVoiceServerUpdate.bind(this));
+
+		await this.client.registerCollector("voiceStateUpdate", this.#_voiceStateUpdates);
+		await this.client.registerCollector("voiceServerUpdate", this.#_voiceServerUpdates);
+
 		this.node.on("error", (error) => {
 			if (error.message.includes("ECONNREFUSED")) {
 				return;
@@ -57,7 +70,7 @@ class LavalinkService extends GlobalService {
 
 		this.node.on("connect", ({ took: tookMs }) => this.log.info(`Connected to audio node. Time taken: ${tookMs} ms`));
 
-		return this.node.connect(this.client.bot.id.toString());
+		this.node.connect(this.client.bot.id.toString());
 	}
 
 	async stop(): Promise<void> {
@@ -70,10 +83,12 @@ class LavalinkService extends GlobalService {
 			player.connected = false;
 			await player.destroy();
 		}
+
+		await this.#_voiceStateUpdates.close();
+		await this.#_voiceServerUpdates.close();
 	}
 
-	// TODO(vxern): Add a collector for this.
-	async voiceStateUpdate(voiceState: Discord.VoiceState): Promise<void> {
+	async #_handleVoiceStateUpdate(voiceState: Discord.VoiceState): Promise<void> {
 		return this.node.handleVoiceUpdate({
 			session_id: voiceState.sessionId,
 			channel_id: voiceState.channelId !== undefined ? `${voiceState.channelId}` : null,
@@ -82,8 +97,7 @@ class LavalinkService extends GlobalService {
 		});
 	}
 
-	// TODO(vxern): Add a collector for this.
-	async voiceServerUpdate(voiceServerUpdate: Discord.VoiceServerUpdate): Promise<void> {
+	async #_handleVoiceServerUpdate(voiceServerUpdate: Discord.VoiceServerUpdate): Promise<void> {
 		if (voiceServerUpdate.endpoint === undefined) {
 			this.log.info(
 				`Discarding voice server update for ${diagnostics.display.guild(
