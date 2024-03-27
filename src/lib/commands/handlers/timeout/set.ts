@@ -3,7 +3,7 @@ import diagnostics from "logos:core/diagnostics";
 import { mention, timestamp, trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
-import { parseTimeExpression } from "logos/stores/interactions";
+import { parseTimeExpression } from "logos/commands/interactions";
 
 async function handleSetTimeoutAutocomplete(
 	client: Client,

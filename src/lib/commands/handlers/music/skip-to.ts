@@ -1,7 +1,7 @@
 import { Locale } from "logos:constants/languages";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { parseTimeExpression } from "logos/stores/interactions";
+import { parseTimeExpression } from "logos/commands/interactions";
 
 async function handleSkipToTimestampAutocomplete(
 	client: Client,
