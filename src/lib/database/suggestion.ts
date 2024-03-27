@@ -18,8 +18,7 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }
 		return Number(this.idParts[2]);
 	}
 
-	// TODO(vxern): Rename this to `formData`.
-	readonly answers: SuggestionFormData;
+	readonly formData: SuggestionFormData;
 
 	isResolved: boolean;
 
@@ -32,7 +31,7 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }
 			"@metadata": Model.buildMetadata(data, { collection: "Suggestions" }),
 		});
 
-		this.answers = answers;
+		this.formData = answers;
 		this.isResolved = isResolved ?? false;
 	}
 

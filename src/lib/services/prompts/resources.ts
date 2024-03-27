@@ -47,7 +47,7 @@ class ResourcePromptService extends PromptService<{
 		return {
 			embeds: [
 				{
-					description: `*${resourceDocument.answers.resource}*`,
+					description: `*${resourceDocument.formData.resource}*`,
 					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					footer: {
 						text: diagnostics.display.user(user),

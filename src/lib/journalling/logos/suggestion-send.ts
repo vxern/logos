@@ -22,7 +22,7 @@ class SuggestionSendEventLogger extends EventLogger<"suggestionSend"> {
 		}
 
 		return `${diagnostics.display.user(memberUser)} has made a suggestion.\n\nSuggestion: *${
-			suggestion.answers.suggestion
+			suggestion.formData.suggestion
 		}*`;
 	}
 }

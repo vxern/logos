@@ -20,8 +20,7 @@ class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 		return Number(this.idParts[2]);
 	}
 
-	// TODO(vxern): Rename this to `formData`.
-	readonly answers: ReportFormData;
+	readonly formData: ReportFormData;
 
 	isResolved: boolean;
 
@@ -34,7 +33,7 @@ class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 			"@metadata": Model.buildMetadata(data, { collection: "Reports" }),
 		});
 
-		this.answers = answers;
+		this.formData = answers;
 		this.isResolved = isResolved ?? false;
 	}
 

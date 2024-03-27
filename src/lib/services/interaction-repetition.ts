@@ -90,7 +90,7 @@ class InteractionRepetitionService extends GlobalService {
 			no: this.client.localise("interactions.show.sureToShow.no", locale)(),
 		};
 
-		await this.client.warned(buttonPress, {
+		await this.client.pushedBack(buttonPress, {
 			embeds: [
 				{
 					title: strings.title,

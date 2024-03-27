@@ -76,19 +76,19 @@ class ReportPromptService extends PromptService<{
 					fields: [
 						{
 							name: diagnostics.display.user(user),
-							value: reportDocument.answers.reason,
+							value: reportDocument.formData.reason,
 							inline: false,
 						},
 						{
 							name: strings.report.users,
-							value: reportDocument.answers.users,
+							value: reportDocument.formData.users,
 							inline: true,
 						},
 						{
 							name: strings.report.link,
 							value:
-								reportDocument.answers.messageLink !== undefined
-									? reportDocument.answers.messageLink
+								reportDocument.formData.messageLink !== undefined
+									? reportDocument.formData.messageLink
 									: `*${strings.report.noLinkProvided}*`,
 							inline: true,
 						},

@@ -47,7 +47,7 @@ class SuggestionPromptService extends PromptService<{
 		return {
 			embeds: [
 				{
-					description: `*${suggestionDocument.answers.suggestion}*`,
+					description: `*${suggestionDocument.formData.suggestion}*`,
 					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
 					footer: {
 						text: diagnostics.display.user(user),

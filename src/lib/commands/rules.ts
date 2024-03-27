@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
 import { Locale } from "logos:constants/languages";
 import { Rule, isValidRule } from "logos:constants/rules";
+import { Client } from "logos/client";
 
 type RuleOrOther = Rule | "other";
 type RuleTitleMode = "option" | "display";

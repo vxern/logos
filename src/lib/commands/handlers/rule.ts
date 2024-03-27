@@ -1,8 +1,8 @@
 import { Locale } from "logos:constants/languages";
 import { Rule, isValidRule } from "logos:constants/rules";
 import { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
 import { getRuleTitleFormatted } from "logos/commands/rules";
+import { Guild } from "logos/database/guild";
 
 async function handleCiteRuleAutocomplete(
 	client: Client,

@@ -64,4 +64,3 @@ class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> 
 }
 
 export { Warning };
-export type { Rule };

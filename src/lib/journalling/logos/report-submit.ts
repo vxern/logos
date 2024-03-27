@@ -21,15 +21,15 @@ class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
 			return;
 		}
 
-		const messageLink = report.answers.messageLink ?? "*No message link*.";
+		const messageLink = report.formData.messageLink ?? "*No message link*.";
 
 		return `${diagnostics.display.user(authorUser)} has submitted a report.
 
 **REASON**
-${report.answers.reason}
+${report.formData.reason}
 
 **REPORTED USERS**
-${report.answers.users}
+${report.formData.users}
 
 **MESSAGE LINK**
 ${messageLink}`;

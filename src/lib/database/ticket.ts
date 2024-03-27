@@ -22,8 +22,7 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 
 	readonly createdAt: number;
 	readonly type: TicketType;
-	// TODO(vxern): Rename this to `formData`.
-	readonly answers: TicketFormData;
+	readonly formData: TicketFormData;
 
 	isResolved: boolean;
 
@@ -45,7 +44,7 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 
 		this.createdAt = createdAt ?? Date.now();
 		this.type = type;
-		this.answers = answers;
+		this.formData = answers;
 		this.isResolved = isResolved ?? false;
 	}
 

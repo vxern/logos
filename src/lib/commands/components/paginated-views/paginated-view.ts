@@ -104,6 +104,8 @@ abstract class PaginatedView<T> {
 		{ interaction, elements, showable }: { interaction: Logos.Interaction; elements: T[]; showable?: boolean },
 	) {
 		this.client = client;
+		this.anchor = interaction;
+
 		this.#pages = elements.toChunked(constants.RESULTS_PER_PAGE);
 		this.#showable = showable ?? false;
 		this.#index = 0;
@@ -111,7 +113,6 @@ abstract class PaginatedView<T> {
 		this.#_pageButtons = new InteractionCollector<[action: PageAction]>(client, {
 			only: interaction.parameters.show ? [interaction.user.id] : undefined,
 		});
-		this.anchor = interaction;
 	}
 
 	abstract build(page: T[], index: number, { locale }: { locale: Locale }): Page;

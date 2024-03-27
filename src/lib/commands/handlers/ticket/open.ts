@@ -92,7 +92,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 async function openTicket(
 	client: Client,
 	configuration: NonNullable<Configurations["tickets"] | Configurations["verification"]>,
-	answers: Ticket["answers"],
+	answers: Ticket["formData"],
 	[guild, user, member]: [Logos.Guild, Logos.User, Logos.Member],
 	categoryId: string,
 	type: TicketType,

@@ -18,7 +18,7 @@ class InquiryOpenEventLogger extends EventLogger<"inquiryOpen"> {
 			return undefined;
 		}
 
-		return `${diagnostics.display.user(memberUser)} has opened a ticket.\n\nTopic: *${ticket.answers.topic}*`;
+		return `${diagnostics.display.user(memberUser)} has opened a ticket.\n\nTopic: *${ticket.formData.topic}*`;
 	}
 }
 

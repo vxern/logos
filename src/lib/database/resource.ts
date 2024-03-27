@@ -18,8 +18,7 @@ class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> 
 		return Number(this.idParts[2]);
 	}
 
-	// TODO(vxern): Rename this to `formData`.
-	readonly answers: ResourceFormData;
+	readonly formData: ResourceFormData;
 
 	isResolved: boolean;
 
@@ -32,7 +31,7 @@ class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> 
 			"@metadata": Model.buildMetadata(data, { collection: "Resources" }),
 		});
 
-		this.answers = answers;
+		this.formData = answers;
 		this.isResolved = isResolved ?? false;
 	}
 

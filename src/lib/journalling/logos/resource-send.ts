@@ -22,7 +22,7 @@ class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
 		}
 
 		return `${diagnostics.display.user(memberUser)} has submitted a resource.\n\nResource: *${
-			resource.answers.resource
+			resource.formData.resource
 		}*`;
 	}
 }

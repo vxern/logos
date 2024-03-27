@@ -57,7 +57,7 @@ class TicketPromptService extends PromptService<{
 		return {
 			embeds: [
 				{
-					description: `*${ticketDocument.answers.topic}*`,
+					description: `*${ticketDocument.formData.topic}*`,
 					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					footer: {
 						text: diagnostics.display.user(user),
