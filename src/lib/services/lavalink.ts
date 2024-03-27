@@ -19,24 +19,10 @@ class LavalinkService extends GlobalService {
 				port: Number(client.environment.lavalinkPort),
 				password: client.environment.lavalinkPassword,
 			},
-			// TODO(vxern): Extract to function.
 			sendGatewayPayload: async (guildIdString, payload) => {
 				const guildId = BigInt(guildIdString);
-				if (this.client.getMusicService(guildId) === undefined) {
-					return;
-				}
 
-				const shardId = this.client.entities.guilds.get(guildId)?.shardId;
-				if (shardId === undefined) {
-					return;
-				}
-
-				const shard = this.client.bot.gateway.shards.get(shardId);
-				if (shard === undefined) {
-					return;
-				}
-
-				await shard.send(payload, true);
+				await this.#_sendGatewayPayload(guildId, payload);
 			},
 		});
 		this.node.setMaxListeners(0);
@@ -86,6 +72,24 @@ class LavalinkService extends GlobalService {
 
 		await this.#_voiceStateUpdates.close();
 		await this.#_voiceServerUpdates.close();
+	}
+
+	async #_sendGatewayPayload(guildId: bigint, payload: Discord.ShardSocketRequest): Promise<void> {
+		if (this.client.getMusicService(guildId) === undefined) {
+			return;
+		}
+
+		const shardId = this.client.entities.guilds.get(guildId)?.shardId;
+		if (shardId === undefined) {
+			return;
+		}
+
+		const shard = this.client.bot.gateway.shards.get(shardId);
+		if (shard === undefined) {
+			return;
+		}
+
+		await shard.send(payload, true);
 	}
 
 	async #_handleVoiceStateUpdate(voiceState: Discord.VoiceState): Promise<void> {
