@@ -1,7 +1,7 @@
 import * as fs from "node:fs/promises";
 import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "logos:constants/languages";
 import * as dotenv from "dotenv";
-import { Client } from "logos/client";
+import { Client, Environment } from "logos/client";
 
 async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
 	const kind = isTemplate ? "environment template" : "environment";
@@ -167,17 +167,18 @@ async function setup(): Promise<void> {
 
 	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
-	const environmentProvisional: Record<keyof Client["environment"], string | boolean | undefined> = {
+	const environmentProvisional: Record<keyof Environment, string | boolean | undefined> = {
 		isDebug: process.env.DEBUG !== undefined && process.env.DEBUG === "true",
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
 		ravendbHost: process.env.RAVENDB_HOST,
-		// TODO(vxern): Add port here.
+		ravendbPort: process.env.RAVENDB_PORT,
 		ravendbDatabase: process.env.RAVENDB_DATABASE,
 		ravendbSecure: process.env.RAVENDB_SECURE !== undefined && process.env.RAVENDB_SECURE === "true",
 		redisHost: process.env.REDIS_HOST,
 		redisPort: process.env.REDIS_PORT,
+		redisPassword: process.env.REDIS_PASSWORD,
 		lavalinkHost: process.env.LAVALINK_HOST,
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
@@ -189,7 +190,7 @@ async function setup(): Promise<void> {
 		}
 	}
 
-	const environment = environmentProvisional as Client["environment"];
+	const environment = environmentProvisional as Environment;
 
 	const localisations = await loadLocalisations("./assets/localisations");
 

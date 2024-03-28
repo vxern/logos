@@ -8,6 +8,7 @@ class Cache {
 		this.redis = new Redis({
 			host: client.environment.redisHost,
 			port: client.environment.redisPort !== undefined ? Number(client.environment.redisPort) : undefined,
+			password: client.environment.redisPassword,
 			reconnectOnError: (_) => true,
 			lazyConnect: true,
 		});

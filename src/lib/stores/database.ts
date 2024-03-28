@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { isValidCollection } from "logos:constants/database";
+import { Client } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
@@ -44,16 +45,12 @@ class Database extends ravendb.DocumentStore {
 		Warnings: Warning,
 	} as const);
 
-	constructor({
-		host,
-		database,
-		certificate,
-		isDebug,
-	}: { host: string; database: string; certificate?: Buffer; isDebug?: boolean }) {
+	constructor(client: Client, { certificate }: { certificate?: Buffer }) {
+		const hostWithPort = `${client.environment.ravendbHost}:${client.environment.ravendbPort}`;
 		if (certificate !== undefined) {
-			super(host, database, { certificate, type: "pfx" });
+			super(hostWithPort, client.environment.ravendbDatabase, { certificate, type: "pfx" });
 		} else {
-			super(host, database);
+			super(hostWithPort, client.environment.ravendbDatabase);
 		}
 
 		this.cache = {
@@ -70,7 +67,7 @@ class Database extends ravendb.DocumentStore {
 			warningsByTarget: new Map(),
 		};
 
-		this.#log = Logger.create({ identifier: "Client/Database", isDebug });
+		this.#log = Logger.create({ identifier: "Client/Database", isDebug: client.environment.isDebug });
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): { new (data: any): Model } {

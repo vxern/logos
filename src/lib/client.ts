@@ -27,10 +27,12 @@ interface Environment {
 	readonly deeplSecret: string;
 	readonly rapidApiSecret: string;
 	readonly ravendbHost: string;
+	readonly ravendbPort: string;
 	readonly ravendbDatabase: string;
 	readonly ravendbSecure: boolean;
 	readonly redisHost?: string;
 	readonly redisPort?: string;
+	readonly redisPassword?: string;
 	readonly lavalinkHost: string;
 	readonly lavalinkPort: string;
 	readonly lavalinkPassword: string;
@@ -256,20 +258,20 @@ class Client {
 
 	private constructor({
 		environment,
+		certificate,
 		log,
 		bot,
-		database,
 		localisations,
 	}: {
 		environment: Environment;
+		certificate?: Buffer;
 		log: Logger;
 		bot: Discord.Bot;
-		database: Database;
 		localisations: RawLocalisations;
 	}) {
 		this.environment = environment;
 		this.log = log;
-		this.database = database;
+		this.database = new Database(this, { certificate });
 		this.cache = new Cache(this);
 
 		this.#localisations = new LocalisationStore(this, { localisations });
@@ -310,13 +312,6 @@ class Client {
 
 		log.info("Bootstrapping the client...");
 
-		const database = new Database({
-			host: environment.ravendbHost,
-			database: environment.ravendbDatabase,
-			certificate,
-			isDebug: environment.isDebug,
-		});
-
 		const bot = Discord.createBot({
 			token: environment.discordSecret,
 			intents:
@@ -339,7 +334,7 @@ class Client {
 			},
 		});
 
-		const client = new Client({ environment, log, bot, database, localisations });
+		const client = new Client({ environment, certificate, log, bot, localisations });
 
 		Client.#client = client;
 
