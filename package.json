@@ -64,6 +64,7 @@
     "@types/chai": "^4.3.12",
     "@types/event-stream": "^4.0.5",
     "@types/object-hash": "^3.0.6",
-    "chai": "^5.1.0"
+    "chai": "^5.1.0",
+    "typescript": "^5.4.3"
   }
 }
