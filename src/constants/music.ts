@@ -64,5 +64,23 @@ interface SongStream {
 	url: string;
 }
 
-export { SongListingType };
-export type { Song, SongCollection, SongListing, SongStream };
+// TODO(vxern): Rename to 'isCollection'.
+function isCollection(object: Song | SongStream | SongCollection): object is SongCollection {
+	return object.type === "collection";
+}
+
+// TODO(vxern): Rename to 'isSongStream' together with all other uses of 'external'.
+function isExternal(object: Song | SongStream | SongCollection): object is SongStream {
+	return object.type === "file";
+}
+
+function isFirstInCollection(collection: SongCollection): boolean {
+	return collection.position === 0;
+}
+
+function isLastInCollection(collection: SongCollection): boolean {
+	return collection.position === collection.songs.length - 1;
+}
+
+export { isCollection, isExternal, isFirstInCollection, isLastInCollection };
+export type { Song, SongCollection, SongStream, SongListing, SongListingType };

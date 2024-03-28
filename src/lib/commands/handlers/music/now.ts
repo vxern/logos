@@ -1,8 +1,8 @@
 import { Song, SongCollection, SongStream } from "logos:constants/music";
+import { isCollection } from "logos:constants/music";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { SongCollectionView } from "logos/commands/components/paginated-views/song-collection-view";
-import { isCollection } from "logos/services/music";
 
 async function handleDisplayCurrentlyPlaying(
 	client: Client,

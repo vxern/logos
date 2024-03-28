@@ -1,7 +1,15 @@
 import { EventEmitter } from "node:events";
 import { getEmojiBySongListingType } from "logos:constants/emojis";
 import { getLocalisationBySongListingType } from "logos:constants/localisations";
-import { Song, SongCollection, SongListing, SongStream } from "logos:constants/music";
+import {
+	Song,
+	SongListing,
+	SongStream,
+	isCollection,
+	isExternal,
+	isFirstInCollection,
+	isLastInCollection,
+} from "logos:constants/music";
 import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";
 import * as Lavaclient from "lavaclient";
@@ -1044,20 +1052,4 @@ class MusicService extends LocalService {
 	}
 }
 
-function isCollection(object: Song | SongStream | SongCollection): object is SongCollection {
-	return object.type === "collection";
-}
-
-function isExternal(object: Song | SongStream | SongCollection): object is SongStream {
-	return object.type === "file";
-}
-
-function isFirstInCollection(collection: SongCollection): boolean {
-	return collection.position === 0;
-}
-
-function isLastInCollection(collection: SongCollection): boolean {
-	return collection.position === collection.songs.length - 1;
-}
-
-export { isCollection, MusicService };
+export { MusicService };

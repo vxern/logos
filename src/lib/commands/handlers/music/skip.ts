@@ -1,5 +1,5 @@
+import { isCollection } from "logos:constants/music";
 import { Client } from "logos/client";
-import { isCollection } from "logos/services/music";
 
 async function handleSkipAction(
 	client: Client,
