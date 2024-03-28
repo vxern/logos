@@ -62,8 +62,8 @@ const emojis = Object.freeze({
 	},
 	music: {
 		song: "🎵",
-		file: "📁",
 		collection: "🎶",
+		stream: "📁",
 		list: "📋",
 		loopEnabled: "🔁",
 		loopDisabled: "⏸️",
@@ -227,7 +227,7 @@ const emojis = Object.freeze({
 const emojiBySongListingType = Object.freeze({
 	song: emojis.music.song,
 	collection: emojis.music.collection,
-	file: emojis.music.file,
+	stream: emojis.music.stream,
 } as const satisfies Record<SongListingType, string>);
 
 function getEmojiBySongListingType(type: SongListingType): string {

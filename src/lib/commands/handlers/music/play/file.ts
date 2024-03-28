@@ -2,7 +2,7 @@ import { SongListing } from "logos:constants/music";
 import { Client } from "logos/client";
 import { handleRequestPlayback } from "logos/commands/handlers/music/play/query";
 
-async function handleRequestFilePlayback(
+async function handleRequestStreamPlayback(
 	client: Client,
 	interaction: Logos.Interaction<any, { url: string }>,
 ): Promise<void> {
@@ -12,15 +12,15 @@ async function handleRequestFilePlayback(
 	await client.deleteReply(interaction);
 
 	const strings = {
-		externalFile: client.localise("music.options.play.strings.externalFile", locale)(),
+		stream: client.localise("music.options.play.strings.stream", locale)(),
 	};
 
 	const listing: SongListing = {
 		requestedBy: interaction.user.id,
 		managerIds: [],
 		content: {
-			type: "file",
-			title: strings.externalFile,
+			type: "stream",
+			title: strings.stream,
 			url: interaction.parameters.url,
 		},
 	};
@@ -28,4 +28,4 @@ async function handleRequestFilePlayback(
 	await handleRequestPlayback(client, interaction, listing);
 }
 
-export { handleRequestFilePlayback };
+export { handleRequestStreamPlayback };

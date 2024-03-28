@@ -1,4 +1,4 @@
-import { isCollection } from "logos:constants/music";
+import { isSongCollection } from "logos:constants/music";
 import { Client } from "logos/client";
 
 async function handleUnskipAction(
@@ -66,7 +66,7 @@ async function handleUnskipAction(
 			return true;
 		}
 
-		if (!isCollection(current.content)) {
+		if (!isSongCollection(current.content)) {
 			return true;
 		}
 
@@ -94,7 +94,7 @@ async function handleUnskipAction(
 
 	if (
 		interaction.parameters.collection !== undefined &&
-		(current === undefined || current.content === undefined || !isCollection(current.content))
+		(current === undefined || current.content === undefined || !isSongCollection(current.content))
 	) {
 		const locale = interaction.locale;
 		const strings = {
@@ -193,7 +193,7 @@ async function handleUnskipAction(
 			if (
 				current !== undefined &&
 				current.content !== undefined &&
-				isCollection(current.content) &&
+				isSongCollection(current.content) &&
 				interaction.parameters.collection === undefined
 			) {
 				listingsToUnskip = Math.min(interaction.parameters.by, current.content.position);
@@ -206,7 +206,7 @@ async function handleUnskipAction(
 			if (
 				current !== undefined &&
 				current.content !== undefined &&
-				isCollection(current.content) &&
+				isSongCollection(current.content) &&
 				interaction.parameters.collection === undefined
 			) {
 				listingToSkipTo = Math.max(interaction.parameters.to, 1);

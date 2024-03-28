@@ -4,9 +4,9 @@ import { getLocalisationBySongListingType } from "logos:constants/localisations"
 import {
 	Song,
 	SongListing,
-	SongStream,
-	isCollection,
-	isExternal,
+	AudioStream,
+	isSongCollection,
+	isSongStream,
 	isFirstInCollection,
 	isLastInCollection,
 } from "logos:constants/music";
@@ -78,13 +78,13 @@ class MusicService extends LocalService {
 		return this.#session?.listings.current;
 	}
 
-	get currentSong(): Song | SongStream | undefined {
+	get currentSong(): Song | AudioStream | undefined {
 		const current = this.current;
 		if (current === undefined) {
 			return undefined;
 		}
 
-		if (isCollection(current.content)) {
+		if (isSongCollection(current.content)) {
 			return current.content.songs[current.content.position];
 		}
 
@@ -497,7 +497,7 @@ class MusicService extends LocalService {
 		}
 
 		// Adjust the position for being incremented automatically when played next time.
-		if (isCollection(listing.content)) {
+		if (isSongCollection(listing.content)) {
 			listing.content.position--;
 		}
 
@@ -591,14 +591,14 @@ class MusicService extends LocalService {
 		this.tryClearDisconnectTimeout();
 
 		if (!session.flags.loop.song) {
-			if (session.listings.current !== undefined && !isCollection(session.listings.current.content)) {
+			if (session.listings.current !== undefined && !isSongCollection(session.listings.current.content)) {
 				this.moveListingToHistory(session.listings.current);
 				session.listings.current = undefined;
 			}
 
 			if (
 				!isQueueEmpty &&
-				(session.listings.current === undefined || !isCollection(session.listings.current.content))
+				(session.listings.current === undefined || !isSongCollection(session.listings.current.content))
 			) {
 				session.listings.current = session.listings.queue.shift();
 				session.events.emit("queueUpdate");
@@ -608,7 +608,7 @@ class MusicService extends LocalService {
 		if (
 			session.listings.current !== undefined &&
 			session.listings.current.content !== undefined &&
-			isCollection(session.listings.current.content)
+			isSongCollection(session.listings.current.content)
 		) {
 			if (isLastInCollection(session.listings.current.content)) {
 				if (session.flags.loop.collection) {
@@ -641,7 +641,10 @@ class MusicService extends LocalService {
 		await this.loadSong(currentSong);
 	}
 
-	async loadSong(song: Song | SongStream, restore?: { paused: boolean; volume: number }): Promise<boolean | undefined> {
+	async loadSong(
+		song: Song | AudioStream,
+		restore?: { paused: boolean; volume: number },
+	): Promise<boolean | undefined> {
 		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
@@ -694,7 +697,7 @@ class MusicService extends LocalService {
 		if (
 			session.listings.current !== undefined &&
 			session.listings.current.content !== undefined &&
-			isExternal(session.listings.current.content)
+			isSongStream(session.listings.current.content)
 		) {
 			session.listings.current.content.title = track.info.title;
 		}
@@ -801,7 +804,7 @@ class MusicService extends LocalService {
 				track:
 					session.listings.current !== undefined &&
 					session.listings.current.content !== undefined &&
-					isCollection(session.listings.current.content)
+					isSongCollection(session.listings.current.content)
 						? this.client.localise(
 								"music.options.play.strings.nowPlaying.description.track",
 								guildLocale,
@@ -851,7 +854,7 @@ class MusicService extends LocalService {
 		if (
 			session.listings.current !== undefined &&
 			session.listings.current.content !== undefined &&
-			isCollection(session.listings.current.content)
+			isSongCollection(session.listings.current.content)
 		) {
 			if (skipCollection || isLastInCollection(session.listings.current.content)) {
 				session.flags.loop.collection = false;
@@ -905,7 +908,7 @@ class MusicService extends LocalService {
 		if (
 			session.listings.current !== undefined &&
 			session.listings.current.content !== undefined &&
-			isCollection(session.listings.current.content)
+			isSongCollection(session.listings.current.content)
 		) {
 			if (unskipCollection || isFirstInCollection(session.listings.current.content)) {
 				session.flags.loop.collection = false;
@@ -987,7 +990,7 @@ class MusicService extends LocalService {
 		if (
 			session.listings.current !== undefined &&
 			session.listings.current.content !== undefined &&
-			isCollection(session.listings.current.content)
+			isSongCollection(session.listings.current.content)
 		) {
 			if (replayCollection) {
 				session.listings.current.content.position = -1;

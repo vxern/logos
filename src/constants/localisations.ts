@@ -243,7 +243,7 @@ const localisations = Object.freeze({
 const localisationBySongListingType = Object.freeze({
 	song: "music.options.play.strings.nowPlaying.title.type.song",
 	collection: "music.options.play.strings.nowPlaying.title.type.songCollection",
-	file: "music.options.play.strings.nowPlaying.title.type.external",
+	stream: "music.options.play.strings.nowPlaying.title.type.stream",
 } as const satisfies Record<SongListingType, string>);
 
 function getLocalisationBySongListingType(type: SongListingType): string {

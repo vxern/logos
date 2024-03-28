@@ -1,5 +1,5 @@
-import { Song, SongCollection, SongStream } from "logos:constants/music";
-import { isCollection } from "logos:constants/music";
+import { Song, SongCollection, AudioStream } from "logos:constants/music";
+import { isSongCollection } from "logos:constants/music";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { SongCollectionView } from "logos/commands/components/paginated-views/song-collection-view";
@@ -46,7 +46,7 @@ async function handleDisplayCurrentlyPlaying(
 	const [current, playingSince] = [musicService.current, musicService.playingSince];
 
 	if (interaction.parameters.collection) {
-		if (current?.content === undefined || !isCollection(current.content)) {
+		if (current?.content === undefined || !isSongCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.now.strings.noSongCollection.title", locale)(),
@@ -104,7 +104,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const song = current.content as Song | SongStream;
+	const song = current.content as Song | AudioStream;
 
 	const strings = {
 		nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),

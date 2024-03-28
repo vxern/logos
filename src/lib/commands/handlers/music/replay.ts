@@ -1,4 +1,4 @@
-import { isCollection } from "logos:constants/music";
+import { isSongCollection } from "logos:constants/music";
 import { Client } from "logos/client";
 
 async function handleReplayAction(
@@ -41,7 +41,7 @@ async function handleReplayAction(
 	}
 
 	if (interaction.parameters.collection) {
-		if (current?.content === undefined || !isCollection(current.content)) {
+		if (current?.content === undefined || !isSongCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.replay.strings.noSongCollection.title", locale)(),

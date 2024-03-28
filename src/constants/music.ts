@@ -1,4 +1,4 @@
-type SongListingType = "song" | "collection" | "file";
+type SongListingType = "song" | "collection" | "stream";
 
 /** Represents a musical piece, playable singly by the music controller. */
 interface Song {
@@ -50,12 +50,12 @@ interface SongListing {
 	managerIds: bigint[];
 
 	/** The content of this song listing. */
-	content: Song | SongCollection | SongStream;
+	content: Song | SongCollection | AudioStream;
 }
 
 /** Represents a musical piece in stream format. */
-interface SongStream {
-	type: "file";
+interface AudioStream {
+	type: "stream";
 
 	/** The title of the stream. */
 	title: string;
@@ -64,14 +64,12 @@ interface SongStream {
 	url: string;
 }
 
-// TODO(vxern): Rename to 'isCollection'.
-function isCollection(object: Song | SongStream | SongCollection): object is SongCollection {
+function isSongCollection(object: Song | SongCollection | AudioStream): object is SongCollection {
 	return object.type === "collection";
 }
 
-// TODO(vxern): Rename to 'isSongStream' together with all other uses of 'external'.
-function isExternal(object: Song | SongStream | SongCollection): object is SongStream {
-	return object.type === "file";
+function isSongStream(object: Song | SongCollection | AudioStream): object is AudioStream {
+	return object.type === "stream";
 }
 
 function isFirstInCollection(collection: SongCollection): boolean {
@@ -82,5 +80,5 @@ function isLastInCollection(collection: SongCollection): boolean {
 	return collection.position === collection.songs.length - 1;
 }
 
-export { isCollection, isExternal, isFirstInCollection, isLastInCollection };
-export type { Song, SongCollection, SongStream, SongListing, SongListingType };
+export { isSongCollection, isSongStream, isFirstInCollection, isLastInCollection };
+export type { Song, SongCollection, AudioStream, SongListing, SongListingType };

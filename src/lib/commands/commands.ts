@@ -30,7 +30,7 @@ import { handleDisplayPlaybackHistory } from "logos/commands/handlers/music/hist
 import { handleLoopPlayback } from "logos/commands/handlers/music/loop";
 import { handleDisplayCurrentlyPlaying } from "logos/commands/handlers/music/now";
 import { handlePausePlayback } from "logos/commands/handlers/music/pause";
-import { handleRequestFilePlayback } from "logos/commands/handlers/music/play/file";
+import { handleRequestStreamPlayback } from "logos/commands/handlers/music/play/file";
 import { handleRequestQueryPlayback } from "logos/commands/handlers/music/play/query";
 import { handleDisplayPlaybackQueue } from "logos/commands/handlers/music/queue";
 import { handleRemoveSongListing } from "logos/commands/handlers/music/remove";
@@ -513,9 +513,9 @@ const commands = Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
 				options: [
 					{
-						identifier: "file",
+						identifier: "stream",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
-						handle: handleRequestFilePlayback,
+						handle: handleRequestStreamPlayback,
 						options: [
 							{
 								identifier: "url",

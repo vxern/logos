@@ -1,4 +1,4 @@
-import { isCollection } from "logos:constants/music";
+import { isSongCollection } from "logos:constants/music";
 import { Client } from "logos/client";
 
 async function handleSkipAction(
@@ -52,7 +52,7 @@ async function handleSkipAction(
 	}
 
 	if (interaction.parameters.collection) {
-		if (current?.content === undefined || !isCollection(current.content)) {
+		if (current?.content === undefined || !isSongCollection(current.content)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.skip.strings.noSongCollection.title", locale)(),
@@ -147,7 +147,7 @@ async function handleSkipAction(
 
 	if (interaction.parameters.by !== undefined) {
 		let listingsToSkip!: number;
-		if (isCollection(current.content) && interaction.parameters.collection === undefined) {
+		if (isSongCollection(current.content) && interaction.parameters.collection === undefined) {
 			listingsToSkip = Math.min(
 				interaction.parameters.by,
 				current.content.songs.length - (current.content.position + 1),
@@ -158,7 +158,7 @@ async function handleSkipAction(
 		await musicService.skip(isSkippingCollection, { by: listingsToSkip });
 	} else if (interaction.parameters.to !== undefined) {
 		let listingToSkipTo!: number;
-		if (isCollection(current.content) && interaction.parameters.collection === undefined) {
+		if (isSongCollection(current.content) && interaction.parameters.collection === undefined) {
 			listingToSkipTo = Math.min(interaction.parameters.to, current.content.songs.length);
 		} else {
 			listingToSkipTo = Math.min(interaction.parameters.to, queue.length);
