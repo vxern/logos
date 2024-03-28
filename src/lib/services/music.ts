@@ -168,7 +168,7 @@ class MusicService extends LocalService {
 		const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId === session.channelId);
 		const hasSessionBeenAbandoned = voiceStates.length === 1 && voiceStates.at(0)?.userId === this.client.bot.id;
 		if (hasSessionBeenAbandoned) {
-			this.handleSessionAbandoned();
+			await this.handleSessionAbandoned();
 		}
 	}
 
@@ -195,7 +195,7 @@ class MusicService extends LocalService {
 			})
 			.catch(() => this.log.warn("Failed to send stopped music message."));
 
-		this.destroySession();
+		await this.destroySession();
 	}
 
 	async createSession(channelId: bigint): Promise<Session | undefined> {
@@ -206,7 +206,7 @@ class MusicService extends LocalService {
 
 		const player = this.client.lavalinkService.node.createPlayer(this.guildIdString);
 
-		player.setVolume(configuration.implicitVolume);
+		await player.setVolume(configuration.implicitVolume);
 
 		const session = {
 			events: oldSession?.events ?? new EventEmitter().setMaxListeners(Number.POSITIVE_INFINITY),
@@ -316,7 +316,7 @@ class MusicService extends LocalService {
 
 		const currentSong = this.currentSong;
 		if (currentSong === undefined) {
-			this.destroySession();
+			await this.destroySession();
 			return;
 		}
 
@@ -332,7 +332,7 @@ class MusicService extends LocalService {
 
 		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 
-		this.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
+		await this.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
 
 		const guildLocale = this.guildLocale;
 
@@ -630,7 +630,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		this.loadSong(currentSong);
+		await this.loadSong(currentSong);
 	}
 
 	async loadSong(song: Song | SongStream, restore?: { paused: boolean; volume: number }): Promise<boolean | undefined> {
@@ -750,7 +750,8 @@ class MusicService extends LocalService {
 			}
 
 			session.restoreAt = 0;
-			this.advanceQueueAndPlay();
+
+			await this.advanceQueueAndPlay();
 		});
 
 		session.player.once("trackStart", async () => {
@@ -758,21 +759,21 @@ class MusicService extends LocalService {
 			session.startedAt = now;
 
 			if (session.restoreAt !== 0) {
-				session.player.seek(session.restoreAt);
+				await session.player.seek(session.restoreAt);
 			}
 
 			if (restore !== undefined) {
-				session.player.pause(restore.paused);
+				await session.player.pause(restore.paused);
 			}
 		});
 
 		if (restore !== undefined) {
-			session.player.setVolume(restore.volume);
-			session.player.play(track.track);
+			await session.player.setVolume(restore.volume);
+			await session.player.play(track.track);
 			return;
 		}
 
-		session.player.play(track.track);
+		await session.player.play(track.track);
 
 		const emoji = getEmojiBySongListingType(this.current?.content.type ?? song.type);
 
@@ -949,9 +950,9 @@ class MusicService extends LocalService {
 		}
 
 		if (session.player.track !== undefined) {
-			session.player.stop();
+			await session.player.stop();
 		} else {
-			this.advanceQueueAndPlay();
+			await this.advanceQueueAndPlay();
 		}
 	}
 
@@ -987,36 +988,21 @@ class MusicService extends LocalService {
 
 		session.flags.breakLoop = true;
 		session.restoreAt = 0;
-		session.player.stop();
+		await session.player.stop();
 
-		this.advanceQueueAndPlay();
+		await this.advanceQueueAndPlay();
 	}
 
 	setVolume(volume: number): void {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		session.player.setVolume(volume);
+		this.#session?.player.setVolume(volume);
 	}
 
 	pause(): void {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		session.player.pause(true);
+		this.#session?.player.pause(true);
 	}
 
 	resume(): void {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		session.player.pause(false);
+		this.#session?.player.pause(false);
 	}
 
 	async skipTo(timestampMilliseconds: number): Promise<void> {
@@ -1051,7 +1037,9 @@ class MusicService extends LocalService {
 			session.flags.loop.collection = !session.flags.loop.collection;
 			return session.flags.loop.collection;
 		}
+
 		session.flags.loop.song = !session.flags.loop.song;
+
 		return session.flags.loop.song;
 	}
 }
