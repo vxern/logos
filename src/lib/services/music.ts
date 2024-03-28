@@ -51,57 +51,27 @@ class MusicService extends LocalService {
 	}
 
 	get channelId(): bigint | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.channelId;
+		return this.#session?.channelId;
 	}
 
 	get events(): EventEmitter | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.events;
+		return this.#session?.events;
 	}
 
 	get volume(): number | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.player.volume;
+		return this.#session?.player.volume;
 	}
 
 	get history(): SongListing[] | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.listings.history;
+		return this.#session?.listings.history;
 	}
 
 	get current(): SongListing | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.listings.current;
+		return this.#session?.listings.current;
 	}
 
 	get currentSong(): Song | SongStream | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		const current = session.listings.current;
+		const current = this.current;
 		if (current === undefined) {
 			return undefined;
 		}
@@ -114,12 +84,7 @@ class MusicService extends LocalService {
 	}
 
 	get queue(): SongListing[] | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.listings.queue;
+		return this.#session?.listings.queue;
 	}
 
 	get isQueueVacant(): boolean | undefined {
@@ -159,48 +124,23 @@ class MusicService extends LocalService {
 	}
 
 	get isOccupied(): boolean {
-		const session = this.#session;
-		if (session === undefined) {
-			return false;
-		}
-
-		return true;
+		return this.#session !== undefined;
 	}
 
 	get isPaused(): boolean | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.player.paused;
+		return this.#session?.player.paused;
 	}
 
 	get playingSince(): number | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.player.playingSince;
+		return this.#session?.player.playingSince;
 	}
 
 	get position(): number | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.player.position;
+		return this.#session?.player.position;
 	}
 
 	get length(): number | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.player.trackData?.length;
+		return this.#session?.player.trackData?.length;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
