@@ -214,7 +214,8 @@ class MusicService extends LocalService {
 
 		const player = this.client.lavalinkService.node.createPlayer(this.guildIdString);
 
-		await player.setVolume(configuration.implicitVolume);
+		// TODO(vxern): This promise never resolves in lavaclient.
+		player.setVolume(configuration.implicitVolume);
 
 		const session = {
 			events: oldSession?.events ?? new EventEmitter().setMaxListeners(Number.POSITIVE_INFINITY),
