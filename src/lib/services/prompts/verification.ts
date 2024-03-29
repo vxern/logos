@@ -3,12 +3,12 @@ import diagnostics from "logos:core/diagnostics";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { EntryRequest } from "logos/database/entry-request";
+import { EntryRequest, VoteType } from "logos/database/entry-request";
+import { Guild } from "logos/database/guild";
 import { Model } from "logos/database/model";
 import { Ticket } from "logos/database/ticket";
 import { User } from "logos/database/user";
 import { PromptService } from "logos/services/prompts/service";
-import { Guild } from "logos/database/guild";
 
 type Configuration = NonNullable<Guild["verification"]>;
 type VoteInformation = {
@@ -18,6 +18,7 @@ type VoteInformation = {
 	};
 };
 
+// TODO(vxern): Reduce code duplication.
 class VerificationPromptService extends PromptService<{
 	type: "verification";
 	model: EntryRequest;
@@ -83,26 +84,21 @@ class VerificationPromptService extends PromptService<{
 				continue;
 			}
 
-			const [isAccepted, isRejected] = [
-				voteInformation.acceptance.remaining === 0,
-				voteInformation.rejection.remaining === 0,
-			];
-			if (isAccepted || isRejected) {
-				const author = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
-				if (author === undefined) {
-					continue;
-				}
-
-				this.getUserDocument(entryRequestDocument).then((authorDocument) => {
-					if (authorDocument === undefined) {
-						return;
-					}
-
-					this.#finalise(entryRequestDocument, configuration, [author, member, guild], [isAccepted, isRejected]);
-				});
-
+			const verdict = entryRequestDocument.getVerdict({
+				requiredFor: voteInformation.acceptance.required,
+				requiredAgainst: voteInformation.rejection.required,
+			});
+			if (verdict === undefined) {
 				continue;
 			}
+
+			this.getUserDocument(entryRequestDocument).then((authorDocument) => {
+				if (authorDocument === undefined) {
+					return;
+				}
+
+				this.#tryFinalise({ entryRequestDocument, voter: member });
+			});
 
 			entryRequests.set(partialId, entryRequestDocument);
 		}
@@ -159,8 +155,8 @@ class VerificationPromptService extends PromptService<{
 		const accountCreatedRelativeTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), { format: "relative" });
 		const accountCreatedLongDateTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), { format: "long-date" });
 
-		const votedForFormatted = entryRequestDocument.votedFor?.map((userId) => mention(userId, { type: "user" }));
-		const votedAgainstFormatted = entryRequestDocument.votedAgainst?.map((userId) => mention(userId, { type: "user" }));
+		const votedForFormatted = entryRequestDocument.votersFor.map((userId) => mention(userId, { type: "user" }));
+		const votedAgainstFormatted = entryRequestDocument.votersAgainst.map((userId) => mention(userId, { type: "user" }));
 
 		return {
 			embeds: [
@@ -272,16 +268,10 @@ class VerificationPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const isAccept = interaction.metadata[1] === "true";
+		const newVote: VoteType = interaction.metadata[1] === "true" ? "for" : "against";
 
-		const member = interaction.member;
-		if (member === undefined) {
-			return undefined;
-		}
-
-		const guild = this.client.entities.guilds.get(BigInt(guildId));
-		if (guild === undefined) {
-			await this.#displayVoteError(interaction, { locale });
+		const voter = interaction.member;
+		if (voter === undefined) {
 			return undefined;
 		}
 
@@ -293,215 +283,196 @@ class VerificationPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const [alreadyVotedToAccept, alreadyVotedToReject] = [
-			entryRequestDocument.votedFor ?? [],
-			entryRequestDocument.votedAgainst ?? [],
-		].map((voterIds) => voterIds.some((voterId) => voterId === interaction.user.id.toString())) as [boolean, boolean];
-
-		const voteInformation = this.#getVoteInformation(entryRequestDocument);
-		if (voteInformation === undefined) {
-			return undefined;
-		}
-
-		const [votedFor, votedAgainst] = [
-			[...(entryRequestDocument.votedFor ?? [])],
-			[...(entryRequestDocument.votedAgainst ?? [])],
-		];
-
-		const author = this.client.entities.users.get(BigInt(userId));
-		if (author === undefined) {
-			return undefined;
-		}
+		const currentVote = entryRequestDocument.getUserVote({ userId: interaction.user.id.toString() });
 
 		const management = configuration.management;
 
 		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
 		const userIds = management?.users?.map((userId) => BigInt(userId));
 
-		// If the voter has already voted to accept or to reject the user.
-		if (alreadyVotedToAccept || alreadyVotedToReject) {
-			// If the voter has already voted to accept, and is voting to accept again.
-			if (alreadyVotedToAccept && isAccept) {
-				const isAuthorised =
-					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-					(userIds?.includes(interaction.user.id) ?? false);
+		if (currentVote === "for" && newVote === "for") {
+			const isAuthorised =
+				voter.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+				(userIds?.includes(interaction.user.id) ?? false);
 
-				if (isAuthorised) {
-					const strings = {
-						title: this.client.localise("entry.verification.vote.sureToForce.accept.title", locale)(),
-						description: this.client.localise("entry.verification.vote.sureToForce.accept.description", locale)(),
-						yes: this.client.localise("entry.verification.vote.sureToForce.yes", locale)(),
-						no: this.client.localise("entry.verification.vote.sureToForce.no", locale)(),
-					};
-
-					const { promise, resolve } = Promise.withResolvers<null | undefined>();
-
-					const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
-					const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
-
-					confirmButton.onCollect(async (_) => {
-						await this.client.deleteReply(interaction);
-
-						if (entryRequestDocument.isFinalised) {
-							resolve(undefined);
-							return;
-						}
-
-						await this.#finalise(entryRequestDocument, configuration, [author, member, guild], [true, false]);
-
-						resolve(null);
-					});
-
-					cancelButton.onCollect(async (_) => {
-						await this.client.deleteReply(interaction);
-
-						resolve(undefined);
-					});
-
-					await this.client.registerInteractionCollector(confirmButton);
-					await this.client.registerInteractionCollector(cancelButton);
-
-					await this.client.pushback(interaction, {
-						embeds: [
-							{
-								title: strings.title,
-								description: strings.description,
-							},
-						],
-						components: [
-							{
-								type: Discord.MessageComponentTypes.ActionRow,
-								components: [
-									{
-										type: Discord.MessageComponentTypes.Button,
-										customId: confirmButton.customId,
-										label: strings.yes,
-										style: Discord.ButtonStyles.Success,
-									},
-									{
-										type: Discord.MessageComponentTypes.Button,
-										customId: cancelButton.customId,
-										label: strings.no,
-										style: Discord.ButtonStyles.Danger,
-									},
-								],
-							},
-						],
-					});
-
-					return promise;
-				}
-
+			if (isAuthorised) {
 				const strings = {
-					title: this.client.localise("entry.verification.vote.alreadyVoted.inFavour.title", locale)(),
-					description: this.client.localise("entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
+					title: this.client.localise("entry.verification.vote.sureToForce.accept.title", locale)(),
+					description: this.client.localise("entry.verification.vote.sureToForce.accept.description", locale)(),
+					yes: this.client.localise("entry.verification.vote.sureToForce.yes", locale)(),
+					no: this.client.localise("entry.verification.vote.sureToForce.no", locale)(),
 				};
 
-				await this.client.warning(interaction, {
-					title: strings.title,
-					description: strings.description,
+				const { promise, resolve } = Promise.withResolvers<null | undefined>();
+
+				const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+				const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+
+				confirmButton.onCollect(async (_) => {
+					await this.client.deleteReply(interaction);
+
+					if (entryRequestDocument.isFinalised) {
+						resolve(undefined);
+						return;
+					}
+
+					await entryRequestDocument.update(this.client, () => {
+						entryRequestDocument.forceVerdict({ userId: interaction.user.id.toString(), verdict: "accepted" });
+					});
+
+					await this.#tryFinalise({ entryRequestDocument, voter });
+
+					resolve(null);
 				});
 
-				return undefined;
+				cancelButton.onCollect(async (_) => {
+					await this.client.deleteReply(interaction);
+
+					resolve(undefined);
+				});
+
+				// TODO(vxern): For all confirm and reject buttons, resolve the promise once the collectors are done.
+
+				await this.client.registerInteractionCollector(confirmButton);
+				await this.client.registerInteractionCollector(cancelButton);
+
+				await this.client.pushback(interaction, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+						},
+					],
+					components: [
+						{
+							type: Discord.MessageComponentTypes.ActionRow,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.Button,
+									customId: confirmButton.customId,
+									label: strings.yes,
+									style: Discord.ButtonStyles.Success,
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									customId: cancelButton.customId,
+									label: strings.no,
+									style: Discord.ButtonStyles.Danger,
+								},
+							],
+						},
+					],
+				});
+
+				return promise;
 			}
 
-			// If the voter has already voted to reject, and is voting to reject again.
-			if (alreadyVotedToReject && !isAccept) {
-				const isAuthorised =
-					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-					(userIds?.includes(interaction.user.id) ?? false);
+			const strings = {
+				title: this.client.localise("entry.verification.vote.alreadyVoted.inFavour.title", locale)(),
+				description: this.client.localise("entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
+			};
 
-				if (isAuthorised) {
-					const strings = {
-						title: this.client.localise("entry.verification.vote.sureToForce.reject.title", locale)(),
-						description: this.client.localise("entry.verification.vote.sureToForce.reject.description", locale)(),
-						yes: this.client.localise("entry.verification.vote.sureToForce.yes", locale)(),
-						no: this.client.localise("entry.verification.vote.sureToForce.no", locale)(),
-					};
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
+			});
 
-					const { promise, resolve } = Promise.withResolvers<null | undefined>();
+			return undefined;
+		}
 
-					const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
-					const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+		if (currentVote === "against" && newVote === "against") {
+			const isAuthorised =
+				voter.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+				(userIds?.includes(interaction.user.id) ?? false);
 
-					confirmButton.onCollect(async (_) => {
-						await this.client.deleteReply(interaction);
-
-						if (entryRequestDocument.isFinalised) {
-							resolve(undefined);
-							return;
-						}
-
-						await this.#finalise(entryRequestDocument, configuration, [author, member, guild], [false, true]);
-
-						resolve(null);
-					});
-
-					cancelButton.onCollect(async (_) => {
-						await this.client.deleteReply(interaction);
-
-						resolve(undefined);
-					});
-
-					await this.client.registerInteractionCollector(confirmButton);
-					await this.client.registerInteractionCollector(cancelButton);
-
-					await this.client.pushback(interaction, {
-						embeds: [
-							{
-								title: strings.title,
-								description: strings.description,
-							},
-						],
-						components: [
-							{
-								type: Discord.MessageComponentTypes.ActionRow,
-								components: [
-									{
-										type: Discord.MessageComponentTypes.Button,
-										customId: confirmButton.customId,
-										label: strings.yes,
-										style: Discord.ButtonStyles.Success,
-									},
-									{
-										type: Discord.MessageComponentTypes.Button,
-										customId: cancelButton.customId,
-										label: strings.no,
-										style: Discord.ButtonStyles.Danger,
-									},
-								],
-							},
-						],
-					});
-
-					return promise;
-				}
-
+			if (isAuthorised) {
 				const strings = {
-					title: this.client.localise("entry.verification.vote.alreadyVoted.against.title", locale)(),
-					description: this.client.localise("entry.verification.vote.alreadyVoted.against.description", locale)(),
+					title: this.client.localise("entry.verification.vote.sureToForce.reject.title", locale)(),
+					description: this.client.localise("entry.verification.vote.sureToForce.reject.description", locale)(),
+					yes: this.client.localise("entry.verification.vote.sureToForce.yes", locale)(),
+					no: this.client.localise("entry.verification.vote.sureToForce.no", locale)(),
 				};
 
-				await this.client.warning(interaction, {
-					title: strings.title,
-					description: strings.description,
+				const { promise, resolve } = Promise.withResolvers<null | undefined>();
+
+				const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+				const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+
+				confirmButton.onCollect(async (_) => {
+					await this.client.deleteReply(interaction);
+
+					if (entryRequestDocument.isFinalised) {
+						resolve(undefined);
+						return;
+					}
+
+					await entryRequestDocument.update(this.client, () => {
+						entryRequestDocument.forceVerdict({ userId: interaction.user.id.toString(), verdict: "rejected" });
+					});
+
+					await this.#tryFinalise({ entryRequestDocument, voter });
+
+					resolve(null);
 				});
 
-				return undefined;
+				cancelButton.onCollect(async (_) => {
+					await this.client.deleteReply(interaction);
+
+					resolve(undefined);
+				});
+
+				await this.client.registerInteractionCollector(confirmButton);
+				await this.client.registerInteractionCollector(cancelButton);
+
+				await this.client.pushback(interaction, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+						},
+					],
+					components: [
+						{
+							type: Discord.MessageComponentTypes.ActionRow,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.Button,
+									customId: confirmButton.customId,
+									label: strings.yes,
+									style: Discord.ButtonStyles.Success,
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									customId: cancelButton.customId,
+									label: strings.no,
+									style: Discord.ButtonStyles.Danger,
+								},
+							],
+						},
+					],
+				});
+
+				return promise;
 			}
 
-			if (isAccept) {
-				const voterIndex = votedAgainst.findIndex((voterId) => voterId === interaction.user.id.toString());
+			const strings = {
+				title: this.client.localise("entry.verification.vote.alreadyVoted.against.title", locale)(),
+				description: this.client.localise("entry.verification.vote.alreadyVoted.against.description", locale)(),
+			};
 
-				votedAgainst.splice(voterIndex, 1);
-				votedFor.push(interaction.user.id.toString());
-			} else {
-				const voterIndex = votedFor.findIndex((voterId) => voterId === interaction.user.id.toString());
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
+			});
 
-				votedFor.splice(voterIndex, 1);
-				votedAgainst.push(interaction.user.id.toString());
-			}
+			return undefined;
+		}
 
+		await entryRequestDocument.update(this.client, () => {
+			entryRequestDocument.addVote({ userId: interaction.user.id.toString(), vote: newVote });
+		});
+
+		if (currentVote !== undefined) {
 			const strings = {
 				title: this.client.localise("entry.verification.vote.stanceChanged.title", locale)(),
 				description: this.client.localise("entry.verification.vote.stanceChanged.description", locale)(),
@@ -513,81 +484,53 @@ class VerificationPromptService extends PromptService<{
 			});
 		} else {
 			await this.client.acknowledge(interaction);
-
-			if (isAccept) {
-				votedFor.push(interaction.user.id.toString());
-			} else {
-				votedAgainst.push(interaction.user.id.toString());
-			}
 		}
 
-		const [isAccepted, isRejected] = [
-			votedFor.length >= voteInformation.acceptance.required,
-			votedAgainst.length >= voteInformation.rejection.required,
-		];
-
-		if (votedFor.length !== 0) {
-			entryRequestDocument.votedFor = votedFor;
-		} else {
-			entryRequestDocument.votedFor = undefined;
-		}
-
-		if (votedAgainst.length !== 0) {
-			entryRequestDocument.votedAgainst = votedAgainst;
-		} else {
-			entryRequestDocument.votedAgainst = undefined;
-		}
-
-		if (isAccepted || isRejected) {
-			await this.#finalise(entryRequestDocument, configuration, [author, member, guild], [isAccepted, isRejected]);
-
+		const isFinalised = await this.#tryFinalise({ entryRequestDocument, voter });
+		if (isFinalised) {
 			return null;
 		}
 
 		return entryRequestDocument;
 	}
 
-	// TODO(vxern): Improve how authorised.
-	async #finalise(
-		entryRequestDocument: EntryRequest,
-		_configuration: Configuration,
-		[author, voter, guild]: [Logos.User, Logos.Member, Logos.Guild],
-		[isAccepted, isRejected]: [boolean, boolean],
-	): Promise<void> {
-		const authorDocument = await User.getOrCreate(this.client, { userId: author.id.toString() });
-
-		let isFinalised = false;
-
-		if (isAccepted || isRejected) {
-			isFinalised = true;
-
-			if (isAccepted) {
-				await this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
-			} else {
-				await this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
-			}
+	async #tryFinalise({
+		entryRequestDocument,
+		voter,
+	}: {
+		entryRequestDocument: EntryRequest;
+		voter: Logos.Member;
+	}): Promise<boolean> {
+		const guild = this.client.entities.guilds.get(this.guildId);
+		if (guild === undefined) {
+			return false;
 		}
 
-		if (entryRequestDocument.ticketChannelId !== undefined) {
-			const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
-			if (ticketService !== undefined) {
-				const [ticketDocument] = await Ticket.getAll(this.client, {
-					where: { channelId: entryRequestDocument.ticketChannelId },
-				});
-				if (ticketDocument === undefined) {
-					throw "StateError: Unable to find ticket document.";
-				}
+		const author = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
+		if (author === undefined) {
+			return false;
+		}
 
-				await ticketService.handleDelete(ticketDocument);
-			}
+		const authorDocument = await User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
+
+		const voteInformation = this.#getVoteInformation(entryRequestDocument);
+		if (voteInformation === undefined) {
+			return false;
+		}
+
+		const verdict = entryRequestDocument.getVerdict({
+			requiredFor: voteInformation.acceptance.required,
+			requiredAgainst: voteInformation.rejection.required,
+		});
+		if (verdict === undefined) {
+			return false;
 		}
 
 		await entryRequestDocument.update(this.client, () => {
-			entryRequestDocument.ticketChannelId = undefined;
-			entryRequestDocument.isFinalised = isFinalised;
+			entryRequestDocument.isFinalised = true;
 		});
 
-		if (isAccepted) {
+		if (verdict === "accepted") {
 			await authorDocument.update(this.client, () => {
 				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "authorised" });
 			});
@@ -605,7 +548,9 @@ class VerificationPromptService extends PromptService<{
 						)} to ${diagnostics.display.user(authorDocument.account.id)} on ${diagnostics.display.guild(guild)}.`,
 					),
 				);
-		} else if (isRejected) {
+
+			await this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
+		} else if (verdict === "rejected") {
 			await authorDocument.update(this.client, () => {
 				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "rejected" });
 			});
@@ -623,7 +568,29 @@ class VerificationPromptService extends PromptService<{
 						)}.`,
 					),
 				);
+
+			await this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
 		}
+
+		if (entryRequestDocument.ticketChannelId !== undefined) {
+			const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
+			if (ticketService !== undefined) {
+				const [ticketDocument] = await Ticket.getAll(this.client, {
+					where: { channelId: entryRequestDocument.ticketChannelId },
+				});
+				if (ticketDocument === undefined) {
+					throw "StateError: Unable to find ticket document.";
+				}
+
+				await ticketService.handleDelete(ticketDocument);
+
+				await entryRequestDocument.update(this.client, () => {
+					entryRequestDocument.ticketChannelId = undefined;
+				});
+			}
+		}
+
+		return true;
 	}
 
 	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
@@ -715,7 +682,7 @@ class VerificationPromptService extends PromptService<{
 		}
 	}
 
-	#getVoteInformation(entryRequest: EntryRequest): VoteInformation | undefined {
+	#getVoteInformation(entryRequestDocument: EntryRequest): VoteInformation | undefined {
 		const [configuration, guild] = [this.configuration, this.guild];
 		if (configuration === undefined || guild === undefined) {
 			return undefined;
@@ -752,8 +719,8 @@ class VerificationPromptService extends PromptService<{
 			}
 		}
 
-		const acceptance = getVoteInformation("acceptance", configuration, entryRequest.votedFor?.length ?? 0);
-		const rejection = getVoteInformation("rejection", configuration, entryRequest.votedAgainst?.length ?? 0);
+		const acceptance = getVoteInformation("acceptance", configuration, entryRequestDocument.votersFor.length);
+		const rejection = getVoteInformation("rejection", configuration, entryRequestDocument.votersAgainst.length);
 
 		return { acceptance, rejection };
 	}

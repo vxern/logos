@@ -1,10 +1,10 @@
+import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
 import diagnostics from "logos:core/diagnostics";
+import { mention, trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Ticket, TicketFormData, TicketType } from "logos/database/ticket";
 import { User } from "logos/database/user";
 import { PromptService } from "logos/services/prompts/service";
-import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
-import { mention, trim } from "logos:core/formatting";
 
 class TicketPromptService extends PromptService<{
 	type: "tickets";

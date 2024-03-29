@@ -1,4 +1,4 @@
-import { Song, SongCollection, AudioStream } from "logos:constants/music";
+import { AudioStream, Song, SongCollection } from "logos:constants/music";
 import { isSongCollection } from "logos:constants/music";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";

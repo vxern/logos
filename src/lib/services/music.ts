@@ -2,13 +2,13 @@ import { EventEmitter } from "node:events";
 import { getEmojiBySongListingType } from "logos:constants/emojis";
 import { getLocalisationBySongListingType } from "logos:constants/localisations";
 import {
+	AudioStream,
 	Song,
 	SongListing,
-	AudioStream,
-	isSongCollection,
-	isSongStream,
 	isFirstInCollection,
 	isLastInCollection,
+	isSongCollection,
+	isSongStream,
 } from "logos:constants/music";
 import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";

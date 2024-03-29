@@ -7,7 +7,18 @@ interface EntryRequestFormData {
 	readonly whereFound: string;
 }
 
+interface VoteStats {
+	for?: string[];
+	against?: string[];
+}
+
 type VoteType = "for" | "against";
+type VoteVerdict = "accepted" | "rejected";
+
+interface ForcedVerdict {
+	readonly userId: string;
+	readonly verdict: VoteVerdict;
+}
 
 class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
@@ -23,28 +34,35 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	readonly formData: EntryRequestFormData;
 
 	isFinalised: boolean;
+	forcedVerdict?: ForcedVerdict;
 	ticketChannelId?: string;
-	// TODO(vxern): Store as an object "votes".
-	votedFor?: string[];
-	votedAgainst?: string[];
+	votes?: VoteStats;
+
+	get votersFor(): string[] {
+		return this.votes?.for ?? [];
+	}
+
+	get votersAgainst(): string[] {
+		return this.votes?.against ?? [];
+	}
 
 	constructor({
 		createdAt,
 		requestedRoleId,
 		formData,
 		isFinalised,
+		forcedVerdict,
 		ticketChannelId,
-		votedFor,
-		votedAgainst,
+		votes,
 		...data
 	}: {
 		createdAt?: number;
 		requestedRoleId: string;
 		formData: EntryRequestFormData;
 		isFinalised?: boolean;
+		forcedVerdict?: ForcedVerdict;
 		ticketChannelId?: string;
-		votedFor?: string[];
-		votedAgainst?: string[];
+		votes?: VoteStats;
 	} & MetadataOrIdentifierData<EntryRequest>) {
 		super({
 			"@metadata": Model.buildMetadata(data, { collection: "EntryRequests" }),
@@ -54,9 +72,9 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 		this.requestedRoleId = requestedRoleId;
 		this.formData = formData;
 		this.isFinalised = isFinalised ?? false;
+		this.forcedVerdict = forcedVerdict;
 		this.ticketChannelId = ticketChannelId;
-		this.votedFor = votedFor;
-		this.votedAgainst = votedAgainst;
+		this.votes = votes;
 	}
 
 	static async get(client: Client, data: IdentifierData<EntryRequest>): Promise<EntryRequest | undefined> {
@@ -100,11 +118,11 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	}
 
 	getUserVote({ userId }: { userId: string }): VoteType | undefined {
-		if (this.votedFor?.includes(userId)) {
+		if (this.votes?.for?.includes(userId)) {
 			return "for";
 		}
 
-		if (this.votedAgainst?.includes(userId)) {
+		if (this.votes?.against?.includes(userId)) {
 			return "against";
 		}
 
@@ -123,21 +141,23 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 
 		switch (vote) {
 			case "for": {
-				if (this.votedFor === undefined) {
-					this.votedFor = [userId];
-					return;
+				if (this.votes === undefined) {
+					this.votes = { for: [userId] };
+				} else if (this.votes.for === undefined) {
+					this.votes.for = [userId];
+				} else {
+					this.votes.for.push(userId);
 				}
-
-				this.votedFor.push(userId);
 				break;
 			}
 			case "against": {
-				if (this.votedAgainst === undefined) {
-					this.votedAgainst = [userId];
-					return;
+				if (this.votes === undefined) {
+					this.votes = { against: [userId] };
+				} else if (this.votes.against === undefined) {
+					this.votes.against = [userId];
+				} else {
+					this.votes.against.push(userId);
 				}
-
-				this.votedAgainst.push(userId);
 				break;
 			}
 		}
@@ -146,14 +166,37 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	removeVote({ userId, vote }: { userId: string; vote: VoteType }): void {
 		switch (vote) {
 			case "for": {
-				this.votedFor!.splice(this.votedFor!.indexOf(userId), 1);
+				this.votes!.for!.splice(this.votes!.for!.indexOf(userId), 1);
 				break;
 			}
 			case "against": {
-				this.votedAgainst!.splice(this.votedAgainst!.indexOf(userId), 1);
+				this.votes!.against!.splice(this.votes!.against!.indexOf(userId), 1);
 				break;
 			}
 		}
+	}
+
+	getVerdict({
+		requiredFor,
+		requiredAgainst,
+	}: { requiredFor: number; requiredAgainst: number }): VoteVerdict | undefined {
+		if (this.forcedVerdict !== undefined) {
+			return this.forcedVerdict.verdict;
+		}
+
+		if (this.votersFor.length >= requiredFor) {
+			return "accepted";
+		}
+
+		if (this.votersAgainst.length >= requiredAgainst) {
+			return "rejected";
+		}
+
+		return undefined;
+	}
+
+	forceVerdict(forcedVerdict: ForcedVerdict): void {
+		this.forcedVerdict = forcedVerdict;
 	}
 }
 
