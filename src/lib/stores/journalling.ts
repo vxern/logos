@@ -194,12 +194,12 @@ class JournallingStore {
 		}
 
 		// @ts-ignore: This is fine.
-		if (!this.filter(guildId, ...args)) {
+		if (!logger.filter(guildId, ...args)) {
 			return;
 		}
 
 		// @ts-ignore: This is fine.
-		const contents = await this.message(...args);
+		const contents = await logger.message(...args);
 		if (contents === undefined) {
 			return;
 		}
