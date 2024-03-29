@@ -23,15 +23,15 @@ class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> 
 	isResolved: boolean;
 
 	constructor({
-		answers,
+		formData,
 		isResolved,
 		...data
-	}: { answers: ResourceFormData; isResolved?: boolean } & MetadataOrIdentifierData<Resource>) {
+	}: { formData: ResourceFormData; isResolved?: boolean } & MetadataOrIdentifierData<Resource>) {
 		super({
 			"@metadata": Model.buildMetadata(data, { collection: "Resources" }),
 		});
 
-		this.formData = answers;
+		this.formData = formData;
 		this.isResolved = isResolved ?? false;
 	}
 
@@ -47,7 +47,7 @@ class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> 
 
 	static async create(
 		client: Client,
-		data: Omit<IdentifierData<Resource>, "createdAt"> & { answers: ResourceFormData },
+		data: Omit<IdentifierData<Resource>, "createdAt"> & { formData: ResourceFormData },
 	): Promise<Resource> {
 		const resourceDocument = new Resource({ ...data, createdAt: Date.now().toString() });
 

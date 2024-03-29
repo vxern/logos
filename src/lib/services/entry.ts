@@ -306,7 +306,7 @@ class EntryService extends LocalService {
 					guildId: guild.id.toString(),
 					authorId: buttonPress.user.id.toString(),
 					requestedRoleId: requestedRoleId.toString(),
-					answers: formData,
+					formData,
 				});
 
 				await this.client.tryLog("entryRequestSubmit", {

@@ -3,14 +3,14 @@ import diagnostics from "logos:core/diagnostics";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { openTicket } from "logos/commands/handlers/ticket/open";
 import { EntryRequest } from "logos/database/entry-request";
 import { Model } from "logos/database/model";
 import { Ticket } from "logos/database/ticket";
 import { User } from "logos/database/user";
-import { Configurations, PromptService } from "logos/services/prompts/service";
+import { PromptService } from "logos/services/prompts/service";
+import { Guild } from "logos/database/guild";
 
-type Configuration = NonNullable<Configurations["verification"]>;
+type Configuration = NonNullable<Guild["verification"]>;
 type VoteInformation = {
 	[K in keyof NonNullable<Configuration["voting"]>["verdict"]]: {
 		required: number;
@@ -182,9 +182,9 @@ class VerificationPromptService extends PromptService<{
 						{
 							name: diagnostics.display.user(user),
 							value:
-								`1. *${entryRequestDocument.answers.reason}*\n` +
-								`2. *${entryRequestDocument.answers.aim}*\n` +
-								`3. *${entryRequestDocument.answers.whereFound}*`,
+								`1. *${entryRequestDocument.formData.reason}*\n` +
+								`2. *${entryRequestDocument.formData.aim}*\n` +
+								`3. *${entryRequestDocument.formData.whereFound}*`,
 							inline: false,
 						},
 						{
@@ -648,13 +648,13 @@ class VerificationPromptService extends PromptService<{
 			return;
 		}
 
-		const user = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
-		if (user === undefined) {
+		const author = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
+		if (author === undefined) {
 			return;
 		}
 
-		const member = this.client.entities.members.get(guild.id)?.get(interaction.user.id);
-		if (member === undefined) {
+		const target = this.client.entities.members.get(guild.id)?.get(interaction.user.id);
+		if (target === undefined) {
 			return;
 		}
 
@@ -662,18 +662,20 @@ class VerificationPromptService extends PromptService<{
 			inquiryChannel: this.client.localise(
 				"entry.verification.inquiry.channel",
 				this.guildLocale,
-			)({ user: user.username }),
+			)({ user: author.username }),
 		};
 
-		const ticketDocument = await openTicket(
-			this.client,
-			configuration,
-			{ topic: strings.inquiryChannel },
-			[guild, user, member],
-			ticketConfiguration.categoryId,
-			"inquiry",
-			{ guildLocale: this.guildLocale },
-		);
+		const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
+		if (ticketService === undefined) {
+			return;
+		}
+
+		const ticketDocument = await ticketService.openTicket({
+			type: "standalone",
+			formData: { topic: strings.inquiryChannel },
+			author: author,
+			target: target,
+		});
 		if (ticketDocument === undefined) {
 			const strings = {
 				title: this.client.localise("entry.verification.inquiry.failed.title", this.guildLocale)(),
@@ -737,7 +739,7 @@ class VerificationPromptService extends PromptService<{
 
 		function getVoteInformation<VerdictType extends keyof VoteInformation>(
 			type: VerdictType,
-			configuration: Configurations["verification"] & { enabled: true },
+			configuration: Guild["verification"] & { enabled: true },
 			votes: number,
 		): VoteInformation[VerdictType] {
 			const verdict = configuration.voting.verdict[type];

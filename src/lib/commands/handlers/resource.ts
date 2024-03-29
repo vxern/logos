@@ -59,7 +59,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		const resourceDocument = await Resource.create(client, {
 			guildId: guild.id.toString(),
 			authorId: interaction.user.id.toString(),
-			answers: formData,
+			formData,
 		});
 
 		await client.tryLog("resourceSend", {

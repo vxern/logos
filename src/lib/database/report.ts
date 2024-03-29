@@ -25,15 +25,15 @@ class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 	isResolved: boolean;
 
 	constructor({
-		answers,
+		formData,
 		isResolved,
 		...data
-	}: { answers: ReportFormData; isResolved?: boolean } & MetadataOrIdentifierData<Report>) {
+	}: { formData: ReportFormData; isResolved?: boolean } & MetadataOrIdentifierData<Report>) {
 		super({
 			"@metadata": Model.buildMetadata(data, { collection: "Reports" }),
 		});
 
-		this.formData = answers;
+		this.formData = formData;
 		this.isResolved = isResolved ?? false;
 	}
 
@@ -49,7 +49,7 @@ class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 
 	static async create(
 		client: Client,
-		data: Omit<IdentifierData<Report>, "createdAt"> & { answers: ReportFormData },
+		data: Omit<IdentifierData<Report>, "createdAt"> & { formData: ReportFormData },
 	): Promise<Report> {
 		const reportDocument = new Report({ ...data, createdAt: Date.now().toString() });
 

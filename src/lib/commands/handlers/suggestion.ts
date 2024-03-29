@@ -59,7 +59,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		const suggestionDocument = await Suggestion.create(client, {
 			guildId: guild.id.toString(),
 			authorId: interaction.user.id.toString(),
-			answers: formData,
+			formData,
 		});
 
 		await client.tryLog("suggestionSend", {

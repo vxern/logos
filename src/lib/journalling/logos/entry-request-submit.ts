@@ -39,11 +39,11 @@ class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 		return `${diagnostics.display.user(user)} has submitted a request to join the server.
 
 **${strings.reason}**
-${codeMultiline(entryRequest.answers.reason)}
+${codeMultiline(entryRequest.formData.reason)}
 **${strings.aim}**
-${codeMultiline(entryRequest.answers.aim)}
+${codeMultiline(entryRequest.formData.aim)}
 **${strings.whereFound}**
-${codeMultiline(entryRequest.answers.whereFound)}`;
+${codeMultiline(entryRequest.formData.whereFound)}`;
 	}
 }
 

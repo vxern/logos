@@ -23,15 +23,15 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }
 	isResolved: boolean;
 
 	constructor({
-		answers,
+		formData,
 		isResolved,
 		...data
-	}: { answers: SuggestionFormData; isResolved?: boolean } & MetadataOrIdentifierData<Suggestion>) {
+	}: { formData: SuggestionFormData; isResolved?: boolean } & MetadataOrIdentifierData<Suggestion>) {
 		super({
 			"@metadata": Model.buildMetadata(data, { collection: "Suggestions" }),
 		});
 
-		this.formData = answers;
+		this.formData = formData;
 		this.isResolved = isResolved ?? false;
 	}
 
@@ -47,7 +47,7 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }
 
 	static async create(
 		client: Client,
-		data: Omit<IdentifierData<Suggestion>, "createdAt"> & { answers: SuggestionFormData },
+		data: Omit<IdentifierData<Suggestion>, "createdAt"> & { formData: SuggestionFormData },
 	): Promise<Suggestion> {
 		const suggestionDocument = new Suggestion({ ...data, createdAt: Date.now().toString() });
 

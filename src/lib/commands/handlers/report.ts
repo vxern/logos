@@ -59,7 +59,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		const reportDocument = await Report.create(client, {
 			guildId: guild.id.toString(),
 			authorId: interaction.user.id.toString(),
-			answers: formData,
+			formData,
 		});
 
 		await client.tryLog("reportSubmit", {

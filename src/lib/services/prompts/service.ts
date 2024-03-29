@@ -232,23 +232,23 @@ abstract class PromptService<
 			let management: { roles?: string[]; users?: string[] } | undefined;
 			switch (this.#type) {
 				case "verification": {
-					management = (configuration as Configurations["verification"])?.management;
+					management = (configuration as Guild["verification"])?.management;
 					break;
 				}
 				case "reports": {
-					management = (configuration as Configurations["reports"])?.management;
+					management = (configuration as Guild["reports"])?.management;
 					break;
 				}
 				case "resources": {
-					management = (configuration as Configurations["resources"])?.management;
+					management = (configuration as Guild["resourceSubmissions"])?.management;
 					break;
 				}
 				case "suggestions": {
-					management = (configuration as Configurations["suggestions"])?.management;
+					management = (configuration as Guild["suggestions"])?.management;
 					break;
 				}
 				case "tickets": {
-					management = (configuration as Configurations["tickets"])?.management;
+					management = (configuration as Guild["tickets"])?.management;
 					break;
 				}
 				default: {
@@ -526,4 +526,4 @@ abstract class PromptService<
 	}
 }
 
-export { PromptService, Configurations };
+export { PromptService };

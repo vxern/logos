@@ -29,13 +29,13 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 	constructor({
 		createdAt,
 		type,
-		answers,
+		formData,
 		isResolved,
 		...data
 	}: {
 		createdAt?: number;
 		type: TicketType;
-		answers: TicketFormData;
+		formData: TicketFormData;
 		isResolved?: boolean;
 	} & MetadataOrIdentifierData<Ticket>) {
 		super({
@@ -44,7 +44,7 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 
 		this.createdAt = createdAt ?? Date.now();
 		this.type = type;
-		this.formData = answers;
+		this.formData = formData;
 		this.isResolved = isResolved ?? false;
 	}
 
@@ -60,7 +60,7 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 
 	static async create(
 		client: Client,
-		data: IdentifierData<Ticket> & { type: TicketType; answers: TicketFormData },
+		data: IdentifierData<Ticket> & { type: TicketType; formData: TicketFormData },
 	): Promise<Ticket> {
 		const ticketDocument = new Ticket(data);
 

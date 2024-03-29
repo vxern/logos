@@ -20,8 +20,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 
 	readonly createdAt: number;
 	readonly requestedRoleId: string;
-	// TODO(vxern): Rename to "formData".
-	readonly answers: EntryRequestFormData;
+	readonly formData: EntryRequestFormData;
 
 	isFinalised: boolean;
 	ticketChannelId?: string;
@@ -32,7 +31,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	constructor({
 		createdAt,
 		requestedRoleId,
-		answers,
+		formData,
 		isFinalised,
 		ticketChannelId,
 		votedFor,
@@ -41,7 +40,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	}: {
 		createdAt?: number;
 		requestedRoleId: string;
-		answers: EntryRequestFormData;
+		formData: EntryRequestFormData;
 		isFinalised?: boolean;
 		ticketChannelId?: string;
 		votedFor?: string[];
@@ -53,7 +52,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 
 		this.createdAt = createdAt ?? Date.now();
 		this.requestedRoleId = requestedRoleId;
-		this.answers = answers;
+		this.formData = formData;
 		this.isFinalised = isFinalised ?? false;
 		this.ticketChannelId = ticketChannelId;
 		this.votedFor = votedFor;
@@ -91,7 +90,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 
 	static async create(
 		client: Client,
-		data: IdentifierData<EntryRequest> & { requestedRoleId: string; answers: EntryRequestFormData },
+		data: IdentifierData<EntryRequest> & { requestedRoleId: string; formData: EntryRequestFormData },
 	): Promise<EntryRequest> {
 		const entryRequestDocument = new EntryRequest(data);
 
