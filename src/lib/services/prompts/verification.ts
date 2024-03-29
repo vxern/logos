@@ -648,13 +648,8 @@ class VerificationPromptService extends PromptService<{
 			return;
 		}
 
-		const author = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
-		if (author === undefined) {
-			return;
-		}
-
-		const target = this.client.entities.members.get(guild.id)?.get(interaction.user.id);
-		if (target === undefined) {
+		const entryRequestAuthor = this.client.entities.users.get(BigInt(entryRequestDocument.authorId));
+		if (entryRequestAuthor === undefined) {
 			return;
 		}
 
@@ -662,7 +657,7 @@ class VerificationPromptService extends PromptService<{
 			inquiryChannel: this.client.localise(
 				"entry.verification.inquiry.channel",
 				this.guildLocale,
-			)({ user: author.username }),
+			)({ user: entryRequestAuthor.username }),
 		};
 
 		const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
@@ -673,8 +668,7 @@ class VerificationPromptService extends PromptService<{
 		const ticketDocument = await ticketService.openTicket({
 			type: "standalone",
 			formData: { topic: strings.inquiryChannel },
-			author: author,
-			target: target,
+			user: entryRequestAuthor,
 		});
 		if (ticketDocument === undefined) {
 			const strings = {

@@ -153,20 +153,22 @@ class TicketPromptService extends PromptService<{
 		});
 	}
 
-	// TODO(vxern): This number of parameters is insanity, this function is way too large.
 	async openTicket({
 		type,
 		formData,
-		author,
-		target,
+		user,
 	}: {
 		type: TicketType;
 		formData: TicketFormData;
-		author: Logos.User;
-		target: Logos.Member;
+		user: Logos.User;
 	}): Promise<Ticket | undefined> {
 		const [guildDocument, configuration] = [this.guildDocument, this.configuration];
 		if (guildDocument === undefined || configuration === undefined) {
+			return undefined;
+		}
+
+		const member = this.client.entities.members.get(this.guildId)?.get(user.id);
+		if (member === undefined) {
 			return undefined;
 		}
 
@@ -189,14 +191,14 @@ class TicketPromptService extends PromptService<{
 			.createChannel(this.guildId, {
 				parentId: configuration.categoryId,
 				name: trim(
-					`${author.username}${constants.special.sigils.channelSeparator}${
+					`${user.username}${constants.special.sigils.channelSeparator}${
 						type === "standalone" ? formData.topic : strings.inquiry
 					}`,
 					100,
 				),
 				permissionOverwrites: [
 					...categoryChannel.permissionOverwrites,
-					{ type: Discord.OverwriteTypes.Member, id: author.id, allow: ["VIEW_CHANNEL"] },
+					{ type: Discord.OverwriteTypes.Member, id: user.id, allow: ["VIEW_CHANNEL"] },
 				],
 				topic: formData.topic,
 			})
@@ -208,11 +210,9 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		// TODO(vxern): Do not mention the target user if they're the same as the author / they don't exist.
-		const mentions = [mention(target.id, { type: "user" }), mention(author.id, { type: "user" })];
-		const mentionsFormatted = mentions.join(" ");
+		const memberMention = mention(user.id, { type: "user" });
 
-		this.client.bot.helpers.sendMessage(channel.id, { content: mentionsFormatted }).catch(() => {
+		this.client.bot.helpers.sendMessage(channel.id, { content: memberMention }).catch(() => {
 			this.client.log.warn("Failed to mention participants in ticket.");
 			return undefined;
 		});
@@ -221,7 +221,7 @@ class TicketPromptService extends PromptService<{
 			.sendMessage(channel.id, {
 				embeds: [
 					{
-						description: `${mention(author.id, { type: "user" })}: *${formData.topic}*`,
+						description: `${memberMention}: *${formData.topic}*`,
 						color: constants.colours.husky,
 					},
 				],
@@ -233,8 +233,7 @@ class TicketPromptService extends PromptService<{
 
 		const ticketDocument = await Ticket.create(this.client, {
 			guildId: this.guildIdString,
-			// TODO(vxern): Should this be the target?
-			authorId: target.id.toString(),
+			authorId: user.id.toString(),
 			channelId: channel.id.toString(),
 			type,
 			formData,
@@ -245,7 +244,7 @@ class TicketPromptService extends PromptService<{
 				await this.client.tryLog("ticketOpen", {
 					guildId: this.guildId,
 					journalling: configuration.journaling,
-					args: [target, ticketDocument],
+					args: [member, ticketDocument],
 				});
 				break;
 			}
@@ -253,7 +252,7 @@ class TicketPromptService extends PromptService<{
 				await this.client.tryLog("inquiryOpen", {
 					guildId: this.guildId,
 					journalling: configuration.journaling,
-					args: [target, ticketDocument],
+					args: [member, ticketDocument],
 				});
 				break;
 			}
@@ -266,13 +265,12 @@ class TicketPromptService extends PromptService<{
 			return ticketDocument;
 		}
 
-		// TODO(vxern): Should it be 'author' here?
-		const prompt = await ticketService.savePrompt(author, ticketDocument);
+		const prompt = await ticketService.savePrompt(user, ticketDocument);
 		if (prompt === undefined) {
 			return undefined;
 		}
 
-		ticketService.registerPrompt(prompt, author.id, ticketDocument);
+		ticketService.registerPrompt(prompt, user.id, ticketDocument);
 
 		return ticketDocument;
 	}

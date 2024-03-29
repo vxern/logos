@@ -64,8 +64,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 			const ticketDocument = await ticketService.openTicket({
 				type: "standalone",
 				formData,
-				author: submission.user,
-				target: member,
+				user: submission.user,
 			});
 			if (ticketDocument === undefined) {
 				return;
