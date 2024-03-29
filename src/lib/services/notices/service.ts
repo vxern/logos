@@ -82,6 +82,19 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 	}
 
 	async start(): Promise<void> {
+		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
+		this.#_messageDeletes.onCollect(async (payload) => {
+			const message = this.client.entities.messages.latest.get(payload.id);
+			if (message === undefined) {
+				return;
+			}
+
+			this.#handleMessageDelete(message);
+		});
+
+		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
+		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
+
 		const [channelId, configuration, guild, guildDocument] = [
 			this.channelId,
 			this.configuration,
@@ -150,25 +163,13 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			this.registerNotice(BigInt(notice.id), hash);
 			return;
 		}
-
-		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
-		this.#_messageDeletes.onCollect(async (payload) => {
-			const message = this.client.entities.messages.latest.get(payload.id);
-			if (message === undefined) {
-				return;
-			}
-
-			this.#handleMessageDelete(message);
-		});
-
-		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
-		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
 	}
 
 	async stop(): Promise<void> {
-		this.#noticeData = undefined;
 		await this.#_messageUpdates.close();
 		await this.#_messageDeletes.close();
+
+		this.#noticeData = undefined;
 	}
 
 	// Anti-tampering feature; detects notices being changed from the outside (embeds being deleted).
