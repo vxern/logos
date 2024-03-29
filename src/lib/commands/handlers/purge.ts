@@ -316,6 +316,9 @@ async function handlePurgeMessages(
 			resolve(false);
 		});
 
+		continueButton.onDone(() => resolve(false));
+		cancelButton.onDone(() => resolve(false));
+
 		await client.registerInteractionCollector(continueButton);
 		await client.registerInteractionCollector(cancelButton);
 
@@ -396,7 +399,6 @@ async function handlePurgeMessages(
 			],
 		});
 
-		// TODO(vxern): This is currently unsafe because it will hang indefinitely if the user never presses a button.
 		shouldContinue = await promise;
 		if (!shouldContinue) {
 			await client.deleteReply(interaction);
@@ -421,6 +423,9 @@ async function handlePurgeMessages(
 			await client.acknowledge(buttonPress);
 			resolve(false);
 		});
+
+		continueButton.onDone(() => resolve(false));
+		cancelButton.onDone(() => resolve(false));
 
 		await client.registerInteractionCollector(continueButton);
 		await client.registerInteractionCollector(cancelButton);
