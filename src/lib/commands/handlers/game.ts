@@ -72,7 +72,6 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 
 	const guessButton = new InteractionCollector<[index: string]>(client, {
 		only: [interaction.user.id],
-		isSingle: true,
 	});
 	const skipButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
