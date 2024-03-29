@@ -56,7 +56,7 @@ describe("Model", () => {
 		it("returns a partial document ID constructed from the passed data.", () => {
 			expect(
 				Model.buildPartialId<Warning>({ guildId: `${0}`, authorId: `${123}`, targetId: `${456}`, createdAt: `${789}` }),
-			).to.equal("123/456/789");
+			).to.equal("0/123/456/789");
 		});
 
 		// TODO(vxern): Improve by including samples of all ordered properties.
