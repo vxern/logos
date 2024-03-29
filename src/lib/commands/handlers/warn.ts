@@ -129,8 +129,8 @@ async function handleWarnUser(
 		return undefined;
 	}
 
-	// TODO(vxern): Test this.
 	const warningDocument = await Warning.create(client, {
+		guildId: guildId.toString(),
 		authorId: interaction.user.id.toString(),
 		targetId: member.id.toString(),
 		reason: interaction.parameters.reason,

@@ -77,6 +77,7 @@ async function handlePraiseUser(
 	}
 
 	const praiseDocument = await Praise.create(client, {
+		guildId: guildId.toString(),
 		authorId: interaction.user.id.toString(),
 		targetId: member.id.toString(),
 		comment: interaction.parameters.comment,

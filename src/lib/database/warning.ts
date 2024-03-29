@@ -2,18 +2,21 @@ import { Rule } from "logos:constants/rules";
 import { Client } from "logos/client";
 import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
 
-// TODO(vxern): This needs a guild in the ID as well.
-class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> {
-	get authorId(): string {
+class Warning extends Model<{ idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
+	get guildId(): string {
 		return this.idParts[0];
 	}
 
-	get targetId(): string {
+	get authorId(): string {
 		return this.idParts[1];
 	}
 
+	get targetId(): string {
+		return this.idParts[2];
+	}
+
 	get createdAt(): number {
-		return Number(this.idParts[2]);
+		return Number(this.idParts[3]);
 	}
 
 	readonly reason: string;
@@ -36,7 +39,10 @@ class Warning extends Model<{ idParts: ["authorId", "targetId", "createdAt"] }> 
 	): Promise<Warning[]> {
 		return await Model.all<Warning>(clientOrDatabase, {
 			collection: "Warnings",
-			where: Object.assign({ ...clauses?.where }, { authorId: undefined, targetId: undefined, createdAt: undefined }),
+			where: Object.assign(
+				{ ...clauses?.where },
+				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },
+			),
 		});
 	}
 
