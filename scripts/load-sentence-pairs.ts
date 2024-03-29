@@ -101,7 +101,7 @@ const entryBuffer: EntryBuffer = {
 	size: 0,
 	add(record: RecordWithLanguage) {
 		this.entries[`${record[0]}:${record[1][0]}`] = JSON.stringify(record[1]);
-		this.size++;
+		this.size += 1;
 
 		indexes[record[0]].push(record[1][0] as number);
 

@@ -91,7 +91,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		});
 
 		if (isCorrect) {
-			data.sessionScore++;
+			data.sessionScore += 1;
 			data.embedColour = constants.colours.lightGreen;
 			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
 

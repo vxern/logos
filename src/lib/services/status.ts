@@ -37,7 +37,7 @@ class StatusService extends GlobalService {
 		if (this.#currentIndex === constants.statuses.length - 1) {
 			this.#currentIndex = 0;
 		} else {
-			this.#currentIndex++;
+			this.#currentIndex += 1;
 		}
 
 		this.client.bot.gateway

@@ -90,10 +90,10 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 			return;
 		}
 
-		statsForGame.totalSessions++;
+		statsForGame.totalSessions += 1;
 
 		if (isUnique) {
-			statsForGame.uniquePlayers++;
+			statsForGame.uniquePlayers += 1;
 		}
 	}
 
@@ -105,7 +105,7 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 			return;
 		}
 
-		statsForGame.totalScore++;
+		statsForGame.totalScore += 1;
 	}
 }
 

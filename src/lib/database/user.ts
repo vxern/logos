@@ -112,7 +112,7 @@ class User extends Model<{ idParts: ["userId"] }> {
 			return;
 		}
 
-		statsForGame.sessionCount++;
+		statsForGame.sessionCount += 1;
 	}
 
 	incrementScore({ game, learningLocale }: { game: GameType; learningLocale: Locale }): void {
@@ -123,7 +123,7 @@ class User extends Model<{ idParts: ["userId"] }> {
 			return;
 		}
 
-		scoresForGame.totalScore++;
+		scoresForGame.totalScore += 1;
 	}
 
 	getGameScores({ game, learningLocale }: { game: GameType; learningLocale: Locale }): GameScores | undefined {

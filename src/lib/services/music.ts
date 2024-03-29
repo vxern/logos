@@ -498,7 +498,7 @@ class MusicService extends LocalService {
 
 		// Adjust the position for being incremented automatically when played next time.
 		if (isSongCollection(listing.content)) {
-			listing.content.position--;
+			listing.content.position -= 1;
 		}
 
 		session.listings.history.push(listing);
@@ -621,10 +621,10 @@ class MusicService extends LocalService {
 				}
 			} else {
 				if (session.flags.loop.song) {
-					session.listings.current.content.position--;
+					session.listings.current.content.position -= 1;
 				}
 
-				session.listings.current.content.position++;
+				session.listings.current.content.position += 1;
 			}
 		}
 
