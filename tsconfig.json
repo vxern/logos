@@ -42,5 +42,5 @@
   },
   "compileOnSave": true,
   "exclude": ["dist/", "node_modules/"],
-  "include": ["bun-types", "src/", "scripts/", "test/"]
+  "include": ["src/", "scripts/", "test/"]
 }
