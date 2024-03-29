@@ -67,12 +67,12 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 		return true;
 	}
 
-	dispatchCollect(...args: Parameters<Discord.EventHandlers[Event]>): void {
+	async dispatchCollect(...args: Parameters<Discord.EventHandlers[Event]>): Promise<void> {
 		if (this.#isClosed) {
 			return;
 		}
 
-		this.#onCollect?.(...args);
+		await this.#onCollect?.(...args);
 
 		if (this.#isSingle) {
 			this.close();

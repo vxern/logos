@@ -62,6 +62,7 @@ class EventStore {
 					continue;
 				}
 
+				// unawaited
 				collector.dispatchCollect?.(...args);
 			}
 		}
