@@ -115,7 +115,7 @@ abstract class PromptService<
 		this.#type = type;
 		this.#deleteMode = deleteMode;
 
-		this.documents = this.getAllDocuments();
+		this.documents = new Map();
 		this.promptByPartialId = new Map();
 
 		this.#handlerByPartialId = new Map();
@@ -152,6 +152,11 @@ abstract class PromptService<
 		];
 		if (channelId === undefined || configuration === undefined || guild === undefined || guildDocument === undefined) {
 			return;
+		}
+
+		const documents = this.getAllDocuments();
+		for (const [partialId, document] of documents.entries()) {
+			documents.set(partialId, document);
 		}
 
 		const promptsAll = (await getAllMessages(this.client, channelId)) ?? [];
