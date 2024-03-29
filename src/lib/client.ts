@@ -193,7 +193,7 @@ class Client {
 	}
 
 	get tryLog(): JournallingStore["tryLog"] {
-		return this.#journalling.tryLog.bind(this);
+		return this.#journalling.tryLog.bind(this.#journalling);
 	}
 
 	get lavalinkService(): LavalinkService {
