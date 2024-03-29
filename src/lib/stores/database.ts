@@ -100,7 +100,11 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	cacheDocuments<M extends Model>(documents: M[]): void {
-		this.#log.info(`Caching ${documents.length} documents...`);
+		if (documents.length === 0) {
+			return;
+		}
+
+		this.#log.debug(`Caching ${documents.length} document(s)...`);
 
 		for (const document of documents) {
 			this.cacheDocument(document);
@@ -290,13 +294,15 @@ class DocumentSession extends ravendb.DocumentSession {
 
 		const documents: (M | undefined)[] = [];
 		for (const documentRaw of documentsRaw) {
-			if ((documentRaw ?? undefined) === undefined) {
+			if (documentRaw === undefined) {
 				documents.push(undefined);
 				continue;
 			}
 
-			const document = DocumentSession.instantiateModel(documentRaw!) as M;
+			const document = DocumentSession.instantiateModel(documentRaw) as M;
+
 			documents.push(document);
+			this.#database.cacheDocument(document);
 		}
 
 		if (Array.isArray(idOrIds)) {
