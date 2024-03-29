@@ -22,10 +22,14 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 		});
 
 		await this.client.registerInteractionCollector(this.#_selectRolesButton);
+
+		await super.start();
 	}
 
 	async stop(): Promise<void> {
 		await this.#_selectRolesButton.close();
+
+		await super.stop();
 	}
 
 	generateNotice(): HashableMessageContents | undefined {

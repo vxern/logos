@@ -75,6 +75,12 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		this.#_messageDeletes = new Collector<"messageDelete">({ guildId });
 	}
 
+	static encodeHashInGuildIcon({ guild, hash }: { guild: Logos.Guild; hash: string }): string {
+		const iconUrl = Discord.guildIconUrl(guild.id, guild.icon);
+
+		return `${iconUrl}&hash=${hash}`;
+	}
+
 	async start(): Promise<void> {
 		const [channelId, configuration, guild, guildDocument] = [
 			this.channelId,
@@ -231,7 +237,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			return undefined;
 		}
 
-		lastEmbed.footer = { text: guild.name, iconUrl: `${Discord.guildIconUrl(guild.id, guild.icon)}&hash=${hash}` };
+		lastEmbed.footer = { text: guild.name, iconUrl: NoticeService.encodeHashInGuildIcon({ guild, hash }) };
 
 		return await this.client.bot.rest.sendMessage(channelId, contents).catch(() => {
 			this.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);

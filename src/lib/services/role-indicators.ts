@@ -36,7 +36,9 @@ class RoleIndicatorService extends LocalService {
 		await this.client.registerCollector("guildMemberUpdate", this.#_guildMemberUpdates);
 	}
 
-	async stop(): Promise<void> {}
+	async stop(): Promise<void> {
+		await this.#_guildMemberUpdates.close();
+	}
 
 	async guildMemberUpdate(member: Discord.Member | Logos.Member, user: Discord.User | Logos.User): Promise<void> {
 		const [configuration, guild] = [this.configuration, this.guild];

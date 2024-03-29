@@ -37,19 +37,19 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async start(): Promise<void> {
-		await super.start();
-
 		this.#_openInquiry.onCollect(async (selection) => {
 			await this.#handleOpenInquiry(selection, selection.metadata[1]);
 		});
 
 		await this.client.registerInteractionCollector(this.#_openInquiry);
+
+		await super.start();
 	}
 
 	async stop(): Promise<void> {
-		await super.stop();
-
 		this.#_openInquiry.close();
+
+		await super.stop();
 	}
 
 	getAllDocuments(): Map<string, EntryRequest> {
