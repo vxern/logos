@@ -199,7 +199,7 @@ class JournallingStore {
 		}
 
 		// @ts-ignore: This is fine.
-		const contents = await logger.message(...args);
+		const contents = await logger.buildMessage(...args);
 		if (contents === undefined) {
 			return;
 		}
