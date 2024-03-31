@@ -14,7 +14,8 @@ class EventStore {
 
 	buildEventHandlers(): Partial<Discord.EventHandlers> {
 		return {
-			ready: (..._) => {},
+			raw: (payload, shardId) => this.dispatchEvent(undefined, "raw", { args: [payload, shardId] }),
+			ready: (payload, rawPayload) => this.dispatchEvent(undefined, "ready", { args: [payload, rawPayload] }),
 			interactionCreate: (interactionRaw) =>
 				this.dispatchEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] }),
 			guildMemberAdd: (member, user) => this.dispatchEvent(member.guildId, "guildMemberAdd", { args: [member, user] }),

@@ -12,10 +12,10 @@ import {
 } from "logos:constants/music";
 import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";
-import * as Lavaclient from "lavaclient";
 import { Client } from "logos/client";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
+import * as shoukaku from "shoukaku";
 
 interface PositionControls {
 	by: number;
@@ -25,7 +25,7 @@ interface PositionControls {
 interface Session {
 	events: EventEmitter;
 
-	player: Lavaclient.Player;
+	player: shoukaku.Player;
 	channelId: bigint;
 
 	disconnectTimeout: Timer | undefined;
@@ -139,16 +139,12 @@ class MusicService extends LocalService {
 		return this.#session?.player.paused;
 	}
 
-	get playingSince(): number | undefined {
-		return this.#session?.player.playingSince;
-	}
-
 	get position(): number | undefined {
 		return this.#session?.player.position;
 	}
 
 	get length(): number | undefined {
-		return this.#session?.player.trackData?.length;
+		return this.#session?.player.data.playerOptions.endTime;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -158,8 +154,8 @@ class MusicService extends LocalService {
 	}
 
 	async start(): Promise<void> {
-		this.client.lavalinkService.node.on("disconnect", () => this.handleConnectionLost());
-		this.client.lavalinkService.node.on("connect", () => this.handleConnectionRestored());
+		this.client.lavalinkService.manager.on("disconnect", (_, __) => this.handleConnectionLost());
+		this.client.lavalinkService.manager.on("ready", (_, __) => this.handleConnectionRestored());
 	}
 
 	async stop(): Promise<void> {
@@ -207,18 +203,22 @@ class MusicService extends LocalService {
 	}
 
 	async createSession(channelId: bigint): Promise<Session | undefined> {
-		const [configuration, oldSession] = [this.configuration, this.#session];
-		if (configuration === undefined) {
+		const [configuration, guild, oldSession] = [this.configuration, this.guild, this.#session];
+		if (configuration === undefined || guild === undefined) {
 			return undefined;
 		}
 
-		const player = this.client.lavalinkService.node.createPlayer(this.guildIdString);
+		const player = await this.client.lavalinkService.manager.joinVoiceChannel({
+			shardId: guild.shardId,
+			guildId: this.guildIdString,
+			channelId: channelId.toString(),
+			deaf: true,
+		});
 
-		// TODO(vxern): This promise never resolves in lavaclient.
-		player.setVolume(configuration.implicitVolume);
+		await player.setGlobalVolume(configuration.implicitVolume);
 
 		const session = {
-			events: oldSession?.events ?? new EventEmitter().setMaxListeners(Number.POSITIVE_INFINITY),
+			events: oldSession?.events ?? new EventEmitter().setMaxListeners(0),
 			player,
 			disconnectTimeout: undefined,
 			channelId,
@@ -251,11 +251,7 @@ class MusicService extends LocalService {
 		this.#session = undefined;
 
 		session.events.emit("stop");
-		session.player.removeAllListeners();
-		await session.player.stop();
-		session.player.disconnect();
-		session.player.playing = false;
-		session.player.connected = false;
+		await session.player.node.manager.leaveVoiceChannel(this.guildIdString);
 		await session.player.destroy();
 
 		clearTimeout(session.disconnectTimeout);
@@ -338,8 +334,6 @@ class MusicService extends LocalService {
 		}
 
 		this.#session = { ...oldSession, player: newSession.player };
-
-		newSession.player.connect(newSession.channelId.toString(), { deafened: true });
 
 		await this.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
 
@@ -545,12 +539,6 @@ class MusicService extends LocalService {
 
 		listing.managerIds.push(...managerUserIds);
 
-		// If the player is not connected to a voice channel, or if it is connected
-		// to a different voice channel, connect to the new voice channel.
-		if (!session.player.connected || session.channelId !== channelId) {
-			session.player.connect(channelId.toString(), { deafened: true });
-		}
-
 		const guildLocale = this.guildLocale;
 
 		if (session.listings.current !== undefined) {
@@ -651,9 +639,9 @@ class MusicService extends LocalService {
 			return undefined;
 		}
 
-		const result = await session.player.node.rest.loadTracks(song.url);
+		const result = await session.player.node.rest.resolve(`ytsearch:${song.url}`);
 
-		if (result.loadType === "LOAD_FAILED" || result.loadType === "NO_MATCHES") {
+		if (result === undefined || result.loadType === "error" || result.loadType === "empty") {
 			session.flags.loop.song = false;
 
 			const guildLocale = this.guildLocale;
@@ -690,7 +678,10 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const track = result.tracks.at(0);
+		let track: shoukaku.Track | undefined;
+		if (result.loadType === "search") {
+			track = result.data.at(0);
+		}
 		if (track === undefined) {
 			return false;
 		}
@@ -703,7 +694,7 @@ class MusicService extends LocalService {
 			session.listings.current.content.title = track.info.title;
 		}
 
-		session.player.once("trackException", async (_: string | null, error: Error) => {
+		session.player.once("exception", async (reason) => {
 			const session = this.#session;
 			if (session === undefined) {
 				return;
@@ -711,7 +702,7 @@ class MusicService extends LocalService {
 
 			session.flags.loop.song = false;
 
-			this.log.warn(`Failed to play track: ${error}`);
+			this.log.warn(`Failed to play track: ${reason.exception}`);
 
 			const guildLocale = this.guildLocale;
 			const strings = {
@@ -743,7 +734,7 @@ class MusicService extends LocalService {
 				);
 		});
 
-		session.player.once("trackEnd", async () => {
+		session.player.once("end", async () => {
 			const session = this.#session;
 			if (session === undefined) {
 				return;
@@ -766,26 +757,26 @@ class MusicService extends LocalService {
 			await this.advanceQueueAndPlay();
 		});
 
-		session.player.once("trackStart", async () => {
+		session.player.once("start", async () => {
 			const now = Date.now();
 			session.startedAt = now;
 
 			if (session.restoreAt !== 0) {
-				await session.player.seek(session.restoreAt);
+				await session.player.seekTo(session.restoreAt);
 			}
 
 			if (restore !== undefined) {
-				await session.player.pause(restore.paused);
+				await session.player.setPaused(restore.paused);
 			}
 		});
 
 		if (restore !== undefined) {
-			await session.player.setVolume(restore.volume);
-			await session.player.play(track.track);
+			await session.player.setGlobalVolume(restore.volume);
+			await session.player.playTrack({ track: track.encoded });
 			return;
 		}
 
-		await session.player.play(track.track);
+		await session.player.playTrack({ track: track.encoded });
 
 		const emoji = getEmojiBySongListingType(this.current?.content.type ?? song.type);
 
@@ -897,7 +888,7 @@ class MusicService extends LocalService {
 			}
 		}
 
-		await session.player.stop();
+		await session.player.stopTrack();
 	}
 
 	async unskip(unskipCollection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
@@ -962,7 +953,7 @@ class MusicService extends LocalService {
 		}
 
 		if (session.player.track !== undefined) {
-			await session.player.stop();
+			await session.player.stopTrack();
 		} else {
 			await this.advanceQueueAndPlay();
 		}
@@ -977,13 +968,13 @@ class MusicService extends LocalService {
 		if (replayCollection) {
 			const previousLoopState = session.flags.loop.collection;
 			session.flags.loop.collection = true;
-			session.player.once("trackStart", () => {
+			session.player.once("start", () => {
 				session.flags.loop.collection = previousLoopState;
 			});
 		} else {
 			const previousLoopState = session.flags.loop.song;
 			session.flags.loop.song = true;
-			session.player.once("trackStart", () => {
+			session.player.once("start", () => {
 				session.flags.loop.song = previousLoopState;
 			});
 		}
@@ -1000,21 +991,21 @@ class MusicService extends LocalService {
 
 		session.flags.breakLoop = true;
 		session.restoreAt = 0;
-		await session.player.stop();
+		await session.player.stopTrack();
 
 		await this.advanceQueueAndPlay();
 	}
 
 	setVolume(volume: number): void {
-		this.#session?.player.setVolume(volume);
+		this.#session?.player.setGlobalVolume(volume);
 	}
 
 	pause(): void {
-		this.#session?.player.pause(true);
+		this.#session?.player.setPaused(true);
 	}
 
 	resume(): void {
-		this.#session?.player.pause(false);
+		this.#session?.player.setPaused(false);
 	}
 
 	async skipTo(timestampMilliseconds: number): Promise<void> {
@@ -1024,7 +1015,7 @@ class MusicService extends LocalService {
 		}
 
 		session.restoreAt = timestampMilliseconds;
-		await session.player.seek(timestampMilliseconds);
+		await session.player.seekTo(timestampMilliseconds);
 	}
 
 	remove(index: number): SongListing | undefined {
