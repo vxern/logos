@@ -1,6 +1,6 @@
 import { getTinyLDDetectionLanguageByLocale, isTinyLDLocale } from "logos:constants/languages";
 import { Detection, LanguageDetectorAdapter } from "logos/commands/detectors/adapter";
-import * as tinyld from "tinyld";
+import * as tinyld from "tinyld/heavy";
 
 class TinyLDAdapter extends LanguageDetectorAdapter {
 	constructor() {
