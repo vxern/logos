@@ -13,6 +13,7 @@ import {
 import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
+import { Collector } from "logos/collectors";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
@@ -53,6 +54,8 @@ interface Session {
 // TODO(vxern): This needs cleaning up.
 class MusicService extends LocalService {
 	#session: Session | undefined;
+
+	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
 
 	get configuration(): Guild["music"] {
 		return this.guildDocument?.music;
@@ -151,19 +154,24 @@ class MusicService extends LocalService {
 		super(client, { identifier: "MusicService", guildId });
 
 		this.#session = undefined;
+
+		this.#_voiceStateUpdates = new Collector({ guildId });
 	}
 
 	async start(): Promise<void> {
+		this.#_voiceStateUpdates.onCollect(this.#handleVoiceStateUpdate.bind(this));
+
 		this.client.lavalinkService.manager.on("disconnect", (_, __) => this.handleConnectionLost());
 		this.client.lavalinkService.manager.on("ready", (_, __) => this.handleConnectionRestored());
 	}
 
 	async stop(): Promise<void> {
+		await this.#_voiceStateUpdates.close();
+
 		await this.destroySession();
 	}
 
-	// TODO(vxern): Add a collector for this.
-	async voiceStateUpdate(_: Discord.VoiceState): Promise<void> {
+	async #handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
 		const [guild, session] = [this.guild, this.#session];
 		if (guild === undefined || session === undefined) {
 			return;
