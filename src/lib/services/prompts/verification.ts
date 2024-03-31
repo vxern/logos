@@ -331,7 +331,8 @@ class VerificationPromptService extends PromptService<{
 					resolve(undefined);
 				});
 
-				// TODO(vxern): For all confirm and reject buttons, resolve the promise once the collectors are done.
+				confirmButton.onDone(() => resolve(undefined));
+				cancelButton.onDone(() => resolve(undefined));
 
 				await this.client.registerInteractionCollector(confirmButton);
 				await this.client.registerInteractionCollector(cancelButton);
@@ -420,6 +421,9 @@ class VerificationPromptService extends PromptService<{
 
 					resolve(undefined);
 				});
+
+				confirmButton.onDone(() => resolve(undefined));
+				cancelButton.onDone(() => resolve(undefined));
 
 				await this.client.registerInteractionCollector(confirmButton);
 				await this.client.registerInteractionCollector(cancelButton);

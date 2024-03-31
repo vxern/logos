@@ -71,6 +71,8 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		return resolve(getSongListingFromVideo(result, interaction.user.id));
 	});
 
+	selectMenuSelection.onDone(() => resolve(undefined));
+
 	client.registerInteractionCollector(selectMenuSelection);
 
 	const strings = {

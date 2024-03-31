@@ -183,6 +183,9 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			});
 		});
 
+		continueButton.onDone(() => resolve(undefined));
+		cancelButton.onDone(() => resolve(undefined));
+
 		await this.client.registerInteractionCollector(continueButton);
 		await this.client.registerInteractionCollector(cancelButton);
 		await this.client.registerInteractionCollector(returnButton);
@@ -263,6 +266,8 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 
 			await this.#display();
 		});
+
+		this.#_submissions.onDone(() => resolve(undefined));
 
 		await this.client.registerInteractionCollector(this.#_submissions);
 
