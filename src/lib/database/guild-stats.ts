@@ -45,27 +45,19 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 			return client.documents.guildStats.get(partialId)!;
 		}
 
-		const { promise, resolve } = Promise.withResolvers<GuildStats>();
-
-		await client.database.withSession(async (session) => {
+		return await client.database.withSession(async (session) => {
 			const guildStatsDocument = await session.get<GuildStats>(Model.buildId(data, { collection: "GuildStats" }));
-			if (guildStatsDocument === undefined) {
-				return;
+			if (guildStatsDocument !== undefined) {
+				return guildStatsDocument;
 			}
 
-			resolve(guildStatsDocument);
-		});
+			const newGuildStatsDocument = new GuildStats(data);
 
-		await client.database.withSession(async (session) => {
-			const guildStatsDocument = new GuildStats(data);
-
-			await session.set(guildStatsDocument);
+			await session.set(newGuildStatsDocument);
 			await session.saveChanges();
 
-			resolve(guildStatsDocument);
+			return newGuildStatsDocument;
 		});
-
-		return promise;
 	}
 
 	registerSession({

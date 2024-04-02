@@ -243,12 +243,14 @@ class Database extends ravendb.DocumentStore {
 		return session;
 	}
 
-	async withSession(callback: (session: DocumentSession) => Promise<void>): Promise<void> {
+	async withSession<T>(callback: (session: DocumentSession) => Promise<T>): Promise<T> {
 		const session = this.openSession();
 
-		await callback(session);
+		const result = await callback(session);
 
 		session.dispose();
+
+		return result;
 	}
 }
 

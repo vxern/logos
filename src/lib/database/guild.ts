@@ -401,19 +401,14 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 			return client.documents.guilds.get(partialId)!;
 		}
 
-		const { promise, resolve } = Promise.withResolvers<Guild>();
-
-		client.database.withSession(async (session) => {
+		return await client.database.withSession(async (session) => {
 			const guildDocument = await session.get<Guild>(Model.buildId(data, { collection: "Guilds" }));
 			if (guildDocument === undefined) {
-				resolve(undefined);
-				return;
+				return undefined;
 			}
 
-			resolve(guildDocument);
+			return guildDocument;
 		});
-
-		return promise;
 	}
 
 	static async getOrCreate(client: Client, data: IdentifierData<Guild>): Promise<Guild> {
@@ -422,16 +417,12 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 			return guildDocument;
 		}
 
-		const { promise, resolve } = Promise.withResolvers<Guild>();
-
-		client.database.withSession(async (session) => {
+		return await client.database.withSession(async (session) => {
 			const guildDocument = await session.set(new Guild(data));
 			await session.saveChanges();
 
-			resolve(guildDocument);
+			return guildDocument;
 		});
-
-		return promise;
 	}
 
 	isEnabled(feature: keyof Guild) {

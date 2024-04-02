@@ -83,17 +83,13 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 			return client.documents.entryRequests.get(partialId)!;
 		}
 
-		const { promise, resolve } = Promise.withResolvers<EntryRequest | undefined>();
-
-		await client.database.withSession(async (session) => {
+		return await client.database.withSession(async (session) => {
 			const entryRequestDocument = await session.get<EntryRequest>(
 				Model.buildId(data, { collection: "EntryRequests" }),
 			);
 
-			resolve(entryRequestDocument);
+			return entryRequestDocument;
 		});
-
-		return promise;
 	}
 
 	static async getAll(

@@ -73,25 +73,17 @@ class User extends Model<{ idParts: ["userId"] }> {
 			return client.documents.users.get(partialId)!;
 		}
 
-		const { promise, resolve } = Promise.withResolvers<User>();
-
-		// TODO(vxern): Do this better.
-		client.database.withSession(async (session) => {
+		return await client.database.withSession(async (session) => {
 			const userDocument = await session.get<User>(Model.buildId(data, { collection: "Users" }));
 			if (userDocument !== undefined) {
-				resolve(userDocument);
-				return;
+				return userDocument;
 			}
 
-			{
-				const userDocument = await session.set(new User(data));
-				await session.saveChanges();
+			const newUserDocument = await session.set(new User(data));
+			await session.saveChanges();
 
-				resolve(userDocument);
-			}
+			return newUserDocument;
 		});
-
-		return promise;
 	}
 
 	registerSession({ game, learningLocale }: { game: GameType; learningLocale: Locale }): void {
