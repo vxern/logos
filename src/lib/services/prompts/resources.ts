@@ -32,11 +32,6 @@ class ResourcePromptService extends PromptService<{
 	}
 
 	getPromptContent(user: Logos.User, resourceDocument: Resource): Discord.CreateMessageOptions | undefined {
-		const guild = this.guild;
-		if (guild === undefined) {
-			return undefined;
-		}
-
 		const guildLocale = this.guildLocale;
 		const strings = {
 			markResolved: this.client.localise("markResolved", guildLocale)(),

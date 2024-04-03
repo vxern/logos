@@ -107,11 +107,6 @@ class EntryService extends LocalService {
 	): Promise<void> {
 		const locale = buttonPress.locale;
 
-		const guild = this.guild;
-		if (guild === undefined) {
-			return;
-		}
-
 		const index = Number.parseInt(buttonPress.metadata[1]);
 		const snowflake = (
 			Object.values(constants.roles.language.categories.proficiency.collection.list)[index]?.snowflakes as
@@ -123,7 +118,7 @@ class EntryService extends LocalService {
 		}
 
 		const roleId = BigInt(snowflake);
-		const role = guild.roles.get(roleId);
+		const role = this.guild.roles.get(roleId);
 		if (role === undefined) {
 			return;
 		}
@@ -160,7 +155,7 @@ class EntryService extends LocalService {
 							"entry.verification.getVerified.description.verificationRequired",
 							locale,
 						)({
-							server_name: guild.name,
+							server_name: this.guild.name,
 						}),
 						honestAnswers: this.client.localise("entry.verification.getVerified.description.honestAnswers", locale)(),
 						understood: this.client.localise("entry.verification.getVerified.description.understood", locale)(),
@@ -201,7 +196,7 @@ class EntryService extends LocalService {
 					"entry.proficiency.receivedAccess.description.nowMember",
 					locale,
 				)({
-					server_name: guild.name,
+					server_name: this.guild.name,
 				}),
 				toStart: this.client.localise("entry.proficiency.receivedAccess.description.toStart", locale)(),
 			},
@@ -214,23 +209,18 @@ class EntryService extends LocalService {
 		});
 
 		this.client.bot.rest
-			.addRole(guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
+			.addRole(this.guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
 			.catch(() =>
 				this.log.warn(
 					`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
 						buttonPress.user,
-					)} on ${diagnostics.display.guild(guild.id)}.`,
+					)} on ${diagnostics.display.guild(this.guild.id)}.`,
 				),
 			);
 	}
 
 	async #handleRequestVerification(buttonPress: Logos.Interaction<[index: string]>): Promise<void> {
 		const locale = buttonPress.locale;
-
-		const guild = this.guild;
-		if (guild === undefined) {
-			return;
-		}
 
 		const index = Number.parseInt(buttonPress.metadata[1]);
 		const snowflake = (
@@ -269,7 +259,7 @@ class EntryService extends LocalService {
 		}
 
 		const entryRequest = await EntryRequest.get(this.client, {
-			guildId: guild.id.toString(),
+			guildId: this.guild.id.toString(),
 			authorId: buttonPress.user.id.toString(),
 		});
 
@@ -298,14 +288,14 @@ class EntryService extends LocalService {
 				await this.client.postponeReply(submission);
 
 				const entryRequestDocument = await EntryRequest.create(this.client, {
-					guildId: guild.id.toString(),
+					guildId: this.guild.id.toString(),
 					authorId: buttonPress.user.id.toString(),
 					requestedRoleId: requestedRoleId.toString(),
 					formData,
 				});
 
 				await this.client.tryLog("entryRequestSubmit", {
-					guildId: guild.id,
+					guildId: this.guild.id,
 					args: [buttonPress.user, entryRequestDocument],
 				});
 

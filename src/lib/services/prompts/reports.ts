@@ -34,11 +34,6 @@ class ReportPromptService extends PromptService<{
 	}
 
 	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
-		const guild = this.guild;
-		if (guild === undefined) {
-			return;
-		}
-
 		const guildLocale = this.guildLocale;
 		const strings = {
 			report: {
@@ -94,8 +89,11 @@ class ReportPromptService extends PromptService<{
 						},
 					],
 					footer: {
-						text: guild.name,
-						iconUrl: PromptService.encodePartialIdInGuildIcon({ guild, partialId: reportDocument.partialId }),
+						text: this.guild.name,
+						iconUrl: PromptService.encodePartialIdInGuildIcon({
+							guild: this.guild,
+							partialId: reportDocument.partialId,
+						}),
 					},
 				},
 			],

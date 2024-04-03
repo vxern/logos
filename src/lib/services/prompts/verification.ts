@@ -58,11 +58,6 @@ class VerificationPromptService extends PromptService<{
 			return new Map();
 		}
 
-		const guild = this.guild;
-		if (guild === undefined) {
-			return new Map();
-		}
-
 		const entryRequests: Map<string, EntryRequest> = new Map();
 
 		for (const [partialId, entryRequestDocument] of this.client.documents.entryRequests) {

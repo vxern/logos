@@ -44,11 +44,6 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const guild = this.guild;
-		if (guild === undefined) {
-			return undefined;
-		}
-
 		const guildLocale = this.guildLocale;
 		const strings = {
 			markResolved: this.client.localise("markResolved", guildLocale)(),
