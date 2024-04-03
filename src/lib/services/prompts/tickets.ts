@@ -162,17 +162,12 @@ class TicketPromptService extends PromptService<{
 		formData: TicketFormData;
 		user: Logos.User;
 	}): Promise<Ticket | undefined> {
-		const [guildDocument, configuration] = [this.guildDocument, this.configuration];
-		if (guildDocument === undefined || configuration === undefined) {
-			return undefined;
-		}
-
 		const member = this.client.entities.members.get(this.guildId)?.get(user.id);
 		if (member === undefined) {
 			return undefined;
 		}
 
-		const categoryChannel = this.client.entities.channels.get(BigInt(configuration.categoryId));
+		const categoryChannel = this.client.entities.channels.get(BigInt(this.configuration.categoryId));
 		if (categoryChannel === undefined) {
 			return undefined;
 		}
@@ -182,14 +177,14 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const guildLocale = getLocaleByLocalisationLanguage(guildDocument.localisationLanguage);
+		const guildLocale = getLocaleByLocalisationLanguage(this.guildDocument.localisationLanguage);
 		const strings = {
 			inquiry: this.client.localise("entry.verification.inquiry.inquiry", guildLocale)(),
 		};
 
 		const channel = await this.client.bot.helpers
 			.createChannel(this.guildId, {
-				parentId: configuration.categoryId,
+				parentId: this.configuration.categoryId,
 				name: trim(
 					`${user.username}${constants.special.sigils.channelSeparator}${
 						type === "standalone" ? formData.topic : strings.inquiry
@@ -243,7 +238,7 @@ class TicketPromptService extends PromptService<{
 			case "standalone": {
 				await this.client.tryLog("ticketOpen", {
 					guildId: this.guildId,
-					journalling: configuration.journaling,
+					journalling: this.configuration.journaling,
 					args: [member, ticketDocument],
 				});
 				break;
@@ -251,7 +246,7 @@ class TicketPromptService extends PromptService<{
 			case "inquiry": {
 				await this.client.tryLog("inquiryOpen", {
 					guildId: this.guildId,
-					journalling: configuration.journaling,
+					journalling: this.configuration.journaling,
 					args: [member, ticketDocument],
 				});
 				break;

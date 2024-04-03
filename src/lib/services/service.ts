@@ -26,24 +26,16 @@ abstract class LocalService extends Service {
 	readonly guildId: bigint;
 	readonly guildIdString: string;
 
-	get guild(): Logos.Guild | undefined {
-		return this.client.entities.guilds.get(this.guildId);
+	get guild(): Logos.Guild {
+		return this.client.entities.guilds.get(this.guildId)!;
 	}
 
-	get guildDocument(): Guild | undefined {
-		return this.client.documents.guilds.get(this.guildIdString);
+	get guildDocument(): Guild {
+		return this.client.documents.guilds.get(this.guildIdString)!;
 	}
 
 	get guildLocale(): Locale {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return constants.defaults.LOCALISATION_LOCALE;
-		}
-
-		const guildLanguage = guildDocument.localisationLanguage;
-		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
-
-		return guildLocale;
+		return getLocaleByLocalisationLanguage(this.guildDocument.localisationLanguage);
 	}
 
 	constructor(client: Client, { identifier, guildId }: { identifier: string; guildId: bigint }) {

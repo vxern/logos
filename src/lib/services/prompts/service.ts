@@ -70,31 +70,12 @@ abstract class PromptService<
 	readonly #_messageUpdates: Collector<"messageUpdate">;
 	readonly #_messageDeletes: Collector<"messageDelete">;
 
-	get configuration(): Configurations[Generic["type"]] | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return this.#_configuration(guildDocument);
+	get configuration(): NonNullable<Configurations[Generic["type"]]> {
+		return this.#_configuration(this.guildDocument)!;
 	}
 
 	get channelId(): bigint | undefined {
-		const configuration = this.configuration;
-		if (configuration === undefined) {
-			return undefined;
-		}
-
-		if (configuration.channelId === undefined) {
-			return undefined;
-		}
-
-		const channelId = BigInt(configuration.channelId);
-		if (channelId === undefined) {
-			return undefined;
-		}
-
-		return channelId;
+		return this.configuration.channelId !== undefined ? BigInt(this.configuration.channelId) : undefined;
 	}
 
 	constructor(
@@ -144,13 +125,8 @@ abstract class PromptService<
 	}
 
 	async start(): Promise<void> {
-		const [channelId, configuration, guild, guildDocument] = [
-			this.channelId,
-			this.configuration,
-			this.guild,
-			this.guildDocument,
-		];
-		if (channelId === undefined || configuration === undefined || guild === undefined || guildDocument === undefined) {
+		const [channelId, configuration] = [this.channelId, this.configuration];
+		if (channelId === undefined || configuration === undefined) {
 			return;
 		}
 

@@ -4,22 +4,12 @@ import { Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 
 class AlertService extends LocalService {
-	get configuration(): Guild["alerts"] {
-		return this.guildDocument?.alerts;
+	get configuration(): NonNullable<Guild["alerts"]> {
+		return this.guildDocument.alerts!;
 	}
 
 	get channelId(): bigint | undefined {
-		const configuration = this.configuration;
-		if (configuration === undefined) {
-			return undefined;
-		}
-
-		const channelId = BigInt(configuration.channelId);
-		if (channelId === undefined) {
-			return undefined;
-		}
-
-		return channelId;
+		return this.configuration.channelId !== undefined ? BigInt(this.configuration.channelId) : undefined;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {

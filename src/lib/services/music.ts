@@ -57,8 +57,8 @@ class MusicService extends LocalService {
 
 	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
 
-	get configuration(): Guild["music"] {
-		return this.guildDocument?.music;
+	get configuration(): NonNullable<Guild["music"]> {
+		return this.guildDocument.music!;
 	}
 
 	get channelId(): bigint | undefined {
@@ -211,19 +211,16 @@ class MusicService extends LocalService {
 	}
 
 	async createSession(channelId: bigint): Promise<Session | undefined> {
-		const [configuration, guild, oldSession] = [this.configuration, this.guild, this.#session];
-		if (configuration === undefined || guild === undefined) {
-			return undefined;
-		}
+		const oldSession = this.#session;
 
 		const player = await this.client.lavalinkService.manager.joinVoiceChannel({
-			shardId: guild.shardId,
+			shardId: this.guild.shardId,
 			guildId: this.guildIdString,
 			channelId: channelId.toString(),
 			deaf: true,
 		});
 
-		await player.setGlobalVolume(configuration.implicitVolume);
+		await player.setGlobalVolume(this.configuration.implicitVolume);
 
 		const session = {
 			events: oldSession?.events ?? new EventEmitter().setMaxListeners(0),

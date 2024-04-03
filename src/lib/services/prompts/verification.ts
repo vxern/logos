@@ -111,11 +111,6 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	getPromptContent(user: Logos.User, entryRequestDocument: EntryRequest): Discord.CreateMessageOptions | undefined {
-		const [guild, guildDocument] = [this.guild, this.guildDocument];
-		if (guild === undefined || guildDocument === undefined) {
-			return undefined;
-		}
-
 		const voteInformation = this.#getVoteInformation(entryRequestDocument);
 		if (voteInformation === undefined) {
 			return undefined;
@@ -216,8 +211,11 @@ class VerificationPromptService extends PromptService<{
 						},
 					],
 					footer: {
-						text: guild.name,
-						iconUrl: PromptService.encodePartialIdInGuildIcon({ guild, partialId: entryRequestDocument.partialId }),
+						text: this.guild.name,
+						iconUrl: PromptService.encodePartialIdInGuildIcon({
+							guild: this.guild,
+							partialId: entryRequestDocument.partialId,
+						}),
 					},
 				},
 			],
@@ -600,12 +598,12 @@ class VerificationPromptService extends PromptService<{
 	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
 		await this.client.postponeReply(interaction);
 
-		const [configuration, guild, guildDocument] = [this.configuration, this.guild, this.guildDocument];
-		if (configuration === undefined || guild === undefined || guildDocument === undefined) {
+		const [configuration] = [this.configuration];
+		if (configuration === undefined) {
 			return;
 		}
 
-		const ticketConfiguration = guildDocument.tickets;
+		const ticketConfiguration = this.guildDocument.tickets;
 		if (ticketConfiguration === undefined) {
 			return;
 		}
@@ -675,7 +673,7 @@ class VerificationPromptService extends PromptService<{
 					"entry.verification.inquiry.opened.description",
 					this.guildLocale,
 				)({
-					guild_name: guild.name,
+					guild_name: this.guild.name,
 				}),
 			};
 

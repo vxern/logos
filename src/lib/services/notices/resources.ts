@@ -7,23 +7,18 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
 		const configuration = this.configuration;
 		if (configuration === undefined) {
 			return;
 		}
 
-		const resourceConfiguration = guildDocument.resources;
+		const resourceConfiguration = this.guildDocument.resources;
 		if (resourceConfiguration === undefined) {
 			return;
 		}
 
 		const guildLocale = this.guildLocale;
-		const featureLanguage = guildDocument.featureLanguage;
+		const featureLanguage = this.guildDocument.featureLanguage;
 
 		const strings = {
 			title: this.client.localise("notices.resources.title", guildLocale)(),

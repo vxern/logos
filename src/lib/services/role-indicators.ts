@@ -6,8 +6,8 @@ import { LocalService } from "logos/services/service";
 class RoleIndicatorService extends LocalService {
 	readonly #_guildMemberUpdates: Collector<"guildMemberUpdate">;
 
-	get configuration(): Guild["roleIndicators"] {
-		return this.guildDocument?.roleIndicators;
+	get configuration(): NonNullable<Guild["roleIndicators"]> {
+		return this.guildDocument.roleIndicators!;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -17,13 +17,7 @@ class RoleIndicatorService extends LocalService {
 	}
 
 	async start(): Promise<void> {
-		// TODO(vxern): Get rid of all this nullability all over the place.
-		const [configuration, guild] = [this.configuration, this.guild];
-		if (configuration === undefined || guild === undefined) {
-			return;
-		}
-
-		for (const member of guild.members.array()) {
+		for (const member of this.guild.members.array()) {
 			if (member.user === undefined) {
 				continue;
 			}
@@ -41,18 +35,13 @@ class RoleIndicatorService extends LocalService {
 	}
 
 	async guildMemberUpdate(member: Discord.Member | Logos.Member, user: Discord.User | Logos.User): Promise<void> {
-		const [configuration, guild] = [this.configuration, this.guild];
-		if (configuration === undefined || guild === undefined) {
-			return;
-		}
-
 		// Bots cannot change the guild owner's nickname.
-		if (member.id === guild.ownerId) {
+		if (member.id === this.guild.ownerId) {
 			return;
 		}
 
 		const applicableRolesAll: RoleWithIndicator[] = [];
-		for (const role of configuration.roles) {
+		for (const role of this.configuration.roles ?? []) {
 			if (!member.roles.includes(BigInt(role.roleId))) {
 				continue;
 			}
@@ -60,7 +49,7 @@ class RoleIndicatorService extends LocalService {
 			applicableRolesAll.push(role);
 		}
 
-		const applicableRoles = applicableRolesAll.slice(0, configuration.limit ?? applicableRolesAll.length);
+		const applicableRoles = applicableRolesAll.slice(0, this.configuration.limit ?? applicableRolesAll.length);
 		const applicableIndicators = applicableRoles.map((role) => role.indicator);
 
 		const hasApplicableIndicators = applicableIndicators.length !== 0;

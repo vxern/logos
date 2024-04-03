@@ -19,8 +19,8 @@ type DynamicVoiceChannelData = {
 class DynamicVoiceChannelService extends LocalService {
 	readonly oldVoiceStates: Map</*userId:*/ bigint, Logos.VoiceState> = new Map();
 
-	get configuration(): Guild["dynamicVoiceChannels"] {
-		return this.guildDocument?.dynamicVoiceChannels;
+	get configuration(): NonNullable<Guild["dynamicVoiceChannels"]> {
+		return this.guildDocument.dynamicVoiceChannels!;
 	}
 
 	get channels(): DynamicVoiceChannelData[] | undefined {

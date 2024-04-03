@@ -11,12 +11,12 @@ import { LocalService } from "logos/services/service";
 class EntryService extends LocalService {
 	readonly #_acceptedRulesButton: InteractionCollector;
 
-	get configuration(): Guild["entry"] {
-		return this.guildDocument?.entry;
+	get configuration(): NonNullable<Guild["entry"]> {
+		return this.guildDocument.entry!;
 	}
 
 	get verificationConfiguration(): Guild["verification"] {
-		return this.guildDocument?.verification;
+		return this.guildDocument.verification;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -40,11 +40,6 @@ class EntryService extends LocalService {
 	}
 
 	async #handleAcceptRules(buttonPress: Logos.Interaction): Promise<void> {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return;
-		}
-
 		const languageProficiencyButtons = new InteractionCollector<[index: string]>(this.client, {
 			only: [buttonPress.user.id],
 			dependsOn: this.#_acceptedRulesButton,
