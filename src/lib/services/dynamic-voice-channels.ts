@@ -23,18 +23,13 @@ class DynamicVoiceChannelService extends LocalService {
 		return this.guildDocument.dynamicVoiceChannels!;
 	}
 
-	get channels(): DynamicVoiceChannelData[] | undefined {
-		const [configuration, guild] = [this.configuration, this.guild];
-		if (configuration === undefined || guild === undefined) {
-			return undefined;
-		}
-
-		const channelIdConfigurationTuples = configuration.channels.map<[bigint, DynamicVoiceChannel]>(
+	get channels(): DynamicVoiceChannelData[] {
+		const channelIdConfigurationTuples = this.configuration.channels.map<[bigint, DynamicVoiceChannel]>(
 			(channelConfiguration) => [BigInt(channelConfiguration.id), channelConfiguration],
 		);
 		const parentChannelIds = channelIdConfigurationTuples.map(([channelId, _]) => channelId);
 
-		const channelsAll = guild.channels
+		const channelsAll = this.guild.channels
 			.filter((channel) => isVoice(channel))
 			.array()
 			.sort((a, b) => {
@@ -54,7 +49,9 @@ class DynamicVoiceChannelService extends LocalService {
 			});
 		const channelIds = channelsAll.map((channel) => channel.id);
 
-		const voiceStateByUserId = guild.voiceStates.filter((voiceState) => voiceState.channelId !== undefined).array();
+		const voiceStateByUserId = this.guild.voiceStates
+			.filter((voiceState) => voiceState.channelId !== undefined)
+			.array();
 		const voiceStatesByChannelId = new Map<bigint, Logos.VoiceState[]>(
 			channelIds.map((channelId) => [
 				channelId,
@@ -103,12 +100,7 @@ class DynamicVoiceChannelService extends LocalService {
 	}
 
 	async start(): Promise<void> {
-		const [channels, configuration, guild] = [this.channels, this.configuration, this.guild];
-		if (channels === undefined || configuration === undefined || guild === undefined) {
-			return;
-		}
-
-		const voiceStatesAll = channels.flatMap((channel) => [
+		const voiceStatesAll = this.channels.flatMap((channel) => [
 			...channel.parent.voiceStates,
 			...channel.children.flatMap((channel) => channel.voiceStates),
 		]);
@@ -116,7 +108,7 @@ class DynamicVoiceChannelService extends LocalService {
 			await this.voiceStateUpdate(voiceState);
 		}
 
-		for (const { parent, children, configuration } of channels) {
+		for (const { parent, children, configuration } of this.channels) {
 			const groupChannelsCount = children.length + 1;
 			const surplusVacantChannels = Math.max(
 				0,
@@ -148,12 +140,6 @@ class DynamicVoiceChannelService extends LocalService {
 
 	// TODO(vxern): Add a collector for this.
 	async voiceStateUpdate(newVoiceState: Logos.VoiceState): Promise<void> {
-		const [channels, configuration, guild] = [this.channels, this.configuration, this.guild];
-		if (channels === undefined || configuration === undefined || guild === undefined) {
-			this.oldVoiceStates.set(newVoiceState.userId, newVoiceState);
-			return;
-		}
-
 		const oldVoiceState = this.oldVoiceStates.get(newVoiceState.userId);
 
 		if (oldVoiceState === undefined || oldVoiceState.channelId === undefined) {

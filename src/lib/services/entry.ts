@@ -15,8 +15,8 @@ class EntryService extends LocalService {
 		return this.guildDocument.entry!;
 	}
 
-	get verificationConfiguration(): Guild["verification"] {
-		return this.guildDocument.verification;
+	get verificationConfiguration(): NonNullable<Guild["verification"]> {
+		return this.guildDocument.verification!;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {

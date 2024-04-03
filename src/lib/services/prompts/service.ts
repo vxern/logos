@@ -125,8 +125,8 @@ abstract class PromptService<
 	}
 
 	async start(): Promise<void> {
-		const [channelId, configuration] = [this.channelId, this.configuration];
-		if (channelId === undefined || configuration === undefined) {
+		const channelId = this.channelId;
+		if (channelId === undefined) {
 			return;
 		}
 
@@ -213,23 +213,23 @@ abstract class PromptService<
 			let management: { roles?: string[]; users?: string[] } | undefined;
 			switch (this.#type) {
 				case "verification": {
-					management = (configuration as Guild["verification"])?.management;
+					management = (this.configuration as Guild["verification"])?.management;
 					break;
 				}
 				case "reports": {
-					management = (configuration as Guild["reports"])?.management;
+					management = (this.configuration as Guild["reports"])?.management;
 					break;
 				}
 				case "resources": {
-					management = (configuration as Guild["resourceSubmissions"])?.management;
+					management = (this.configuration as Guild["resourceSubmissions"])?.management;
 					break;
 				}
 				case "suggestions": {
-					management = (configuration as Guild["suggestions"])?.management;
+					management = (this.configuration as Guild["suggestions"])?.management;
 					break;
 				}
 				case "tickets": {
-					management = (configuration as Guild["tickets"])?.management;
+					management = (this.configuration as Guild["tickets"])?.management;
 					break;
 				}
 				default: {

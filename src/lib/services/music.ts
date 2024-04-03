@@ -172,12 +172,14 @@ class MusicService extends LocalService {
 	}
 
 	async #handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
-		const [guild, session] = [this.guild, this.#session];
-		if (guild === undefined || session === undefined) {
+		const session = this.#session;
+		if (session === undefined) {
 			return;
 		}
 
-		const voiceStates = guild.voiceStates.array().filter((voiceState) => voiceState.channelId === session.channelId);
+		const voiceStates = this.guild.voiceStates
+			.array()
+			.filter((voiceState) => voiceState.channelId === session.channelId);
 		const hasSessionBeenAbandoned = voiceStates.length === 1 && voiceStates.at(0)?.userId === this.client.bot.id;
 		if (hasSessionBeenAbandoned) {
 			await this.handleSessionAbandoned();
@@ -365,8 +367,8 @@ class MusicService extends LocalService {
 	verifyVoiceState(interaction: Logos.Interaction, action: "manage" | "check"): boolean {
 		const locale = interaction.locale;
 
-		const [guild, session] = [this.guild, this.#session];
-		if (guild === undefined) {
+		const session = this.#session;
+		if (session === undefined) {
 			return false;
 		}
 
@@ -387,7 +389,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const voiceState = guild.voiceStates.get(interaction.user.id);
+		const voiceState = this.guild.voiceStates.get(interaction.user.id);
 		const userChannelId = voiceState?.channelId;
 
 		if (voiceState === undefined || userChannelId === undefined) {
@@ -526,8 +528,8 @@ class MusicService extends LocalService {
 	}
 
 	async receiveNewListing(listing: SongListing, channelId: bigint): Promise<void> {
-		const [guild, session] = [this.guild, this.#session ?? (await this.createSession(channelId))];
-		if (guild === undefined || session === undefined) {
+		const session = this.#session ?? (await this.createSession(channelId));
+		if (session === undefined) {
 			return;
 		}
 
@@ -536,7 +538,7 @@ class MusicService extends LocalService {
 		session.listings.queue.push(listing);
 		session.events.emit("queueUpdate");
 
-		const voiceStates = guild.voiceStates
+		const voiceStates = this.guild.voiceStates
 			.filter((voiceState) => voiceState.channelId !== undefined)
 			.filter((voiceState) => (voiceState.channelId ?? 0n) === channelId)
 			.array();

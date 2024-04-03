@@ -80,8 +80,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
 		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
 
-		const [channelId, configuration] = [this.channelId, this.configuration];
-		if (channelId === undefined || configuration === undefined) {
+		const channelId = this.channelId;
+		if (channelId === undefined) {
 			return;
 		}
 

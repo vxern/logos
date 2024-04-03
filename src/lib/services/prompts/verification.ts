@@ -598,11 +598,6 @@ class VerificationPromptService extends PromptService<{
 	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
 		await this.client.postponeReply(interaction);
 
-		const [configuration] = [this.configuration];
-		if (configuration === undefined) {
-			return;
-		}
-
 		const ticketConfiguration = this.guildDocument.tickets;
 		if (ticketConfiguration === undefined) {
 			return;
@@ -685,17 +680,12 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	#getVoteInformation(entryRequestDocument: EntryRequest): VoteInformation | undefined {
-		const [configuration, guild] = [this.configuration, this.guild];
-		if (configuration === undefined || guild === undefined) {
-			return undefined;
-		}
-
-		const roleIds = guild.roles
-			.filter((role) => configuration.voting.roles.includes(role.id.toString()))
+		const roleIds = this.guild.roles
+			.filter((role) => this.configuration.voting.roles.includes(role.id.toString()))
 			.map((role) => role.id);
-		const userIds = configuration.voting.users?.map((userId) => BigInt(userId));
+		const userIds = this.configuration.voting.users?.map((userId) => BigInt(userId));
 
-		const voterCount = guild.members
+		const voterCount = this.guild.members
 			.filter((member) => userIds?.includes(member.id) || roleIds.some((roleId) => member.roles.includes(roleId)))
 			.filter((member) => !member.user?.toggles?.has("bot"))
 			.array().length;
@@ -721,8 +711,8 @@ class VerificationPromptService extends PromptService<{
 			}
 		}
 
-		const acceptance = getVoteInformation("acceptance", configuration, entryRequestDocument.votersFor.length);
-		const rejection = getVoteInformation("rejection", configuration, entryRequestDocument.votersAgainst.length);
+		const acceptance = getVoteInformation("acceptance", this.configuration, entryRequestDocument.votersFor.length);
+		const rejection = getVoteInformation("rejection", this.configuration, entryRequestDocument.votersAgainst.length);
 
 		return { acceptance, rejection };
 	}

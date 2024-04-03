@@ -8,16 +8,11 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const [configuration, guild] = [this.configuration, this.guild];
-		if (configuration === undefined || guild === undefined) {
-			return undefined;
-		}
-
-		const ruleChannelId = BigInt(configuration.ruleChannelId);
+		const ruleChannelId = BigInt(this.configuration.ruleChannelId);
 
 		const guildLocale = this.guildLocale;
 		const strings = {
-			title: this.client.localise("entry.welcome.title", guildLocale)({ server_name: guild.name }),
+			title: this.client.localise("entry.welcome.title", guildLocale)({ server_name: this.guild.name }),
 			description: {
 				toEnter: this.client.localise(
 					"entry.welcome.description.toEnter",
