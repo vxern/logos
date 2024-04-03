@@ -1,7 +1,7 @@
 import { DetectionLanguage, Locale } from "logos:constants/languages";
 import { list } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { getAdapters } from "logos/commands/detectors";
+import { detectLanguages } from "logos/commands/detectors";
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,
@@ -188,43 +188,4 @@ async function handleRecogniseLanguage(
 	}
 }
 
-// TODO(vxern): This should be elsewhere.
-async function detectLanguages({ text }: { text: string }): Promise<DetectedLanguagesSorted> {
-	const adapters = getAdapters();
-
-	const detectionFrequencies: Partial<Record<DetectionLanguage, number>> = {};
-	for await (const element of Promise.createRace(adapters, (adapter) => adapter.detect(text))) {
-		if (element.result === undefined) {
-			continue;
-		}
-
-		const detection = element.result;
-		const detectedLanguage = detection.language;
-
-		detectionFrequencies[detectedLanguage] = (detectionFrequencies[detectedLanguage] ?? 1) + 1;
-	}
-
-	return getLanguagesSorted(detectionFrequencies);
-}
-
-type DetectedLanguagesSorted = {
-	likely: DetectionLanguage[];
-	possible: DetectionLanguage[];
-};
-function getLanguagesSorted(detectionFrequencies: Partial<Record<DetectionLanguage, number>>): DetectedLanguagesSorted {
-	const entries = Object.entries(detectionFrequencies) as [DetectionLanguage, number][];
-
-	let mode = 0;
-	for (const [_, frequency] of entries) {
-		if (frequency > mode) {
-			mode = frequency;
-		}
-	}
-
-	const likely = entries.filter(([_, frequency]) => frequency === mode).map(([language, _]) => language);
-	const possible = entries.map(([language, _]) => language).filter((language) => !likely.includes(language));
-
-	return { likely, possible };
-}
-
-export { handleRecogniseLanguageChatInput, handleRecogniseLanguageMessage, detectLanguages };
+export { handleRecogniseLanguageChatInput, handleRecogniseLanguageMessage };

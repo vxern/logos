@@ -7,9 +7,9 @@ import languages, {
 } from "logos:constants/languages";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { detectLanguages } from "logos/commands/handlers/recognise";
 import { resolveAdapters } from "logos/commands/translators";
 import { Translation } from "logos/commands/translators/adapter";
+import { detectLanguages } from "logos/commands/detectors";
 
 async function handleTranslateChatInputAutocomplete(
 	client: Client,

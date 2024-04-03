@@ -75,8 +75,8 @@ async function displayError(
 	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const strings = {
-		title: client.localise("licenses.strings.invalid.title", locale)(),
-		description: client.localise("licenses.strings.invalid.description", locale)(),
+		title: client.localise("license.strings.invalid.title", locale)(),
+		description: client.localise("license.strings.invalid.description", locale)(),
 	};
 
 	await client.error(interaction, {
