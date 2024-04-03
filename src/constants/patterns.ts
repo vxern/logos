@@ -21,7 +21,6 @@ const patterns = Object.freeze({
 	youtubeUrl:
 		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
 	/** Used for matching against role indicators in nicknames, e.g. Logos﹘EA・WA */
-	// TODO(vxern): This needs verifying.
 	roleIndicators: new RegExp(
 		`^(.+)${special.sigils.divider}([^${special.sigils.separator}]{2,4}(?:${special.sigils.separator}[^${special.sigils.separator}]{2,4})*)$`,
 	),

@@ -25,7 +25,6 @@ type PromptType = keyof ServiceStore["local"]["prompts"];
 
 type PromptDeleteMode = "delete" | "close" | "none";
 
-// TODO(vxern): Use hashing and registering old prompts.
 abstract class PromptService<
 	Generic extends {
 		type: PromptType;
