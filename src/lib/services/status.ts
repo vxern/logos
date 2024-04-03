@@ -4,47 +4,35 @@ import { GlobalService } from "logos/services/service";
 class StatusService extends GlobalService {
 	#currentIndex: number;
 
+	#_timer?: Timer;
+
+	get status(): string {
+		return constants.statuses[this.#currentIndex]!;
+	}
+
 	constructor(client: Client) {
 		super(client, { identifier: "StatusService" });
 
 		this.#currentIndex = 0;
 	}
 
-	get status(): string | undefined {
-		return constants.statuses[this.#currentIndex];
-	}
-
 	async start(): Promise<void> {
-		if (constants.statuses.length === 0) {
-			return;
-		}
-
-		this.#cycleStatus();
+		this.#_timer = setInterval(this.#cycleStatus.bind(this), constants.STATUS_CYCLE_PERIOD);
 	}
 
 	async stop(): Promise<void> {
+		clearInterval(this.#_timer);
+		this.#_timer = undefined;
+
 		this.#currentIndex = 0;
 	}
 
-	#cycleStatus(): void {
-		const status = this.status;
-		if (status === undefined) {
-			this.#currentIndex = 0;
-			this.#cycleStatus();
-			return;
-		}
-
-		if (this.#currentIndex === constants.statuses.length - 1) {
-			this.#currentIndex = 0;
-		} else {
-			this.#currentIndex += 1;
-		}
-
-		this.client.bot.gateway
+	async #cycleStatus(): Promise<void> {
+		await this.client.bot.gateway
 			.editBotStatus({
 				activities: [
 					{
-						name: status,
+						name: this.status,
 						type: Discord.ActivityTypes.Streaming,
 					},
 				],
@@ -52,7 +40,11 @@ class StatusService extends GlobalService {
 			})
 			.catch(() => this.log.warn("Unable to edit bot status."));
 
-		setTimeout(() => this.#cycleStatus(), constants.STATUS_CYCLE_PERIOD);
+		if (this.#currentIndex === constants.statuses.length - 1) {
+			this.#currentIndex = 0;
+		} else {
+			this.#currentIndex += 1;
+		}
 	}
 }
 
