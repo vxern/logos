@@ -2,6 +2,7 @@ import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { DynamicVoiceChannel, Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
+import { Collector } from "logos/collectors";
 
 type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
 
@@ -17,7 +18,9 @@ type DynamicVoiceChannelData = {
 };
 
 class DynamicVoiceChannelService extends LocalService {
-	readonly oldVoiceStates: Map</*userId:*/ bigint, Logos.VoiceState> = new Map();
+	readonly oldVoiceStates: Map</*userId:*/ bigint, Logos.VoiceState>;
+
+	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
 
 	get configuration(): NonNullable<Guild["dynamicVoiceChannels"]> {
 		return this.guildDocument.dynamicVoiceChannels!;
@@ -97,15 +100,23 @@ class DynamicVoiceChannelService extends LocalService {
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "DynamicVoiceChannelService", guildId });
+
+		this.oldVoiceStates = new Map();
+
+		this.#_voiceStateUpdates = new Collector({ guildId });
 	}
 
 	async start(): Promise<void> {
+		this.#_voiceStateUpdates.onCollect(this.#_handleVoiceStateUpdate.bind(this));
+
+		await this.client.registerCollector("voiceStateUpdate", this.#_voiceStateUpdates);
+
 		const voiceStatesAll = this.channels.flatMap((channel) => [
 			...channel.parent.voiceStates,
 			...channel.children.flatMap((channel) => channel.voiceStates),
 		]);
 		for (const voiceState of voiceStatesAll) {
-			await this.voiceStateUpdate(voiceState);
+			await this.#_handleVoiceStateUpdate(voiceState);
 		}
 
 		for (const { parent, children, configuration } of this.channels) {
@@ -135,26 +146,27 @@ class DynamicVoiceChannelService extends LocalService {
 	}
 
 	async stop(): Promise<void> {
+		await this.#_voiceStateUpdates.close();
+
 		this.oldVoiceStates.clear();
 	}
 
-	// TODO(vxern): Add a collector for this.
-	async voiceStateUpdate(newVoiceState: Logos.VoiceState): Promise<void> {
+	async #_handleVoiceStateUpdate(newVoiceState: Logos.VoiceState): Promise<void> {
 		const oldVoiceState = this.oldVoiceStates.get(newVoiceState.userId);
 
 		if (oldVoiceState === undefined || oldVoiceState.channelId === undefined) {
-			await this.#onConnect(newVoiceState);
+			await this.#_handleConnect(newVoiceState);
 		} else if (newVoiceState.channelId === undefined) {
-			await this.#onDisconnect(oldVoiceState);
+			await this.#_handleDisconnect(oldVoiceState);
 		} else {
-			await this.#onConnect(newVoiceState);
-			await this.#onDisconnect(oldVoiceState);
+			await this.#_handleConnect(newVoiceState);
+			await this.#_handleDisconnect(oldVoiceState);
 		}
 
 		this.oldVoiceStates.set(newVoiceState.userId, newVoiceState);
 	}
 
-	async #onConnect(newVoiceState: Logos.VoiceState): Promise<void> {
+	async #_handleConnect(newVoiceState: Logos.VoiceState): Promise<void> {
 		const channels = this.channels;
 		if (channels === undefined) {
 			return;
@@ -207,7 +219,7 @@ class DynamicVoiceChannelService extends LocalService {
 			.catch(() => this.log.warn(`Failed to create voice channel on ${diagnostics.display.guild(this.guildId)}.`));
 	}
 
-	async #onDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
+	async #_handleDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
 		const channels = this.channels;
 		if (channels === undefined) {
 			return;
