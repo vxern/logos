@@ -7,11 +7,6 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const configuration = this.configuration;
-		if (configuration === undefined) {
-			return;
-		}
-
 		const resourceConfiguration = this.guildDocument.resources;
 		if (resourceConfiguration === undefined) {
 			return;

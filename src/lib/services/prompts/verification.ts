@@ -53,11 +53,6 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	getAllDocuments(): Map<string, EntryRequest> {
-		const configuration = this.configuration;
-		if (configuration === undefined) {
-			return new Map();
-		}
-
 		const member = this.client.entities.members.get(this.guildId)?.get(this.client.bot.id);
 		if (member === undefined) {
 			return new Map();
@@ -256,11 +251,6 @@ class VerificationPromptService extends PromptService<{
 	): Promise<EntryRequest | null | undefined> {
 		const locale = interaction.locale;
 
-		const configuration = this.configuration;
-		if (configuration === undefined) {
-			return undefined;
-		}
-
 		const [guildId, userId] = interaction.metadata[0].split("/");
 		if (guildId === undefined || userId === undefined) {
 			return undefined;
@@ -283,7 +273,7 @@ class VerificationPromptService extends PromptService<{
 
 		const currentVote = entryRequestDocument.getUserVote({ userId: interaction.user.id.toString() });
 
-		const management = configuration.management;
+		const management = this.configuration.management;
 
 		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
 		const userIds = management?.users?.map((userId) => BigInt(userId));

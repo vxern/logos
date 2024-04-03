@@ -7,11 +7,6 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const configuration = this.configuration;
-		if (configuration === undefined) {
-			return undefined;
-		}
-
 		const guildLocale = this.guildLocale;
 		const informationFields = constants.rules.map((rule, index) => {
 			const strings = {
@@ -45,7 +40,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 					fields: [
 						{
 							name: `${constants.emojis.information.inviteLink}  ${strings.invite}`,
-							value: `**${configuration.inviteLink}**`,
+							value: `**${this.configuration.inviteLink}**`,
 						},
 					],
 				},
