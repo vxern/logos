@@ -191,19 +191,20 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		await this.client.registerInteractionCollector(returnButton);
 		await this.client.registerInteractionCollector(leaveButton);
 
-		// TODO(vxern): Localise this.
-		const embed: Discord.CamelizedDiscordEmbed = this.getErrorMessage(submission, submission, { error }) ?? {
-			title: "Something went wrong",
-			description: "Your submission could not be processed.",
-		};
-
 		const strings = {
+			title: this.client.localise("form.failedToSubmit.title", locale)(),
+			description: this.client.localise("form.failedToSubmit.description", locale)(),
 			continue: this.client.localise("prompts.continue", locale)(),
 			cancel: this.client.localise("prompts.cancel", locale)(),
 		};
 
 		await this.client.editReply(submission, {
-			embeds: [embed],
+			embeds: [
+				this.getErrorMessage(submission, submission, { error }) ?? {
+					title: strings.title,
+					description: strings.description,
+				},
+			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
