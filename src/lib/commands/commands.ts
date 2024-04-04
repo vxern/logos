@@ -679,10 +679,10 @@ interface OptionTemplate extends OptionMetadata {
 	readonly required?: boolean;
 	readonly choices?: Discord.ApplicationCommandOptionChoice[];
 	readonly channelTypes?: Discord.ChannelTypes[];
-	readonly minValue?: number;
-	readonly maxValue?: number;
-	readonly minLength?: number;
-	readonly maxLength?: number;
+	readonly minimumValue?: number;
+	readonly maximumValue?: number;
+	readonly minimumLength?: number;
+	readonly maximumLength?: number;
 	readonly autocomplete?: boolean;
 	readonly options?: OptionTemplate[];
 }
