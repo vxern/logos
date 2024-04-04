@@ -142,6 +142,15 @@ class MusicService extends LocalService {
 		return this.#session?.player.paused;
 	}
 
+	get playingSince(): number | undefined {
+		const position = this.position;
+		if (position === undefined) {
+			return undefined;
+		}
+
+		return Date.now() - position;
+	}
+
 	get position(): number | undefined {
 		return this.#session?.player.position;
 	}
