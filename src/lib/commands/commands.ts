@@ -31,7 +31,7 @@ import { handleLoopPlayback } from "logos/commands/handlers/music/loop";
 import { handleDisplayCurrentlyPlaying } from "logos/commands/handlers/music/now";
 import { handlePausePlayback } from "logos/commands/handlers/music/pause";
 import { handleRequestStreamPlayback } from "logos/commands/handlers/music/play/file";
-import { handleRequestQueryPlayback } from "logos/commands/handlers/music/play/query";
+import { handleRequestYouTubePlayback } from "logos/commands/handlers/music/play/query";
 import { handleDisplayPlaybackQueue } from "logos/commands/handlers/music/queue";
 import { handleRemoveSongListing } from "logos/commands/handlers/music/remove";
 import { handleReplayAction } from "logos/commands/handlers/music/replay";
@@ -68,8 +68,6 @@ import {
 	handleTranslateMessage,
 } from "logos/commands/handlers/translate";
 import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
-// TODO(vxern): This shouldn't be here.
-import resolvers from "logos/commands/resolvers";
 
 // TODO(vxern): Make options named so as to allow referencing specific subcommands.
 /**
@@ -527,8 +525,7 @@ const commands = Object.freeze({
 					{
 						identifier: "youtube",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
-						handle: async (client: Client, interaction: Logos.Interaction) =>
-							handleRequestQueryPlayback(client, interaction, resolvers.youtube),
+						handle: handleRequestYouTubePlayback,
 						options: [constants.parameters.query],
 					},
 				],
