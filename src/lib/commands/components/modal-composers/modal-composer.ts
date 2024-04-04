@@ -244,7 +244,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		this.#_submissions.onCollect(async (submission) => {
 			const formData = ModalComposer.getFormData<FormData>(submission);
 			if (formData === undefined) {
-				// TODO(vxern): Log.
+				this.client.log.warn("Could not get form data from modal composer.");
 				resolve(undefined);
 				return;
 			}
