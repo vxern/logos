@@ -80,52 +80,52 @@ const commands = Object.freeze({
 		identifier: "information",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: [
-			{
+		options: {
+			bot: {
 				identifier: "bot",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayBotInformation,
 			},
-			{
+			server: {
 				identifier: "server",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayGuildInformation,
 			},
-		],
+		},
 	},
 	list: {
 		identifier: "list",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: [
-			{
+		options: {
+			praises: {
 				identifier: "praises",
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
-				options: [
-					{
+				options: {
+					author: {
 						identifier: "author",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayPraisesByAuthor,
 						handleAutocomplete: handleDisplayPraisesByAuthorAutocomplete,
-						options: [{ ...constants.parameters.user, required: false }],
+						options: { user: { ...constants.parameters.user, required: false } },
 					},
-					{
+					target: {
 						identifier: "target",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayPraisesByTarget,
 						handleAutocomplete: handleDisplayPraisesByTargetAutocomplete,
-						options: [{ ...constants.parameters.user, required: false }],
+						options: { user: { ...constants.parameters.user, required: false } },
 					},
-				],
+				},
 			},
-			{
+			warnings: {
 				identifier: "warnings",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayWarnings,
 				handleAutocomplete: handleDisplayWarningsAutocomplete,
-				options: [{ ...constants.parameters.user, required: false }],
+				options: { user: { ...constants.parameters.user, required: false } },
 			},
-		],
+		},
 	},
 	// Language
 	answerMessage: {
@@ -139,15 +139,14 @@ const commands = Object.freeze({
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayCefrGuide,
-		options: [constants.parameters.show],
-		flags: {
-			isShowable: true,
-		},
+		options: { show: constants.parameters.show },
+		flags: { isShowable: true },
 	},
 	correctionPartialMessage: {
 		identifier: "correction.options.partial.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
+		// TODO(vxern): Make these standalone handlers in the correction file.
 		handle: (client: Client, interaction: Logos.Interaction) =>
 			handleStartCorrecting(client, interaction, { mode: "partial" }),
 	},
@@ -155,6 +154,7 @@ const commands = Object.freeze({
 		identifier: "correction.options.full.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
+		// TODO(vxern): Make these standalone handlers in the correction file.
 		handle: (client: Client, interaction: Logos.Interaction) =>
 			handleStartCorrecting(client, interaction, { mode: "full" }),
 	},
@@ -169,13 +169,13 @@ const commands = Object.freeze({
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleRecogniseLanguageChatInput,
-		options: [
-			{
+		options: {
+			text: {
 				identifier: "text",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 			},
-		],
+		},
 	},
 	recogniseMessage: {
 		identifier: "recognize.message",
@@ -188,10 +188,8 @@ const commands = Object.freeze({
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayResources,
-		options: [constants.parameters.show],
-		flags: {
-			isShowable: true,
-		},
+		options: { show: constants.parameters.show },
+		flags: { isShowable: true },
 	},
 	translate: {
 		identifier: "translate",
@@ -199,37 +197,32 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleTranslateChatInput,
 		handleAutocomplete: handleTranslateChatInputAutocomplete,
-		options: [
-			{
+		options: {
+			text: {
 				identifier: "text",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 			},
-			{
+			to: {
 				identifier: "to",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
-			{
+			from: {
 				identifier: "from",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
-			constants.parameters.show,
-		],
-		flags: {
-			hasRateLimit: true,
-			isShowable: true,
+			show: constants.parameters.show,
 		},
+		flags: { hasRateLimit: true, isShowable: true },
 	},
 	translateMessage: {
 		identifier: "translate.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleTranslateMessage,
-		flags: {
-			isShowable: true,
-		},
+		flags: { isShowable: true },
 	},
 	// Meta
 	acknowledgements: {
@@ -248,73 +241,73 @@ const commands = Object.freeze({
 		identifier: "license",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: [
-			{
+		options: {
+			dictionary: {
 				identifier: "dictionary",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayDictionaryLicence,
 				handleAutocomplete: handleDisplayDictionaryLicenceAutocomplete,
-				options: [
-					{
+				options: {
+					dictionary: {
 						identifier: "dictionary",
 						type: Discord.ApplicationCommandOptionTypes.String,
 						required: true,
 						autocomplete: true,
 					},
-				],
+				},
 			},
-			{
+			software: {
 				identifier: "software",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplaySoftwareLicence,
 				handleAutocomplete: handleDisplaySoftwareLicenceAutocomplete,
-				options: [
-					{
+				options: {
+					package: {
 						identifier: "package",
 						type: Discord.ApplicationCommandOptionTypes.String,
 						required: true,
 						autocomplete: true,
 					},
-				],
+				},
 			},
-		],
+		},
 	},
 	settings: {
 		identifier: "settings",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: [
-			{
+		options: {
+			language: {
 				identifier: "language",
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
-				options: [
-					{
+				options: {
+					clear: {
 						identifier: "clear",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleClearLanguage,
 					},
-					{
+					set: {
 						identifier: "set",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleSetLanguage,
 						handleAutocomplete: handleSetLanguageAutocomplete,
-						options: [
-							{
+						options: {
+							language: {
 								identifier: "language",
 								type: Discord.ApplicationCommandOptionTypes.String,
 								required: true,
 								autocomplete: true,
 							},
-						],
+						},
 					},
-				],
+				},
 			},
-			{
+			view: {
 				identifier: "view",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplaySettings,
 			},
-		],
+		},
 	},
 	// Moderation
 	pardon: {
@@ -323,25 +316,23 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		handle: handlePardonUser,
 		handleAutocomplete: handlePardonUserAutocomplete,
-		options: [
-			constants.parameters.user,
-			{
+		options: {
+			user: constants.parameters.user,
+			warning: {
 				identifier: "warning",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 				autocomplete: true,
 			},
-		],
+		},
 	},
 	policy: {
 		identifier: "policy",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleDisplayModerationPolicy,
-		options: [constants.parameters.show],
-		flags: {
-			isShowable: true,
-		},
+		options: { show: constants.parameters.show },
+		flags: { isShowable: true },
 	},
 	purge: {
 		identifier: "purge",
@@ -349,18 +340,18 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		handle: handlePurgeMessages,
 		handleAutocomplete: handlePurgeMessagesAutocomplete,
-		options: [
-			{
+		options: {
+			start: {
 				identifier: "start",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 			},
-			{
+			end: {
 				identifier: "end",
 				type: Discord.ApplicationCommandOptionTypes.String,
 			},
-			{ ...constants.parameters.user, identifier: "author", required: false },
-		],
+			author: { ...constants.parameters.user, identifier: "author", required: false },
+		},
 	},
 	report: {
 		identifier: "report",
@@ -374,18 +365,16 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleCiteRule,
 		handleAutocomplete: handleCiteRuleAutocomplete,
-		options: [
-			{
+		options: {
+			rule: {
 				identifier: "rule",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 				autocomplete: true,
 			},
-			constants.parameters.show,
-		],
-		flags: {
-			isShowable: true,
+			show: constants.parameters.show,
 		},
+		flags: { isShowable: true },
 	},
 	slowmode: {
 		identifier: "slowmode",
@@ -393,34 +382,38 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		handle: handleToggleSlowmode,
 		handleAutocomplete: handleToggleSlowmodeAutocomplete,
-		options: [
-			{
+		options: {
+			level: {
 				identifier: "level",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
-		],
+		},
 	},
 	timeout: {
 		identifier: "timeout",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
-		options: [
-			{
+		options: {
+			set: {
 				identifier: "set",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSetTimeout,
 				handleAutocomplete: handleSetTimeoutAutocomplete,
-				options: [constants.parameters.user, constants.parameters.duration, constants.parameters.reason],
+				options: {
+					user: constants.parameters.user,
+					duration: constants.parameters.duration,
+					reason: constants.parameters.reason,
+				},
 			},
-			{
+			clear: {
 				identifier: "clear",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleClearTimeout,
 				handleAutocomplete: handleClearTimeoutAutocomplete,
-				options: [constants.parameters.user],
+				options: { user: constants.parameters.user },
 			},
-		],
+		},
 	},
 	warn: {
 		identifier: "warn",
@@ -428,16 +421,16 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["MODERATE_MEMBERS"],
 		handle: handleWarnUser,
 		handleAutocomplete: handleWarnUserAutocomplete,
-		options: [
-			constants.parameters.user,
-			{
+		options: {
+			user: constants.parameters.user,
+			rule: {
 				identifier: "rule",
 				type: Discord.ApplicationCommandOptionTypes.String,
 				required: true,
 				autocomplete: true,
 			},
-			constants.parameters.reason,
-		],
+			reason: constants.parameters.reason,
+		},
 	},
 	//Server
 	resource: {
@@ -456,164 +449,164 @@ const commands = Object.freeze({
 		identifier: "ticket",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: [
-			{
+		options: {
+			open: {
 				identifier: "open",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleOpenTicket,
 			},
-		],
+		},
 	},
 	// Social
 	music: {
 		identifier: "music",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: [
-			{
+		options: {
+			fastForward: {
 				identifier: "fast-forward",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleFastForward,
 				handleAutocomplete: handleFastForwardAutocomplete,
-				options: [constants.parameters.timestamp],
+				options: { timestamp: constants.parameters.timestamp },
 			},
-			{
+			history: {
 				identifier: "history",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayPlaybackHistory,
-				options: [constants.parameters.show],
-				flags: {
-					isShowable: true,
-				},
+				options: { show: constants.parameters.show },
+				flags: { isShowable: true },
 			},
-			{
+			loop: {
 				identifier: "loop",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleLoopPlayback,
-				options: [constants.parameters.collection],
+				options: { collection: constants.parameters.collection },
 			},
-			{
+			now: {
 				identifier: "now",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayCurrentlyPlaying,
-				options: [constants.parameters.collection, constants.parameters.show],
-				flags: {
-					isShowable: true,
-				},
+				options: { collection: constants.parameters.collection, show: constants.parameters.show },
+				flags: { isShowable: true },
 			},
-			{
+			pause: {
 				identifier: "pause",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handlePausePlayback,
 			},
-			{
+			play: {
 				identifier: "play",
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
-				options: [
-					{
+				options: {
+					stream: {
 						identifier: "stream",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleRequestStreamPlayback,
-						options: [
-							{
+						options: {
+							url: {
 								identifier: "url",
 								type: Discord.ApplicationCommandOptionTypes.String,
 								required: true,
 							},
-						],
+						},
 					},
-					{
+					youtube: {
 						identifier: "youtube",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleRequestYouTubePlayback,
-						options: [constants.parameters.query],
+						options: { query: constants.parameters.query },
 					},
-				],
+				},
 			},
-			{
+			queue: {
 				identifier: "queue",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayPlaybackQueue,
-				options: [constants.parameters.show],
-				flags: {
-					isShowable: true,
-				},
+				options: { show: constants.parameters.show },
+				flags: { isShowable: true },
 			},
-			{
+			remove: {
 				identifier: "remove",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleRemoveSongListing,
 			},
-			{
+			replay: {
 				identifier: "replay",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleReplayAction,
-				options: [constants.parameters.collection],
+				options: { collection: constants.parameters.collection },
 			},
-			{
+			resume: {
 				identifier: "resume",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleResumePlayback,
 			},
-			{
+			rewind: {
 				identifier: "rewind",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleRewind,
 				handleAutocomplete: handleRewindAutocomplete,
-				options: [constants.parameters.timestamp],
+				options: { timestamp: constants.parameters.timestamp },
 			},
-			{
+			skipTo: {
 				identifier: "skip-to",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSkipToTimestamp,
 				handleAutocomplete: handleSkipToTimestampAutocomplete,
-				options: [constants.parameters.timestamp],
+				options: { timestamp: constants.parameters.timestamp },
 			},
-			{
+			skip: {
 				identifier: "skip",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleSkipAction,
-				options: [constants.parameters.collection, constants.parameters.by, constants.parameters.to],
+				options: {
+					collection: constants.parameters.collection,
+					by: constants.parameters.by,
+					to: constants.parameters.to,
+				},
 			},
-			{
+			stop: {
 				identifier: "stop",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleStopPlayback,
 			},
-			{
+			unskip: {
 				identifier: "unskip",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleUnskipAction,
-				options: [constants.parameters.collection, constants.parameters.by, constants.parameters.to],
+				options: {
+					collection: constants.parameters.collection,
+					by: constants.parameters.by,
+					to: constants.parameters.to,
+				},
 			},
-			{
+			volume: {
 				identifier: "volume",
 				type: Discord.ApplicationCommandOptionTypes.SubCommandGroup,
-				options: [
-					{
+				options: {
+					display: {
 						identifier: "display",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleDisplayVolume,
-						options: [constants.parameters.show],
-						flags: {
-							isShowable: true,
-						},
+						options: { show: constants.parameters.show },
+						flags: { isShowable: true },
 					},
-					{
+					set: {
 						identifier: "set",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
 						handle: handleSetVolume,
-						options: [
-							{
+						options: {
+							volume: {
 								identifier: "volume",
 								type: Discord.ApplicationCommandOptionTypes.Integer,
 								required: true,
 							},
-						],
+						},
 					},
-				],
+				},
 			},
-		],
+		},
 	},
 	praise: {
 		identifier: "praise",
@@ -621,35 +614,33 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handlePraiseUser,
 		handleAutocomplete: handlePraiseUserAutocomplete,
-		options: [
-			constants.parameters.user,
-			{
+		options: {
+			user: constants.parameters.user,
+			comment: {
 				identifier: "comment",
 				type: Discord.ApplicationCommandOptionTypes.String,
 			},
-		],
+		},
 	},
 	profile: {
 		identifier: "profile",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: [
-			{
+		options: {
+			view: {
 				identifier: "view",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayProfile,
 				handleAutocomplete: handleDisplayProfileAutocomplete,
-				options: [{ ...constants.parameters.user, required: false }, constants.parameters.show],
-				flags: {
-					isShowable: true,
-				},
+				options: { user: { ...constants.parameters.user, required: false }, show: constants.parameters.show },
+				flags: { isShowable: true },
 			},
-			{
+			roles: {
 				identifier: "roles",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleOpenRoleSelectionMenu,
 			},
-		],
+		},
 	},
 } satisfies Record<string, CommandTemplate>);
 type CommandName = keyof typeof commands;
@@ -671,7 +662,7 @@ type Option = Discord.ApplicationCommandOption;
 interface CommandTemplate extends OptionMetadata {
 	readonly type: Discord.ApplicationCommandTypes;
 	readonly defaultMemberPermissions: Discord.PermissionStrings[];
-	readonly options?: OptionTemplate[];
+	readonly options?: Record<string, OptionTemplate>;
 }
 
 interface OptionTemplate extends OptionMetadata {
@@ -684,7 +675,7 @@ interface OptionTemplate extends OptionMetadata {
 	readonly minimumLength?: number;
 	readonly maximumLength?: number;
 	readonly autocomplete?: boolean;
-	readonly options?: OptionTemplate[];
+	readonly options?: Record<string, OptionTemplate>;
 }
 
 export default commands;
