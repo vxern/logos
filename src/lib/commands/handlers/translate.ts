@@ -7,9 +7,7 @@ import languages, {
 } from "logos:constants/languages";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { resolveAdapters } from "logos/commands/translators";
-import { Translation } from "logos/commands/translators/adapter";
-import { detectLanguages } from "logos/commands/detectors";
+import { TranslationResult } from "logos/adapters/translators/adapter";
 
 async function handleTranslateChatInputAutocomplete(
 	client: Client,
@@ -306,7 +304,7 @@ async function translateText(
 	{ text, languages }: { text: string; languages: Languages<TranslationLanguage> },
 	{ locale }: { locale: Locale },
 ): Promise<void> {
-	const adapters = resolveAdapters(languages);
+	const adapters = client.adapters.translators.getTranslators({ languages });
 	if (adapters === undefined || adapters.length === 0) {
 		const strings = {
 			title: client.localise("translate.strings.noTranslationAdapters.title", locale)(),
@@ -323,8 +321,8 @@ async function translateText(
 
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
-	let translation: Translation | undefined;
-	for await (const element of Promise.createRace(adapters, (adapter) => adapter.translate(client, text, languages))) {
+	let translation: TranslationResult | undefined;
+	for await (const element of Promise.createRace(adapters, (adapter) => adapter.translate({ text, languages }))) {
 		if (element.result === undefined) {
 			continue;
 		}
@@ -416,8 +414,9 @@ async function detectLanguage(
 	interaction: Logos.Interaction,
 	{ text }: { text: string },
 ): Promise<TranslationLanguage | undefined> {
-	const detectionResult = (await detectLanguages({ text })).likely.at(0);
-	if (detectionResult === undefined) {
+	const detectedLanguages = await client.adapters.detectors.detectLanguages({ text });
+	const detectedLanguage = detectedLanguages.likely.at(0);
+	if (detectedLanguage === undefined) {
 		const locale = interaction.locale;
 
 		const strings = {
@@ -439,8 +438,7 @@ async function detectLanguage(
 		return undefined;
 	}
 
-	const detectedLanguage = getTranslationLanguage(detectionResult);
-	if (detectedLanguage === undefined) {
+	if (!isTranslationLanguage(detectedLanguage)) {
 		const locale = interaction.locale;
 
 		const strings = {

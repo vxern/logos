@@ -171,6 +171,7 @@ const languages = Object.freeze({
 		"Zulu",
 	],
 } as const);
+type Translator = keyof typeof languages;
 
 const languageToLocale = Object.freeze({
 	deepl: {
@@ -389,6 +390,7 @@ function getGoogleTranslateLanguageByLocale(locale: GoogleTranslateLocale): Goog
 
 export {
 	languages,
+  languageToLocale,
 	isLanguage,
 	getDeepLLocaleByLanguage,
 	getGoogleTranslateLocaleByLanguage,
@@ -397,4 +399,12 @@ export {
 	isDeepLLocale,
 	isGoogleTranslateLocale,
 };
-export type { Language, DeepLLanguage, DeepLLocale, GoogleTranslateLocale, GoogleTranslateLanguage, Locale };
+export type {
+	Translator,
+	Language,
+	Locale,
+	DeepLLanguage,
+	DeepLLocale,
+	GoogleTranslateLocale,
+	GoogleTranslateLanguage,
+};

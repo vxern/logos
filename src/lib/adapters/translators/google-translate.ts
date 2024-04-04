@@ -6,9 +6,9 @@ import {
 } from "logos:constants/languages";
 import { getGoogleTranslateLanguageByLocale, isGoogleTranslateLocale } from "logos:constants/languages/translation";
 import { Client } from "logos/client";
-import { Translation, TranslationAdapter } from "logos/commands/translators/adapter";
+import { TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 
-interface TranslationResult {
+interface GoogleTranslationResult {
 	data: {
 		translations: {
 			detectedSourceLanguage?: string;
@@ -17,16 +17,15 @@ interface TranslationResult {
 	};
 }
 
-class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage> {
-	constructor() {
-		super({ identifier: "GoogleTranslate" });
+class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> {
+	constructor(client: Client) {
+		super(client, { identifier: "GoogleTranslate" });
 	}
 
-	async translate(
-		client: Client,
-		text: string,
-		languages: Languages<GoogleTranslateLanguage>,
-	): Promise<Translation | undefined> {
+	async translate({
+		text,
+		languages,
+	}: { text: string; languages: Languages<GoogleTranslateLanguage> }): Promise<TranslationResult | undefined> {
 		const sourceLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.source);
 		const targetLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.target);
 
@@ -39,21 +38,13 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 				headers: {
 					"User-Agent": constants.USER_AGENT,
 					"Content-Type": "application/x-www-form-urlencoded",
-					"X-RapidAPI-Key": client.environment.rapidApiSecret,
+					"X-RapidAPI-Key": this.client.environment.rapidApiSecret,
 					"X-RapidAPI-Host": constants.endpoints.googleTranslate.host,
 				},
-				body: new URLSearchParams({
-					source: locales.source,
-					target: locales.target,
-					q: text,
-					format: "text",
-				}),
+				body: new URLSearchParams({ source: locales.source, target: locales.target, q: text, format: "text" }),
 			});
 		} catch (exception) {
-			client.log.error(
-				`The request to translate text of length ${text.length} to ${this.identifier} failed:`,
-				exception,
-			);
+			this.client.log.error(`The request to translate text of length ${text.length} failed:`, exception);
 			return undefined;
 		}
 
@@ -61,11 +52,11 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 			return undefined;
 		}
 
-		let result: TranslationResult;
+		let result: GoogleTranslationResult;
 		try {
-			result = (await response.json()) as TranslationResult;
+			result = (await response.json()) as GoogleTranslationResult;
 		} catch (exception) {
-			client.log.error(`Reading response data for text translation to ${this.identifier} failed:`, exception);
+			this.client.log.error("Reading response data for text translation failed:", exception);
 			return undefined;
 		}
 
@@ -88,6 +79,4 @@ class GoogleTranslateAdapter extends TranslationAdapter<GoogleTranslateLanguage>
 	}
 }
 
-const adapter = new GoogleTranslateAdapter();
-
-export default adapter;
+export { GoogleTranslateAdapter };

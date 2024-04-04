@@ -20,6 +20,7 @@ import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationBuilder, LocalisationStore, RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
+import { AdapterStore } from "./stores/adapters";
 
 interface Environment {
 	readonly isDebug: boolean;
@@ -57,6 +58,7 @@ class Client {
 	readonly #services: ServiceStore;
 	readonly #events: EventStore;
 	readonly #journalling: JournallingStore;
+	readonly #adapters: AdapterStore;
 	readonly #connection: DiscordConnection;
 
 	readonly #_guildCreateCollector: Collector<"guildCreate">;
@@ -248,6 +250,10 @@ class Client {
 		return (collector) => this.#events.registerCollector("interactionCreate", collector);
 	}
 
+	get adapters(): AdapterStore {
+		return this.#adapters;
+	}
+
 	get bot(): DiscordConnection["bot"] {
 		return this.#connection.bot;
 	}
@@ -283,6 +289,7 @@ class Client {
 		this.#services = new ServiceStore(this);
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);
+		this.#adapters = new AdapterStore(this);
 		this.#connection = new DiscordConnection(this, { bot, events: this.#events.buildEventHandlers() });
 
 		this.#_guildCreateCollector = new Collector<"guildCreate">();

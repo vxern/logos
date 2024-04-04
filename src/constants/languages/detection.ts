@@ -239,6 +239,7 @@ const languages = Object.freeze({
 		"Yiddish",
 	],
 } as const);
+type Detector = keyof typeof languages;
 
 const languageToLocale = Object.freeze({
 	cld: {
@@ -512,4 +513,4 @@ function getTinyLDLanguageByLocale(locale: TinyLDLocale): TinyLDLanguage {
 }
 
 export { getTinyLDLanguageByLocale, isTinyLDLocale, isCLDLocale, getCLDLanguageByLocale };
-export type { Language, Locale, TinyLDLanguage, TinyLDLocale, CLDLanguage, CLDLocale };
+export type { Detector, Language, Locale, TinyLDLanguage, TinyLDLocale, CLDLanguage, CLDLocale };

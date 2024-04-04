@@ -1,4 +1,5 @@
 import {
+	Detector,
 	CLDLanguage,
 	CLDLocale,
 	Language as DetectionLanguage,
@@ -31,6 +32,7 @@ import {
 	languages as localisationLanguages,
 } from "logos:constants/languages/localisation";
 import {
+	Translator,
 	DeepLLanguage,
 	DeepLLocale,
 	GoogleTranslateLanguage,
@@ -138,6 +140,8 @@ export {
 	getBaseLanguage,
 };
 export type {
+	Detector,
+	Translator,
 	LearningLanguage,
 	FeatureLanguage,
 	LocalisationLanguage,

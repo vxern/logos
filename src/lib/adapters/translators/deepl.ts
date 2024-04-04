@@ -6,14 +6,17 @@ import {
 	isDeepLLocale,
 } from "logos:constants/languages";
 import { Client } from "logos/client";
-import { Translation, TranslationAdapter } from "logos/commands/translators/adapter";
+import { TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 
-class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
-	constructor() {
-		super({ identifier: "DeepL" });
+class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
+	constructor(client: Client) {
+		super(client, { identifier: "DeepL" });
 	}
 
-	async translate(client: Client, text: string, languages: Languages<DeepLLanguage>): Promise<Translation | undefined> {
+	async translate({
+		text,
+		languages,
+	}: { text: string; languages: Languages<DeepLLanguage> }): Promise<TranslationResult | undefined> {
 		const sourceLocaleComplete = getDeepLLocaleByTranslationLanguage(languages.source);
 		const targetLocale = getDeepLLocaleByTranslationLanguage(languages.target);
 
@@ -29,7 +32,7 @@ class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 				headers: {
 					"User-Agent": constants.USER_AGENT,
 					"Content-Type": "application/json",
-					Authorization: `DeepL-Auth-Key ${client.environment.deeplSecret}`,
+					Authorization: `DeepL-Auth-Key ${this.client.environment.deeplSecret}`,
 				},
 				body: JSON.stringify({
 					text: [text],
@@ -38,10 +41,7 @@ class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 				}),
 			});
 		} catch (exception) {
-			client.log.error(
-				`The request to translate text of length ${text.length} to ${this.identifier} failed:`,
-				exception,
-			);
+			this.log.error(`The request to translate text of length ${text.length} failed:`, exception);
 			return undefined;
 		}
 
@@ -53,7 +53,7 @@ class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 		try {
 			data = await response.json();
 		} catch (exception) {
-			client.log.error(`Reading response data for text translation to ${this.identifier} failed:`, exception);
+			this.log.error("Reading response data for text translation failed:", exception);
 			return undefined;
 		}
 
@@ -76,6 +76,4 @@ class DeepLAdapter extends TranslationAdapter<DeepLLanguage> {
 	}
 }
 
-const adapter = new DeepLAdapter();
-
-export default adapter;
+export { DeepLAdapter };

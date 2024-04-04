@@ -1,7 +1,6 @@
 import { DetectionLanguage, Locale } from "logos:constants/languages";
 import { list } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { detectLanguages } from "logos/commands/detectors";
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,
@@ -68,7 +67,7 @@ async function handleRecogniseLanguage(
 
 	await client.postponeReply(interaction);
 
-	const detectedLanguages = await detectLanguages({ text });
+	const detectedLanguages = await client.adapters.detectors.detectLanguages({ text });
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
 		const strings = {
 			title: client.localise("recognize.strings.unknown.title", locale)(),
