@@ -4,7 +4,7 @@ import diagnostics from "logos:core/diagnostics";
 import { timestamp, trim } from "logos:core/formatting";
 import { Cache } from "logos/cache";
 import { Collector, InteractionCollector } from "logos/collectors";
-import commandTemplates from "logos/commands/commands";
+import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
@@ -283,7 +283,7 @@ class Client {
 		this.#localisations = new LocalisationStore(this, { localisations });
 		this.#commands = CommandStore.create(this, {
 			localisations: this.#localisations,
-			templates: Array.from(Object.values(commandTemplates)),
+			templates: Array.from(Object.values(commands)),
 		});
 		this.#interactions = new InteractionStore(this, { bot });
 		this.#services = new ServiceStore(this);

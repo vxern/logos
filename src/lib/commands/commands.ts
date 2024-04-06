@@ -69,7 +69,6 @@ import {
 } from "logos/commands/handlers/translate";
 import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
 
-// TODO(vxern): Make options named so as to allow referencing specific subcommands.
 /**
  * @privateRemarks
  * Commands, command groups and options are ordered alphabetically.
@@ -643,7 +642,10 @@ const commands = Object.freeze({
 		},
 	},
 } satisfies Record<string, CommandTemplate>);
-type CommandName = keyof typeof commands;
+type Commands = typeof commands;
+type CommandName = keyof Commands;
+
+type BuiltCommands = Commands & Record<CommandName, BuiltCommand>;
 
 interface OptionFlags {
 	readonly hasRateLimit?: boolean;
@@ -659,13 +661,16 @@ interface OptionMetadata {
 type Command = Discord.CreateApplicationCommand;
 type Option = Discord.ApplicationCommandOption;
 
-interface CommandTemplate extends OptionMetadata {
+interface CommandBuilderBase<Generic extends { built: boolean }> extends OptionMetadata {
 	readonly type: Discord.ApplicationCommandTypes;
 	readonly defaultMemberPermissions: Discord.PermissionStrings[];
-	readonly options?: Record<string, OptionTemplate>;
+	readonly options?: Record<string, OptionBuilder<Generic>>;
 }
+type CommandBuilder<Generic extends { built: boolean } = { built: boolean }> = true extends Generic["built"]
+	? CommandBuilderBase<Generic> & { built: Discord.CreateApplicationCommand }
+	: CommandBuilderBase<Generic>;
 
-interface OptionTemplate extends OptionMetadata {
+interface OptionBuilderBase<Generic extends { built: boolean }> extends OptionMetadata {
 	readonly type: Discord.ApplicationCommandOptionTypes;
 	readonly required?: boolean;
 	readonly choices?: Discord.ApplicationCommandOptionChoice[];
@@ -675,8 +680,29 @@ interface OptionTemplate extends OptionMetadata {
 	readonly minimumLength?: number;
 	readonly maximumLength?: number;
 	readonly autocomplete?: boolean;
-	readonly options?: Record<string, OptionTemplate>;
+	readonly options?: Record<string, OptionBuilder<Generic>>;
 }
+type OptionBuilder<Generic extends { built: boolean } = { built: boolean }> = true extends Generic["built"]
+	? OptionBuilderBase<Generic> & { built: Discord.ApplicationCommandOption }
+	: OptionBuilderBase<Generic>;
+
+type CommandTemplate = CommandBuilder<{ built: false }>;
+type OptionTemplate = OptionBuilder<{ built: false }>;
+
+type BuiltCommand = CommandBuilder<{ built: true }>;
+type BuiltOption = OptionBuilder<{ built: true }>;
 
 export default commands;
-export type { Command, CommandName, CommandTemplate, OptionMetadata, Option, OptionTemplate };
+export type {
+	CommandBuilder,
+	OptionBuilder,
+	BuiltCommands,
+	BuiltCommand,
+	BuiltOption,
+	Command,
+	CommandName,
+	CommandTemplate,
+	OptionMetadata,
+	Option,
+	OptionTemplate,
+};

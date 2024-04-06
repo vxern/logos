@@ -1,6 +1,6 @@
+import { DetectionLanguage } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { Logger } from "logos/logger";
-import { DetectionLanguage } from "logos:constants/languages";
 
 interface SingleDetectionResult {
 	readonly language: DetectionLanguage;

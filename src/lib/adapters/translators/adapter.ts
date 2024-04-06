@@ -1,6 +1,6 @@
 import { Languages, TranslationLanguage } from "logos:constants/languages";
-import { Logger } from "logos/logger";
 import { Client } from "logos/client";
+import { Logger } from "logos/logger";
 
 interface TranslationResult {
 	/** The language detected from the text sent to be translated. */

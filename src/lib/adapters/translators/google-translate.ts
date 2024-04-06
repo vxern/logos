@@ -5,8 +5,8 @@ import {
 	getGoogleTranslateLocaleByTranslationLanguage,
 } from "logos:constants/languages";
 import { getGoogleTranslateLanguageByLocale, isGoogleTranslateLocale } from "logos:constants/languages/translation";
-import { Client } from "logos/client";
 import { TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
+import { Client } from "logos/client";
 
 interface GoogleTranslationResult {
 	data: {

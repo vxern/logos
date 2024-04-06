@@ -1,9 +1,9 @@
 import {
-	Detector,
 	CLDLanguage,
 	CLDLocale,
 	Language as DetectionLanguage,
 	Locale as DetectionLocale,
+	Detector,
 	TinyLDLanguage,
 	TinyLDLocale,
 	getCLDLanguageByLocale as getCLDDetectionLanguageByLocale,
@@ -32,13 +32,13 @@ import {
 	languages as localisationLanguages,
 } from "logos:constants/languages/localisation";
 import {
-	Translator,
 	DeepLLanguage,
 	DeepLLocale,
 	GoogleTranslateLanguage,
 	GoogleTranslateLocale,
 	Language as TranslationLanguage,
 	Locale as TranslationLocale,
+	Translator,
 	getDeepLLocaleByLanguage as getDeepLLocaleByTranslationLanguage,
 	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
 	getGoogleTranslateLocaleByLanguage as getGoogleTranslateLocaleByTranslationLanguage,

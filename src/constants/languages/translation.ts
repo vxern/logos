@@ -390,7 +390,7 @@ function getGoogleTranslateLanguageByLocale(locale: GoogleTranslateLocale): Goog
 
 export {
 	languages,
-  languageToLocale,
+	languageToLocale,
 	isLanguage,
 	getDeepLLocaleByLanguage,
 	getGoogleTranslateLocaleByLanguage,

@@ -6,8 +6,8 @@ import languages, {
 	isTranslationLanguage,
 } from "logos:constants/languages";
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
 import { TranslationResult } from "logos/adapters/translators/adapter";
+import { Client } from "logos/client";
 
 async function handleTranslateChatInputAutocomplete(
 	client: Client,

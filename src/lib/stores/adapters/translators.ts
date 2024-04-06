@@ -1,9 +1,9 @@
+import { Languages, TranslationLanguage, Translator } from "logos:constants/languages";
 import { languageToLocale as languagesByIdentifier } from "logos:constants/languages/translation";
 import { TranslatorAdapter } from "logos/adapters/translators/adapter";
 import { DeepLAdapter } from "logos/adapters/translators/deepl";
 import { GoogleTranslateAdapter } from "logos/adapters/translators/google-translate";
 import { Client } from "logos/client";
-import { Languages, TranslationLanguage, Translator } from "logos:constants/languages";
 
 class TranslatorStore {
 	static readonly priority: Translator[] = ["deepl", "google"];

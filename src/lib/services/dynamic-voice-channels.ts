@@ -1,8 +1,8 @@
 import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
+import { Collector } from "logos/collectors";
 import { DynamicVoiceChannel, Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
-import { Collector } from "logos/collectors";
 
 type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
 
