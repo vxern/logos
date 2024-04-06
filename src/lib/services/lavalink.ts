@@ -8,15 +8,16 @@ class ClientConnector extends shoukaku.Connector {
 
 	readonly #nodes: shoukaku.NodeOption[];
 
-	// TODO(vxern): Do not listen to raw events, instead plug in voice state and voice server events into it.
-	readonly #_rawEvents: Collector<"raw">;
+	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
+	readonly #_voiceServerUpdates: Collector<"voiceServerUpdate">;
 
 	constructor(client: Client, { nodes }: { nodes: shoukaku.NodeOption[] }) {
 		super(client);
 
 		this.#nodes = nodes;
 
-		this.#_rawEvents = new Collector<"raw">();
+		this.#_voiceStateUpdates = new Collector<"voiceStateUpdate">();
+		this.#_voiceServerUpdates = new Collector<"voiceServerUpdate">();
 	}
 
 	getId(): string {
@@ -36,15 +37,31 @@ class ClientConnector extends shoukaku.Connector {
 	}
 
 	async setup(): Promise<void> {
-		this.#_rawEvents.onCollect((payload, _) => this.raw(payload));
+		this.#_voiceStateUpdates.onCollect((voiceState) =>
+			this.manager?.connections.get(voiceState.guildId.toString())?.setStateUpdate({
+				session_id: voiceState.sessionId,
+				channel_id: voiceState.channelId?.toString(),
+				self_deaf: voiceState.toggles.selfDeaf,
+				self_mute: voiceState.toggles.selfMute,
+			}),
+		);
+		this.#_voiceServerUpdates.onCollect((voiceServer) =>
+			this.manager?.connections.get(voiceServer.guildId.toString())?.setServerUpdate({
+				token: voiceServer.token,
+				guild_id: voiceServer.guildId.toString(),
+				endpoint: voiceServer.endpoint!,
+			}),
+		);
 
-		await this.client.registerCollector("raw", this.#_rawEvents);
+		await this.client.registerCollector("voiceStateUpdate", this.#_voiceStateUpdates);
+		await this.client.registerCollector("voiceServerUpdate", this.#_voiceServerUpdates);
 
 		this.ready(this.#nodes);
 	}
 
 	async teardown(): Promise<void> {
-		await this.#_rawEvents.close();
+		await this.#_voiceStateUpdates.close();
+		await this.#_voiceServerUpdates.close();
 	}
 }
 
