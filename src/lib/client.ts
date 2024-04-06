@@ -72,12 +72,12 @@ class Client {
 		return this.database.cache;
 	}
 
-	get localise(): LocalisationStore["localise"] {
-		return this.#localisations.localise.bind(this.#localisations);
+	get localiseRaw(): LocalisationStore["localiseRaw"] {
+		return this.#localisations.localiseRaw.bind(this.#localisations);
 	}
 
-	get localiseUnsafe(): LocalisationStore["localiseUnsafe"] {
-		return this.#localisations.localiseUnsafe.bind(this.#localisations);
+	get localise(): LocalisationStore["localise"] {
+		return this.#localisations.localise.bind(this.#localisations);
 	}
 
 	get localiseCommand(): LocalisationStore["localiseCommand"] {

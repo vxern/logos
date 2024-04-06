@@ -526,13 +526,13 @@ function createSelectOptionsFromCollection(
 		const strings = {
 			assigned: client.localise("profile.options.roles.strings.assigned", locale)(),
 			name: client.localise(`${role.id}.name`, locale)(),
-			description: client.localiseUnsafe(`${role.id}.description`, locale),
+			description: client.localiseRaw(`${role.id}.description`, locale)(),
 		};
 
 		selectOptions.push({
 			label: trim(memberHasRole ? `[${strings.assigned}] ${strings.name}` : strings.name, 25),
 			value: name,
-			description: strings.description !== undefined ? trim(strings.description(), 100) : undefined,
+			description: strings.description !== undefined ? trim(strings.description, 100) : undefined,
 			emoji: (() => {
 				if (role.emoji === undefined) {
 					return;
