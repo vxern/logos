@@ -20,13 +20,9 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 
 	constructor(
 		client: Client,
-		{
-			interaction,
-			showable,
-			guildDocument,
-		}: { interaction: Logos.Interaction; showable: boolean; guildDocument: Guild },
+		{ interaction, guildDocument }: { interaction: Logos.Interaction; guildDocument: Guild },
 	) {
-		super(client, { interaction, showable, tabs: { bracket: "a", mode: "guide" } });
+		super(client, { interaction, tabs: { bracket: "a", mode: "guide" }, showable: true });
 
 		this.#_guildDocument = guildDocument;
 	}

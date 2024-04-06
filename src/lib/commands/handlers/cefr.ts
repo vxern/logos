@@ -10,7 +10,7 @@ async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interac
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
 
-	const component = new CefrGuideView(client, { interaction, showable: !interaction.parameters.show, guildDocument });
+	const component = new CefrGuideView(client, { interaction, guildDocument });
 
 	await component.open();
 }
