@@ -19,7 +19,7 @@ import { Database } from "logos/stores/database";
 import { EventStore } from "logos/stores/events";
 import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
-import { LocalisationBuilder, LocalisationStore, RawLocalisations } from "logos/stores/localisations";
+import { LocalisationStore, RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
 
 interface Environment {
@@ -76,18 +76,20 @@ class Client {
 		return this.#localisations.localise.bind(this.#localisations);
 	}
 
-	get localiseUnsafe(): (key: string, locale: Locale | undefined) => LocalisationBuilder | undefined {
-		return (key, locale) => {
-			if (!this.#localisations.has(key)) {
-				return undefined;
-			}
+	get localiseUnsafe(): LocalisationStore["localiseUnsafe"] {
+		return this.#localisations.localiseUnsafe.bind(this.#localisations);
+	}
 
-			return this.#localisations.localise(key, locale);
-		};
+	get localiseCommand(): LocalisationStore["localiseCommand"] {
+		return this.#localisations.localiseCommand.bind(this.#localisations);
 	}
 
 	get pluralise(): LocalisationStore["pluralise"] {
 		return this.#localisations.pluralise.bind(this.#localisations);
+	}
+
+	get commands(): CommandStore["commands"] {
+		return this.#commands.commands;
 	}
 
 	get isShowable(): CommandStore["isShowable"] {

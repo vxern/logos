@@ -186,6 +186,31 @@ class LocalisationStore {
 		};
 	}
 
+	// TODO(vxern): Perhaps `localise` should be something like `localiseRaw` instead.
+	localiseUnsafe(key: string, locale?: Locale): string | undefined {
+		if (!this.#localisations.has(key)) {
+			return undefined;
+		}
+
+		return this.localise(key, locale)();
+	}
+
+	localiseCommand(key: string, locale?: Locale): string {
+		const keyParts = key.split(".options.");
+		if (keyParts.length === 0) {
+			return constants.special.missingString;
+		}
+
+		const parts: string[] = [];
+		for (const index of Array(keyParts).keys()) {
+			const key = keyParts.slice(0, index + 1).join(".options.");
+			parts.push(this.localise(key, locale)());
+		}
+		const commandName = parts.join(" ");
+
+		return `/${commandName}`;
+	}
+
 	pluralise(key: string, locale: Locale, { quantity }: { quantity: number }): string {
 		const language = getLocalisationLanguageByLocale(locale);
 

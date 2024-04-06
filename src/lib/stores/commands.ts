@@ -24,7 +24,11 @@ interface RateLimit {
 	nextAllowedUsageTimestamp: number;
 }
 type LocalisedNamesWithMetadata = [names: NameLocalisations, metadata: OptionMetadata];
-type BuildResult<Object extends Command | Option> = [object: Object, namesWithFlags: LocalisedNamesWithMetadata[]];
+type BuildResult<Object extends Command | Option> = {
+	key: string;
+	built: Object;
+	namesWithMetadata: LocalisedNamesWithMetadata[];
+};
 class CommandStore {
 	readonly commands: BuiltCommands;
 
@@ -97,10 +101,12 @@ class CommandStore {
 				continue;
 			}
 
-			const [command, namesWithMetadataPart] = result;
+			const { key, built, namesWithMetadata: namesWithMetadataPart } = result;
 
 			const builtCommand = template as BuiltCommand;
-			builtCommand.built = command;
+
+			builtCommand.key = key;
+			builtCommand.built = built;
 
 			// TODO(vxern): Why is this flagging up?
 			// @ts-ignore: This is fine.
@@ -216,40 +222,41 @@ class CommandStore {
 		if (template.options === undefined || Object.keys(template.options).length === 0) {
 			const localisedNamesWithMetadata: LocalisedNamesWithMetadata = [nameLocalisations, template];
 
-			let object: Discord.CreateApplicationCommand | Discord.ApplicationCommandOption;
+			let built: Discord.CreateApplicationCommand | Discord.ApplicationCommandOption;
 			if (keyPrefix !== undefined) {
-				object = CommandStore.buildOption({
+				built = CommandStore.buildOption({
 					template: template as OptionTemplate,
 					nameLocalisations,
 					descriptionLocalisations,
 				});
 			} else {
-				object = CommandStore.buildCommand({
+				built = CommandStore.buildCommand({
 					template: template as CommandTemplate,
 					nameLocalisations,
 					descriptionLocalisations,
 				});
 			}
 
-			return [object, [localisedNamesWithMetadata]];
+			return { key, built, namesWithMetadata: [localisedNamesWithMetadata] };
 		}
 
 		const namesWithMetadata: LocalisedNamesWithMetadata[] = [];
-		const options = Object.values(template.options) as OptionBuilder[];
-		for (const template of options) {
+		const optionTemplates = Object.values(template.options) as OptionBuilder[];
+		for (const template of optionTemplates) {
 			const result = CommandStore.build({ localisations, template, keyPrefix: key });
 			if (result === undefined) {
 				continue;
 			}
 
-			const [option, namesWithMetadataPart] = result;
+			const { key: builtKey, built, namesWithMetadata: namesWithMetadataPart } = result;
 
-			template.built = option;
+			template.key = builtKey;
+			template.built = built;
 
 			if (
 				!(
-					option.type === Discord.ApplicationCommandOptionTypes.SubCommand ||
-					option.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup
+					template.type === Discord.ApplicationCommandOptionTypes.SubCommand ||
+					template.type === Discord.ApplicationCommandOptionTypes.SubCommandGroup
 				)
 			) {
 				continue;
@@ -286,24 +293,24 @@ class CommandStore {
 
 		namesWithMetadata.push([nameLocalisations, template]);
 
-		let object: Discord.CreateApplicationCommand | Discord.ApplicationCommandOption;
+		let built: Discord.CreateApplicationCommand | Discord.ApplicationCommandOption;
 		if (keyPrefix !== undefined) {
-			object = CommandStore.buildOption({
+			built = CommandStore.buildOption({
 				template: template as OptionTemplate,
 				nameLocalisations,
 				descriptionLocalisations,
-				options: options.map((option) => option.built),
+				options: optionTemplates.map((option) => option.built),
 			});
 		} else {
-			object = CommandStore.buildCommand({
+			built = CommandStore.buildCommand({
 				template: template as CommandTemplate,
 				nameLocalisations,
 				descriptionLocalisations,
-				options: options.map((option) => option.built),
+				options: optionTemplates.map((option) => option.built),
 			});
 		}
 
-		return [object, namesWithMetadata];
+		return { key, built, namesWithMetadata };
 	}
 
 	static buildCommand({

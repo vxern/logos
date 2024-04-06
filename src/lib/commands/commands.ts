@@ -659,7 +659,10 @@ interface CommandBuilderBase<Generic extends { built: boolean }> extends OptionM
 	readonly options?: Record<string, OptionBuilder<Generic>>;
 }
 type CommandBuilder<Generic extends { built: boolean } = { built: boolean }> = true extends Generic["built"]
-	? CommandBuilderBase<Generic> & { built: Discord.CreateApplicationCommand }
+	? CommandBuilderBase<Generic> & {
+			key: string;
+			built: Discord.CreateApplicationCommand;
+	  }
 	: CommandBuilderBase<Generic>;
 
 interface OptionBuilderBase<Generic extends { built: boolean }> extends OptionMetadata {
@@ -675,7 +678,10 @@ interface OptionBuilderBase<Generic extends { built: boolean }> extends OptionMe
 	readonly options?: Record<string, OptionBuilder<Generic>>;
 }
 type OptionBuilder<Generic extends { built: boolean } = { built: boolean }> = true extends Generic["built"]
-	? OptionBuilderBase<Generic> & { built: Discord.ApplicationCommandOption }
+	? OptionBuilderBase<Generic> & {
+			key: string;
+			built: Discord.ApplicationCommandOption;
+	  }
 	: OptionBuilderBase<Generic>;
 
 type CommandTemplate = CommandBuilder<{ built: false }>;
