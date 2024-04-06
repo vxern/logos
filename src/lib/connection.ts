@@ -31,7 +31,7 @@ class DiscordConnection {
 
 		this.#log = Logger.create({ identifier: "Client/DiscordConnection", isDebug: client.environment.isDebug });
 
-		// TODO(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
+		// REMINDER(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
 		this.bot.handlers.MESSAGE_UPDATE = (bot, data) => {
 			const payload = data.d as Discord.DiscordMessage;
 			if (!payload.author) return;
@@ -62,7 +62,7 @@ class DiscordConnection {
 	#transformGuild(_: Discord.Bot, payload: Parameters<Discord.Transformers["guild"]>[1]): Discord.Guild {
 		const result = Discord.transformGuild(this.bot, payload);
 
-		// TODO(vxern): Fix for Discordeno filtering out shard IDs equal to 0.
+		// REMINDER(vxern): Fix for Discordeno filtering out shard IDs equal to 0.
 		result.shardId = payload.shardId;
 
 		for (const channel of payload.guild.channels ?? []) {

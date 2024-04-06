@@ -94,7 +94,7 @@ const properties = {
 	},
 	entitlement: {},
 	sku: {},
-	// TODO(vxern): Remove once added in Discordeno.
+	// REMINDER(vxern): Remove once added in Discordeno.
 	// @ts-ignore: This is fine.
 	voiceState: {
 		guildId: true,

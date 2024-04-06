@@ -17,13 +17,10 @@ import {
 	handleDisplaySoftwareLicenceAutocomplete,
 } from "logos/commands/handlers/licence/software";
 import {
-	handleDisplayPraisesByAuthor,
-	handleDisplayPraisesByAuthorAutocomplete,
-} from "logos/commands/handlers/list/praises/author";
-import {
-	handleDisplayPraisesByTarget,
-	handleDisplayPraisesByTargetAutocomplete,
-} from "logos/commands/handlers/list/praises/target";
+	handleDisplayAuthorPraises,
+	handleDisplayTargetPraises,
+	handleDisplayPraisesAutocomplete,
+} from "logos/commands/handlers/list/praises";
 import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "logos/commands/handlers/list/warnings";
 import { handleFastForward, handleFastForwardAutocomplete } from "logos/commands/handlers/music/fast-forward";
 import { handleDisplayPlaybackHistory } from "logos/commands/handlers/music/history";
@@ -104,15 +101,15 @@ const commands = Object.freeze({
 					author: {
 						identifier: "author",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
-						handle: handleDisplayPraisesByAuthor,
-						handleAutocomplete: handleDisplayPraisesByAuthorAutocomplete,
+						handle: handleDisplayAuthorPraises,
+						handleAutocomplete: handleDisplayPraisesAutocomplete,
 						options: { user: { ...constants.parameters.user, required: false } },
 					},
 					target: {
 						identifier: "target",
 						type: Discord.ApplicationCommandOptionTypes.SubCommand,
-						handle: handleDisplayPraisesByTarget,
-						handleAutocomplete: handleDisplayPraisesByTargetAutocomplete,
+						handle: handleDisplayTargetPraises,
+						handleAutocomplete: handleDisplayPraisesAutocomplete,
 						options: { user: { ...constants.parameters.user, required: false } },
 					},
 				},
