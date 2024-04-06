@@ -2,7 +2,6 @@ import { Client } from "logos/client";
 import { CefrGuideView } from "logos/commands/components/tabbed-views/cefr-guide-view";
 import { Guild } from "logos/database/guild";
 
-// TODO(vxern): Refactor the view stuff into a component.
 async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {

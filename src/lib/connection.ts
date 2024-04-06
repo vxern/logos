@@ -53,7 +53,7 @@ class DiscordConnection {
 			voiceState: this.#transformVoiceState.bind(this),
 		});
 
-		// TODO(vxern): Move this to `createBot()` once it's supported.
+		// REMINDER(vxern): Move this to `createBot()` once it's supported.
 		transformers.desiredProperties = constants.properties as unknown as Discord.Transformers["desiredProperties"];
 
 		return transformers;
