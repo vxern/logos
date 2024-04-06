@@ -2,7 +2,7 @@ import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
-import { LocalService, getAllMessages } from "logos/services/service";
+import { LocalService } from "logos/services/service";
 import { ServiceStore } from "logos/stores/services";
 import Hash from "object-hash";
 
@@ -92,7 +92,17 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 		const expectedHash = NoticeService.hash(expectedContents);
 
-		const noticesAll = (await getAllMessages(this.client, channelId)) ?? [];
+		const noticesAll = await this.getAllMessages({ channelId });
+		if (noticesAll === undefined || noticesAll.length === 0) {
+			const notice = await this.saveNotice(expectedContents, expectedHash);
+			if (notice === undefined) {
+				return;
+			}
+
+			this.registerNotice(BigInt(notice.id), expectedHash);
+			return;
+		}
+
 		if (noticesAll.length > 1) {
 			while (noticesAll.length !== 0) {
 				const notice = noticesAll.pop();
@@ -104,16 +114,6 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 					this.log.warn("Failed to delete notice.");
 				});
 			}
-		}
-
-		if (noticesAll.length === 0) {
-			const notice = await this.saveNotice(expectedContents, expectedHash);
-			if (notice === undefined) {
-				return;
-			}
-
-			this.registerNotice(BigInt(notice.id), expectedHash);
-			return;
 		}
 
 		if (noticesAll.length === 1) {

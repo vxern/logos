@@ -4,7 +4,7 @@ import { Collector, InteractionCollector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
 import { Model } from "logos/database/model";
 import { User } from "logos/database/user";
-import { LocalService, getAllMessages } from "logos/services/service";
+import { LocalService } from "logos/services/service";
 import { ServiceStore } from "logos/stores/services";
 
 interface Configurations {
@@ -134,8 +134,8 @@ abstract class PromptService<
 			documents.set(partialId, document);
 		}
 
-		const promptsAll = (await getAllMessages(this.client, channelId)) ?? [];
-		const [validPrompts, invalidPrompts] = this.filterPrompts(promptsAll);
+		const promptsAll = await this.getAllMessages({ channelId });
+		const [validPrompts, invalidPrompts] = this.filterPrompts(promptsAll ?? []);
 
 		const prompts = new Map(validPrompts);
 

@@ -47,40 +47,34 @@ abstract class LocalService extends Service {
 
 	abstract start(): Promise<void>;
 	abstract stop(): Promise<void>;
-}
 
-// TODO(vxern): Better location for this?
-async function getAllMessages(
-	client: Client,
-	channelId: bigint,
-): Promise<Discord.CamelizedDiscordMessage[] | undefined> {
-	const messages: Discord.CamelizedDiscordMessage[] = [];
-	let isFinished = false;
+	async getAllMessages({ channelId }: { channelId: bigint }): Promise<Discord.CamelizedDiscordMessage[] | undefined> {
+		const buffer: Discord.CamelizedDiscordMessage[] = [];
 
-	while (!isFinished) {
-		const bufferUnoptimised = await client.bot.rest
-			.getMessages(channelId, {
-				limit: 100,
-				before: messages.length === 0 ? undefined : messages.at(-1)?.id,
-			})
-			.catch(() => {
-				client.log.warn(`Failed to get all messages from ${diagnostics.display.channel(channelId)}.`);
+		let isFinished = false;
+		while (!isFinished) {
+			const chunk = await this.client.bot.rest
+				.getMessages(channelId, {
+					limit: 100,
+					before: buffer.length === 0 ? undefined : buffer.at(-1)?.id,
+				})
+				.catch(() => {
+					this.client.log.warn(`Failed to get all messages from ${diagnostics.display.channel(channelId)}.`);
+					return undefined;
+				});
+			if (chunk === undefined) {
 				return undefined;
-			});
-		if (bufferUnoptimised === undefined) {
-			return undefined;
+			}
+
+			if (chunk.length < 100) {
+				isFinished = true;
+			}
+
+			buffer.push(...chunk);
 		}
 
-		if (bufferUnoptimised.length < 100) {
-			isFinished = true;
-		}
-
-		const buffer = bufferUnoptimised;
-
-		messages.push(...buffer);
+		return buffer;
 	}
-
-	return messages;
 }
 
-export { Service, GlobalService, LocalService, getAllMessages };
+export { Service, GlobalService, LocalService };
