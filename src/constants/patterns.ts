@@ -15,7 +15,6 @@ const patterns = Object.freeze({
 			old: /^([^@](?:.{1,31})?#(?:\d{4}|0))$/,
 		},
 	},
-	// TODO(vxern): Remove this, I don't like it.
 	userDisplay: /^.*?\(?(\d{16,20})\)?$/,
 	/** Used for matching YouTube video/playlist links, e.g. https://www.youtube.com/watch?v=zNbCbYbaE3Y */
 	youtubeUrl:
