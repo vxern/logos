@@ -2,7 +2,7 @@ import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { AnswerComposer } from "logos/commands/components/modal-composers/answer-composer";
 
-async function handleStartAnswering(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleAnswer(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
 	const guildId = interaction.guildId;
@@ -83,4 +83,4 @@ async function handleStartAnswering(client: Client, interaction: Logos.Interacti
 	await composer.open();
 }
 
-export { handleStartAnswering };
+export { handleAnswer };

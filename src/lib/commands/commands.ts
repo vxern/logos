@@ -1,5 +1,5 @@
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
-import { handleStartAnswering } from "logos/commands/handlers/answer";
+import { handleAnswer } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
 import { handleMakeFullCorrection, handleMakePartialCorrection } from "logos/commands/handlers/correction";
 import { handleDisplayCredits } from "logos/commands/handlers/credits";
@@ -127,7 +127,7 @@ const commands = Object.freeze({
 		identifier: "answer.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleStartAnswering,
+		handle: handleAnswer,
 	},
 	cefr: {
 		identifier: "cefr",
