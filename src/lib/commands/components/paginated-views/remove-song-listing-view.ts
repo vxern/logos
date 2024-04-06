@@ -10,6 +10,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 	readonly #_selectMenuSelection: InteractionCollector;
 
 	constructor(client: Client, { interaction, listings }: { interaction: Logos.Interaction; listings: SongListing[] }) {
+		// TODO(vxern): Check if these showable properties are fine to keep as-is, or if they need additional logic.
 		super(client, { interaction, elements: listings, showable: true });
 
 		this.#_selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });

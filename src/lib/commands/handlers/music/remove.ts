@@ -94,6 +94,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 	});
 
 	const refreshView = async () => view.refresh();
+	// TODO(vxern): This isn't right.
 	const closeView = async () => client.deleteReply(interaction);
 
 	events.on("queueUpdate", refreshView);

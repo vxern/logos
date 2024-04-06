@@ -13,6 +13,7 @@ import { InteractionRepetitionService } from "logos/services/interaction-repetit
 import { LavalinkService } from "logos/services/lavalink";
 import { RealtimeUpdateService } from "logos/services/realtime-updates";
 import { StatusService } from "logos/services/status";
+import { AdapterStore } from "logos/stores/adapters";
 import { CommandStore } from "logos/stores/commands";
 import { Database } from "logos/stores/database";
 import { EventStore } from "logos/stores/events";
@@ -20,7 +21,6 @@ import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationBuilder, LocalisationStore, RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
-import { AdapterStore } from "./stores/adapters";
 
 interface Environment {
 	readonly isDebug: boolean;

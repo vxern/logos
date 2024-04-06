@@ -1,6 +1,6 @@
 import { Client } from "logos/client";
-import { DetectorStore } from "./adapters/detectors";
-import { TranslatorStore } from "./adapters/translators";
+import { DetectorStore } from "logos/stores/adapters/detectors";
+import { TranslatorStore } from "logos/stores/adapters/translators";
 
 class AdapterStore {
 	readonly detectors: DetectorStore;

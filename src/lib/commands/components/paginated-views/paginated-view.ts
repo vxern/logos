@@ -16,7 +16,7 @@ abstract class PaginatedView<T> {
 	#index: number;
 
 	readonly #_pageButtons: InteractionCollector<[action: PageAction]>;
-	#_anchor: Logos.Interaction;
+	readonly #_anchor: Logos.Interaction;
 
 	get #isOnFirstPage(): boolean {
 		return this.#index === 0;
@@ -80,8 +80,9 @@ abstract class PaginatedView<T> {
 		];
 
 		if (this.#showable && !this.#_anchor.parameters.show) {
+			const locale = this.#_anchor.parameters.show ? this.#_anchor.guildLocale : this.#_anchor.locale;
 			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor, {
-				locale: this.#_anchor.locale,
+				locale,
 			});
 
 			return [
