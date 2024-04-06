@@ -1,7 +1,8 @@
-import { SingleDetectionResult } from "logos/adapters/detectors/adapter";
+import { DetectionLanguage, Detector } from "logos:constants/languages";
+import { DetectorAdapter, SingleDetectionResult } from "logos/adapters/detectors/adapter";
+import { CLDAdapter } from "logos/adapters/detectors/cld";
 import { TinyLDAdapter } from "logos/adapters/detectors/tinyld";
 import { Client } from "logos/client";
-import { DetectionLanguage } from "logos:constants/languages";
 
 interface DetectionResult {
 	readonly likely: DetectionLanguage[];
@@ -11,11 +12,13 @@ interface DetectionResult {
 type DetectionFrequencies = Partial<Record<DetectionLanguage, number>>;
 class DetectorStore {
 	readonly adapters: {
+		readonly cld: CLDAdapter;
 		readonly tinyld: TinyLDAdapter;
-	};
+	} & Record<Detector, DetectorAdapter>;
 
 	constructor(client: Client) {
 		this.adapters = {
+			cld: new CLDAdapter(client),
 			tinyld: new TinyLDAdapter(client),
 		};
 	}
