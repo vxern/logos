@@ -1,6 +1,6 @@
 import { Locale } from "logos:constants/languages/localisation";
 import { Client } from "logos/client";
-import { Page, PaginatedView } from "logos/commands/components/paginated-views/paginated-view";
+import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
 
 class SoftwareLicenceView extends PaginatedView<string> {
 	readonly #title: string;
@@ -14,7 +14,7 @@ class SoftwareLicenceView extends PaginatedView<string> {
 		this.#title = title;
 	}
 
-	build(page: string[], _: number, { locale: __ }: { locale: Locale }): Page {
+	build(page: string[], _: number, { locale: __ }: { locale: Locale }): View {
 		return { embed: { title: this.#title, description: `*${page}*` } };
 	}
 }

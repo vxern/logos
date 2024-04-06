@@ -2,7 +2,7 @@ import { getEmojiBySongListingType } from "logos:constants/emojis";
 import { Locale } from "logos:constants/languages/localisation";
 import { SongListing } from "logos:constants/music";
 import { Client } from "logos/client";
-import { Page, PaginatedView } from "logos/commands/components/paginated-views/paginated-view";
+import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
 
 class SongListingView extends PaginatedView<SongListing> {
 	readonly #title: string;
@@ -16,7 +16,7 @@ class SongListingView extends PaginatedView<SongListing> {
 		this.#title = title;
 	}
 
-	build(page: SongListing[], pageIndex: number, { locale }: { locale: Locale }): Page {
+	build(page: SongListing[], pageIndex: number, { locale }: { locale: Locale }): View {
 		if (page.length === 0) {
 			const strings = {
 				listEmpty: this.client.localise("music.strings.listEmpty", locale)(),

@@ -4,7 +4,7 @@ import { SongListing } from "logos:constants/music";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { Page, PaginatedView } from "logos/commands/components/paginated-views/paginated-view";
+import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
 
 class RemoveSongListingView extends PaginatedView<SongListing> {
 	readonly #_selectMenuSelection: InteractionCollector;
@@ -36,7 +36,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 		};
 	}
 
-	build(page: SongListing[], pageIndex: number, { locale }: { locale: Locale }): Page {
+	build(page: SongListing[], pageIndex: number, { locale }: { locale: Locale }): View {
 		if (page.length === 0) {
 			const strings = {
 				title: this.client.localise("music.options.remove.strings.queueEmpty.title", locale)(),

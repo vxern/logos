@@ -2,20 +2,21 @@ import { Locale } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
-type Page = { embed: Discord.CamelizedDiscordEmbed; components?: Discord.MessageComponents };
+interface View {
+	embed: Discord.CamelizedDiscordEmbed;
+	components?: Discord.MessageComponents;
+}
 type PageAction = "previous" | "next";
 
 abstract class PaginatedView<T> {
 	readonly client: Client;
 
-	anchor: Logos.Interaction;
-
 	readonly #pages: T[][];
 	readonly #showable: boolean;
-
 	#index: number;
 
 	readonly #_pageButtons: InteractionCollector<[action: PageAction]>;
+	#_anchor: Logos.Interaction;
 
 	get #isOnFirstPage(): boolean {
 		return this.#index === 0;
@@ -33,8 +34,8 @@ abstract class PaginatedView<T> {
 		return this.#pages.at(this.#index)!;
 	}
 
-	get #view(): Page {
-		const locale = this.anchor.parameters.show ? this.anchor.guildLocale : this.anchor.locale;
+	get #view(): View {
+		const locale = this.#_anchor.parameters.show ? this.#_anchor.guildLocale : this.#_anchor.locale;
 
 		const { embed, components } = this.build(this.#currentPage, this.#index, { locale });
 
@@ -78,9 +79,9 @@ abstract class PaginatedView<T> {
 			},
 		];
 
-		if (this.#showable && !this.anchor.parameters.show) {
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.anchor, {
-				locale: this.anchor.locale,
+		if (this.#showable && !this.#_anchor.parameters.show) {
+			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor, {
+				locale: this.#_anchor.locale,
 			});
 
 			return [
@@ -104,7 +105,7 @@ abstract class PaginatedView<T> {
 		{ interaction, elements, showable }: { interaction: Logos.Interaction; elements: T[]; showable?: boolean },
 	) {
 		this.client = client;
-		this.anchor = interaction;
+		this.#_anchor = interaction;
 
 		this.#pages = elements.toChunked(constants.RESULTS_PER_PAGE);
 		this.#showable = showable ?? false;
@@ -115,10 +116,10 @@ abstract class PaginatedView<T> {
 		});
 	}
 
-	abstract build(page: T[], index: number, { locale }: { locale: Locale }): Page;
+	abstract build(page: T[], index: number, { locale }: { locale: Locale }): View;
 
 	async #display(): Promise<void> {
-		await this.client.reply(this.anchor, {
+		await this.client.reply(this.#_anchor, {
 			embeds: [this.#view.embed],
 			components: this.#paginationControls,
 		});
@@ -127,7 +128,7 @@ abstract class PaginatedView<T> {
 	async refresh(): Promise<void> {
 		const view = this.#view;
 
-		await this.client.editReply(this.anchor, {
+		await this.client.editReply(this.#_anchor, {
 			embeds: [view.embed],
 			components: [...(view.components ?? []), ...this.#paginationControls],
 		});
@@ -179,4 +180,4 @@ abstract class PaginatedView<T> {
 	}
 }
 
-export { PaginatedView, Page };
+export { PaginatedView, View };
