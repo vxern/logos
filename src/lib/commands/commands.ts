@@ -634,10 +634,10 @@ const commands = Object.freeze({
 		},
 	},
 } satisfies Record<string, CommandTemplate>);
-type Commands = typeof commands;
-type CommandName = keyof Commands;
+type CommandTemplates = typeof commands;
+type CommandName = keyof CommandTemplates;
 
-type BuiltCommands = Commands & Record<CommandName, BuiltCommand>;
+type BuiltCommands = CommandTemplates & Record<CommandName, BuiltCommand>;
 
 interface OptionFlags {
 	readonly hasRateLimit?: boolean;
@@ -693,6 +693,7 @@ export type {
 	BuiltOption,
 	Command,
 	CommandName,
+	CommandTemplates,
 	CommandTemplate,
 	OptionMetadata,
 	Option,

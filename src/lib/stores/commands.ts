@@ -1,6 +1,5 @@
 import { isAutocomplete } from "logos:constants/interactions";
 import { getDiscordLanguageByLocale } from "logos:constants/languages/localisation";
-import { capitalise } from "logos:core/formatting";
 import { isDefined } from "logos:core/utilities";
 import { Client } from "logos/client";
 import {
@@ -10,6 +9,7 @@ import {
 	CommandBuilder,
 	CommandName,
 	CommandTemplate,
+	CommandTemplates,
 	Option,
 	OptionBuilder,
 	OptionMetadata,
@@ -83,7 +83,7 @@ class CommandStore {
 			templates,
 		}: {
 			localisations: LocalisationStore;
-			templates: CommandTemplate[];
+			templates: CommandTemplates;
 		},
 	): CommandStore {
 		const log = Logger.create({ identifier: "Client/CommandStore", isDebug: client.environment.isDebug });
@@ -91,7 +91,7 @@ class CommandStore {
 		// Build commands from templates.
 		const commands: Partial<BuiltCommands> = {};
 		const namesWithMetadata: LocalisedNamesWithMetadata[] = [];
-		for (const template of templates) {
+		for (const [identifier, template] of Object.entries(templates) as [CommandName, CommandTemplate][]) {
 			const result = CommandStore.build({ localisations, template });
 			if (result === undefined) {
 				continue;
@@ -99,19 +99,12 @@ class CommandStore {
 
 			const [command, namesWithMetadataPart] = result;
 
-			// TODO(vxern): This needs to be documented somewhere.
-			// TODO(vxern): This could also be done better.
-			const nameParts = template.identifier.replace(".message", "Message").split(".options.");
-			const commandName = [nameParts.at(0)!, ...nameParts.slice(1).map((part) => capitalise(part))]
-				.join("")
-				.replace("recognize", "recognise")
-				.replace("license", "licence");
-
 			const builtCommand = template as BuiltCommand;
 			builtCommand.built = command;
 
+			// TODO(vxern): Why is this flagging up?
 			// @ts-ignore: This is fine.
-			commands[commandName as CommandName] = builtCommand;
+			commands[identifier] = builtCommand;
 			namesWithMetadata.push(...namesWithMetadataPart);
 		}
 

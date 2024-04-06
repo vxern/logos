@@ -283,7 +283,7 @@ class Client {
 		this.#localisations = new LocalisationStore(this, { localisations });
 		this.#commands = CommandStore.create(this, {
 			localisations: this.#localisations,
-			templates: Array.from(Object.values(commands)),
+			templates: commands,
 		});
 		this.#interactions = new InteractionStore(this, { bot });
 		this.#services = new ServiceStore(this);
