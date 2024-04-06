@@ -43,7 +43,6 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		return;
 	}
 
-	// TODO(vxern): This may not display the updated listings on queue change.
 	const view = new RemoveSongListingView(client, { interaction, listings: queue });
 
 	view.onInteraction(async (buttonPress) => {

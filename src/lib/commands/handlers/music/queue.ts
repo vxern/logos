@@ -46,7 +46,6 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 		queue: client.localise("music.options.queue.strings.queue", locale)(),
 	};
 
-	// TODO(vxern): This may not display the updated listings on history change.
 	const view = new SongListingView(client, {
 		interaction,
 		title: `${constants.emojis.music.list} ${strings.queue}`,

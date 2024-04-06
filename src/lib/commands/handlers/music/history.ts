@@ -46,7 +46,6 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 		title: client.localise("music.options.history.strings.playbackHistory", locale)(),
 	};
 
-	// TODO(vxern): This will not display the updated listings on history change.
 	const view = new SongListingView(client, {
 		interaction,
 		title: `${constants.emojis.music.list} ${strings.title}`,
