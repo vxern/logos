@@ -232,9 +232,16 @@ class InteractionCollector<
 		return true;
 	}
 
-	// @ts-ignore
-	onCollect(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => Promise<void>): void {
-		super.onCollect(async (interactionRaw) => {
+	/**
+	 * @deprecated
+	 * Do not use as this receives raw Discord interaction events, rather than Logos ones.
+	 * Use {@link InteractionCollector.onInteraction} instead.
+	 */
+	onCollect: Collector<"interactionCreate">["onCollect"] = super.onCollect.bind(this);
+
+	onInteraction(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => Promise<void>): void {
+		// @ts-ignore: Internal use.
+		this.onCollect(async (interactionRaw) => {
 			const locales = await this.#getLocaleData(interactionRaw);
 			const metadata = this.#getMetadata(interactionRaw);
 			const parameters = this.#getParameters<Parameters>(interactionRaw);

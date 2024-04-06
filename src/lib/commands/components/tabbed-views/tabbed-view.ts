@@ -74,7 +74,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 	}
 
 	async open(): Promise<void> {
-		this.buttonPresses.onCollect(async (buttonPress) => {
+		this.buttonPresses.onInteraction(async (buttonPress) => {
 			await this.client.acknowledge(buttonPress);
 
 			const group = buttonPress.metadata[1] as keyof Generic["groups"];

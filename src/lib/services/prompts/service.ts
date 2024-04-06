@@ -184,7 +184,7 @@ abstract class PromptService<
 			this.#handleMessageDelete(message);
 		});
 
-		this.magicButton.onCollect(async (buttonPress) => {
+		this.magicButton.onInteraction(async (buttonPress) => {
 			const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
 			if (handle === undefined) {
 				return;
@@ -193,7 +193,7 @@ abstract class PromptService<
 			handle(buttonPress);
 		});
 
-		this.removeButton.onCollect(async (buttonPress) => {
+		this.removeButton.onInteraction(async (buttonPress) => {
 			const customId = buttonPress.data?.customId;
 			if (customId === undefined) {
 				return;

@@ -24,8 +24,8 @@ class InteractionRepetitionService extends GlobalService {
 	}
 
 	async start(): Promise<void> {
-		this.#_commandInteractions.onCollect(this.#handleCommandInteraction.bind(this));
-		this.#_showInChatButtons.onCollect(this.#handleShowInChat.bind(this));
+		this.#_commandInteractions.onInteraction(this.#handleCommandInteraction.bind(this));
+		this.#_showInChatButtons.onInteraction(this.#handleShowInChat.bind(this));
 
 		await this.client.registerInteractionCollector(this.#_commandInteractions);
 		await this.client.registerInteractionCollector(this.#_showInChatButtons);
@@ -58,7 +58,7 @@ class InteractionRepetitionService extends GlobalService {
 			isSingle: true,
 		});
 
-		confirmButton.onCollect(async (confirmButtonPress) => {
+		confirmButton.onInteraction(async (confirmButtonPress) => {
 			await this.client.deleteReply(buttonPress);
 
 			const originalInteraction = this.client.unregisterInteraction(BigInt(buttonPress.metadata[1]));
@@ -76,7 +76,7 @@ class InteractionRepetitionService extends GlobalService {
 			await this.client.handleInteraction(interactionSpoofed);
 		});
 
-		cancelButton.onCollect(async (_) => this.client.deleteReply(buttonPress));
+		cancelButton.onInteraction(async (_) => this.client.deleteReply(buttonPress));
 
 		await this.client.registerInteractionCollector(confirmButton);
 		await this.client.registerInteractionCollector(cancelButton);

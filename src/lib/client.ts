@@ -247,8 +247,6 @@ class Client {
 	get registerInteractionCollector(): <Metadata extends string[]>(
 		collector: InteractionCollector<Metadata>,
 	) => Promise<void> {
-		// TODO(vxern): Find a way to get rid of ts-ignore?
-		// @ts-ignore: This is fine.
 		return (collector) => this.#events.registerCollector("interactionCreate", collector);
 	}
 
@@ -355,7 +353,7 @@ class Client {
 
 		this.#_guildCreateCollector.onCollect(this.#setupGuild.bind(this));
 		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
-		this.#_interactionCollector.onCollect(this.handleInteraction.bind(this));
+		this.#_interactionCollector.onInteraction(this.handleInteraction.bind(this));
 		this.#_channelDeleteCollector.onCollect((channel) => {
 			this.#connection.cache.channels.delete(channel.id);
 

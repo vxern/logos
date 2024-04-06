@@ -306,12 +306,12 @@ async function handlePurgeMessages(
 		const continueButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
-		continueButton.onCollect(async (buttonPress) => {
+		continueButton.onInteraction(async (buttonPress) => {
 			await client.acknowledge(buttonPress);
 			resolve(true);
 		});
 
-		cancelButton.onCollect(async (buttonPress) => {
+		cancelButton.onInteraction(async (buttonPress) => {
 			await client.acknowledge(buttonPress);
 			resolve(false);
 		});
@@ -414,12 +414,12 @@ async function handlePurgeMessages(
 		const continueButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
-		continueButton.onCollect(async (buttonPress) => {
+		continueButton.onInteraction(async (buttonPress) => {
 			await client.acknowledge(buttonPress);
 			resolve(true);
 		});
 
-		cancelButton.onCollect(async (buttonPress) => {
+		cancelButton.onInteraction(async (buttonPress) => {
 			await client.acknowledge(buttonPress);
 			resolve(false);
 		});

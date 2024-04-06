@@ -30,7 +30,7 @@ class EntryService extends LocalService {
 	}
 
 	async start(): Promise<void> {
-		this.#_acceptedRulesButton.onCollect(this.#handleAcceptRules.bind(this));
+		this.#_acceptedRulesButton.onInteraction(this.#handleAcceptRules.bind(this));
 
 		await this.client.registerInteractionCollector(this.#_acceptedRulesButton);
 	}
@@ -46,7 +46,7 @@ class EntryService extends LocalService {
 			isSingle: true,
 		});
 
-		languageProficiencyButtons.onCollect((buttonPress) =>
+		languageProficiencyButtons.onInteraction((buttonPress) =>
 			this.#handlePickLanguageProficiency(buttonPress, { collector: languageProficiencyButtons }),
 		);
 
@@ -139,7 +139,7 @@ class EntryService extends LocalService {
 				isSingle: true,
 			});
 
-			requestVerificationButton.onCollect(this.#handleRequestVerification.bind(this));
+			requestVerificationButton.onInteraction(this.#handleRequestVerification.bind(this));
 
 			await this.client.registerInteractionCollector(requestVerificationButton);
 

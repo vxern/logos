@@ -37,7 +37,7 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async start(): Promise<void> {
-		this.#_openInquiry.onCollect(async (selection) => {
+		this.#_openInquiry.onInteraction(async (selection) => {
 			await this.#handleOpenInquiry(selection, selection.metadata[1]);
 		});
 
@@ -291,7 +291,7 @@ class VerificationPromptService extends PromptService<{
 				const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
 				const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
 
-				confirmButton.onCollect(async (_) => {
+				confirmButton.onInteraction(async (_) => {
 					await this.client.deleteReply(interaction);
 
 					if (entryRequestDocument.isFinalised) {
@@ -308,7 +308,7 @@ class VerificationPromptService extends PromptService<{
 					resolve(null);
 				});
 
-				cancelButton.onCollect(async (_) => {
+				cancelButton.onInteraction(async (_) => {
 					await this.client.deleteReply(interaction);
 
 					resolve(undefined);
@@ -382,7 +382,7 @@ class VerificationPromptService extends PromptService<{
 				const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
 				const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
 
-				confirmButton.onCollect(async (_) => {
+				confirmButton.onInteraction(async (_) => {
 					await this.client.deleteReply(interaction);
 
 					if (entryRequestDocument.isFinalised) {
@@ -399,7 +399,7 @@ class VerificationPromptService extends PromptService<{
 					resolve(null);
 				});
 
-				cancelButton.onCollect(async (_) => {
+				cancelButton.onInteraction(async (_) => {
 					await this.client.deleteReply(interaction);
 
 					resolve(undefined);

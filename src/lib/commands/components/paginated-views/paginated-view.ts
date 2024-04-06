@@ -152,7 +152,7 @@ abstract class PaginatedView<T> {
 	}
 
 	async open(): Promise<void> {
-		this.#_pageButtons.onCollect(async (buttonPress) => {
+		this.#_pageButtons.onInteraction(async (buttonPress) => {
 			await this.client.acknowledge(buttonPress);
 
 			switch (buttonPress.metadata[1]) {

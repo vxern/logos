@@ -129,19 +129,19 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			dependsOn: cancelButton,
 		});
 
-		continueButton.onCollect(async (buttonPress) => {
+		continueButton.onInteraction(async (buttonPress) => {
 			await this.client.deleteReply(submission);
 			resolve(buttonPress);
 		});
 
-		cancelButton.onCollect(async (cancelButtonPress) => {
-			returnButton.onCollect(async (returnButtonPress) => {
+		cancelButton.onInteraction(async (cancelButtonPress) => {
+			returnButton.onInteraction(async (returnButtonPress) => {
 				await this.client.deleteReply(submission);
 				await this.client.deleteReply(cancelButtonPress);
 				resolve(returnButtonPress);
 			});
 
-			leaveButton.onCollect(async (_) => {
+			leaveButton.onInteraction(async (_) => {
 				await this.client.deleteReply(submission);
 				await this.client.deleteReply(cancelButtonPress);
 				resolve(undefined);
@@ -241,7 +241,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 	async open(): Promise<FormData | undefined> {
 		const { promise, resolve } = Promise.withResolvers<FormData | undefined>();
 
-		this.#_submissions.onCollect(async (submission) => {
+		this.#_submissions.onInteraction(async (submission) => {
 			const formData = ModalComposer.getFormData<FormData>(submission);
 			if (formData === undefined) {
 				this.client.log.warn("Could not get form data from modal composer.");

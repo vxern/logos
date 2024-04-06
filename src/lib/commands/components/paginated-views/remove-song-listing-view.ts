@@ -9,6 +9,10 @@ import { PaginatedView, View } from "logos/commands/components/paginated-views/p
 class RemoveSongListingView extends PaginatedView<SongListing> {
 	readonly #_selectMenuSelection: InteractionCollector;
 
+  get onInteraction(): InteractionCollector["onInteraction"] {
+    return this.#_selectMenuSelection.onInteraction.bind(this);
+  }
+
 	constructor(client: Client, { interaction, listings }: { interaction: Logos.Interaction; listings: SongListing[] }) {
 		// TODO(vxern): Check if these showable properties are fine to keep as-is, or if they need additional logic.
 		super(client, { interaction, elements: listings, showable: true });
@@ -58,10 +62,6 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 			embed: { title: strings.title, description: strings.description, color: constants.colours.notice },
 			components: [selectMenu],
 		};
-	}
-
-	onCollect(callback: (buttonPress: Logos.Interaction) => Promise<void>): void {
-		this.#_selectMenuSelection.onCollect(callback);
 	}
 
 	async open(): Promise<void> {

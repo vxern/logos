@@ -40,7 +40,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 
 	const selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
-	selectMenuSelection.onCollect(async (selection) => {
+	selectMenuSelection.onInteraction(async (selection) => {
 		await client.deleteReply(interaction);
 
 		const indexString = selection.data?.values?.at(0) as string | undefined;

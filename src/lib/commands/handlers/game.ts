@@ -75,7 +75,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	});
 	const skipButton = new InteractionCollector(client, { only: [interaction.user.id] });
 
-	guessButton.onCollect(async (buttonPress) => {
+	guessButton.onInteraction(async (buttonPress) => {
 		await client.acknowledge(buttonPress);
 
 		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === buttonPress.metadata[1]);
@@ -108,7 +108,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		}
 	});
 
-	skipButton.onCollect(async (buttonPress) => {
+	skipButton.onInteraction(async (buttonPress) => {
 		await client.acknowledge(buttonPress);
 
 		data.embedColour = constants.colours.blue;

@@ -17,7 +17,7 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	}
 
 	async start(): Promise<void> {
-		this.#_selectRolesButton.onCollect(async (buttonPress) => {
+		this.#_selectRolesButton.onInteraction(async (buttonPress) => {
 			await handleOpenRoleSelectionMenu(this.client, buttonPress);
 		});
 

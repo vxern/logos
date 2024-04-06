@@ -148,7 +148,7 @@ async function createRoleSelectionMenu(
 
 	const selectionMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
 
-	selectionMenuSelection.onCollect(async (selection) => {
+	selectionMenuSelection.onInteraction(async (selection) => {
 		await client.acknowledge(selection);
 
 		const identifier = selection.data?.values?.at(0);
