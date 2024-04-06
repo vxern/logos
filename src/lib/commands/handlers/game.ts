@@ -13,10 +13,10 @@ function random(max: number): number {
 const wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
 interface GameData {
+	readonly guessButton: InteractionCollector<[index: string]>;
+	readonly skipButton: InteractionCollector;
 	sentenceSelection: SentenceSelection;
 	embedColour: number;
-	guessButton: InteractionCollector<[index: string]>;
-	skipButton: InteractionCollector;
 	sessionScore: number;
 }
 
@@ -73,7 +73,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	const guessButton = new InteractionCollector<[index: string]>(client, {
 		only: [interaction.user.id],
 	});
-	const skipButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
+	const skipButton = new InteractionCollector(client, { only: [interaction.user.id] });
 
 	guessButton.onCollect(async (buttonPress) => {
 		await client.acknowledge(buttonPress);
@@ -124,10 +124,10 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	await client.registerInteractionCollector(skipButton);
 
 	const data: GameData = {
+		guessButton,
+		skipButton,
 		sentenceSelection: await getSentenceSelection(client, learningLocale),
 		embedColour: constants.colours.blue,
-		guessButton: guessButton,
-		skipButton: skipButton,
 		sessionScore: 0,
 	};
 
@@ -203,7 +203,6 @@ async function getGameView(
 						}
 					}
 
-					// TODO(vxern): Possibly insecure? The user could tell the right answer from the button IDs.
 					let customId: string;
 					if (mode === "hide") {
 						customId = data.guessButton.encodeId([pick[0]]);
@@ -265,15 +264,10 @@ async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
 
 /** Represents a pair of a sentence and its translation. */
 interface SentencePair {
-	sentenceId: number;
-
-	/** The source sentence. */
-	sentence: string;
-
-	translationId: number;
-
-	/** The translation of the sentence. */
-	translation: string;
+	readonly sentenceId: number;
+	readonly sentence: string;
+	readonly translationId: number;
+	readonly translation: string;
 }
 
 async function getSentencePairById(client: Client, locale: Locale, id: string): Promise<SentencePair> {
