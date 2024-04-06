@@ -1,8 +1,7 @@
-import type { Client } from "logos/client";
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
 import { handleStartAnswering } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
-import { handleStartCorrecting } from "logos/commands/handlers/correction";
+import { handleMakeFullCorrection, handleMakePartialCorrection } from "logos/commands/handlers/correction";
 import { handleDisplayCredits } from "logos/commands/handlers/credits";
 import { handleStartGame } from "logos/commands/handlers/game";
 import { InteractionHandler } from "logos/commands/handlers/handler";
@@ -18,8 +17,8 @@ import {
 } from "logos/commands/handlers/licence/software";
 import {
 	handleDisplayAuthorPraises,
-	handleDisplayTargetPraises,
 	handleDisplayPraisesAutocomplete,
+	handleDisplayTargetPraises,
 } from "logos/commands/handlers/list/praises";
 import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "logos/commands/handlers/list/warnings";
 import { handleFastForward, handleFastForwardAutocomplete } from "logos/commands/handlers/music/fast-forward";
@@ -142,17 +141,13 @@ const commands = Object.freeze({
 		identifier: "correction.options.partial.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		// TODO(vxern): Make these standalone handlers in the correction file.
-		handle: (client: Client, interaction: Logos.Interaction) =>
-			handleStartCorrecting(client, interaction, { mode: "partial" }),
+		handle: handleMakePartialCorrection,
 	},
 	correctionFullMessage: {
 		identifier: "correction.options.full.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		// TODO(vxern): Make these standalone handlers in the correction file.
-		handle: (client: Client, interaction: Logos.Interaction) =>
-			handleStartCorrecting(client, interaction, { mode: "full" }),
+		handle: handleMakeFullCorrection,
 	},
 	game: {
 		identifier: "game",

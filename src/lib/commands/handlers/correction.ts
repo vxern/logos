@@ -1,12 +1,17 @@
 import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { CorrectionComposer } from "logos/commands/components/modal-composers/correction-composer";
+import { InteractionHandler } from "logos/commands/handlers/handler";
 
 type CorrectionMode = "partial" | "full";
 
-async function handleStartCorrecting(
+const handleMakePartialCorrection: InteractionHandler = (...args) => handleMakeCorrection(...args, { mode: "partial" });
+const handleMakeFullCorrection: InteractionHandler = (...args) => handleMakeCorrection(...args, { mode: "full" });
+
+async function handleMakeCorrection(
 	client: Client,
 	interaction: Logos.Interaction,
+	_: Logos.InteractionLocaleData,
 	{ mode }: { mode: CorrectionMode },
 ): Promise<void> {
 	const locale = interaction.locale;
@@ -137,4 +142,4 @@ async function handleStartCorrecting(
 	await composer.open();
 }
 
-export { handleStartCorrecting };
+export { handleMakeFullCorrection, handleMakePartialCorrection };
