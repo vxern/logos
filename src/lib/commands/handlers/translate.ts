@@ -443,7 +443,12 @@ async function detectLanguage(
 
 		const strings = {
 			title: client.localise("translate.strings.languageNotSupported.title", locale)(),
-			description: client.localise("translate.strings.languageNotSupported.description", locale)(),
+			description: client.localise(
+				"translate.strings.languageNotSupported.description",
+				locale,
+			)({
+				language: client.localise(constants.localisations.languages[detectedLanguage], locale)(),
+			}),
 		};
 
 		await client.unsupported(interaction, {
