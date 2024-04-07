@@ -6,11 +6,6 @@ async function handleDisplayDictionaryLicenceAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { dictionary: string }>,
 ): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const dictionaryLowercase = interaction.parameters.dictionary.trim().toLowerCase();
 	const choices = Object.entries(constants.licences.dictionaries)
 		.map(([dictionaryKey, dictionary]) => {

@@ -12,12 +12,7 @@ async function handleRequestQueryPlayback(
 	interaction: Logos.Interaction<any, { query: string }>,
 	resolveToSongListing: SongListingResolver,
 ): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const musicService = client.getMusicService(guildId);
+	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
 	}
@@ -59,17 +54,12 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}
 
-	const musicService = client.getMusicService(guildId);
+	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
 	}

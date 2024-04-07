@@ -3,12 +3,7 @@ import { Client } from "logos/client";
 async function handleSetVolume(client: Client, interaction: Logos.Interaction<any, { volume: number }>): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const musicService = client.getMusicService(guildId);
+	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
 	}

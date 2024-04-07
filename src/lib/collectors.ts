@@ -259,7 +259,7 @@ class InteractionCollector<
 			}
 
 			const interaction: Logos.Interaction<Metadata, Parameters> = {
-				...interactionRaw,
+				...(interactionRaw as unknown as Logos.Interaction),
 				...locales,
 				commandName: name,
 				metadata,
@@ -271,14 +271,8 @@ class InteractionCollector<
 	}
 
 	async #getLocaleData(interaction: Discord.Interaction): Promise<Logos.InteractionLocaleData> {
-		const [guildId, channelId, member] = [
-			interaction.guildId,
-			interaction.channelId,
-			interaction.guildId !== undefined
-				? this.#client.entities.members.get(interaction.guildId)?.get(interaction.user.id)
-				: undefined,
-		];
-		if (guildId === undefined || channelId === undefined || member === undefined) {
+		const member = this.#client.entities.members.get(interaction.guildId!)?.get(interaction.user.id);
+		if (member === undefined) {
 			return {
 				language: constants.defaults.LOCALISATION_LANGUAGE,
 				locale: constants.defaults.LOCALISATION_LOCALE,
@@ -291,13 +285,13 @@ class InteractionCollector<
 
 		const [userDocument, guildDocument] = await Promise.all([
 			User.getOrCreate(this.#client, { userId: interaction.user.id.toString() }),
-			Guild.getOrCreate(this.#client, { guildId: guildId.toString() }),
+			Guild.getOrCreate(this.#client, { guildId: interaction.guildId!.toString() }),
 		]);
 
 		const targetLanguage = guildDocument.targetLanguage;
 		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
 
-		const guildLanguage = guildDocument.isTargetLanguageOnly(channelId.toString())
+		const guildLanguage = guildDocument.isTargetLanguageOnly(interaction.channelId!.toString())
 			? targetLanguage
 			: guildDocument.localisationLanguage;
 		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);

@@ -28,12 +28,7 @@ async function handleFastForward(
 ): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const musicService = client.getMusicService(guildId);
+	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
 	}

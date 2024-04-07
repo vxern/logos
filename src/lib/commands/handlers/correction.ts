@@ -16,12 +16,7 @@ async function handleMakeCorrection(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const member = client.entities.members.get(guildId)?.get(interaction.user.id);
+	const member = client.entities.members.get(interaction.guildId)?.get(interaction.user.id);
 	if (member === undefined) {
 		return;
 	}
@@ -59,14 +54,14 @@ async function handleMakeCorrection(
 		return;
 	}
 
-	const correctedMember = client.entities.members.get(guildId)?.get(message.author.id);
+	const correctedMember = client.entities.members.get(interaction.guildId)?.get(message.author.id);
 	if (correctedMember === undefined) {
 		return;
 	}
 
 	const doNotCorrectMeRoleId = (
 		constants.roles.learning.collection.list.doNotCorrectMe.snowflakes as Record<string, string>
-	)[guildId.toString()];
+	)[interaction.guildId.toString()];
 	if (doNotCorrectMeRoleId !== undefined) {
 		if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
 			const strings = {
@@ -122,7 +117,12 @@ async function handleMakeCorrection(
 
 		client.bot.rest
 			.sendMessage(message.channelId, {
-				messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
+				messageReference: {
+					messageId: message.id,
+					channelId: message.channelId,
+					guildId: interaction.guildId,
+					failIfNotExists: false,
+				},
 				embeds: [
 					{
 						description: formData.corrected,

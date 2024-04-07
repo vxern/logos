@@ -636,12 +636,12 @@ class Client {
 		},
 		{ locale }: { locale: Locale },
 	): Logos.Member | undefined {
-		const guildId = interaction.guildId;
-		if (guildId === undefined) {
-			return undefined;
-		}
-
-		const result = this.resolveIdentifierToMembers({ guildId, seekerUserId: interaction.user.id, identifier, options });
+		const result = this.resolveIdentifierToMembers({
+			guildId: interaction.guildId,
+			seekerUserId: interaction.user.id,
+			identifier,
+			options,
+		});
 		if (result === undefined) {
 			return;
 		}
@@ -699,13 +699,8 @@ class Client {
 			return;
 		}
 
-		const guildId = interaction.guildId;
-		if (guildId === undefined) {
-			return undefined;
-		}
-
 		const result = this.resolveIdentifierToMembers({
-			guildId,
+			guildId: interaction.guildId,
 			seekerUserId: interaction.user.id,
 			identifier: identifierTrimmed,
 			options,

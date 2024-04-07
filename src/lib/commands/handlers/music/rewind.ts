@@ -25,12 +25,7 @@ async function handleRewindAutocomplete(
 async function handleRewind(client: Client, interaction: Logos.Interaction<any, { timestamp: string }>): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const musicService = client.getMusicService(guildId);
+	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
 	}

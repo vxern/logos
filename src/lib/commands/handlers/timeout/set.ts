@@ -45,12 +45,7 @@ async function handleSetTimeout(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.timeouts;
 	if (configuration === undefined) {
@@ -95,13 +90,13 @@ async function handleSetTimeout(
 
 	const until = Date.now() + durationParsed;
 
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}
 
 	await client.bot.rest
-		.editMember(guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
+		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
 		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
 
 	await client.tryLog("memberTimeoutAdd", {

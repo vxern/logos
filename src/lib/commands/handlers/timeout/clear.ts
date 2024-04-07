@@ -19,12 +19,7 @@ async function handleClearTimeout(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.timeouts;
 	if (configuration === undefined) {
@@ -68,13 +63,13 @@ async function handleClearTimeout(
 		return;
 	}
 
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}
 
 	await client.bot.rest
-		.editMember(guildId, member.id, { communicationDisabledUntil: null })
+		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: null })
 		.catch(() => client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`));
 
 	await client.tryLog("memberTimeoutRemove", {

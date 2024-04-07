@@ -4,12 +4,7 @@ import { SongListingView } from "logos/commands/components/paginated-views/song-
 async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const musicService = client.getMusicService(guildId);
+	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
 	}

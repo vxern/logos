@@ -25,11 +25,6 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	const locale = interaction.locale;
 	const learningLocale = getLocaleByLearningLanguage(interaction.learningLanguage);
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const sentencePairCount = await client.cache.redis.scard(`${learningLocale}:index`);
 	if (sentencePairCount === 0) {
 		const strings = {
@@ -53,7 +48,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		return;
 	}
 
-	const guildStatsDocument = await GuildStats.getOrCreate(client, { guildId: guildId.toString() });
+	const guildStatsDocument = await GuildStats.getOrCreate(client, { guildId: interaction.guildId.toString() });
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 	await guildStatsDocument.update(client, () => {

@@ -4,12 +4,7 @@ import { handleResumePlayback } from "logos/commands/handlers/music/resume";
 async function handlePausePlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const musicService = client.getMusicService(guildId);
+	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
 	}

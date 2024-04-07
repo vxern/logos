@@ -9,11 +9,6 @@ async function handleSetLanguageAutocomplete(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const languageLowercase = interaction.parameters.language.trim().toLowerCase();
 	if (languageLowercase.length === 0) {
 		const strings = {

@@ -6,19 +6,14 @@ import { Ticket, TicketFormData } from "logos/database/ticket";
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.tickets;
 	if (configuration === undefined) {
 		return;
 	}
 
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -56,7 +51,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		) => {
 			await client.postponeReply(submission);
 
-			const ticketService = client.getPromptService(guildId, { type: "tickets" });
+			const ticketService = client.getPromptService(interaction.guildId, { type: "tickets" });
 			if (ticketService === undefined) {
 				return;
 			}

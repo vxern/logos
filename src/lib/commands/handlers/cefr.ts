@@ -3,12 +3,7 @@ import { CefrGuideView } from "logos/commands/components/tabbed-views/cefr-guide
 import { Guild } from "logos/database/guild";
 
 async function handleDisplayCefrGuide(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const component = new CefrGuideView(client, { interaction, guildDocument });
 

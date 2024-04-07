@@ -5,19 +5,14 @@ import { Guild } from "logos/database/guild";
 async function handleDisplayModerationPolicy(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.policy;
 	if (configuration === undefined) {
 		return;
 	}
 
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}

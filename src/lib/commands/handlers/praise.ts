@@ -16,12 +16,7 @@ async function handlePraiseUser(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.praises;
 	if (configuration === undefined) {
@@ -71,13 +66,13 @@ async function handlePraiseUser(
 		return;
 	}
 
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}
 
 	const praiseDocument = await Praise.create(client, {
-		guildId: guildId.toString(),
+		guildId: interaction.guildId.toString(),
 		authorId: interaction.user.id.toString(),
 		targetId: member.id.toString(),
 		comment: interaction.parameters.comment,

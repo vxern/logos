@@ -26,12 +26,7 @@ async function handlePurgeMessages(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.purging;
 	if (configuration === undefined) {
@@ -66,15 +61,10 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	const channelId = interaction.channelId;
-	if (channelId === undefined) {
-		return;
-	}
-
 	const end =
 		interaction.parameters.end ??
 		(await client.bot.rest
-			.getMessages(channelId, { limit: 1 })
+			.getMessages(interaction.channelId, { limit: 1 })
 			.catch(() => undefined)
 			.then((messages) => messages?.at(0)?.id?.toString()));
 
@@ -112,12 +102,12 @@ async function handlePurgeMessages(
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		client.bot.rest.getMessage(channelId, startMessageId).catch(() => {
+		client.bot.rest.getMessage(interaction.channelId, startMessageId).catch(() => {
 			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
 
 			return undefined;
 		}),
-		client.bot.rest.getMessage(channelId, endMessageId).catch(() => {
+		client.bot.rest.getMessage(interaction.channelId, endMessageId).catch(() => {
 			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
 
 			return undefined;
@@ -131,7 +121,7 @@ async function handlePurgeMessages(
 		return;
 	}
 
-	const channelMention = mention(channelId, { type: "channel" });
+	const channelMention = mention(interaction.channelId, { type: "channel" });
 
 	const [startMessageContent, endMessageContent] = [
 		getMessageContent(client, startMessage, { locale }),
@@ -229,7 +219,7 @@ async function handlePurgeMessages(
 		}
 
 		const newMessages = await client.bot.rest
-			.getMessages(channelId, {
+			.getMessages(interaction.channelId, {
 				after: messages.length === 0 ? startMessage.id : messages.at(-1)?.id,
 				limit: 100,
 			})
@@ -536,14 +526,14 @@ async function handlePurgeMessages(
 
 	client.log.info(
 		`Purging ${messages.length} message(s) in ${diagnostics.display.channel(
-			channelId,
+			interaction.channelId,
 		)} as requested by ${diagnostics.display.user(interaction.user)}...`,
 	);
 
 	const [guild, member, channel] = [
-		client.entities.guilds.get(guildId),
-		client.entities.members.get(guildId)?.get(interaction.user.id),
-		client.entities.channels.get(channelId),
+		client.entities.guilds.get(interaction.guildId),
+		client.entities.members.get(interaction.guildId)?.get(interaction.user.id),
+		client.entities.channels.get(interaction.channelId),
 	];
 	if (guild === undefined || member === undefined || channel === undefined) {
 		return;
@@ -580,9 +570,11 @@ async function handlePurgeMessages(
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await client.bot.rest.deleteMessages(channelId, messageIds).catch((reason) => {
+			await client.bot.rest.deleteMessages(interaction.channelId, messageIds).catch((reason) => {
 				client.log.warn(
-					`Failed to delete ${messageIds.length} message(s) from ${diagnostics.display.channel(channelId)}:`,
+					`Failed to delete ${messageIds.length} message(s) from ${diagnostics.display.channel(
+						interaction.channelId,
+					)}:`,
 					reason,
 				);
 			});
@@ -595,7 +587,7 @@ async function handlePurgeMessages(
 
 	for (const message of nonBulkDeletable) {
 		await client.bot.rest
-			.deleteMessage(channelId, message.id)
+			.deleteMessage(interaction.channelId, message.id)
 			.catch((reason) => client.log.warn(`Failed to delete ${diagnostics.display.message(message)}:`, reason));
 
 		await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -604,9 +596,9 @@ async function handlePurgeMessages(
 	}
 
 	client.log.info(
-		`Purged ${deletedCount}/${
-			messages.length
-		} message(s) in channel ID ${channelId} as requested by ${diagnostics.display.user(interaction.user)}.`,
+		`Purged ${deletedCount}/${messages.length} message(s) in ${diagnostics.display.channel(
+			interaction.channelId,
+		)} as requested by ${diagnostics.display.user(interaction.user)}.`,
 	);
 
 	await client.tryLog("purgeEnd", {

@@ -45,17 +45,15 @@ async function handleToggleSlowmode(
 		return;
 	}
 
-	const { guildId, channelId } = interaction;
-	if (guildId === undefined || channelId === undefined) {
-		return;
-	}
-
-	const [guild, channel] = [client.entities.guilds.get(guildId), client.entities.channels.get(channelId)];
+	const [guild, channel] = [
+		client.entities.guilds.get(interaction.guildId),
+		client.entities.channels.get(interaction.channelId),
+	];
 	if (guild === undefined || channel === undefined) {
 		return;
 	}
 
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.slowmode;
 	if (configuration === undefined) {
@@ -147,7 +145,7 @@ async function handleToggleSlowmode(
 			return;
 		}
 
-		const lastUse = lastUseByGuildId.get(guildId);
+		const lastUse = lastUseByGuildId.get(interaction.guildId);
 		if (lastUse !== undefined) {
 			const now = Date.now();
 			const timeElapsedSinceUse = now - lastUse;

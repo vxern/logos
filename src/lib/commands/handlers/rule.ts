@@ -8,12 +8,7 @@ async function handleCiteRuleAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { rule: string }>,
 ): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.warns;
 	if (configuration === undefined) {
@@ -43,12 +38,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		return;
 	}
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}

@@ -21,12 +21,7 @@ import { InteractionCollector } from "logos/collectors";
  * from within it.
  */
 async function handleOpenRoleSelectionMenu(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -120,12 +115,7 @@ async function createRoleSelectionMenu(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -350,11 +340,6 @@ async function traverseRoleTreeAndDisplay(
 		throw "StateError: Could not get the last role category.";
 	}
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		throw "StateError: The guild ID was unexpectedly `undefined`.";
-	}
-
 	let selectOptions: Discord.SelectOption[];
 	if (isSingle(category)) {
 		const menuRoles = getRoles(category.collection, data.browsingData.guildId);
@@ -367,11 +352,12 @@ async function traverseRoleTreeAndDisplay(
 				]);
 			}
 
-			const guildIdString = guildId.toString();
 			return (Object.entries(menuRoles) as [string, RoleImplicit][]).map(([name, role]) => {
-				const snowflake = role.snowflakes[guildIdString];
+				const snowflake = role.snowflakes[interaction.guildId.toString()];
 				if (snowflake === undefined) {
-					throw `StateError: Could not get the snowflake for a role on ${diagnostics.display.guild(guildIdString)}.`;
+					throw `StateError: Could not get the snowflake for a role on ${diagnostics.display.guild(
+						interaction.guildId,
+					)}.`;
 				}
 
 				return [name, BigInt(snowflake)];

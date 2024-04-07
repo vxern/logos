@@ -5,12 +5,7 @@ import { Guild } from "logos/database/guild";
 async function handleDisplayResources(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.resources;
 	if (configuration === undefined) {

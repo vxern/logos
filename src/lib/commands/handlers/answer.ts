@@ -5,12 +5,7 @@ import { AnswerComposer } from "logos/commands/components/modal-composers/answer
 async function handleAnswer(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const member = client.entities.members.get(guildId)?.get(interaction.user.id);
+	const member = client.entities.members.get(interaction.guildId)?.get(interaction.user.id);
 	if (member === undefined) {
 		return;
 	}
@@ -63,7 +58,12 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 
 		client.bot.rest
 			.sendMessage(message.channelId, {
-				messageReference: { messageId: message.id, channelId: message.channelId, guildId, failIfNotExists: false },
+				messageReference: {
+					messageId: message.id,
+					channelId: message.channelId,
+					guildId: interaction.guildId,
+					failIfNotExists: false,
+				},
 				embeds: [
 					{
 						description: `– *${formData.answer}*`,

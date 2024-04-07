@@ -7,11 +7,6 @@ async function handleDisplaySoftwareLicenceAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { package: string }>,
 ): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
 	const packageLowercase = interaction.parameters.package.trim().toLowerCase();
 	const choices = Object.keys(constants.licences.software)
 		.map((packageName) => {

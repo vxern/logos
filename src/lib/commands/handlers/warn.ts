@@ -11,12 +11,7 @@ async function handleWarnUserAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
 ): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.warns;
 	if (configuration === undefined) {
@@ -70,12 +65,7 @@ async function handleWarnUser(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: guildId.toString() });
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.warns;
 	if (configuration === undefined) {
@@ -116,7 +106,7 @@ async function handleWarnUser(
 		return;
 	}
 
-	const guild = client.entities.guilds.get(guildId);
+	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
 	}
@@ -130,7 +120,7 @@ async function handleWarnUser(
 	}
 
 	const warningDocument = await Warning.create(client, {
-		guildId: guildId.toString(),
+		guildId: interaction.guildId.toString(),
 		authorId: interaction.user.id.toString(),
 		targetId: member.id.toString(),
 		reason: interaction.parameters.reason,
