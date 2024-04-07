@@ -21,6 +21,7 @@ import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationStore, RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
+import { ActionLock } from "./helpers/action-lock";
 
 interface Environment {
 	readonly isDebug: boolean;
@@ -47,6 +48,8 @@ interface MemberNarrowingOptions {
 }
 
 class Client {
+	static #client?: Client;
+
 	readonly environment: Environment;
 	readonly log: Logger;
 	readonly database: Database;
@@ -61,12 +64,11 @@ class Client {
 	readonly #adapters: AdapterStore;
 	readonly #connection: DiscordConnection;
 
+	readonly #_guildReloadLock: ActionLock;
 	readonly #_guildCreateCollector: Collector<"guildCreate">;
 	readonly #_guildDeleteCollector: Collector<"guildDelete">;
 	readonly #_interactionCollector: InteractionCollector;
 	readonly #_channelDeleteCollector: Collector<"channelDelete">;
-
-	static #client?: Client;
 
 	get documents(): Database["cache"] {
 		return this.database.cache;
@@ -292,6 +294,7 @@ class Client {
 		this.#adapters = new AdapterStore(this);
 		this.#connection = new DiscordConnection(this, { bot, events: this.#events.buildEventHandlers() });
 
+		this.#_guildReloadLock = new ActionLock();
 		this.#_guildCreateCollector = new Collector<"guildCreate">();
 		this.#_guildDeleteCollector = new Collector<"guildDelete">();
 		this.#_interactionCollector = new InteractionCollector(this, {
@@ -434,8 +437,11 @@ class Client {
 		await this.#connection.close();
 	}
 
-	// TODO(vxern): Add some kind of locking mechanism.
 	async reloadGuild(guildId: bigint): Promise<void> {
+		await this.#_guildReloadLock.doAction(() => this.#_handleGuildReload(guildId));
+	}
+
+	async #_handleGuildReload(guildId: bigint): Promise<void> {
 		const guild = this.#connection.cache.guilds.get(guildId);
 		if (guild === undefined) {
 			return;
