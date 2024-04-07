@@ -3,11 +3,15 @@ import { Logger } from "logos/logger";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
 type EmbedOrCallbackData = Discord.CamelizedDiscordEmbed | InteractionCallbackData;
+interface ReplyData {
+	readonly ephemeral: boolean;
+}
 class InteractionStore {
 	readonly log: Logger;
 
 	readonly #bot: Discord.Bot;
 	readonly #interactions: Map<bigint, Logos.Interaction>;
+	readonly #replies: Map<string, ReplyData>;
 
 	/** ⬜ The action should have succeeded if not for the bot's limitations. */
 	get unsupported(): InteractionStore["reply"] {
@@ -33,18 +37,23 @@ class InteractionStore {
 	get success(): InteractionStore["reply"] {
 		return async (interaction, embedOrData, flags) => {
 			if (flags?.visible) {
-				return this.notice(interaction, embedOrData, flags);
+				return await this.notice(interaction, embedOrData, flags);
 			}
 
 			return this.#buildColouredReplier({ colour: constants.colours.success })(interaction, embedOrData, flags);
 		};
 	}
 
-	// TODO(vxern): This is not aware of the visibility of the original postponed reply, and thus cannot decide
-	//  whether to show a success or a notice.
 	/** @see {@link success()} */
 	get succeeded(): InteractionStore["editReply"] {
-		return this.#buildColouredReplyEditor({ colour: constants.colours.success });
+		return async (interaction, embedOrData) => {
+			const replyData = this.#replies.get(interaction.token)!;
+			if (!replyData.ephemeral) {
+				return await this.noticed(interaction, embedOrData);
+			}
+
+			return this.#buildColouredReplyEditor({ colour: constants.colours.success })(interaction, embedOrData);
+		};
 	}
 
 	/** 🟧 The user tried to do something that isn't technically invalid, but which the bot will not allow for. */
@@ -102,6 +111,7 @@ class InteractionStore {
 
 		this.#bot = bot;
 		this.#interactions = new Map();
+		this.#replies = new Map();
 	}
 
 	static spoofInteraction<Interaction extends Logos.Interaction>(
@@ -141,6 +151,8 @@ class InteractionStore {
 	}
 
 	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
+		this.#replies.set(interaction.token, { ephemeral: !visible });
+
 		await this.#bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
@@ -159,6 +171,8 @@ class InteractionStore {
 		if (!visible) {
 			data.flags = Discord.MessageFlags.Ephemeral;
 		}
+
+		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		await this.#bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
