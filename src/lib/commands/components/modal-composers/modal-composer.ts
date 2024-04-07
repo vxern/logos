@@ -16,8 +16,6 @@ type SubmitEvent<FormData> = (
 	localeData: Logos.InteractionLocaleData,
 	{ formData }: { formData: FormData },
 ) => Promise<void>;
-// TODO(vxern): Test.
-// TODO(vxern): There should be some feedback for when something goes wrong when submitting the form.
 /**
  * @remarks
  * IMPORTANT: When creating a new modal composer and implementing {@link buildModal}, make sure to link all of the
@@ -238,43 +236,34 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		this.#onSubmit = callback;
 	}
 
-	async open(): Promise<FormData | undefined> {
-		const { promise, resolve } = Promise.withResolvers<FormData | undefined>();
-
+	async open(): Promise<void> {
 		this.#_submissions.onInteraction(async (submission) => {
 			const formData = ModalComposer.getFormData<FormData>(submission);
 			if (formData === undefined) {
 				this.client.log.warn("Could not get form data from modal composer.");
-				resolve(undefined);
 				return;
 			}
 
 			this.#formData = formData;
 
 			const error = await this.validate({ formData: this.#formData });
-			if (error === undefined) {
-				resolve(this.#formData);
-				return;
+			if (error !== undefined) {
+				const newAnchor = await this.handleInvalid(submission, { error });
+				if (newAnchor === undefined) {
+					return;
+				}
+
+				this.anchor = newAnchor;
+
+				await this.#display();
 			}
 
-			const newAnchor = await this.handleInvalid(submission, { error });
-			if (newAnchor === undefined) {
-				await this.#dispatchSubmit(submission, { formData: this.#formData });
-				return;
-			}
-
-			this.anchor = newAnchor;
-
-			await this.#display();
+			await this.#dispatchSubmit(submission, { formData: this.#formData });
 		});
-
-		this.#_submissions.onDone(() => resolve(undefined));
 
 		await this.client.registerInteractionCollector(this.#_submissions);
 
 		await this.#display();
-
-		return promise;
 	}
 
 	async close(): Promise<void> {
