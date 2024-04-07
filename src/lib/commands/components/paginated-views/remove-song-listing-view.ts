@@ -9,9 +9,9 @@ import { PaginatedView, View } from "logos/commands/components/paginated-views/p
 class RemoveSongListingView extends PaginatedView<SongListing> {
 	readonly #_selectMenuSelection: InteractionCollector;
 
-  get onInteraction(): InteractionCollector["onInteraction"] {
-    return this.#_selectMenuSelection.onInteraction.bind(this);
-  }
+	get onInteraction(): InteractionCollector["onInteraction"] {
+		return this.#_selectMenuSelection.onInteraction.bind(this);
+	}
 
 	constructor(client: Client, { interaction, listings }: { interaction: Logos.Interaction; listings: SongListing[] }) {
 		super(client, { interaction, elements: listings, showable: true });

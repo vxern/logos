@@ -23,6 +23,8 @@ type MetadataOrIdentifierData<M extends Model> = { "@metadata": DocumentMetadata
 type ClientOrDatabase = Client | Database;
 
 abstract class Model<Generic extends { idParts: readonly string[] } = any> {
+	declare readonly id: string;
+
 	readonly "@metadata": DocumentMetadata;
 
 	readonly #_idParts: Generic["idParts"];
@@ -171,7 +173,6 @@ function getDatabase(clientOrDatabase: ClientOrDatabase): Database {
 
 export { Model };
 export type {
-	Collection,
 	RawDocument,
 	DocumentMetadata,
 	IdentifierParts,

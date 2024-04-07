@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { isValidCollection } from "logos:constants/database";
+import { Collection, isValidCollection } from "logos:constants/database";
 import { Client } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
-import { Collection, Model, RawDocument } from "logos/database/model";
+import { Model, RawDocument } from "logos/database/model";
 import { Praise } from "logos/database/praise";
 import { Report } from "logos/database/report";
 import { Resource } from "logos/database/resource";
@@ -68,6 +68,8 @@ class Database extends ravendb.DocumentStore {
 		};
 
 		this.#log = Logger.create({ identifier: "Client/Database", isDebug: client.environment.isDebug });
+
+		this.initialize();
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): { new (data: any): Model } {
@@ -75,8 +77,6 @@ class Database extends ravendb.DocumentStore {
 	}
 
 	async start(): Promise<void> {
-		this.initialize();
-
 		await this.#prefetchDocuments();
 	}
 
@@ -284,19 +284,12 @@ class DocumentSession extends ravendb.DocumentSession {
 	async get<M extends Model>(id: string): Promise<M | undefined>;
 	async get<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
 	async get<M extends Model>(idOrIds: string | string[]): Promise<M | undefined | (M | undefined)[]> {
-		const result = (await this.load(Array.isArray(idOrIds) ? idOrIds : [idOrIds])) as Record<
-			string,
-			RawDocument | null
-		>;
-		if (result === null) {
-			return undefined;
-		}
-
-		const documentsRaw = Object.values(result).map((documentRaw) => documentRaw ?? undefined);
+		const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
+		const result = await this.load(ids);
 
 		const documents: (M | undefined)[] = [];
-		for (const documentRaw of documentsRaw) {
-			if (documentRaw === undefined) {
+		for (const documentRaw of Object.values(result) as (RawDocument | null)[]) {
+			if (documentRaw === null) {
 				documents.push(undefined);
 				continue;
 			}
@@ -329,4 +322,4 @@ class DocumentSession extends ravendb.DocumentSession {
 	}
 }
 
-export { Database };
+export { Database, DocumentSession };

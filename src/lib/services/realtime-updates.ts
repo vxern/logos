@@ -1,104 +1,69 @@
+import { Collection } from "logos:constants/database";
 import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
+import { Model, RawDocument } from "logos/database/model";
+import { ActionLock } from "logos/helpers/action-lock";
 import { GlobalService } from "logos/services/service";
+import { DocumentSession } from "logos/stores/database";
 import * as ravendb from "ravendb";
 
-type DocumentChangeHandler = (data: ravendb.DocumentChange) => Promise<void>;
-
-// TODO(vxern): This definitely can be improved or somehow extended to other objects.
 class RealtimeUpdateService extends GlobalService {
-	changes?: ravendb.IDatabaseChanges;
-	streamSubscription?: ravendb.IChangesObservable<ravendb.DocumentChange>;
-
-	onUpdateGuildConfiguration?: DocumentChangeHandler;
-	onError?: (error: Error) => void;
-
-	isHandlingUpdate = false;
-	readonly handlerQueue: (() => Promise<void>)[] = [];
+	readonly lock: ActionLock;
+	readonly changes: ravendb.IDatabaseChanges;
+	readonly streamSubscription: ravendb.IChangesObservable<ravendb.DocumentChange>;
 
 	constructor(client: Client) {
 		super(client, { identifier: "RealtimeUpdateService" });
+
+		this.lock = new ActionLock();
+		this.changes = client.database.changes();
+		this.streamSubscription = this.changes.forDocumentsInCollection("Guilds");
 	}
 
 	async start(): Promise<void> {
-		this.log.info("Streaming updates to guild documents...");
+		this.log.info("Streaming updates...");
 
-		const changes = this.client.database.changes();
-		const streamSubscription = changes.forDocumentsInCollection("Guilds");
-
-		this.onUpdateGuildConfiguration = async (data) => {
-			if (this.isHandlingUpdate) {
-				this.handlerQueue.push(() => this.handleUpdateGuildConfiguration(data));
-			} else {
-				this.handleUpdateGuildConfiguration(data);
-			}
-		};
-		this.onError = (error) => {
-			this.log.info(`Guild document stream closed: ${error}`);
-			this.log.info("Reopening in 10 seconds...");
-
-			changes.dispose();
-
-			setTimeout(() => this.start(), 10_000);
-		};
-
-		streamSubscription.on("data", this.onUpdateGuildConfiguration);
-		streamSubscription.on("error", this.onError);
-
-		this.changes = changes;
-		this.streamSubscription = streamSubscription;
+		this.streamSubscription.on("data", this.#_receiveGuildConfigurationUpdate);
+		this.streamSubscription.on("error", this.#_handleError);
 	}
 
 	async stop(): Promise<void> {
-		const [onUpdateGuildConfiguration, onError] = [this.onUpdateGuildConfiguration, this.onError];
-		if (onUpdateGuildConfiguration === undefined || onError === undefined) {
-			throw "StateError: Tried to stop service before it was started.";
-		}
+		this.changes.dispose();
 
-		this.streamSubscription?.off("data", onUpdateGuildConfiguration);
-		this.streamSubscription?.off("error", onError);
-
-		this.changes?.dispose();
+		this.streamSubscription.off("data", this.#_receiveGuildConfigurationUpdate);
+		this.streamSubscription.off("error", this.#_handleError);
 	}
 
-	async handleUpdateGuildConfiguration(data: ravendb.DocumentChange): Promise<void> {
-		this.isHandlingUpdate = true;
+	#_receiveGuildConfigurationUpdate = async (data: ravendb.DocumentChange): Promise<void> => {
+		const [_, [guildId]] = Model.getDataFromId<Guild>(data.id);
+		this.log.info(`Detected update to configuration for ${diagnostics.display.guild(guildId)}. Queueing update...`);
+		await this.lock.doAction(() => this.#_handleUpdateGuildConfiguration(data));
+	};
 
-		const guildId = data.id.split("/").at(-1);
-		if (guildId === undefined) {
-			return;
-		}
+	async #_handleUpdateGuildConfiguration(data: ravendb.DocumentChange): Promise<void> {
+		const newGuildDocument = await this.client.database.withSession<Guild>(async (session) => {
+			// TODO(vxern): Remove.
+			await new Promise((resolve) => setTimeout(resolve, 10000));
 
-		const guild = this.client.entities.guilds.get(BigInt(guildId));
-		if (guild === undefined) {
-			return;
-		}
+			const query = session
+				.query({ collection: "Guilds" satisfies Collection })
+				.whereEquals("id", data.id)
+				.waitForNonStaleResults();
+			const rawDocument = (await query.first()) as RawDocument;
+			const guildDocument = DocumentSession.instantiateModel<Guild>(rawDocument);
 
-		this.log.info(`Detected update to configuration for ${diagnostics.display.guild(guild)}. Updating...`);
+			this.client.database.cacheDocument(guildDocument);
 
-		const oldGuildDocument = await Guild.get(this.client, { guildId: data.id });
-
-		if (oldGuildDocument === undefined) {
-			return;
-		}
-
-		await this.client.database.withSession(async (session) => {
-			await session.advanced.refresh(oldGuildDocument);
+			return guildDocument;
 		});
 
-		this.client.documents.guilds.set(oldGuildDocument.guildId, oldGuildDocument);
-
-		await this.client.reloadGuild(guild.id);
-
-		const nextHandler = this.handlerQueue.shift();
-		if (nextHandler === undefined) {
-			this.isHandlingUpdate = false;
-			return;
-		}
-
-		await nextHandler();
+		await this.client.reloadGuild(BigInt(newGuildDocument.guildId));
 	}
+
+	#_handleError = (error: Error): void => {
+		this.log.info(`Guild document stream closed: ${error}`);
+	};
 }
 
 export { RealtimeUpdateService };
