@@ -37,15 +37,14 @@ class RealtimeUpdateService extends GlobalService {
 
 	#_receiveGuildConfigurationUpdate = async (data: ravendb.DocumentChange): Promise<void> => {
 		const [_, [guildId]] = Model.getDataFromId<Guild>(data.id);
+
 		this.log.info(`Detected update to configuration for ${diagnostics.display.guild(guildId)}. Queueing update...`);
+
 		await this.lock.doAction(() => this.#_handleUpdateGuildConfiguration(data));
 	};
 
 	async #_handleUpdateGuildConfiguration(data: ravendb.DocumentChange): Promise<void> {
 		const newGuildDocument = await this.client.database.withSession<Guild>(async (session) => {
-			// TODO(vxern): Remove.
-			await new Promise((resolve) => setTimeout(resolve, 10000));
-
 			const query = session
 				.query({ collection: "Guilds" satisfies Collection })
 				.whereEquals("id", data.id)
