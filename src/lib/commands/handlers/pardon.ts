@@ -109,7 +109,6 @@ async function handlePardonUser(
 		timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
 	});
 
-	// TODO(vxern): Fetch the document directly.
 	const warningDocument = warningDocumentsActive.find(
 		(warningDocument) => warningDocument.partialId === interaction.parameters.warning,
 	);
