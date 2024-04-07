@@ -119,12 +119,19 @@ describe("trim()", () => {
 	});
 
 	it("makes the passed string trail off if it's not composed of words.", () => {
+		// Naive slice is 'qwertyuiopasdfghjklz'.
 		expect(trim("qwertyuiopasdfghjklzxcvbnm", 20)).to.equal("qwertyuiopasdfghj...");
 	});
 
 	it("trims the passed sentence, replacing trimmed words with a continuation indicator.", () => {
+		// Naive slice is 'This is a sample sentence that's too long to be di'.
 		expect(trim("This is a sample sentence that's too long to be displayed in full.", 50)).to.equal(
 			"This is a sample sentence that's too long to (...)",
 		);
+	});
+
+	it("trims trailing whitespace before replacing the ending with a continuation indicator.", () => {
+		// Naive slice is 'This is a sample              '.
+		expect(trim("This is a sample                   sentence.", 30)).to.equal("This is a sample (...)");
 	});
 });

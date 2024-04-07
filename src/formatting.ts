@@ -102,7 +102,6 @@ function mention(id: bigint | string, { type }: { type: MentionType }): string {
 	return `<${sigil}${id}>`;
 }
 
-// TODO(vxern): What does this function do with multiple whitespaces?
 /**
  * Taking a string, trims it to the desired length and returns it.
  *
@@ -125,7 +124,7 @@ function trim(string: string, length: number): string {
 	let trimmed = string.slice(0, length);
 	while (length - trimmed.length < constants.special.strings.continued.length + 1) {
 		const indexOfLastSpace = trimmed.lastIndexOf(" ");
-		trimmed = trimmed.slice(0, indexOfLastSpace);
+		trimmed = trimmed.slice(0, indexOfLastSpace).trim();
 	}
 
 	return `${trimmed} ${constants.special.strings.continued}`;
