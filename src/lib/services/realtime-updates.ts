@@ -29,6 +29,7 @@ class RealtimeUpdateService extends GlobalService {
 	}
 
 	async stop(): Promise<void> {
+		await this.lock.dispose();
 		this.changes.dispose();
 
 		this.streamSubscription.off("data", this.#_receiveGuildConfigurationUpdate);

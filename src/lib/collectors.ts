@@ -21,11 +21,10 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	readonly #removeAfter?: number;
 	readonly #dependsOn?: Collector;
 
-	#onCollect?: CollectEvent<Event>;
-	#onDone?: DoneEvent;
-	#isClosed = false;
-
 	readonly #_resolveDone: () => void;
+	#_onCollect?: CollectEvent<Event>;
+	#_onDone?: DoneEvent;
+	#_isClosed = false;
 
 	get close(): DoneEvent {
 		return this.dispatchDone.bind(this);
@@ -68,11 +67,11 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	}
 
 	async dispatchCollect(...args: Parameters<Discord.EventHandlers[Event]>): Promise<void> {
-		if (this.#isClosed) {
+		if (this.#_isClosed) {
 			return;
 		}
 
-		await this.#onCollect?.(...args);
+		await this.#_onCollect?.(...args);
 
 		if (this.#isSingle) {
 			this.close();
@@ -81,30 +80,30 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	}
 
 	async dispatchDone(): Promise<void> {
-		if (this.#isClosed) {
+		if (this.#_isClosed) {
 			return;
 		}
 
-		const dispatchDone = this.#onDone;
+		const dispatchDone = this.#_onDone;
 
-		this.#isClosed = true;
-		this.#onCollect = undefined;
-		this.#onDone = undefined;
+		this.#_isClosed = true;
+		this.#_onCollect = undefined;
+		this.#_onDone = undefined;
 
 		await dispatchDone?.();
 		this.#_resolveDone();
 	}
 
 	onCollect(callback: CollectEvent<Event>): void {
-		this.#onCollect = callback;
+		this.#_onCollect = callback;
 	}
 
 	onDone(callback: DoneEvent): void {
-		if (this.#onDone !== undefined) {
+		if (this.#_onDone !== undefined) {
 			return;
 		}
 
-		this.#onDone = callback;
+		this.#_onDone = callback;
 	}
 }
 

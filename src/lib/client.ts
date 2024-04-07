@@ -429,6 +429,8 @@ class Client {
 	}
 
 	async stop(): Promise<void> {
+		await this.#_guildReloadLock.dispose();
+
 		this.cache.stop();
 		this.database.stop();
 		await this.#services.stop();
