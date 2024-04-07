@@ -75,7 +75,11 @@ declare global {
 			guildLanguage: LocalisationLanguage;
 		}
 
-		type InteractionParameters<Parameters> = Parameters & { show: boolean; focused?: keyof Parameters };
+		type InteractionParameters<Parameters> = Parameters & {
+			"@repeat": boolean;
+			show: boolean;
+			focused?: keyof Parameters;
+		};
 
 		type Interaction<
 			Metadata extends string[] = any,

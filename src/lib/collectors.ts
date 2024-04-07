@@ -113,7 +113,10 @@ class InteractionCollector<
 > extends Collector<"interactionCreate"> {
 	static readonly noneId = constants.components.none;
 
-	static readonly #_defaultParameters: Logos.InteractionParameters<Record<string, unknown>> = { show: false };
+	static readonly #_defaultParameters: Logos.InteractionParameters<Record<string, unknown>> = Object.freeze({
+		"@repeat": false,
+		show: false,
+	});
 
 	readonly anyType: boolean;
 	readonly type: Discord.InteractionTypes;
@@ -330,7 +333,7 @@ class InteractionCollector<
 	): Logos.InteractionParameters<Parameters> {
 		const options = interaction.data?.options;
 		if (options === undefined) {
-			return { show: false } as Logos.InteractionParameters<Parameters>;
+			return InteractionCollector.#_defaultParameters as Logos.InteractionParameters<Parameters>;
 		}
 
 		return Object.assign(

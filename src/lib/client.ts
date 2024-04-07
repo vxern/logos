@@ -287,7 +287,7 @@ class Client {
 			localisations: this.#localisations,
 			templates: commands,
 		});
-		this.#interactions = new InteractionStore(this, { bot });
+		this.#interactions = new InteractionStore(this);
 		this.#services = new ServiceStore(this);
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);

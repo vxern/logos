@@ -24,8 +24,8 @@ class InteractionRepetitionService extends GlobalService {
 	}
 
 	async start(): Promise<void> {
-		this.#_commandInteractions.onInteraction(this.#handleCommandInteraction.bind(this));
-		this.#_showInChatButtons.onInteraction(this.#handleShowInChat.bind(this));
+		this.#_commandInteractions.onInteraction(this.#_handleCommandInteraction.bind(this));
+		this.#_showInChatButtons.onInteraction(this.#_handleShowInChat.bind(this));
 
 		await this.client.registerInteractionCollector(this.#_commandInteractions);
 		await this.client.registerInteractionCollector(this.#_showInChatButtons);
@@ -36,7 +36,7 @@ class InteractionRepetitionService extends GlobalService {
 		await this.#_showInChatButtons.close();
 	}
 
-	async #handleCommandInteraction(interaction: Logos.Interaction): Promise<void> {
+	async #_handleCommandInteraction(interaction: Logos.Interaction): Promise<void> {
 		if (!this.client.isShowable(interaction)) {
 			return;
 		}
@@ -44,7 +44,7 @@ class InteractionRepetitionService extends GlobalService {
 		this.client.registerInteraction(interaction);
 	}
 
-	async #handleShowInChat(buttonPress: Logos.Interaction<[interactionId: string]>): Promise<void> {
+	async #_handleShowInChat(buttonPress: Logos.Interaction<[interactionId: string]>): Promise<void> {
 		await this.client.postponeReply(buttonPress);
 
 		const confirmButton = new InteractionCollector(this.client, {
@@ -70,7 +70,7 @@ class InteractionRepetitionService extends GlobalService {
 
 			const interactionSpoofed = InteractionStore.spoofInteraction(originalInteraction, {
 				using: confirmButtonPress,
-				parameters: { show: true },
+				parameters: { "@repeat": true, show: true },
 			});
 
 			await this.client.handleInteraction(interactionSpoofed);

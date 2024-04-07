@@ -9,9 +9,11 @@ interface ReplyData {
 class InteractionStore {
 	readonly log: Logger;
 
-	readonly #bot: Discord.Bot;
-	readonly #interactions: Map<bigint, Logos.Interaction>;
-	readonly #replies: Map<string, ReplyData>;
+	readonly #client: Client;
+
+	readonly #_interactions: Map<bigint, Logos.Interaction>;
+	readonly #_replies: Map<string, ReplyData>;
+	readonly #_messages: Map<string, string>;
 
 	/** ⬜ The action should have succeeded if not for the bot's limitations. */
 	get unsupported(): InteractionStore["reply"] {
@@ -47,7 +49,7 @@ class InteractionStore {
 	/** @see {@link success()} */
 	get succeeded(): InteractionStore["editReply"] {
 		return async (interaction, embedOrData) => {
-			const replyData = this.#replies.get(interaction.token)!;
+			const replyData = this.#_replies.get(interaction.token)!;
 			if (!replyData.ephemeral) {
 				return await this.noticed(interaction, embedOrData);
 			}
@@ -106,12 +108,14 @@ class InteractionStore {
 		return this.#buildColouredReplyEditor({ colour: constants.colours.death });
 	}
 
-	constructor(client: Client, { bot }: { bot: Discord.Bot }) {
+	constructor(client: Client) {
 		this.log = Logger.create({ identifier: "Interactions", isDebug: client.environment.isDebug });
 
-		this.#bot = bot;
-		this.#interactions = new Map();
-		this.#replies = new Map();
+		this.#client = client;
+
+		this.#_interactions = new Map();
+		this.#_replies = new Map();
+		this.#_messages = new Map();
 	}
 
 	static spoofInteraction<Interaction extends Logos.Interaction>(
@@ -128,22 +132,30 @@ class InteractionStore {
 	}
 
 	registerInteraction(interaction: Logos.Interaction): void {
-		this.#interactions.set(interaction.id, interaction);
+		this.#_interactions.set(interaction.id, interaction);
 	}
 
 	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
-		const interaction = this.#interactions.get(interactionId);
+		const interaction = this.#_interactions.get(interactionId);
 		if (interaction === undefined) {
 			return undefined;
 		}
 
-		this.#interactions.delete(interactionId);
+		this.#_interactions.delete(interactionId);
 
 		return interaction;
 	}
 
+	registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: string }): void {
+		this.#_messages.set(interaction.token, messageId);
+	}
+
+	unregisterMessage(interaction: Logos.Interaction): void {
+		this.#_messages.delete(interaction.token);
+	}
+
 	async acknowledge(interaction: Logos.Interaction): Promise<void> {
-		await this.#bot.rest
+		await this.#client.bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
 			})
@@ -151,9 +163,35 @@ class InteractionStore {
 	}
 
 	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
-		this.#replies.set(interaction.token, { ephemeral: !visible });
+		this.#_replies.set(interaction.token, { ephemeral: !visible });
 
-		await this.#bot.rest
+		if (interaction.parameters["@repeat"]) {
+			const strings = {
+				thinking: this.#client.localise("interactions.thinking", interaction.guildLocale)(),
+			};
+
+			const message = await this.#client.bot.rest
+				.sendMessage(interaction.channelId!, {
+					embeds: [
+						{
+							description: strings.thinking,
+							color: constants.colours.notice,
+						},
+					],
+				})
+				.catch((reason) => {
+					this.log.warn("Failed to postpone message reply to repeated interaction:", reason);
+					return undefined;
+				});
+			if (message === undefined) {
+				return;
+			}
+
+			this.registerMessage(interaction, { messageId: message.id });
+			return;
+		}
+
+		await this.#client.bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
 				data: !visible ? { flags: Discord.MessageFlags.Ephemeral } : {},
@@ -172,9 +210,22 @@ class InteractionStore {
 			data.flags = Discord.MessageFlags.Ephemeral;
 		}
 
-		this.#replies.set(interaction.token, { ephemeral: !visible });
+		this.#_replies.set(interaction.token, { ephemeral: !visible });
 
-		await this.#bot.rest
+		if (interaction.parameters["@repeat"]) {
+			const message = await this.#client.bot.rest.sendMessage(interaction.channelId!, data).catch((reason) => {
+				this.log.warn("Failed to make message reply to repeated interaction:", reason);
+				return undefined;
+			});
+			if (message === undefined) {
+				return;
+			}
+
+			this.registerMessage(interaction, { messageId: message.id });
+			return;
+		}
+
+		await this.#client.bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
 				data,
@@ -183,19 +234,45 @@ class InteractionStore {
 	}
 
 	async editReply(interaction: Logos.Interaction, embedOrData: EmbedOrCallbackData): Promise<void> {
-		await this.#bot.rest
-			.editOriginalInteractionResponse(interaction.token, getInteractionCallbackData(embedOrData))
+		const data = getInteractionCallbackData(embedOrData);
+
+		if (interaction.parameters["@repeat"]) {
+			const messageId = this.#_messages.get(interaction.token)!;
+
+			await this.#client.bot.rest.editMessage(interaction.channelId!, messageId, data).catch((reason) => {
+				this.log.warn("Failed to edit message reply made to repeated interaction:", reason);
+				return undefined;
+			});
+
+			return;
+		}
+
+		await this.#client.bot.rest
+			.editOriginalInteractionResponse(interaction.token, data)
 			.catch((reason) => this.log.warn("Failed to edit reply to interaction:", reason));
 	}
 
 	async deleteReply(interaction: Logos.Interaction): Promise<void> {
-		await this.#bot.rest
+		if (interaction.parameters["@repeat"]) {
+			const messageId = this.#_messages.get(interaction.token)!;
+
+			this.#_messages.delete(interaction.token);
+
+			await this.#client.bot.rest.deleteMessage(interaction.channelId!, messageId).catch((reason) => {
+				this.log.warn("Failed to delete message reply made to repeated interaction:", reason);
+				return undefined;
+			});
+
+			return;
+		}
+
+		await this.#client.bot.rest
 			.deleteOriginalInteractionResponse(interaction.token)
 			.catch((reason) => this.log.warn("Failed to delete reply to interaction:", reason));
 	}
 
 	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
-		return this.#bot.rest
+		return this.#client.bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: { choices },
@@ -207,7 +284,7 @@ class InteractionStore {
 		interaction: Logos.Interaction,
 		data: Omit<Discord.InteractionCallbackData, "flags">,
 	): Promise<void> {
-		return this.#bot.rest
+		return this.#client.bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.Modal,
 				data,
