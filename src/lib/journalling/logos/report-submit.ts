@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Report } from "logos/database/report";
 import { EventLogger } from "logos/journalling/logger";
@@ -23,7 +22,7 @@ class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
 
 		const messageLink = report.formData.messageLink ?? "*No message link*.";
 
-		return `${diagnostics.display.user(authorUser)} has submitted a report.
+		return `${this.client.diagnostics.user(authorUser)} has submitted a report.
 
 **REASON**
 ${report.formData.reason}

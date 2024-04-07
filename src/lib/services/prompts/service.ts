@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Collector, InteractionCollector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
@@ -329,9 +328,9 @@ abstract class PromptService<
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
 				this.log.warn(
-					`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+					`Failed to delete prompt ${this.client.diagnostics.message(message)} from ${this.client.diagnostics.channel(
 						message.channelId,
-					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
+					)} on ${this.client.diagnostics.guild(message.guildId ?? 0n)}.`,
 				),
 			);
 	}
@@ -428,7 +427,7 @@ abstract class PromptService<
 		}
 
 		return await this.client.bot.rest.sendMessage(channelId, content).catch(() => {
-			this.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 
 			return undefined;
 		});

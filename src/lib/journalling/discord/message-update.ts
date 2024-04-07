@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { codeMultiline, mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
@@ -31,7 +30,7 @@ class MessageUpdateEventLogger extends EventLogger<"messageUpdate"> {
 			return undefined;
 		}
 
-		return `${diagnostics.display.user(author)} updated their message in ${mention(message.channelId, {
+		return `${this.client.diagnostics.user(author)} updated their message in ${mention(message.channelId, {
 			type: "channel",
 		})}.
 

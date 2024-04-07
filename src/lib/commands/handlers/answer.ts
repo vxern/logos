@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { AnswerComposer } from "logos/commands/components/modal-composers/answer-composer";
 
@@ -53,10 +52,10 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 			submittedBy: client.localise(
 				"answer.strings.submittedBy",
 				locale,
-			)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
+			)({ username: client.diagnostics.user(interaction.user, { includeId: false }) }),
 		};
 
-		client.bot.rest
+		await client.bot.rest
 			.sendMessage(message.channelId, {
 				messageReference: {
 					messageId: message.id,
@@ -77,7 +76,7 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 					},
 				],
 			})
-			.catch(() => client.log.warn(`Failed to send answer to ${diagnostics.display.channel(message.channelId)}.`));
+			.catch(() => client.log.warn(`Failed to send answer to ${client.diagnostics.channel(message.channelId)}.`));
 	});
 
 	await composer.open();

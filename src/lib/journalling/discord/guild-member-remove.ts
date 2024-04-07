@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
 
@@ -15,7 +14,7 @@ class GuildMemberRemoveEventLogger extends EventLogger<"guildMemberRemove"> {
 	}
 
 	buildMessage(user: Discord.User, _: bigint): string {
-		return `${diagnostics.display.user(user)} has left the server.`;
+		return `${this.client.diagnostics.user(user)} has left the server.`;
 	}
 }
 

@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
@@ -164,9 +163,9 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
 				this.log.warn(
-					`Failed to delete notice ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
+					`Failed to delete notice ${this.client.diagnostics.message(message)} from ${this.client.diagnostics.channel(
 						message.channelId,
-					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
+					)} on ${this.client.diagnostics.guild(message.guildId ?? 0n)}.`,
 				),
 			);
 	}
@@ -221,7 +220,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		lastEmbed.footer = { text: guild.name, iconUrl: NoticeService.encodeHashInGuildIcon({ guild, hash }) };
 
 		return await this.client.bot.rest.sendMessage(channelId, contents).catch(() => {
-			this.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 			return undefined;
 		});
 	}

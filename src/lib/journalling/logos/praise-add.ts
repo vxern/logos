@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Praise } from "logos/database/praise";
 import { EventLogger } from "logos/journalling/logger";
@@ -23,7 +22,7 @@ class PraiseAddEventLogger extends EventLogger<"praiseAdd"> {
 
 		const comment = praise.comment ?? "None.";
 
-		return `${diagnostics.display.user(memberUser)} has been praised by ${diagnostics.display.user(
+		return `${this.client.diagnostics.user(memberUser)} has been praised by ${this.client.diagnostics.user(
 			by,
 		)}. Comment: ${comment}`;
 	}

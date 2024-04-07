@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Report } from "logos/database/report";
 import { User } from "logos/database/user";
@@ -70,7 +69,7 @@ class ReportPromptService extends PromptService<{
 					})(),
 					fields: [
 						{
-							name: diagnostics.display.user(user),
+							name: this.client.diagnostics.user(user),
 							value: reportDocument.formData.reason,
 							inline: false,
 						},

@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
@@ -29,7 +28,7 @@ class AlertService extends LocalService {
 			.sendMessage(channelId, message)
 			.catch(() =>
 				this.log.warn(
-					`Failed to send alert to ${diagnostics.display.channel(channelId)} on ${diagnostics.display.guild(
+					`Failed to send alert to ${this.client.diagnostics.channel(channelId)} on ${this.client.diagnostics.guild(
 						this.guildId,
 					)}.`,
 				),

@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
 
@@ -20,7 +19,9 @@ class EntryRequestAcceptEventLogger extends EventLogger<"entryRequestAccept"> {
 			return;
 		}
 
-		return `${diagnostics.display.user(user)}'s entry request has been accepted by ${diagnostics.display.user(byUser)}`;
+		return `${this.client.diagnostics.user(user)}'s entry request has been accepted by ${this.client.diagnostics.user(
+			byUser,
+		)}`;
 	}
 }
 

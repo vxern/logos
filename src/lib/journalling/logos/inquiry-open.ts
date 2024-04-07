@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Ticket } from "logos/database/ticket";
 import { EventLogger } from "logos/journalling/logger";
@@ -18,7 +17,7 @@ class InquiryOpenEventLogger extends EventLogger<"inquiryOpen"> {
 			return undefined;
 		}
 
-		return `${diagnostics.display.user(memberUser)} has opened a ticket.\n\nTopic: *${ticket.formData.topic}*`;
+		return `${this.client.diagnostics.user(memberUser)} has opened a ticket.\n\nTopic: *${ticket.formData.topic}*`;
 	}
 }
 

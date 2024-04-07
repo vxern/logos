@@ -1,5 +1,4 @@
 import { SlowmodeLevel } from "logos:constants/slowmode";
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
 
@@ -16,7 +15,7 @@ class SlowmodeEnableEventLogger extends EventLogger<"slowmodeEnable"> {
 	}
 
 	buildMessage(user: Logos.User, channel: Logos.Channel, level: SlowmodeLevel): string {
-		return `${diagnostics.display.user(user)} has enabled slowmode in ${diagnostics.display.channel(
+		return `${this.client.diagnostics.user(user)} has enabled slowmode in ${this.client.diagnostics.channel(
 			channel,
 		)} with level "${level}".`;
 	}

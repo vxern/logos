@@ -1,5 +1,4 @@
 import { Locale } from "logos:constants/languages";
-import diagnostics from "logos:core/diagnostics";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
@@ -161,7 +160,7 @@ class VerificationPromptService extends PromptService<{
 					})(),
 					fields: [
 						{
-							name: diagnostics.display.user(user),
+							name: this.client.diagnostics.user(user),
 							value:
 								`1. *${entryRequestDocument.formData.reason}*\n` +
 								`2. *${entryRequestDocument.formData.aim}*\n` +
@@ -523,16 +522,20 @@ class VerificationPromptService extends PromptService<{
 			});
 
 			this.log.info(
-				`Accepted ${diagnostics.display.user(authorDocument.account.id)} onto ${diagnostics.display.guild(guild)}.`,
+				`Accepted ${this.client.diagnostics.user(authorDocument.account.id)} onto ${this.client.diagnostics.guild(
+					guild,
+				)}.`,
 			);
 
 			this.client.bot.rest
 				.addRole(this.guildId, author.id, BigInt(entryRequestDocument.requestedRoleId), "User-requested role addition.")
 				.catch(() =>
 					this.log.warn(
-						`Failed to add ${diagnostics.display.role(
+						`Failed to add ${this.client.diagnostics.role(
 							entryRequestDocument.requestedRoleId,
-						)} to ${diagnostics.display.user(authorDocument.account.id)} on ${diagnostics.display.guild(guild)}.`,
+						)} to ${this.client.diagnostics.user(authorDocument.account.id)} on ${this.client.diagnostics.guild(
+							guild,
+						)}.`,
 					),
 				);
 
@@ -543,16 +546,18 @@ class VerificationPromptService extends PromptService<{
 			});
 
 			this.log.info(
-				`Rejected ${diagnostics.display.user(authorDocument.account.id)} from ${diagnostics.display.guild(guild)}.`,
+				`Rejected ${this.client.diagnostics.user(authorDocument.account.id)} from ${this.client.diagnostics.guild(
+					guild,
+				)}.`,
 			);
 
 			this.client.bot.rest
 				.banMember(this.guildId, author.id, {}, "Voted to reject entry request.")
 				.catch(() =>
 					this.log.warn(
-						`Failed to ban ${diagnostics.display.user(authorDocument.account.id)} on ${diagnostics.display.guild(
-							guild,
-						)}.`,
+						`Failed to ban ${this.client.diagnostics.user(
+							authorDocument.account.id,
+						)} on ${this.client.diagnostics.guild(guild)}.`,
 					),
 				);
 

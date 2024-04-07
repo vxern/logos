@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Resource } from "logos/database/resource";
 import { User } from "logos/database/user";
@@ -45,7 +44,7 @@ class ResourcePromptService extends PromptService<{
 					description: `*${resourceDocument.formData.resource}*`,
 					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					footer: {
-						text: diagnostics.display.user(user),
+						text: this.client.diagnostics.user(user),
 						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: resourceDocument.partialId }),
 					},
 				},

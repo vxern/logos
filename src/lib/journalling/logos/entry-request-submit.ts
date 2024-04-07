@@ -1,5 +1,4 @@
 import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
-import diagnostics from "logos:core/diagnostics";
 import { codeMultiline } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
@@ -36,7 +35,7 @@ class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 			whereFound: this.client.localise("verification.fields.whereFound", guildLocale)(),
 		};
 
-		return `${diagnostics.display.user(user)} has submitted a request to join the server.
+		return `${this.client.diagnostics.user(user)} has submitted a request to join the server.
 
 **${strings.reason}**
 ${codeMultiline(entryRequest.formData.reason)}

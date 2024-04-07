@@ -1,5 +1,4 @@
 import { Locale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
@@ -59,7 +58,7 @@ abstract class LocalService extends Service {
 					before: buffer.length === 0 ? undefined : buffer.at(-1)?.id,
 				})
 				.catch(() => {
-					this.client.log.warn(`Failed to get all messages from ${diagnostics.display.channel(channelId)}.`);
+					this.client.log.warn(`Failed to get all messages from ${this.client.diagnostics.channel(channelId)}.`);
 					return undefined;
 				});
 			if (chunk === undefined) {

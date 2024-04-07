@@ -1,5 +1,4 @@
 import { Locale } from "logos:constants/languages";
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { EntryRequestComposer } from "logos/commands/components/modal-composers/entry-request-composer";
@@ -209,9 +208,9 @@ class EntryService extends LocalService {
 			.addRole(this.guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
 			.catch(() =>
 				this.log.warn(
-					`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.user(
+					`Failed to add ${this.client.diagnostics.role(role)} to ${this.client.diagnostics.user(
 						buttonPress.user,
-					)} on ${diagnostics.display.guild(this.guild.id)}.`,
+					)} on ${this.client.diagnostics.guild(this.guild.id)}.`,
 				),
 			);
 	}

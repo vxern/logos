@@ -1,5 +1,4 @@
 import { SlowmodeLevel } from "logos:constants/slowmode";
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
 
@@ -21,7 +20,9 @@ class SlowmodeDowngradeEventLogger extends EventLogger<"slowmodeDowngrade"> {
 		previousLevel: SlowmodeLevel,
 		currentLevel: SlowmodeLevel,
 	): string {
-		return `${diagnostics.display.user(user)} has downgraded the slowmode level in ${diagnostics.display.channel(
+		return `${this.client.diagnostics.user(
+			user,
+		)} has downgraded the slowmode level in ${this.client.diagnostics.channel(
 			channel,
 		)} from "${previousLevel}" to "${currentLevel}".`;
 	}

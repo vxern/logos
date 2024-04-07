@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { DynamicVoiceChannel, Guild } from "logos/database/guild";
@@ -216,7 +215,7 @@ class DynamicVoiceChannelService extends LocalService {
 				parentId: parent.channel.parentId,
 				position: parent.channel.position,
 			})
-			.catch(() => this.log.warn(`Failed to create voice channel on ${diagnostics.display.guild(this.guildId)}.`));
+			.catch(() => this.log.warn(`Failed to create voice channel on ${this.client.diagnostics.guild(this.guildId)}.`));
 	}
 
 	async #_handleDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
@@ -263,7 +262,7 @@ class DynamicVoiceChannelService extends LocalService {
 
 		this.client.bot.rest
 			.deleteChannel(lastVacantChannelId)
-			.catch(() => this.log.warn(`Failed to delete voice channel on ${diagnostics.display.guild(this.guildId)}.`));
+			.catch(() => this.log.warn(`Failed to delete voice channel on ${this.client.diagnostics.guild(this.guildId)}.`));
 	}
 }
 

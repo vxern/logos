@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
 
@@ -15,7 +14,7 @@ class GuildMemberAddEventLogger extends EventLogger<"guildMemberAdd"> {
 	}
 
 	buildMessage(_: Discord.Member, user: Discord.User): string {
-		return `${diagnostics.display.user(user)} has joined the server.`;
+		return `${this.client.diagnostics.user(user)} has joined the server.`;
 	}
 }
 

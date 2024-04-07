@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Suggestion } from "logos/database/suggestion";
 import { EventLogger } from "logos/journalling/logger";
@@ -21,7 +20,7 @@ class SuggestionSendEventLogger extends EventLogger<"suggestionSend"> {
 			return undefined;
 		}
 
-		return `${diagnostics.display.user(memberUser)} has made a suggestion.\n\nSuggestion: *${
+		return `${this.client.diagnostics.user(memberUser)} has made a suggestion.\n\nSuggestion: *${
 			suggestion.formData.suggestion
 		}*`;
 	}

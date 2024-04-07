@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { codeMultiline, mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
@@ -43,7 +42,7 @@ class MessageDeleteEventLogger extends EventLogger<"messageDelete"> {
 			return undefined;
 		}
 
-		return `${diagnostics.display.user(author)} deleted their message in ${mention(message.channelId, {
+		return `${this.client.diagnostics.user(author)} deleted their message in ${mention(message.channelId, {
 			type: "channel",
 		})}.
 

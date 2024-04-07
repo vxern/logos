@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
@@ -32,8 +31,8 @@ class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
 			return undefined;
 		}
 
-		const userMention = diagnostics.display.user(user);
-		const authorMention = author !== undefined ? diagnostics.display.user(author) : undefined;
+		const userMention = this.client.diagnostics.user(user);
+		const authorMention = author !== undefined ? this.client.diagnostics.user(author) : undefined;
 		const channelMention = mention(channel.id, { type: "channel" });
 
 		return `${userMention} has initiated a purging of ${messageCount} messages${

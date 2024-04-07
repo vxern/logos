@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { GuildBanAddEventLogger } from "logos/journalling/discord/guild-ban-add";
@@ -165,7 +164,7 @@ class JournallingStore {
 		// If explicitly defined as false, do not log.
 		if (journalling === false) {
 			this.#client.log.info(
-				`Event '${event}' happened on ${diagnostics.display.guild(
+				`Event '${event}' happened on ${this.#client.diagnostics.guild(
 					guildId,
 				)}, but journalling for that feature is explicitly turned off. Ignoring...`,
 			);
@@ -214,7 +213,7 @@ class JournallingStore {
 					},
 				],
 			})
-			.catch(() => this.#log.warn(`Failed to log '${event}' event on ${diagnostics.display.guild(guildId)}.`));
+			.catch(() => this.#log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`));
 	}
 }
 

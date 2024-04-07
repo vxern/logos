@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
@@ -70,7 +69,7 @@ async function handleClearTimeout(
 
 	await client.bot.rest
 		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: null })
-		.catch(() => client.log.warn(`Failed to remove timeout of ${diagnostics.display.member(member)}.`));
+		.catch(() => client.log.warn(`Failed to remove timeout of ${client.diagnostics.member(member)}.`));
 
 	await client.tryLog("memberTimeoutRemove", {
 		guildId: guild.id,

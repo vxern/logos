@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Warning } from "logos/database/warning";
 import { EventLogger } from "logos/journalling/logger";
@@ -21,7 +20,7 @@ class MemberWarnRemoveEventLogger extends EventLogger<"memberWarnRemove"> {
 			return undefined;
 		}
 
-		return `${diagnostics.display.user(memberUser)} has been pardoned by ${diagnostics.display.user(
+		return `${this.client.diagnostics.user(memberUser)} has been pardoned by ${this.client.diagnostics.user(
 			by,
 		)} regarding their warning for: ${warning.reason}`;
 	}

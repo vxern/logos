@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Resource } from "logos/database/resource";
 import { EventLogger } from "logos/journalling/logger";
@@ -21,7 +20,7 @@ class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
 			return undefined;
 		}
 
-		return `${diagnostics.display.user(memberUser)} has submitted a resource.\n\nResource: *${
+		return `${this.client.diagnostics.user(memberUser)} has submitted a resource.\n\nResource: *${
 			resource.formData.resource
 		}*`;
 	}

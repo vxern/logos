@@ -1,6 +1,5 @@
 import { Locale } from "logos:constants/languages";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
-import diagnostics from "logos:core/diagnostics";
 import { timestamp, trim } from "logos:core/formatting";
 import { Cache } from "logos/cache";
 import { Collector, InteractionCollector } from "logos/collectors";
@@ -21,6 +20,7 @@ import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationStore, RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
+import { Diagnostics } from "./diagnostics";
 import { ActionLock } from "./helpers/action-lock";
 
 interface Environment {
@@ -54,6 +54,7 @@ class Client {
 	readonly log: Logger;
 	readonly database: Database;
 	readonly cache: Cache;
+	readonly diagnostics: Diagnostics;
 
 	readonly #localisations: LocalisationStore;
 	readonly #commands: CommandStore;
@@ -281,6 +282,7 @@ class Client {
 		this.log = log;
 		this.database = new Database(this, { certificate });
 		this.cache = new Cache(this);
+		this.diagnostics = new Diagnostics(this);
 
 		this.#localisations = new LocalisationStore(this, { localisations });
 		this.#commands = CommandStore.create(this, {
@@ -396,22 +398,22 @@ class Client {
 
 		this.bot.rest
 			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
-			.catch((reason) => this.log.warn(`Failed to upsert commands on ${diagnostics.display.guild(guild)}:`, reason));
+			.catch((reason) => this.log.warn(`Failed to upsert commands on ${this.diagnostics.guild(guild)}:`, reason));
 
 		if (!options.isUpdate) {
-			this.log.info(`Fetching ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}...`);
+			this.log.info(`Fetching ~${guild.memberCount} members of ${this.diagnostics.guild(guild)}...`);
 
 			const members = await this.bot.gateway
 				.requestMembers(guild.id, { limit: 0, query: "", nonce: Date.now().toString() })
 				.catch((reason) => {
-					this.log.warn(`Failed to fetch members of ${diagnostics.display.guild(guild)}:`, reason);
+					this.log.warn(`Failed to fetch members of ${this.diagnostics.guild(guild)}:`, reason);
 					return [];
 				});
 			for (const member of members) {
 				this.bot.transformers.member(this.bot, member as unknown as Discord.DiscordMember, guild.id, member.user.id);
 			}
 
-			this.log.info(`Fetched ~${guild.memberCount} members of ${diagnostics.display.guild(guild)}.`);
+			this.log.info(`Fetched ~${guild.memberCount} members of ${this.diagnostics.guild(guild)}.`);
 		}
 	}
 
@@ -727,7 +729,7 @@ class Client {
 
 		await this.respond(
 			interaction,
-			users.map((user) => ({ name: diagnostics.display.user(user, { prettify: true }), value: user.id.toString() })),
+			users.map((user) => ({ name: this.diagnostics.user(user, { prettify: true }), value: user.id.toString() })),
 		);
 	}
 }

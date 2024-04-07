@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Suggestion } from "logos/database/suggestion";
 import { User } from "logos/database/user";
@@ -45,7 +44,7 @@ class SuggestionPromptService extends PromptService<{
 					description: `*${suggestionDocument.formData.suggestion}*`,
 					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
 					footer: {
-						text: diagnostics.display.user(user),
+						text: this.client.diagnostics.user(user),
 						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: suggestionDocument.partialId }),
 					},
 				},

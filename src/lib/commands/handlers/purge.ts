@@ -1,6 +1,5 @@
 import { Locale } from "logos:constants/languages";
 import { isValidSnowflake } from "logos:constants/patterns";
-import diagnostics from "logos:core/diagnostics";
 import { mention, timestamp, trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
@@ -225,10 +224,7 @@ async function handlePurgeMessages(
 			})
 			.then((collection) => Array.from(collection.values()).reverse())
 			.catch((reason) => {
-				client.log.warn(
-					`Failed to get messages starting with ${diagnostics.display.message(startMessage.id)}:`,
-					reason,
-				);
+				client.log.warn(`Failed to get messages starting with ${client.diagnostics.message(startMessage.id)}:`, reason);
 
 				return [];
 			});
@@ -525,9 +521,9 @@ async function handlePurgeMessages(
 	}
 
 	client.log.info(
-		`Purging ${messages.length} message(s) in ${diagnostics.display.channel(
+		`Purging ${messages.length} message(s) in ${client.diagnostics.channel(
 			interaction.channelId,
-		)} as requested by ${diagnostics.display.user(interaction.user)}...`,
+		)} as requested by ${client.diagnostics.user(interaction.user)}...`,
 	);
 
 	const [guild, member, channel] = [
@@ -572,9 +568,7 @@ async function handlePurgeMessages(
 
 			await client.bot.rest.deleteMessages(interaction.channelId, messageIds).catch((reason) => {
 				client.log.warn(
-					`Failed to delete ${messageIds.length} message(s) from ${diagnostics.display.channel(
-						interaction.channelId,
-					)}:`,
+					`Failed to delete ${messageIds.length} message(s) from ${client.diagnostics.channel(interaction.channelId)}:`,
 					reason,
 				);
 			});
@@ -588,7 +582,7 @@ async function handlePurgeMessages(
 	for (const message of nonBulkDeletable) {
 		await client.bot.rest
 			.deleteMessage(interaction.channelId, message.id)
-			.catch((reason) => client.log.warn(`Failed to delete ${diagnostics.display.message(message)}:`, reason));
+			.catch((reason) => client.log.warn(`Failed to delete ${client.diagnostics.message(message)}:`, reason));
 
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -596,9 +590,9 @@ async function handlePurgeMessages(
 	}
 
 	client.log.info(
-		`Purged ${deletedCount}/${messages.length} message(s) in ${diagnostics.display.channel(
+		`Purged ${deletedCount}/${messages.length} message(s) in ${client.diagnostics.channel(
 			interaction.channelId,
-		)} as requested by ${diagnostics.display.user(interaction.user)}.`,
+		)} as requested by ${client.diagnostics.user(interaction.user)}.`,
 	);
 
 	await client.tryLog("purgeEnd", {

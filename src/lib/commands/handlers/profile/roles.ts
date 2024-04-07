@@ -10,7 +10,6 @@ import {
 	isGroup,
 	isSingle,
 } from "logos:constants/roles";
-import diagnostics from "logos:core/diagnostics";
 import { trim } from "logos:core/formatting";
 import { isDefined } from "logos:core/utilities";
 import { Client } from "logos/client";
@@ -201,9 +200,9 @@ async function createRoleSelectionMenu(
 				.removeRole(guild.id, member.id, role.id, "User-requested role removal.")
 				.catch(() =>
 					client.log.warn(
-						`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
+						`Failed to remove ${client.diagnostics.role(role)} from ${client.diagnostics.member(
 							member,
-						)} on ${diagnostics.display.guild(guild)}.`,
+						)} on ${client.diagnostics.guild(guild)}.`,
 					),
 				);
 
@@ -253,9 +252,9 @@ async function createRoleSelectionMenu(
 				.addRole(guild.id, member.id, role.id, "User-requested role addition.")
 				.catch(() =>
 					client.log.warn(
-						`Failed to add ${diagnostics.display.role(role)} to ${diagnostics.display.member(
+						`Failed to add ${client.diagnostics.role(role)} to ${client.diagnostics.member(
 							member,
-						)} on ${diagnostics.display.guild(guild)}.`,
+						)} on ${client.diagnostics.guild(guild)}.`,
 					),
 				);
 
@@ -265,9 +264,9 @@ async function createRoleSelectionMenu(
 						.removeRole(guild.id, member.id, memberRoleId)
 						.catch(() =>
 							client.log.warn(
-								`Failed to remove ${diagnostics.display.role(role)} from ${diagnostics.display.member(
+								`Failed to remove ${client.diagnostics.role(role)} from ${client.diagnostics.member(
 									member,
-								)} on ${diagnostics.display.guild(guild)}.`,
+								)} on ${client.diagnostics.guild(guild)}.`,
 							),
 						);
 
@@ -355,7 +354,7 @@ async function traverseRoleTreeAndDisplay(
 			return (Object.entries(menuRoles) as [string, RoleImplicit][]).map(([name, role]) => {
 				const snowflake = role.snowflakes[interaction.guildId.toString()];
 				if (snowflake === undefined) {
-					throw `StateError: Could not get the snowflake for a role on ${diagnostics.display.guild(
+					throw `StateError: Could not get the snowflake for a role on ${client.diagnostics.guild(
 						interaction.guildId,
 					)}.`;
 				}

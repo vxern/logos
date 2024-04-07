@@ -1,5 +1,4 @@
 import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "logos:constants/slowmode";
-import diagnostics from "logos:core/diagnostics";
 import { timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
@@ -72,7 +71,7 @@ async function handleToggleSlowmode(
 				client.bot.rest
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
 					.catch(() =>
-						client.log.warn(`Failed to downgrade slowmode level on ${diagnostics.display.channel(channel)}.`),
+						client.log.warn(`Failed to downgrade slowmode level on ${client.diagnostics.channel(channel)}.`),
 					);
 
 				await client.tryLog("slowmodeDowngrade", {
@@ -101,7 +100,7 @@ async function handleToggleSlowmode(
 			if (newRateLimitDuration > previousRateLimitDuration) {
 				client.bot.rest
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
-					.catch(() => client.log.warn(`Failed to upgrade slowmode level on ${diagnostics.display.channel(channel)}.`));
+					.catch(() => client.log.warn(`Failed to upgrade slowmode level on ${client.diagnostics.channel(channel)}.`));
 
 				await client.tryLog("slowmodeUpgrade", {
 					guildId: guild.id,
@@ -175,7 +174,7 @@ async function handleToggleSlowmode(
 
 		client.bot.rest
 			.editChannel(channel.id, { rateLimitPerUser: null })
-			.catch(() => client.log.warn(`Failed to disable slowmode on ${diagnostics.display.channel(channel)}.`));
+			.catch(() => client.log.warn(`Failed to disable slowmode on ${client.diagnostics.channel(channel)}.`));
 
 		await client.tryLog("slowmodeDisable", {
 			guildId: guild.id,
@@ -205,7 +204,7 @@ async function handleToggleSlowmode(
 	client.bot.rest
 		.editChannel(channel.id, { rateLimitPerUser: getSlowmodeDelayByLevel(interaction.parameters.level ?? "lowest") })
 		.catch((reason) =>
-			client.log.warn(`Failed to enable slowmode on ${diagnostics.display.channel(channel)}: ${reason}`),
+			client.log.warn(`Failed to enable slowmode on ${client.diagnostics.channel(channel)}: ${reason}`),
 		);
 
 	await client.tryLog("slowmodeEnable", {

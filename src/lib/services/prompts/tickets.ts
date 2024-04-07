@@ -1,5 +1,4 @@
 import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
-import diagnostics from "logos:core/diagnostics";
 import { mention, trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Ticket, TicketFormData, TicketType } from "logos/database/ticket";
@@ -57,7 +56,7 @@ class TicketPromptService extends PromptService<{
 					description: `*${ticketDocument.formData.topic}*`,
 					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					footer: {
-						text: diagnostics.display.user(user),
+						text: this.client.diagnostics.user(user),
 						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: ticketDocument.partialId }),
 					},
 				},

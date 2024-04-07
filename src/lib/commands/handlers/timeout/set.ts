@@ -1,5 +1,4 @@
 import { Locale } from "logos:constants/languages";
-import diagnostics from "logos:core/diagnostics";
 import { mention, timestamp, trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { parseTimeExpression } from "logos/commands/interactions";
@@ -97,7 +96,7 @@ async function handleSetTimeout(
 
 	await client.bot.rest
 		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
-		.catch((reason) => client.log.warn(`Failed to time ${diagnostics.display.member(member)} out:`, reason));
+		.catch((reason) => client.log.warn(`Failed to time ${client.diagnostics.member(member)} out:`, reason));
 
 	await client.tryLog("memberTimeoutAdd", {
 		guildId: guild.id,

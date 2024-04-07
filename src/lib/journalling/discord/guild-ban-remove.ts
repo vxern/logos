@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
 
@@ -15,7 +14,7 @@ class GuildBanRemoveEventLogger extends EventLogger<"guildBanRemove"> {
 	}
 
 	buildMessage(user: Discord.User, _: bigint): string {
-		return `${diagnostics.display.user(user)} has been unbanned.`;
+		return `${this.client.diagnostics.user(user)} has been unbanned.`;
 	}
 }
 

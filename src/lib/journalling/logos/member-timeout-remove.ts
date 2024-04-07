@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
 
@@ -20,9 +19,9 @@ class MemberTimeoutRemoveEventLogger extends EventLogger<"memberTimeoutRemove"> 
 			return undefined;
 		}
 
-		return `The timeout of ${diagnostics.display.user(memberUser)} has been cleared by: ${diagnostics.display.user(
-			by,
-		)}`;
+		return `The timeout of ${this.client.diagnostics.user(
+			memberUser,
+		)} has been cleared by: ${this.client.diagnostics.user(by)}`;
 	}
 }
 

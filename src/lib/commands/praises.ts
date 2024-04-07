@@ -1,5 +1,4 @@
 import { Locale } from "logos:constants/languages";
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Praise } from "logos/database/praise";
 
@@ -49,7 +48,7 @@ function getPraisePage(
 		description: praises
 			.map((praise) => {
 				const user = client.entities.users.get(BigInt(type === "author" ? praise.targetId : praise.authorId));
-				const userDisplay = diagnostics.display.user(user ?? praise.authorId, { includeId: false });
+				const userDisplay = client.diagnostics.user(user ?? praise.authorId, { includeId: false });
 
 				const commentFormatted = praise.comment !== undefined ? `– ${praise.comment}` : `*${strings.noComment}*`;
 				const userFormatted =

@@ -1,5 +1,4 @@
 import { Collection } from "logos:constants/database";
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 import { Model, RawDocument } from "logos/database/model";
@@ -39,7 +38,7 @@ class RealtimeUpdateService extends GlobalService {
 	#_receiveGuildConfigurationUpdate = async (data: ravendb.DocumentChange): Promise<void> => {
 		const [_, [guildId]] = Model.getDataFromId<Guild>(data.id);
 
-		this.log.info(`Detected update to configuration for ${diagnostics.display.guild(guildId)}. Queueing update...`);
+		this.log.info(`Detected update to configuration for ${this.client.diagnostics.guild(guildId)}. Queueing update...`);
 
 		await this.lock.doAction(() => this.#_handleUpdateGuildConfiguration(data));
 	};

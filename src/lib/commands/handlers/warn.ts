@@ -1,5 +1,4 @@
 import { isValidRule } from "logos:constants/rules";
-import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
@@ -181,7 +180,7 @@ async function handleWarnUser(
 				.editMember(guild.id, member.id, {
 					communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
 				})
-				.catch(() => client.log.warn(`Failed to edit timeout state of ${diagnostics.display.member(member)}.`));
+				.catch(() => client.log.warn(`Failed to edit timeout state of ${client.diagnostics.member(member)}.`));
 		} else {
 			const locale = interaction.guildLocale;
 			strings = {

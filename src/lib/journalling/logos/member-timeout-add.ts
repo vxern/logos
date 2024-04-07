@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { EventLogger } from "logos/journalling/logger";
@@ -21,7 +20,7 @@ class MemberTimeoutAddEventLogger extends EventLogger<"memberTimeoutAdd"> {
 			return undefined;
 		}
 
-		return `${diagnostics.display.user(memberUser)} has been timed out by ${diagnostics.display.user(
+		return `${this.client.diagnostics.user(memberUser)} has been timed out by ${this.client.diagnostics.user(
 			by,
 		)} until ${timestamp(until, { format: "relative" })} for: ${reason}`;
 	}

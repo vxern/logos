@@ -10,7 +10,6 @@ import {
 	isSongCollection,
 	isSongStream,
 } from "logos:constants/music";
-import diagnostics from "logos:core/diagnostics";
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
@@ -683,9 +682,9 @@ class MusicService extends LocalService {
 				})
 				.catch(() =>
 					this.log.warn(
-						`Failed to send track load failure to ${diagnostics.display.channel(
+						`Failed to send track load failure to ${this.client.diagnostics.channel(
 							session.channelId,
-						)} on ${diagnostics.display.guild(this.guildId)}.`,
+						)} on ${this.client.diagnostics.guild(this.guildId)}.`,
 					),
 				);
 
@@ -743,9 +742,9 @@ class MusicService extends LocalService {
 				})
 				.catch(() =>
 					this.log.warn(
-						`Failed to send track play failure to ${diagnostics.display.channel(
+						`Failed to send track play failure to ${this.client.diagnostics.channel(
 							session.channelId,
-						)} on ${diagnostics.display.guild(this.guildId)}.`,
+						)} on ${this.client.diagnostics.guild(this.guildId)}.`,
 					),
 				);
 		});
@@ -843,9 +842,9 @@ class MusicService extends LocalService {
 				})
 				.catch(() =>
 					this.log.warn(
-						`Failed to send now playing message to ${diagnostics.display.channel(
+						`Failed to send now playing message to ${this.client.diagnostics.channel(
 							session.channelId,
-						)} on ${diagnostics.display.guild(this.guildId)}.`,
+						)} on ${this.client.diagnostics.guild(this.guildId)}.`,
 					),
 				);
 		}

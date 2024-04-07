@@ -1,4 +1,3 @@
-import diagnostics from "logos:core/diagnostics";
 import { Client } from "logos/client";
 import { CorrectionComposer } from "logos/commands/components/modal-composers/correction-composer";
 import { InteractionHandler } from "logos/commands/handlers/handler";
@@ -112,7 +111,7 @@ async function handleMakeCorrection(
 			suggestedBy: client.localise(
 				"correction.strings.suggestedBy",
 				locale,
-			)({ username: diagnostics.display.user(interaction.user, { includeId: false }) }),
+			)({ username: client.diagnostics.user(interaction.user, { includeId: false }) }),
 		};
 
 		client.bot.rest
@@ -136,7 +135,7 @@ async function handleMakeCorrection(
 					},
 				],
 			})
-			.catch(() => client.log.warn(`Failed to send correction to ${diagnostics.display.channel(message.channelId)}.`));
+			.catch(() => client.log.warn(`Failed to send correction to ${client.diagnostics.channel(message.channelId)}.`));
 	});
 
 	await composer.open();
