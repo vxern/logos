@@ -108,9 +108,7 @@ class CommandStore {
 			builtCommand.key = key;
 			builtCommand.built = built;
 
-			// TODO(vxern): Why is this flagging up?
-			// @ts-ignore: This is fine.
-			commands[identifier] = builtCommand;
+			commands[identifier as CommandName] = builtCommand;
 			namesWithMetadata.push(...namesWithMetadataPart);
 		}
 
