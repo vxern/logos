@@ -3,7 +3,7 @@ import { codeMultiline } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 	constructor(client: Client) {

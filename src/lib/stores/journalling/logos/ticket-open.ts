@@ -1,10 +1,13 @@
 import { Client } from "logos/client";
 import { Ticket } from "logos/database/ticket";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
-class InquiryOpenEventLogger extends EventLogger<"inquiryOpen"> {
+class TicketOpenEventLogger extends EventLogger<"ticketOpen"> {
 	constructor(client: Client) {
-		super(client, { title: `${constants.emojis.events.ticket} Inquiry opened`, colour: constants.colours.husky });
+		super(client, {
+			title: `${constants.emojis.events.ticket} Ticket opened`,
+			colour: constants.colours.husky,
+		});
 	}
 
 	filter(originGuildId: bigint, member: Logos.Member, _: Ticket): boolean {
@@ -21,4 +24,4 @@ class InquiryOpenEventLogger extends EventLogger<"inquiryOpen"> {
 	}
 }
 
-export { InquiryOpenEventLogger };
+export { TicketOpenEventLogger };

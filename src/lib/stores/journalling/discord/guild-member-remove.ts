@@ -1,10 +1,10 @@
 import { Client } from "logos/client";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
-class GuildBanRemoveEventLogger extends EventLogger<"guildBanRemove"> {
+class GuildMemberRemoveEventLogger extends EventLogger<"guildMemberRemove"> {
 	constructor(client: Client) {
 		super(client, {
-			title: `${constants.emojis.events.user.unbanned} User unbanned`,
+			title: `${constants.emojis.events.user.left} User left`,
 			colour: constants.colours.dullYellow,
 		});
 	}
@@ -14,8 +14,8 @@ class GuildBanRemoveEventLogger extends EventLogger<"guildBanRemove"> {
 	}
 
 	buildMessage(user: Discord.User, _: bigint): string {
-		return `${this.client.diagnostics.user(user)} has been unbanned.`;
+		return `${this.client.diagnostics.user(user)} has left the server.`;
 	}
 }
 
-export { GuildBanRemoveEventLogger };
+export { GuildMemberRemoveEventLogger };

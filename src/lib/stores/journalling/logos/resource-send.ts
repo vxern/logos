@@ -1,6 +1,6 @@
 import { Client } from "logos/client";
 import { Resource } from "logos/database/resource";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
 	constructor(client: Client) {

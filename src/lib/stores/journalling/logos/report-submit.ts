@@ -1,6 +1,6 @@
 import { Client } from "logos/client";
 import { Report } from "logos/database/report";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
 	constructor(client: Client) {

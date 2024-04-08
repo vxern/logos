@@ -1,6 +1,6 @@
 import { Client } from "logos/client";
 import { Praise } from "logos/database/praise";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class PraiseAddEventLogger extends EventLogger<"praiseAdd"> {
 	constructor(client: Client) {

@@ -1,6 +1,6 @@
 import { Client } from "logos/client";
 import { Suggestion } from "logos/database/suggestion";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class SuggestionSendEventLogger extends EventLogger<"suggestionSend"> {
 	constructor(client: Client) {

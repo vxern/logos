@@ -1,6 +1,6 @@
 import { timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class MemberTimeoutAddEventLogger extends EventLogger<"memberTimeoutAdd"> {
 	constructor(client: Client) {

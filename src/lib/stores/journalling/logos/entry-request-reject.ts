@@ -1,5 +1,5 @@
 import { Client } from "logos/client";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class EntryRequestRejectEventLogger extends EventLogger<"entryRequestReject"> {
 	constructor(client: Client) {

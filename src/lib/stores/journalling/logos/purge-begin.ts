@@ -1,6 +1,6 @@
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
 	constructor(client: Client) {

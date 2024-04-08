@@ -1,6 +1,6 @@
 import { Client } from "logos/client";
 import { Warning } from "logos/database/warning";
-import { EventLogger } from "logos/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/logger";
 
 class MemberWarnRemoveEventLogger extends EventLogger<"memberWarnRemove"> {
 	constructor(client: Client) {
