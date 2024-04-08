@@ -1,6 +1,6 @@
-import {Locale} from "logos:constants/languages/localisation";
+import { Locale } from "logos:constants/languages/localisation";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
-import {trim} from "logos:core/formatting";
+import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
@@ -312,11 +312,11 @@ class InteractionStore {
 	}
 
 	resolveIdentifierToMembers({
-								   guildId,
-								   seekerUserId,
-								   identifier,
-								   options,
-							   }: {
+		guildId,
+		seekerUserId,
+		identifier,
+		options,
+	}: {
 		guildId: bigint;
 		seekerUserId: bigint;
 		identifier: string;
@@ -523,7 +523,10 @@ class InteractionStore {
 
 		await this.respond(
 			interaction,
-			users.map((user) => ({ name: this.#client.diagnostics.user(user, { prettify: true }), value: user.id.toString() })),
+			users.map((user) => ({
+				name: this.#client.diagnostics.user(user, { prettify: true }),
+				value: user.id.toString(),
+			})),
 		);
 	}
 }
