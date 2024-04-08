@@ -4,7 +4,6 @@ import { InteractionCollector } from "logos/collectors";
 import { GlobalService } from "logos/services/service";
 import { InteractionStore } from "logos/stores/interactions";
 
-// TODO(vxern): Improve this by getting rid of the "message could not be loaded" text.
 class InteractionRepetitionService extends GlobalService {
 	readonly #_commandInteractions: InteractionCollector;
 	readonly #_showInChatButtons: InteractionCollector<[interactionId: string]>;
