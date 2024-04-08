@@ -1,25 +1,16 @@
 import { timestamp } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class MemberTimeoutAddEventLogger extends EventLogger<"memberTimeoutAdd"> {
-	constructor(client: Client) {
-		super(client, {
+const logger: EventLogger<"memberTimeoutAdd"> = async (client, member, until, reason, author) => ({
+	embeds: [
+		{
 			title: `${constants.emojis.events.timeout.added} Member timed out`,
-			colour: constants.colours.dullYellow,
-		});
-	}
+			color: constants.colours.warning,
+			description: `${client.diagnostics.member(member)} has been timed out by ${client.diagnostics.user(
+				author,
+			)} until ${timestamp(until, { format: "relative" })} for: ${reason}`,
+		},
+	],
+});
 
-	buildMessage(member: Logos.Member, until: number, reason: string, by: Logos.User): string | undefined {
-		const memberUser = this.client.entities.users.get(member.id);
-		if (memberUser === undefined) {
-			return undefined;
-		}
-
-		return `${this.client.diagnostics.user(memberUser)} has been timed out by ${this.client.diagnostics.user(
-			by,
-		)} until ${timestamp(until, { format: "relative" })} for: ${reason}`;
-	}
-}
-
-export { MemberTimeoutAddEventLogger };
+export default logger;

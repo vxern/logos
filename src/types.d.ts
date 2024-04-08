@@ -178,6 +178,7 @@ declare module "@discordeno/bot" {
 	type Locale = `${Discord.Locales}`;
 	type VoiceServerUpdate = Parameters<Discord.EventHandlers["voiceServerUpdate"]>[0];
 	type DesiredProperties = DeepPartial<Discord.Transformers["desiredProperties"]>;
+	type DeletedMessage = Discord.Events["messageDelete"][0];
 
 	type Events = {
 		[T in keyof Discord.EventHandlers]: Parameters<Discord.EventHandlers[T]>;

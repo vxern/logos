@@ -1,25 +1,15 @@
-import { Client } from "logos/client";
-import { Resource } from "logos/database/resource";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
-	constructor(client: Client) {
-		super(client, {
+const logger: EventLogger<"resourceSend"> = async (client, author, resource) => ({
+	embeds: [
+		{
 			title: `${constants.emojis.events.resource} Resource submitted`,
-			colour: constants.colours.darkGreen,
-		});
-	}
+			color: constants.colours.success,
+			description: `${client.diagnostics.member(author)} has submitted a resource.\n\nResource: *${
+				resource.formData.resource
+			}*`,
+		},
+	],
+});
 
-	buildMessage(member: Logos.Member, resource: Resource): string | undefined {
-		const memberUser = this.client.entities.users.get(member.id);
-		if (memberUser === undefined) {
-			return undefined;
-		}
-
-		return `${this.client.diagnostics.user(memberUser)} has submitted a resource.\n\nResource: *${
-			resource.formData.resource
-		}*`;
-	}
-}
-
-export { ResourceSendEventLogger };
+export default logger;

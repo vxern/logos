@@ -1,14 +1,13 @@
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class GuildBanAddEventLogger extends EventLogger<"guildBanAdd"> {
-	constructor(client: Client) {
-		super(client, { title: `${constants.emojis.events.user.banned} User banned`, colour: constants.colours.red });
-	}
+const logger: EventLogger<"guildBanAdd"> = async (client, user, _) => ({
+	embeds: [
+		{
+			title: `${constants.emojis.events.user.banned} User banned`,
+			colour: constants.colours.failure,
+			description: `${client.diagnostics.user(user)} has been banned.`,
+		},
+	],
+});
 
-	buildMessage(user: Discord.User, _: bigint): string {
-		return `${this.client.diagnostics.user(user)} has been banned.`;
-	}
-}
-
-export { GuildBanAddEventLogger };
+export default logger;

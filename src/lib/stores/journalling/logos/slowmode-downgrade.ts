@@ -1,27 +1,15 @@
-import { SlowmodeLevel } from "logos:constants/slowmode";
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class SlowmodeDowngradeEventLogger extends EventLogger<"slowmodeDowngrade"> {
-	constructor(client: Client) {
-		super(client, {
+const logger: EventLogger<"slowmodeDowngrade"> = async (client, user, channel, previousLevel, currentLevel) => ({
+	embeds: [
+		{
 			title: `${constants.emojis.events.slowmode.downgraded} Slowmode level downgraded`,
-			colour: constants.colours.dullYellow,
-		});
-	}
+			color: constants.colours.warning,
+			description: `${client.diagnostics.user(user)} has downgraded the slowmode level in ${client.diagnostics.channel(
+				channel,
+			)} from "${previousLevel}" to "${currentLevel}".`,
+		},
+	],
+});
 
-	buildMessage(
-		user: Logos.User,
-		channel: Logos.Channel,
-		previousLevel: SlowmodeLevel,
-		currentLevel: SlowmodeLevel,
-	): string {
-		return `${this.client.diagnostics.user(
-			user,
-		)} has downgraded the slowmode level in ${this.client.diagnostics.channel(
-			channel,
-		)} from "${previousLevel}" to "${currentLevel}".`;
-	}
-}
-
-export { SlowmodeDowngradeEventLogger };
+export default logger;

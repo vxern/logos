@@ -1,20 +1,15 @@
-import { SlowmodeLevel } from "logos:constants/slowmode";
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class SlowmodeEnableEventLogger extends EventLogger<"slowmodeEnable"> {
-	constructor(client: Client) {
-		super(client, {
+const logger: EventLogger<"slowmodeEnable"> = async (client, user, channel, level) => ({
+	embeds: [
+		{
 			title: `${constants.emojis.events.slowmode.enabled} Slowmode enabled`,
-			colour: constants.colours.dullYellow,
-		});
-	}
+			color: constants.colours.warning,
+			description: `${client.diagnostics.user(user)} has enabled slowmode in ${client.diagnostics.channel(
+				channel,
+			)} with level "${level}".`,
+		},
+	],
+});
 
-	buildMessage(user: Logos.User, channel: Logos.Channel, level: SlowmodeLevel): string {
-		return `${this.client.diagnostics.user(user)} has enabled slowmode in ${this.client.diagnostics.channel(
-			channel,
-		)} with level "${level}".`;
-	}
-}
-
-export { SlowmodeEnableEventLogger };
+export default logger;

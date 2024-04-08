@@ -1,17 +1,13 @@
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class GuildMemberAddEventLogger extends EventLogger<"guildMemberAdd"> {
-	constructor(client: Client) {
-		super(client, {
+const logger: EventLogger<"guildMemberAdd"> = async (client, _, user) => ({
+	embeds: [
+		{
 			title: `${constants.emojis.events.user.joined} User joined`,
-			colour: constants.colours.lightGreen,
-		});
-	}
+			colour: constants.colours.success,
+			description: `${client.diagnostics.user(user)} has joined the server.`,
+		},
+	],
+});
 
-	buildMessage(_: Discord.Member, user: Discord.User): string {
-		return `${this.client.diagnostics.user(user)} has joined the server.`;
-	}
-}
-
-export { GuildMemberAddEventLogger };
+export default logger;

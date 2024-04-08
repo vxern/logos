@@ -1,34 +1,21 @@
 import { mention } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
-	constructor(client: Client) {
-		super(client, {
-			title: `${constants.emojis.events.purging.begin} Purging started`,
-			colour: constants.colours.yellow,
-		});
-	}
+const logger: EventLogger<"purgeBegin"> = async (client, member, channel, messageCount, author?) => {
+	const authorMention = author !== undefined ? client.diagnostics.user(author) : undefined;
+	const channelMention = mention(channel.id, { type: "channel" });
 
-	buildMessage(
-		member: Logos.Member,
-		channel: Logos.Channel,
-		messageCount: number,
-		author?: Logos.User | undefined,
-	): string | undefined {
-		const user = this.client.entities.users.get(member.id);
-		if (user === undefined) {
-			return undefined;
-		}
+	return {
+		embeds: [
+			{
+				title: `${constants.emojis.events.purging.begin} Purging started`,
+				color: constants.colours.warning,
+				description: `${client.diagnostics.member(member)} has initiated a purging of ${messageCount} messages${
+					author !== undefined ? `sent by ${authorMention}` : ""
+				} in ${channelMention}.`,
+			},
+		],
+	};
+};
 
-		const userMention = this.client.diagnostics.user(user);
-		const authorMention = author !== undefined ? this.client.diagnostics.user(author) : undefined;
-		const channelMention = mention(channel.id, { type: "channel" });
-
-		return `${userMention} has initiated a purging of ${messageCount} messages${
-			author !== undefined ? `sent by ${authorMention}` : ""
-		} in ${channelMention}.`;
-	}
-}
-
-export { PurgeBeginEventLogger };
+export default logger;

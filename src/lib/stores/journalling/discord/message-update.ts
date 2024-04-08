@@ -1,35 +1,28 @@
 import { codeMultiline, mention } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class MessageUpdateEventLogger extends EventLogger<"messageUpdate"> {
-	constructor(client: Client) {
-		super(client, {
-			title: `${constants.emojis.events.message.updated} Message updated`,
-			colour: constants.colours.blue,
-		});
+const logger: EventLogger<"messageUpdate"> = async (client, message, _?) => {
+	const oldMessage = client.entities.messages.previous.get(message.id);
+	if (oldMessage === undefined) {
+		return undefined;
 	}
 
-	buildMessage(message: Discord.Message, _?: Discord.Message | undefined): string | undefined {
-		const oldMessage = this.client.entities.messages.previous.get(message.id);
-		if (oldMessage === undefined) {
-			return undefined;
-		}
+	return {
+		embeds: [
+			{
+				title: `${constants.emojis.events.message.updated} Message updated`,
+				color: constants.colours.notice,
+				description: `${client.diagnostics.user(message.author)} updated their message in ${mention(message.channelId, {
+					type: "channel",
+				})}.
+  
+  **BEFORE**
+  ${codeMultiline(oldMessage.content)}
+  **AFTER**
+  ${codeMultiline(message.content)}`,
+			},
+		],
+	};
+};
 
-		const author = this.client.entities.users.get(message.author.id);
-		if (author === undefined) {
-			return undefined;
-		}
-
-		return `${this.client.diagnostics.user(author)} updated their message in ${mention(message.channelId, {
-			type: "channel",
-		})}.
-
-**BEFORE**
-${codeMultiline(oldMessage.content)}
-**AFTER**
-${codeMultiline(message.content)}`;
-	}
-}
-
-export { MessageUpdateEventLogger };
+export default logger;

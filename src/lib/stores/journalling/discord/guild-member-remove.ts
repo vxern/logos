@@ -1,17 +1,13 @@
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class GuildMemberRemoveEventLogger extends EventLogger<"guildMemberRemove"> {
-	constructor(client: Client) {
-		super(client, {
+const logger: EventLogger<"guildMemberRemove"> = async (client, user, _) => ({
+	embeds: [
+		{
 			title: `${constants.emojis.events.user.left} User left`,
-			colour: constants.colours.dullYellow,
-		});
-	}
+			colour: constants.colours.warning,
+			description: `${client.diagnostics.user(user)} has left the server.`,
+		},
+	],
+});
 
-	buildMessage(user: Discord.User, _: bigint): string {
-		return `${this.client.diagnostics.user(user)} has left the server.`;
-	}
-}
-
-export { GuildMemberRemoveEventLogger };
+export default logger;

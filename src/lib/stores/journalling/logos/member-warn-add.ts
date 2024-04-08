@@ -1,25 +1,15 @@
-import { Client } from "logos/client";
-import { Warning } from "logos/database/warning";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class MemberWarnAddEventLogger extends EventLogger<"memberWarnAdd"> {
-	constructor(client: Client) {
-		super(client, {
+const logger: EventLogger<"memberWarnAdd"> = async (client, member, warning, author) => ({
+	embeds: [
+		{
 			title: `${constants.emojis.events.warned} Member warned`,
-			colour: constants.colours.dullYellow,
-		});
-	}
+			color: constants.colours.warning,
+			description: `${client.diagnostics.member(member)} has been warned by ${client.diagnostics.user(author)} for: ${
+				warning.reason
+			}`,
+		},
+	],
+});
 
-	buildMessage(member: Logos.Member, warning: Warning, by: Logos.User): string | undefined {
-		const memberUser = this.client.entities.users.get(member.id);
-		if (memberUser === undefined) {
-			return undefined;
-		}
-
-		return `${this.client.diagnostics.user(memberUser)} has been warned by ${this.client.diagnostics.user(by)} for: ${
-			warning.reason
-		}`;
-	}
-}
-
-export { MemberWarnAddEventLogger };
+export default logger;

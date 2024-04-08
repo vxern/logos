@@ -1,27 +1,19 @@
-import { Client } from "logos/client";
-import { Praise } from "logos/database/praise";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class PraiseAddEventLogger extends EventLogger<"praiseAdd"> {
-	constructor(client: Client) {
-		super(client, {
-			title: `${constants.emojis.events.praised} Member praised`,
-			colour: constants.colours.lightGreen,
-		});
-	}
+const logger: EventLogger<"praiseAdd"> = async (client, member, praise, author) => {
+	const comment = praise.comment ?? "None.";
 
-	buildMessage(member: Logos.Member, praise: Praise, by: Logos.User): string | undefined {
-		const memberUser = this.client.entities.users.get(member.id);
-		if (memberUser === undefined) {
-			return undefined;
-		}
+	return {
+		embeds: [
+			{
+				title: `${constants.emojis.events.praised} Member praised`,
+				color: constants.colours.success,
+				description: `${client.diagnostics.member(member)} has been praised by ${client.diagnostics.user(
+					author,
+				)}. Comment: ${comment}`,
+			},
+		],
+	};
+};
 
-		const comment = praise.comment ?? "None.";
-
-		return `${this.client.diagnostics.user(memberUser)} has been praised by ${this.client.diagnostics.user(
-			by,
-		)}. Comment: ${comment}`;
-	}
-}
-
-export { PraiseAddEventLogger };
+export default logger;

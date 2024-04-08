@@ -1,24 +1,15 @@
-import { Client } from "logos/client";
-import { EventLogger } from "logos/stores/journalling/logger";
+import { EventLogger } from "logos/stores/journalling/loggers";
 
-class EntryRequestAcceptEventLogger extends EventLogger<"entryRequestAccept"> {
-	constructor(client: Client) {
-		super(client, {
+const logger: EventLogger<"entryRequestAccept"> = async (client, user, author) => ({
+	embeds: [
+		{
 			title: `${constants.emojis.events.entryRequest.accepted} Entry request accepted`,
-			colour: constants.colours.lightGreen,
-		});
-	}
+			colour: constants.colours.success,
+			description: `${client.diagnostics.user(user)}'s entry request has been accepted by ${client.diagnostics.member(
+				author,
+			)}`,
+		},
+	],
+});
 
-	buildMessage(user: Logos.User, by: Logos.Member): string | undefined {
-		const byUser = this.client.entities.users.get(by.id);
-		if (byUser === undefined) {
-			return;
-		}
-
-		return `${this.client.diagnostics.user(user)}'s entry request has been accepted by ${this.client.diagnostics.user(
-			byUser,
-		)}`;
-	}
-}
-
-export { EntryRequestAcceptEventLogger };
+export default logger;
