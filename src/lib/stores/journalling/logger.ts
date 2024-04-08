@@ -14,10 +14,7 @@ abstract class EventLogger<Event extends keyof Events> {
 		this.colour = colour;
 	}
 
-	// TODO(vxern): Filtering could be done directly in the `JournallingStore`,
-	//  and building the message could be just a simple handler.
-	abstract filter(originGuildId: bigint, ...args: Events[Event]): boolean;
-
+	// TODO(vxern): Building the message could be just a simple handler.
 	abstract buildMessage(...args: Events[Event]): Promise<string | undefined> | string | undefined;
 }
 

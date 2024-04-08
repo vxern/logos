@@ -9,10 +9,6 @@ class EntryRequestAcceptEventLogger extends EventLogger<"entryRequestAccept"> {
 		});
 	}
 
-	filter(originGuildId: bigint, _: Logos.User, by: Logos.Member): boolean {
-		return originGuildId === by.guildId;
-	}
-
 	buildMessage(user: Logos.User, by: Logos.Member): string | undefined {
 		const byUser = this.client.entities.users.get(by.id);
 		if (byUser === undefined) {

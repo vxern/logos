@@ -10,10 +10,6 @@ class SlowmodeEnableEventLogger extends EventLogger<"slowmodeEnable"> {
 		});
 	}
 
-	filter(originGuildId: bigint, _: Logos.User, channel: Logos.Channel, __: SlowmodeLevel): boolean {
-		return originGuildId === channel.guildId;
-	}
-
 	buildMessage(user: Logos.User, channel: Logos.Channel, level: SlowmodeLevel): string {
 		return `${this.client.diagnostics.user(user)} has enabled slowmode in ${this.client.diagnostics.channel(
 			channel,

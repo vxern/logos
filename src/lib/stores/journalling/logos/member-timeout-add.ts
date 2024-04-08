@@ -10,10 +10,6 @@ class MemberTimeoutAddEventLogger extends EventLogger<"memberTimeoutAdd"> {
 		});
 	}
 
-	filter(originGuildId: bigint, member: Logos.Member, _: number, __: string, ___: Logos.User): boolean {
-		return originGuildId === member.guildId;
-	}
-
 	buildMessage(member: Logos.Member, until: number, reason: string, by: Logos.User): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {

@@ -10,10 +10,6 @@ class TicketOpenEventLogger extends EventLogger<"ticketOpen"> {
 		});
 	}
 
-	filter(originGuildId: bigint, member: Logos.Member, _: Ticket): boolean {
-		return originGuildId === member.guildId;
-	}
-
 	buildMessage(member: Logos.Member, ticket: Ticket): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {

@@ -9,10 +9,6 @@ class MemberTimeoutRemoveEventLogger extends EventLogger<"memberTimeoutRemove"> 
 		});
 	}
 
-	filter(originGuildId: bigint, member: Logos.Member, _: Logos.User): boolean {
-		return originGuildId === member.guildId;
-	}
-
 	buildMessage(member: Logos.Member, by: Logos.User): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {

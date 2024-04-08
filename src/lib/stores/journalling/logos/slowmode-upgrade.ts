@@ -10,10 +10,6 @@ class SlowmodeUpgradeEventLogger extends EventLogger<"slowmodeUpgrade"> {
 		});
 	}
 
-	filter(originGuildId: bigint, _: Logos.User, channel: Logos.Channel, __: SlowmodeLevel, ___: SlowmodeLevel): boolean {
-		return originGuildId === channel.guildId;
-	}
-
 	buildMessage(
 		user: Logos.User,
 		channel: Logos.Channel,

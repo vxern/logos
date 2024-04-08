@@ -9,10 +9,6 @@ class GuildMemberAddEventLogger extends EventLogger<"guildMemberAdd"> {
 		});
 	}
 
-	filter(originGuildId: bigint, member: Discord.Member, user: Discord.User): boolean {
-		return originGuildId === member.guildId && !user.toggles?.has("bot");
-	}
-
 	buildMessage(_: Discord.Member, user: Discord.User): string {
 		return `${this.client.diagnostics.user(user)} has joined the server.`;
 	}

@@ -10,10 +10,6 @@ class PraiseAddEventLogger extends EventLogger<"praiseAdd"> {
 		});
 	}
 
-	filter(originGuildId: bigint, member: Logos.Member, _: Praise, __: Logos.User): boolean {
-		return originGuildId === member.guildId;
-	}
-
 	buildMessage(member: Logos.Member, praise: Praise, by: Logos.User): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {

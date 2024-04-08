@@ -13,15 +13,6 @@ class EntryRequestSubmitEventLogger extends EventLogger<"entryRequestSubmit"> {
 		});
 	}
 
-	filter(originGuildId: bigint, _: Logos.User, entryRequest: EntryRequest): boolean {
-		const guild = this.client.entities.guilds.get(BigInt(entryRequest.guildId));
-		if (guild === undefined) {
-			return false;
-		}
-
-		return originGuildId === guild.id;
-	}
-
 	async buildMessage(user: Logos.User, entryRequest: EntryRequest): Promise<string> {
 		const guildDocument = await Guild.getOrCreate(this.client, { guildId: entryRequest.guildId });
 

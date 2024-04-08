@@ -10,10 +10,6 @@ class ResourceSendEventLogger extends EventLogger<"resourceSend"> {
 		});
 	}
 
-	filter(originGuildId: bigint, member: Logos.Member, _: Resource): boolean {
-		return originGuildId === member.guildId;
-	}
-
 	buildMessage(member: Logos.Member, resource: Resource): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {

@@ -10,16 +10,6 @@ class PurgeBeginEventLogger extends EventLogger<"purgeBegin"> {
 		});
 	}
 
-	filter(
-		originGuildId: bigint,
-		member: Logos.Member,
-		_: Logos.Channel,
-		__: number,
-		___?: Logos.User | undefined,
-	): boolean {
-		return originGuildId === member.guildId;
-	}
-
 	buildMessage(
 		member: Logos.Member,
 		channel: Logos.Channel,

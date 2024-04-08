@@ -10,10 +10,6 @@ class ReportSubmitEventLogger extends EventLogger<"reportSubmit"> {
 		});
 	}
 
-	filter(originGuildId: bigint, author: Logos.Member, _: Report): boolean {
-		return originGuildId === author.guildId;
-	}
-
 	buildMessage(author: Logos.Member, report: Report): string | undefined {
 		const authorUser = this.client.entities.users.get(author.id);
 		if (authorUser === undefined) {

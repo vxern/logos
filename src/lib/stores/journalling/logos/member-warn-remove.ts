@@ -10,10 +10,6 @@ class MemberWarnRemoveEventLogger extends EventLogger<"memberWarnRemove"> {
 		});
 	}
 
-	filter(originGuildId: bigint, member: Logos.Member, _: Warning, __: Logos.User): boolean {
-		return originGuildId === member.guildId;
-	}
-
 	buildMessage(member: Logos.Member, warning: Warning, by: Logos.User): string | undefined {
 		const memberUser = this.client.entities.users.get(member.id);
 		if (memberUser === undefined) {

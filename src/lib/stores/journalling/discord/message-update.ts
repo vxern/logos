@@ -10,15 +10,6 @@ class MessageUpdateEventLogger extends EventLogger<"messageUpdate"> {
 		});
 	}
 
-	filter(originGuildId: bigint, message: Discord.Message, oldMessage?: Discord.Message | undefined): boolean {
-		const author = this.client.entities.users.get(message.author.id);
-		if (author === undefined) {
-			return false;
-		}
-
-		return originGuildId === message.guildId && !author.bot && message.content !== oldMessage?.content;
-	}
-
 	buildMessage(message: Discord.Message, _?: Discord.Message | undefined): string | undefined {
 		const oldMessage = this.client.entities.messages.previous.get(message.id);
 		if (oldMessage === undefined) {
