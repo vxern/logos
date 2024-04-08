@@ -186,10 +186,6 @@ class Client {
 		return this.#interactions.displayModal.bind(this.#interactions);
 	}
 
-	get resolveIdentifierToMembers(): InteractionStore["resolveIdentifierToMembers"] {
-		return this.#interactions.resolveIdentifierToMembers.bind(this.#interactions);
-	}
-
 	get resolveInteractionToMember(): InteractionStore["resolveInteractionToMember"] {
 		return this.#interactions.resolveInteractionToMember.bind(this.#interactions);
 	}

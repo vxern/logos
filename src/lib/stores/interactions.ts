@@ -311,7 +311,7 @@ class InteractionStore {
 		};
 	}
 
-	resolveIdentifierToMembers({
+	#_resolveIdentifierToMembers({
 		guildId,
 		seekerUserId,
 		identifier,
@@ -432,7 +432,7 @@ class InteractionStore {
 		},
 		{ locale }: { locale: Locale },
 	): Logos.Member | undefined {
-		const result = this.resolveIdentifierToMembers({
+		const result = this.#_resolveIdentifierToMembers({
 			guildId: interaction.guildId,
 			seekerUserId: interaction.user.id,
 			identifier,
@@ -495,7 +495,7 @@ class InteractionStore {
 			return;
 		}
 
-		const result = this.resolveIdentifierToMembers({
+		const result = this.#_resolveIdentifierToMembers({
 			guildId: interaction.guildId,
 			seekerUserId: interaction.user.id,
 			identifier: identifierTrimmed,
