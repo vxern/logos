@@ -140,16 +140,4 @@ describe("Client", () => {
 	describe("handleInteraction()", () => {
 		// TODO(vxern): Add tests.
 	});
-
-	describe("resolveIdentifierToMembers()", () => {
-		// TODO(vxern): Add tests.
-	});
-
-	describe("resolveInteractionToMember()", () => {
-		// TODO(vxern): Add tests.
-	});
-
-	describe("autocompleteMembers()", () => {
-		// TODO(vxern): Add tests.
-	});
 });
