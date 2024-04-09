@@ -33,10 +33,6 @@ class MusicService extends LocalService {
 		return this.#session?.events;
 	}
 
-	get volume(): number | undefined {
-		return this.#session?.player.volume;
-	}
-
 	get history(): SongListing[] | undefined {
 		return this.#session?.listings.history;
 	}
@@ -1026,6 +1022,10 @@ class MusicSession {
 
 	get isPaused(): boolean {
 		return this.player.paused;
+	}
+
+	get volume(): number | undefined {
+		return this.player.volume;
 	}
 
 	constructor({

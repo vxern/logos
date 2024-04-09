@@ -34,11 +34,12 @@ async function handleDisplayVolume(
 		return;
 	}
 
-	const volume = musicService.volume;
-
 	const strings = {
 		title: client.localise("music.options.volume.options.display.strings.volume.title", locale)(),
-		description: client.localise("music.options.volume.options.display.strings.volume.description", locale)({ volume }),
+		description: client.localise(
+			"music.options.volume.options.display.strings.volume.description",
+			locale,
+		)({ volume: musicService.session.volume }),
 	};
 
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
