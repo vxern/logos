@@ -33,10 +33,6 @@ class MusicService extends LocalService {
 		return this.#session?.events;
 	}
 
-	get history(): SongListing[] | undefined {
-		return this.#session?.listings.history;
-	}
-
 	get current(): SongListing | undefined {
 		return this.#session?.listings.current;
 	}
@@ -74,24 +70,6 @@ class MusicService extends LocalService {
 		}
 
 		return session.listings.queue.length === 0;
-	}
-
-	get isHistoryVacant(): boolean | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.listings.history.length < constants.MAXIMUM_HISTORY_ENTRIES;
-	}
-
-	get isHistoryEmpty(): boolean | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.listings.history.length === 0;
 	}
 
 	get isOccupied(): boolean {
@@ -441,12 +419,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		const isHistoryVacant = this.isHistoryVacant;
-		if (isHistoryVacant === undefined) {
-			return;
-		}
-
-		if (!this.isHistoryVacant) {
+		if (!session.isHistoryVacant) {
 			session.listings.history.shift();
 		}
 
@@ -999,6 +972,7 @@ class MusicSession {
 	readonly player: shoukaku.Player;
 	readonly channelId: bigint;
 
+	// TODO(vxern): Convert to its own class.
 	readonly listings: {
 		history: SongListing[];
 		current?: SongListing;
@@ -1024,8 +998,20 @@ class MusicSession {
 		return this.player.paused;
 	}
 
-	get volume(): number | undefined {
+	get volume(): number {
 		return this.player.volume;
+	}
+
+	get history(): SongListing[] {
+		return this.listings.history;
+	}
+
+	get isHistoryVacant(): boolean {
+		return this.listings.history.length < constants.MAXIMUM_HISTORY_ENTRIES;
+	}
+
+	get isHistoryEmpty(): boolean {
+		return this.listings.history.length === 0;
 	}
 
 	constructor({

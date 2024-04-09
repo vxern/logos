@@ -32,8 +32,8 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 		return;
 	}
 
-	const [events, historyReversed] = [musicService.events, musicService.history];
-	if (events === undefined || historyReversed === undefined) {
+	const events = musicService.events;
+	if (events === undefined) {
 		return;
 	}
 
@@ -44,7 +44,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 	const view = new SongListingView(client, {
 		interaction,
 		title: `${constants.emojis.music.list} ${strings.title}`,
-		listings: structuredClone(historyReversed).reverse(),
+		listings: structuredClone(musicService.session.history).reverse(),
 	});
 
 	const refreshView = async () => view.refresh();

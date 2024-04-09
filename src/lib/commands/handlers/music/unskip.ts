@@ -46,13 +46,8 @@ async function handleUnskipAction(
 		return;
 	}
 
-	const [history, current, isQueueVacant, isHistoryEmpty] = [
-		musicService.history,
-		musicService.current,
-		musicService.isQueueVacant,
-		musicService.isHistoryEmpty,
-	];
-	if (history === undefined || isQueueVacant === undefined || isHistoryEmpty === undefined) {
+	const [current, isQueueVacant] = [musicService.current, musicService.isQueueVacant];
+	if (isQueueVacant === undefined) {
 		return;
 	}
 
@@ -72,7 +67,7 @@ async function handleUnskipAction(
 		return false;
 	})();
 
-	if (isUnskippingListing && isHistoryEmpty) {
+	if (isUnskippingListing && musicService.session.isHistoryEmpty) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.unskip.strings.historyEmpty.title", locale)(),
@@ -193,7 +188,7 @@ async function handleUnskipAction(
 			) {
 				listingsToUnskip = Math.min(interaction.parameters.by, current.content.position);
 			} else {
-				listingsToUnskip = Math.min(interaction.parameters.by, history.length);
+				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.history.length);
 			}
 			await musicService.unskip(isUnskippingCollection, { by: listingsToUnskip });
 		} else if (interaction.parameters.to !== undefined) {
@@ -206,7 +201,7 @@ async function handleUnskipAction(
 			) {
 				listingToSkipTo = Math.max(interaction.parameters.to, 1);
 			} else {
-				listingToSkipTo = Math.min(interaction.parameters.to, history.length);
+				listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.history.length);
 			}
 			await musicService.unskip(isUnskippingCollection, { to: listingToSkipTo });
 		} else {
