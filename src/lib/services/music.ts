@@ -945,18 +945,22 @@ class MusicService extends LocalService {
 	}
 }
 
+class ListingManager {
+	readonly history: SongListing[];
+	readonly queue: SongListing[];
+	current?: SongListing;
+
+	constructor() {
+		this.history = [];
+		this.queue = [];
+	}
+}
+
 class MusicSession {
 	readonly events: EventEmitter;
 	readonly player: shoukaku.Player;
 	readonly channelId: bigint;
-
-	// TODO(vxern): Convert to its own class.
-	readonly listings: {
-		history: SongListing[];
-		current?: SongListing;
-		queue: SongListing[];
-	};
-
+	readonly listings: ListingManager;
 	readonly flags: {
 		isDisconnected: boolean;
 		isDestroyed: boolean;
