@@ -51,7 +51,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			return;
 		}
 
-		const songListing = musicService.remove(index);
+		const songListing = musicService.session.listings.dequeue(index);
 		if (songListing === undefined) {
 			const strings = {
 				title: client.localise("music.options.remove.strings.failed.title", locale)(),

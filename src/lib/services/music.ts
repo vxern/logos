@@ -916,18 +916,6 @@ class MusicService extends LocalService {
 		await session.player.seekTo(timestampMilliseconds);
 	}
 
-	remove(index: number): SongListing | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		const listing = session.listings.queue.splice(index, 1)?.at(0);
-		session.events.emit("queueUpdate");
-
-		return listing;
-	}
-
 	loop(collection: boolean): boolean | undefined {
 		const session = this.#session;
 		if (session === undefined) {
@@ -953,6 +941,14 @@ class ListingManager {
 	constructor() {
 		this.history = [];
 		this.queue = [];
+	}
+
+	dequeue(index: number): SongListing | undefined {
+		const listing = this.queue.splice(index, 1)?.at(0);
+
+		// REMINDER(vxern): session.events.emit("queueUpdate");
+
+		return listing;
 	}
 }
 
@@ -1016,7 +1012,7 @@ class MusicSession {
 		this.events = oldSession?.events ?? new EventEmitter().setMaxListeners(0);
 		this.player = player;
 		this.channelId = channelId;
-		this.listings = { history: [], queue: [] };
+		this.listings = new ListingManager();
 		this.startedAt = 0;
 		this.restoreAt = 0;
 		this.flags = {
