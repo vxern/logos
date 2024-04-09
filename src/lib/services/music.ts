@@ -102,10 +102,6 @@ class MusicService extends LocalService {
 		return this.#session !== undefined;
 	}
 
-	get isPaused(): boolean | undefined {
-		return this.#session?.player.paused;
-	}
-
 	get playingSince(): number | undefined {
 		const position = this.position;
 		if (position === undefined) {
@@ -121,6 +117,10 @@ class MusicService extends LocalService {
 
 	get length(): number | undefined {
 		return this.#session?.player.data.playerOptions.endTime;
+	}
+
+	get session(): MusicSession {
+		return this.#session!;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -963,14 +963,6 @@ class MusicService extends LocalService {
 		this.#session?.player.setGlobalVolume(volume);
 	}
 
-	pause(): void {
-		this.#session?.player.setPaused(true);
-	}
-
-	resume(): void {
-		this.#session?.player.setPaused(false);
-	}
-
 	async skipTo(timestampMilliseconds: number): Promise<void> {
 		const session = this.#session;
 		if (session === undefined) {
@@ -1036,6 +1028,10 @@ class MusicSession {
 	startedAt: number;
 	restoreAt: number;
 
+	get isPaused(): boolean {
+		return this.player.paused;
+	}
+
 	constructor({
 		player,
 		channelId,
@@ -1053,6 +1049,14 @@ class MusicSession {
 			loop: { song: false, collection: false },
 			breakLoop: false,
 		};
+	}
+
+	pause(): void {
+		this.player.setPaused(true);
+	}
+
+	resume(): void {
+		this.player.setPaused(false);
 	}
 }
 

@@ -14,7 +14,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	const [isOccupied, current, isPaused] = [musicService.isOccupied, musicService.current, musicService.isPaused];
+	const [isOccupied, current] = [musicService.isOccupied, musicService.current];
 	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
@@ -32,16 +32,12 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	if (isPaused === undefined) {
-		return;
-	}
-
-	if (isPaused) {
+	if (musicService.session.isPaused) {
 		await handleResumePlayback(client, interaction);
 		return;
 	}
 
-	musicService.pause();
+	musicService.session.pause();
 
 	const strings = {
 		title: client.localise("music.options.pause.strings.paused.title", locale)(),
