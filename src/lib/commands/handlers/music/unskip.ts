@@ -64,7 +64,7 @@ async function handleUnskipAction(
 		return false;
 	})();
 
-	if (isUnskippingListing && musicService.session.isHistoryEmpty) {
+	if (isUnskippingListing && musicService.session.listings.history.isEmpty) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.unskip.strings.historyEmpty.title", locale)(),

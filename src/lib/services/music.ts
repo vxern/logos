@@ -344,7 +344,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		if (this.session.isQueueFull) {
+		if (this.session.listings.queue.isFull) {
 			const strings = {
 				title: this.client.localise("music.options.play.strings.queueFull.title", locale)(),
 				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
@@ -397,7 +397,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		if (session.isHistoryFull) {
+		if (session.listings.history.isFull) {
 			session.listings.history.shift();
 		}
 
@@ -496,7 +496,7 @@ class MusicService extends LocalService {
 			}
 
 			if (
-				!session.isQueueEmpty &&
+				!session.listings.queue.isEmpty &&
 				(session.listings.current === undefined || !isSongCollection(session.listings.current.content))
 			) {
 				session.listings.current = session.listings.queue.shift();
@@ -933,22 +933,44 @@ class MusicService extends LocalService {
 	}
 }
 
+class ListingQueue {
+	readonly #_listings: SongListing[];
+	readonly #_limit: number;
+
+	get listings(): SongListing[] {
+		return Object.freeze(structuredClone(this.#_listings)) as SongListing[];
+	}
+
+	get isFull(): boolean {
+		return this.#_listings.length >= this.#_limit;
+	}
+
+	get isEmpty(): boolean {
+		return this.#_listings.length === 0;
+	}
+
+	constructor({ limit }: { limit: number }) {
+		this.#_listings = [];
+		this.#_limit = limit;
+	}
+
+	removeAt(index: number): SongListing | undefined {
+		const listing = this.#_listings.splice(index, 1)?.at(0);
+
+		// REMINDER(vxern): Emit an event.
+
+		return listing;
+	}
+}
+
 class ListingManager {
-	readonly history: SongListing[];
-	readonly queue: SongListing[];
+	readonly history: ListingQueue;
+	readonly queue: ListingQueue;
 	current?: SongListing;
 
 	constructor() {
-		this.history = [];
-		this.queue = [];
-	}
-
-	dequeue(index: number): SongListing | undefined {
-		const listing = this.queue.splice(index, 1)?.at(0);
-
-		// REMINDER(vxern): session.events.emit("queueUpdate");
-
-		return listing;
+		this.history = new ListingQueue({ limit: constants.MAXIMUM_HISTORY_ENTRIES });
+		this.queue = new ListingQueue({ limit: constants.MAXIMUM_QUEUE_ENTRIES });
 	}
 }
 
@@ -978,30 +1000,6 @@ class MusicSession {
 
 	get volume(): number {
 		return this.player.volume;
-	}
-
-	get isHistoryFull(): boolean {
-		return this.history.length >= constants.MAXIMUM_HISTORY_ENTRIES;
-	}
-
-	get isHistoryEmpty(): boolean {
-		return this.history.length === 0;
-	}
-
-	get history(): SongListing[] {
-		return this.listings.history;
-	}
-
-	get isQueueFull(): boolean {
-		return this.queue.length >= constants.MAXIMUM_QUEUE_ENTRIES;
-	}
-
-	get isQueueEmpty(): boolean {
-		return this.queue.length === 0;
-	}
-
-	get queue(): SongListing[] {
-		return this.listings.queue;
 	}
 
 	constructor({

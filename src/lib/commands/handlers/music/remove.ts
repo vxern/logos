@@ -38,7 +38,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		return;
 	}
 
-	const view = new RemoveSongListingView(client, { interaction, listings: musicService.session.queue });
+	const view = new RemoveSongListingView(client, { interaction, listings: musicService.session.listings.queue.listings });
 
 	view.onInteraction(async (buttonPress) => {
 		const indexString = buttonPress.data?.values?.at(0) as string | undefined;
