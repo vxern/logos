@@ -959,10 +959,6 @@ class MusicService extends LocalService {
 		await this.advanceQueueAndPlay();
 	}
 
-	setVolume(volume: number): void {
-		this.#session?.player.setGlobalVolume(volume);
-	}
-
 	async skipTo(timestampMilliseconds: number): Promise<void> {
 		const session = this.#session;
 		if (session === undefined) {
@@ -1057,6 +1053,10 @@ class MusicSession {
 
 	resume(): void {
 		this.player.setPaused(false);
+	}
+
+	setVolume(volume: number): void {
+		this.player.setGlobalVolume(volume);
 	}
 }
 

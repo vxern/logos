@@ -53,7 +53,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 		return;
 	}
 
-	musicService.setVolume(interaction.parameters.volume);
+	musicService.session.setVolume(interaction.parameters.volume);
 
 	const strings = {
 		title: client.localise("music.options.volume.options.set.strings.set.title", locale)(),
