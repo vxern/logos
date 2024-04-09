@@ -398,7 +398,7 @@ class MusicService extends LocalService {
 		}
 
 		if (session.listings.history.isFull) {
-			session.listings.history.shift();
+			session.listings.history.removeOldest();
 		}
 
 		// Adjust the position for being incremented automatically when played next time.
@@ -406,7 +406,7 @@ class MusicService extends LocalService {
 			listing.content.position -= 1;
 		}
 
-		session.listings.history.push(listing);
+		session.listings.history.addNew(listing);
 		session.events.emit("historyUpdate");
 	}
 
@@ -438,7 +438,7 @@ class MusicService extends LocalService {
 
 		this.tryClearDisconnectTimeout();
 
-		session.listings.queue.push(listing);
+		session.listings.queue.addNew(listing);
 		session.events.emit("queueUpdate");
 
 		const voiceStates = this.guild.voiceStates
@@ -499,7 +499,7 @@ class MusicService extends LocalService {
 				!session.listings.queue.isEmpty &&
 				(session.listings.current === undefined || !isSongCollection(session.listings.current.content))
 			) {
-				session.listings.current = session.listings.queue.shift();
+				session.listings.current = session.listings.queue.removeOldest();
 				session.events.emit("queueUpdate");
 			}
 		}
@@ -514,7 +514,7 @@ class MusicService extends LocalService {
 					session.listings.current.content.position = 0;
 				} else {
 					this.moveListingToHistory(session.listings.current);
-					session.listings.current = session.listings.queue.shift();
+					session.listings.current = session.listings.queue.removeOldest();
 					session.events.emit("queueUpdate");
 					return this.advanceQueueAndPlay();
 				}
@@ -776,17 +776,17 @@ class MusicService extends LocalService {
 				}
 			}
 		} else {
-			const listingsToMoveToHistory = Math.min(by ?? to ?? 0, session.listings.queue.length);
+			const listingsToMoveToHistory = Math.min(by ?? to ?? 0, session.listings.queue.count);
 
 			if (session.listings.current !== undefined) {
-				session.listings.history.push(session.listings.current);
+				session.listings.history.addNew(session.listings.current);
 				session.events.emit("historyUpdate");
 				session.events.emit("queueUpdate");
 				session.listings.current = undefined;
 			}
 
 			for (const _ of Array(listingsToMoveToHistory).keys()) {
-				const listing = session.listings.queue.shift();
+				const listing = session.listings.queue.removeOldest();
 				if (listing !== undefined) {
 					this.moveListingToHistory(listing);
 				}
@@ -817,11 +817,11 @@ class MusicService extends LocalService {
 
 				session.listings.current.content.position -= 1;
 
-				session.listings.queue.unshift(session.listings.current);
-				const listing = session.listings.history.pop();
+				session.listings.queue.addOld(session.listings.current);
+				const listing = session.listings.history.removeNewest();
 				session.events.emit("historyUpdate");
 				if (listing !== undefined) {
-					session.listings.queue.unshift(listing);
+					session.listings.queue.addOld(listing);
 				}
 				session.events.emit("queueUpdate");
 				session.listings.current = undefined;
@@ -841,18 +841,18 @@ class MusicService extends LocalService {
 				}
 			}
 		} else {
-			const listingsToMoveToQueue = Math.min(by ?? to ?? 1, session.listings.history.length);
+			const listingsToMoveToQueue = Math.min(by ?? to ?? 1, session.listings.history.count);
 
 			if (session.listings.current !== undefined) {
-				session.listings.queue.unshift(session.listings.current);
+				session.listings.queue.addOld(session.listings.current);
 				session.events.emit("queueUpdate");
 				session.listings.current = undefined;
 			}
 
 			for (const _ of Array(listingsToMoveToQueue).keys()) {
-				const listing = session.listings.history.pop();
+				const listing = session.listings.history.removeNewest();
 				if (listing !== undefined) {
-					session.listings.queue.unshift(listing);
+					session.listings.queue.addOld(listing);
 				}
 			}
 
@@ -941,6 +941,10 @@ class ListingQueue {
 		return Object.freeze(structuredClone(this.#_listings)) as SongListing[];
 	}
 
+	get count(): number {
+		return this.#_listings.length;
+	}
+
 	get isFull(): boolean {
 		return this.#_listings.length >= this.#_limit;
 	}
@@ -952,6 +956,22 @@ class ListingQueue {
 	constructor({ limit }: { limit: number }) {
 		this.#_listings = [];
 		this.#_limit = limit;
+	}
+
+	addOld(listing: SongListing): void {
+		this.#_listings.unshift(listing);
+	}
+
+	addNew(listing: SongListing): void {
+		this.#_listings.push(listing);
+	}
+
+	removeOldest(): SongListing {
+		return this.#_listings.shift()!;
+	}
+
+	removeNewest(): SongListing {
+		return this.#_listings.pop()!;
 	}
 
 	removeAt(index: number): SongListing | undefined {

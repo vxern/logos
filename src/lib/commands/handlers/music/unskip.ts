@@ -106,7 +106,7 @@ async function handleUnskipAction(
 		return;
 	}
 
-	if (musicService.session.isQueueFull) {
+	if (musicService.session.listings.queue.isFull) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.unskip.strings.queueFull.title", locale)(),
@@ -185,7 +185,7 @@ async function handleUnskipAction(
 			) {
 				listingsToUnskip = Math.min(interaction.parameters.by, current.content.position);
 			} else {
-				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.history.length);
+				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.listings.history.count);
 			}
 			await musicService.unskip(isUnskippingCollection, { by: listingsToUnskip });
 		} else if (interaction.parameters.to !== undefined) {
@@ -198,7 +198,7 @@ async function handleUnskipAction(
 			) {
 				listingToSkipTo = Math.max(interaction.parameters.to, 1);
 			} else {
-				listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.history.length);
+				listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.history.count);
 			}
 			await musicService.unskip(isUnskippingCollection, { to: listingToSkipTo });
 		} else {
