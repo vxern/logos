@@ -344,7 +344,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		if (!this.session.isQueueVacant) {
+		if (this.session.isQueueFull) {
 			const strings = {
 				title: this.client.localise("music.options.play.strings.queueFull.title", locale)(),
 				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
@@ -397,7 +397,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		if (!session.isHistoryVacant) {
+		if (session.isHistoryFull) {
 			session.listings.history.shift();
 		}
 
@@ -980,8 +980,8 @@ class MusicSession {
 		return this.player.volume;
 	}
 
-	get isHistoryVacant(): boolean {
-		return this.history.length < constants.MAXIMUM_HISTORY_ENTRIES;
+	get isHistoryFull(): boolean {
+		return this.history.length >= constants.MAXIMUM_HISTORY_ENTRIES;
 	}
 
 	get isHistoryEmpty(): boolean {
@@ -992,8 +992,8 @@ class MusicSession {
 		return this.listings.history;
 	}
 
-	get isQueueVacant(): boolean {
-		return this.queue.length < constants.MAXIMUM_QUEUE_ENTRIES;
+	get isQueueFull(): boolean {
+		return this.queue.length >= constants.MAXIMUM_QUEUE_ENTRIES;
 	}
 
 	get isQueueEmpty(): boolean {

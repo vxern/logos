@@ -106,7 +106,7 @@ async function handleUnskipAction(
 		return;
 	}
 
-	if (!musicService.session.isQueueVacant) {
+	if (musicService.session.isQueueFull) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.unskip.strings.queueFull.title", locale)(),
