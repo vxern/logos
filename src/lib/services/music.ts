@@ -786,10 +786,7 @@ class MusicService extends LocalService {
 			}
 
 			for (const _ of Array(listingsToMoveToHistory).keys()) {
-				const listing = session.listings.queue.removeOldest();
-				if (listing !== undefined) {
-					this.moveListingToHistory(listing);
-				}
+				this.moveListingToHistory(session.listings.queue.removeOldest());
 			}
 
 			if (listingsToMoveToHistory !== 0) {
@@ -818,11 +815,8 @@ class MusicService extends LocalService {
 				session.listings.current.content.position -= 1;
 
 				session.listings.queue.addOld(session.listings.current);
-				const listing = session.listings.history.removeNewest();
+				session.listings.queue.addOld(session.listings.history.removeNewest());
 				session.events.emit("historyUpdate");
-				if (listing !== undefined) {
-					session.listings.queue.addOld(listing);
-				}
 				session.events.emit("queueUpdate");
 				session.listings.current = undefined;
 			} else {
@@ -850,10 +844,7 @@ class MusicService extends LocalService {
 			}
 
 			for (const _ of Array(listingsToMoveToQueue).keys()) {
-				const listing = session.listings.history.removeNewest();
-				if (listing !== undefined) {
-					session.listings.queue.addOld(listing);
-				}
+				session.listings.queue.addOld(session.listings.history.removeNewest());
 			}
 
 			if (listingsToMoveToQueue !== 0) {
