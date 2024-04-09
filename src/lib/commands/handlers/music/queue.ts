@@ -32,8 +32,8 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 		return;
 	}
 
-	const [events, queue] = [musicService.events, musicService.queue];
-	if (events === undefined || queue === undefined) {
+	const events = musicService.events;
+	if (events === undefined) {
 		return;
 	}
 
@@ -44,7 +44,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	const view = new SongListingView(client, {
 		interaction,
 		title: `${constants.emojis.music.list} ${strings.queue}`,
-		listings: queue,
+		listings: musicService.session.queue,
 	});
 
 	const refreshView = async () => view.refresh();

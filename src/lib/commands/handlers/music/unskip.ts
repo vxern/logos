@@ -46,10 +46,7 @@ async function handleUnskipAction(
 		return;
 	}
 
-	const [current, isQueueVacant] = [musicService.current, musicService.isQueueVacant];
-	if (isQueueVacant === undefined) {
-		return;
-	}
+	const current = musicService.current;
 
 	const isUnskippingListing = (() => {
 		if (current === undefined) {
@@ -109,7 +106,7 @@ async function handleUnskipAction(
 		return;
 	}
 
-	if (!isQueueVacant) {
+	if (!musicService.session.isQueueVacant) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.unskip.strings.queueFull.title", locale)(),

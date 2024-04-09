@@ -28,8 +28,8 @@ async function handleSkipAction(
 		return;
 	}
 
-	const [isOccupied, current, queue] = [musicService.isOccupied, musicService.current, musicService.queue];
-	if (!isOccupied || current === undefined || queue === undefined) {
+	const [isOccupied, current] = [musicService.isOccupied, musicService.current];
+	if (!isOccupied || current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),
@@ -148,7 +148,7 @@ async function handleSkipAction(
 				current.content.songs.length - (current.content.position + 1),
 			);
 		} else {
-			listingsToSkip = Math.min(interaction.parameters.by, queue.length);
+			listingsToSkip = Math.min(interaction.parameters.by, musicService.session.queue.length);
 		}
 		await musicService.skip(isSkippingCollection, { by: listingsToSkip });
 	} else if (interaction.parameters.to !== undefined) {
@@ -156,7 +156,7 @@ async function handleSkipAction(
 		if (isSongCollection(current.content) && interaction.parameters.collection === undefined) {
 			listingToSkipTo = Math.min(interaction.parameters.to, current.content.songs.length);
 		} else {
-			listingToSkipTo = Math.min(interaction.parameters.to, queue.length);
+			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.queue.length);
 		}
 		await musicService.skip(isSkippingCollection, { to: listingToSkipTo });
 	} else {

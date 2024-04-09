@@ -33,12 +33,12 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		return;
 	}
 
-	const [events, queue] = [musicService.events, musicService.queue];
-	if (events === undefined || queue === undefined) {
+	const events = musicService.events;
+	if (events === undefined) {
 		return;
 	}
 
-	const view = new RemoveSongListingView(client, { interaction, listings: queue });
+	const view = new RemoveSongListingView(client, { interaction, listings: musicService.session.queue });
 
 	view.onInteraction(async (buttonPress) => {
 		const indexString = buttonPress.data?.values?.at(0) as string | undefined;

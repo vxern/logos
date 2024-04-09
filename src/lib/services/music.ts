@@ -50,28 +50,6 @@ class MusicService extends LocalService {
 		return current.content;
 	}
 
-	get queue(): SongListing[] | undefined {
-		return this.#session?.listings.queue;
-	}
-
-	get isQueueVacant(): boolean | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.listings.queue.length < constants.MAXIMUM_QUEUE_ENTRIES;
-	}
-
-	get isQueueEmpty(): boolean | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		return session.listings.queue.length === 0;
-	}
-
 	get isOccupied(): boolean {
 		return this.#session !== undefined;
 	}
@@ -270,6 +248,7 @@ class MusicService extends LocalService {
 		}
 
 		// TODO(vxern): Create a method to plug in a new player into an old session.
+		// @ts-ignore: For now...
 		this.#session = { ...oldSession, player: newSession.player };
 
 		await this.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
@@ -365,8 +344,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const isQueueVacant = this.isQueueVacant;
-		if (isQueueVacant !== undefined && !isQueueVacant) {
+		if (!this.session.isQueueVacant) {
 			const strings = {
 				title: this.client.localise("music.options.play.strings.queueFull.title", locale)(),
 				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
@@ -504,8 +482,8 @@ class MusicService extends LocalService {
 	}
 
 	async advanceQueueAndPlay(): Promise<void> {
-		const [isQueueEmpty, session] = [this.isQueueEmpty, this.#session];
-		if (isQueueEmpty === undefined || session === undefined) {
+		const session = this.#session;
+		if (session === undefined) {
 			return;
 		}
 
@@ -518,7 +496,7 @@ class MusicService extends LocalService {
 			}
 
 			if (
-				!isQueueEmpty &&
+				!session.isQueueEmpty &&
 				(session.listings.current === undefined || !isSongCollection(session.listings.current.content))
 			) {
 				session.listings.current = session.listings.queue.shift();
@@ -1002,16 +980,28 @@ class MusicSession {
 		return this.player.volume;
 	}
 
+	get isHistoryVacant(): boolean {
+		return this.history.length < constants.MAXIMUM_HISTORY_ENTRIES;
+	}
+
+	get isHistoryEmpty(): boolean {
+		return this.history.length === 0;
+	}
+
 	get history(): SongListing[] {
 		return this.listings.history;
 	}
 
-	get isHistoryVacant(): boolean {
-		return this.listings.history.length < constants.MAXIMUM_HISTORY_ENTRIES;
+	get isQueueVacant(): boolean {
+		return this.queue.length < constants.MAXIMUM_QUEUE_ENTRIES;
 	}
 
-	get isHistoryEmpty(): boolean {
-		return this.listings.history.length === 0;
+	get isQueueEmpty(): boolean {
+		return this.queue.length === 0;
+	}
+
+	get queue(): SongListing[] {
+		return this.listings.queue;
 	}
 
 	constructor({
