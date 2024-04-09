@@ -22,37 +22,8 @@ interface PositionControls {
 	to: number;
 }
 
-interface Session {
-	events: EventEmitter;
-
-	player: shoukaku.Player;
-	channelId: bigint;
-
-	disconnectTimeout: Timer | undefined;
-
-	listings: {
-		history: SongListing[];
-		current: SongListing | undefined;
-		queue: SongListing[];
-	};
-
-	startedAt: number;
-	restoreAt: number;
-
-	flags: {
-		isDisconnected: boolean;
-		isDestroyed: boolean;
-		loop: {
-			song: boolean;
-			collection: boolean;
-		};
-		breakLoop: boolean;
-	};
-}
-
-// TODO(vxern): This needs cleaning up.
 class MusicService extends LocalService {
-	#session: Session | undefined;
+	#session: MusicSession | undefined;
 
 	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
 
@@ -220,7 +191,7 @@ class MusicService extends LocalService {
 		await this.destroySession();
 	}
 
-	async createSession(channelId: bigint): Promise<Session | undefined> {
+	async createSession(channelId: bigint): Promise<MusicSession | undefined> {
 		const oldSession = this.#session;
 
 		const player = await this.client.lavalinkService.manager.joinVoiceChannel({
@@ -232,25 +203,7 @@ class MusicService extends LocalService {
 
 		await player.setGlobalVolume(this.configuration.implicitVolume);
 
-		const session = {
-			events: oldSession?.events ?? new EventEmitter().setMaxListeners(0),
-			player,
-			disconnectTimeout: undefined,
-			channelId,
-			listings: {
-				history: [],
-				current: undefined,
-				queue: [],
-			},
-			startedAt: 0,
-			restoreAt: 0,
-			flags: {
-				isDisconnected: false,
-				isDestroyed: false,
-				loop: { song: false, collection: false },
-				breakLoop: false,
-			},
-		};
+		const session = new MusicSession({ player, channelId, oldSession });
 
 		this.#session = session;
 
@@ -348,6 +301,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
+		// TODO(vxern): Create a method to plug in a new player into an old session.
 		this.#session = { ...oldSession, player: newSession.player };
 
 		await this.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
@@ -1059,6 +1013,53 @@ class MusicService extends LocalService {
 		session.flags.loop.song = !session.flags.loop.song;
 
 		return session.flags.loop.song;
+	}
+}
+
+class MusicSession {
+	events: EventEmitter;
+
+	player: shoukaku.Player;
+	channelId: bigint;
+
+	disconnectTimeout?: Timer;
+
+	listings: {
+		history: SongListing[];
+		current?: SongListing;
+		queue: SongListing[];
+	};
+
+	startedAt: number;
+	restoreAt: number;
+
+	flags: {
+		isDisconnected: boolean;
+		isDestroyed: boolean;
+		loop: {
+			song: boolean;
+			collection: boolean;
+		};
+		breakLoop: boolean;
+	};
+
+	constructor({
+		player,
+		channelId,
+		oldSession,
+	}: { player: shoukaku.Player; channelId: bigint; oldSession?: MusicSession }) {
+		this.events = oldSession?.events ?? new EventEmitter().setMaxListeners(0);
+		this.player = player;
+		this.channelId = channelId;
+		this.listings = { history: [], queue: [] };
+		this.startedAt = 0;
+		this.restoreAt = 0;
+		this.flags = {
+			isDisconnected: false,
+			isDestroyed: false,
+			loop: { song: false, collection: false },
+			breakLoop: false,
+		};
 	}
 }
 
