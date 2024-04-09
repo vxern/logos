@@ -16,12 +16,6 @@ import { Collector } from "logos/collectors";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
-
-interface PositionControls {
-	by: number;
-	to: number;
-}
-
 class MusicService extends LocalService {
 	#session: MusicSession | undefined;
 
@@ -1017,23 +1011,17 @@ class MusicService extends LocalService {
 }
 
 class MusicSession {
-	events: EventEmitter;
+	readonly events: EventEmitter;
+	readonly player: shoukaku.Player;
+	readonly channelId: bigint;
 
-	player: shoukaku.Player;
-	channelId: bigint;
-
-	disconnectTimeout?: Timer;
-
-	listings: {
+	readonly listings: {
 		history: SongListing[];
 		current?: SongListing;
 		queue: SongListing[];
 	};
 
-	startedAt: number;
-	restoreAt: number;
-
-	flags: {
+	readonly flags: {
 		isDisconnected: boolean;
 		isDestroyed: boolean;
 		loop: {
@@ -1042,6 +1030,11 @@ class MusicSession {
 		};
 		breakLoop: boolean;
 	};
+
+	disconnectTimeout?: Timer;
+
+	startedAt: number;
+	restoreAt: number;
 
 	constructor({
 		player,
@@ -1061,6 +1054,11 @@ class MusicSession {
 			breakLoop: false,
 		};
 	}
+}
+
+interface PositionControls {
+	readonly by: number;
+	readonly to: number;
 }
 
 export { MusicService };
