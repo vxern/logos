@@ -852,7 +852,7 @@ class MusicService extends LocalService {
 		return true;
 	}
 
-	async skip(skipCollection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
+	async skip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
 		const session = this.#session;
 		if (session === undefined) {
 			return;
@@ -863,7 +863,7 @@ class MusicService extends LocalService {
 			session.listings.current.content !== undefined &&
 			isSongCollection(session.listings.current.content)
 		) {
-			if (skipCollection || isLastInCollection(session.listings.current.content)) {
+			if (collection || isLastInCollection(session.listings.current.content)) {
 				session.flags.loop.collection = false;
 
 				this.moveListingToHistory(session.listings.current);
@@ -906,7 +906,7 @@ class MusicService extends LocalService {
 		await session.player.stopTrack();
 	}
 
-	async unskip(unskipCollection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
+	async unskip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
 		const session = this.#session;
 		if (session === undefined) {
 			return;
@@ -917,7 +917,7 @@ class MusicService extends LocalService {
 			session.listings.current.content !== undefined &&
 			isSongCollection(session.listings.current.content)
 		) {
-			if (unskipCollection || isFirstInCollection(session.listings.current.content)) {
+			if (collection || isFirstInCollection(session.listings.current.content)) {
 				session.flags.loop.collection = false;
 
 				session.listings.current.content.position -= 1;
@@ -974,13 +974,13 @@ class MusicService extends LocalService {
 		}
 	}
 
-	async replay(replayCollection: boolean): Promise<void> {
+	async replay(collection: boolean): Promise<void> {
 		const session = this.#session;
 		if (session === undefined) {
 			return;
 		}
 
-		if (replayCollection) {
+		if (collection) {
 			const previousLoopState = session.flags.loop.collection;
 			session.flags.loop.collection = true;
 			session.player.once("start", () => {
@@ -999,7 +999,7 @@ class MusicService extends LocalService {
 			session.listings.current.content !== undefined &&
 			isSongCollection(session.listings.current.content)
 		) {
-			if (replayCollection) {
+			if (collection) {
 				session.listings.current.content.position = -1;
 			}
 		}
@@ -1045,13 +1045,13 @@ class MusicService extends LocalService {
 		return listing;
 	}
 
-	loop(isCollection: boolean): boolean | undefined {
+	loop(collection: boolean): boolean | undefined {
 		const session = this.#session;
 		if (session === undefined) {
 			return undefined;
 		}
 
-		if (isCollection) {
+		if (collection) {
 			session.flags.loop.collection = !session.flags.loop.collection;
 			return session.flags.loop.collection;
 		}
