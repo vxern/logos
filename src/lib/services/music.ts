@@ -391,25 +391,6 @@ class MusicService extends LocalService {
 		return true;
 	}
 
-	moveListingToHistory(listing: SongListing): void {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		if (session.listings.history.isFull) {
-			session.listings.history.removeOldest();
-		}
-
-		// Adjust the position for being incremented automatically when played next time.
-		if (isSongCollection(listing.content)) {
-			listing.content.position -= 1;
-		}
-
-		session.listings.history.addNew(listing);
-		session.events.emit("historyUpdate");
-	}
-
 	tryClearDisconnectTimeout(): void {
 		const session = this.#session;
 		if (session === undefined) {
@@ -491,7 +472,7 @@ class MusicService extends LocalService {
 
 		if (!session.flags.loop.song) {
 			if (session.listings.current !== undefined && !isSongCollection(session.listings.current.content)) {
-				this.moveListingToHistory(session.listings.current);
+				session.listings.moveCurrentToHistory();
 				session.listings.current = undefined;
 			}
 
@@ -513,7 +494,7 @@ class MusicService extends LocalService {
 				if (session.flags.loop.collection) {
 					session.listings.current.content.position = 0;
 				} else {
-					this.moveListingToHistory(session.listings.current);
+					session.listings.moveCurrentToHistory();
 					session.listings.current = session.listings.queue.removeOldest();
 					session.events.emit("queueUpdate");
 					return this.advanceQueueAndPlay();
@@ -747,57 +728,6 @@ class MusicService extends LocalService {
 		return true;
 	}
 
-	async skip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		if (
-			session.listings.current !== undefined &&
-			session.listings.current.content !== undefined &&
-			isSongCollection(session.listings.current.content)
-		) {
-			if (collection || isLastInCollection(session.listings.current.content)) {
-				session.flags.loop.collection = false;
-
-				this.moveListingToHistory(session.listings.current);
-				session.events.emit("historyUpdate");
-				session.listings.current = undefined;
-			} else {
-				session.flags.loop.song = false;
-
-				if (by !== undefined) {
-					session.listings.current.content.position += by - 1;
-				}
-
-				if (to !== undefined) {
-					session.listings.current.content.position = to - 2;
-				}
-			}
-		} else {
-			const listingsToMoveToHistory = Math.min(by ?? to ?? 0, session.listings.queue.count);
-
-			if (session.listings.current !== undefined) {
-				session.listings.history.addNew(session.listings.current);
-				session.events.emit("historyUpdate");
-				session.events.emit("queueUpdate");
-				session.listings.current = undefined;
-			}
-
-			for (const _ of Array(listingsToMoveToHistory).keys()) {
-				this.moveListingToHistory(session.listings.queue.removeOldest());
-			}
-
-			if (listingsToMoveToHistory !== 0) {
-				session.flags.loop.song = false;
-				session.events.emit("queueUpdate");
-			}
-		}
-
-		await session.player.stopTrack();
-	}
-
 	async unskip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
 		const session = this.#session;
 		if (session === undefined) {
@@ -927,6 +857,7 @@ class MusicService extends LocalService {
 class ListingQueue {
 	readonly #_listings: SongListing[];
 	readonly #_limit: number;
+	readonly #_discardOnPassedLimit: boolean;
 
 	get listings(): SongListing[] {
 		return Object.freeze(structuredClone(this.#_listings)) as SongListing[];
@@ -944,16 +875,35 @@ class ListingQueue {
 		return this.#_listings.length === 0;
 	}
 
-	constructor({ limit }: { limit: number }) {
+	constructor({ limit, discardOnPassedLimit }: { limit: number; discardOnPassedLimit: boolean }) {
 		this.#_listings = [];
 		this.#_limit = limit;
+		this.#_discardOnPassedLimit = discardOnPassedLimit;
 	}
 
 	addOld(listing: SongListing): void {
+		if (this.isFull) {
+			if (!this.#_discardOnPassedLimit) {
+				// TODO(vxern): Handle refusal to add to queue.
+				return;
+			}
+			
+			this.#_listings.pop();
+		}
+
 		this.#_listings.unshift(listing);
 	}
 
 	addNew(listing: SongListing): void {
+		if (this.isFull) {
+			if (!this.#_discardOnPassedLimit) {
+				// TODO(vxern): Handle refusal to add to queue.
+				return;
+			}
+
+			this.#_listings.shift();
+		}
+
 		this.#_listings.push(listing);
 	}
 
@@ -980,8 +930,24 @@ class ListingManager {
 	current?: SongListing;
 
 	constructor() {
-		this.history = new ListingQueue({ limit: constants.MAXIMUM_HISTORY_ENTRIES });
-		this.queue = new ListingQueue({ limit: constants.MAXIMUM_QUEUE_ENTRIES });
+		this.history = new ListingQueue({ limit: constants.MAXIMUM_HISTORY_ENTRIES, discardOnPassedLimit: true });
+		this.queue = new ListingQueue({ limit: constants.MAXIMUM_QUEUE_ENTRIES, discardOnPassedLimit: false });
+	}
+
+	moveCurrentToHistory(): void {
+		// TODO(vxern): This is bad, and it shouldn't be necessary here.
+		const current = this.current!;
+		// Adjust the position for being incremented automatically when played next time.
+		if (isSongCollection(current.content)) {
+			current.content.position -= 1;
+		}
+
+		this.history.addNew(current);
+		this.current = undefined;
+	}
+
+	moveFromQueueToHistory(): void {
+		this.history.addNew(this.queue.removeOldest());
 	}
 }
 
@@ -1042,6 +1008,48 @@ class MusicSession {
 
 	async setVolume(volume: number): Promise<void> {
 		await this.player.setGlobalVolume(volume);
+	}
+
+	// TODO(vxern): Refactor this.
+	async skip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
+		if (
+			this.listings.current?.content !== undefined &&
+			isSongCollection(this.listings.current.content)
+		) {
+			if (collection || isLastInCollection(this.listings.current.content)) {
+				this.flags.loop.collection = false;
+
+				this.listings.moveCurrentToHistory();
+			} else {
+				this.flags.loop.song = false;
+
+				if (by !== undefined) {
+					this.listings.current.content.position += by - 1;
+				}
+
+				if (to !== undefined) {
+					this.listings.current.content.position = to - 2;
+				}
+			}
+		} else {
+			const listingsToMoveToHistory = Math.min(by ?? to ?? 0, this.listings.queue.count);
+
+			if (this.listings.current !== undefined) {
+				this.listings.moveCurrentToHistory();
+				// REMINDER(vxern): Emit queue update?
+			}
+
+			for (const _ of Array(listingsToMoveToHistory).keys()) {
+				this.listings.moveFromQueueToHistory();
+			}
+
+			if (listingsToMoveToHistory !== 0) {
+				this.flags.loop.song = false;
+				this.events.emit("queueUpdate");
+			}
+		}
+
+		await this.player.stopTrack();
 	}
 }
 

@@ -150,7 +150,7 @@ async function handleSkipAction(
 		} else {
 			listingsToSkip = Math.min(interaction.parameters.by, musicService.session.queue.length);
 		}
-		await musicService.skip(isSkippingCollection, { by: listingsToSkip });
+		await musicService.session.skip(isSkippingCollection, { by: listingsToSkip });
 	} else if (interaction.parameters.to !== undefined) {
 		let listingToSkipTo!: number;
 		if (isSongCollection(current.content) && interaction.parameters.collection === undefined) {
@@ -158,9 +158,9 @@ async function handleSkipAction(
 		} else {
 			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.queue.length);
 		}
-		await musicService.skip(isSkippingCollection, { to: listingToSkipTo });
+		await musicService.session.skip(isSkippingCollection, { to: listingToSkipTo });
 	} else {
-		await musicService.skip(isSkippingCollection, {});
+		await musicService.session.skip(isSkippingCollection, {});
 	}
 }
 
