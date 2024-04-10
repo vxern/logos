@@ -88,7 +88,7 @@ async function handleReplayAction(
 		{ visible: true },
 	);
 
-	await musicService.replay(interaction.parameters.collection ?? false);
+	await musicService.session.replay(interaction.parameters.collection ?? false);
 }
 
 export { handleReplayAction };

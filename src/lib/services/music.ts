@@ -663,43 +663,6 @@ class MusicService extends LocalService {
 			await session.advanceQueueAndPlay();
 		}
 	}
-
-	async replay(collection: boolean): Promise<void> {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		if (collection) {
-			const previousLoopState = session.flags.loop.collection;
-			session.flags.loop.collection = true;
-			session.player.once("start", () => {
-				session.flags.loop.collection = previousLoopState;
-			});
-		} else {
-			const previousLoopState = session.flags.loop.song;
-			session.flags.loop.song = true;
-			session.player.once("start", () => {
-				session.flags.loop.song = previousLoopState;
-			});
-		}
-
-		if (
-			session.listings.current !== undefined &&
-			session.listings.current.content !== undefined &&
-			isSongCollection(session.listings.current.content)
-		) {
-			if (collection) {
-				session.listings.current.content.position = -1;
-			}
-		}
-
-		session.flags.breakLoop = true;
-		session.restoreAt = 0;
-		await session.player.stopTrack();
-
-		await session.advanceQueueAndPlay();
-	}
 }
 
 class ListingQueue {
@@ -877,6 +840,55 @@ class MusicSession {
 		};
 	}
 
+	receiveListing({ listing }: { listing: SongListing }): void {
+		this.listings.queue.addNew(listing);
+	}
+
+	// TODO(vxern): Refactor this.
+	async advanceQueueAndPlay(): Promise<void> {
+		if (!this.flags.loop.song) {
+			if (this.listings.current !== undefined && !isSongCollection(this.listings.current.content)) {
+				this.listings.moveCurrentToHistory();
+			}
+
+			if (
+				!this.listings.queue.isEmpty &&
+				(this.listings.current === undefined || !isSongCollection(this.listings.current.content))
+			) {
+				this.listings.takeCurrentFromQueue();
+			}
+		}
+
+		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
+			if (isLastInCollection(this.listings.current.content)) {
+				if (this.flags.loop.collection) {
+					this.listings.current.content.position = 0;
+				} else {
+					this.listings.moveCurrentToHistory();
+					this.listings.takeCurrentFromQueue();
+					return this.advanceQueueAndPlay();
+				}
+			} else {
+				if (this.flags.loop.song) {
+					this.listings.current.content.position -= 1;
+				}
+
+				this.listings.current.content.position += 1;
+			}
+		}
+
+		if (this.listings.current === undefined) {
+			return;
+		}
+
+		const currentSong = this.currentSong;
+		if (currentSong === undefined) {
+			return;
+		}
+
+		await this.service.loadSong(currentSong);
+	}
+
 	async setPaused(value: boolean): Promise<void> {
 		await this.player.setPaused(value);
 	}
@@ -932,53 +944,37 @@ class MusicSession {
 		await this.player.stopTrack();
 	}
 
-	receiveListing({ listing }: { listing: SongListing }): void {
-		this.listings.queue.addNew(listing);
-	}
-
 	// TODO(vxern): Refactor this.
-	async advanceQueueAndPlay(): Promise<void> {
-		if (!this.flags.loop.song) {
-			if (this.listings.current !== undefined && !isSongCollection(this.listings.current.content)) {
-				this.listings.moveCurrentToHistory();
-			}
-
-			if (
-				!this.listings.queue.isEmpty &&
-				(this.listings.current === undefined || !isSongCollection(this.listings.current.content))
-			) {
-				this.listings.takeCurrentFromQueue();
-			}
+	async replay(collection: boolean): Promise<void> {
+		if (collection) {
+			const previousLoopState = this.flags.loop.collection;
+			this.flags.loop.collection = true;
+			this.player.once("start", () => {
+				this.flags.loop.collection = previousLoopState;
+			});
+		} else {
+			const previousLoopState = this.flags.loop.song;
+			this.flags.loop.song = true;
+			this.player.once("start", () => {
+				this.flags.loop.song = previousLoopState;
+			});
 		}
 
-		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
-			if (isLastInCollection(this.listings.current.content)) {
-				if (this.flags.loop.collection) {
-					this.listings.current.content.position = 0;
-				} else {
-					this.listings.moveCurrentToHistory();
-					this.listings.takeCurrentFromQueue();
-					return this.advanceQueueAndPlay();
-				}
-			} else {
-				if (this.flags.loop.song) {
-					this.listings.current.content.position -= 1;
-				}
-
-				this.listings.current.content.position += 1;
+		if (
+			this.listings.current !== undefined &&
+			this.listings.current.content !== undefined &&
+			isSongCollection(this.listings.current.content)
+		) {
+			if (collection) {
+				this.listings.current.content.position = -1;
 			}
 		}
 
-		if (this.listings.current === undefined) {
-			return;
-		}
+		this.flags.breakLoop = true;
+		this.restoreAt = 0;
+		await this.player.stopTrack();
 
-		const currentSong = this.currentSong;
-		if (currentSong === undefined) {
-			return;
-		}
-
-		await this.service.loadSong(currentSong);
+		await this.advanceQueueAndPlay();
 	}
 
 	// TODO(vxern): Refactor this.
