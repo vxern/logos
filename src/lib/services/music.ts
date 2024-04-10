@@ -836,22 +836,6 @@ class MusicService extends LocalService {
 		session.restoreAt = timestampMilliseconds;
 		await session.player.seekTo(timestampMilliseconds);
 	}
-
-	loop(collection: boolean): boolean | undefined {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		if (collection) {
-			session.flags.loop.collection = !session.flags.loop.collection;
-			return session.flags.loop.collection;
-		}
-
-		session.flags.loop.song = !session.flags.loop.song;
-
-		return session.flags.loop.song;
-	}
 }
 
 class ListingQueue {
@@ -887,7 +871,7 @@ class ListingQueue {
 				// TODO(vxern): Handle refusal to add to queue.
 				return;
 			}
-			
+
 			this.#_listings.pop();
 		}
 
@@ -951,6 +935,7 @@ class ListingManager {
 	}
 }
 
+type ListingMode = "single" | "collection";
 class MusicSession {
 	readonly events: EventEmitter;
 	readonly player: shoukaku.Player;
@@ -998,24 +983,30 @@ class MusicSession {
 		};
 	}
 
-	async pause(): Promise<void> {
-		await this.player.setPaused(true);
-	}
-
-	async resume(): Promise<void> {
-		await this.player.setPaused(false);
+	async setPaused(value: boolean): Promise<void> {
+		await this.player.setPaused(value);
 	}
 
 	async setVolume(volume: number): Promise<void> {
 		await this.player.setGlobalVolume(volume);
 	}
 
+	setLoop(value: boolean, { mode }: { mode: ListingMode }): void {
+		switch (mode) {
+			case "single": {
+				this.flags.loop.song = value;
+				break;
+			}
+			case "collection": {
+				this.flags.loop.collection = value;
+				break;
+			}
+		}
+	}
+
 	// TODO(vxern): Refactor this.
 	async skip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		if (
-			this.listings.current?.content !== undefined &&
-			isSongCollection(this.listings.current.content)
-		) {
+		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
 			if (collection || isLastInCollection(this.listings.current.content)) {
 				this.flags.loop.collection = false;
 

@@ -37,7 +37,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	musicService.session.pause();
+	musicService.session.setPaused(true);
 
 	const strings = {
 		title: client.localise("music.options.pause.strings.paused.title", locale)(),

@@ -46,7 +46,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	musicService.session.resume();
+	musicService.session.setPaused(false);
 
 	const strings = {
 		title: client.localise("music.options.resume.strings.resumed.title", locale)(),
