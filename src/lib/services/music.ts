@@ -740,6 +740,8 @@ class ListingQueue {
 		}
 
 		this.#_listings.unshift(listing);
+
+		// REMINDER(vxern): Emit an event.
 	}
 
 	addNew(listing: SongListing): void {
@@ -753,13 +755,19 @@ class ListingQueue {
 		}
 
 		this.#_listings.push(listing);
+
+		// REMINDER(vxern): Emit an event.
 	}
 
 	removeOldest(): SongListing {
+		// REMINDER(vxern): Emit an event.
+
 		return this.#_listings.shift()!;
 	}
 
 	removeNewest(): SongListing {
+		// REMINDER(vxern): Emit an event.
+
 		return this.#_listings.pop()!;
 	}
 
@@ -794,11 +802,18 @@ class ListingManager {
 		this.current = undefined;
 	}
 
-	moveFromQueueToHistory(): void {
-		this.history.addNew(this.queue.removeOldest());
+	takeCurrentFromQueue(): void {
+		this.current = this.queue.removeOldest();
+	}
+
+	moveFromQueueToHistory({ count }: { count?: number } = {}): void {
+		for (const _ of Array(count ?? 1).keys()) {
+			this.history.addNew(this.queue.removeOldest());
+		}
 	}
 }
 
+// TODO(vxern): Set up listeners to automatically respond to queue events.
 type ListingMode = "single" | "collection";
 class MusicSession {
 	readonly events: EventEmitter;
@@ -905,16 +920,12 @@ class MusicSession {
 
 			if (this.listings.current !== undefined) {
 				this.listings.moveCurrentToHistory();
-				// REMINDER(vxern): Emit queue update?
 			}
 
-			for (const _ of Array(listingsToMoveToHistory).keys()) {
-				this.listings.moveFromQueueToHistory();
-			}
+			this.listings.moveFromQueueToHistory({ count: listingsToMoveToHistory });
 
 			if (listingsToMoveToHistory !== 0) {
 				this.flags.loop.song = false;
-				this.events.emit("queueUpdate");
 			}
 		}
 
@@ -936,8 +947,7 @@ class MusicSession {
 				!this.listings.queue.isEmpty &&
 				(this.listings.current === undefined || !isSongCollection(this.listings.current.content))
 			) {
-				this.listings.current = this.listings.queue.removeOldest();
-				this.events.emit("queueUpdate");
+				this.listings.takeCurrentFromQueue();
 			}
 		}
 
@@ -947,8 +957,7 @@ class MusicSession {
 					this.listings.current.content.position = 0;
 				} else {
 					this.listings.moveCurrentToHistory();
-					this.listings.current = this.listings.queue.removeOldest();
-					this.events.emit("queueUpdate");
+					this.listings.takeCurrentFromQueue();
 					return this.advanceQueueAndPlay();
 				}
 			} else {
