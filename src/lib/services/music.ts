@@ -601,68 +601,6 @@ class MusicService extends LocalService {
 
 		return true;
 	}
-
-	async unskip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		if (
-			session.listings.current !== undefined &&
-			session.listings.current.content !== undefined &&
-			isSongCollection(session.listings.current.content)
-		) {
-			if (collection || isFirstInCollection(session.listings.current.content)) {
-				session.flags.loop.collection = false;
-
-				session.listings.current.content.position -= 1;
-
-				session.listings.queue.addOld(session.listings.current);
-				session.listings.queue.addOld(session.listings.history.removeNewest());
-				session.events.emit("historyUpdate");
-				session.events.emit("queueUpdate");
-				session.listings.current = undefined;
-			} else {
-				session.flags.loop.song = false;
-
-				if (by !== undefined) {
-					session.listings.current.content.position -= by + 1;
-				}
-
-				if (to !== undefined) {
-					session.listings.current.content.position = to - 2;
-				}
-
-				if (by === undefined && to === undefined) {
-					session.listings.current.content.position -= 2;
-				}
-			}
-		} else {
-			const listingsToMoveToQueue = Math.min(by ?? to ?? 1, session.listings.history.count);
-
-			if (session.listings.current !== undefined) {
-				session.listings.queue.addOld(session.listings.current);
-				session.events.emit("queueUpdate");
-				session.listings.current = undefined;
-			}
-
-			for (const _ of Array(listingsToMoveToQueue).keys()) {
-				session.listings.queue.addOld(session.listings.history.removeNewest());
-			}
-
-			if (listingsToMoveToQueue !== 0) {
-				session.events.emit("queueUpdate");
-				session.events.emit("historyUpdate");
-			}
-		}
-
-		if (session.player.track !== undefined) {
-			await session.player.stopTrack();
-		} else {
-			await session.advanceQueueAndPlay();
-		}
-	}
 }
 
 class ListingQueue {
@@ -942,6 +880,60 @@ class MusicSession {
 		}
 
 		await this.player.stopTrack();
+	}
+
+	// TODO(vxern): Refactor this.
+	async unskip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
+		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
+			if (collection || isFirstInCollection(this.listings.current.content)) {
+				this.flags.loop.collection = false;
+
+				this.listings.current.content.position -= 1;
+
+				this.listings.queue.addOld(this.listings.current);
+				this.listings.queue.addOld(this.listings.history.removeNewest());
+				this.events.emit("historyUpdate");
+				this.events.emit("queueUpdate");
+				this.listings.current = undefined;
+			} else {
+				this.flags.loop.song = false;
+
+				if (by !== undefined) {
+					this.listings.current.content.position -= by + 1;
+				}
+
+				if (to !== undefined) {
+					this.listings.current.content.position = to - 2;
+				}
+
+				if (by === undefined && to === undefined) {
+					this.listings.current.content.position -= 2;
+				}
+			}
+		} else {
+			const listingsToMoveToQueue = Math.min(by ?? to ?? 1, this.listings.history.count);
+
+			if (this.listings.current !== undefined) {
+				this.listings.queue.addOld(this.listings.current);
+				this.events.emit("queueUpdate");
+				this.listings.current = undefined;
+			}
+
+			for (const _ of Array(listingsToMoveToQueue).keys()) {
+				this.listings.queue.addOld(this.listings.history.removeNewest());
+			}
+
+			if (listingsToMoveToQueue !== 0) {
+				this.events.emit("queueUpdate");
+				this.events.emit("historyUpdate");
+			}
+		}
+
+		if (this.player.track !== undefined) {
+			await this.player.stopTrack();
+		} else {
+			await this.advanceQueueAndPlay();
+		}
 	}
 
 	// TODO(vxern): Refactor this.
