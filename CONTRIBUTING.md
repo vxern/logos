@@ -47,6 +47,10 @@ Once you've made your changes, create a pull request to merge them into `logos`,
   - If you can't write a test and the reason for that isn't immediately obvious, state why they couldn't be written.
 - Keep your pull requests small, ideally up to 200 lines of code, or 400 at the maximum. This makes it easier for potential reviewers of your PR to not get discouraged reading a massive PR with tons of changes, and increases your chances of having your PR merged quickly.
 
+## Good-to-knows
+
+- Time is stored and measured in milliseconds by default.
+
 ## Style Guidelines
 
 - Use <u>British English</u> spelling for everything other than string keys (localisations), special `custom_id`s, as well as property names in objects stored or transferred out of Logos. This would include database documents and Redis entries. 
