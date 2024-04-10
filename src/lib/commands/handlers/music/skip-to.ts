@@ -60,7 +60,7 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	await musicService.skipTo(timestamp);
+	await musicService.session.skipTo({ timestamp });
 
 	const strings = {
 		title: client.localise("music.options.skip-to.strings.skippedTo.title", locale)(),

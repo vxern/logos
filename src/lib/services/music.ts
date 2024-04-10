@@ -700,16 +700,6 @@ class MusicService extends LocalService {
 
 		await session.advanceQueueAndPlay();
 	}
-
-	async skipTo(timestampMilliseconds: number): Promise<void> {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		session.restoreAt = timestampMilliseconds;
-		await session.player.seekTo(timestampMilliseconds);
-	}
 }
 
 class ListingQueue {
@@ -812,7 +802,7 @@ class ListingManager {
 type ListingMode = "single" | "collection";
 class MusicSession {
 	readonly events: EventEmitter;
-  readonly service: MusicService;
+	readonly service: MusicService;
 	readonly player: shoukaku.Player;
 	readonly channelId: bigint;
 	readonly listings: ListingManager;
@@ -852,13 +842,13 @@ class MusicSession {
 	}
 
 	constructor({
-    service,
+		service,
 		player,
 		channelId,
 		oldSession,
 	}: { service: MusicService; player: shoukaku.Player; channelId: bigint; oldSession?: MusicSession }) {
 		this.events = oldSession?.events ?? new EventEmitter().setMaxListeners(0);
-    this.service = service;
+		this.service = service;
 		this.player = player;
 		this.channelId = channelId;
 		this.listings = new ListingManager();
@@ -980,6 +970,12 @@ class MusicSession {
 		}
 
 		await this.service.loadSong(currentSong);
+	}
+
+	// TODO(vxern): Refactor this.
+	async skipTo({ timestamp }: { timestamp: number }): Promise<void> {
+		this.restoreAt = timestamp;
+		await this.player.seekTo(timestamp);
 	}
 }
 
