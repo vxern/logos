@@ -1032,16 +1032,16 @@ class MusicSession {
 		};
 	}
 
-	pause(): void {
-		this.player.setPaused(true);
+	async pause(): Promise<void> {
+		await this.player.setPaused(true);
 	}
 
-	resume(): void {
-		this.player.setPaused(false);
+	async resume(): Promise<void> {
+		await this.player.setPaused(false);
 	}
 
-	setVolume(volume: number): void {
-		this.player.setGlobalVolume(volume);
+	async setVolume(volume: number): Promise<void> {
+		await this.player.setGlobalVolume(volume);
 	}
 }
 
