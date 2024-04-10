@@ -43,12 +43,6 @@ interface SongListing {
 	/** The ID of the user who requested this song listing. */
 	requestedBy: bigint;
 
-	/**
-	 * IDs of user who were present at the time of the addition of this song listing,
-	 * and can therefore manage it.
-	 */
-	managerIds: bigint[];
-
 	/** The content of this song listing. */
 	content: Song | SongCollection | AudioStream;
 }

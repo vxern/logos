@@ -33,23 +33,6 @@ class MusicService extends LocalService {
 		return this.#session?.events;
 	}
 
-	get current(): SongListing | undefined {
-		return this.#session?.listings.current;
-	}
-
-	get currentSong(): Song | AudioStream | undefined {
-		const current = this.current;
-		if (current === undefined) {
-			return undefined;
-		}
-
-		if (isSongCollection(current.content)) {
-			return current.content.songs[current.content.position];
-		}
-
-		return current.content;
-	}
-
 	get isOccupied(): boolean {
 		return this.#session !== undefined;
 	}
@@ -149,7 +132,7 @@ class MusicService extends LocalService {
 
 		await player.setGlobalVolume(this.configuration.implicitVolume);
 
-		const session = new MusicSession({ player, channelId, oldSession });
+		const session = new MusicSession({ service: this, player, channelId, oldSession });
 
 		this.#session = session;
 
@@ -211,7 +194,7 @@ class MusicService extends LocalService {
 
 		session.flags.isDisconnected = true;
 
-		const currentSong = this.currentSong;
+		const currentSong = session.currentSong;
 		if (currentSong === undefined) {
 			return;
 		}
@@ -231,7 +214,7 @@ class MusicService extends LocalService {
 
 		oldSession.flags.isDisconnected = false;
 
-		const currentSong = this.currentSong;
+		const currentSong = oldSession.currentSong;
 		if (currentSong === undefined) {
 			await this.destroySession();
 			return;
@@ -360,8 +343,6 @@ class MusicService extends LocalService {
 	}
 
 	verifyCanManagePlayback(interaction: Logos.Interaction): boolean {
-		const locale = interaction.locale;
-
 		const isVoiceStateVerified = this.verifyVoiceState(interaction, "manage");
 		if (!isVoiceStateVerified) {
 			return false;
@@ -370,20 +351,6 @@ class MusicService extends LocalService {
 		const current = this.#session?.listings.current;
 		if (current === undefined) {
 			return true;
-		}
-
-		if (!current.managerIds.includes(interaction.user.id)) {
-			const strings = {
-				title: this.client.localise("music.strings.cannotChange.title", locale)(),
-				description: this.client.localise("music.strings.cannotChange.description", locale)(),
-			};
-
-			this.client.pushback(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
-
-			return false;
 		}
 
 		return true;
@@ -395,16 +362,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		session.listings.queue.addNew(listing);
-		session.events.emit("queueUpdate");
-
-		const voiceStates = this.guild.voiceStates
-			.filter((voiceState) => voiceState.channelId !== undefined)
-			.filter((voiceState) => (voiceState.channelId ?? 0n) === channelId)
-			.array();
-		const managerUserIds = voiceStates.map((voiceState) => voiceState.userId);
-
-		listing.managerIds.push(...managerUserIds);
+		session.receiveListing({ listing });
 
 		const guildLocale = this.guildLocale;
 
@@ -435,63 +393,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		await this.advanceQueueAndPlay();
-	}
-
-	async advanceQueueAndPlay(): Promise<void> {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		if (!session.flags.loop.song) {
-			if (session.listings.current !== undefined && !isSongCollection(session.listings.current.content)) {
-				session.listings.moveCurrentToHistory();
-				session.listings.current = undefined;
-			}
-
-			if (
-				!session.listings.queue.isEmpty &&
-				(session.listings.current === undefined || !isSongCollection(session.listings.current.content))
-			) {
-				session.listings.current = session.listings.queue.removeOldest();
-				session.events.emit("queueUpdate");
-			}
-		}
-
-		if (
-			session.listings.current !== undefined &&
-			session.listings.current.content !== undefined &&
-			isSongCollection(session.listings.current.content)
-		) {
-			if (isLastInCollection(session.listings.current.content)) {
-				if (session.flags.loop.collection) {
-					session.listings.current.content.position = 0;
-				} else {
-					session.listings.moveCurrentToHistory();
-					session.listings.current = session.listings.queue.removeOldest();
-					session.events.emit("queueUpdate");
-					return this.advanceQueueAndPlay();
-				}
-			} else {
-				if (session.flags.loop.song) {
-					session.listings.current.content.position -= 1;
-				}
-
-				session.listings.current.content.position += 1;
-			}
-		}
-
-		if (session.listings.current === undefined) {
-			return;
-		}
-
-		const currentSong = this.currentSong;
-		if (currentSong === undefined) {
-			return;
-		}
-
-		await this.loadSong(currentSong);
+		await session.advanceQueueAndPlay();
 	}
 
 	async loadSong(
@@ -537,7 +439,7 @@ class MusicService extends LocalService {
 					),
 				);
 
-			await this.advanceQueueAndPlay();
+			await session.advanceQueueAndPlay();
 
 			return false;
 		}
@@ -617,7 +519,7 @@ class MusicService extends LocalService {
 
 			session.restoreAt = 0;
 
-			await this.advanceQueueAndPlay();
+			await session.advanceQueueAndPlay();
 		});
 
 		session.player.once("start", async () => {
@@ -641,7 +543,7 @@ class MusicService extends LocalService {
 
 		await session.player.playTrack({ track: track.encoded });
 
-		const emoji = getEmojiBySongListingType(this.current?.content.type ?? song.type);
+		const emoji = getEmojiBySongListingType(session.listings.current?.content.type ?? song.type);
 
 		const guildLocale = this.guildLocale;
 		const strings = {
@@ -650,7 +552,7 @@ class MusicService extends LocalService {
 				guildLocale,
 			)({
 				listing_type: this.client.localise(
-					getLocalisationBySongListingType(this.current?.content.type ?? song.type),
+					getLocalisationBySongListingType(session.listings.current?.content.type ?? song.type),
 					guildLocale,
 				)(),
 			}),
@@ -758,7 +660,7 @@ class MusicService extends LocalService {
 		if (session.player.track !== undefined) {
 			await session.player.stopTrack();
 		} else {
-			await this.advanceQueueAndPlay();
+			await session.advanceQueueAndPlay();
 		}
 	}
 
@@ -796,7 +698,7 @@ class MusicService extends LocalService {
 		session.restoreAt = 0;
 		await session.player.stopTrack();
 
-		await this.advanceQueueAndPlay();
+		await session.advanceQueueAndPlay();
 	}
 
 	async skipTo(timestampMilliseconds: number): Promise<void> {
@@ -910,6 +812,7 @@ class ListingManager {
 type ListingMode = "single" | "collection";
 class MusicSession {
 	readonly events: EventEmitter;
+  readonly service: MusicService;
 	readonly player: shoukaku.Player;
 	readonly channelId: bigint;
 	readonly listings: ListingManager;
@@ -934,12 +837,28 @@ class MusicSession {
 		return this.player.volume;
 	}
 
+	// TODO(vxern): Refactor.
+	get currentSong(): Song | AudioStream | undefined {
+		const current = this.listings.current;
+		if (current === undefined) {
+			return undefined;
+		}
+
+		if (isSongCollection(current.content)) {
+			return current.content.songs[current.content.position];
+		}
+
+		return current.content;
+	}
+
 	constructor({
+    service,
 		player,
 		channelId,
 		oldSession,
-	}: { player: shoukaku.Player; channelId: bigint; oldSession?: MusicSession }) {
+	}: { service: MusicService; player: shoukaku.Player; channelId: bigint; oldSession?: MusicSession }) {
 		this.events = oldSession?.events ?? new EventEmitter().setMaxListeners(0);
+    this.service = service;
 		this.player = player;
 		this.channelId = channelId;
 		this.listings = new ListingManager();
@@ -979,7 +898,6 @@ class MusicSession {
 		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
 			if (collection || isLastInCollection(this.listings.current.content)) {
 				this.flags.loop.collection = false;
-
 				this.listings.moveCurrentToHistory();
 			} else {
 				this.flags.loop.song = false;
@@ -1011,6 +929,57 @@ class MusicSession {
 		}
 
 		await this.player.stopTrack();
+	}
+
+	receiveListing({ listing }: { listing: SongListing }): void {
+		this.listings.queue.addNew(listing);
+	}
+
+	// TODO(vxern): Refactor this.
+	async advanceQueueAndPlay(): Promise<void> {
+		if (!this.flags.loop.song) {
+			if (this.listings.current !== undefined && !isSongCollection(this.listings.current.content)) {
+				this.listings.moveCurrentToHistory();
+			}
+
+			if (
+				!this.listings.queue.isEmpty &&
+				(this.listings.current === undefined || !isSongCollection(this.listings.current.content))
+			) {
+				this.listings.current = this.listings.queue.removeOldest();
+				this.events.emit("queueUpdate");
+			}
+		}
+
+		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
+			if (isLastInCollection(this.listings.current.content)) {
+				if (this.flags.loop.collection) {
+					this.listings.current.content.position = 0;
+				} else {
+					this.listings.moveCurrentToHistory();
+					this.listings.current = this.listings.queue.removeOldest();
+					this.events.emit("queueUpdate");
+					return this.advanceQueueAndPlay();
+				}
+			} else {
+				if (this.flags.loop.song) {
+					this.listings.current.content.position -= 1;
+				}
+
+				this.listings.current.content.position += 1;
+			}
+		}
+
+		if (this.listings.current === undefined) {
+			return;
+		}
+
+		const currentSong = this.currentSong;
+		if (currentSong === undefined) {
+			return;
+		}
+
+		await this.service.loadSong(currentSong);
 	}
 }
 
