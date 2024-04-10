@@ -13,7 +13,7 @@ import {
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Guild, timeStructToMilliseconds } from "logos/database/guild";
+import { Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
 class MusicService extends LocalService {
@@ -167,8 +167,6 @@ class MusicService extends LocalService {
 		session.events.emit("stop");
 		await session.player.node.manager.leaveVoiceChannel(this.guildIdString);
 		await session.player.destroy();
-
-		clearTimeout(session.disconnectTimeout);
 	}
 
 	handleConnectionLost(): void {
@@ -391,33 +389,11 @@ class MusicService extends LocalService {
 		return true;
 	}
 
-	tryClearDisconnectTimeout(): void {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		clearTimeout(session.disconnectTimeout);
-	}
-
-	setDisconnectTimeout(): void {
-		const session = this.#session;
-		if (session === undefined) {
-			return;
-		}
-
-		const timeoutMilliseconds = timeStructToMilliseconds(constants.defaults.MUSIC_DISCONNECT_TIMEOUT);
-
-		session.disconnectTimeout = setTimeout(() => this.destroySession(), timeoutMilliseconds);
-	}
-
 	async receiveNewListing(listing: SongListing, channelId: bigint): Promise<void> {
 		const session = this.#session ?? (await this.createSession(channelId));
 		if (session === undefined) {
 			return;
 		}
-
-		this.tryClearDisconnectTimeout();
 
 		session.listings.queue.addNew(listing);
 		session.events.emit("queueUpdate");
@@ -468,8 +444,6 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		this.tryClearDisconnectTimeout();
-
 		if (!session.flags.loop.song) {
 			if (session.listings.current !== undefined && !isSongCollection(session.listings.current.content)) {
 				session.listings.moveCurrentToHistory();
@@ -509,7 +483,6 @@ class MusicService extends LocalService {
 		}
 
 		if (session.listings.current === undefined) {
-			this.setDisconnectTimeout();
 			return;
 		}
 
@@ -634,7 +607,6 @@ class MusicService extends LocalService {
 			session.player.removeAllListeners("trackException");
 
 			if (session.flags.isDestroyed) {
-				this.setDisconnectTimeout();
 				return;
 			}
 
@@ -950,8 +922,6 @@ class MusicSession {
 		};
 		breakLoop: boolean;
 	};
-
-	disconnectTimeout?: Timer;
 
 	startedAt: number;
 	restoreAt: number;
