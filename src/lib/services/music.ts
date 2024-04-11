@@ -1,15 +1,4 @@
 import { EventEmitter } from "node:events";
-import { getEmojiBySongListingType } from "logos:constants/emojis";
-import { getLocalisationBySongListingType } from "logos:constants/localisations";
-import {
-	AudioStream,
-	Song,
-	SongListing,
-	isFirstInCollection,
-	isLastInCollection,
-	isSongCollection,
-	isSongStream,
-} from "logos:constants/music";
 import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
@@ -194,7 +183,7 @@ class MusicService extends LocalService {
 
 		session.flags.isDisconnected = true;
 
-		const currentSong = session.currentSong;
+		const currentSong = session.listings.current?.queueable.playable;
 		if (currentSong === undefined) {
 			return;
 		}
@@ -214,7 +203,7 @@ class MusicService extends LocalService {
 
 		oldSession.flags.isDisconnected = false;
 
-		const currentSong = oldSession.currentSong;
+		const currentSong = oldSession.listings.current?.queueable.playable;
 		if (currentSong === undefined) {
 			await this.destroySession();
 			return;
@@ -373,8 +362,8 @@ class MusicService extends LocalService {
 					"music.options.play.strings.queued.description.public",
 					guildLocale,
 				)({
-					title: listing.content.title,
-					user_mention: mention(listing.requestedBy, { type: "user" }),
+					title: listing.queueable.playable.title,
+					user_mention: mention(listing.userId, { type: "user" }),
 				}),
 			};
 
@@ -453,11 +442,10 @@ class MusicService extends LocalService {
 		}
 
 		if (
-			session.listings.current !== undefined &&
-			session.listings.current.content !== undefined &&
-			isSongStream(session.listings.current.content)
+			session.listings.current?.queueable !== undefined &&
+			session.listings.current.queueable instanceof AudioStream
 		) {
-			session.listings.current.content.title = track.info.title;
+			session.listings.current.queueable.title = track.info.title;
 		}
 
 		session.player.once("exception", async (reason) => {
@@ -543,8 +531,6 @@ class MusicService extends LocalService {
 
 		await session.player.playTrack({ track: track.encoded });
 
-		const emoji = getEmojiBySongListingType(session.listings.current?.content.type ?? song.type);
-
 		const guildLocale = this.guildLocale;
 		const strings = {
 			title: this.client.localise(
@@ -552,23 +538,37 @@ class MusicService extends LocalService {
 				guildLocale,
 			)({
 				listing_type: this.client.localise(
-					getLocalisationBySongListingType(session.listings.current?.content.type ?? song.type),
+					(() => {
+						const queueable = session.listings.current?.queueable ?? song;
+						switch (true) {
+							case queueable instanceof Song: {
+								return "music.options.play.strings.nowPlaying.title.type.song";
+							}
+							case queueable instanceof AudioStream: {
+								return "music.options.play.strings.nowPlaying.title.type.stream";
+							}
+							case queueable instanceof SongCollection: {
+								return "music.options.play.strings.nowPlaying.title.type.songCollection";
+							}
+							default:
+								return constants.special.missingString;
+						}
+					})(),
 					guildLocale,
 				)(),
 			}),
 			description: {
 				nowPlaying: this.client.localise("music.options.play.strings.nowPlaying.description.nowPlaying", guildLocale),
 				track:
-					session.listings.current !== undefined &&
-					session.listings.current.content !== undefined &&
-					isSongCollection(session.listings.current.content)
+					session.listings.current?.queueable !== undefined &&
+					session.listings.current.queueable instanceof SongCollection
 						? this.client.localise(
 								"music.options.play.strings.nowPlaying.description.track",
 								guildLocale,
 						  )({
-								index: session.listings.current.content.position + 1,
-								number: session.listings.current.content.songs.length,
-								title: session.listings.current.content.title,
+								index: session.listings.current.queueable.position + 1,
+								number: session.listings.current.queueable.songs.length,
+								title: session.listings.current.queueable.title,
 						  })
 						: "",
 			},
@@ -579,12 +579,12 @@ class MusicService extends LocalService {
 				.sendMessage(session.channelId, {
 					embeds: [
 						{
-							title: `${emoji} ${strings.title}`,
+							title: `${session.listings.current.queueable.emoji} ${strings.title}`,
 							description: strings.description.nowPlaying({
 								song_information: strings.description.track,
 								title: song.title,
 								url: song.url,
-								user_mention: mention(session.listings.current.requestedBy, { type: "user" }),
+								user_mention: mention(session.listings.current.userId, { type: "user" }),
 							}),
 							color: constants.colours.notice,
 						},
@@ -695,8 +695,8 @@ class ListingManager {
 		// TODO(vxern): This is bad, and it shouldn't be necessary here.
 		const current = this.current!;
 		// Adjust the position for being incremented automatically when played next time.
-		if (isSongCollection(current.content)) {
-			current.content.position -= 1;
+		if (current.queueable instanceof SongCollection) {
+			current.queueable.position -= 1;
 		}
 
 		this.history.addNew(current);
@@ -758,20 +758,6 @@ class MusicSession {
 		return this.player.volume;
 	}
 
-	// TODO(vxern): Refactor.
-	get currentSong(): Song | AudioStream | undefined {
-		const current = this.listings.current;
-		if (current === undefined) {
-			return undefined;
-		}
-
-		if (isSongCollection(current.content)) {
-			return current.content.songs[current.content.position];
-		}
-
-		return current.content;
-	}
-
 	constructor({
 		service,
 		player,
@@ -800,22 +786,22 @@ class MusicSession {
 	// TODO(vxern): Refactor this.
 	async advanceQueueAndPlay(): Promise<void> {
 		if (!this.flags.loop.song) {
-			if (this.listings.current !== undefined && !isSongCollection(this.listings.current.content)) {
+			if (this.listings.current !== undefined && !(this.listings.current.queueable instanceof SongCollection)) {
 				this.listings.moveCurrentToHistory();
 			}
 
 			if (
 				!this.listings.queue.isEmpty &&
-				(this.listings.current === undefined || !isSongCollection(this.listings.current.content))
+				(this.listings.current === undefined || !(this.listings.current.queueable instanceof SongCollection))
 			) {
 				this.listings.takeCurrentFromQueue();
 			}
 		}
 
-		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
-			if (isLastInCollection(this.listings.current.content)) {
+		if (this.listings.current !== undefined && this.listings.current.queueable instanceof SongCollection) {
+			if (this.listings.current.queueable.isLastInCollection) {
 				if (this.flags.loop.collection) {
-					this.listings.current.content.position = 0;
+					this.listings.current.queueable.position = 0;
 				} else {
 					this.listings.moveCurrentToHistory();
 					// REMINDER(vxern): Check whether the movement from queue to current here was necessary, or an issue.
@@ -823,10 +809,10 @@ class MusicSession {
 				}
 			} else {
 				if (this.flags.loop.song) {
-					this.listings.current.content.position -= 1;
+					this.listings.current.queueable.position -= 1;
 				}
 
-				this.listings.current.content.position += 1;
+				this.listings.current.queueable.position += 1;
 			}
 		}
 
@@ -834,7 +820,7 @@ class MusicSession {
 			return;
 		}
 
-		const currentSong = this.currentSong;
+		const currentSong = this.listings.current.queueable.playable;
 		if (currentSong === undefined) {
 			return;
 		}
@@ -865,19 +851,19 @@ class MusicSession {
 
 	// TODO(vxern): Refactor this.
 	async skip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
-			if (collection || isLastInCollection(this.listings.current.content)) {
+		if (this.listings.current?.queueable !== undefined && this.listings.current.queueable instanceof SongCollection) {
+			if (collection || this.listings.current.queueable.isLastInCollection) {
 				this.flags.loop.collection = false;
 				this.listings.moveCurrentToHistory();
 			} else {
 				this.flags.loop.song = false;
 
 				if (by !== undefined) {
-					this.listings.current.content.position += by - 1;
+					this.listings.current.queueable.position += by - 1;
 				}
 
 				if (to !== undefined) {
-					this.listings.current.content.position = to - 2;
+					this.listings.current.queueable.position = to - 2;
 				}
 			}
 		} else {
@@ -899,11 +885,11 @@ class MusicSession {
 
 	// TODO(vxern): Refactor this.
 	async unskip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		if (this.listings.current?.content !== undefined && isSongCollection(this.listings.current.content)) {
-			if (collection || isFirstInCollection(this.listings.current.content)) {
+		if (this.listings.current?.queueable !== undefined && this.listings.current.queueable instanceof SongCollection) {
+			if (collection || this.listings.current.queueable.isFirstInCollection) {
 				this.flags.loop.collection = false;
 
-				this.listings.current.content.position -= 1;
+				this.listings.current.queueable.position -= 1;
 
 				this.listings.moveCurrentToQueue();
 				this.listings.moveFromQueueToHistory({ count: 1 });
@@ -912,15 +898,15 @@ class MusicSession {
 				this.flags.loop.song = false;
 
 				if (by !== undefined) {
-					this.listings.current.content.position -= by + 1;
+					this.listings.current.queueable.position -= by + 1;
 				}
 
 				if (to !== undefined) {
-					this.listings.current.content.position = to - 2;
+					this.listings.current.queueable.position = to - 2;
 				}
 
 				if (by === undefined && to === undefined) {
-					this.listings.current.content.position -= 2;
+					this.listings.current.queueable.position -= 2;
 				}
 			}
 		} else {
@@ -956,12 +942,9 @@ class MusicSession {
 			});
 		}
 
-		if (
-			this.listings.current?.content !== undefined &&
-			isSongCollection(this.listings.current.content)
-		) {
+		if (this.listings.current?.queueable !== undefined && this.listings.current.queueable instanceof SongCollection) {
 			if (collection) {
-				this.listings.current.content.position = -1;
+				this.listings.current.queueable.position = -1;
 			}
 		}
 
@@ -984,4 +967,88 @@ interface PositionControls {
 	readonly to: number;
 }
 
-export { MusicService };
+abstract class Queueable {
+	title: string;
+	readonly url: string;
+	readonly emoji: string;
+
+	abstract get playable(): Playable;
+
+	constructor({ title, url, emoji }: { title: string; url: string; emoji: string }) {
+		this.title = title;
+		this.url = url;
+		this.emoji = emoji;
+	}
+}
+
+abstract class Playable extends Queueable {
+	get playable(): Playable {
+		return this;
+	}
+}
+
+/** Represents a musical piece, playable singly by the music controller. */
+class Song extends Playable {
+	constructor({ title, url }: { title: string; url: string }) {
+		super({ title, url, emoji: constants.emojis.music.song });
+	}
+}
+
+/** Represents a musical piece in stream format. */
+class AudioStream extends Playable {
+	constructor({ title, url }: { title: string; url: string }) {
+		super({ title, url, emoji: constants.emojis.music.stream });
+	}
+}
+
+/**
+ * Represents a collection of {@link Song}s.
+ *
+ * Collections occupy a single position in a queue whilst containing multiple,
+ * playable songs that would each normally occupy a single place of their own
+ * in the queue.
+ */
+class SongCollection extends Queueable {
+	/** The songs in this collection. */
+	readonly songs: Song[];
+
+	/** The index of the song that is currently playing. */
+	position: number;
+
+	get playable(): Playable {
+		return this.songs[this.position]!;
+	}
+
+	get isFirstInCollection(): boolean {
+		return this.position === 0;
+	}
+
+	get isLastInCollection(): boolean {
+		return this.position === this.songs.length - 1;
+	}
+
+	constructor({ title, url, songs }: { title: string; url: string; songs: Song[] }) {
+		super({ title, url, emoji: constants.emojis.music.collection });
+
+		this.songs = songs;
+		this.position = 0;
+	}
+}
+
+/**
+ * Represents a playable object in the form of a song or a collection of songs
+ * that contains key information about the listing.
+ */
+class SongListing {
+	readonly queueable: Queueable;
+	readonly userId: bigint;
+	// TODO(vxern): Is this needed?
+	readonly source?: string;
+
+	constructor({ queueable, userId }: { queueable: Queueable; userId: bigint }) {
+		this.queueable = queueable;
+		this.userId = userId;
+	}
+}
+
+export { MusicService, Song, SongCollection, AudioStream, SongListing };

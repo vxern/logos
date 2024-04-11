@@ -6,7 +6,3 @@ describe("The emojis object", () => {
 		expect(Object.isFrozen(emojis)).to.be.true;
 	});
 });
-
-describe("getEmojiBySongListingType()", () => {
-	// TODO(vxern): Add tests.
-});

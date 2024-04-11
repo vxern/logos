@@ -1,5 +1,4 @@
 import { Language, LocalisationLanguage } from "logos:constants/languages";
-import { SongListingType } from "logos:constants/music";
 import armenian from "logos:constants/transformers/armenian";
 import danish from "logos:constants/transformers/danish";
 import dutch from "logos:constants/transformers/dutch";
@@ -240,16 +239,5 @@ const localisations = Object.freeze({
 	} satisfies Record<Language, string>,
 } as const);
 
-const localisationBySongListingType = Object.freeze({
-	song: "music.options.play.strings.nowPlaying.title.type.song",
-	collection: "music.options.play.strings.nowPlaying.title.type.songCollection",
-	stream: "music.options.play.strings.nowPlaying.title.type.stream",
-} as const satisfies Record<SongListingType, string>);
-
-function getLocalisationBySongListingType(type: SongListingType): string {
-	return localisationBySongListingType[type];
-}
-
 export default localisations;
-export { getLocalisationBySongListingType };
 export type { Transformer, TransformerType };

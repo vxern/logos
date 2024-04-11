@@ -14,7 +14,3 @@ describe("The localisations object", () => {
 		});
 	});
 });
-
-describe("getLocalisationBySongListingType()", () => {
-	// TODO(vxern): Add tests.
-});

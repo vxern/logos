@@ -1,5 +1,3 @@
-import { SongListingType } from "logos:constants/music";
-
 const emojis = Object.freeze({
 	ruleBullet: "💠",
 	understood: "✅",
@@ -224,15 +222,4 @@ const emojis = Object.freeze({
 	},
 } as const);
 
-const emojiBySongListingType = Object.freeze({
-	song: emojis.music.song,
-	collection: emojis.music.collection,
-	stream: emojis.music.stream,
-} as const satisfies Record<SongListingType, string>);
-
-function getEmojiBySongListingType(type: SongListingType): string {
-	return emojiBySongListingType[type];
-}
-
 export default emojis;
-export { getEmojiBySongListingType };
