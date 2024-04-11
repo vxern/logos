@@ -803,7 +803,7 @@ class MusicSession {
 					this.listings.current.content.position = 0;
 				} else {
 					this.listings.moveCurrentToHistory();
-					this.listings.takeCurrentFromQueue();
+					// REMINDER(vxern): Check whether the movement from queue to current here was necessary, or an issue.
 					return this.advanceQueueAndPlay();
 				}
 			} else {
@@ -892,8 +892,6 @@ class MusicSession {
 
 				this.listings.queue.addOld(this.listings.current);
 				this.listings.queue.addOld(this.listings.history.removeNewest());
-				this.events.emit("historyUpdate");
-				this.events.emit("queueUpdate");
 				this.listings.current = undefined;
 			} else {
 				this.flags.loop.song = false;
@@ -915,17 +913,11 @@ class MusicSession {
 
 			if (this.listings.current !== undefined) {
 				this.listings.queue.addOld(this.listings.current);
-				this.events.emit("queueUpdate");
 				this.listings.current = undefined;
 			}
 
 			for (const _ of Array(listingsToMoveToQueue).keys()) {
 				this.listings.queue.addOld(this.listings.history.removeNewest());
-			}
-
-			if (listingsToMoveToQueue !== 0) {
-				this.events.emit("queueUpdate");
-				this.events.emit("historyUpdate");
 			}
 		}
 
