@@ -905,8 +905,8 @@ class MusicSession {
 
 				this.listings.current.content.position -= 1;
 
-				this.listings.queue.addOld(this.listings.current);
-				this.listings.queue.addOld(this.listings.history.removeNewest());
+				this.listings.moveCurrentToQueue();
+				this.listings.moveFromQueueToHistory({ count: 1 });
 				this.listings.current = undefined;
 			} else {
 				this.flags.loop.song = false;
