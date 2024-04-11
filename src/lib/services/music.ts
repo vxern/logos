@@ -183,11 +183,6 @@ class MusicService extends LocalService {
 
 		session.flags.isDisconnected = true;
 
-		const currentSong = session.listings.current?.queueable.playable;
-		if (currentSong === undefined) {
-			return;
-		}
-
 		session.restoreAt = session.restoreAt + (now - session.startedAt);
 	}
 
@@ -203,11 +198,7 @@ class MusicService extends LocalService {
 
 		oldSession.flags.isDisconnected = false;
 
-		const currentSong = oldSession.listings.current?.queueable.playable;
-		if (currentSong === undefined) {
-			await this.destroySession();
-			return;
-		}
+		const currentSong = oldSession.listings.current.queueable.playable;
 
 		await this.destroySession();
 		await this.createSession(oldSession.channelId);
@@ -355,6 +346,7 @@ class MusicService extends LocalService {
 
 		const guildLocale = this.guildLocale;
 
+		// TODO(vxern): Convert to an 'is playing' check.
 		if (session.listings.current !== undefined) {
 			const strings = {
 				title: this.client.localise("music.options.play.strings.queued.title", guildLocale)(),
@@ -441,10 +433,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		if (
-			session.listings.current?.queueable !== undefined &&
-			session.listings.current.queueable instanceof AudioStream
-		) {
+		if (session.listings.current.queueable instanceof AudioStream) {
 			session.listings.current.queueable.title = track.info.title;
 		}
 
@@ -539,7 +528,7 @@ class MusicService extends LocalService {
 			)({
 				listing_type: this.client.localise(
 					(() => {
-						const queueable = session.listings.current?.queueable ?? song;
+						const queueable = session.listings.current.queueable;
 						switch (true) {
 							case queueable instanceof Song: {
 								return "music.options.play.strings.nowPlaying.title.type.song";
@@ -560,7 +549,6 @@ class MusicService extends LocalService {
 			description: {
 				nowPlaying: this.client.localise("music.options.play.strings.nowPlaying.description.nowPlaying", guildLocale),
 				track:
-					session.listings.current?.queueable !== undefined &&
 					session.listings.current.queueable instanceof SongCollection
 						? this.client.localise(
 								"music.options.play.strings.nowPlaying.description.track",
@@ -574,30 +562,28 @@ class MusicService extends LocalService {
 			},
 		};
 
-		if (session.listings.current !== undefined) {
-			this.client.bot.rest
-				.sendMessage(session.channelId, {
-					embeds: [
-						{
-							title: `${session.listings.current.queueable.emoji} ${strings.title}`,
-							description: strings.description.nowPlaying({
-								song_information: strings.description.track,
-								title: song.title,
-								url: song.url,
-								user_mention: mention(session.listings.current.userId, { type: "user" }),
-							}),
-							color: constants.colours.notice,
-						},
-					],
-				})
-				.catch(() =>
-					this.log.warn(
-						`Failed to send now playing message to ${this.client.diagnostics.channel(
-							session.channelId,
-						)} on ${this.client.diagnostics.guild(this.guildId)}.`,
-					),
-				);
-		}
+		this.client.bot.rest
+			.sendMessage(session.channelId, {
+				embeds: [
+					{
+						title: `${session.listings.current.queueable.emoji} ${strings.title}`,
+						description: strings.description.nowPlaying({
+							song_information: strings.description.track,
+							title: song.title,
+							url: song.url,
+							user_mention: mention(session.listings.current.userId, { type: "user" }),
+						}),
+						color: constants.colours.notice,
+					},
+				],
+			})
+			.catch(() =>
+				this.log.warn(
+					`Failed to send now playing message to ${this.client.diagnostics.channel(
+						session.channelId,
+					)} on ${this.client.diagnostics.guild(this.guildId)}.`,
+				),
+			);
 
 		return true;
 	}
@@ -790,19 +776,16 @@ class MusicSession {
 	// TODO(vxern): Refactor this.
 	async advanceQueueAndPlay(): Promise<void> {
 		if (!this.flags.loop.song) {
-			if (this.listings.current !== undefined && !(this.listings.current.queueable instanceof SongCollection)) {
+			if (!(this.listings.current.queueable instanceof SongCollection)) {
 				this.listings.moveCurrentToHistory();
 			}
 
-			if (
-				!this.listings.queue.isEmpty &&
-				(this.listings.current === undefined || !(this.listings.current.queueable instanceof SongCollection))
-			) {
+			if (!this.listings.queue.isEmpty && !(this.listings.current.queueable instanceof SongCollection)) {
 				this.listings.takeCurrentFromQueue();
 			}
 		}
 
-		if (this.listings.current !== undefined && this.listings.current.queueable instanceof SongCollection) {
+		if (this.listings.current.queueable instanceof SongCollection) {
 			if (this.listings.current.queueable.isLastInCollection) {
 				if (this.flags.loop.collection) {
 					this.listings.current.queueable.position = 0;
@@ -820,16 +803,7 @@ class MusicSession {
 			}
 		}
 
-		if (this.listings.current === undefined) {
-			return;
-		}
-
-		const currentSong = this.listings.current.queueable.playable;
-		if (currentSong === undefined) {
-			return;
-		}
-
-		await this.service.loadSong(currentSong);
+		await this.service.loadSong(this.listings.current.queueable.playable);
 	}
 
 	async setPaused(value: boolean): Promise<void> {
@@ -855,7 +829,7 @@ class MusicSession {
 
 	// TODO(vxern): Refactor this.
 	async skip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		if (this.listings.current?.queueable !== undefined && this.listings.current.queueable instanceof SongCollection) {
+		if (this.listings.current.queueable instanceof SongCollection) {
 			if (collection || this.listings.current.queueable.isLastInCollection) {
 				this.flags.loop.collection = false;
 				this.listings.moveCurrentToHistory();
@@ -873,10 +847,7 @@ class MusicSession {
 		} else {
 			const listingsToMoveToHistory = Math.min(by ?? to ?? 0, this.listings.queue.count);
 
-			if (this.listings.current !== undefined) {
-				this.listings.moveCurrentToHistory();
-			}
-
+			this.listings.moveCurrentToHistory();
 			this.listings.moveFromQueueToHistory({ count: listingsToMoveToHistory });
 
 			if (listingsToMoveToHistory !== 0) {
@@ -889,7 +860,7 @@ class MusicSession {
 
 	// TODO(vxern): Refactor this.
 	async unskip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
-		if (this.listings.current?.queueable !== undefined && this.listings.current.queueable instanceof SongCollection) {
+		if (this.listings.current.queueable instanceof SongCollection) {
 			if (collection || this.listings.current.queueable.isFirstInCollection) {
 				this.flags.loop.collection = false;
 
@@ -915,10 +886,7 @@ class MusicSession {
 		} else {
 			const listingsToMoveToQueue = Math.min(by ?? to ?? 1, this.listings.history.count);
 
-			if (this.listings.current !== undefined) {
-				this.listings.moveCurrentToQueue();
-			}
-
+			this.listings.moveCurrentToQueue();
 			this.listings.moveFromHistoryToQueue({ count: listingsToMoveToQueue });
 		}
 
@@ -945,7 +913,7 @@ class MusicSession {
 			});
 		}
 
-		if (this.listings.current?.queueable !== undefined && this.listings.current.queueable instanceof SongCollection) {
+		if (this.listings.current.queueable instanceof SongCollection) {
 			if (collection) {
 				this.listings.current.queueable.position = -1;
 			}
