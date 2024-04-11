@@ -212,7 +212,7 @@ class MusicService extends LocalService {
 		// @ts-ignore: For now...
 		this.#session = { ...oldSession, player: newSession.player };
 
-		await this.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
+		await this.session.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
 
 		const guildLocale = this.guildLocale;
 
@@ -375,217 +375,6 @@ class MusicService extends LocalService {
 		}
 
 		await session.advanceQueueAndPlay();
-	}
-
-	async loadSong(
-		song: Song | AudioStream,
-		restore?: { paused: boolean; volume: number },
-	): Promise<boolean | undefined> {
-		const session = this.#session;
-		if (session === undefined) {
-			return undefined;
-		}
-
-		const result = await session.player.node.rest.resolve(`ytsearch:${song.url}`);
-
-		if (result === undefined || result.loadType === "error" || result.loadType === "empty") {
-			session.flags.loop.song = false;
-
-			const guildLocale = this.guildLocale;
-			const strings = {
-				title: this.client.localise("music.options.play.strings.failedToLoad.title", guildLocale)(),
-				description: this.client.localise(
-					"music.options.play.strings.failedToLoad.description",
-					guildLocale,
-				)({
-					title: song.title,
-				}),
-			};
-
-			this.client.bot.rest
-				.sendMessage(session.channelId, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.failure,
-						},
-					],
-				})
-				.catch(() =>
-					this.log.warn(
-						`Failed to send track load failure to ${this.client.diagnostics.channel(
-							session.channelId,
-						)} on ${this.client.diagnostics.guild(this.guildId)}.`,
-					),
-				);
-
-			await session.advanceQueueAndPlay();
-
-			return false;
-		}
-
-		let track: shoukaku.Track | undefined;
-		if (result.loadType === "search") {
-			track = result.data.at(0);
-		}
-		if (track === undefined) {
-			return false;
-		}
-
-		if (session.listings.current.queueable instanceof AudioStream) {
-			session.listings.current.queueable.title = track.info.title;
-		}
-
-		session.player.once("exception", async (reason) => {
-			const session = this.#session;
-			if (session === undefined) {
-				return;
-			}
-
-			session.flags.loop.song = false;
-
-			this.log.warn(`Failed to play track: ${reason.exception}`);
-
-			const guildLocale = this.guildLocale;
-			const strings = {
-				title: this.client.localise("music.options.play.strings.failedToPlay.title", guildLocale)(),
-				description: this.client.localise(
-					"music.options.play.strings.failedToPlay.description",
-					guildLocale,
-				)({
-					title: song.title,
-				}),
-			};
-
-			this.client.bot.rest
-				.sendMessage(session.channelId, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.failure,
-						},
-					],
-				})
-				.catch(() =>
-					this.log.warn(
-						`Failed to send track play failure to ${this.client.diagnostics.channel(
-							session.channelId,
-						)} on ${this.client.diagnostics.guild(this.guildId)}.`,
-					),
-				);
-		});
-
-		session.player.once("end", async () => {
-			const session = this.#session;
-			if (session === undefined) {
-				return;
-			}
-
-			session.player.removeAllListeners("trackException");
-
-			if (session.flags.isDestroyed) {
-				return;
-			}
-
-			if (session.flags.breakLoop) {
-				session.flags.breakLoop = false;
-				return;
-			}
-
-			session.restoreAt = 0;
-
-			await session.advanceQueueAndPlay();
-		});
-
-		session.player.once("start", async () => {
-			const now = Date.now();
-			session.startedAt = now;
-
-			if (session.restoreAt !== 0) {
-				await session.player.seekTo(session.restoreAt);
-			}
-
-			if (restore !== undefined) {
-				await session.player.setPaused(restore.paused);
-			}
-		});
-
-		if (restore !== undefined) {
-			await session.player.setGlobalVolume(restore.volume);
-			await session.player.playTrack({ track: track.encoded });
-			return;
-		}
-
-		await session.player.playTrack({ track: track.encoded });
-
-		const guildLocale = this.guildLocale;
-		const strings = {
-			title: this.client.localise(
-				"music.options.play.strings.nowPlaying.title.nowPlaying",
-				guildLocale,
-			)({
-				listing_type: this.client.localise(
-					(() => {
-						const queueable = session.listings.current.queueable;
-						switch (true) {
-							case queueable instanceof Song: {
-								return "music.options.play.strings.nowPlaying.title.type.song";
-							}
-							case queueable instanceof AudioStream: {
-								return "music.options.play.strings.nowPlaying.title.type.stream";
-							}
-							case queueable instanceof SongCollection: {
-								return "music.options.play.strings.nowPlaying.title.type.songCollection";
-							}
-							default:
-								return constants.special.missingString;
-						}
-					})(),
-					guildLocale,
-				)(),
-			}),
-			description: {
-				nowPlaying: this.client.localise("music.options.play.strings.nowPlaying.description.nowPlaying", guildLocale),
-				track:
-					session.listings.current.queueable instanceof SongCollection
-						? this.client.localise(
-								"music.options.play.strings.nowPlaying.description.track",
-								guildLocale,
-						  )({
-								index: session.listings.current.queueable.position + 1,
-								number: session.listings.current.queueable.songs.length,
-								title: session.listings.current.queueable.title,
-						  })
-						: "",
-			},
-		};
-
-		this.client.bot.rest
-			.sendMessage(session.channelId, {
-				embeds: [
-					{
-						title: `${session.listings.current.queueable.emoji} ${strings.title}`,
-						description: strings.description.nowPlaying({
-							song_information: strings.description.track,
-							title: song.title,
-							url: song.url,
-							user_mention: mention(session.listings.current.userId, { type: "user" }),
-						}),
-						color: constants.colours.notice,
-					},
-				],
-			})
-			.catch(() =>
-				this.log.warn(
-					`Failed to send now playing message to ${this.client.diagnostics.channel(
-						session.channelId,
-					)} on ${this.client.diagnostics.guild(this.guildId)}.`,
-				),
-			);
-
-		return true;
 	}
 }
 
@@ -803,7 +592,7 @@ class MusicSession {
 			}
 		}
 
-		await this.service.loadSong(this.listings.current.queueable.playable);
+		await this.loadSong(this.listings.current.queueable.playable);
 	}
 
 	async setPaused(value: boolean): Promise<void> {
@@ -930,6 +719,206 @@ class MusicSession {
 	async skipTo({ timestamp }: { timestamp: number }): Promise<void> {
 		this.restoreAt = timestamp;
 		await this.player.seekTo(timestamp);
+	}
+
+	// TODO(vxern): Refactor this.
+	async loadSong(
+		song: Song | AudioStream,
+		restore?: { paused: boolean; volume: number },
+	): Promise<boolean | undefined> {
+		const result = await this.player.node.rest.resolve(`ytsearch:${song.url}`);
+
+		if (result === undefined || result.loadType === "error" || result.loadType === "empty") {
+			this.flags.loop.song = false;
+
+			const guildLocale = this.service.guildLocale;
+			const strings = {
+				title: this.service.client.localise("music.options.play.strings.failedToLoad.title", guildLocale)(),
+				description: this.service.client.localise(
+					"music.options.play.strings.failedToLoad.description",
+					guildLocale,
+				)({
+					title: song.title,
+				}),
+			};
+
+			this.service.client.bot.rest
+				.sendMessage(this.channelId, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colours.failure,
+						},
+					],
+				})
+				.catch(() =>
+					this.service.log.warn(
+						`Failed to send track load failure to ${this.service.client.diagnostics.channel(
+							this.channelId,
+						)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
+					),
+				);
+
+			await this.advanceQueueAndPlay();
+
+			return false;
+		}
+
+		let track: shoukaku.Track | undefined;
+		if (result.loadType === "search") {
+			track = result.data.at(0);
+		}
+		if (track === undefined) {
+			return false;
+		}
+
+		if (this.listings.current.queueable instanceof AudioStream) {
+			this.listings.current.queueable.title = track.info.title;
+		}
+
+		this.player.once("exception", async (reason) => {
+			this.flags.loop.song = false;
+
+			this.service.log.warn(`Failed to play track: ${reason.exception}`);
+
+			const guildLocale = this.service.guildLocale;
+			const strings = {
+				title: this.service.client.localise("music.options.play.strings.failedToPlay.title", guildLocale)(),
+				description: this.service.client.localise(
+					"music.options.play.strings.failedToPlay.description",
+					guildLocale,
+				)({
+					title: song.title,
+				}),
+			};
+
+			this.service.client.bot.rest
+				.sendMessage(this.channelId, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+							color: constants.colours.failure,
+						},
+					],
+				})
+				.catch(() =>
+					this.service.log.warn(
+						`Failed to send track play failure to ${this.service.client.diagnostics.channel(
+							this.channelId,
+						)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
+					),
+				);
+		});
+
+		this.player.once("end", async () => {
+			this.player.removeAllListeners("trackException");
+
+			if (this.flags.isDestroyed) {
+				return;
+			}
+
+			if (this.flags.breakLoop) {
+				this.flags.breakLoop = false;
+				return;
+			}
+
+			this.restoreAt = 0;
+
+			await this.advanceQueueAndPlay();
+		});
+
+		this.player.once("start", async () => {
+			const now = Date.now();
+			this.startedAt = now;
+
+			if (this.restoreAt !== 0) {
+				await this.player.seekTo(this.restoreAt);
+			}
+
+			if (restore !== undefined) {
+				await this.player.setPaused(restore.paused);
+			}
+		});
+
+		if (restore !== undefined) {
+			await this.player.setGlobalVolume(restore.volume);
+			await this.player.playTrack({ track: track.encoded });
+			return;
+		}
+
+		await this.player.playTrack({ track: track.encoded });
+
+		const guildLocale = this.service.guildLocale;
+		const strings = {
+			title: this.service.client.localise(
+				"music.options.play.strings.nowPlaying.title.nowPlaying",
+				guildLocale,
+			)({
+				listing_type: this.service.client.localise(
+					(() => {
+						const queueable = this.listings.current.queueable;
+						switch (true) {
+							case queueable instanceof Song: {
+								return "music.options.play.strings.nowPlaying.title.type.song";
+							}
+							case queueable instanceof AudioStream: {
+								return "music.options.play.strings.nowPlaying.title.type.stream";
+							}
+							case queueable instanceof SongCollection: {
+								return "music.options.play.strings.nowPlaying.title.type.songCollection";
+							}
+							default:
+								return constants.special.missingString;
+						}
+					})(),
+					guildLocale,
+				)(),
+			}),
+			description: {
+				nowPlaying: this.service.client.localise(
+					"music.options.play.strings.nowPlaying.description.nowPlaying",
+					guildLocale,
+				),
+				track:
+					this.listings.current.queueable instanceof SongCollection
+						? this.service.client.localise(
+								"music.options.play.strings.nowPlaying.description.track",
+								guildLocale,
+						  )({
+								index: this.listings.current.queueable.position + 1,
+								number: this.listings.current.queueable.songs.length,
+								title: this.listings.current.queueable.title,
+						  })
+						: "",
+			},
+		};
+
+		this.service.client.bot.rest
+			.sendMessage(this.channelId, {
+				embeds: [
+					{
+						title: `${this.listings.current.queueable.emoji} ${strings.title}`,
+						description: strings.description.nowPlaying({
+							song_information: strings.description.track,
+							title: song.title,
+							url: song.url,
+							user_mention: mention(this.listings.current.userId, { type: "user" }),
+						}),
+						color: constants.colours.notice,
+					},
+				],
+			})
+			.catch(() =>
+				this.service.log.warn(
+					`Failed to send now playing message to ${this.service.client.diagnostics.channel(
+						this.channelId,
+					)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
+				),
+			);
+
+		return true;
 	}
 }
 
