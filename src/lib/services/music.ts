@@ -707,10 +707,20 @@ class ListingManager {
 		this.current = this.queue.removeOldest();
 	}
 
-	moveFromQueueToHistory({ count }: { count?: number } = {}): void {
-		for (const _ of Array(count ?? 1).keys()) {
+	moveFromQueueToHistory({ count }: { count: number }): void {
+		for (const _ of Array(count).keys()) {
 			this.history.addNew(this.queue.removeOldest());
 		}
+
+		// REMINDER(vxern): Emit event.
+	}
+
+	moveFromHistoryToQueue({ count }: { count: number }): void {
+		for (const _ of Array(count).keys()) {
+			this.queue.addOld(this.history.removeNewest());
+		}
+
+		// REMINDER(vxern): Emit event.
 	}
 }
 
@@ -916,9 +926,7 @@ class MusicSession {
 				this.listings.current = undefined;
 			}
 
-			for (const _ of Array(listingsToMoveToQueue).keys()) {
-				this.listings.queue.addOld(this.listings.history.removeNewest());
-			}
+			this.listings.moveFromHistoryToQueue({ count: listingsToMoveToQueue });
 		}
 
 		if (this.player.track !== undefined) {
