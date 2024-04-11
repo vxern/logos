@@ -703,6 +703,11 @@ class ListingManager {
 		this.current = undefined;
 	}
 
+	moveCurrentToQueue(): void {
+		this.queue.addOld(this.current!);
+		this.current = undefined;
+	}
+
 	takeCurrentFromQueue(): void {
 		this.current = this.queue.removeOldest();
 	}
@@ -922,8 +927,7 @@ class MusicSession {
 			const listingsToMoveToQueue = Math.min(by ?? to ?? 1, this.listings.history.count);
 
 			if (this.listings.current !== undefined) {
-				this.listings.queue.addOld(this.listings.current);
-				this.listings.current = undefined;
+				this.listings.moveCurrentToQueue();
 			}
 
 			this.listings.moveFromHistoryToQueue({ count: listingsToMoveToQueue });
@@ -953,8 +957,7 @@ class MusicSession {
 		}
 
 		if (
-			this.listings.current !== undefined &&
-			this.listings.current.content !== undefined &&
+			this.listings.current?.content !== undefined &&
 			isSongCollection(this.listings.current.content)
 		) {
 			if (collection) {
