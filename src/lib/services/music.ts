@@ -684,7 +684,12 @@ class ListingQueue {
 class ListingManager {
 	readonly history: ListingQueue;
 	readonly queue: ListingQueue;
-	current?: SongListing;
+
+	#current?: SongListing;
+
+	get current(): SongListing {
+		return this.#current!;
+	}
 
 	constructor() {
 		this.history = new ListingQueue({ limit: constants.MAXIMUM_HISTORY_ENTRIES, discardOnPassedLimit: true });
@@ -693,23 +698,22 @@ class ListingManager {
 
 	moveCurrentToHistory(): void {
 		// TODO(vxern): This is bad, and it shouldn't be necessary here.
-		const current = this.current!;
 		// Adjust the position for being incremented automatically when played next time.
-		if (current.queueable instanceof SongCollection) {
-			current.queueable.position -= 1;
+		if (this.current.queueable instanceof SongCollection) {
+			this.current.queueable.position -= 1;
 		}
 
-		this.history.addNew(current);
-		this.current = undefined;
+		this.history.addNew(this.#current!);
+		this.#current = undefined;
 	}
 
 	moveCurrentToQueue(): void {
-		this.queue.addOld(this.current!);
-		this.current = undefined;
+		this.queue.addOld(this.#current!);
+		this.#current = undefined;
 	}
 
 	takeCurrentFromQueue(): void {
-		this.current = this.queue.removeOldest();
+		this.#current = this.queue.removeOldest();
 	}
 
 	moveFromQueueToHistory({ count }: { count: number }): void {
@@ -892,8 +896,7 @@ class MusicSession {
 				this.listings.current.queueable.position -= 1;
 
 				this.listings.moveCurrentToQueue();
-				this.listings.moveFromQueueToHistory({ count: 1 });
-				this.listings.current = undefined;
+				this.listings.moveFromHistoryToQueue({ count: 1 });
 			} else {
 				this.flags.loop.song = false;
 
