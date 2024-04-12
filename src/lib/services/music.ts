@@ -520,12 +520,12 @@ class MusicSession {
 	readonly flags: {
 		isDisconnected: boolean;
 		isDestroyed: boolean;
-		loop: {
-			song: boolean;
-			collection: boolean;
-		};
 		breakLoop: boolean;
 	};
+
+	// TODO(vxern): These ought to be moved onto the queueable.
+	isLoopingSong: boolean;
+	isLoopingCollection: boolean;
 
 	startedAt: number;
 	restoreAt: number;
@@ -549,14 +549,15 @@ class MusicSession {
 		this.player = player;
 		this.channelId = channelId;
 		this.listings = new ListingManager();
-		this.startedAt = 0;
-		this.restoreAt = 0;
 		this.flags = {
 			isDisconnected: false,
 			isDestroyed: false,
-			loop: { song: false, collection: false },
 			breakLoop: false,
 		};
+		this.isLoopingSong = true;
+		this.isLoopingCollection = true;
+		this.startedAt = 0;
+		this.restoreAt = 0;
 	}
 
 	receiveListing({ listing }: { listing: SongListing }): void {
@@ -565,7 +566,7 @@ class MusicSession {
 
 	// TODO(vxern): Refactor this.
 	async advanceQueueAndPlay(): Promise<void> {
-		if (!this.flags.loop.song) {
+		if (!this.isLoopingSong) {
 			if (!(this.listings.current.queueable instanceof SongCollection)) {
 				this.listings.moveCurrentToHistory();
 			}
@@ -577,7 +578,7 @@ class MusicSession {
 
 		if (this.listings.current.queueable instanceof SongCollection) {
 			if (this.listings.current.queueable.isLastInCollection) {
-				if (this.flags.loop.collection) {
+				if (this.isLoopingCollection) {
 					this.listings.current.queueable.position = 0;
 				} else {
 					this.listings.moveCurrentToHistory();
@@ -585,7 +586,7 @@ class MusicSession {
 					return this.advanceQueueAndPlay();
 				}
 			} else {
-				if (this.flags.loop.song) {
+				if (this.isLoopingSong) {
 					this.listings.current.queueable.position -= 1;
 				}
 
@@ -607,11 +608,11 @@ class MusicSession {
 	setLoop(value: boolean, { mode }: { mode: ListingMode }): void {
 		switch (mode) {
 			case "single": {
-				this.flags.loop.song = value;
+				this.isLoopingSong = value;
 				break;
 			}
 			case "collection": {
-				this.flags.loop.collection = value;
+				this.isLoopingCollection = value;
 				break;
 			}
 		}
@@ -621,10 +622,10 @@ class MusicSession {
 	async skip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
 		if (this.listings.current.queueable instanceof SongCollection) {
 			if (collection || this.listings.current.queueable.isLastInCollection) {
-				this.flags.loop.collection = false;
+				this.isLoopingCollection = false;
 				this.listings.moveCurrentToHistory();
 			} else {
-				this.flags.loop.song = false;
+				this.isLoopingSong = false;
 
 				if (by !== undefined) {
 					this.listings.current.queueable.position += by - 1;
@@ -641,7 +642,7 @@ class MusicSession {
 			this.listings.moveFromQueueToHistory({ count: listingsToMoveToHistory });
 
 			if (listingsToMoveToHistory !== 0) {
-				this.flags.loop.song = false;
+				this.isLoopingSong = false;
 			}
 		}
 
@@ -652,14 +653,14 @@ class MusicSession {
 	async unskip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
 		if (this.listings.current.queueable instanceof SongCollection) {
 			if (collection || this.listings.current.queueable.isFirstInCollection) {
-				this.flags.loop.collection = false;
+				this.isLoopingCollection = false;
 
 				this.listings.current.queueable.position -= 1;
 
 				this.listings.moveCurrentToQueue();
 				this.listings.moveFromHistoryToQueue({ count: 1 });
 			} else {
-				this.flags.loop.song = false;
+				this.isLoopingSong = false;
 
 				if (by !== undefined) {
 					this.listings.current.queueable.position -= by + 1;
@@ -690,16 +691,16 @@ class MusicSession {
 	// TODO(vxern): Refactor this.
 	async replay(collection: boolean): Promise<void> {
 		if (collection) {
-			const previousLoopState = this.flags.loop.collection;
-			this.flags.loop.collection = true;
+			const previousLoopState = this.isLoopingCollection;
+			this.isLoopingCollection = true;
 			this.player.once("start", () => {
-				this.flags.loop.collection = previousLoopState;
+				this.isLoopingCollection = previousLoopState;
 			});
 		} else {
-			const previousLoopState = this.flags.loop.song;
-			this.flags.loop.song = true;
+			const previousLoopState = this.isLoopingSong;
+			this.isLoopingSong = true;
 			this.player.once("start", () => {
-				this.flags.loop.song = previousLoopState;
+				this.isLoopingSong = previousLoopState;
 			});
 		}
 
@@ -730,7 +731,7 @@ class MusicSession {
 		const result = await this.player.node.rest.resolve(`ytsearch:${song.url}`);
 
 		if (result === undefined || result.loadType === "error" || result.loadType === "empty") {
-			this.flags.loop.song = false;
+			this.isLoopingSong = false;
 
 			const guildLocale = this.service.guildLocale;
 			const strings = {
@@ -779,7 +780,7 @@ class MusicSession {
 		}
 
 		this.player.once("exception", async (reason) => {
-			this.flags.loop.song = false;
+			this.isLoopingSong = false;
 
 			this.service.log.warn(`Failed to play track: ${reason.exception}`);
 
