@@ -5,25 +5,25 @@ import guildMemberAdd from "logos/stores/journalling/discord/guild-member-add";
 import guildMemberRemove from "logos/stores/journalling/discord/guild-member-remove";
 import messageDelete from "logos/stores/journalling/discord/message-delete";
 import messageUpdate from "logos/stores/journalling/discord/message-update";
-import entryRequestSubmit from "logos/stores/journalling/logos/entry-request-submit";
 import entryRequestAccept from "logos/stores/journalling/logos/entry-request-accept";
 import entryRequestReject from "logos/stores/journalling/logos/entry-request-reject";
-import memberWarnAdd from "logos/stores/journalling/logos/member-warn-add";
-import memberWarnRemove from "logos/stores/journalling/logos/member-warn-remove";
+import entryRequestSubmit from "logos/stores/journalling/logos/entry-request-submit";
+import inquiryOpen from "logos/stores/journalling/logos/inquiry-open";
 import memberTimeoutAdd from "logos/stores/journalling/logos/member-timeout-add";
 import memberTimeoutRemove from "logos/stores/journalling/logos/member-timeout-remove";
+import memberWarnAdd from "logos/stores/journalling/logos/member-warn-add";
+import memberWarnRemove from "logos/stores/journalling/logos/member-warn-remove";
 import praiseAdd from "logos/stores/journalling/logos/praise-add";
-import reportSubmit from "logos/stores/journalling/logos/report-submit";
-import resourceSend from "logos/stores/journalling/logos/resource-send";
-import suggestionSend from "logos/stores/journalling/logos/suggestion-send";
-import ticketOpen from "logos/stores/journalling/logos/ticket-open";
-import inquiryOpen from "logos/stores/journalling/logos/inquiry-open";
 import purgeBegin from "logos/stores/journalling/logos/purge-begin";
 import purgeEnd from "logos/stores/journalling/logos/purge-end";
-import slowmodeEnable from "logos/stores/journalling/logos/slowmode-enable";
+import reportSubmit from "logos/stores/journalling/logos/report-submit";
+import resourceSend from "logos/stores/journalling/logos/resource-send";
 import slowmodeDisable from "logos/stores/journalling/logos/slowmode-disable";
-import slowmodeUpgrade from "logos/stores/journalling/logos/slowmode-upgrade";
 import slowmodeDowngrade from "logos/stores/journalling/logos/slowmode-downgrade";
+import slowmodeEnable from "logos/stores/journalling/logos/slowmode-enable";
+import slowmodeUpgrade from "logos/stores/journalling/logos/slowmode-upgrade";
+import suggestionSend from "logos/stores/journalling/logos/suggestion-send";
+import ticketOpen from "logos/stores/journalling/logos/ticket-open";
 
 const loggers = Object.freeze({
 	guildBanAdd,

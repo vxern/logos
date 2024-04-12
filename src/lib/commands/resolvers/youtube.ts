@@ -1,8 +1,8 @@
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import * as YouTubeSearch from "youtube-sr";
 import { Song, SongCollection, SongListing } from "logos/services/music";
+import * as YouTubeSearch from "youtube-sr";
 
 async function resolveYouTubeSongListings(
 	client: Client,
