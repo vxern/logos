@@ -1,7 +1,7 @@
-import { SongListing } from "logos:constants/music";
 import { Client } from "logos/client";
 import resolvers from "logos/commands/resolvers";
 import { SongListingResolver } from "logos/commands/resolvers/resolver";
+import { SongListing } from "logos/services/music";
 
 async function handleRequestYouTubePlayback(client: Client, interaction: Logos.Interaction<any, { query: string }>) {
 	await handleRequestQueryPlayback(client, interaction, resolvers.youtube);

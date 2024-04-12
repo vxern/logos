@@ -1,8 +1,7 @@
-import { getEmojiBySongListingType } from "logos:constants/emojis";
 import { Locale } from "logos:constants/languages/localisation";
-import { SongListing } from "logos:constants/music";
 import { Client } from "logos/client";
 import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
+import { SongListing } from "logos/services/music";
 
 class SongListingView extends PaginatedView<SongListing> {
 	readonly #title: string;
@@ -28,9 +27,8 @@ class SongListingView extends PaginatedView<SongListing> {
 		const listingsFormatted = page
 			.map((listing, listingIndex) => {
 				const indexDisplayed = pageIndex * 10 + (listingIndex + 1);
-				const emoji = getEmojiBySongListingType(listing.content.type);
 
-				return `${indexDisplayed}. ${emoji} ~ ${listing.content.title}`;
+				return `${indexDisplayed}. ${listing.queueable.emoji} ~ ${listing.queueable.title}`;
 			})
 			.join("\n");
 

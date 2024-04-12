@@ -44,7 +44,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	const view = new SongListingView(client, {
 		interaction,
 		title: `${constants.emojis.music.list} ${strings.queue}`,
-		listings: musicService.session.queue,
+		listings: musicService.session.listings.queue.listings,
 	});
 
 	const refreshView = async () => view.refresh();

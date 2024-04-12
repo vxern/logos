@@ -1,5 +1,5 @@
-import { isSongCollection } from "logos:constants/music";
 import { Client } from "logos/client";
+import { SongCollection } from "logos/services/music";
 
 async function handleUnskipAction(
 	client: Client,
@@ -46,18 +46,12 @@ async function handleUnskipAction(
 		return;
 	}
 
-	const current = musicService.current;
-
 	const isUnskippingListing = (() => {
-		if (current === undefined) {
+		if (!(musicService.session.listings.current instanceof SongCollection)) {
 			return true;
 		}
 
-		if (!isSongCollection(current.content)) {
-			return true;
-		}
-
-		if (interaction.parameters.collection !== undefined || current.content.position === 0) {
+		if (interaction.parameters.collection !== undefined || musicService.session.listings.current.position === 0) {
 			return true;
 		}
 
@@ -81,7 +75,7 @@ async function handleUnskipAction(
 
 	if (
 		interaction.parameters.collection !== undefined &&
-		(current === undefined || current.content === undefined || !isSongCollection(current.content))
+		!(musicService.session.listings.current instanceof SongCollection)
 	) {
 		const locale = interaction.locale;
 		const strings = {
@@ -181,12 +175,10 @@ async function handleUnskipAction(
 		if (interaction.parameters.by !== undefined) {
 			let listingsToUnskip!: number;
 			if (
-				current !== undefined &&
-				current.content !== undefined &&
-				isSongCollection(current.content) &&
+				musicService.session.listings.current instanceof SongCollection &&
 				interaction.parameters.collection === undefined
 			) {
-				listingsToUnskip = Math.min(interaction.parameters.by, current.content.position);
+				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.listings.current.position);
 			} else {
 				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.listings.history.count);
 			}
@@ -194,9 +186,7 @@ async function handleUnskipAction(
 		} else if (interaction.parameters.to !== undefined) {
 			let listingToSkipTo!: number;
 			if (
-				current !== undefined &&
-				current.content !== undefined &&
-				isSongCollection(current.content) &&
+				musicService.session.listings.current instanceof SongCollection &&
 				interaction.parameters.collection === undefined
 			) {
 				listingToSkipTo = Math.max(interaction.parameters.to, 1);

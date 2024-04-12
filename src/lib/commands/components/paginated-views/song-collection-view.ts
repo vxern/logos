@@ -1,8 +1,8 @@
 import { Locale } from "logos:constants/languages/localisation";
-import { Song, SongCollection } from "logos:constants/music";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
+import { Song, SongCollection } from "logos/services/music";
 
 class SongCollectionView extends PaginatedView<Song> {
 	readonly #title: string;

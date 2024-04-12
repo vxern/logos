@@ -1,8 +1,8 @@
-import { Song, SongListing } from "logos:constants/music";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import * as YouTubeSearch from "youtube-sr";
+import { Song, SongCollection, SongListing } from "logos/services/music";
 
 async function resolveYouTubeSongListings(
 	client: Client,
@@ -143,22 +143,17 @@ function getSongListingFromPlaylist(playlist: YouTubeSearch.Playlist, requestedB
 		return undefined;
 	}
 
-	const tracks: Song[] = [];
+	const songs: Song[] = [];
 	for (const video of playlist.videos) {
 		const { title, url } = video;
 		if (title === undefined || url === undefined) {
 			continue;
 		}
 
-		tracks.push({ type: "song", title, url, duration: video.duration });
+		songs.push(new Song({ title, url }));
 	}
 
-	return {
-		source: "YouTube",
-		requestedBy,
-		managerIds: [],
-		content: { type: "collection", title, songs: tracks, position: -1 },
-	};
+	return new SongListing({ queueable: new SongCollection({ title, url: playlist.url!, songs }), userId: requestedBy });
 }
 
 function getSongListingFromVideo(video: YouTubeSearch.Video, requestedBy: bigint): SongListing | undefined {
@@ -166,12 +161,7 @@ function getSongListingFromVideo(video: YouTubeSearch.Video, requestedBy: bigint
 		return undefined;
 	}
 
-	const { title, url, duration } = video;
-	if (title === undefined || url === undefined) {
-		return undefined;
-	}
-
-	return { source: "YouTube", requestedBy, managerIds: [], content: { type: "song", title, url, duration } };
+	return new SongListing({ queueable: new Song({ title: video.title!, url: video.url! }), userId: requestedBy });
 }
 
 export { resolveYouTubeSongListings as resolveYouTubeListings };

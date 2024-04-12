@@ -1,10 +1,9 @@
-import { getEmojiBySongListingType } from "logos:constants/emojis";
 import { Locale } from "logos:constants/languages/localisation";
-import { SongListing } from "logos:constants/music";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
+import { SongListing } from "logos/services/music";
 
 class RemoveSongListingView extends PaginatedView<SongListing> {
 	readonly #_selectMenuSelection: InteractionCollector;
@@ -20,9 +19,9 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 	}
 
 	#buildSelectMenu(page: SongListing[], pageIndex: number): Discord.ActionRow {
-		const options = page.map<Discord.SelectOption>((songListing, index) => ({
-			emoji: { name: getEmojiBySongListingType(songListing.content.type) },
-			label: trim(songListing.content.title, 100),
+		const options = page.map<Discord.SelectOption>((listing, index) => ({
+			emoji: { name: listing.queueable.emoji },
+			label: trim(listing.queueable.title, 100),
 			value: (pageIndex * constants.RESULTS_PER_PAGE + index).toString(),
 		}));
 

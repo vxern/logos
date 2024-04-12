@@ -54,8 +54,8 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			return;
 		}
 
-		const songListing = musicService.session.listings.queue.removeAt(index);
-		if (songListing === undefined) {
+		const listing = musicService.session.listings.queue.removeAt(index);
+		if (listing === undefined) {
 			const strings = {
 				title: client.localise("music.options.remove.strings.failed.title", locale)(),
 				description: client.localise("music.options.remove.strings.failed.description", locale)(),
@@ -75,7 +75,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 				"music.options.remove.strings.removed.description",
 				guildLocale,
 			)({
-				title: songListing.content.title,
+				title: listing.queueable.title,
 				user_mention: mention(buttonPress.user.id, { type: "user" }),
 			}),
 		};

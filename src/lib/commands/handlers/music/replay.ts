@@ -1,5 +1,5 @@
-import { isSongCollection } from "logos:constants/music";
 import { Client } from "logos/client";
+import { SongCollection } from "logos/services/music";
 
 async function handleReplayAction(
 	client: Client,
@@ -17,7 +17,7 @@ async function handleReplayAction(
 		return;
 	}
 
-	const [current, isOccupied] = [musicService.current, musicService.isOccupied];
+	const isOccupied = musicService.isOccupied;
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
@@ -36,7 +36,7 @@ async function handleReplayAction(
 	}
 
 	if (interaction.parameters.collection) {
-		if (current?.content === undefined || !isSongCollection(current.content)) {
+		if (!(musicService.session.listings.current instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.replay.strings.noSongCollection.title", locale)(),
@@ -59,7 +59,11 @@ async function handleReplayAction(
 
 			return;
 		}
-	} else if (current?.content === undefined) {
+	}
+
+	// TODO(vxern): Remove this.
+	/*
+  else if (current?.content === undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.replay.strings.noSong.title", locale)(),
@@ -72,7 +76,7 @@ async function handleReplayAction(
 		});
 
 		return;
-	}
+	}*/
 
 	const strings = {
 		title: client.localise("music.options.replay.strings.replaying.title", locale)(),

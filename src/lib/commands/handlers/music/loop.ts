@@ -1,5 +1,5 @@
-import { isSongCollection } from "logos:constants/music";
 import { Client } from "logos/client";
+import { SongCollection } from "logos/services/music";
 
 async function handleLoopPlayback(
 	client: Client,
@@ -18,7 +18,7 @@ async function handleLoopPlayback(
 		return;
 	}
 
-	const [current, isOccupied] = [musicService.current, musicService.isOccupied];
+	const isOccupied = musicService.isOccupied;
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
@@ -37,7 +37,7 @@ async function handleLoopPlayback(
 	}
 
 	if (interaction.parameters.collection) {
-		if (current?.content === undefined || !isSongCollection(current.content)) {
+		if (!(musicService.session.listings.current instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.loop.strings.noSongCollection.title", locale)(),
@@ -60,7 +60,11 @@ async function handleLoopPlayback(
 
 			return;
 		}
-	} else if (current?.content === undefined) {
+	}
+
+	// TODO(vxern): Remove this.
+	/*
+  else if (musicService.session.listings.current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.loop.strings.noSong.title", locale)(),
@@ -73,7 +77,7 @@ async function handleLoopPlayback(
 		});
 
 		return;
-	}
+	}*/
 
 	if (interaction.parameters.collection) {
 		musicService.session.setLoop(!musicService.session.flags.loop.collection, { mode: "collection" });

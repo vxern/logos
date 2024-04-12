@@ -44,7 +44,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 	const view = new SongListingView(client, {
 		interaction,
 		title: `${constants.emojis.music.list} ${strings.title}`,
-		listings: structuredClone(musicService.session.history).reverse(),
+		listings: musicService.session.listings.history.listings.toReversed(),
 	});
 
 	const refreshView = async () => view.refresh();

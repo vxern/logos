@@ -38,8 +38,8 @@ async function handleFastForward(
 		return;
 	}
 
-	const [isOccupied, current, position] = [musicService.isOccupied, musicService.current, musicService.position];
-	if (!isOccupied || current === undefined) {
+	const [isOccupied, position] = [musicService.isOccupied, musicService.position];
+	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.fast-forward.strings.noSong.title", locale)(),
@@ -64,7 +64,7 @@ async function handleFastForward(
 		return;
 	}
 
-	await musicService.skipTo(Math.round((position + timestamp) / 1000) * 1000);
+	await musicService.session.skipTo({ timestamp: position + timestamp });
 
 	const strings = {
 		title: client.localise("music.options.fast-forward.strings.fastForwarded.title", locale)(),

@@ -1,8 +1,7 @@
-import { AudioStream, Song, SongCollection } from "logos:constants/music";
-import { isSongCollection } from "logos:constants/music";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { SongCollectionView } from "logos/commands/components/paginated-views/song-collection-view";
+import { AudioStream, Song, SongCollection } from "logos/services/music";
 
 async function handleDisplayCurrentlyPlaying(
 	client: Client,
@@ -38,10 +37,10 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const [current, playingSince] = [musicService.current, musicService.playingSince];
+	const playingSince = musicService.playingSince;
 
 	if (interaction.parameters.collection) {
-		if (current?.content === undefined || !isSongCollection(current.content)) {
+		if (!(musicService.session.listings.current instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.now.strings.noSongCollection.title", locale)(),
@@ -64,7 +63,11 @@ async function handleDisplayCurrentlyPlaying(
 
 			return;
 		}
-	} else if (current?.content === undefined) {
+	}
+
+	// TODO(vxern): Remove this.
+	/*
+  else if (current?.content === undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.now.strings.noSong.title", locale)(),
@@ -77,10 +80,10 @@ async function handleDisplayCurrentlyPlaying(
 		});
 
 		return;
-	}
+	}*/
 
 	if (interaction.parameters.collection) {
-		const collection = current.content as SongCollection;
+		const collection = musicService.session.listings.current.queueable as SongCollection;
 
 		const locale = interaction.locale;
 		const strings = {
@@ -99,7 +102,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const song = current.content as Song | AudioStream;
+	const song = musicService.session.listings.current.queueable as Song | AudioStream;
 
 	const strings = {
 		nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),
@@ -117,7 +120,9 @@ async function handleDisplayCurrentlyPlaying(
 			"music.options.now.strings.sourcedFrom",
 			locale,
 		)({
-			source: current.source ?? client.localise("music.options.now.strings.theInternet", locale)(),
+			source:
+				musicService.session.listings.current.source ??
+				client.localise("music.options.now.strings.theInternet", locale)(),
 		}),
 	};
 
@@ -133,7 +138,7 @@ async function handleDisplayCurrentlyPlaying(
 				},
 				{
 					name: strings.requestedBy,
-					value: mention(current.requestedBy, { type: "user" }),
+					value: mention(musicService.session.listings.current.userId, { type: "user" }),
 					inline: false,
 				},
 				{

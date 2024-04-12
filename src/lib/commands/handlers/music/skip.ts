@@ -1,5 +1,5 @@
-import { isSongCollection } from "logos:constants/music";
 import { Client } from "logos/client";
+import { SongCollection } from "logos/services/music";
 
 async function handleSkipAction(
 	client: Client,
@@ -28,8 +28,8 @@ async function handleSkipAction(
 		return;
 	}
 
-	const [isOccupied, current] = [musicService.isOccupied, musicService.current];
-	if (!isOccupied || current === undefined) {
+	const isOccupied = musicService.isOccupied;
+	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),
@@ -47,7 +47,7 @@ async function handleSkipAction(
 	}
 
 	if (interaction.parameters.collection) {
-		if (current?.content === undefined || !isSongCollection(current.content)) {
+		if (!(musicService.session.listings.current instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.skip.strings.noSongCollection.title", locale)(),
@@ -70,7 +70,11 @@ async function handleSkipAction(
 
 			return;
 		}
-	} else if (current?.content === undefined) {
+	}
+
+	// TODO(vxern): Remove this.
+	/*
+  else if (current?.content === undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.skip.strings.noSong.title", locale)(),
@@ -83,7 +87,7 @@ async function handleSkipAction(
 		});
 
 		return;
-	}
+	}*/
 
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (interaction.parameters.by !== undefined && interaction.parameters.to !== undefined) {
@@ -142,21 +146,27 @@ async function handleSkipAction(
 
 	if (interaction.parameters.by !== undefined) {
 		let listingsToSkip!: number;
-		if (isSongCollection(current.content) && interaction.parameters.collection === undefined) {
+		if (
+			musicService.session.listings.current instanceof SongCollection &&
+			interaction.parameters.collection === undefined
+		) {
 			listingsToSkip = Math.min(
 				interaction.parameters.by,
-				current.content.songs.length - (current.content.position + 1),
+				musicService.session.listings.current.songs.length - (musicService.session.listings.current.position + 1),
 			);
 		} else {
-			listingsToSkip = Math.min(interaction.parameters.by, musicService.session.queue.length);
+			listingsToSkip = Math.min(interaction.parameters.by, musicService.session.listings.queue.listings.length);
 		}
 		await musicService.session.skip(isSkippingCollection, { by: listingsToSkip });
 	} else if (interaction.parameters.to !== undefined) {
 		let listingToSkipTo!: number;
-		if (isSongCollection(current.content) && interaction.parameters.collection === undefined) {
-			listingToSkipTo = Math.min(interaction.parameters.to, current.content.songs.length);
+		if (
+			musicService.session.listings.current instanceof SongCollection &&
+			interaction.parameters.collection === undefined
+		) {
+			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.current.songs.length);
 		} else {
-			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.queue.length);
+			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.queue.listings.length);
 		}
 		await musicService.session.skip(isSkippingCollection, { to: listingToSkipTo });
 	} else {

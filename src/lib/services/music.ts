@@ -26,6 +26,7 @@ class MusicService extends LocalService {
 		return this.#session !== undefined;
 	}
 
+	// TODO(vxern): Remove this.
 	get playingSince(): number | undefined {
 		const position = this.position;
 		if (position === undefined) {
@@ -384,7 +385,7 @@ class ListingQueue {
 	readonly #_discardOnPassedLimit: boolean;
 
 	get listings(): SongListing[] {
-		return Object.freeze(structuredClone(this.#_listings)) as SongListing[];
+		return structuredClone(this.#_listings);
 	}
 
 	get count(): number {

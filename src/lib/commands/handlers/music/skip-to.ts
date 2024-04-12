@@ -38,8 +38,8 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	const [isOccupied, current] = [musicService.isOccupied, musicService.current];
-	if (!isOccupied || current === undefined) {
+	const isOccupied = musicService.isOccupied;
+	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.skip-to.strings.noSong.title", locale)(),
