@@ -78,13 +78,13 @@ async function handleLoopPlayback(
 	}*/
 
 	if (interaction.parameters.collection) {
-		musicService.session.setLoop(!musicService.session.isLoopingCollection, { mode: "song-collection" });
+		musicService.session.setLoop(!musicService.session.queueable.isLooping, { mode: "song-collection" });
 	} else {
-		musicService.session.setLoop(!musicService.session.isLoopingSong, { mode: "playable" });
+		musicService.session.setLoop(!musicService.session.playable.isLooping, { mode: "playable" });
 	}
 
 	if (interaction.parameters.collection) {
-		if (!musicService.session.isLoopingCollection) {
+		if (!musicService.session.queueable.isLooping) {
 			const strings = {
 				title: client.localise("music.options.loop.strings.disabled.title", locale)(),
 				description: client.localise("music.options.loop.strings.disabled.description.songCollection", locale)(),
@@ -119,7 +119,7 @@ async function handleLoopPlayback(
 		return;
 	}
 
-	if (!musicService.session.isLoopingSong) {
+	if (!musicService.session.playable.isLooping) {
 		const strings = {
 			title: client.localise("music.options.loop.strings.disabled.title", locale)(),
 			description: client.localise("music.options.loop.strings.disabled.description.song", locale)(),

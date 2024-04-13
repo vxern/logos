@@ -62,8 +62,6 @@ class MusicService extends LocalService {
 	}
 
 	async createSession({ channelId }: { channelId: bigint }): Promise<MusicSession> {
-		const oldSession = this.#session;
-
 		const player = await this.client.lavalinkService.manager.joinVoiceChannel({
 			shardId: this.guild.shardId,
 			guildId: this.guildIdString,
@@ -73,7 +71,7 @@ class MusicService extends LocalService {
 
 		await player.setGlobalVolume(this.configuration.implicitVolume);
 
-		this.#session = new MusicSession({ service: this, player, channelId, oldSession });
+		this.#session = new MusicSession({ service: this, player, channelId, oldSession: this.#session });
 
 		return this.#session;
 	}
@@ -156,7 +154,7 @@ class MusicService extends LocalService {
 		await this.destroySession();
 	}
 
-	#_handleConnectionLost(): void {
+	#_handleConnectionLost(_: string, __: number): void {
 		this.client.bot.gateway
 			.leaveVoiceChannel(this.guildId)
 			.catch(() => this.log.warn("Failed to leave voice channel."));
@@ -196,7 +194,7 @@ class MusicService extends LocalService {
 		this.session.restoreAt = this.session.restoreAt + (Date.now() - this.session.startedAt);
 	}
 
-	async #_handleConnectionRestored(): Promise<void> {
+	async #_handleConnectionRestored(_: string, __: boolean): Promise<void> {
 		if (!this.hasSession) {
 			return;
 		}
@@ -472,10 +470,6 @@ class MusicSession {
 		breakLoop: boolean;
 	};
 
-	// TODO(vxern): These ought to be moved onto the queueable.
-	isLoopingSong: boolean;
-	isLoopingCollection: boolean;
-
 	startedAt: number;
 	restoreAt: number;
 
@@ -515,8 +509,6 @@ class MusicSession {
 			isDestroyed: false,
 			breakLoop: false,
 		};
-		this.isLoopingSong = true;
-		this.isLoopingCollection = true;
 		this.startedAt = 0;
 		this.restoreAt = 0;
 	}
@@ -528,7 +520,7 @@ class MusicSession {
 	// TODO(vxern): Put this on the song collection.
 	#_advanceSongCollection({ queueable }: { queueable: SongCollection }): void {
 		if (!queueable.isLastInCollection) {
-			if (this.isLoopingSong) {
+			if (queueable.playable.isLooping) {
 				queueable.position -= 1;
 			} else {
 				queueable.position += 1;
@@ -538,7 +530,7 @@ class MusicSession {
 
 		queueable.position = 0;
 
-		if (!this.isLoopingCollection) {
+		if (!queueable.isLooping) {
 			this.listings.moveCurrentToHistory();
 		}
 	}
@@ -548,7 +540,7 @@ class MusicSession {
 	}
 
 	async advanceQueueAndPlayNext(): Promise<void> {
-		if (this.isLoopingSong) {
+		if (this.playable.isLooping) {
 			await this.play(this.playable);
 			return;
 		}
@@ -592,11 +584,11 @@ class MusicSession {
 	setLoop(value: boolean, { mode }: { mode: QueueableMode }): void {
 		switch (mode) {
 			case "song-collection": {
-				this.isLoopingCollection = value;
+				this.queueable.isLooping = value;
 				break;
 			}
 			case "playable": {
-				this.isLoopingSong = value;
+				this.playable.isLooping = value;
 				break;
 			}
 		}
@@ -606,7 +598,7 @@ class MusicSession {
 		queueable,
 		controls,
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
-		this.isLoopingSong = false;
+		this.playable.isLooping = false;
 
 		if (controls.by !== undefined) {
 			queueable.position += controls.by - 1;
@@ -618,13 +610,13 @@ class MusicSession {
 	}
 
 	#_skipSongCollection(): void {
-		this.isLoopingCollection = false;
+		this.queueable.isLooping = false;
 
 		this.listings.moveCurrentToHistory();
 	}
 
 	#_skipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
-		this.isLoopingSong = false;
+		this.playable.isLooping = false;
 
 		this.listings.moveCurrentToHistory();
 
@@ -650,7 +642,7 @@ class MusicSession {
 	}
 
 	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
-		this.isLoopingCollection = false;
+		this.queueable.isLooping = false;
 
 		queueable.position -= 1;
 
@@ -662,7 +654,7 @@ class MusicSession {
 		queueable,
 		controls,
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
-		this.isLoopingSong = false;
+		this.playable.isLooping = false;
 
 		if (controls.by !== undefined) {
 			queueable.position -= controls.by + 1;
@@ -678,9 +670,8 @@ class MusicSession {
 	}
 
 	#_unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
-		this.isLoopingSong = false;
-
 		if (this.hasCurrent) {
+			this.playable.isLooping = false;
 			this.listings.moveCurrentToQueue();
 		}
 
@@ -710,23 +701,24 @@ class MusicSession {
 	}
 
 	#_replaySongCollection(): void {
-		const previousLoopState = this.isLoopingCollection;
-		this.isLoopingCollection = true;
-		this.player.once("start", () => {
-			this.isLoopingCollection = previousLoopState;
-		});
-
-		if (this.queueable instanceof SongCollection) {
-			this.queueable.position = -1;
+		const queueable = this.queueable;
+		if (!(queueable instanceof SongCollection)) {
+			return;
 		}
+
+		const previousLoopState = queueable.isLooping;
+		queueable.isLooping = true;
+		this.player.once("start", () => (queueable.isLooping = previousLoopState));
+
+		queueable.position = -1;
 	}
 
 	#_replayPlayable(): void {
-		const previousLoopState = this.isLoopingSong;
-		this.isLoopingSong = true;
-		this.player.once("start", () => {
-			this.isLoopingSong = previousLoopState;
-		});
+		const playable = this.playable;
+
+		const previousLoopState = playable.isLooping;
+		playable.isLooping = true;
+		this.player.once("start", () => (playable.isLooping = previousLoopState));
 	}
 
 	async replay({ mode }: { mode: QueueableMode }): Promise<void> {
@@ -762,7 +754,7 @@ class MusicSession {
 		const result = await this.player.node.rest.resolve(`ytsearch:${playable.url}`);
 
 		if (result === undefined || result.loadType === "error" || result.loadType === "empty") {
-			this.isLoopingSong = false;
+			this.playable.isLooping = false;
 
 			const guildLocale = this.service.guildLocale;
 			const strings = {
@@ -811,7 +803,7 @@ class MusicSession {
 		}
 
 		this.player.once("exception", async (reason) => {
-			this.isLoopingSong = false;
+			this.playable.isLooping = false;
 
 			this.service.log.warn(`Failed to play track: ${reason.exception}`);
 
@@ -972,6 +964,7 @@ abstract class Queueable {
 	title: string;
 	readonly url: string;
 	readonly emoji: string;
+	isLooping: boolean;
 
 	abstract get playable(): Playable;
 
@@ -979,6 +972,7 @@ abstract class Queueable {
 		this.title = title;
 		this.url = url;
 		this.emoji = emoji;
+		this.isLooping = false;
 	}
 }
 
@@ -1012,7 +1006,6 @@ class AudioStream extends Playable {
 class SongCollection extends Queueable {
 	/** The songs in this collection. */
 	readonly songs: Song[];
-
 	/** The index of the song that is currently playing. */
 	position: number;
 
