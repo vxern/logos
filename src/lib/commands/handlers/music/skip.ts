@@ -154,7 +154,10 @@ async function handleSkipAction(
 		} else {
 			listingsToSkip = Math.min(interaction.parameters.by, musicService.session.listings.queue.listings.length);
 		}
-		await musicService.session.skip({ skipCollection: isSkippingCollection, controls: { by: listingsToSkip } });
+		await musicService.session.skip({
+			mode: isSkippingCollection ? "song-collection" : "playable",
+			controls: { by: listingsToSkip },
+		});
 	} else if (interaction.parameters.to !== undefined) {
 		let listingToSkipTo!: number;
 		if (musicService.session.current instanceof SongCollection && interaction.parameters.collection === undefined) {
@@ -162,9 +165,12 @@ async function handleSkipAction(
 		} else {
 			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.queue.listings.length);
 		}
-		await musicService.session.skip({ skipCollection: isSkippingCollection, controls: { to: listingToSkipTo } });
+		await musicService.session.skip({
+			mode: isSkippingCollection ? "song-collection" : "playable",
+			controls: { to: listingToSkipTo },
+		});
 	} else {
-		await musicService.session.skip({ skipCollection: isSkippingCollection, controls: {} });
+		await musicService.session.skip({ mode: isSkippingCollection ? "song-collection" : "playable", controls: {} });
 	}
 }
 

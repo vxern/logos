@@ -510,7 +510,7 @@ class ListingManager {
 }
 
 // TODO(vxern): Set up listeners to automatically respond to queue events.
-type ListingMode = "single" | "collection";
+type QueueableMode = "song-collection" | "playable";
 class MusicSession {
 	readonly events: EventEmitter;
 	readonly service: MusicService;
@@ -621,14 +621,14 @@ class MusicSession {
 		await this.player.setGlobalVolume(volume);
 	}
 
-	setLoop(value: boolean, { mode }: { mode: ListingMode }): void {
+	setLoop(value: boolean, { mode }: { mode: QueueableMode }): void {
 		switch (mode) {
-			case "single": {
-				this.isLoopingSong = value;
+			case "song-collection": {
+				this.isLoopingCollection = value;
 				break;
 			}
-			case "collection": {
-				this.isLoopingCollection = value;
+			case "playable": {
+				this.isLoopingSong = value;
 				break;
 			}
 		}
@@ -665,12 +665,9 @@ class MusicSession {
 		this.listings.moveFromQueueToHistory({ count: listingsToMoveToHistory });
 	}
 
-	async skip({
-		skipCollection,
-		controls,
-	}: { skipCollection: boolean; controls: Partial<PositionControls> }): Promise<void> {
+	async skip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
 		if (this.queueable instanceof SongCollection) {
-			if (skipCollection || this.queueable.isLastInCollection) {
+			if (mode === "song-collection" || this.queueable.isLastInCollection) {
 				this.#_skipSongCollection();
 			} else {
 				this.#_skipSongInSongCollection({ queueable: this.queueable, controls });
@@ -720,12 +717,9 @@ class MusicSession {
 		this.listings.moveFromHistoryToQueue({ count: listingsToMoveToQueue });
 	}
 
-	async unskip({
-		unskipCollection,
-		controls,
-	}: { unskipCollection: boolean; controls: Partial<PositionControls> }): Promise<void> {
+	async unskip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
 		if (this.queueable instanceof SongCollection) {
-			if (unskipCollection || this.queueable.isFirstInCollection) {
+			if (mode === "song-collection" || this.queueable.isFirstInCollection) {
 				this.#_unskipSongCollection({ queueable: this.queueable });
 			} else {
 				this.#_unskipSongInSongColletion({ queueable: this.queueable, controls });
@@ -761,11 +755,16 @@ class MusicSession {
 		});
 	}
 
-	async replay({ replayCollection }: { replayCollection: boolean }): Promise<void> {
-		if (replayCollection) {
-			this.#_replaySongCollection();
-		} else {
-			this.#_replayPlayable();
+	async replay({ mode }: { mode: QueueableMode }): Promise<void> {
+		switch (mode) {
+			case "song-collection": {
+				this.#_replaySongCollection();
+				break;
+			}
+			case "playable": {
+				this.#_replayPlayable();
+				break;
+			}
 		}
 
 		this.flags.breakLoop = true;
@@ -774,7 +773,6 @@ class MusicSession {
 		await this.advanceQueueAndPlay();
 	}
 
-	// TODO(vxern): Refactor this.
 	async skipTo({ timestamp }: { timestamp: number }): Promise<void> {
 		this.restoreAt = timestamp;
 		await this.player.seekTo(timestamp);

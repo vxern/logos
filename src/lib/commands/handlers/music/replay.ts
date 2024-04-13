@@ -92,7 +92,9 @@ async function handleReplayAction(
 		{ visible: true },
 	);
 
-	await musicService.session.replay({ replayCollection: interaction.parameters.collection ?? false });
+	await musicService.session.replay({
+		mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
+	});
 }
 
 export { handleReplayAction };

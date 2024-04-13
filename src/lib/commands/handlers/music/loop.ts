@@ -80,9 +80,9 @@ async function handleLoopPlayback(
 	}*/
 
 	if (interaction.parameters.collection) {
-		musicService.session.setLoop(!musicService.session.isLoopingCollection, { mode: "collection" });
+		musicService.session.setLoop(!musicService.session.isLoopingCollection, { mode: "song-collection" });
 	} else {
-		musicService.session.setLoop(!musicService.session.isLoopingSong, { mode: "single" });
+		musicService.session.setLoop(!musicService.session.isLoopingSong, { mode: "playable" });
 	}
 
 	if (interaction.parameters.collection) {

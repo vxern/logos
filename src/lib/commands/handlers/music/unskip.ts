@@ -163,7 +163,7 @@ async function handleUnskipAction(
 
 	if (isUnskippingListing) {
 		await musicService.session.unskip({
-			unskipCollection: interaction.parameters.collection ?? false,
+			mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
 			controls: {
 				by: interaction.parameters.by,
 				to: interaction.parameters.to,
@@ -178,7 +178,7 @@ async function handleUnskipAction(
 				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.listings.history.count);
 			}
 			await musicService.session.unskip({
-				unskipCollection: interaction.parameters.collection ?? false,
+				mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
 				controls: { by: listingsToUnskip },
 			});
 		} else if (interaction.parameters.to !== undefined) {
@@ -189,11 +189,14 @@ async function handleUnskipAction(
 				listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.history.count);
 			}
 			await musicService.session.unskip({
-				unskipCollection: interaction.parameters.collection ?? false,
+				mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
 				controls: { to: listingToSkipTo },
 			});
 		} else {
-			await musicService.session.unskip({ unskipCollection: interaction.parameters.collection ?? false, controls: {} });
+			await musicService.session.unskip({
+				mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
+				controls: {},
+			});
 		}
 	}
 }
