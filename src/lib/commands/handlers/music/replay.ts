@@ -36,7 +36,7 @@ async function handleReplayAction(
 	}
 
 	if (interaction.parameters.collection) {
-		if (!(musicService.session.current instanceof SongCollection)) {
+		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.replay.strings.noSongCollection.title", locale)(),

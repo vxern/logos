@@ -47,7 +47,7 @@ async function handleSkipAction(
 	}
 
 	if (interaction.parameters.collection) {
-		if (!(musicService.session.current instanceof SongCollection)) {
+		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.skip.strings.noSongCollection.title", locale)(),
@@ -146,10 +146,10 @@ async function handleSkipAction(
 
 	if (interaction.parameters.by !== undefined) {
 		let listingsToSkip!: number;
-		if (musicService.session.current instanceof SongCollection && interaction.parameters.collection === undefined) {
+		if (musicService.session.queueable instanceof SongCollection && interaction.parameters.collection === undefined) {
 			listingsToSkip = Math.min(
 				interaction.parameters.by,
-				musicService.session.current.songs.length - (musicService.session.current.position + 1),
+				musicService.session.queueable.songs.length - (musicService.session.queueable.position + 1),
 			);
 		} else {
 			listingsToSkip = Math.min(interaction.parameters.by, musicService.session.listings.queue.listings.length);
@@ -160,8 +160,8 @@ async function handleSkipAction(
 		});
 	} else if (interaction.parameters.to !== undefined) {
 		let listingToSkipTo!: number;
-		if (musicService.session.current instanceof SongCollection && interaction.parameters.collection === undefined) {
-			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.current.songs.length);
+		if (musicService.session.queueable instanceof SongCollection && interaction.parameters.collection === undefined) {
+			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.queueable.songs.length);
 		} else {
 			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.queue.listings.length);
 		}

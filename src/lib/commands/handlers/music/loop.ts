@@ -37,7 +37,7 @@ async function handleLoopPlayback(
 	}
 
 	if (interaction.parameters.collection) {
-		if (!(musicService.session.current instanceof SongCollection)) {
+		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.loop.strings.noSongCollection.title", locale)(),

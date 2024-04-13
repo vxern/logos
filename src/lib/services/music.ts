@@ -213,7 +213,10 @@ class MusicService extends LocalService {
 		// @ts-ignore: For now...
 		this.#session = { ...oldSession, player: newSession.player };
 
-		await this.session.play({ playable: currentSong, restore: { paused: oldSession.player.paused, volume: oldSession.player.volume }});
+		await this.session.play({
+			playable: currentSong,
+			restore: { paused: oldSession.player.paused, volume: oldSession.player.volume },
+		});
 
 		const guildLocale = this.guildLocale;
 
@@ -238,12 +241,7 @@ class MusicService extends LocalService {
 	verifyVoiceState(interaction: Logos.Interaction, action: "manage" | "check"): boolean {
 		const locale = interaction.locale;
 
-		const session = this.#session;
-		if (session === undefined) {
-			return false;
-		}
-
-		if (session?.flags.isDisconnected) {
+		if (this.#session?.flags.isDisconnected) {
 			const strings = {
 				title: this.client.localise("music.strings.outage.cannotManage.title", locale)(),
 				description: {
@@ -306,7 +304,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		if (this.session.listings.queue.isFull) {
+		if (this.#session?.listings.queue.isFull) {
 			const strings = {
 				title: this.client.localise("music.options.play.strings.queueFull.title", locale)(),
 				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
@@ -355,7 +353,7 @@ class MusicService extends LocalService {
 					"music.options.play.strings.queued.description.public",
 					guildLocale,
 				)({
-					title: listing.queueable.playable.title,
+					title: listing.queueable.title,
 					user_mention: mention(listing.userId, { type: "user" }),
 				}),
 			};
@@ -375,7 +373,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		await session.advanceQueueAndPlay();
+		await session.playNext();
 	}
 }
 
@@ -463,6 +461,10 @@ class ListingManager {
 
 	#current?: SongListing;
 
+	get hasCurrent(): boolean {
+		return this.#current !== undefined;
+	}
+
 	get current(): SongListing {
 		return this.#current!;
 	}
@@ -475,7 +477,7 @@ class ListingManager {
 	moveCurrentToHistory(): void {
 		// TODO(vxern): This is bad, and it shouldn't be necessary here.
 		// Adjust the position for being incremented automatically when played next time.
-		if (this.current.queueable instanceof SongCollection) {
+		if (this.hasCurrent && this.current.queueable instanceof SongCollection) {
 			this.current.queueable.position -= 1;
 		}
 
@@ -530,16 +532,20 @@ class MusicSession {
 	startedAt: number;
 	restoreAt: number;
 
+	get hasCurrent(): boolean {
+		return this.listings.hasCurrent;
+	}
+
 	get current(): SongListing {
-		return this.current;
+		return this.listings.current;
 	}
 
 	get queueable(): Queueable {
-		return this.queueable;
+		return this.current.queueable;
 	}
 
 	get playable(): Playable {
-		return this.playable;
+		return this.queueable.playable;
 	}
 
 	get isPaused(): boolean {
@@ -584,26 +590,45 @@ class MusicSession {
 			} else {
 				queueable.position += 1;
 			}
-
 			return;
 		}
 
-		if (this.isLoopingCollection) {
-			queueable.position = 0;
-			return;
+		queueable.position = 0;
+
+		if (!this.isLoopingCollection) {
+			this.listings.moveCurrentToHistory();
 		}
 	}
 
-	async advanceQueueAndPlay(): Promise<void> {
-		if (this.queueable instanceof SongCollection) {
-			this.#_advanceSongCollection({ queueable: this.queueable });
-		} else if (this.isLoopingSong) {
+	#_advancePlayable(): void {
+		this.listings.moveCurrentToHistory();
+	}
+
+	async advanceQueueAndPlayNext(): Promise<void> {
+		if (this.isLoopingSong) {
 			await this.play(this.playable);
 			return;
 		}
 
-		this.listings.moveCurrentToHistory();
+		// There could be no current queueable in the case of the current song elapsing, or in the case of
+		// it having been removed through some other action, for example during a skip/unskip action.
+		//
+		// If it is indeed the situation that there is no current queueable, we just ignore it and carry on
+		// as normal, attempting to play the next queueable.
+		if (this.hasCurrent) {
+			if (this.queueable instanceof SongCollection) {
+				this.#_advanceSongCollection({ queueable: this.queueable });
+				await this.play(this.playable);
+				return;
+			}
 
+			this.#_advancePlayable();
+		}
+
+		await this.playNext();
+	}
+
+	async playNext(): Promise<void> {
 		if (this.listings.queue.isEmpty) {
 			return;
 		}
@@ -677,6 +702,8 @@ class MusicSession {
 		}
 
 		await this.player.stopTrack();
+		// REMINDER(vxern): Remove once merged.
+		this.player.track = null;
 	}
 
 	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
@@ -710,7 +737,9 @@ class MusicSession {
 	#_unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
 		this.isLoopingSong = false;
 
-		this.listings.moveCurrentToQueue();
+		if (this.hasCurrent) {
+			this.listings.moveCurrentToQueue();
+		}
 
 		const count = controls.by ?? controls.to ?? 1;
 		const listingsToMoveToQueue = Math.min(count, this.listings.history.count);
@@ -718,7 +747,7 @@ class MusicSession {
 	}
 
 	async unskip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
-		if (this.queueable instanceof SongCollection) {
+		if (this.hasCurrent && this.queueable instanceof SongCollection) {
 			if (mode === "song-collection" || this.queueable.isFirstInCollection) {
 				this.#_unskipSongCollection({ queueable: this.queueable });
 			} else {
@@ -728,10 +757,12 @@ class MusicSession {
 			this.#_unskipPlayable({ controls });
 		}
 
-		if (this.player.track !== undefined) {
+		if (this.player.track !== null) {
 			await this.player.stopTrack();
+			// REMINDER(vxern): Remove this once it's merged into Shoukaku.
+			this.player.track = null;
 		} else {
-			await this.advanceQueueAndPlay();
+			await this.advanceQueueAndPlayNext();
 		}
 	}
 
@@ -770,7 +801,9 @@ class MusicSession {
 		this.flags.breakLoop = true;
 		this.restoreAt = 0;
 		await this.player.stopTrack();
-		await this.advanceQueueAndPlay();
+		// REMINDER(vxern): Remove once merged.
+		this.player.track = null;
+		await this.advanceQueueAndPlayNext();
 	}
 
 	async skipTo({ timestamp }: { timestamp: number }): Promise<void> {
@@ -817,7 +850,7 @@ class MusicSession {
 					),
 				);
 
-			await this.advanceQueueAndPlay();
+			await this.advanceQueueAndPlayNext();
 
 			return false;
 		}
@@ -870,7 +903,10 @@ class MusicSession {
 		});
 
 		this.player.once("end", async () => {
-			this.player.removeAllListeners("trackException");
+			// REMINDER(vxern): Remove once merged.
+			this.player.track = null;
+
+			this.player.removeAllListeners("exception");
 
 			if (this.flags.isDestroyed) {
 				return;
@@ -883,7 +919,7 @@ class MusicSession {
 
 			this.restoreAt = 0;
 
-			await this.advanceQueueAndPlay();
+			await this.advanceQueueAndPlayNext();
 		});
 
 		this.player.once("start", async () => {

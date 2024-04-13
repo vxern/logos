@@ -40,7 +40,7 @@ async function handleDisplayCurrentlyPlaying(
 	const playingSince = musicService.playingSince;
 
 	if (interaction.parameters.collection) {
-		if (!(musicService.session.current instanceof SongCollection)) {
+		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.now.strings.noSongCollection.title", locale)(),
