@@ -8,8 +8,7 @@ async function handleRequestStreamPlayback(
 ): Promise<void> {
 	const locale = interaction.locale;
 
-	await client.postponeReply(interaction);
-	await client.deleteReply(interaction);
+	await client.acknowledge(interaction);
 
 	const strings = {
 		stream: client.localise("music.options.play.strings.stream", locale)(),

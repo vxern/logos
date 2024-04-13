@@ -13,8 +13,7 @@ async function resolveYouTubeSongListings(
 		return await search(client, interaction, query);
 	}
 
-	await client.postponeReply(interaction);
-	await client.deleteReply(interaction);
+	await client.acknowledge(interaction);
 
 	if (query.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);

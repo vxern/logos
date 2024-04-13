@@ -158,6 +158,12 @@ class InteractionStore {
 	}
 
 	async acknowledge(interaction: Logos.Interaction): Promise<void> {
+		if (interaction.type === Discord.InteractionTypes.ApplicationCommand) {
+			await this.postponeReply(interaction);
+			await this.deleteReply(interaction);
+			return;
+		}
+
 		await this.#client.bot.rest
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
