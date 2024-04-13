@@ -741,32 +741,36 @@ class MusicSession {
 		}
 	}
 
-	// TODO(vxern): Refactor this.
-	async replay(collection: boolean): Promise<void> {
-		if (collection) {
-			const previousLoopState = this.isLoopingCollection;
-			this.isLoopingCollection = true;
-			this.player.once("start", () => {
-				this.isLoopingCollection = previousLoopState;
-			});
-		} else {
-			const previousLoopState = this.isLoopingSong;
-			this.isLoopingSong = true;
-			this.player.once("start", () => {
-				this.isLoopingSong = previousLoopState;
-			});
-		}
+	#_replaySongCollection(): void {
+		const previousLoopState = this.isLoopingCollection;
+		this.isLoopingCollection = true;
+		this.player.once("start", () => {
+			this.isLoopingCollection = previousLoopState;
+		});
 
 		if (this.queueable instanceof SongCollection) {
-			if (collection) {
-				this.queueable.position = -1;
-			}
+			this.queueable.position = -1;
+		}
+	}
+
+	#_replayPlayable(): void {
+		const previousLoopState = this.isLoopingSong;
+		this.isLoopingSong = true;
+		this.player.once("start", () => {
+			this.isLoopingSong = previousLoopState;
+		});
+	}
+
+	async replay({ replayCollection }: { replayCollection: boolean }): Promise<void> {
+		if (replayCollection) {
+			this.#_replaySongCollection();
+		} else {
+			this.#_replayPlayable();
 		}
 
 		this.flags.breakLoop = true;
 		this.restoreAt = 0;
 		await this.player.stopTrack();
-
 		await this.advanceQueueAndPlay();
 	}
 
