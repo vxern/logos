@@ -576,6 +576,7 @@ class MusicSession {
 		this.listings.queue.addNew(listing);
 	}
 
+	// TODO(vxern): Put this on the song collection.
 	#_advanceSongCollection({ queueable }: { queueable: SongCollection }): void {
 		if (!queueable.isLastInCollection) {
 			if (this.isLoopingSong) {
@@ -633,32 +634,49 @@ class MusicSession {
 		}
 	}
 
-	// TODO(vxern): Refactor this.
-	async skip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
+	#_skipSongInSongCollection({
+		queueable,
+		controls,
+	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
+		this.isLoopingSong = false;
+
+		if (controls.by !== undefined) {
+			queueable.position += controls.by - 1;
+		}
+
+		if (controls.to !== undefined) {
+			queueable.position = controls.to - 2;
+		}
+	}
+
+	#_skipSongCollection(): void {
+		this.isLoopingCollection = false;
+
+		this.listings.moveCurrentToHistory();
+	}
+
+	#_skipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
+		this.isLoopingSong = false;
+
+		this.listings.moveCurrentToHistory();
+
+		const count = controls.by ?? controls.to ?? 0;
+		const listingsToMoveToHistory = Math.min(count, this.listings.queue.count);
+		this.listings.moveFromQueueToHistory({ count: listingsToMoveToHistory });
+	}
+
+	async skip({
+		skipCollection,
+		controls,
+	}: { skipCollection: boolean; controls: Partial<PositionControls> }): Promise<void> {
 		if (this.queueable instanceof SongCollection) {
-			if (collection || this.queueable.isLastInCollection) {
-				this.isLoopingCollection = false;
-				this.listings.moveCurrentToHistory();
+			if (skipCollection || this.queueable.isLastInCollection) {
+				this.#_skipSongCollection();
 			} else {
-				this.isLoopingSong = false;
-
-				if (by !== undefined) {
-					this.queueable.position += by - 1;
-				}
-
-				if (to !== undefined) {
-					this.queueable.position = to - 2;
-				}
+				this.#_skipSongInSongCollection({ queueable: this.queueable, controls });
 			}
 		} else {
-			const listingsToMoveToHistory = Math.min(by ?? to ?? 0, this.listings.queue.count);
-
-			this.listings.moveCurrentToHistory();
-			this.listings.moveFromQueueToHistory({ count: listingsToMoveToHistory });
-
-			if (listingsToMoveToHistory !== 0) {
-				this.isLoopingSong = false;
-			}
+			this.#_skipPlayable({ controls });
 		}
 
 		await this.player.stopTrack();
