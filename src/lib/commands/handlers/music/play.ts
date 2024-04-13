@@ -1,7 +1,7 @@
 import { Client } from "logos/client";
 import resolvers from "logos/commands/resolvers";
 import { SongListingResolver } from "logos/commands/resolvers/resolver";
-import { AudioStream, SongListing } from "logos/services/music";
+import { AudioStream, MusicService, SongListing } from "logos/services/music";
 
 async function handleRequestStreamPlayback(
 	client: Client,
@@ -37,7 +37,7 @@ async function handleRequestQueryPlayback(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(interaction);
+	const isVoiceStateVerified = verifyCanRequestPlayback(client, interaction, { musicService });
 	if (!isVoiceStateVerified) {
 		return;
 	}
@@ -84,7 +84,7 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanRequestPlayback(interaction);
+	const isVoiceStateVerified = verifyCanRequestPlayback(client, interaction, { musicService });
 	if (!isVoiceStateVerified) {
 		return;
 	}
@@ -96,6 +96,35 @@ async function handleRequestPlayback(
 	}
 
 	await musicService.receiveNewListing(listing, channelId);
+}
+
+function verifyCanRequestPlayback(
+	client: Client,
+	interaction: Logos.Interaction,
+	{ musicService }: { musicService: MusicService },
+): boolean {
+	const locale = interaction.locale;
+
+	const isVoiceStateVerified = musicService.verifyVoiceState(interaction, "manage");
+	if (!isVoiceStateVerified) {
+		return false;
+	}
+
+	if (musicService.session.listings.queue.isFull) {
+		const strings = {
+			title: client.localise("music.options.play.strings.queueFull.title", locale)(),
+			description: client.localise("music.options.play.strings.queueFull.description", locale)(),
+		};
+
+		client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
+		});
+
+		return false;
+	}
+
+	return true;
 }
 
 export { handleRequestYouTubePlayback, handleRequestStreamPlayback };

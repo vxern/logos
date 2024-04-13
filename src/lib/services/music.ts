@@ -288,31 +288,6 @@ class MusicService extends LocalService {
 		return true;
 	}
 
-	verifyCanRequestPlayback(interaction: Logos.Interaction): boolean {
-		const locale = interaction.locale;
-
-		const isVoiceStateVerified = this.verifyVoiceState(interaction, "manage");
-		if (!isVoiceStateVerified) {
-			return false;
-		}
-
-		if (this.#session?.listings.queue.isFull) {
-			const strings = {
-				title: this.client.localise("music.options.play.strings.queueFull.title", locale)(),
-				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
-			};
-
-			this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
-
-			return false;
-		}
-
-		return true;
-	}
-
 	verifyCanManagePlayback(interaction: Logos.Interaction): boolean {
 		const isVoiceStateVerified = this.verifyVoiceState(interaction, "manage");
 		if (!isVoiceStateVerified) {
