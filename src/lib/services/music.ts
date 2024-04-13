@@ -26,11 +26,17 @@ class MusicService extends LocalService {
 		return this.#session!;
 	}
 
-	get #_usersInChannel(): number {
+	get #_isLogosAlone(): boolean | undefined {
+		const botVoiceState = this.guild.voiceStates.get(this.client.bot.id);
+		if (botVoiceState?.channelId === undefined) {
+			return undefined;
+		}
+
 		const voiceStatesForChannel = this.guild.voiceStates
 			.array()
-			.filter((voiceState) => voiceState.channelId === this.session.channelId);
-		return voiceStatesForChannel.length;
+			.filter((voiceState) => voiceState.channelId === botVoiceState.channelId);
+
+		return voiceStatesForChannel.length === 1;
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -68,6 +74,21 @@ class MusicService extends LocalService {
 			channelId: channelId.toString(),
 			deaf: true,
 		});
+
+		// Shoukaku does not remove the current track by default, which means we have to override
+		// these methods and add that functionality ourselves, given that the value of `track` is
+		// how we check whether the player is playing something or not.
+		const { stopTrack, onPlayerEvent } = player;
+		player.stopTrack = async () => {
+			await stopTrack.call(player);
+			player.track = null;
+		};
+		player.onPlayerEvent = (json) => {
+			onPlayerEvent.call(player, json);
+			if (json.type === "TrackEndEvent") {
+				player.track = null;
+			}
+		};
 
 		await player.setGlobalVolume(this.configuration.implicitVolume);
 
@@ -124,11 +145,7 @@ class MusicService extends LocalService {
 	}
 
 	async #_handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
-		if (!this.hasSession) {
-			return;
-		}
-
-		if (this.#_usersInChannel === 1) {
+		if (this.#_isLogosAlone === true) {
 			await this.#_handleSessionAbandoned();
 		}
 	}
@@ -302,6 +319,10 @@ class MusicService extends LocalService {
 	}
 
 	canRequestPlayback(interaction: Logos.Interaction): boolean {
+		if (!this.hasSession) {
+			return true;
+		}
+
 		const locale = interaction.locale;
 
 		if (this.session.listings.queue.isFull) {
@@ -544,26 +565,28 @@ class MusicSession {
 	}
 
 	async advanceQueueAndPlayNext(): Promise<void> {
-		if (this.playable.isLooping) {
-			await this.play(this.playable);
-			return;
-		}
-
 		// There could be no current queueable in the case of the current song elapsing, or in the case of
 		// it having been removed through some other action, for example during a skip/unskip action.
 		//
 		// If it is indeed the situation that there is no current queueable, we just ignore it and carry on
 		// as normal, attempting to play the next queueable.
-		if (this.hasCurrent) {
-			if (this.queueable instanceof SongCollection) {
-				this.#_advanceSongCollection({ queueable: this.queueable });
-				await this.play(this.playable);
-				return;
-			}
-
-			this.#_advancePlayable();
+		if (!this.hasCurrent) {
+			await this.playNext();
+			return;
 		}
 
+		if (this.playable.isLooping) {
+			await this.play(this.playable);
+			return;
+		}
+
+		if (this.queueable instanceof SongCollection) {
+			this.#_advanceSongCollection({ queueable: this.queueable });
+			await this.play(this.playable);
+			return;
+		}
+
+		this.#_advancePlayable();
 		await this.playNext();
 	}
 
@@ -637,8 +660,6 @@ class MusicSession {
 		}
 
 		await this.player.stopTrack();
-		// REMINDER(vxern): Remove once merged.
-		this.player.track = null;
 	}
 
 	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
@@ -690,11 +711,10 @@ class MusicSession {
 
 		if (this.player.track !== null) {
 			await this.player.stopTrack();
-			// REMINDER(vxern): Remove this once it's merged into Shoukaku.
-			this.player.track = null;
-		} else {
-			await this.advanceQueueAndPlayNext();
+			return;
 		}
+
+		await this.advanceQueueAndPlayNext();
 	}
 
 	#_replaySongCollection(): void {
@@ -733,8 +753,6 @@ class MusicSession {
 		this.flags.breakLoop = true;
 		this.restoreAt = 0;
 		await this.player.stopTrack();
-		// REMINDER(vxern): Remove once merged.
-		this.player.track = null;
 		await this.advanceQueueAndPlayNext();
 	}
 
@@ -835,9 +853,6 @@ class MusicSession {
 		});
 
 		this.player.once("end", async () => {
-			// REMINDER(vxern): Remove once merged.
-			this.player.track = null;
-
 			this.player.removeAllListeners("exception");
 
 			if (this.flags.isDestroyed) {

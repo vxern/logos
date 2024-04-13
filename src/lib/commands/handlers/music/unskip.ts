@@ -45,6 +45,10 @@ async function handleUnskipAction(
 	}
 
 	const isUnskippingListing = (() => {
+		if (!musicService.session.hasCurrent) {
+			return true;
+		}
+
 		if (!(musicService.session.queueable instanceof SongCollection)) {
 			return true;
 		}

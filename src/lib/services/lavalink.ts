@@ -20,6 +20,10 @@ class ClientConnector extends shoukaku.Connector {
 		this.#_voiceServerUpdates = new Collector<"voiceServerUpdate">();
 	}
 
+	/**
+	 * @privateRemarks
+	 * This method is intentionally not a getter; it conforms to shoukaku's Connector signature.
+	 */
 	getId(): string {
 		return this.client.bot.id.toString();
 	}
