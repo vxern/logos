@@ -38,7 +38,7 @@ async function handleFastForward(
 		return;
 	}
 
-	const [isOccupied, position] = [musicService.isOccupied, musicService.position];
+	const [isOccupied, position] = [musicService.hasActiveSession, musicService.position];
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {

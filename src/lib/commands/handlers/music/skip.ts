@@ -28,7 +28,7 @@ async function handleSkipAction(
 		return;
 	}
 
-	const isOccupied = musicService.isOccupied;
+	const isOccupied = musicService.hasActiveSession;
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {

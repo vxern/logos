@@ -35,7 +35,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		return;
 	}
 
-	const [isOccupied, position] = [musicService.isOccupied, musicService.position];
+	const [isOccupied, position] = [musicService.hasActiveSession, musicService.position];
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {

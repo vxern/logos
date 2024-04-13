@@ -14,7 +14,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 		return;
 	}
 
-	const isOccupied = musicService.isOccupied;
+	const isOccupied = musicService.hasActiveSession;
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
@@ -32,11 +32,6 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 		return;
 	}
 
-	const events = musicService.events;
-	if (events === undefined) {
-		return;
-	}
-
 	const strings = {
 		queue: client.localise("music.options.queue.strings.queue", locale)(),
 	};
@@ -50,12 +45,12 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	const refreshView = async () => view.refresh();
 	const closeView = async () => view.close();
 
-	events.on("queueUpdate", refreshView);
-	events.on("stop", closeView);
+	musicService.session.events.on("queueUpdate", refreshView);
+	musicService.session.events.on("stop", closeView);
 
 	setTimeout(() => {
-		events.off("queueUpdate", refreshView);
-		events.off("stop", closeView);
+		musicService.session.events.off("queueUpdate", refreshView);
+		musicService.session.events.off("stop", closeView);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 
 	await view.open();

@@ -14,7 +14,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 		return;
 	}
 
-	const isOccupied = musicService.isOccupied;
+	const isOccupied = musicService.hasActiveSession;
 	if (!isOccupied) {
 		const locale = interaction.locale;
 		const strings = {
@@ -32,11 +32,6 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 		return;
 	}
 
-	const events = musicService.events;
-	if (events === undefined) {
-		return;
-	}
-
 	const strings = {
 		title: client.localise("music.options.history.strings.playbackHistory", locale)(),
 	};
@@ -50,12 +45,12 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 	const refreshView = async () => view.refresh();
 	const closeView = async () => view.close();
 
-	events.on("queueUpdate", refreshView);
-	events.on("stop", closeView);
+	musicService.session.events.on("queueUpdate", refreshView);
+	musicService.session.events.on("stop", closeView);
 
 	setTimeout(() => {
-		events.off("queueUpdate", refreshView);
-		events.off("stop", closeView);
+		musicService.session.events.off("queueUpdate", refreshView);
+		musicService.session.events.off("stop", closeView);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 
 	await view.open();

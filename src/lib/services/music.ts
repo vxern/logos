@@ -14,15 +14,7 @@ class MusicService extends LocalService {
 		return this.guildDocument.music!;
 	}
 
-	get channelId(): bigint | undefined {
-		return this.#session?.channelId;
-	}
-
-	get events(): EventEmitter | undefined {
-		return this.#session?.events;
-	}
-
-	get isOccupied(): boolean {
+	get hasActiveSession(): boolean {
 		return this.#session !== undefined;
 	}
 
@@ -278,8 +270,8 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const [isOccupied, channelId] = [this.isOccupied, this.channelId];
-		if (isOccupied !== undefined && isOccupied && voiceState.channelId !== channelId) {
+		const isOccupied = this.hasActiveSession;
+		if (isOccupied && voiceState.channelId !== this.session.channelId) {
 			const strings = {
 				title: this.client.localise("music.options.play.strings.inDifferentVc.title", locale)(),
 				description: this.client.localise("music.options.play.strings.inDifferentVc.description", locale)(),
@@ -1095,7 +1087,6 @@ class SongCollection extends Queueable {
 class SongListing {
 	readonly queueable: Queueable;
 	readonly userId: bigint;
-	// TODO(vxern): Is this needed?
 	readonly source?: string;
 
 	constructor({ queueable, userId }: { queueable: Queueable; userId: bigint }) {
