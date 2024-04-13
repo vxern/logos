@@ -1,7 +1,27 @@
 import { Client } from "logos/client";
 import resolvers from "logos/commands/resolvers";
 import { SongListingResolver } from "logos/commands/resolvers/resolver";
-import { SongListing } from "logos/services/music";
+import { AudioStream, SongListing } from "logos/services/music";
+
+async function handleRequestStreamPlayback(
+	client: Client,
+	interaction: Logos.Interaction<any, { url: string }>,
+): Promise<void> {
+	const locale = interaction.locale;
+
+	await client.acknowledge(interaction);
+
+	const strings = {
+		stream: client.localise("music.options.play.strings.stream", locale)(),
+	};
+
+	const listing: SongListing = new SongListing({
+		queueable: new AudioStream({ title: strings.stream, url: interaction.parameters.url }),
+		userId: interaction.user.id,
+	});
+
+	await handleRequestPlayback(client, interaction, listing);
+}
 
 async function handleRequestYouTubePlayback(client: Client, interaction: Logos.Interaction<any, { query: string }>) {
 	await handleRequestQueryPlayback(client, interaction, resolvers.youtube);
@@ -78,4 +98,4 @@ async function handleRequestPlayback(
 	await musicService.receiveNewListing(listing, channelId);
 }
 
-export { handleRequestPlayback, handleRequestYouTubePlayback };
+export { handleRequestYouTubePlayback, handleRequestStreamPlayback };
