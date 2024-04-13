@@ -213,7 +213,7 @@ class MusicService extends LocalService {
 		// @ts-ignore: For now...
 		this.#session = { ...oldSession, player: newSession.player };
 
-		await this.session.loadSong(currentSong, { paused: oldSession.player.paused, volume: oldSession.player.volume });
+		await this.session.play({ playable: currentSong, restore: { paused: oldSession.player.paused, volume: oldSession.player.volume }});
 
 		const guildLocale = this.guildLocale;
 
@@ -598,7 +598,7 @@ class MusicSession {
 		if (this.queueable instanceof SongCollection) {
 			this.#_advanceSongCollection({ queueable: this.queueable });
 		} else if (this.isLoopingSong) {
-			await this.loadSong(this.playable);
+			await this.play(this.playable);
 			return;
 		}
 
@@ -610,7 +610,7 @@ class MusicSession {
 
 		this.listings.takeCurrentFromQueue();
 
-		await this.loadSong(this.playable);
+		await this.play(this.playable);
 	}
 
 	async setPaused(value: boolean): Promise<void> {
@@ -779,11 +779,11 @@ class MusicSession {
 	}
 
 	// TODO(vxern): Refactor this.
-	async loadSong(
-		song: Song | AudioStream,
-		restore?: { paused: boolean; volume: number },
-	): Promise<boolean | undefined> {
-		const result = await this.player.node.rest.resolve(`ytsearch:${song.url}`);
+	async play({
+		playable,
+		restore,
+	}: { playable: Playable; restore?: { paused: boolean; volume: number } }): Promise<boolean | undefined> {
+		const result = await this.player.node.rest.resolve(`ytsearch:${playable.url}`);
 
 		if (result === undefined || result.loadType === "error" || result.loadType === "empty") {
 			this.isLoopingSong = false;
@@ -795,7 +795,7 @@ class MusicSession {
 					"music.options.play.strings.failedToLoad.description",
 					guildLocale,
 				)({
-					title: song.title,
+					title: playable.title,
 				}),
 			};
 
@@ -846,7 +846,7 @@ class MusicSession {
 					"music.options.play.strings.failedToPlay.description",
 					guildLocale,
 				)({
-					title: song.title,
+					title: playable.title,
 				}),
 			};
 
@@ -959,8 +959,8 @@ class MusicSession {
 						title: `${this.queueable.emoji} ${strings.title}`,
 						description: strings.description.nowPlaying({
 							song_information: strings.description.track,
-							title: song.title,
-							url: song.url,
+							title: playable.title,
+							url: playable.url,
 							user_mention: mention(this.current.userId, { type: "user" }),
 						}),
 						color: constants.colours.notice,
