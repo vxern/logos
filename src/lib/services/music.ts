@@ -682,36 +682,56 @@ class MusicSession {
 		await this.player.stopTrack();
 	}
 
-	// TODO(vxern): Refactor this.
-	async unskip(collection: boolean, { by, to }: Partial<PositionControls>): Promise<void> {
+	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
+		this.isLoopingCollection = false;
+
+		queueable.position -= 1;
+
+		this.listings.moveCurrentToQueue();
+		this.listings.moveFromHistoryToQueue({ count: 1 });
+	}
+
+	#_unskipSongInSongColletion({
+		queueable,
+		controls,
+	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
+		this.isLoopingSong = false;
+
+		if (controls.by !== undefined) {
+			queueable.position -= controls.by + 1;
+		}
+
+		if (controls.to !== undefined) {
+			queueable.position = controls.to - 2;
+		}
+
+		if (controls.by === undefined && controls.to === undefined) {
+			queueable.position -= 2;
+		}
+	}
+
+	#_unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
+		this.isLoopingSong = false;
+
+		this.listings.moveCurrentToQueue();
+
+		const count = controls.by ?? controls.to ?? 1;
+		const listingsToMoveToQueue = Math.min(count, this.listings.history.count);
+		this.listings.moveFromHistoryToQueue({ count: listingsToMoveToQueue });
+	}
+
+	async unskip({
+		unskipCollection,
+		controls,
+	}: { unskipCollection: boolean; controls: Partial<PositionControls> }): Promise<void> {
 		if (this.queueable instanceof SongCollection) {
-			if (collection || this.queueable.isFirstInCollection) {
-				this.isLoopingCollection = false;
-
-				this.queueable.position -= 1;
-
-				this.listings.moveCurrentToQueue();
-				this.listings.moveFromHistoryToQueue({ count: 1 });
+			if (unskipCollection || this.queueable.isFirstInCollection) {
+				this.#_unskipSongCollection({ queueable: this.queueable });
 			} else {
-				this.isLoopingSong = false;
-
-				if (by !== undefined) {
-					this.queueable.position -= by + 1;
-				}
-
-				if (to !== undefined) {
-					this.queueable.position = to - 2;
-				}
-
-				if (by === undefined && to === undefined) {
-					this.queueable.position -= 2;
-				}
+				this.#_unskipSongInSongColletion({ queueable: this.queueable, controls });
 			}
 		} else {
-			const listingsToMoveToQueue = Math.min(by ?? to ?? 1, this.listings.history.count);
-
-			this.listings.moveCurrentToQueue();
-			this.listings.moveFromHistoryToQueue({ count: listingsToMoveToQueue });
+			this.#_unskipPlayable({ controls });
 		}
 
 		if (this.player.track !== undefined) {
