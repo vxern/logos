@@ -8,8 +8,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
-	if (!isVoiceStateVerified) {
+	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 

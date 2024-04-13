@@ -23,8 +23,7 @@ async function handleSkipAction(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
-	if (!isVoiceStateVerified) {
+	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 

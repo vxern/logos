@@ -13,8 +13,7 @@ async function handleLoopPlayback(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
-	if (!isVoiceStateVerified) {
+	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 

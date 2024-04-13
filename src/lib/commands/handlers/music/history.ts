@@ -9,8 +9,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyVoiceState(interaction, "check");
-	if (!isVoiceStateVerified) {
+	if (!musicService.canCheckPlayback(interaction)) {
 		return;
 	}
 

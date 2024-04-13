@@ -9,8 +9,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
-	if (!isVoiceStateVerified) {
+	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 

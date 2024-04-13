@@ -30,8 +30,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
-	if (!isVoiceStateVerified) {
+	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 

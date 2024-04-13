@@ -5,6 +5,8 @@ import { Collector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
+
+type PlaybackActionType = "manage" | "check";
 class MusicService extends LocalService {
 	#session: MusicSession | undefined;
 
@@ -201,7 +203,7 @@ class MusicService extends LocalService {
 			.catch(() => this.log.warn("Failed to send audio restored message."));
 	}
 
-	verifyVoiceState(interaction: Logos.Interaction, action: "manage" | "check"): boolean {
+	#_canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
 		const locale = interaction.locale;
 
 		if (this.#session?.flags.isDisconnected) {
@@ -221,10 +223,8 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const voiceState = this.guild.voiceStates.get(interaction.user.id);
-		const userChannelId = voiceState?.channelId;
-
-		if (voiceState === undefined || userChannelId === undefined) {
+		const userChannelId = this.guild.voiceStates.get(interaction.user.id)?.channelId;
+		if (userChannelId === undefined) {
 			const strings = {
 				title: this.client.localise("music.strings.notInVc.title", locale)(),
 				description: {
@@ -241,7 +241,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		if (this.hasSession && voiceState.channelId !== this.session.channelId) {
+		if (this.hasSession && userChannelId !== this.session.channelId) {
 			const strings = {
 				title: this.client.localise("music.options.play.strings.inDifferentVc.title", locale)(),
 				description: this.client.localise("music.options.play.strings.inDifferentVc.description", locale)(),
@@ -258,15 +258,29 @@ class MusicService extends LocalService {
 		return true;
 	}
 
-	verifyCanManagePlayback(interaction: Logos.Interaction): boolean {
-		const isVoiceStateVerified = this.verifyVoiceState(interaction, "manage");
-		if (!isVoiceStateVerified) {
-			return false;
-		}
+	canCheckPlayback(interaction: Logos.Interaction) {
+		return this.#_canPerformAction(interaction, { action: "check" });
+	}
 
-		const current = this.#session?.current;
-		if (current === undefined) {
-			return true;
+	canManagePlayback(interaction: Logos.Interaction) {
+		return this.#_canPerformAction(interaction, { action: "manage" });
+	}
+
+	canRequestPlayback(interaction: Logos.Interaction): boolean {
+		const locale = interaction.locale;
+
+		if (this.session.listings.queue.isFull) {
+			const strings = {
+				title: this.client.localise("music.options.play.strings.queueFull.title", locale)(),
+				description: this.client.localise("music.options.play.strings.queueFull.description", locale)(),
+			};
+
+			this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
+			});
+
+			return false;
 		}
 
 		return true;

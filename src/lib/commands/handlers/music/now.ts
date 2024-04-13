@@ -14,8 +14,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyVoiceState(interaction, "check");
-	if (!isVoiceStateVerified) {
+	if (!musicService.canCheckPlayback(interaction)) {
 		return;
 	}
 

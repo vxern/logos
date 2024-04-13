@@ -8,8 +8,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 		return;
 	}
 
-	const isVoiceStateVerified = musicService.verifyCanManagePlayback(interaction);
-	if (!isVoiceStateVerified) {
+	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 
