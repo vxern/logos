@@ -70,6 +70,7 @@ class ClientConnector extends shoukaku.Connector {
 }
 
 class LavalinkService extends GlobalService {
+	readonly connector: ClientConnector;
 	readonly manager: shoukaku.Shoukaku;
 
 	constructor(client: Client) {
@@ -82,7 +83,9 @@ class LavalinkService extends GlobalService {
 				auth: client.environment.lavalinkPassword,
 			},
 		];
-		this.manager = new shoukaku.Shoukaku(new ClientConnector(client, { nodes }), nodes, {
+
+		this.connector = new ClientConnector(client, { nodes });
+		this.manager = new shoukaku.Shoukaku(this.connector, nodes, {
 			resume: true,
 			resumeTimeout: constants.time.minute / 1000,
 			resumeByLibrary: true,
@@ -111,7 +114,7 @@ class LavalinkService extends GlobalService {
 			}
 		});
 
-		await (this.manager.connector as ClientConnector).setup();
+		await this.connector.setup();
 	}
 
 	async stop(): Promise<void> {
@@ -121,7 +124,7 @@ class LavalinkService extends GlobalService {
 			await player.destroy();
 		}
 
-		await (this.manager.connector as ClientConnector).teardown();
+		await this.connector.teardown();
 	}
 }
 

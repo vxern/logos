@@ -47,7 +47,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			return;
 		}
 
-		const listing = musicService.session.listings.queue.removeAt(index);
+		const listing = musicService.session.listings.removeFromQueue({ index });
 		if (listing === undefined) {
 			const strings = {
 				title: client.localise("music.options.remove.strings.failed.title", locale)(),
@@ -86,12 +86,12 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 	const refreshView = async () => view.refresh();
 	const closeView = async () => view.close();
 
-	musicService.session.events.on("queueUpdate", refreshView);
-	musicService.session.events.on("stop", closeView);
+	musicService.session.listings.on("queue", refreshView);
+	musicService.session.on("end", closeView);
 
 	setTimeout(() => {
-		musicService.session.events.off("queueUpdate", refreshView);
-		musicService.session.events.off("stop", closeView);
+		musicService.session.listings.off("queue", refreshView);
+		musicService.session.off("end", closeView);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 
 	await view.open();

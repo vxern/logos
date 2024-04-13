@@ -43,12 +43,12 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	const refreshView = async () => view.refresh();
 	const closeView = async () => view.close();
 
-	musicService.session.events.on("queueUpdate", refreshView);
-	musicService.session.events.on("stop", closeView);
+	musicService.session.listings.on("queue", refreshView);
+	musicService.session.on("end", closeView);
 
 	setTimeout(() => {
-		musicService.session.events.off("queueUpdate", refreshView);
-		musicService.session.events.off("stop", closeView);
+		musicService.session.listings.off("queue", refreshView);
+		musicService.session.off("end", closeView);
 	}, constants.INTERACTION_TOKEN_EXPIRY);
 
 	await view.open();

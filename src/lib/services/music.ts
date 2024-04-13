@@ -92,7 +92,7 @@ class MusicService extends LocalService {
 
 		await player.setGlobalVolume(this.configuration.implicitVolume);
 
-		this.#session = new MusicSession({ service: this, player, channelId, oldSession: this.#session });
+		this.#session = new MusicSession({ service: this, player, channelId });
 
 		return this.#session;
 	}
@@ -343,7 +343,7 @@ class MusicService extends LocalService {
 	}
 }
 
-class ListingQueue {
+class ListingQueue extends EventEmitter {
 	readonly #_listings: SongListing[];
 	readonly #_limit: number;
 	readonly #_discardOnPassedLimit: boolean;
@@ -365,6 +365,7 @@ class ListingQueue {
 	}
 
 	constructor({ limit, discardOnPassedLimit }: { limit: number; discardOnPassedLimit: boolean }) {
+		super();
 		this.#_listings = [];
 		this.#_limit = limit;
 		this.#_discardOnPassedLimit = discardOnPassedLimit;
@@ -373,7 +374,6 @@ class ListingQueue {
 	addOld(listing: SongListing): void {
 		if (this.isFull) {
 			if (!this.#_discardOnPassedLimit) {
-				// TODO(vxern): Handle refusal to add to queue.
 				return;
 			}
 
@@ -381,14 +381,11 @@ class ListingQueue {
 		}
 
 		this.#_listings.unshift(listing);
-
-		// REMINDER(vxern): Emit an event.
 	}
 
 	addNew(listing: SongListing): void {
 		if (this.isFull) {
 			if (!this.#_discardOnPassedLimit) {
-				// TODO(vxern): Handle refusal to add to queue.
 				return;
 			}
 
@@ -396,32 +393,22 @@ class ListingQueue {
 		}
 
 		this.#_listings.push(listing);
-
-		// REMINDER(vxern): Emit an event.
 	}
 
 	removeOldest(): SongListing {
-		// REMINDER(vxern): Emit an event.
-
 		return this.#_listings.shift()!;
 	}
 
 	removeNewest(): SongListing {
-		// REMINDER(vxern): Emit an event.
-
 		return this.#_listings.pop()!;
 	}
 
 	removeAt(index: number): SongListing | undefined {
-		const listing = this.#_listings.splice(index, 1)?.at(0);
-
-		// REMINDER(vxern): Emit an event.
-
-		return listing;
+		return this.#_listings.splice(index, 1)?.at(0);
 	}
 }
 
-class ListingManager {
+class ListingManager extends EventEmitter {
 	readonly history: ListingQueue;
 	readonly queue: ListingQueue;
 
@@ -436,6 +423,10 @@ class ListingManager {
 	}
 
 	constructor() {
+		super();
+
+		this.setMaxListeners(0);
+
 		this.history = new ListingQueue({ limit: constants.MAXIMUM_HISTORY_ENTRIES, discardOnPassedLimit: true });
 		this.queue = new ListingQueue({ limit: constants.MAXIMUM_QUEUE_ENTRIES, discardOnPassedLimit: false });
 	}
@@ -451,6 +442,8 @@ class ListingManager {
 
 		this.history.addNew(this.#current!);
 		this.#current = undefined;
+
+		this.emit("history");
 	}
 
 	moveCurrentToQueue(): void {
@@ -458,33 +451,64 @@ class ListingManager {
 
 		this.queue.addOld(this.#current!);
 		this.#current = undefined;
+
+		this.emit("queue");
 	}
 
 	takeCurrentFromQueue(): void {
 		this.#current = this.queue.removeOldest();
+
+		this.emit("queue");
 	}
 
 	moveFromQueueToHistory({ count }: { count: number }): void {
-		for (const _ of Array(Math.min(Math.max(count, 0), this.queue.count)).keys()) {
+		count = Math.min(Math.max(count, 0), this.queue.count);
+
+		for (const _ of Array(count).keys()) {
 			this.history.addNew(this.queue.removeOldest());
 		}
 
-		// REMINDER(vxern): Emit event.
+		if (count !== 0) {
+			this.emit("queue");
+			this.emit("history");
+		}
 	}
 
 	moveFromHistoryToQueue({ count }: { count: number }): void {
-		for (const _ of Array(Math.min(Math.max(count, 0), this.history.count)).keys()) {
+		count = Math.min(Math.max(count, 0), this.history.count);
+
+		for (const _ of Array().keys()) {
 			this.queue.addOld(this.history.removeNewest());
 		}
 
-		// REMINDER(vxern): Emit event.
+		if (count !== 0) {
+			this.emit("history");
+			this.emit("queue");
+		}
+	}
+
+	addToQueue(listing: SongListing): void {
+		this.queue.addNew(listing);
+
+		this.emit("queue");
+	}
+
+	removeFromQueue({ index }: { index: number }): SongListing | undefined {
+		const listing = this.queue.removeAt(index);
+
+		this.emit("queue");
+
+		return listing;
+	}
+
+	dispose() {
+		this.removeAllListeners();
 	}
 }
 
 // TODO(vxern): Set up listeners to automatically respond to queue events.
 type QueueableMode = "song-collection" | "playable";
-class MusicSession {
-	readonly events: EventEmitter;
+class MusicSession extends EventEmitter {
 	readonly service: MusicService;
 	readonly player: shoukaku.Player;
 	readonly channelId: bigint;
@@ -518,13 +542,11 @@ class MusicSession {
 		return Date.now() - this.player.position;
 	}
 
-	constructor({
-		service,
-		player,
-		channelId,
-		oldSession,
-	}: { service: MusicService; player: shoukaku.Player; channelId: bigint; oldSession?: MusicSession }) {
-		this.events = oldSession?.events ?? new EventEmitter().setMaxListeners(0);
+	constructor({ service, player, channelId }: { service: MusicService; player: shoukaku.Player; channelId: bigint }) {
+		super();
+
+		this.setMaxListeners(0);
+
 		this.service = service;
 		this.player = player;
 		this.channelId = channelId;
@@ -955,7 +977,9 @@ class MusicSession {
 	}
 
 	async dispose(): Promise<void> {
-		// REMINDER(vxern): Emit stop event.
+		this.emit("end");
+		this.removeAllListeners();
+
 		await this.player.destroy();
 	}
 }
