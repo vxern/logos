@@ -161,12 +161,13 @@ async function handleUnskipAction(
 		{ visible: true },
 	);
 
-	const isUnskippingCollection = interaction.parameters.collection ?? false;
-
 	if (isUnskippingListing) {
-		await musicService.session.unskip(isUnskippingCollection, {
-			by: interaction.parameters.by,
-			to: interaction.parameters.to,
+		await musicService.session.unskip({
+			unskipCollection: interaction.parameters.collection ?? false,
+			controls: {
+				by: interaction.parameters.by,
+				to: interaction.parameters.to,
+			},
 		});
 	} else {
 		if (interaction.parameters.by !== undefined) {
@@ -176,7 +177,10 @@ async function handleUnskipAction(
 			} else {
 				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.listings.history.count);
 			}
-			await musicService.session.unskip(isUnskippingCollection, { by: listingsToUnskip });
+			await musicService.session.unskip({
+				unskipCollection: interaction.parameters.collection ?? false,
+				controls: { by: listingsToUnskip },
+			});
 		} else if (interaction.parameters.to !== undefined) {
 			let listingToSkipTo!: number;
 			if (musicService.session.current instanceof SongCollection && interaction.parameters.collection === undefined) {
@@ -184,9 +188,12 @@ async function handleUnskipAction(
 			} else {
 				listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.history.count);
 			}
-			await musicService.session.unskip(isUnskippingCollection, { to: listingToSkipTo });
+			await musicService.session.unskip({
+				unskipCollection: interaction.parameters.collection ?? false,
+				controls: { to: listingToSkipTo },
+			});
 		} else {
-			await musicService.session.unskip(isUnskippingCollection, {});
+			await musicService.session.unskip({ unskipCollection: interaction.parameters.collection ?? false, controls: {} });
 		}
 	}
 }
