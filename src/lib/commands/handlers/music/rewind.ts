@@ -35,7 +35,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		return;
 	}
 
-	if (!musicService.hasActiveSession) {
+	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.rewind.strings.noSong.title", locale)(),

@@ -16,7 +16,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		return;
 	}
 
-	if (!musicService.hasActiveSession) {
+	if (!musicService.hasSession) {
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),
 			description: {

@@ -14,7 +14,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		return;
 	}
 
-	if (!musicService.hasActiveSession) {
+	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),

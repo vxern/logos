@@ -38,7 +38,7 @@ async function handleSkipToTimestamp(
 		return;
 	}
 
-	if (!musicService.hasActiveSession) {
+	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.skip-to.strings.noSong.title", locale)(),

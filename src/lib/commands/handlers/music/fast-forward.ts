@@ -38,7 +38,7 @@ async function handleFastForward(
 		return;
 	}
 
-	if (!musicService.hasActiveSession) {
+	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.fast-forward.strings.noSong.title", locale)(),

@@ -17,7 +17,7 @@ async function handleReplayAction(
 		return;
 	}
 
-	if (!musicService.hasActiveSession) {
+	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),

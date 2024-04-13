@@ -13,7 +13,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 		return;
 	}
 
-	if (!musicService.hasActiveSession) {
+	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),

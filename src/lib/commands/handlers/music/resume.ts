@@ -13,7 +13,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	if (!musicService.hasActiveSession) {
+	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),
