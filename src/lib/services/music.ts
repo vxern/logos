@@ -422,15 +422,19 @@ class ListingManager {
 	moveCurrentToHistory(): void {
 		// TODO(vxern): This is bad, and it shouldn't be necessary here.
 		// Adjust the position for being incremented automatically when played next time.
-		if (this.hasCurrent && this.current.queueable instanceof SongCollection) {
+		if (this.current.queueable instanceof SongCollection) {
 			this.current.queueable.position -= 1;
 		}
+
+		this.#current!.queueable.reset();
 
 		this.history.addNew(this.#current!);
 		this.#current = undefined;
 	}
 
 	moveCurrentToQueue(): void {
+		this.#current!.queueable.reset();
+
 		this.queue.addOld(this.#current!);
 		this.#current = undefined;
 	}
@@ -610,14 +614,10 @@ class MusicSession {
 	}
 
 	#_skipSongCollection(): void {
-		this.queueable.isLooping = false;
-
 		this.listings.moveCurrentToHistory();
 	}
 
 	#_skipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
-		this.playable.isLooping = false;
-
 		this.listings.moveCurrentToHistory();
 
 		const count = controls.by ?? controls.to ?? 0;
@@ -642,8 +642,6 @@ class MusicSession {
 	}
 
 	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
-		this.queueable.isLooping = false;
-
 		queueable.position -= 1;
 
 		this.listings.moveCurrentToQueue();
@@ -671,7 +669,6 @@ class MusicSession {
 
 	#_unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
 		if (this.hasCurrent) {
-			this.playable.isLooping = false;
 			this.listings.moveCurrentToQueue();
 		}
 
@@ -974,6 +971,10 @@ abstract class Queueable {
 		this.emoji = emoji;
 		this.isLooping = false;
 	}
+
+	reset(): void {
+		this.isLooping = false;
+	}
 }
 
 abstract class Playable extends Queueable {
@@ -1025,6 +1026,16 @@ class SongCollection extends Queueable {
 		super({ title, url, emoji: constants.emojis.music.collection });
 
 		this.songs = songs;
+		this.position = 0;
+	}
+
+	reset(): void {
+		super.reset();
+
+		for (const playable of this.songs) {
+			playable.reset();
+		}
+
 		this.position = 0;
 	}
 }
