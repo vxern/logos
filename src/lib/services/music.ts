@@ -40,10 +40,10 @@ class MusicService extends LocalService {
 	}
 
 	async start(): Promise<void> {
-		this.#_voiceStateUpdates.onCollect(this.#handleVoiceStateUpdate.bind(this));
+		this.#_voiceStateUpdates.onCollect(this.#_handleVoiceStateUpdate.bind(this));
 
-		this.client.lavalinkService.manager.on("disconnect", (_, __) => this.handleConnectionLost());
-		this.client.lavalinkService.manager.on("ready", (_, __) => this.handleConnectionRestored());
+		this.client.lavalinkService.manager.on("disconnect", (_, __) => this.#_handleConnectionLost());
+		this.client.lavalinkService.manager.on("ready", (_, __) => this.#_handleConnectionRestored());
 	}
 
 	async stop(): Promise<void> {
@@ -52,7 +52,7 @@ class MusicService extends LocalService {
 		await this.destroySession();
 	}
 
-	async createSession(channelId: bigint): Promise<MusicSession | undefined> {
+	async createSession({ channelId }: { channelId: bigint }): Promise<MusicSession> {
 		const oldSession = this.#session;
 
 		const player = await this.client.lavalinkService.manager.joinVoiceChannel({
@@ -64,11 +64,9 @@ class MusicService extends LocalService {
 
 		await player.setGlobalVolume(this.configuration.implicitVolume);
 
-		const session = new MusicSession({ service: this, player, channelId, oldSession });
+		this.#session = new MusicSession({ service: this, player, channelId, oldSession });
 
-		this.#session = session;
-
-		return session;
+		return this.#session;
 	}
 
 	async destroySession(): Promise<void> {
@@ -76,17 +74,59 @@ class MusicService extends LocalService {
 		this.#session = undefined;
 	}
 
-	async #handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
+	async receiveListing(listing: SongListing, { channelId }: { channelId: bigint }): Promise<void> {
+		let session: MusicSession;
+		if (this.hasSession) {
+			session = this.session;
+		} else {
+			session = await this.createSession({ channelId });
+		}
+
+		session.receiveListing({ listing });
+
+		if (session.hasCurrent) {
+			const locale = this.guildLocale;
+
+			const strings = {
+				title: this.client.localise("music.options.play.strings.queued.title", locale)(),
+				description: this.client.localise(
+					"music.options.play.strings.queued.description.public",
+					locale,
+				)({
+					title: listing.queueable.title,
+					user_mention: mention(listing.userId, { type: "user" }),
+				}),
+			};
+
+			await this.client.bot.rest
+				.sendMessage(session.channelId, {
+					embeds: [
+						{
+							title: `${constants.emojis.music.queued} ${strings.title}`,
+							description: strings.description,
+							color: constants.colours.success,
+						},
+					],
+				})
+				.catch(() => this.log.warn("Failed to send music feedback message."));
+
+			return;
+		}
+
+		await session.playNext();
+	}
+
+	async #_handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
 		if (!this.hasSession) {
 			return;
 		}
 
 		if (this.#_usersInChannel === 1) {
-			await this.handleSessionAbandoned();
+			await this.#_handleSessionAbandoned();
 		}
 	}
 
-	async handleSessionAbandoned(): Promise<void> {
+	async #_handleSessionAbandoned(): Promise<void> {
 		const strings = {
 			title: this.client.localise("music.options.stop.strings.stopped.title", this.guildLocale)(),
 			description: this.client.localise("music.options.stop.strings.stopped.description", this.guildLocale)(),
@@ -107,23 +147,20 @@ class MusicService extends LocalService {
 		await this.destroySession();
 	}
 
-	handleConnectionLost(): void {
+	#_handleConnectionLost(): void {
 		this.client.bot.gateway
 			.leaveVoiceChannel(this.guildId)
 			.catch(() => this.log.warn("Failed to leave voice channel."));
 
-		const session = this.#session;
-		if (session === undefined) {
+		if (!this.hasSession) {
 			return;
 		}
 
-		if (session.flags.isDisconnected) {
+		if (this.session.flags.isDisconnected) {
 			return;
 		}
 
 		const guildLocale = this.guildLocale;
-
-		const now = Date.now();
 
 		const strings = {
 			title: this.client.localise("music.strings.outage.halted.title", guildLocale)(),
@@ -134,7 +171,7 @@ class MusicService extends LocalService {
 		};
 
 		this.client.bot.rest
-			.sendMessage(session.channelId, {
+			.sendMessage(this.session.channelId, {
 				embeds: [
 					{
 						title: strings.title,
@@ -145,41 +182,32 @@ class MusicService extends LocalService {
 			})
 			.catch(() => this.log.warn("Failed to send audio halted message."));
 
-		session.player.removeAllListeners();
-
-		session.flags.isDisconnected = true;
-
-		session.restoreAt = session.restoreAt + (now - session.startedAt);
+		this.session.player.removeAllListeners();
+		this.session.flags.isDisconnected = true;
+		this.session.restoreAt = this.session.restoreAt + (Date.now() - this.session.startedAt);
 	}
 
-	async handleConnectionRestored(): Promise<void> {
-		const oldSession = this.#session;
-		if (oldSession === undefined) {
+	async #_handleConnectionRestored(): Promise<void> {
+		if (!this.hasSession) {
 			return;
 		}
 
-		if (!oldSession.flags.isDisconnected) {
+		if (!this.session.flags.isDisconnected) {
 			return;
 		}
 
+		const oldSession = this.session;
 		oldSession.flags.isDisconnected = false;
 
-		const currentSong = oldSession.playable;
-
 		await this.destroySession();
-		await this.createSession(oldSession.channelId);
-
-		const newSession = this.#session;
-		if (newSession === undefined) {
-			return;
-		}
+		await this.createSession({ channelId: oldSession.channelId });
 
 		// TODO(vxern): Create a method to plug in a new player into an old session.
 		// @ts-ignore: For now...
-		this.#session = { ...oldSession, player: newSession.player };
+		this.session = { ...oldSession, player: this.session.player };
 
 		await this.session.play({
-			playable: currentSong,
+			playable: this.session.playable,
 			restore: { paused: oldSession.player.paused, volume: oldSession.player.volume },
 		});
 
@@ -191,7 +219,7 @@ class MusicService extends LocalService {
 		};
 
 		this.client.bot.rest
-			.sendMessage(newSession.channelId, {
+			.sendMessage(this.session.channelId, {
 				embeds: [
 					{
 						title: strings.title,
@@ -284,47 +312,6 @@ class MusicService extends LocalService {
 		}
 
 		return true;
-	}
-
-	async receiveNewListing(listing: SongListing, channelId: bigint): Promise<void> {
-		const session = this.#session ?? (await this.createSession(channelId));
-		if (session === undefined) {
-			return;
-		}
-
-		session.receiveListing({ listing });
-
-		const guildLocale = this.guildLocale;
-
-		// TODO(vxern): Convert to an 'is playing' check.
-		if (session.current !== undefined) {
-			const strings = {
-				title: this.client.localise("music.options.play.strings.queued.title", guildLocale)(),
-				description: this.client.localise(
-					"music.options.play.strings.queued.description.public",
-					guildLocale,
-				)({
-					title: listing.queueable.title,
-					user_mention: mention(listing.userId, { type: "user" }),
-				}),
-			};
-
-			await this.client.bot.rest
-				.sendMessage(session.channelId, {
-					embeds: [
-						{
-							title: `${constants.emojis.music.queued} ${strings.title}`,
-							description: strings.description,
-							color: constants.colours.success,
-						},
-					],
-				})
-				.catch(() => this.log.warn("Failed to send music feedback message."));
-
-			return;
-		}
-
-		await session.playNext();
 	}
 }
 

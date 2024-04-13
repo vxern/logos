@@ -93,7 +93,7 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	await musicService.receiveNewListing(listing, channelId);
+	await musicService.receiveListing(listing, { channelId });
 }
 
 export { handleRequestYouTubePlayback, handleRequestStreamPlayback };
