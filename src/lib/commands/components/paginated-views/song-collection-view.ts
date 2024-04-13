@@ -29,7 +29,7 @@ class SongCollectionView extends PaginatedView<Song> {
 
 		const songsFormatted = page
 			.map((song, songIndex) => {
-				const isCurrent = pageIndex * 10 + songIndex === this.#collection.position;
+				const isCurrent = pageIndex * 10 + songIndex === this.#collection.index;
 
 				const titleFormatted = trim(
 					song.title.replaceAll("(", "❨").replaceAll(")", "❩").replaceAll("[", "⁅").replaceAll("]", "⁆"),

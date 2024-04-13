@@ -444,7 +444,7 @@ class ListingManager {
 		// TODO(vxern): This is bad, and it shouldn't be necessary here.
 		// Adjust the position for being incremented automatically when played next time.
 		if (this.current.queueable instanceof SongCollection) {
-			this.current.queueable.position -= 1;
+			this.current.queueable.index -= 1;
 		}
 
 		this.#current!.queueable.reset();
@@ -465,7 +465,7 @@ class ListingManager {
 	}
 
 	moveFromQueueToHistory({ count }: { count: number }): void {
-		for (const _ of Array(count).keys()) {
+		for (const _ of Array(Math.min(Math.max(count, 0), this.queue.count)).keys()) {
 			this.history.addNew(this.queue.removeOldest());
 		}
 
@@ -473,7 +473,7 @@ class ListingManager {
 	}
 
 	moveFromHistoryToQueue({ count }: { count: number }): void {
-		for (const _ of Array(count).keys()) {
+		for (const _ of Array(Math.min(Math.max(count, 0), this.history.count)).keys()) {
 			this.queue.addOld(this.history.removeNewest());
 		}
 
@@ -544,20 +544,21 @@ class MusicSession {
 
 	// TODO(vxern): Put this on the song collection.
 	#_advanceSongCollection({ queueable }: { queueable: SongCollection }): void {
-		if (!queueable.isLastInCollection) {
-			if (queueable.playable.isLooping) {
-				queueable.position -= 1;
-			} else {
-				queueable.position += 1;
-			}
+		if (queueable.playable.isLooping) {
 			return;
 		}
 
-		queueable.position = 0;
-
-		if (!queueable.isLooping) {
-			this.listings.moveCurrentToHistory();
+		if (!queueable.isLastInCollection) {
+			queueable.moveBy({ count: 1, direction: "forward" });
+			return;
 		}
+
+		if (queueable.isLooping) {
+			queueable.moveTo({ index: 0 });
+			return;
+		}
+
+		this.listings.moveCurrentToHistory();
 	}
 
 	#_advancePlayable(): void {
@@ -625,14 +626,12 @@ class MusicSession {
 		queueable,
 		controls,
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
-		this.playable.isLooping = false;
-
 		if (controls.by !== undefined) {
-			queueable.position += controls.by - 1;
+			queueable.moveBy({ count: controls.by, direction: "forward" });
 		}
 
 		if (controls.to !== undefined) {
-			queueable.position = controls.to - 2;
+			queueable.moveTo({ index: controls.to - 1 });
 		}
 	}
 
@@ -663,28 +662,22 @@ class MusicSession {
 	}
 
 	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
-		queueable.position -= 1;
+		queueable.index -= 1;
 
 		this.listings.moveCurrentToQueue();
 		this.listings.moveFromHistoryToQueue({ count: 1 });
 	}
 
-	#_unskipSongInSongColletion({
+	#_unskipSongInSongCollection({
 		queueable,
 		controls,
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
-		this.playable.isLooping = false;
-
 		if (controls.by !== undefined) {
-			queueable.position -= controls.by + 1;
+			queueable.moveBy({ count: controls.by, direction: "backward" });
 		}
 
 		if (controls.to !== undefined) {
-			queueable.position = controls.to - 2;
-		}
-
-		if (controls.by === undefined && controls.to === undefined) {
-			queueable.position -= 2;
+			queueable.moveTo({ index: controls.to - 1 });
 		}
 	}
 
@@ -703,7 +696,7 @@ class MusicSession {
 			if (mode === "song-collection" || this.queueable.isFirstInCollection) {
 				this.#_unskipSongCollection({ queueable: this.queueable });
 			} else {
-				this.#_unskipSongInSongColletion({ queueable: this.queueable, controls });
+				this.#_unskipSongInSongCollection({ queueable: this.queueable, controls });
 			}
 		} else {
 			this.#_unskipPlayable({ controls });
@@ -727,7 +720,7 @@ class MusicSession {
 		queueable.isLooping = true;
 		this.player.once("start", () => (queueable.isLooping = previousLoopState));
 
-		queueable.position = -1;
+		queueable.moveTo({ index: 0 });
 	}
 
 	#_replayPlayable(): void {
@@ -927,7 +920,7 @@ class MusicSession {
 								"music.options.play.strings.nowPlaying.description.track",
 								guildLocale,
 						  )({
-								index: this.queueable.position + 1,
+								index: this.queueable.index + 1,
 								number: this.queueable.songs.length,
 								title: this.queueable.title,
 						  })
@@ -1012,6 +1005,7 @@ class AudioStream extends Playable {
 	}
 }
 
+type MoveDirection = "forward" | "backward";
 /**
  * Represents a collection of {@link Song}s.
  *
@@ -1023,25 +1017,33 @@ class SongCollection extends Queueable {
 	/** The songs in this collection. */
 	readonly songs: Song[];
 	/** The index of the song that is currently playing. */
-	position: number;
+	index: number;
 
 	get playable(): Playable {
-		return this.songs[this.position]!;
+		return this.songs[this.index]!;
 	}
 
 	get isFirstInCollection(): boolean {
-		return this.position === 0;
+		return this.index === 0;
 	}
 
 	get isLastInCollection(): boolean {
-		return this.position === this.songs.length - 1;
+		return this.index === this.songs.length - 1;
+	}
+
+	get #precedingSongCount(): number {
+		return this.index;
+	}
+
+	get #followingSongCount(): number {
+		return this.songs.length - (this.index + 1);
 	}
 
 	constructor({ title, url, songs }: { title: string; url: string; songs: Song[] }) {
 		super({ title, url, emoji: constants.emojis.music.collection });
 
 		this.songs = songs;
-		this.position = 0;
+		this.index = 0;
 	}
 
 	reset(): void {
@@ -1051,7 +1053,27 @@ class SongCollection extends Queueable {
 			playable.reset();
 		}
 
-		this.position = 0;
+		this.index = 0;
+	}
+
+	moveBy({ count, direction }: { count: number; direction: MoveDirection }): void {
+		this.playable.reset();
+
+		switch (direction) {
+			case "forward": {
+				this.index += Math.min(count, this.#followingSongCount);
+				break;
+			}
+			case "backward": {
+				this.index -= Math.min(count, this.#precedingSongCount);
+				break;
+			}
+		}
+	}
+
+	moveTo({ index }: { index: number }): void {
+		this.playable.reset();
+		this.index = Math.min(Math.max(index, 0), this.songs.length - 1);
 	}
 }
 

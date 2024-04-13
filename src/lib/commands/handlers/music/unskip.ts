@@ -53,7 +53,7 @@ async function handleUnskipAction(
 			return true;
 		}
 
-		if (interaction.parameters.collection || musicService.session.queueable.position === 0) {
+		if (interaction.parameters.collection || musicService.session.queueable.index === 0) {
 			return true;
 		}
 
@@ -163,44 +163,10 @@ async function handleUnskipAction(
 		{ visible: true },
 	);
 
-	if (isUnskippingListing) {
-		await musicService.session.unskip({
-			mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
-			controls: {
-				by: interaction.parameters.by,
-				to: interaction.parameters.to,
-			},
-		});
-	} else {
-		if (interaction.parameters.by !== undefined) {
-			let listingsToUnskip!: number;
-			if (musicService.session.queueable instanceof SongCollection && interaction.parameters.collection === undefined) {
-				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.queueable.position);
-			} else {
-				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.listings.history.count);
-			}
-			await musicService.session.unskip({
-				mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
-				controls: { by: listingsToUnskip },
-			});
-		} else if (interaction.parameters.to !== undefined) {
-			let listingToSkipTo!: number;
-			if (musicService.session.queueable instanceof SongCollection && interaction.parameters.collection === undefined) {
-				listingToSkipTo = Math.max(interaction.parameters.to, 1);
-			} else {
-				listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.history.count);
-			}
-			await musicService.session.unskip({
-				mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
-				controls: { to: listingToSkipTo },
-			});
-		} else {
-			await musicService.session.unskip({
-				mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
-				controls: {},
-			});
-		}
-	}
+	await musicService.session.unskip({
+		mode: interaction.parameters.collection ? "song-collection" : "playable",
+		controls: { by: interaction.parameters.by, to: interaction.parameters.to },
+	});
 }
 
 export { handleUnskipAction };

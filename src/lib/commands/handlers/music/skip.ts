@@ -10,14 +10,6 @@ async function handleSkipAction(
 ): Promise<void> {
 	const locale = interaction.guildLocale;
 
-	if (interaction.parameters.by !== undefined && !Number.isSafeInteger(interaction.parameters.by)) {
-		return;
-	}
-
-	if (interaction.parameters.to !== undefined && !Number.isSafeInteger(interaction.parameters.to)) {
-		return;
-	}
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -123,34 +115,10 @@ async function handleSkipAction(
 		{ visible: true },
 	);
 
-	if (interaction.parameters.by !== undefined) {
-		let listingsToSkip!: number;
-		if (musicService.session.queueable instanceof SongCollection && interaction.parameters.collection === undefined) {
-			listingsToSkip = Math.min(
-				interaction.parameters.by,
-				musicService.session.queueable.songs.length - (musicService.session.queueable.position + 1),
-			);
-		} else {
-			listingsToSkip = Math.min(interaction.parameters.by, musicService.session.listings.queue.listings.length);
-		}
-		await musicService.session.skip({
-			mode: isSkippingCollection ? "song-collection" : "playable",
-			controls: { by: listingsToSkip },
-		});
-	} else if (interaction.parameters.to !== undefined) {
-		let listingToSkipTo!: number;
-		if (musicService.session.queueable instanceof SongCollection && interaction.parameters.collection === undefined) {
-			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.queueable.songs.length);
-		} else {
-			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.queue.listings.length);
-		}
-		await musicService.session.skip({
-			mode: isSkippingCollection ? "song-collection" : "playable",
-			controls: { to: listingToSkipTo },
-		});
-	} else {
-		await musicService.session.skip({ mode: isSkippingCollection ? "song-collection" : "playable", controls: {} });
-	}
+	await musicService.session.skip({
+		mode: interaction.parameters.collection ? "song-collection" : "playable",
+		controls: { by: interaction.parameters.by, to: interaction.parameters.to },
+	});
 }
 
 export { handleSkipAction };
