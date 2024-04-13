@@ -40,7 +40,7 @@ async function handleDisplayCurrentlyPlaying(
 	const playingSince = musicService.playingSince;
 
 	if (interaction.parameters.collection) {
-		if (!(musicService.session.listings.current instanceof SongCollection)) {
+		if (!(musicService.session.current instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.now.strings.noSongCollection.title", locale)(),
@@ -83,7 +83,7 @@ async function handleDisplayCurrentlyPlaying(
 	}*/
 
 	if (interaction.parameters.collection) {
-		const collection = musicService.session.listings.current.queueable as SongCollection;
+		const collection = musicService.session.queueable as SongCollection;
 
 		const locale = interaction.locale;
 		const strings = {
@@ -102,7 +102,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const song = musicService.session.listings.current.queueable as Song | AudioStream;
+	const song = musicService.session.queueable as Song | AudioStream;
 
 	const strings = {
 		nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),
@@ -120,9 +120,7 @@ async function handleDisplayCurrentlyPlaying(
 			"music.options.now.strings.sourcedFrom",
 			locale,
 		)({
-			source:
-				musicService.session.listings.current.source ??
-				client.localise("music.options.now.strings.theInternet", locale)(),
+			source: musicService.session.current.source ?? client.localise("music.options.now.strings.theInternet", locale)(),
 		}),
 	};
 
@@ -138,7 +136,7 @@ async function handleDisplayCurrentlyPlaying(
 				},
 				{
 					name: strings.requestedBy,
-					value: mention(musicService.session.listings.current.userId, { type: "user" }),
+					value: mention(musicService.session.current.userId, { type: "user" }),
 					inline: false,
 				},
 				{

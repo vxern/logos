@@ -37,7 +37,7 @@ async function handleLoopPlayback(
 	}
 
 	if (interaction.parameters.collection) {
-		if (!(musicService.session.listings.current instanceof SongCollection)) {
+		if (!(musicService.session.current instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.loop.strings.noSongCollection.title", locale)(),
@@ -64,7 +64,7 @@ async function handleLoopPlayback(
 
 	// TODO(vxern): Remove this.
 	/*
-  else if (musicService.session.listings.current === undefined) {
+  else if (musicService.session.current === undefined) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.loop.strings.noSong.title", locale)(),

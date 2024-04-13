@@ -47,7 +47,7 @@ async function handleSkipAction(
 	}
 
 	if (interaction.parameters.collection) {
-		if (!(musicService.session.listings.current instanceof SongCollection)) {
+		if (!(musicService.session.current instanceof SongCollection)) {
 			const locale = interaction.locale;
 			const strings = {
 				title: client.localise("music.options.skip.strings.noSongCollection.title", locale)(),
@@ -146,13 +146,10 @@ async function handleSkipAction(
 
 	if (interaction.parameters.by !== undefined) {
 		let listingsToSkip!: number;
-		if (
-			musicService.session.listings.current instanceof SongCollection &&
-			interaction.parameters.collection === undefined
-		) {
+		if (musicService.session.current instanceof SongCollection && interaction.parameters.collection === undefined) {
 			listingsToSkip = Math.min(
 				interaction.parameters.by,
-				musicService.session.listings.current.songs.length - (musicService.session.listings.current.position + 1),
+				musicService.session.current.songs.length - (musicService.session.current.position + 1),
 			);
 		} else {
 			listingsToSkip = Math.min(interaction.parameters.by, musicService.session.listings.queue.listings.length);
@@ -160,11 +157,8 @@ async function handleSkipAction(
 		await musicService.session.skip(isSkippingCollection, { by: listingsToSkip });
 	} else if (interaction.parameters.to !== undefined) {
 		let listingToSkipTo!: number;
-		if (
-			musicService.session.listings.current instanceof SongCollection &&
-			interaction.parameters.collection === undefined
-		) {
-			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.current.songs.length);
+		if (musicService.session.current instanceof SongCollection && interaction.parameters.collection === undefined) {
+			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.current.songs.length);
 		} else {
 			listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.queue.listings.length);
 		}

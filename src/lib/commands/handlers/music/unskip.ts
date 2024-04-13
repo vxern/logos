@@ -47,11 +47,11 @@ async function handleUnskipAction(
 	}
 
 	const isUnskippingListing = (() => {
-		if (!(musicService.session.listings.current instanceof SongCollection)) {
+		if (!(musicService.session.current instanceof SongCollection)) {
 			return true;
 		}
 
-		if (interaction.parameters.collection !== undefined || musicService.session.listings.current.position === 0) {
+		if (interaction.parameters.collection !== undefined || musicService.session.current.position === 0) {
 			return true;
 		}
 
@@ -73,10 +73,7 @@ async function handleUnskipAction(
 		return;
 	}
 
-	if (
-		interaction.parameters.collection !== undefined &&
-		!(musicService.session.listings.current instanceof SongCollection)
-	) {
+	if (interaction.parameters.collection !== undefined && !(musicService.session.current instanceof SongCollection)) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.unskip.strings.noSongCollection.title", locale)(),
@@ -174,21 +171,15 @@ async function handleUnskipAction(
 	} else {
 		if (interaction.parameters.by !== undefined) {
 			let listingsToUnskip!: number;
-			if (
-				musicService.session.listings.current instanceof SongCollection &&
-				interaction.parameters.collection === undefined
-			) {
-				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.listings.current.position);
+			if (musicService.session.current instanceof SongCollection && interaction.parameters.collection === undefined) {
+				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.current.position);
 			} else {
 				listingsToUnskip = Math.min(interaction.parameters.by, musicService.session.listings.history.count);
 			}
 			await musicService.session.unskip(isUnskippingCollection, { by: listingsToUnskip });
 		} else if (interaction.parameters.to !== undefined) {
 			let listingToSkipTo!: number;
-			if (
-				musicService.session.listings.current instanceof SongCollection &&
-				interaction.parameters.collection === undefined
-			) {
+			if (musicService.session.current instanceof SongCollection && interaction.parameters.collection === undefined) {
 				listingToSkipTo = Math.max(interaction.parameters.to, 1);
 			} else {
 				listingToSkipTo = Math.min(interaction.parameters.to, musicService.session.listings.history.count);
