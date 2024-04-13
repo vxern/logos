@@ -5,7 +5,6 @@ async function handleLoopPlayback(
 	client: Client,
 	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
 ): Promise<void> {
-	// TODO(vxern): Do something about having to declare things like these everywhere.
 	const locale = interaction.guildLocale;
 
 	const musicService = client.getMusicService(interaction.guildId);
@@ -20,15 +19,13 @@ async function handleLoopPlayback(
 	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
-			},
+			title: client.localise("music.options.loop.strings.noSong.title", locale)(),
+			description: client.localise("music.options.loop.strings.noSong.description", locale)(),
 		};
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: strings.description.toManage,
+			description: strings.description,
 		});
 
 		return;
@@ -59,23 +56,6 @@ async function handleLoopPlayback(
 			return;
 		}
 	}
-
-	// TODO(vxern): Remove this.
-	/*
-  else if (musicService.session.current === undefined) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.loop.strings.noSong.title", locale)(),
-			description: client.localise("music.options.loop.strings.noSong.description", locale)(),
-		};
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
-
-		return;
-	}*/
 
 	if (interaction.parameters.collection) {
 		musicService.session.setLoop(!musicService.session.queueable.isLooping, { mode: "song-collection" });

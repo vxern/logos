@@ -19,15 +19,13 @@ async function handleReplayAction(
 	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
-			},
+			title: client.localise("music.options.replay.strings.noSong.title", locale)(),
+			description: client.localise("music.options.replay.strings.noSong.description", locale)(),
 		};
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: strings.description.toManage,
+			description: strings.description,
 		});
 
 		return;
@@ -58,23 +56,6 @@ async function handleReplayAction(
 			return;
 		}
 	}
-
-	// TODO(vxern): Remove this.
-	/*
-  else if (current?.content === undefined) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.replay.strings.noSong.title", locale)(),
-			description: client.localise("music.options.replay.strings.noSong.description", locale)(),
-		};
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
-
-		return;
-	}*/
 
 	const strings = {
 		title: client.localise("music.options.replay.strings.replaying.title", locale)(),

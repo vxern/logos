@@ -452,7 +452,6 @@
   "music.options.now.strings.requestedBy": "Requested by",
   "music.options.now.strings.runningTime": "Running time",
   "music.options.now.strings.playingSince": "Since {relative_timestamp}.",
-  "music.options.now.strings.startTimeUnknown": "Start time unknown.",
   "music.options.now.strings.sourcedFrom": "This listing was sourced from {source}.",
   "music.options.now.strings.theInternet": "the internet",
   "music.options.pause.name": "pause",

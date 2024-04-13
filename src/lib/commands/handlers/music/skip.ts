@@ -30,15 +30,13 @@ async function handleSkipAction(
 	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
-			},
+			title: client.localise("music.options.skip.strings.noSong.title", locale)(),
+			description: client.localise("music.options.skip.strings.noSong.description", locale)(),
 		};
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: strings.description.toManage,
+			description: strings.description,
 		});
 
 		return;
@@ -69,23 +67,6 @@ async function handleSkipAction(
 			return;
 		}
 	}
-
-	// TODO(vxern): Remove this.
-	/*
-  else if (current?.content === undefined) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.skip.strings.noSong.title", locale)(),
-			description: client.localise("music.options.skip.strings.noSong.description", locale)(),
-		};
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
-
-		return;
-	}*/
 
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (interaction.parameters.by !== undefined && interaction.parameters.to !== undefined) {

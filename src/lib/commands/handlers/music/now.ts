@@ -21,15 +21,13 @@ async function handleDisplayCurrentlyPlaying(
 	if (!musicService.hasSession) {
 		const locale = interaction.locale;
 		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toCheck: client.localise("music.strings.notPlaying.description.toCheck", locale)(),
-			},
+			title: client.localise("music.options.now.strings.noSong.title", locale)(),
+			description: client.localise("music.options.now.strings.noSong.description", locale)(),
 		};
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: strings.description.toCheck,
+			description: strings.description,
 		});
 
 		return;
@@ -60,23 +58,6 @@ async function handleDisplayCurrentlyPlaying(
 			return;
 		}
 	}
-
-	// TODO(vxern): Remove this.
-	/*
-  else if (current?.content === undefined) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.now.strings.noSong.title", locale)(),
-			description: client.localise("music.options.now.strings.noSong.description", locale)(),
-		};
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
-
-		return;
-	}*/
 
 	if (interaction.parameters.collection) {
 		const collection = musicService.session.queueable as SongCollection;
@@ -109,8 +90,6 @@ async function handleDisplayCurrentlyPlaying(
 			"music.options.now.strings.playingSince",
 			locale,
 		)({ relative_timestamp: timestamp(musicService.session.playingTimeMilliseconds, { format: "relative" }) }),
-		// TODO(vxern): Is this needed?
-		startTimeUnknown: client.localise("music.options.now.strings.startTimeUnknown", locale)(),
 		sourcedFrom: client.localise(
 			"music.options.now.strings.sourcedFrom",
 			locale,
