@@ -18,20 +18,6 @@ class MusicService extends LocalService {
 		return this.#session !== undefined;
 	}
 
-	// TODO(vxern): Remove this.
-	get playingSince(): number | undefined {
-		const position = this.position;
-		if (position === undefined) {
-			return undefined;
-		}
-
-		return Date.now() - position;
-	}
-
-	get position(): number | undefined {
-		return this.#session?.player.position;
-	}
-
 	get length(): number | undefined {
 		return this.#session?.player.data.playerOptions.endTime;
 	}
@@ -270,8 +256,7 @@ class MusicService extends LocalService {
 			return false;
 		}
 
-		const isOccupied = this.hasActiveSession;
-		if (isOccupied && voiceState.channelId !== this.session.channelId) {
+		if (this.hasActiveSession && voiceState.channelId !== this.session.channelId) {
 			const strings = {
 				title: this.client.localise("music.options.play.strings.inDifferentVc.title", locale)(),
 				description: this.client.localise("music.options.play.strings.inDifferentVc.description", locale)(),
@@ -515,12 +500,8 @@ class MusicSession {
 		return this.queueable.playable;
 	}
 
-	get isPaused(): boolean {
-		return this.player.paused;
-	}
-
-	get volume(): number {
-		return this.player.volume;
+	get playingTimeMilliseconds(): number {
+		return Date.now() - this.player.position;
 	}
 
 	constructor({

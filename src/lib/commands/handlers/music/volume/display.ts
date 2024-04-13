@@ -16,8 +16,7 @@ async function handleDisplayVolume(
 		return;
 	}
 
-	const isOccupied = musicService.hasActiveSession;
-	if (!isOccupied) {
+	if (!musicService.hasActiveSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),
@@ -39,7 +38,7 @@ async function handleDisplayVolume(
 		description: client.localise(
 			"music.options.volume.options.display.strings.volume.description",
 			locale,
-		)({ volume: musicService.session.volume }),
+		)({ volume: musicService.session.player.volume }),
 	};
 
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show

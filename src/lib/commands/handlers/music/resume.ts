@@ -13,8 +13,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const isOccupied = musicService.hasActiveSession;
-	if (!isOccupied) {
+	if (!musicService.hasActiveSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),
@@ -31,7 +30,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	if (!musicService.session.isPaused) {
+	if (!musicService.session.player.paused) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.resume.strings.notPaused.title", locale)(),

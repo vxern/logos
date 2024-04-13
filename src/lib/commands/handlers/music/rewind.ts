@@ -35,8 +35,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		return;
 	}
 
-	const [isOccupied, position] = [musicService.hasActiveSession, musicService.position];
-	if (!isOccupied) {
+	if (!musicService.hasActiveSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.options.rewind.strings.noSong.title", locale)(),
@@ -51,17 +50,13 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		return;
 	}
 
-	if (position === undefined) {
-		return;
-	}
-
 	const timestamp = Number(interaction.parameters.timestamp);
 	if (!Number.isSafeInteger(timestamp)) {
 		await displayInvalidTimestampError(client, interaction, { locale });
 		return;
 	}
 
-	await musicService.session.skipTo({ timestamp: position - timestamp });
+	await musicService.session.skipTo({ timestamp: musicService.session.playingTimeMilliseconds - timestamp });
 
 	const strings = {
 		title: client.localise("music.options.rewind.strings.rewound.title", locale)(),

@@ -1,7 +1,7 @@
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { SongCollectionView } from "logos/commands/components/paginated-views/song-collection-view";
-import { AudioStream, Song, SongCollection } from "logos/services/music";
+import { SongCollection } from "logos/services/music";
 
 async function handleDisplayCurrentlyPlaying(
 	client: Client,
@@ -19,8 +19,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const isOccupied = musicService.hasActiveSession;
-	if (!isOccupied) {
+	if (!musicService.hasActiveSession) {
 		const locale = interaction.locale;
 		const strings = {
 			title: client.localise("music.strings.notPlaying.title", locale)(),
@@ -36,8 +35,6 @@ async function handleDisplayCurrentlyPlaying(
 
 		return;
 	}
-
-	const playingSince = musicService.playingSince;
 
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
@@ -102,8 +99,6 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const song = musicService.session.queueable as Song | AudioStream;
-
 	const strings = {
 		nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),
 		collection: client.localise("music.options.now.strings.collection", locale)(),
@@ -114,7 +109,8 @@ async function handleDisplayCurrentlyPlaying(
 		playingSince: client.localise(
 			"music.options.now.strings.playingSince",
 			locale,
-		)({ relative_timestamp: timestamp(playingSince ?? 0, { format: "relative" }) }),
+		)({ relative_timestamp: timestamp(musicService.session.playingTimeMilliseconds, { format: "relative" }) }),
+		// TODO(vxern): Is this needed?
 		startTimeUnknown: client.localise("music.options.now.strings.startTimeUnknown", locale)(),
 		sourcedFrom: client.localise(
 			"music.options.now.strings.sourcedFrom",
@@ -131,7 +127,7 @@ async function handleDisplayCurrentlyPlaying(
 			fields: [
 				{
 					name: strings.title,
-					value: `[${song.title}](${song.url})`,
+					value: `[${musicService.session.queueable.title}](${musicService.session.queueable.url})`,
 					inline: false,
 				},
 				{
@@ -141,7 +137,7 @@ async function handleDisplayCurrentlyPlaying(
 				},
 				{
 					name: strings.runningTime,
-					value: playingSince !== undefined ? strings.playingSince : strings.startTimeUnknown,
+					value: strings.playingSince,
 					inline: false,
 				},
 			],
