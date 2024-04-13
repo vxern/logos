@@ -8,9 +8,11 @@ import * as shoukaku from "shoukaku";
 
 type PlaybackActionType = "manage" | "check";
 class MusicService extends LocalService {
-	#session: MusicSession | undefined;
+	#session?: MusicSession;
 
 	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
+	#_managerDisconnects!: (name: string, count: number) => void;
+	#_managerConnectionRestores!: (name: string, reconnected: boolean) => void;
 
 	get configuration(): NonNullable<Guild["music"]> {
 		return this.guildDocument.music!;
@@ -34,20 +36,27 @@ class MusicService extends LocalService {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "MusicService", guildId });
 
-		this.#session = undefined;
-
 		this.#_voiceStateUpdates = new Collector({ guildId });
 	}
 
 	async start(): Promise<void> {
 		this.#_voiceStateUpdates.onCollect(this.#_handleVoiceStateUpdate.bind(this));
 
-		this.client.lavalinkService.manager.on("disconnect", (_, __) => this.#_handleConnectionLost());
-		this.client.lavalinkService.manager.on("ready", (_, __) => this.#_handleConnectionRestored());
+		this.client.lavalinkService.manager.on(
+			"disconnect",
+			(this.#_managerDisconnects = this.#_handleConnectionLost.bind(this)),
+		);
+		this.client.lavalinkService.manager.on(
+			"ready",
+			(this.#_managerConnectionRestores = this.#_handleConnectionRestored.bind(this)),
+		);
 	}
 
 	async stop(): Promise<void> {
 		await this.#_voiceStateUpdates.close();
+
+		this.client.lavalinkService.manager.off("disconnect", this.#_managerDisconnects);
+		this.client.lavalinkService.manager.off("ready", this.#_managerConnectionRestores);
 
 		await this.destroySession();
 	}
