@@ -425,12 +425,6 @@ class ListingManager extends EventEmitter {
 	}
 
 	moveCurrentToHistory(): void {
-		// TODO(vxern): This is bad, and it shouldn't be necessary here.
-		// Adjust the position for being incremented automatically when played next time.
-		if (this.current.queueable instanceof SongCollection) {
-			this.current.queueable.index -= 1;
-		}
-
 		this.#current!.queueable.reset();
 
 		this.history.addNew(this.#current!);
