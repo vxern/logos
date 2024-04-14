@@ -93,13 +93,20 @@ class MusicService extends LocalService {
 		await player.setGlobalVolume(this.configuration.implicitVolume);
 
 		this.#session = new MusicSession({ service: this, player, channelId });
+		this.#session.start();
 
 		return this.#session;
 	}
 
 	async destroySession(): Promise<void> {
-		await this.#session?.dispose();
+		await this.#session?.stop();
 		this.#session = undefined;
+	}
+
+	async restoreSession(): Promise<void> {
+		this.session.flags.isDisconnected = false;
+
+		await this.session.play({ playable: this.session.playable });
 	}
 
 	async receiveListing(listing: SongListing, { channelId }: { channelId: bigint }): Promise<void> {
@@ -114,7 +121,6 @@ class MusicService extends LocalService {
 
 		if (session.hasCurrent) {
 			const locale = this.guildLocale;
-
 			const strings = {
 				title: this.client.localise("music.options.play.strings.queued.title", locale)(),
 				description: this.client.localise(
@@ -220,20 +226,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		const oldSession = this.session;
-		oldSession.flags.isDisconnected = false;
-
-		await this.destroySession();
-		await this.createSession({ channelId: oldSession.channelId });
-
-		// TODO(vxern): Create a method to plug in a new player into an old session.
-		// @ts-ignore: For now...
-		this.session = { ...oldSession, player: this.session.player };
-
-		await this.session.play({
-			playable: this.session.playable,
-			restore: { paused: oldSession.player.paused, volume: oldSession.player.volume },
-		});
+		await this.restoreSession();
 
 		const guildLocale = this.guildLocale;
 
@@ -506,7 +499,6 @@ class ListingManager extends EventEmitter {
 	}
 }
 
-// TODO(vxern): Set up listeners to automatically respond to queue events.
 type QueueableMode = "song-collection" | "playable";
 class MusicSession extends EventEmitter {
 	readonly service: MusicService;
@@ -521,6 +513,10 @@ class MusicSession extends EventEmitter {
 
 	startedAt: number;
 	restoreAt: number;
+
+	#_trackStarts!: (data: shoukaku.TrackStartEvent) => void;
+	#_trackEnds!: (data: shoukaku.TrackEndEvent) => void;
+	#_trackExceptions!: (data: shoukaku.TrackExceptionEvent) => void;
 
 	get hasCurrent(): boolean {
 		return this.listings.hasCurrent;
@@ -560,11 +556,90 @@ class MusicSession extends EventEmitter {
 		this.restoreAt = 0;
 	}
 
-	receiveListing({ listing }: { listing: SongListing }): void {
-		this.listings.queue.addNew(listing);
+	start(): void {
+		this.player.on("start", (this.#_trackStarts = this.#_handleTrackStart.bind(this)));
+		this.player.on("end", (this.#_trackEnds = this.#_handleTrackEnd.bind(this)));
+		this.player.on("exception", (this.#_trackExceptions = this.#_handleTrackException.bind(this)));
 	}
 
-	// TODO(vxern): Put this on the song collection.
+	async stop(): Promise<void> {
+		this.player.off("start", this.#_trackStarts);
+		this.player.off("end", this.#_trackEnds);
+		this.player.off("exception", this.#_trackExceptions);
+
+		this.listings.dispose();
+		await this.player.destroy();
+		this.emit("end");
+		this.removeAllListeners();
+	}
+
+	async #_handleTrackStart(_: shoukaku.TrackStartEvent): Promise<void> {
+		this.startedAt = Date.now();
+
+		if (this.restoreAt !== 0) {
+			await this.player.seekTo(this.restoreAt);
+		}
+
+		// TODO(vxern): Get restore from somewhere.
+		// if (restore !== undefined) {
+		// 	   await this.player.setPaused(restore.paused);
+		// }
+	}
+
+	async #_handleTrackEnd(_: shoukaku.TrackEndEvent): Promise<void> {
+		if (this.flags.isDestroyed) {
+			return;
+		}
+
+		if (this.flags.breakLoop) {
+			this.flags.breakLoop = false;
+			return;
+		}
+
+		this.restoreAt = 0;
+
+		await this.advanceQueueAndPlayNext();
+	}
+
+	async #_handleTrackException(event: shoukaku.TrackExceptionEvent): Promise<void> {
+		this.playable.isLooping = false;
+
+		this.service.log.warn(`Failed to play track: ${event.exception}`);
+
+		const guildLocale = this.service.guildLocale;
+		const strings = {
+			title: this.service.client.localise("music.options.play.strings.failedToPlay.title", guildLocale)(),
+			description: this.service.client.localise(
+				"music.options.play.strings.failedToPlay.description",
+				guildLocale,
+			)({
+				title: this.playable.title,
+			}),
+		};
+
+		this.service.client.bot.rest
+			.sendMessage(this.channelId, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+						color: constants.colours.failure,
+					},
+				],
+			})
+			.catch(() =>
+				this.service.log.warn(
+					`Failed to send track play failure to ${this.service.client.diagnostics.channel(
+						this.channelId,
+					)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
+				),
+			);
+	}
+
+	receiveListing({ listing }: { listing: SongListing }): void {
+		this.listings.addToQueue(listing);
+	}
+
 	#_advanceSongCollection({ queueable }: { queueable: SongCollection }): void {
 		if (queueable.playable.isLooping) {
 			return;
@@ -599,13 +674,13 @@ class MusicSession extends EventEmitter {
 		}
 
 		if (this.playable.isLooping) {
-			await this.play(this.playable);
+			await this.play({ playable: this.playable });
 			return;
 		}
 
 		if (this.queueable instanceof SongCollection) {
 			this.#_advanceSongCollection({ queueable: this.queueable });
-			await this.play(this.playable);
+			await this.play({ playable: this.playable });
 			return;
 		}
 
@@ -620,7 +695,7 @@ class MusicSession extends EventEmitter {
 
 		this.listings.takeCurrentFromQueue();
 
-		await this.play(this.playable);
+		await this.play({ playable: this.playable });
 	}
 
 	async setPaused(value: boolean): Promise<void> {
@@ -776,54 +851,8 @@ class MusicSession extends EventEmitter {
 		await this.player.seekTo(timestamp);
 	}
 
-	// TODO(vxern): Refactor this.
-	async play({
-		playable,
-		restore,
-	}: { playable: Playable; restore?: { paused: boolean; volume: number } }): Promise<boolean | undefined> {
-		const result = await this.player.node.rest.resolve(`ytsearch:${playable.url}`);
-
-		if (result === undefined || result.loadType === "error" || result.loadType === "empty") {
-			this.playable.isLooping = false;
-
-			const guildLocale = this.service.guildLocale;
-			const strings = {
-				title: this.service.client.localise("music.options.play.strings.failedToLoad.title", guildLocale)(),
-				description: this.service.client.localise(
-					"music.options.play.strings.failedToLoad.description",
-					guildLocale,
-				)({
-					title: playable.title,
-				}),
-			};
-
-			this.service.client.bot.rest
-				.sendMessage(this.channelId, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.failure,
-						},
-					],
-				})
-				.catch(() =>
-					this.service.log.warn(
-						`Failed to send track load failure to ${this.service.client.diagnostics.channel(
-							this.channelId,
-						)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
-					),
-				);
-
-			await this.advanceQueueAndPlayNext();
-
-			return false;
-		}
-
-		let track: shoukaku.Track | undefined;
-		if (result.loadType === "search") {
-			track = result.data.at(0);
-		}
+	async play({ playable }: { playable: Playable }): Promise<boolean> {
+		const track = await this.#_getTrack({ playable });
 		if (track === undefined) {
 			return false;
 		}
@@ -832,84 +861,13 @@ class MusicSession extends EventEmitter {
 			this.queueable.title = track.info.title;
 		}
 
-		this.player.once("exception", async (reason) => {
-			this.playable.isLooping = false;
-
-			this.service.log.warn(`Failed to play track: ${reason.exception}`);
-
-			const guildLocale = this.service.guildLocale;
-			const strings = {
-				title: this.service.client.localise("music.options.play.strings.failedToPlay.title", guildLocale)(),
-				description: this.service.client.localise(
-					"music.options.play.strings.failedToPlay.description",
-					guildLocale,
-				)({
-					title: playable.title,
-				}),
-			};
-
-			this.service.client.bot.rest
-				.sendMessage(this.channelId, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-							color: constants.colours.failure,
-						},
-					],
-				})
-				.catch(() =>
-					this.service.log.warn(
-						`Failed to send track play failure to ${this.service.client.diagnostics.channel(
-							this.channelId,
-						)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
-					),
-				);
-		});
-
-		this.player.once("end", async () => {
-			this.player.removeAllListeners("exception");
-
-			if (this.flags.isDestroyed) {
-				return;
-			}
-
-			if (this.flags.breakLoop) {
-				this.flags.breakLoop = false;
-				return;
-			}
-
-			this.restoreAt = 0;
-
-			await this.advanceQueueAndPlayNext();
-		});
-
-		this.player.once("start", async () => {
-			const now = Date.now();
-			this.startedAt = now;
-
-			if (this.restoreAt !== 0) {
-				await this.player.seekTo(this.restoreAt);
-			}
-
-			if (restore !== undefined) {
-				await this.player.setPaused(restore.paused);
-			}
-		});
-
-		if (restore !== undefined) {
-			await this.player.setGlobalVolume(restore.volume);
-			await this.player.playTrack({ track: track.encoded });
-			return;
-		}
-
 		await this.player.playTrack({ track: track.encoded });
 
-		const guildLocale = this.service.guildLocale;
+		const locale = this.service.guildLocale;
 		const strings = {
 			title: this.service.client.localise(
 				"music.options.play.strings.nowPlaying.title.nowPlaying",
-				guildLocale,
+				locale,
 			)({
 				listing_type: this.service.client.localise(
 					(() => {
@@ -928,19 +886,19 @@ class MusicSession extends EventEmitter {
 								return constants.special.missingString;
 						}
 					})(),
-					guildLocale,
+					locale,
 				)(),
 			}),
 			description: {
 				nowPlaying: this.service.client.localise(
 					"music.options.play.strings.nowPlaying.description.nowPlaying",
-					guildLocale,
+					locale,
 				),
 				track:
 					this.queueable instanceof SongCollection
 						? this.service.client.localise(
 								"music.options.play.strings.nowPlaying.description.track",
-								guildLocale,
+								locale,
 						  )({
 								index: this.queueable.index + 1,
 								number: this.queueable.songs.length,
@@ -976,11 +934,56 @@ class MusicSession extends EventEmitter {
 		return true;
 	}
 
-	async dispose(): Promise<void> {
-		this.emit("end");
-		this.removeAllListeners();
+	async #_getTrack({ playable }: { playable: Playable }): Promise<shoukaku.Track | undefined> {
+		const result = await this.player.node.rest.resolve(`ytsearch:${playable.url}`);
+		if (result === undefined) {
+			return undefined;
+		}
 
-		await this.player.destroy();
+		switch (result.loadType) {
+			case shoukaku.LoadType.SEARCH: {
+				return result.data.at(0)!;
+			}
+			case shoukaku.LoadType.PLAYLIST:
+			case shoukaku.LoadType.TRACK: {
+				throw `UnhandledError: Received an unknown track load type '${result}' when searching for track.`;
+			}
+			case shoukaku.LoadType.ERROR:
+			case shoukaku.LoadType.EMPTY: {
+				this.playable.reset();
+
+				const locale = this.service.guildLocale;
+				const strings = {
+					title: this.service.client.localise("music.options.play.strings.failedToLoad.title", locale)(),
+					description: this.service.client.localise(
+						"music.options.play.strings.failedToLoad.description",
+						locale,
+					)({
+						title: playable.title,
+					}),
+				};
+
+				this.service.client.bot.rest
+					.sendMessage(this.channelId, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+								color: constants.colours.failure,
+							},
+						],
+					})
+					.catch(() =>
+						this.service.log.warn(
+							`Failed to send track load failure to ${this.service.client.diagnostics.channel(
+								this.channelId,
+							)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
+						),
+					);
+
+				return undefined;
+			}
+		}
 	}
 }
 
