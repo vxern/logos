@@ -800,31 +800,12 @@ class MusicSession extends EventEmitter {
 			return;
 		}
 
-		const previousLoopState = queueable.isLooping;
-		queueable.isLooping = true;
-		this.player.once("start", () => (queueable.isLooping = previousLoopState));
-
 		queueable.moveTo({ index: 0 });
 	}
 
-	#_replayPlayable(): void {
-		const playable = this.playable;
-
-		const previousLoopState = playable.isLooping;
-		playable.isLooping = true;
-		this.player.once("start", () => (playable.isLooping = previousLoopState));
-	}
-
 	async replay({ mode }: { mode: QueueableMode }): Promise<void> {
-		switch (mode) {
-			case "song-collection": {
-				this.#_replaySongCollection();
-				break;
-			}
-			case "playable": {
-				this.#_replayPlayable();
-				break;
-			}
+		if (mode === "song-collection") {
+			this.#_replaySongCollection();
 		}
 
 		await this.advanceQueue({ replay: true });
