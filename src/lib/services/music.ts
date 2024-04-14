@@ -502,7 +502,6 @@ class MusicSession extends EventEmitter {
 	readonly flags: {
 		isDisconnected: boolean;
 		isDestroyed: boolean;
-		breakLoop: boolean;
 	};
 
 	startedAt: number;
@@ -544,7 +543,6 @@ class MusicSession extends EventEmitter {
 		this.flags = {
 			isDisconnected: false,
 			isDestroyed: false,
-			breakLoop: false,
 		};
 		this.startedAt = 0;
 		this.restoreAt = 0;
@@ -585,14 +583,9 @@ class MusicSession extends EventEmitter {
 			return;
 		}
 
-		if (this.flags.breakLoop) {
-			this.flags.breakLoop = false;
-			return;
-		}
-
 		this.restoreAt = 0;
 
-		await this.advanceQueueAndPlayNext();
+		await this.advanceQueue();
 	}
 
 	async #_handleTrackException(event: shoukaku.TrackExceptionEvent): Promise<void> {
@@ -656,7 +649,7 @@ class MusicSession extends EventEmitter {
 		this.listings.moveCurrentToHistory();
 	}
 
-	async advanceQueueAndPlayNext(): Promise<void> {
+	async advanceQueue({ replay = false }: { replay?: boolean } = {}): Promise<void> {
 		// There could be no current queueable in the case of the current song elapsing, or in the case of
 		// it having been removed through some other action, for example during a skip/unskip action.
 		//
@@ -667,7 +660,7 @@ class MusicSession extends EventEmitter {
 			return;
 		}
 
-		if (this.playable.isLooping) {
+		if (this.playable.isLooping || replay) {
 			await this.play({ playable: this.playable });
 			return;
 		}
@@ -798,7 +791,7 @@ class MusicSession extends EventEmitter {
 			return;
 		}
 
-		await this.advanceQueueAndPlayNext();
+		await this.advanceQueue();
 	}
 
 	#_replaySongCollection(): void {
@@ -834,10 +827,7 @@ class MusicSession extends EventEmitter {
 			}
 		}
 
-		this.flags.breakLoop = true;
-		this.restoreAt = 0;
-		await this.player.stopTrack();
-		await this.advanceQueueAndPlayNext();
+		await this.advanceQueue({ replay: true });
 	}
 
 	async skipTo({ timestamp }: { timestamp: number }): Promise<void> {
