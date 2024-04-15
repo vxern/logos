@@ -4,10 +4,10 @@ import { ResourceFormData } from "logos/database/resource";
 
 class ResourceComposer extends ModalComposer<ResourceFormData, never> {
 	async buildModal(
-		_: Logos.Interaction,
-		{ locale }: Logos.InteractionLocaleData,
+		submission: Logos.Interaction,
 		{ formData }: { formData: ResourceFormData },
 	): Promise<Modal<ResourceFormData>> {
+		const locale = submission.locale;
 		const strings = {
 			title: this.client.localise("resource.title", locale)(),
 			fields: {

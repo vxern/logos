@@ -4,10 +4,10 @@ import { TicketFormData } from "logos/database/ticket";
 
 class TicketComposer extends ModalComposer<TicketFormData, never> {
 	async buildModal(
-		_: Logos.Interaction<any, any>,
-		{ locale }: Logos.InteractionLocaleData,
+		submission: Logos.Interaction<any, any>,
 		{ formData }: { formData: TicketFormData },
 	): Promise<Modal<TicketFormData>> {
+		const locale = submission.locale;
 		const strings = {
 			title: this.client.localise("ticket.title", locale)(),
 			topic: this.client.localise("ticket.fields.topic", locale)(),

@@ -1,16 +1,6 @@
 import { Client } from "logos/client";
-import { InteractionHandler } from "logos/commands/handlers/handler";
 import { getPraisePage } from "logos/commands/praises";
 import { Praise } from "logos/database/praise";
-
-type PraiseSearchMode = "author" | "target";
-const propertyByUserSearchMode = Object.freeze({
-	author: "authorId",
-	target: "targetId",
-} satisfies Record<PraiseSearchMode, keyof Praise>);
-
-const handleDisplayAuthorPraises: InteractionHandler = (...args) => handleDisplayPraises(...args, { mode: "author" });
-const handleDisplayTargetPraises: InteractionHandler = (...args) => handleDisplayPraises(...args, { mode: "target" });
 
 async function handleDisplayPraisesAutocomplete(
 	client: Client,
@@ -23,10 +13,23 @@ async function handleDisplayPraisesAutocomplete(
 	await client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
 }
 
+async function handleDisplayAuthorPraises(client: Client, interaction: Logos.Interaction): Promise<void> {
+	await handleDisplayPraises(client, interaction, { mode: "author" });
+}
+
+async function handleDisplayTargetPraises(client: Client, interaction: Logos.Interaction): Promise<void> {
+	await handleDisplayPraises(client, interaction, { mode: "target" });
+}
+
+type PraiseSearchMode = "author" | "target";
+const propertyByUserSearchMode = Object.freeze({
+	author: "authorId",
+	target: "targetId",
+} satisfies Record<PraiseSearchMode, keyof Praise>);
+
 async function handleDisplayPraises(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string | undefined }>,
-	_: Logos.InteractionLocaleData,
 	{ mode }: { mode: PraiseSearchMode },
 ): Promise<void> {
 	const locale = interaction.locale;

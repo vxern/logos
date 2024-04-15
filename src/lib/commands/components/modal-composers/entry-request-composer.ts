@@ -4,10 +4,11 @@ import { EntryRequestFormData } from "logos/database/entry-request";
 
 class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 	async buildModal(
-		_: Logos.Interaction,
-		{ featureLanguage, locale }: Logos.InteractionLocaleData,
+		submission: Logos.Interaction,
 		{ formData }: { formData: EntryRequestFormData },
 	): Promise<Modal<EntryRequestFormData>> {
+		const locale = submission.locale;
+		const featureLanguage = submission.featureLanguage;
 		const strings = {
 			title: this.client.localise("verification.title", locale)(),
 			fields: {

@@ -12,10 +12,10 @@ class AnswerComposer extends ModalComposer<AnswerFormData, never> {
 	}
 
 	async buildModal(
-		_: Logos.Interaction<any, any>,
-		{ locale }: Logos.InteractionLocaleData,
+		submission: Logos.Interaction<any, any>,
 		{ formData }: { formData: AnswerFormData },
 	): Promise<Modal<AnswerFormData>> {
+		const locale = submission.locale;
 		const strings = {
 			title: this.client.localise("answer.title", locale)(),
 			fields: {

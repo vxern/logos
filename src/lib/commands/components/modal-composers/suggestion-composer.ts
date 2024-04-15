@@ -9,10 +9,10 @@ class SuggestionComposer extends ModalComposer<SuggestionFormData, never> {
 	}
 
 	async buildModal(
-		_: Logos.Interaction,
-		{ locale }: Logos.InteractionLocaleData,
+		submission: Logos.Interaction,
 		{ formData }: { formData: SuggestionFormData },
 	): Promise<Modal<SuggestionFormData>> {
+		const locale = submission.locale;
 		const strings = {
 			title: this.client.localise("suggestion.title", locale)(),
 			fields: {

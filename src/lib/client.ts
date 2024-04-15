@@ -510,7 +510,7 @@ class Client {
 		}
 
 		try {
-			await handle(this, interaction, interaction);
+			await handle(this, interaction);
 		} catch (exception) {
 			this.log.error(exception);
 		}

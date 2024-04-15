@@ -43,39 +43,34 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 
 	const composer = new TicketComposer(client, { interaction });
 
-	composer.onSubmit(
-		async (
-			submission: Logos.Interaction,
-			{ locale }: Logos.InteractionLocaleData,
-			{ formData }: { formData: TicketFormData },
-		) => {
-			await client.postponeReply(submission);
+	composer.onSubmit(async (submission: Logos.Interaction, { formData }: { formData: TicketFormData }) => {
+		await client.postponeReply(submission);
 
-			const ticketService = client.getPromptService(interaction.guildId, { type: "tickets" });
-			if (ticketService === undefined) {
-				return;
-			}
+		const ticketService = client.getPromptService(interaction.guildId, { type: "tickets" });
+		if (ticketService === undefined) {
+			return;
+		}
 
-			const ticketDocument = await ticketService.openTicket({
-				type: "standalone",
-				formData,
-				user: submission.user,
-			});
-			if (ticketDocument === undefined) {
-				return;
-			}
+		const ticketDocument = await ticketService.openTicket({
+			type: "standalone",
+			formData,
+			user: submission.user,
+		});
+		if (ticketDocument === undefined) {
+			return;
+		}
 
-			const strings = {
-				title: client.localise("ticket.strings.sent.title", locale)(),
-				description: client.localise("ticket.strings.sent.description", locale)(),
-			};
+		const locale = submission.locale;
+		const strings = {
+			title: client.localise("ticket.strings.sent.title", locale)(),
+			description: client.localise("ticket.strings.sent.description", locale)(),
+		};
 
-			await client.succeeded(submission, {
-				title: strings.title,
-				description: strings.description,
-			});
-		},
-	);
+		await client.succeeded(submission, {
+			title: strings.title,
+			description: strings.description,
+		});
+	});
 
 	await composer.open();
 }

@@ -4,10 +4,10 @@ import { ReportFormData } from "logos/database/report";
 
 class ReportComposer extends ModalComposer<ReportFormData, never> {
 	async buildModal(
-		_: Logos.Interaction,
-		{ locale }: Logos.InteractionLocaleData,
+		submission: Logos.Interaction,
 		{ formData }: { formData: ReportFormData },
 	): Promise<Modal<ReportFormData>> {
+		const locale = submission.locale;
 		const strings = {
 			title: this.client.localise("report.title", locale)(),
 			fields: {

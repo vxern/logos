@@ -11,11 +11,7 @@ interface Modal<FormData> {
 	title: string;
 	elements: ModalElement<FormData>[];
 }
-type SubmitEvent<FormData> = (
-	interaction: Logos.Interaction,
-	localeData: Logos.InteractionLocaleData,
-	{ formData }: { formData: FormData },
-) => Promise<void>;
+type SubmitEvent<FormData> = (interaction: Logos.Interaction, { formData }: { formData: FormData }) => Promise<void>;
 /**
  * @remarks
  * IMPORTANT: When creating a new modal composer and implementing {@link buildModal}, make sure to link all of the
@@ -78,26 +74,18 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		return content as FormData;
 	}
 
-	abstract buildModal(
-		interaction: Logos.Interaction,
-		localeData: Logos.InteractionLocaleData,
-		{ formData }: { formData: FormData },
-	): Promise<Modal<FormData>>;
+	abstract buildModal(interaction: Logos.Interaction, { formData }: { formData: FormData }): Promise<Modal<FormData>>;
 
 	async validate(_: { formData: FormData }): Promise<ValidationError | undefined> {
 		return undefined;
 	}
 
-	getErrorMessage(
-		_: Logos.Interaction,
-		__: Logos.InteractionLocaleData,
-		___: { error: ValidationError },
-	): Discord.CamelizedDiscordEmbed | undefined {
+	getErrorMessage(_: Logos.Interaction, __: { error: ValidationError }): Discord.CamelizedDiscordEmbed | undefined {
 		return undefined;
 	}
 
 	async #display(): Promise<void> {
-		const modal = await this.buildModal(this.anchor, this.anchor, { formData: this.#formData });
+		const modal = await this.buildModal(this.anchor, { formData: this.#formData });
 
 		await this.client.displayModal(this.anchor, {
 			title: modal.title,
@@ -198,7 +186,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 
 		await this.client.editReply(submission, {
 			embeds: [
-				this.getErrorMessage(submission, submission, { error }) ?? {
+				this.getErrorMessage(submission, { error }) ?? {
 					title: strings.title,
 					description: strings.description,
 				},
@@ -228,7 +216,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 	}
 
 	async #dispatchSubmit(submission: Logos.Interaction, { formData }: { formData: FormData }): Promise<void> {
-		this.#onSubmit?.(submission, submission, { formData });
+		this.#onSubmit?.(submission, { formData });
 		await this.close();
 	}
 
