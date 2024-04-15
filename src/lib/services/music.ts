@@ -100,26 +100,18 @@ class MusicService extends LocalService {
 
 	async destroySession(): Promise<void> {
 		await this.#session?.stop();
+
 		this.#session = undefined;
 	}
 
-	async restoreSession(): Promise<void> {
-		this.session.isDisconnected = false;
-
-		await this.session.play({ playable: this.session.playable });
-	}
-
 	async receiveListing(listing: SongListing, { channelId }: { channelId: bigint }): Promise<void> {
-		let session: MusicSession;
-		if (this.hasSession) {
-			session = this.session;
-		} else {
-			session = await this.createSession({ channelId });
+		if (!this.hasSession) {
+			await this.createSession({ channelId });
 		}
 
-		session.receiveListing({ listing });
+		this.session.receiveListing({ listing });
 
-		if (session.hasCurrent) {
+		if (this.session.hasCurrent) {
 			const locale = this.guildLocale;
 			const strings = {
 				title: this.client.localise("music.options.play.strings.queued.title", locale)(),
@@ -133,7 +125,7 @@ class MusicService extends LocalService {
 			};
 
 			await this.client.bot.rest
-				.sendMessage(session.channelId, {
+				.sendMessage(this.session.channelId, {
 					embeds: [
 						{
 							title: `${constants.emojis.music.queued} ${strings.title}`,
@@ -147,7 +139,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		await session.playNext();
+		await this.session.playNext();
 	}
 
 	async #_handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
@@ -221,11 +213,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		if (!this.session.isDisconnected) {
-			return;
-		}
-
-		await this.restoreSession();
+		await this.session.restore();
 
 		const guildLocale = this.guildLocale;
 
@@ -593,6 +581,12 @@ class MusicSession extends EventEmitter {
 		this.listings.addToQueue(listing);
 	}
 
+	async restore(): Promise<void> {
+		this.isDisconnected = false;
+
+		await this.advanceQueue({ replay: true });
+	}
+
 	#_advanceSongCollection({ queueable }: { queueable: SongCollection }): void {
 		if (queueable.playable.isLooping) {
 			return;
@@ -649,136 +643,6 @@ class MusicSession extends EventEmitter {
 		this.listings.takeCurrentFromQueue();
 
 		await this.play({ playable: this.playable });
-	}
-
-	async setPaused(value: boolean): Promise<void> {
-		await this.player.setPaused(value);
-	}
-
-	async setVolume(volume: number): Promise<void> {
-		await this.player.setGlobalVolume(volume);
-	}
-
-	setLoop(value: boolean, { mode }: { mode: QueueableMode }): void {
-		switch (mode) {
-			case "song-collection": {
-				this.queueable.isLooping = value;
-				break;
-			}
-			case "playable": {
-				this.playable.isLooping = value;
-				break;
-			}
-		}
-	}
-
-	#_skipSongInSongCollection({
-		queueable,
-		controls,
-	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
-		if (controls.by !== undefined) {
-			queueable.moveBy({ count: controls.by, direction: "forward" });
-		}
-
-		if (controls.to !== undefined) {
-			queueable.moveTo({ index: controls.to - 1 });
-		}
-	}
-
-	#_skipSongCollection(): void {
-		this.listings.moveCurrentToHistory();
-	}
-
-	#_skipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
-		this.listings.moveCurrentToHistory();
-
-		const count = controls.by ?? controls.to ?? 0;
-		const listingsToMoveToHistory = Math.min(count, this.listings.queue.count);
-		this.listings.moveFromQueueToHistory({ count: listingsToMoveToHistory });
-	}
-
-	async skip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
-		if (this.queueable instanceof SongCollection) {
-			if (mode === "song-collection" || this.queueable.isLastInCollection) {
-				this.#_skipSongCollection();
-			} else {
-				this.#_skipSongInSongCollection({ queueable: this.queueable, controls });
-			}
-		} else {
-			this.#_skipPlayable({ controls });
-		}
-
-		await this.player.stopTrack();
-	}
-
-	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
-		queueable.index -= 1;
-
-		this.listings.moveCurrentToQueue();
-		this.listings.moveFromHistoryToQueue({ count: 1 });
-	}
-
-	#_unskipSongInSongCollection({
-		queueable,
-		controls,
-	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
-		if (controls.by !== undefined) {
-			queueable.moveBy({ count: controls.by, direction: "backward" });
-		}
-
-		if (controls.to !== undefined) {
-			queueable.moveTo({ index: controls.to - 1 });
-		}
-	}
-
-	#_unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
-		if (this.hasCurrent) {
-			this.listings.moveCurrentToQueue();
-		}
-
-		const count = controls.by ?? controls.to ?? 1;
-		const listingsToMoveToQueue = Math.min(count, this.listings.history.count);
-		this.listings.moveFromHistoryToQueue({ count: listingsToMoveToQueue });
-	}
-
-	async unskip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
-		if (this.hasCurrent && this.queueable instanceof SongCollection) {
-			if (mode === "song-collection" || this.queueable.isFirstInCollection) {
-				this.#_unskipSongCollection({ queueable: this.queueable });
-			} else {
-				this.#_unskipSongInSongCollection({ queueable: this.queueable, controls });
-			}
-		} else {
-			this.#_unskipPlayable({ controls });
-		}
-
-		if (this.player.track !== null) {
-			await this.player.stopTrack();
-			return;
-		}
-
-		await this.advanceQueue();
-	}
-
-	#_replaySongCollection(): void {
-		const queueable = this.queueable;
-		if (!(queueable instanceof SongCollection)) {
-			return;
-		}
-
-		queueable.moveTo({ index: 0 });
-	}
-
-	async replay({ mode }: { mode: QueueableMode }): Promise<void> {
-		if (mode === "song-collection") {
-			this.#_replaySongCollection();
-		}
-
-		await this.advanceQueue({ replay: true });
-	}
-
-	async skipTo({ timestamp }: { timestamp: number }): Promise<void> {
-		await this.player.seekTo(timestamp);
 	}
 
 	async play({ playable }: { playable: Playable }): Promise<boolean> {
@@ -914,6 +778,136 @@ class MusicSession extends EventEmitter {
 				return undefined;
 			}
 		}
+	}
+
+	async setPaused(value: boolean): Promise<void> {
+		await this.player.setPaused(value);
+	}
+
+	async setVolume(volume: number): Promise<void> {
+		await this.player.setGlobalVolume(volume);
+	}
+
+	setLoop(value: boolean, { mode }: { mode: QueueableMode }): void {
+		switch (mode) {
+			case "song-collection": {
+				this.queueable.isLooping = value;
+				break;
+			}
+			case "playable": {
+				this.playable.isLooping = value;
+				break;
+			}
+		}
+	}
+
+	#_skipSongInSongCollection({
+		queueable,
+		controls,
+	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
+		if (controls.by !== undefined) {
+			queueable.moveBy({ count: controls.by, direction: "forward" });
+		}
+
+		if (controls.to !== undefined) {
+			queueable.moveTo({ index: controls.to - 1 });
+		}
+	}
+
+	#_skipSongCollection(): void {
+		this.listings.moveCurrentToHistory();
+	}
+
+	#_skipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
+		this.listings.moveCurrentToHistory();
+
+		const count = controls.by ?? controls.to ?? 0;
+		const listingsToMoveToHistory = Math.min(count, this.listings.queue.count);
+		this.listings.moveFromQueueToHistory({ count: listingsToMoveToHistory });
+	}
+
+	async skip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
+		if (this.queueable instanceof SongCollection) {
+			if (mode === "song-collection" || this.queueable.isLastInCollection) {
+				this.#_skipSongCollection();
+			} else {
+				this.#_skipSongInSongCollection({ queueable: this.queueable, controls });
+			}
+		} else {
+			this.#_skipPlayable({ controls });
+		}
+
+		await this.player.stopTrack();
+	}
+
+	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
+		queueable.index -= 1;
+
+		this.listings.moveCurrentToQueue();
+		this.listings.moveFromHistoryToQueue({ count: 1 });
+	}
+
+	#_unskipSongInSongCollection({
+		queueable,
+		controls,
+	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
+		if (controls.by !== undefined) {
+			queueable.moveBy({ count: controls.by, direction: "backward" });
+		}
+
+		if (controls.to !== undefined) {
+			queueable.moveTo({ index: controls.to - 1 });
+		}
+	}
+
+	#_unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
+		if (this.hasCurrent) {
+			this.listings.moveCurrentToQueue();
+		}
+
+		const count = controls.by ?? controls.to ?? 1;
+		const listingsToMoveToQueue = Math.min(count, this.listings.history.count);
+		this.listings.moveFromHistoryToQueue({ count: listingsToMoveToQueue });
+	}
+
+	async unskip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
+		if (this.hasCurrent && this.queueable instanceof SongCollection) {
+			if (mode === "song-collection" || this.queueable.isFirstInCollection) {
+				this.#_unskipSongCollection({ queueable: this.queueable });
+			} else {
+				this.#_unskipSongInSongCollection({ queueable: this.queueable, controls });
+			}
+		} else {
+			this.#_unskipPlayable({ controls });
+		}
+
+		if (this.player.track !== null) {
+			await this.player.stopTrack();
+			return;
+		}
+
+		await this.advanceQueue();
+	}
+
+	#_replaySongCollection(): void {
+		const queueable = this.queueable;
+		if (!(queueable instanceof SongCollection)) {
+			return;
+		}
+
+		queueable.moveTo({ index: 0 });
+	}
+
+	async replay({ mode }: { mode: QueueableMode }): Promise<void> {
+		if (mode === "song-collection") {
+			this.#_replaySongCollection();
+		}
+
+		await this.advanceQueue({ replay: true });
+	}
+
+	async skipTo({ timestamp }: { timestamp: number }): Promise<void> {
+		await this.player.seekTo(timestamp);
 	}
 }
 
