@@ -5,6 +5,7 @@ import { Collector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
+import { Logger } from "logos/logger";
 
 type PlaybackActionType = "manage" | "check";
 class MusicService extends LocalService {
@@ -92,7 +93,7 @@ class MusicService extends LocalService {
 
 		await player.setGlobalVolume(this.configuration.implicitVolume);
 
-		this.#session = new MusicSession({ service: this, player, channelId });
+		this.#session = new MusicSession({ client: this.client, service: this, player, channelId });
 		this.#session.start();
 
 		return this.#session;
@@ -110,36 +111,6 @@ class MusicService extends LocalService {
 		}
 
 		this.session.receiveListing({ listing });
-
-		if (this.session.hasCurrent) {
-			const locale = this.guildLocale;
-			const strings = {
-				title: this.client.localise("music.options.play.strings.queued.title", locale)(),
-				description: this.client.localise(
-					"music.options.play.strings.queued.description.public",
-					locale,
-				)({
-					title: listing.queueable.title,
-					user_mention: mention(listing.userId, { type: "user" }),
-				}),
-			};
-
-			await this.client.bot.rest
-				.sendMessage(this.session.channelId, {
-					embeds: [
-						{
-							title: `${constants.emojis.music.queued} ${strings.title}`,
-							description: strings.description,
-							color: constants.colours.success,
-						},
-					],
-				})
-				.catch(() => this.log.warn("Failed to send music feedback message."));
-
-			return;
-		}
-
-		await this.session.playNext();
 	}
 
 	async #_handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
@@ -482,6 +453,8 @@ class ListingManager extends EventEmitter {
 
 type QueueableMode = "song-collection" | "playable";
 class MusicSession extends EventEmitter {
+	readonly log: Logger;
+	readonly client: Client;
 	readonly service: MusicService;
 	readonly player: shoukaku.Player;
 	readonly channelId: bigint;
@@ -511,11 +484,18 @@ class MusicSession extends EventEmitter {
 		return Date.now() - this.player.position;
 	}
 
-	constructor({ service, player, channelId }: { service: MusicService; player: shoukaku.Player; channelId: bigint }) {
+	constructor({
+		client,
+		service,
+		player,
+		channelId,
+	}: { client: Client; service: MusicService; player: shoukaku.Player; channelId: bigint }) {
 		super();
 
 		this.setMaxListeners(0);
 
+		this.log = Logger.create({ identifier: `MusicSession@${service.guildId}` });
+		this.client = client;
 		this.service = service;
 		this.player = player;
 		this.channelId = channelId;
@@ -545,12 +525,12 @@ class MusicSession extends EventEmitter {
 	async #_handleTrackException(event: shoukaku.TrackExceptionEvent): Promise<void> {
 		this.playable.isLooping = false;
 
-		this.service.log.warn(`Failed to play track: ${event.exception}`);
+		this.log.warn(`Failed to play track: ${event.exception}`);
 
 		const guildLocale = this.service.guildLocale;
 		const strings = {
-			title: this.service.client.localise("music.options.play.strings.failedToPlay.title", guildLocale)(),
-			description: this.service.client.localise(
+			title: this.client.localise("music.options.play.strings.failedToPlay.title", guildLocale)(),
+			description: this.client.localise(
 				"music.options.play.strings.failedToPlay.description",
 				guildLocale,
 			)({
@@ -558,7 +538,7 @@ class MusicSession extends EventEmitter {
 			}),
 		};
 
-		this.service.client.bot.rest
+		this.client.bot.rest
 			.sendMessage(this.channelId, {
 				embeds: [
 					{
@@ -569,16 +549,46 @@ class MusicSession extends EventEmitter {
 				],
 			})
 			.catch(() =>
-				this.service.log.warn(
-					`Failed to send track play failure to ${this.service.client.diagnostics.channel(
+				this.log.warn(
+					`Failed to send track play failure to ${this.client.diagnostics.channel(
 						this.channelId,
-					)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
+					)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,
 				),
 			);
 	}
 
-	receiveListing({ listing }: { listing: SongListing }): void {
+	async receiveListing({ listing }: { listing: SongListing }): Promise<void> {
 		this.listings.addToQueue(listing);
+
+		if (this.hasCurrent) {
+			const locale = this.service.guildLocale;
+			const strings = {
+				title: this.client.localise("music.options.play.strings.queued.title", locale)(),
+				description: this.client.localise(
+					"music.options.play.strings.queued.description.public",
+					locale,
+				)({
+					title: listing.queueable.title,
+					user_mention: mention(listing.userId, { type: "user" }),
+				}),
+			};
+
+			await this.client.bot.rest
+				.sendMessage(this.channelId, {
+					embeds: [
+						{
+							title: `${constants.emojis.music.queued} ${strings.title}`,
+							description: strings.description,
+							color: constants.colours.success,
+						},
+					],
+				})
+				.catch(() => this.log.warn("Failed to send music feedback message."));
+
+			return;
+		}
+
+		await this.playNext();
 	}
 
 	async restore(): Promise<void> {
@@ -659,11 +669,11 @@ class MusicSession extends EventEmitter {
 
 		const locale = this.service.guildLocale;
 		const strings = {
-			title: this.service.client.localise(
+			title: this.client.localise(
 				"music.options.play.strings.nowPlaying.title.nowPlaying",
 				locale,
 			)({
-				listing_type: this.service.client.localise(
+				listing_type: this.client.localise(
 					(() => {
 						const queueable = this.queueable;
 						switch (true) {
@@ -684,13 +694,10 @@ class MusicSession extends EventEmitter {
 				)(),
 			}),
 			description: {
-				nowPlaying: this.service.client.localise(
-					"music.options.play.strings.nowPlaying.description.nowPlaying",
-					locale,
-				),
+				nowPlaying: this.client.localise("music.options.play.strings.nowPlaying.description.nowPlaying", locale),
 				track:
 					this.queueable instanceof SongCollection
-						? this.service.client.localise(
+						? this.client.localise(
 								"music.options.play.strings.nowPlaying.description.track",
 								locale,
 						  )({
@@ -702,7 +709,7 @@ class MusicSession extends EventEmitter {
 			},
 		};
 
-		this.service.client.bot.rest
+		this.client.bot.rest
 			.sendMessage(this.channelId, {
 				embeds: [
 					{
@@ -718,10 +725,10 @@ class MusicSession extends EventEmitter {
 				],
 			})
 			.catch(() =>
-				this.service.log.warn(
-					`Failed to send now playing message to ${this.service.client.diagnostics.channel(
+				this.log.warn(
+					`Failed to send now playing message to ${this.client.diagnostics.channel(
 						this.channelId,
-					)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
+					)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,
 				),
 			);
 
@@ -748,8 +755,8 @@ class MusicSession extends EventEmitter {
 
 				const locale = this.service.guildLocale;
 				const strings = {
-					title: this.service.client.localise("music.options.play.strings.failedToLoad.title", locale)(),
-					description: this.service.client.localise(
+					title: this.client.localise("music.options.play.strings.failedToLoad.title", locale)(),
+					description: this.client.localise(
 						"music.options.play.strings.failedToLoad.description",
 						locale,
 					)({
@@ -757,7 +764,7 @@ class MusicSession extends EventEmitter {
 					}),
 				};
 
-				this.service.client.bot.rest
+				this.client.bot.rest
 					.sendMessage(this.channelId, {
 						embeds: [
 							{
@@ -768,10 +775,10 @@ class MusicSession extends EventEmitter {
 						],
 					})
 					.catch(() =>
-						this.service.log.warn(
-							`Failed to send track load failure to ${this.service.client.diagnostics.channel(
+						this.log.warn(
+							`Failed to send track load failure to ${this.client.diagnostics.channel(
 								this.channelId,
-							)} on ${this.service.client.diagnostics.guild(this.service.guildId)}.`,
+							)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,
 						),
 					);
 
