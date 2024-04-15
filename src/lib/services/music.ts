@@ -104,7 +104,7 @@ class MusicService extends LocalService {
 	}
 
 	async restoreSession(): Promise<void> {
-		this.session.flags.isDisconnected = false;
+		this.session.isDisconnected = false;
 
 		await this.session.play({ playable: this.session.playable });
 	}
@@ -186,7 +186,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		if (this.session.flags.isDisconnected) {
+		if (this.session.isDisconnected) {
 			return;
 		}
 
@@ -213,8 +213,7 @@ class MusicService extends LocalService {
 			.catch(() => this.log.warn("Failed to send audio halted message."));
 
 		this.session.player.removeAllListeners();
-		this.session.flags.isDisconnected = true;
-		this.session.restoreAt = this.session.restoreAt + (Date.now() - this.session.startedAt);
+		this.session.isDisconnected = true;
 	}
 
 	async #_handleConnectionRestored(_: string, __: boolean): Promise<void> {
@@ -222,7 +221,7 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		if (!this.session.flags.isDisconnected) {
+		if (!this.session.isDisconnected) {
 			return;
 		}
 
@@ -251,7 +250,7 @@ class MusicService extends LocalService {
 	#_canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
 		const locale = interaction.locale;
 
-		if (this.#session?.flags.isDisconnected) {
+		if (this.session.isDisconnected) {
 			const strings = {
 				title: this.client.localise("music.strings.outage.cannotManage.title", locale)(),
 				description: {
@@ -499,15 +498,8 @@ class MusicSession extends EventEmitter {
 	readonly player: shoukaku.Player;
 	readonly channelId: bigint;
 	readonly listings: ListingManager;
-	readonly flags: {
-		isDisconnected: boolean;
-		isDestroyed: boolean;
-	};
+	isDisconnected: boolean;
 
-	startedAt: number;
-	restoreAt: number;
-
-	#_trackStarts!: (data: shoukaku.TrackStartEvent) => void;
 	#_trackEnds!: (data: shoukaku.TrackEndEvent) => void;
 	#_trackExceptions!: (data: shoukaku.TrackExceptionEvent) => void;
 
@@ -540,22 +532,15 @@ class MusicSession extends EventEmitter {
 		this.player = player;
 		this.channelId = channelId;
 		this.listings = new ListingManager();
-		this.flags = {
-			isDisconnected: false,
-			isDestroyed: false,
-		};
-		this.startedAt = 0;
-		this.restoreAt = 0;
+		this.isDisconnected = false;
 	}
 
 	start(): void {
-		this.player.on("start", (this.#_trackStarts = this.#_handleTrackStart.bind(this)));
 		this.player.on("end", (this.#_trackEnds = this.#_handleTrackEnd.bind(this)));
 		this.player.on("exception", (this.#_trackExceptions = this.#_handleTrackException.bind(this)));
 	}
 
 	async stop(): Promise<void> {
-		this.player.off("start", this.#_trackStarts);
 		this.player.off("end", this.#_trackEnds);
 		this.player.off("exception", this.#_trackExceptions);
 
@@ -565,26 +550,7 @@ class MusicSession extends EventEmitter {
 		this.removeAllListeners();
 	}
 
-	async #_handleTrackStart(_: shoukaku.TrackStartEvent): Promise<void> {
-		this.startedAt = Date.now();
-
-		if (this.restoreAt !== 0) {
-			await this.player.seekTo(this.restoreAt);
-		}
-
-		// TODO(vxern): Get restore from somewhere.
-		// if (restore !== undefined) {
-		// 	   await this.player.setPaused(restore.paused);
-		// }
-	}
-
 	async #_handleTrackEnd(_: shoukaku.TrackEndEvent): Promise<void> {
-		if (this.flags.isDestroyed) {
-			return;
-		}
-
-		this.restoreAt = 0;
-
 		await this.advanceQueue();
 	}
 
@@ -812,7 +778,6 @@ class MusicSession extends EventEmitter {
 	}
 
 	async skipTo({ timestamp }: { timestamp: number }): Promise<void> {
-		this.restoreAt = timestamp;
 		await this.player.seekTo(timestamp);
 	}
 
