@@ -4,8 +4,6 @@ import { Guild } from "logos/database/guild";
 import { Suggestion } from "logos/database/suggestion";
 
 async function handleMakeSuggestion(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.suggestions;
@@ -28,10 +26,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		configuration.rateLimit ?? constants.defaults.SUGGESTION_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = {
-			title: client.localise("suggestion.strings.tooMany.title", locale)(),
-			description: client.localise("suggestion.strings.tooMany.description", locale)(),
-		};
+		const strings = constants.contexts.tooManySuggestions({ localise: client.localise, locale: interaction.locale });
 
 		await client.pushback(interaction, {
 			title: strings.title,
@@ -48,7 +43,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 
 	const composer = new SuggestionComposer(client, { interaction });
 
-	composer.onSubmit(async (submission, { locale }, { formData }) => {
+	composer.onSubmit(async (submission, { formData }) => {
 		await client.postponeReply(submission);
 
 		const suggestionDocument = await Suggestion.create(client, {
@@ -77,10 +72,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		suggestionService.registerPrompt(prompt, interaction.user.id, suggestionDocument);
 		suggestionService.registerHandler(suggestionDocument);
 
-		const strings = {
-			title: client.localise("suggestion.strings.sent.title", locale)(),
-			description: client.localise("suggestion.strings.sent.description", locale)(),
-		};
+		const strings = constants.contexts.suggestionSent({ localise: client.localise, locale: interaction.locale });
 
 		await client.succeeded(submission, {
 			title: strings.title,

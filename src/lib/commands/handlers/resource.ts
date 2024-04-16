@@ -4,8 +4,6 @@ import { Guild } from "logos/database/guild";
 import { Resource } from "logos/database/resource";
 
 async function handleSubmitResource(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.resourceSubmissions;
@@ -28,10 +26,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		configuration.rateLimit ?? constants.defaults.RESOURCE_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = {
-			title: client.localise("resource.strings.tooMany.title", locale)(),
-			description: client.localise("resource.strings.tooMany.description", locale)(),
-		};
+		const strings = constants.contexts.tooManyResources({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -48,7 +43,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 
 	const composer = new ResourceComposer(client, { interaction });
 
-	composer.onSubmit(async (submission, { locale }, { formData }) => {
+	composer.onSubmit(async (submission, { formData }) => {
 		await client.postponeReply(submission);
 
 		const resourceDocument = await Resource.create(client, {
@@ -77,10 +72,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		resourceService.registerPrompt(prompt, interaction.user.id, resourceDocument);
 		resourceService.registerHandler(resourceDocument);
 
-		const strings = {
-			title: client.localise("resource.strings.sent.title", locale)(),
-			description: client.localise("resource.strings.sent.description", locale)(),
-		};
+		const strings = constants.contexts.resourceSent({ localise: client.localise, locale: interaction.locale });
 
 		await client.succeeded(submission, {
 			title: strings.title,

@@ -16,8 +16,6 @@ async function handleMakeCorrection(
 	interaction: Logos.Interaction,
 	{ mode }: { mode: CorrectionMode },
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const member = client.entities.members.get(interaction.guildId)?.get(interaction.user.id);
 	if (member === undefined) {
 		return;
@@ -29,10 +27,7 @@ async function handleMakeCorrection(
 	}
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
-		const strings = {
-			title: client.localise("correction.strings.cannotCorrect.title", locale)(),
-			description: client.localise("correction.strings.cannotCorrect.description", locale)(),
-		};
+		const strings = constants.contexts.cannotCorrect({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -43,10 +38,7 @@ async function handleMakeCorrection(
 	}
 
 	if (message.author.id === interaction.user.id) {
-		const strings = {
-			title: client.localise("correction.strings.cannotCorrectOwn.title", locale)(),
-			description: client.localise("correction.strings.cannotCorrectOwn.description", locale)(),
-		};
+		const strings = constants.contexts.cannotCorrectOwn({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -66,10 +58,10 @@ async function handleMakeCorrection(
 	)[interaction.guildId.toString()];
 	if (doNotCorrectMeRoleId !== undefined) {
 		if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
-			const strings = {
-				title: client.localise("correction.strings.userDoesNotWantCorrections.title", locale)(),
-				description: client.localise("correction.strings.userDoesNotWantCorrections.description", locale)(),
-			};
+			const strings = constants.contexts.userDoesNotWantCorrections({
+				localise: client.localise,
+				locale: interaction.locale,
+			});
 
 			await client.warning(interaction, {
 				title: strings.title,
@@ -81,20 +73,13 @@ async function handleMakeCorrection(
 	}
 
 	if (message.content.length > constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH) {
-		const strings = {
-			title: client.localise("correction.strings.tooLong.title", locale)(),
-			description: {
-				tooLong: client.localise("correction.strings.tooLong.description.tooLong", locale)(),
-				maximumLength: client.localise(
-					"correction.strings.tooLong.description.maximumLength",
-					locale,
-				)({ character_limit: constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH }),
-			},
-		};
+		const strings = constants.contexts.correctionTooLong({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: `${strings.description.tooLong} ${strings.description.maximumLength}`,
+			description: `${strings.description.tooLong} ${strings.description.maximumLength({
+				character_limit: constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH,
+			})}`,
 		});
 
 		return;
@@ -106,16 +91,10 @@ async function handleMakeCorrection(
 		prefillCorrectedField: mode === "full",
 	});
 
-	composer.onSubmit(async (submission, { locale }, { formData }) => {
+	composer.onSubmit(async (submission, { formData }) => {
 		await client.acknowledge(submission);
 
-		const strings = {
-			correction: client.localise("correction.strings.correction", locale)(),
-			suggestedBy: client.localise(
-				"correction.strings.suggestedBy",
-				locale,
-			)({ username: client.diagnostics.user(interaction.user, { includeId: false }) }),
-		};
+		const strings = constants.contexts.correction({ localise: client.localise, locale: interaction.locale });
 
 		client.bot.rest
 			.sendMessage(message.channelId, {
@@ -130,7 +109,9 @@ async function handleMakeCorrection(
 						description: formData.corrected,
 						color: constants.colours.success,
 						footer: {
-							text: `${constants.emojis.correction} ${strings.suggestedBy}`,
+							text: `${constants.emojis.correction} ${strings.suggestedBy({
+								username: client.diagnostics.user(interaction.user, { includeId: false }),
+							})}`,
 							iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
 								avatar: interaction.user.avatar,
 							}),

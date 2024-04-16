@@ -328,5 +328,52 @@ export default Object.freeze({
 		answer: localise("answer.strings.answer", locale)(),
 		submittedBy: localise("answer.strings.submittedBy", locale),
 	}),
+	cannotCorrect: ({ localise, locale }) => ({
+		title: localise("correction.strings.cannotCorrect.title", locale)(),
+		description: localise("correction.strings.cannotCorrect.description", locale)(),
+	}),
+	cannotCorrectOwn: ({ localise, locale }) => ({
+		title: localise("correction.strings.cannotCorrectOwn.title", locale)(),
+		description: localise("correction.strings.cannotCorrectOwn.description", locale)(),
+	}),
+	userDoesNotWantCorrections: ({ localise, locale }) => ({
+		title: localise("correction.strings.userDoesNotWantCorrections.title", locale)(),
+		description: localise("correction.strings.userDoesNotWantCorrections.description", locale)(),
+	}),
+	correctionTooLong: ({ localise, locale }) => ({
+		title: localise("correction.strings.tooLong.title", locale)(),
+		description: {
+			tooLong: localise("correction.strings.tooLong.description.tooLong", locale)(),
+			maximumLength: localise("correction.strings.tooLong.description.maximumLength", locale),
+		},
+	}),
+	correction: ({ localise, locale }) => ({
+		correction: localise("correction.strings.correction", locale)(),
+		suggestedBy: localise("correction.strings.suggestedBy", locale),
+	}),
+	tooManyReports: ({ localise, locale }) => ({
+		title: localise("report.strings.tooMany.title", locale)(),
+		description: localise("report.strings.tooMany.description", locale)(),
+	}),
+	reportSubmitted: ({ localise, locale }) => ({
+		title: localise("report.strings.submitted.title", locale)(),
+		description: localise("report.strings.submitted.description", locale)(),
+	}),
+	tooManyResources: ({ localise, locale }) => ({
+		title: localise("resource.strings.tooMany.title", locale)(),
+		description: localise("resource.strings.tooMany.description", locale)(),
+	}),
+	resourceSent: ({ localise, locale }) => ({
+		title: localise("resource.strings.sent.title", locale)(),
+		description: localise("resource.strings.sent.description", locale)(),
+	}),
+	tooManySuggestions: ({ localise, locale }) => ({
+		title: localise("suggestion.strings.tooMany.title", locale)(),
+		description: localise("suggestion.strings.tooMany.description", locale)(),
+	}),
+	suggestionSent: ({ localise, locale }) => ({
+		title: localise("suggestion.strings.sent.title", locale)(),
+		description: localise("suggestion.strings.sent.description", locale)(),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

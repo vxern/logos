@@ -4,8 +4,6 @@ import { Guild } from "logos/database/guild";
 import { Report } from "logos/database/report";
 
 async function handleMakeReport(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.reports;
@@ -28,10 +26,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		configuration.rateLimit ?? constants.defaults.REPORT_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = {
-			title: client.localise("report.strings.tooMany.title", locale)(),
-			description: client.localise("report.strings.tooMany.description", locale)(),
-		};
+		const strings = constants.contexts.tooManyReports({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -48,7 +43,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 
 	const composer = new ReportComposer(client, { interaction });
 
-	composer.onSubmit(async (submission, { locale }, { formData }) => {
+	composer.onSubmit(async (submission, { formData }) => {
 		await client.postponeReply(submission);
 
 		const reportDocument = await Report.create(client, {
@@ -77,10 +72,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		reportService.registerPrompt(prompt, user.id, reportDocument);
 		reportService.registerHandler(reportDocument);
 
-		const strings = {
-			title: client.localise("report.strings.submitted.title", locale)(),
-			description: client.localise("report.strings.submitted.description", locale)(),
-		};
+		const strings = constants.contexts.reportSubmitted({ localise: client.localise, locale: interaction.locale });
 
 		await client.succeeded(submission, {
 			title: strings.title,
