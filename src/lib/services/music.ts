@@ -3,9 +3,9 @@ import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
+import { Logger } from "logos/logger";
 import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
-import { Logger } from "logos/logger";
 
 type PlaybackActionType = "manage" | "check";
 class MusicService extends LocalService {

@@ -1,13 +1,13 @@
+import { ContextBuilder } from "logos:constants/contexts";
 import { Locale } from "logos:constants/languages";
 import { list } from "logos:core/formatting";
 import { Client } from "logos/client";
 
-type ContextBuilder<T> = ({ l, locale }: { l: Client["localise"]; locale: Locale }) => T;
 async function withContext<T>(
 	{ localise, locale, builder }: { localise: Client["localise"]; locale: Locale; builder: ContextBuilder<T> },
 	action: ({ strings }: { strings: T }) => Promise<void>,
 ): Promise<void> {
-	const strings = builder({ l: localise, locale });
+	const strings = builder({ localise, locale });
 
 	await action({ strings });
 }
@@ -27,27 +27,7 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 		{
 			localise: client.localise.bind(client),
 			locale: interaction.locale,
-			builder: ({ l, locale }) => ({
-				concept: {
-					title: l("information.options.bot.strings.concept.title", locale)(),
-					description: l("information.options.bot.strings.concept.description", locale)(),
-				},
-				function: {
-					title: l("information.options.bot.strings.function.title", locale)(),
-					description: l("information.options.bot.strings.function.description", locale)(),
-					features: {
-						definitions: l("information.options.bot.strings.function.features.definitions", locale)(),
-						translations: l("information.options.bot.strings.function.features.translations", locale)(),
-						games: l("information.options.bot.strings.function.features.games", locale)(),
-						messages: l("information.options.bot.strings.function.features.messages", locale)(),
-						guides: l("information.options.bot.strings.function.features.guides", locale)(),
-					},
-				},
-				languages: {
-					title: l("information.options.bot.strings.languages.title", locale)(),
-					description: l("information.options.bot.strings.languages.description", locale)(),
-				},
-			}),
+			builder: constants.contexts.informationBot,
 		},
 		async ({ strings }) => {
 			const featuresFormatted = list([

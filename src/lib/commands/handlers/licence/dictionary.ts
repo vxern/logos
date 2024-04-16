@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { getDictionaryLicenceByDictionary, isValidDictionary } from "logos:constants/licences";
 import { Client } from "logos/client";
 
@@ -23,26 +22,18 @@ async function handleDisplayDictionaryLicence(
 	client: Client,
 	interaction: Logos.Interaction<any, { dictionary: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	if (!isValidDictionary(interaction.parameters.dictionary)) {
-		await displayError(client, interaction, { locale: interaction.locale });
+		await displayError(client, interaction);
 		return;
 	}
 
 	const licence = getDictionaryLicenceByDictionary(interaction.parameters.dictionary);
 
-	const strings = {
-		title: client.localise("license.strings.license", locale)({ entity: licence.name }),
-		fields: {
-			source: client.localise("license.strings.source", locale)(),
-			copyright: client.localise("license.strings.copyright", locale)(),
-		},
-	};
+	const strings = constants.contexts.dictionaryLicence({ localise: client.localise, locale: interaction.locale });
 
 	await client.notice(interaction, {
 		author: {
-			name: strings.title,
+			name: strings.title({ entity: licence.name }),
 			iconUrl: licence.faviconLink,
 			url: licence.link,
 		},
@@ -64,15 +55,8 @@ async function handleDisplayDictionaryLicence(
 	});
 }
 
-async function displayError(
-	client: Client,
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Promise<void> {
-	const strings = {
-		title: client.localise("license.strings.invalid.title", locale)(),
-		description: client.localise("license.strings.invalid.description", locale)(),
-	};
+async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
+	const strings = constants.contexts.invalidLicence({ localise: client.localise, locale: interaction.locale });
 
 	await client.error(interaction, {
 		title: strings.title,

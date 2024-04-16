@@ -1,6 +1,7 @@
 import acknowledgements from "logos:constants/acknowledgements";
 import colours from "logos:constants/colours";
 import components from "logos:constants/components";
+import contexts from "logos:constants/contexts";
 import contributions from "logos:constants/contributions";
 import database from "logos:constants/database";
 import defaults from "logos:constants/defaults";
@@ -45,6 +46,7 @@ export default Object.freeze({
 	acknowledgements,
 	colours,
 	components,
+	contexts,
 	contributions,
 	database,
 	defaults,

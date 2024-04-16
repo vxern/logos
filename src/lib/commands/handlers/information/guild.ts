@@ -5,8 +5,6 @@ import { Guild } from "logos/database/guild";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
@@ -19,39 +17,12 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 		return;
 	}
 
-	const strings = {
-		title: client.localise("information.options.server.strings.information.title", locale)({ server_name: guild.name }),
-		description: {
-			description: {
-				title: client.localise("information.options.server.strings.information.description.description", locale)(),
-				noDescription: client.localise(
-					"information.options.server.strings.information.description.noDescription",
-					locale,
-				)(),
-			},
-			members: client.localise("information.options.server.strings.information.description.members", locale)(),
-			created: client.localise("information.options.server.strings.information.description.created", locale)(),
-			channels: client.localise("information.options.server.strings.information.description.channels", locale)(),
-			languages: client.localise("information.options.server.strings.information.description.languages", locale)(),
-			owner: client.localise("information.options.server.strings.information.description.owner", locale)(),
-			moderators: {
-				title: client.localise("information.options.server.strings.information.description.moderators", locale)(),
-				overseenByModerators: client.localise(
-					"information.options.server.strings.information.description.overseenByModerators",
-					locale,
-				)(),
-			},
-			distribution: client.localise(
-				"information.options.server.strings.information.description.distribution",
-				locale,
-			)(),
-		},
-	};
+	const strings = constants.contexts.guildInformation({ localise: client.localise, locale: interaction.locale });
 
 	await client.notice(interaction, {
 		author: {
 			iconUrl: Discord.guildIconUrl(guild.id, guild.icon, { size: 4096, format: "png" }),
-			name: strings.title,
+			name: strings.title({ server_name: guild.name }),
 		},
 		fields: [
 			{
@@ -71,12 +42,12 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 			},
 			{
 				name: `${constants.emojis.guild.channels.channels} ${strings.description.channels}`,
-				value: getChannelInformationSection(client, guild, { locale }),
+				value: getChannelInformationSection(client, interaction, guild),
 				inline: true,
 			},
 			{
 				name: `${constants.emojis.guild.languages.languages} ${strings.description.languages}`,
-				value: getLanguageInformationSection(client, guildDocument, { locale }),
+				value: getLanguageInformationSection(client, interaction, guildDocument),
 				inline: true,
 			},
 			...(guildDocument.isNative
@@ -88,7 +59,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 						},
 						{
 							name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
-							value: formatDistribution(client, getProficiencyRoleDistribution(client, guild), { locale }),
+							value: formatDistribution(client, getProficiencyRoleDistribution(client, guild)),
 							inline: false,
 						},
 				  ]
@@ -103,7 +74,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 	});
 }
 
-function getChannelInformationSection(client: Client, guild: Logos.Guild, { locale }: { locale: Locale }): string {
+function getChannelInformationSection(client: Client, interaction: Logos.Interaction, guild: Logos.Guild): string {
 	function getChannelCountByType(channels: Logos.Channel[], type: Discord.ChannelTypes): number {
 		return channels.filter((channel) => channel.type === type).length;
 	}
@@ -112,26 +83,25 @@ function getChannelInformationSection(client: Client, guild: Logos.Guild, { loca
 	const textChannelsCount = getChannelCountByType(channels, Discord.ChannelTypes.GuildText);
 	const voiceChannelsCount = getChannelCountByType(channels, Discord.ChannelTypes.GuildVoice);
 
-	const strings = {
-		text: client.localise("information.options.server.strings.channelTypes.text", locale)(),
-		voice: client.localise("information.options.server.strings.channelTypes.voice", locale)(),
-	};
+	const strings = constants.contexts.channelTypes({ localise: client.localise, locale: interaction.locale });
 
 	return `${constants.emojis.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.emojis.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
-function getLanguageInformationSection(client: Client, guildDocument: Guild, { locale }: { locale: Locale }): string {
-	const strings = {
-		home: client.localise("information.options.server.strings.languageTypes.home", locale)(),
-		target: client.localise("information.options.server.strings.languageTypes.target", locale)(),
-		localisationLanguage: client.localise(
-			constants.localisations.languages[guildDocument.localisationLanguage],
-			locale,
-		)(),
-		featureLanguage: client.localise(constants.localisations.languages[guildDocument.featureLanguage], locale)(),
-	};
+function getLanguageInformationSection(client: Client, interaction: Logos.Interaction, _guildDocument: Guild): string {
+	const strings = constants.contexts.languageTypes({ localise: client.localise, locale: interaction.locale });
 
-	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${strings.featureLanguage}`;
+	// TODO(vxern): Fix.
+	/**
+	localisationLanguage: ({ localisationLanguage }: { localisationLanguage: LocalisationLanguage }) => localise(
+		constants.localisations.languages[localisationLanguage],
+		locale,
+	)(),
+		featureLanguage: ({ featureLanguage }: { featureLanguage: FeatureLanguage }) => localise(constants.localisations.languages[featureLanguage], locale)(),*/
+
+	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage()}\n${
+		constants.emojis.guild.languages.feature
+	} ${strings.target} – ${strings.featureLanguage}`;
 }
 
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];

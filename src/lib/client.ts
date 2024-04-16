@@ -5,6 +5,8 @@ import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
+import { Diagnostics } from "logos/diagnostics";
+import { ActionLock } from "logos/helpers/action-lock";
 import { Logger } from "logos/logger";
 import { InteractionRepetitionService } from "logos/services/interaction-repetition";
 import { LavalinkService } from "logos/services/lavalink";
@@ -18,8 +20,6 @@ import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationStore, RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
-import { Diagnostics } from "./diagnostics";
-import { ActionLock } from "./helpers/action-lock";
 
 interface Environment {
 	readonly isDebug: boolean;

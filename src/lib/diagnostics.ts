@@ -1,4 +1,4 @@
-import { Client } from "./client";
+import { Client } from "logos/client";
 
 type ID = bigint | string;
 type Indexable<T> = T | ID;
