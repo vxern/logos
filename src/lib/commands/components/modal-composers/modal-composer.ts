@@ -177,12 +177,10 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		await this.client.registerInteractionCollector(returnButton);
 		await this.client.registerInteractionCollector(leaveButton);
 
-		const strings = {
-			title: this.client.localise("form.failedToSubmit.title", locale)(),
-			description: this.client.localise("form.failedToSubmit.description", locale)(),
-			continue: this.client.localise("prompts.continue", locale)(),
-			cancel: this.client.localise("prompts.cancel", locale)(),
-		};
+		const strings = constants.contexts.failedToSubmitForm({
+			localise: this.client.localise,
+			locale: submission.locale,
+		});
 
 		await this.client.editReply(submission, {
 			embeds: [

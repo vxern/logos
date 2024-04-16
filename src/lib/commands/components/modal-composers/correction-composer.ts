@@ -23,14 +23,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 		submission: Logos.Interaction,
 		{ formData }: { formData: CorrectionFormData },
 	): Promise<Modal<CorrectionFormData>> {
-		const locale = submission.locale;
-		const strings = {
-			title: this.client.localise("correction.title", locale)(),
-			fields: {
-				original: this.client.localise("correction.fields.original", locale)(),
-				corrected: this.client.localise("correction.fields.corrected", locale)(),
-			},
-		};
+		const strings = constants.contexts.correctionModal({ localise: this.client.localise, locale: submission.locale });
 
 		return {
 			title: strings.title,
@@ -79,11 +72,10 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 	): Discord.CamelizedDiscordEmbed | undefined {
 		switch (error) {
 			case "texts-not-different": {
-				const locale = submission.locale;
-				const strings = {
-					title: this.client.localise("correction.strings.textsNotDifferent.title", locale)(),
-					description: this.client.localise("correction.strings.textsNotDifferent.description", locale)(),
-				};
+				const strings = constants.contexts.correctionTextsNotDifferent({
+					localise: this.client.localise,
+					locale: submission.locale,
+				});
 
 				return {
 					title: strings.title,

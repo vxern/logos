@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
@@ -35,15 +34,11 @@ abstract class PaginatedView<T> {
 	}
 
 	get #view(): View {
-		const locale = this.#_anchor.parameters.show ? this.#_anchor.guildLocale : this.#_anchor.locale;
-
-		const { embed, components } = this.build(this.#currentPage, this.#index, { locale });
+		const { embed, components } = this.build(this.#_anchor, this.#currentPage, this.#index);
 
 		let title: string | undefined;
 		if (!this.#hasSinglePage) {
-			const strings = {
-				page: this.client.localise("interactions.page", locale)(),
-			};
+			const strings = constants.contexts.page({ localise: this.client.localise, locale: this.#_anchor.locale });
 
 			title = `${embed.title} ~ ${strings.page} ${this.#index + 1}/${this.#pages.length}`;
 		} else {
@@ -51,9 +46,7 @@ abstract class PaginatedView<T> {
 		}
 
 		if (!this.#isOnLastPage) {
-			const strings = {
-				continuedOnNextPage: this.client.localise("interactions.continuedOnNextPage", locale)(),
-			};
+			const strings = constants.contexts.continuedOnNextPage({ localise: this.client.localise, locale: this.#_anchor.locale });
 
 			return { embed: { ...embed, title, footer: { text: strings.continuedOnNextPage } }, components };
 		}
@@ -117,7 +110,7 @@ abstract class PaginatedView<T> {
 		});
 	}
 
-	abstract build(page: T[], index: number, { locale }: { locale: Locale }): View;
+	abstract build(interaction: Logos.Interaction, page: T[], index: number): View;
 
 	async #display(): Promise<void> {
 		await this.client.reply(this.#_anchor, {

@@ -15,14 +15,7 @@ class AnswerComposer extends ModalComposer<AnswerFormData, never> {
 		submission: Logos.Interaction<any, any>,
 		{ formData }: { formData: AnswerFormData },
 	): Promise<Modal<AnswerFormData>> {
-		const locale = submission.locale;
-		const strings = {
-			title: this.client.localise("answer.title", locale)(),
-			fields: {
-				question: this.client.localise("answer.fields.question", locale)(),
-				answer: this.client.localise("answer.fields.answer", locale)(),
-			},
-		};
+		const strings = constants.contexts.answerModal({ localise: this.client.localise, locale: submission.locale });
 
 		return {
 			title: strings.title,

@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages/localisation";
 import { Client } from "logos/client";
 import { TabbedView, View } from "logos/commands/components/tabbed-views/tabbed-view";
 import { Guild } from "logos/database/guild";
@@ -27,46 +26,31 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		this.#_guildDocument = guildDocument;
 	}
 
-	build({ tabs }: { tabs: TabGroups }, { locale }: { locale: Locale }): View {
-		const embed = this.getEmbed(tabs, { locale });
-		const buttons = this.getButtons(tabs, { locale });
+	build(interaction: Logos.Interaction, { tabs }: { tabs: TabGroups }): View {
+		const embed = this.getEmbed(interaction, tabs);
+		const buttons = this.getButtons(interaction, tabs);
 
 		return { embed, components: buttons };
 	}
 
-	getEmbed({ bracket, mode }: TabGroups, { locale }: { locale: Locale }): Discord.CamelizedDiscordEmbed {
+	getEmbed(interaction: Logos.Interaction, { bracket, mode }: TabGroups): Discord.CamelizedDiscordEmbed {
 		switch (mode) {
 			case "guide": {
-				return this.getGuideEmbed({ bracket }, { locale });
+				return this.getGuideEmbed(interaction, { bracket });
 			}
 			case "examples": {
-				return this.getExampleEmbed({ bracket }, { locale });
+				return this.getExampleEmbed(interaction, { bracket });
 			}
 		}
 	}
 
-	getGuideEmbed({ bracket }: { bracket: Bracket }, { locale }: { locale: Locale }): Discord.CamelizedDiscordEmbed {
+	getGuideEmbed(interaction: Logos.Interaction, { bracket }: { bracket: Bracket }): Discord.CamelizedDiscordEmbed {
 		switch (bracket) {
 			case "a": {
-				const strings = {
-					brackets: {
-						a: this.client.localise("cefr.strings.brackets.a", locale)(),
-					},
-					levels: {
-						a0: {
-							title: this.client.localise("cefr.strings.levels.a0.title", locale)(),
-							description: this.client.localise("cefr.strings.levels.a0.description", locale)(),
-						},
-						a1: {
-							title: this.client.localise("cefr.strings.levels.a1.title", locale)(),
-							description: this.client.localise("cefr.strings.levels.a1.description", locale)(),
-						},
-						a2: {
-							title: this.client.localise("cefr.strings.levels.a2.title", locale)(),
-							description: this.client.localise("cefr.strings.levels.a2.description", locale)(),
-						},
-					},
-				};
+				const strings = constants.contexts.cefrGuideBracketA({
+					localise: this.client.localise,
+					locale: interaction.locale,
+				});
 
 				return {
 					title: strings.brackets.a,
@@ -92,21 +76,10 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 				};
 			}
 			case "b": {
-				const strings = {
-					brackets: {
-						b: this.client.localise("cefr.strings.brackets.b", locale)(),
-					},
-					levels: {
-						b1: {
-							title: this.client.localise("cefr.strings.levels.b1.title", locale)(),
-							description: this.client.localise("cefr.strings.levels.b1.description", locale)(),
-						},
-						b2: {
-							title: this.client.localise("cefr.strings.levels.b2.title", locale)(),
-							description: this.client.localise("cefr.strings.levels.b2.description", locale)(),
-						},
-					},
-				};
+				const strings = constants.contexts.cefrGuideBracketB({
+					localise: this.client.localise,
+					locale: interaction.locale,
+				});
 
 				return {
 					title: strings.brackets.b,
@@ -124,25 +97,10 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 				};
 			}
 			case "c": {
-				const strings = {
-					brackets: {
-						c: this.client.localise("cefr.strings.brackets.c", locale)(),
-					},
-					levels: {
-						c1: {
-							title: this.client.localise("cefr.strings.levels.c1.title", locale)(),
-							description: this.client.localise("cefr.strings.levels.c1.description", locale)(),
-						},
-						c2: {
-							title: this.client.localise("cefr.strings.levels.c2.title", locale)(),
-							description: this.client.localise("cefr.strings.levels.c2.description", locale)(),
-						},
-						c3: {
-							title: this.client.localise("cefr.strings.levels.c3.title", locale)(),
-							description: this.client.localise("cefr.strings.levels.c3.description", locale)(),
-						},
-					},
-				};
+				const strings = constants.contexts.cefrGuideBracketC({
+					localise: this.client.localise,
+					locale: interaction.locale,
+				});
 
 				return {
 					title: strings.brackets.c,
@@ -170,7 +128,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		}
 	}
 
-	getExampleEmbed({ bracket }: { bracket: Bracket }, { locale }: { locale: Locale }): Discord.CamelizedDiscordEmbed {
+	getExampleEmbed(interaction: Logos.Interaction, { bracket }: { bracket: Bracket }): Discord.CamelizedDiscordEmbed {
 		const examples = this.#configuration.examples?.levels;
 		if (examples === undefined) {
 			throw "StateError: Attempted to get example embed when the CEFR configuration was missing examples.";
@@ -178,22 +136,10 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 
 		switch (bracket) {
 			case "a": {
-				const strings = {
-					brackets: {
-						a: this.client.localise("cefr.strings.brackets.a", locale)(),
-					},
-					levels: {
-						a0: {
-							title: this.client.localise("cefr.strings.levels.a0.title", locale)(),
-						},
-						a1: {
-							title: this.client.localise("cefr.strings.levels.a1.title", locale)(),
-						},
-						a2: {
-							title: this.client.localise("cefr.strings.levels.a2.title", locale)(),
-						},
-					},
-				};
+				const strings = constants.contexts.cefrExamplesBracketA({
+					localise: this.client.localise,
+					locale: interaction.locale,
+				});
 
 				return {
 					title: strings.brackets.a,
@@ -219,19 +165,10 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 				};
 			}
 			case "b": {
-				const strings = {
-					brackets: {
-						b: this.client.localise("cefr.strings.brackets.b", locale)(),
-					},
-					levels: {
-						b1: {
-							title: this.client.localise("cefr.strings.levels.b1.title", locale)(),
-						},
-						b2: {
-							title: this.client.localise("cefr.strings.levels.b2.title", locale)(),
-						},
-					},
-				};
+				const strings = constants.contexts.cefrExamplesBracketB({
+					localise: this.client.localise,
+					locale: interaction.locale,
+				});
 
 				return {
 					title: strings.brackets.b,
@@ -249,22 +186,10 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 				};
 			}
 			case "c": {
-				const strings = {
-					brackets: {
-						c: this.client.localise("cefr.strings.brackets.c", locale)(),
-					},
-					levels: {
-						c1: {
-							title: this.client.localise("cefr.strings.levels.c1.title", locale)(),
-						},
-						c2: {
-							title: this.client.localise("cefr.strings.levels.c2.title", locale)(),
-						},
-						c3: {
-							title: this.client.localise("cefr.strings.levels.c3.title", locale)(),
-						},
-					},
-				};
+				const strings = constants.contexts.cefrExamplesBracketC({
+					localise: this.client.localise,
+					locale: interaction.locale,
+				});
 
 				return {
 					title: strings.brackets.c,
@@ -293,20 +218,10 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	}
 
 	getButtons(
+		interaction: Logos.Interaction,
 		{ bracket, mode }: { bracket: Bracket; mode: Mode },
-		{ locale }: { locale: Locale },
 	): Discord.MessageComponents {
-		const strings = {
-			brackets: {
-				a: this.client.localise("cefr.strings.brackets.a", locale)(),
-				b: this.client.localise("cefr.strings.brackets.b", locale)(),
-				c: this.client.localise("cefr.strings.brackets.c", locale)(),
-			},
-			tabs: {
-				guide: this.client.localise("cefr.strings.tabs.guide", locale)(),
-				examples: this.client.localise("cefr.strings.tabs.examples", locale)(),
-			},
-		};
+		const strings = constants.contexts.cefrButtons({ localise: this.client.localise, locale: interaction.locale });
 
 		const bracketButtonComponents = [
 			{

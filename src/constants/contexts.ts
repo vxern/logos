@@ -135,5 +135,198 @@ export default Object.freeze({
 		title: localise("rules.other.title", locale)(),
 		summary: localise("rules.other.summary", locale)(),
 	}),
+	roleLimitReached: ({ localise, locale }) => ({
+		title: localise("warn.strings.limitReached.title", locale)(),
+		description: {
+			limitReached: localise("profile.options.roles.strings.limitReached.description.limitReached", locale)(),
+			toChooseNew: localise("profile.options.roles.strings.limitReached.description.toChooseNew", locale)(),
+		},
+	}),
+	previousRoleCategory: ({ localise, locale }) => ({
+		back: localise("profile.options.roles.strings.back", locale)(),
+	}),
+	answerModal: ({ localise, locale }) => ({
+		title: localise("answer.title", locale)(),
+		fields: {
+			question: localise("answer.fields.question", locale)(),
+			answer: localise("answer.fields.answer", locale)(),
+		},
+	}),
+	correctionModal: ({ localise, locale }) => ({
+		title: localise("correction.title", locale)(),
+		fields: {
+			original: localise("correction.fields.original", locale)(),
+			corrected: localise("correction.fields.corrected", locale)(),
+		},
+	}),
+	correctionTextsNotDifferent: ({ localise, locale }) => ({
+		title: localise("correction.strings.textsNotDifferent.title", locale)(),
+		description: localise("correction.strings.textsNotDifferent.description", locale)(),
+	}),
+	reportModal: ({ localise, locale }) => ({
+		title: localise("report.title", locale)(),
+		fields: {
+			reason: localise("report.fields.reason", locale)(),
+			users: localise("report.fields.users", locale)(),
+			link: localise("report.fields.link", locale)(),
+		},
+	}),
+	resourceModal: ({ localise, locale }) => ({
+		title: localise("resource.title", locale)(),
+		fields: {
+			resource: localise("resource.fields.resource", locale)(),
+		},
+	}),
+	suggestionModal: ({ localise, locale }) => ({
+		title: localise("suggestion.title", locale)(),
+		fields: {
+			suggestion: localise("suggestion.fields.suggestion", locale)(),
+		},
+	}),
+	ticketModal: ({ localise, locale }) => ({
+		title: localise("ticket.title", locale)(),
+		topic: localise("ticket.fields.topic", locale)(),
+	}),
+	failedToSubmitForm: ({ localise, locale }) => ({
+		title: localise("form.failedToSubmit.title", locale)(),
+		description: localise("form.failedToSubmit.description", locale)(),
+		continue: localise("prompts.continue", locale)(),
+		cancel: localise("prompts.cancel", locale)(),
+	}),
+	queueEmpty: ({ localise, locale }) => ({
+		title: localise("music.options.remove.strings.queueEmpty.title", locale)(),
+		description: localise("music.options.remove.strings.queueEmpty.description", locale)(),
+	}),
+	page: ({ localise, locale }) => ({
+		page: localise("interactions.page", locale)(),
+	}),
+	selectSongToRemove: ({ localise, locale }) => ({
+		title: localise("music.options.remove.strings.selectSong.title", locale)(),
+		description: localise("music.options.remove.strings.selectSong.description", locale)(),
+	}),
+	continuedOnNextPage: ({ localise, locale }) => ({
+		continuedOnNextPage: localise("interactions.continuedOnNextPage", locale)(),
+	}),
+	cefrGuideBracketA: ({ localise, locale }) => ({
+		brackets: {
+			a: localise("cefr.strings.brackets.a", locale)(),
+		},
+		levels: {
+			a0: {
+				title: localise("cefr.strings.levels.a0.title", locale)(),
+				description: localise("cefr.strings.levels.a0.description", locale)(),
+			},
+			a1: {
+				title: localise("cefr.strings.levels.a1.title", locale)(),
+				description: localise("cefr.strings.levels.a1.description", locale)(),
+			},
+			a2: {
+				title: localise("cefr.strings.levels.a2.title", locale)(),
+				description: localise("cefr.strings.levels.a2.description", locale)(),
+			},
+		},
+	}),
+	cefrGuideBracketB: ({ localise, locale }) => ({
+		brackets: {
+			b: localise("cefr.strings.brackets.b", locale)(),
+		},
+		levels: {
+			b1: {
+				title: localise("cefr.strings.levels.b1.title", locale)(),
+				description: localise("cefr.strings.levels.b1.description", locale)(),
+			},
+			b2: {
+				title: localise("cefr.strings.levels.b2.title", locale)(),
+				description: localise("cefr.strings.levels.b2.description", locale)(),
+			},
+		},
+	}),
+	cefrGuideBracketC: ({ localise, locale }) => ({
+		brackets: {
+			c: localise("cefr.strings.brackets.c", locale)(),
+		},
+		levels: {
+			c1: {
+				title: localise("cefr.strings.levels.c1.title", locale)(),
+				description: localise("cefr.strings.levels.c1.description", locale)(),
+			},
+			c2: {
+				title: localise("cefr.strings.levels.c2.title", locale)(),
+				description: localise("cefr.strings.levels.c2.description", locale)(),
+			},
+			c3: {
+				title: localise("cefr.strings.levels.c3.title", locale)(),
+				description: localise("cefr.strings.levels.c3.description", locale)(),
+			},
+		},
+	}),
+	cefrExamplesBracketA: ({ localise, locale }) => ({
+		brackets: {
+			a: localise("cefr.strings.brackets.a", locale)(),
+		},
+		levels: {
+			a0: {
+				title: localise("cefr.strings.levels.a0.title", locale)(),
+			},
+			a1: {
+				title: localise("cefr.strings.levels.a1.title", locale)(),
+			},
+			a2: {
+				title: localise("cefr.strings.levels.a2.title", locale)(),
+			},
+		},
+	}),
+	cefrExamplesBracketB: ({ localise, locale }) => ({
+		brackets: {
+			b: localise("cefr.strings.brackets.b", locale)(),
+		},
+		levels: {
+			b1: {
+				title: localise("cefr.strings.levels.b1.title", locale)(),
+			},
+			b2: {
+				title: localise("cefr.strings.levels.b2.title", locale)(),
+			},
+		},
+	}),
+	cefrExamplesBracketC: ({ localise, locale }) => ({
+		brackets: {
+			c: localise("cefr.strings.brackets.c", locale)(),
+		},
+		levels: {
+			c1: {
+				title: localise("cefr.strings.levels.c1.title", locale)(),
+			},
+			c2: {
+				title: localise("cefr.strings.levels.c2.title", locale)(),
+			},
+			c3: {
+				title: localise("cefr.strings.levels.c3.title", locale)(),
+			},
+		},
+	}),
+	cefrButtons: ({ localise, locale }) => ({
+		brackets: {
+			a: localise("cefr.strings.brackets.a", locale)(),
+			b: localise("cefr.strings.brackets.b", locale)(),
+			c: localise("cefr.strings.brackets.c", locale)(),
+		},
+		tabs: {
+			guide: localise("cefr.strings.tabs.guide", locale)(),
+			examples: localise("cefr.strings.tabs.examples", locale)(),
+		},
+	}),
+	cannotAnswer: ({ localise, locale }) => ({
+		title: localise("answer.strings.cannotAnswer.title", locale)(),
+		description: localise("answer.strings.cannotAnswer.description", locale)(),
+	}),
+	cannotAnswerOwn: ({ localise, locale }) => ({
+		title: localise("answer.strings.cannotAnswerOwn.title", locale)(),
+		description: localise("answer.strings.cannotAnswerOwn.description", locale)(),
+	}),
+	answer: ({ localise, locale }) => ({
+		answer: localise("answer.strings.answer", locale)(),
+		submittedBy: localise("answer.strings.submittedBy", locale),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

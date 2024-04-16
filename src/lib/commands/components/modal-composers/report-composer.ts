@@ -7,15 +7,7 @@ class ReportComposer extends ModalComposer<ReportFormData, never> {
 		submission: Logos.Interaction,
 		{ formData }: { formData: ReportFormData },
 	): Promise<Modal<ReportFormData>> {
-		const locale = submission.locale;
-		const strings = {
-			title: this.client.localise("report.title", locale)(),
-			fields: {
-				reason: this.client.localise("report.fields.reason", locale)(),
-				users: this.client.localise("report.fields.users", locale)(),
-				link: this.client.localise("report.fields.link", locale)(),
-			},
-		};
+		const strings = constants.contexts.reportModal({ localise: this.client.localise, locale: submission.locale });
 
 		return {
 			title: strings.title,

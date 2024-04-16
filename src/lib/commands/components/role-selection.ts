@@ -192,19 +192,7 @@ async function createRoleSelectionMenu(
 				viewData.category.maximum !== 1 &&
 				viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 			) {
-				const strings = {
-					title: client.localise("warn.strings.limitReached.title", locale)(),
-					description: {
-						limitReached: client.localise(
-							"profile.options.roles.strings.limitReached.description.limitReached",
-							locale,
-						)({ category: client.localise(`${viewData.category.id}.name`, locale)() }),
-						toChooseNew: client.localise(
-							"profile.options.roles.strings.limitReached.description.toChooseNew",
-							locale,
-						)(),
-					},
-				};
+				const strings = constants.contexts.roleLimitReached({ localise: client.localise, locale: interaction.locale });
 
 				await client.notice(interaction, {
 					title: strings.title,
@@ -362,7 +350,7 @@ async function traverseRoleTreeAndDisplay(
 
 	data.viewData.category = category;
 
-	const menu = await displaySelectMenu(client, data, categories, selectOptions, { locale });
+	const menu = await displaySelectMenu(client, interaction, data, categories, selectOptions);
 
 	if (editResponse) {
 		await client.editReply(interaction, menu);
@@ -377,16 +365,14 @@ async function traverseRoleTreeAndDisplay(
 
 async function displaySelectMenu(
 	client: Client,
+	interaction: Logos.Interaction,
 	data: RoleDisplayData,
 	categories: [RoleCategory, ...RoleCategory[]],
 	selectOptions: Discord.SelectOption[],
-	{ locale }: { locale: Locale },
 ): Promise<Discord.InteractionCallbackData> {
 	const isInRootCategory = data.browsingData.navigationData.identifiersAccessed.length === 0;
 	if (!isInRootCategory) {
-		const strings = {
-			back: client.localise("profile.options.roles.strings.back", locale)(),
-		};
+		const strings = constants.contexts.previousRoleCategory({ localise: client.localise, locale: interaction.locale });
 
 		selectOptions.push({ label: trim(strings.back, 25), value: constants.special.roles.back });
 	}
@@ -399,7 +385,7 @@ async function displaySelectMenu(
 	const title = (categories.length > 1 ? categories.slice(1) : categories)
 		.map((category) => {
 			const strings = {
-				categoryName: client.localise(`${category.id}.name`, locale)(),
+				categoryName: client.localise(`${category.id}.name`, interaction.locale)(),
 			};
 
 			return `${category.emoji}  ${strings.categoryName}`;
@@ -407,9 +393,9 @@ async function displaySelectMenu(
 		.join(` ${constants.emojis.indicators.arrowRight}  `);
 
 	const strings = {
-		description: client.localise(`${category.id}.description`, locale)(),
-		chooseCategory: client.localise("profile.options.roles.strings.chooseCategory", locale)(),
-		chooseRole: client.localise("profile.options.roles.strings.chooseRole", locale)(),
+		description: client.localise(`${category.id}.description`, interaction.locale)(),
+		chooseCategory: client.localise("profile.options.roles.strings.chooseCategory", interaction.locale)(),
+		chooseRole: client.localise("profile.options.roles.strings.chooseRole", interaction.locale)(),
 	};
 
 	return {

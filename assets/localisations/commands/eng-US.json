@@ -652,7 +652,7 @@
   "profile.options.roles.name": "roles",
   "profile.options.roles.description": "Opens the role selection menu.",
   "profile.options.roles.strings.limitReached.title": "Role limit reached",
-  "profile.options.roles.strings.limitReached.description.limitReached": "You have reached the limit of roles you can assign from within the '{category}' category.",
+  "profile.options.roles.strings.limitReached.description.limitReached": "You have reached the limit of roles you can assign in this category.",
   "profile.options.roles.strings.limitReached.description.toChooseNew": "To choose a new role, unassign one of your existing roles.",
   "profile.options.roles.strings.roleMandatory.title": "This role is mandatory",
   "profile.options.roles.strings.roleMandatory.description": "You cannot unassign this role. You can only swap it for another role from the same category.",

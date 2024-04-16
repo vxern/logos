@@ -2,8 +2,6 @@ import { Client } from "logos/client";
 import { AnswerComposer } from "logos/commands/components/modal-composers/answer-composer";
 
 async function handleAnswer(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-
 	const member = client.entities.members.get(interaction.guildId)?.get(interaction.user.id);
 	if (member === undefined) {
 		return;
@@ -15,10 +13,7 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 	}
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
-		const strings = {
-			title: client.localise("answer.strings.cannotAnswer.title", locale)(),
-			description: client.localise("answer.strings.cannotAnswer.description", locale)(),
-		};
+		const strings = constants.contexts.cannotAnswer({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -29,10 +24,7 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 	}
 
 	if (message.author.id === interaction.user.id) {
-		const strings = {
-			title: client.localise("answer.strings.cannotAnswerOwn.title", locale)(),
-			description: client.localise("answer.strings.cannotAnswerOwn.description", locale)(),
-		};
+		const strings = constants.contexts.cannotAnswerOwn({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -44,16 +36,10 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 
 	const composer = new AnswerComposer(client, { interaction, question: message.content });
 
-	composer.onSubmit(async (submission, { locale }, { formData }) => {
+	composer.onSubmit(async (submission, { formData }) => {
 		await client.acknowledge(submission);
 
-		const strings = {
-			answer: client.localise("answer.strings.answer", locale)(),
-			submittedBy: client.localise(
-				"answer.strings.submittedBy",
-				locale,
-			)({ username: client.diagnostics.user(interaction.user, { includeId: false }) }),
-		};
+		const strings = constants.contexts.answer({ localise: client.localise, locale: submission.locale });
 
 		await client.bot.rest
 			.sendMessage(message.channelId, {
@@ -68,7 +54,9 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 						description: `– *${formData.answer}*`,
 						color: constants.colours.success,
 						footer: {
-							text: `${constants.emojis.answer} ${strings.submittedBy}`,
+							text: `${constants.emojis.answer} ${strings.submittedBy({
+								username: client.diagnostics.user(interaction.user, { includeId: false }),
+							})}`,
 							iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {
 								avatar: interaction.user.avatar,
 							}),

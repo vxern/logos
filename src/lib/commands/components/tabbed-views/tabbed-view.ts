@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
@@ -18,7 +17,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 
 	get #view(): View {
 		const locale = this.#_anchor.parameters.show ? this.#_anchor.guildLocale : this.#_anchor.locale;
-		const view = this.build({ tabs: this.#tabs }, { locale });
+		const view = this.build(this.#_anchor, { tabs: this.#tabs });
 
 		if (this.#showable && !this.#_anchor.parameters.show) {
 			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor, {
@@ -53,7 +52,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 		this.#_anchor = interaction;
 	}
 
-	abstract build({ tabs }: { tabs: Generic["groups"] }, { locale }: { locale: Locale }): View;
+	abstract build(interaction: Logos.Interaction, { tabs }: { tabs: Generic["groups"] }): View;
 
 	async #display(): Promise<void> {
 		const view = this.#view;

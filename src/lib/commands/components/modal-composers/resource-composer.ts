@@ -7,13 +7,7 @@ class ResourceComposer extends ModalComposer<ResourceFormData, never> {
 		submission: Logos.Interaction,
 		{ formData }: { formData: ResourceFormData },
 	): Promise<Modal<ResourceFormData>> {
-		const locale = submission.locale;
-		const strings = {
-			title: this.client.localise("resource.title", locale)(),
-			fields: {
-				resource: this.client.localise("resource.fields.resource", locale)(),
-			},
-		};
+		const strings = constants.contexts.resourceModal({ localise: this.client.localise, locale: submission.locale });
 
 		return {
 			title: strings.title,

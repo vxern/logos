@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages/localisation";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
@@ -39,22 +38,19 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 		};
 	}
 
-	build(page: SongListing[], pageIndex: number, { locale }: { locale: Locale }): View {
+	build(interaction: Logos.Interaction, page: SongListing[], pageIndex: number): View {
 		if (page.length === 0) {
-			const strings = {
-				title: this.client.localise("music.options.remove.strings.queueEmpty.title", locale)(),
-				description: this.client.localise("music.options.remove.strings.queueEmpty.description", locale)(),
-			};
+			const strings = constants.contexts.queueEmpty({ localise: this.client.localise, locale: interaction.locale });
 
 			return { embed: { title: strings.title, description: strings.description, color: constants.colours.notice } };
 		}
 
 		const selectMenu = this.#buildSelectMenu(page, pageIndex);
 
-		const strings = {
-			title: this.client.localise("music.options.remove.strings.selectSong.title", locale)(),
-			description: this.client.localise("music.options.remove.strings.selectSong.description", locale)(),
-		};
+		const strings = constants.contexts.selectSongToRemove({
+			localise: this.client.localise,
+			locale: interaction.locale,
+		});
 
 		return {
 			embed: { title: strings.title, description: strings.description, color: constants.colours.notice },
