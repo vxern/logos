@@ -2,7 +2,7 @@ import { Locale } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { EntryRequestComposer } from "logos/commands/components/modal-composers/entry-request-composer";
-import { EntryRequest, EntryRequestFormData } from "logos/database/entry-request";
+import { EntryRequest } from "logos/database/entry-request";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { User } from "logos/database/user";
 import { LocalService } from "logos/services/service";
@@ -261,71 +261,65 @@ class EntryService extends LocalService {
 
 		const composer = new EntryRequestComposer(this.client, { interaction: buttonPress });
 
-		composer.onSubmit(
-			async (
-				submission: Logos.Interaction,
-				{ locale }: { locale: Locale },
-				{ formData }: { formData: EntryRequestFormData },
-			) => {
-				if (entryRequest !== undefined) {
-					const strings = {
-						title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
-						description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
-					};
-
-					await this.client.pushback(submission, {
-						title: strings.title,
-						description: strings.description,
-					});
-
-					return;
-				}
-
-				await this.client.postponeReply(submission);
-
-				const entryRequestDocument = await EntryRequest.create(this.client, {
-					guildId: this.guild.id.toString(),
-					authorId: buttonPress.user.id.toString(),
-					requestedRoleId: requestedRoleId.toString(),
-					formData,
-				});
-
-				await this.client.tryLog("entryRequestSubmit", {
-					guildId: this.guild.id,
-					args: [buttonPress.user, entryRequestDocument],
-				});
-
-				const user = this.client.entities.users.get(buttonPress.user.id);
-				if (user === undefined) {
-					return;
-				}
-
-				const prompt = await verificationService.savePrompt(user, entryRequestDocument);
-				if (prompt === undefined) {
-					return;
-				}
-
-				verificationService.registerDocument(entryRequestDocument);
-				verificationService.registerPrompt(prompt, buttonPress.user.id, entryRequestDocument);
-				verificationService.registerHandler(entryRequestDocument);
-
+		composer.onSubmit(async (submission, { formData }) => {
+			if (entryRequest !== undefined) {
 				const strings = {
-					title: this.client.localise("entry.verification.answers.submitted.title", locale)(),
-					description: {
-						submitted: this.client.localise("entry.verification.answers.submitted.description.submitted", locale)(),
-						willBeReviewed: this.client.localise(
-							"entry.verification.answers.submitted.description.willBeReviewed",
-							locale,
-						)(),
-					},
+					title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
+					description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
 				};
 
-				await this.client.succeeded(submission, {
+				await this.client.pushback(submission, {
 					title: strings.title,
-					description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
+					description: strings.description,
 				});
-			},
-		);
+
+				return;
+			}
+
+			await this.client.postponeReply(submission);
+
+			const entryRequestDocument = await EntryRequest.create(this.client, {
+				guildId: this.guild.id.toString(),
+				authorId: buttonPress.user.id.toString(),
+				requestedRoleId: requestedRoleId.toString(),
+				formData,
+			});
+
+			await this.client.tryLog("entryRequestSubmit", {
+				guildId: this.guild.id,
+				args: [buttonPress.user, entryRequestDocument],
+			});
+
+			const user = this.client.entities.users.get(buttonPress.user.id);
+			if (user === undefined) {
+				return;
+			}
+
+			const prompt = await verificationService.savePrompt(user, entryRequestDocument);
+			if (prompt === undefined) {
+				return;
+			}
+
+			verificationService.registerDocument(entryRequestDocument);
+			verificationService.registerPrompt(prompt, buttonPress.user.id, entryRequestDocument);
+			verificationService.registerHandler(entryRequestDocument);
+
+			const strings = {
+				title: this.client.localise("entry.verification.answers.submitted.title", locale)(),
+				description: {
+					submitted: this.client.localise("entry.verification.answers.submitted.description.submitted", locale)(),
+					willBeReviewed: this.client.localise(
+						"entry.verification.answers.submitted.description.willBeReviewed",
+						locale,
+					)(),
+				},
+			};
+
+			await this.client.succeeded(submission, {
+				title: strings.title,
+				description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
+			});
+		});
 	}
 
 	async #vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {

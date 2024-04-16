@@ -1,7 +1,7 @@
 import { Client } from "logos/client";
 import { TicketComposer } from "logos/commands/components/modal-composers/ticket-composer";
 import { Guild } from "logos/database/guild";
-import { Ticket, TicketFormData } from "logos/database/ticket";
+import { Ticket } from "logos/database/ticket";
 
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const locale = interaction.locale;
@@ -43,7 +43,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 
 	const composer = new TicketComposer(client, { interaction });
 
-	composer.onSubmit(async (submission: Logos.Interaction, { formData }: { formData: TicketFormData }) => {
+	composer.onSubmit(async (submission, { formData }) => {
 		await client.postponeReply(submission);
 
 		const ticketService = client.getPromptService(interaction.guildId, { type: "tickets" });
