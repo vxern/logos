@@ -53,7 +53,7 @@ async function handleDisplayPraises(
 	const propertyName = propertyByUserSearchMode[mode];
 	const praiseDocuments = await Praise.getAll(client, { where: { [propertyName]: member.id.toString() } });
 
-	await client.notice(interaction, getPraisePage(client, praiseDocuments, isSelf, mode, { locale }));
+	await client.notice(interaction, getPraisePage(client, interaction, praiseDocuments, isSelf, mode));
 }
 
 export { handleDisplayAuthorPraises, handleDisplayTargetPraises, handleDisplayPraisesAutocomplete };

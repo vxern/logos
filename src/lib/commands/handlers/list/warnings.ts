@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
@@ -60,31 +59,26 @@ async function handleDisplayWarnings(
 
 	const warningDocuments = await Warning.getAll(client, { where: { targetId: member.id.toString() } });
 
-	await client.notice(interaction, getWarningPage(client, warningDocuments, isSelf, { locale }));
+	await client.notice(interaction, getWarningPage(client, interaction, warningDocuments, isSelf));
 }
 
 function getWarningPage(
 	client: Client,
+	interaction: Logos.Interaction,
 	warnings: Warning[],
 	isSelf: boolean,
-	{ locale }: { locale: Locale },
 ): Discord.CamelizedDiscordEmbed {
 	if (warnings.length === 0) {
 		if (isSelf) {
-			const strings = {
-				title: client.localise("list.options.warnings.strings.noActiveWarnings.title", locale)(),
-				description: client.localise("list.options.warnings.strings.noActiveWarnings.description.self", locale)(),
-			};
+			const strings = constants.contexts.noWarningsForSelf({ localise: client.localise, locale: interaction.locale });
 
 			return {
 				title: strings.title,
 				description: strings.description,
 			};
 		}
-		const strings = {
-			title: client.localise("list.options.warnings.strings.noActiveWarnings.title", locale)(),
-			description: client.localise("list.options.warnings.strings.noActiveWarnings.description.other", locale)(),
-		};
+
+		const strings = constants.contexts.noWarningsForOther({ localise: client.localise, locale: interaction.locale });
 
 		return {
 			title: strings.title,
@@ -92,10 +86,7 @@ function getWarningPage(
 		};
 	}
 
-	const strings = {
-		title: client.localise("list.options.warnings.strings.warnings.title", locale)(),
-		warning: client.localise("list.options.warnings.strings.warnings.description.warning", locale),
-	};
+	const strings = constants.contexts.warnings({ localise: client.localise, locale: interaction.locale });
 
 	return {
 		title: strings.title,
@@ -105,7 +96,7 @@ function getWarningPage(
 				relative_timestamp: timestamp(warning.createdAt, { format: "relative" }),
 			});
 
-			const ruleTitle = getRuleTitleFormatted(client, { rule: warning.rule ?? "other", mode: "option" }, { locale });
+			const ruleTitle = getRuleTitleFormatted(client, interaction, { rule: warning.rule ?? "other", mode: "option" });
 
 			return { name: warningString, value: `${ruleTitle}\n> *${warning.reason}*` };
 		}),

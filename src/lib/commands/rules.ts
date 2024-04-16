@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { Rule, isValidRule } from "logos:constants/rules";
 import { Client } from "logos/client";
 
@@ -6,15 +5,42 @@ type RuleOrOther = Rule | "other";
 type RuleTitleMode = "option" | "display";
 function getRuleTitleFormatted(
 	client: Client,
+	interaction: Logos.Interaction,
 	{ rule, mode }: { rule: RuleOrOther; mode: RuleTitleMode },
-	{ locale }: { locale: Locale },
 ): string {
 	const index = isValidRule(rule) ? constants.rules.indexOf(rule) : undefined;
 
-	const strings = {
-		title: client.localise(`rules.${rule}.title`, locale)(),
-		summary: client.localise(`rules.${rule}.summary`, locale)(),
-	};
+	let strings: { title: string; summary: string };
+	switch (rule) {
+		case "behaviour": {
+			strings = constants.contexts.behaviourRule({ localise: client.localise, locale: interaction.locale });
+			break;
+		}
+		case "quality": {
+			strings = constants.contexts.qualityRule({ localise: client.localise, locale: interaction.locale });
+			break;
+		}
+		case "relevance": {
+			strings = constants.contexts.relevanceRule({ localise: client.localise, locale: interaction.locale });
+			break;
+		}
+		case "suitability": {
+			strings = constants.contexts.suitabilityRule({ localise: client.localise, locale: interaction.locale });
+			break;
+		}
+		case "exclusivity": {
+			strings = constants.contexts.exclusivityRule({ localise: client.localise, locale: interaction.locale });
+			break;
+		}
+		case "adherence": {
+			strings = constants.contexts.adherenceRule({ localise: client.localise, locale: interaction.locale });
+			break;
+		}
+		case "other": {
+			strings = constants.contexts.otherRule({ localise: client.localise, locale: interaction.locale });
+			break;
+		}
+	}
 
 	const indexFormatted = index !== undefined ? index + 1 : "?";
 

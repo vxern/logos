@@ -15,13 +15,11 @@ async function handleCiteRuleAutocomplete(
 		return;
 	}
 
-	const locale = interaction.locale;
-
 	const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
 	const choices = constants.rules
 		.map((rule) => {
 			return {
-				name: getRuleTitleFormatted(client, { rule, mode: "option" }, { locale }),
+				name: getRuleTitleFormatted(client, interaction, { rule, mode: "option" }),
 				value: rule,
 			};
 		})
@@ -63,7 +61,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		{
 			embeds: [
 				{
-					title: getRuleTitleFormatted(client, { rule: interaction.parameters.rule, mode: "display" }, { locale }),
+					title: getRuleTitleFormatted(client, interaction, { rule: interaction.parameters.rule, mode: "display" }),
 					description: strings.content,
 					footer: { text: `${strings.tldr}: ${strings.summary}` },
 					image: { url: constants.gifs.chaosWithoutRules },

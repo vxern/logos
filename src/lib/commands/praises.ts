@@ -1,36 +1,56 @@
-import { Locale } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { Praise } from "logos/database/praise";
 
 function getPraisePage(
 	client: Client,
+	interaction: Logos.Interaction,
 	praises: Praise[],
 	isSelf: boolean,
 	type: "author" | "target",
-	{ locale }: { locale: Locale },
 ): Discord.CamelizedDiscordEmbed {
 	if (praises.length === 0) {
 		if (isSelf) {
-			const strings = {
-				title: client.localise("list.options.praises.strings.noPraises.title", locale)(),
-				description:
-					type === "author"
-						? client.localise("list.options.praises.strings.noPraises.description.self.author", locale)()
-						: client.localise("list.options.praises.strings.noPraises.description.self.target", locale)(),
-			};
+			let strings: { title: string; description: string };
+			switch (type) {
+				case "author": {
+					strings = constants.contexts.noPraisesForSelfAsAuthor({
+						localise: client.localise,
+						locale: interaction.locale,
+					});
+					break;
+				}
+				case "target": {
+					strings = constants.contexts.noPraisesForSelfAsTarget({
+						localise: client.localise,
+						locale: interaction.locale,
+					});
+					break;
+				}
+			}
 
 			return {
 				title: strings.title,
 				description: strings.description,
 			};
 		}
-		const strings = {
-			title: client.localise("list.options.praises.strings.noPraises.title", locale)(),
-			description:
-				type === "author"
-					? client.localise("list.options.praises.strings.noPraises.description.other.author", locale)()
-					: client.localise("list.options.praises.strings.noPraises.description.other.target", locale)(),
-		};
+
+		let strings: { title: string; description: string };
+		switch (type) {
+			case "author": {
+				strings = constants.contexts.noPraisesForOtherAsAuthor({
+					localise: client.localise,
+					locale: interaction.locale,
+				});
+				break;
+			}
+			case "target": {
+				strings = constants.contexts.noPraisesForOtherAsTarget({
+					localise: client.localise,
+					locale: interaction.locale,
+				});
+				break;
+			}
+		}
 
 		return {
 			title: strings.title,
@@ -38,10 +58,7 @@ function getPraisePage(
 		};
 	}
 
-	const strings = {
-		title: client.localise("list.options.praises.strings.praises.title", locale)(),
-		noComment: client.localise("list.options.praises.strings.praises.noComment", locale)(),
-	};
+	const strings = constants.contexts.praise({ localise: client.localise, locale: interaction.locale });
 
 	return {
 		title: strings.title,

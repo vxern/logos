@@ -44,7 +44,7 @@ async function handleWarnUserAutocomplete(
 				...constants.rules
 					.map((rule) => {
 						return {
-							name: getRuleTitleFormatted(client, { rule, mode: "option" }, { locale }),
+							name: getRuleTitleFormatted(client, interaction, { rule, mode: "option" }),
 							value: rule,
 						};
 					})

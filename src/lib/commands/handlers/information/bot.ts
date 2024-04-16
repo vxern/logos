@@ -27,7 +27,7 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 		{
 			localise: client.localise.bind(client),
 			locale: interaction.locale,
-			builder: constants.contexts.informationBot,
+			builder: constants.contexts.botInformation,
 		},
 		async ({ strings }) => {
 			const featuresFormatted = list([
