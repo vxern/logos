@@ -5,8 +5,6 @@ async function handleReplayAction(
 	client: Client,
 	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
 ): Promise<void> {
-	const locale = interaction.guildLocale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -17,11 +15,7 @@ async function handleReplayAction(
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.replay.strings.noSong.title", locale)(),
-			description: client.localise("music.options.replay.strings.noSong.description", locale)(),
-		};
+		const strings = constants.contexts.noSongToReplay({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -33,20 +27,7 @@ async function handleReplayAction(
 
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
-			const locale = interaction.locale;
-			const strings = {
-				title: client.localise("music.options.replay.strings.noSongCollection.title", locale)(),
-				description: {
-					noSongCollection: client.localise(
-						"music.options.replay.strings.noSongCollection.description.noSongCollection",
-						locale,
-					)(),
-					trySongInstead: client.localise(
-						"music.options.replay.strings.noSongCollection.description.trySongInstead",
-						locale,
-					)(),
-				},
-			};
+			const strings = constants.contexts.noSongCollectionToReplay({ localise: client.localise, locale: interaction.locale });
 
 			await client.warning(interaction, {
 				title: strings.title,
@@ -57,10 +38,7 @@ async function handleReplayAction(
 		}
 	}
 
-	const strings = {
-		title: client.localise("music.options.replay.strings.replaying.title", locale)(),
-		description: client.localise("music.options.replay.strings.replaying.description", locale)(),
-	};
+	const strings = constants.contexts.replaying({ localise: client.localise, locale: interaction.guildLocale });
 
 	await client.success(
 		interaction,

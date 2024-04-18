@@ -19,11 +19,7 @@ async function handleDisplayCurrentlyPlaying(
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.now.strings.noSong.title", locale)(),
-			description: client.localise("music.options.now.strings.noSong.description", locale)(),
-		};
+		const strings = constants.contexts.noSongToShowInformationAbout({ localise: client.localise, locale: interaction.locale});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -35,20 +31,7 @@ async function handleDisplayCurrentlyPlaying(
 
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
-			const locale = interaction.locale;
-			const strings = {
-				title: client.localise("music.options.now.strings.noSongCollection.title", locale)(),
-				description: {
-					noSongCollection: client.localise(
-						"music.options.now.strings.noSongCollection.description.noSongCollection",
-						locale,
-					)(),
-					trySongInstead: client.localise(
-						"music.options.now.strings.noSongCollection.description.trySongInstead",
-						locale,
-					)(),
-				},
-			};
+			const strings = constants.contexts.noSongCollectionToShowInformationAbout({ localise: client.localise, locale: interaction.locale});
 
 			await client.warning(interaction, {
 				title: strings.title,
@@ -57,16 +40,10 @@ async function handleDisplayCurrentlyPlaying(
 
 			return;
 		}
-	}
 
-	if (interaction.parameters.collection) {
 		const collection = musicService.session.queueable as SongCollection;
 
-		const locale = interaction.locale;
-		const strings = {
-			nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),
-			songs: client.localise("music.options.now.strings.songs", locale)(),
-		};
+		const strings = constants.contexts.nowPlayingSong({ localise: client.localise, locale });
 
 		const view = new SongCollectionView(client, {
 			interaction,
@@ -79,24 +56,7 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const strings = {
-		nowPlaying: client.localise("music.options.now.strings.nowPlaying", locale)(),
-		collection: client.localise("music.options.now.strings.collection", locale)(),
-		track: client.localise("music.options.now.strings.track", locale)(),
-		title: client.localise("music.options.now.strings.title", locale)(),
-		requestedBy: client.localise("music.options.now.strings.requestedBy", locale)(),
-		runningTime: client.localise("music.options.now.strings.runningTime", locale)(),
-		playingSince: client.localise(
-			"music.options.now.strings.playingSince",
-			locale,
-		)({ relative_timestamp: timestamp(musicService.session.playingTimeMilliseconds, { format: "relative" }) }),
-		sourcedFrom: client.localise(
-			"music.options.now.strings.sourcedFrom",
-			locale,
-		)({
-			source: musicService.session.current.source ?? client.localise("music.options.now.strings.theInternet", locale)(),
-		}),
-	};
+	const strings = constants.contexts.nowPlayingSongCollection({ localise: client.localise, locale });
 
 	await client.notice(
 		interaction,
@@ -115,11 +75,11 @@ async function handleDisplayCurrentlyPlaying(
 				},
 				{
 					name: strings.runningTime,
-					value: strings.playingSince,
+					value: strings.playingSince({ relative_timestamp: timestamp(musicService.session.playingTimeMilliseconds, { format: "relative" }) }),
 					inline: false,
 				},
 			],
-			footer: { text: strings.sourcedFrom },
+			footer: { text: strings.sourcedFrom({ source: musicService.session.current.source ?? strings.theInternet }) },
 		},
 		{ visible: interaction.parameters.show },
 	);

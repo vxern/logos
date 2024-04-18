@@ -1,8 +1,6 @@
 import { Client } from "logos/client";
 
 async function handleStopPlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.guildLocale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -13,17 +11,11 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
-			},
-		};
+		const strings = constants.contexts.notPlayingMusicToManage({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: strings.description.toManage,
+			description: strings.description,
 		});
 
 		return;
@@ -31,10 +23,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 
 	await musicService.stop();
 
-	const strings = {
-		title: client.localise("music.options.stop.strings.stopped.title", locale)(),
-		description: client.localise("music.options.stop.strings.stopped.description", locale)(),
-	};
+	const strings = constants.contexts.stopped({ localise: client.localise, locale: interaction.guildLocale });
 
 	await client.success(
 		interaction,

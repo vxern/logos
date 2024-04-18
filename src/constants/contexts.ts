@@ -47,6 +47,9 @@ export default Object.freeze({
 			distribution: localise("information.options.server.strings.information.description.distribution", locale)(),
 		},
 	}),
+	withoutProficiency: ({ localise, locale }) => ({
+		withoutProficiency: localise("information.options.server.strings.information.description.withoutProficiency", locale)()
+	}),
 	channelTypes: ({ localise, locale }) => ({
 		text: localise("information.options.server.strings.channelTypes.text", locale)(),
 		voice: localise("information.options.server.strings.channelTypes.voice", locale)(),
@@ -192,6 +195,9 @@ export default Object.freeze({
 		description: localise("form.failedToSubmit.description", locale)(),
 		continue: localise("prompts.continue", locale)(),
 		cancel: localise("prompts.cancel", locale)(),
+	}),
+	queue: ({ localise, locale }) => ({
+		queue: localise("music.options.queue.strings.queue", locale)(),
 	}),
 	queueEmpty: ({ localise, locale }) => ({
 		title: localise("music.options.remove.strings.queueEmpty.title", locale)(),
@@ -374,6 +380,220 @@ export default Object.freeze({
 	suggestionSent: ({ localise, locale }) => ({
 		title: localise("suggestion.strings.sent.title", locale)(),
 		description: localise("suggestion.strings.sent.description", locale)(),
+	}),
+	notPlayingMusicToCheck: ({ localise, locale }) => ({
+		title: localise("music.strings.notPlaying.title", locale)(),
+		description: localise("music.strings.notPlaying.description.toCheck", locale)(),
+	}),
+	notPlayingMusicToManage: ({ localise, locale }) => ({
+		title: localise("music.strings.notPlaying.title", locale)(),
+		description: localise("music.strings.notPlaying.description.toManage", locale)()
+	}),
+	volume: ({ localise, locale }) => ({
+		title: localise("music.options.volume.options.display.strings.volume.title", locale)(),
+		description: localise("music.options.volume.options.display.strings.volume.description", locale),
+	}),
+	volumeInvalid: ({ localise, locale }) => ({
+		title: localise("music.options.volume.options.set.strings.invalid.title", locale)(),
+		description: localise("music.options.volume.options.set.strings.invalid.description", locale ),
+	}),
+	volumeSet: ({ localise, locale }) => ({
+		title: localise("music.options.volume.options.set.strings.set.title", locale)(),
+		description: localise("music.options.volume.options.set.strings.set.description", locale),
+	}),
+	noSongToFastForward: ({ localise, locale }) => ({
+		title: localise("music.options.fast-forward.strings.noSong.title", locale)(),
+		description: localise("music.options.fast-forward.strings.noSong.description", locale)(),
+	}),
+	fastForwarded: ({ localise, locale }) => ({
+		title: localise("music.options.fast-forward.strings.fastForwarded.title", locale)(),
+		description: localise("music.options.fast-forward.strings.fastForwarded.description", locale)(),
+	}),
+	invalidFastForwardTimestamp: ({ localise, locale }) => ({
+		title: localise("music.options.fast-forward.strings.invalidTimestamp.title", locale)(),
+		description: localise("music.options.fast-forward.strings.invalidTimestamp.description", locale)(),
+	}),
+	autocompleteTimestamp: ({ localise, locale }) => ({
+		autocomplete: localise("autocomplete.timestamp", locale)(),
+	}),
+	musicHistory: ({ localise, locale }) => ({
+		title: localise("music.options.history.strings.playbackHistory", locale)(),
+	}),
+	noSongToLoop: ({ localise, locale }) => ({
+		title: localise("music.options.loop.strings.noSong.title", locale)(),
+		description: localise("music.options.loop.strings.noSong.description", locale)(),
+	}),
+	noSongCollectionToLoop: ({ localise, locale }) => ({
+		title: localise("music.options.loop.strings.noSongCollection.title", locale)(),
+		description: {
+			noSongCollection: localise("music.options.loop.strings.noSongCollection.description.noSongCollection", locale)(),
+			trySongInstead: localise("music.options.loop.strings.noSongCollection.description.trySongInstead", locale)(),
+		}
+	}),
+	loopDisabledForSong: ({ localise, locale }) => ({
+		title: localise("music.options.loop.strings.disabled.title", locale)(),
+		description: localise("music.options.loop.strings.disabled.description.song", locale)(),
+	}),
+	loopEnabledForSong: ({ localise, locale }) => ({
+		title: localise("music.options.loop.strings.enabled.title", locale)(),
+		description: localise("music.options.loop.strings.enabled.description.song", locale)(),
+	}),
+	loopDisabledForSongCollection: ({ localise, locale }) => ({
+		title: localise("music.options.loop.strings.disabled.title", locale)(),
+		description: localise("music.options.loop.strings.disabled.description.songCollection", locale)(),
+	}),
+	loopEnabledForSongCollection: ({ localise, locale }) => ({
+		title: localise("music.options.loop.strings.enabled.title", locale)(),
+		description: localise("music.options.loop.strings.enabled.description.songCollection", locale)(),
+	}),
+	noSongToShowInformationAbout: ({ localise, locale }) => ({
+		title: localise("music.options.now.strings.noSong.title", locale)(),
+		description: localise("music.options.now.strings.noSong.description", locale)(),
+	}),
+	noSongCollectionToShowInformationAbout: ({ localise, locale }) => ({
+		title: localise("music.options.now.strings.noSongCollection.title", locale)(),
+		description: {
+			noSongCollection: localise("music.options.now.strings.noSongCollection.description.noSongCollection", locale)(),
+			trySongInstead: localise("music.options.now.strings.noSongCollection.description.trySongInstead", locale)(),
+		},
+	}),
+	nowPlayingSong: ({ localise, locale }) => ({
+		nowPlaying: localise("music.options.now.strings.nowPlaying", locale)(),
+		songs: localise("music.options.now.strings.songs", locale)(),
+	}),
+	nowPlayingSongCollection: ({ localise, locale }) => ({
+		nowPlaying: localise("music.options.now.strings.nowPlaying", locale)(),
+		collection: localise("music.options.now.strings.collection", locale)(),
+		track: localise("music.options.now.strings.track", locale)(),
+		title: localise("music.options.now.strings.title", locale)(),
+		requestedBy: localise("music.options.now.strings.requestedBy", locale)(),
+		runningTime: localise("music.options.now.strings.runningTime", locale)(),
+		playingSince: localise("music.options.now.strings.playingSince", locale,),
+		sourcedFrom: localise("music.options.now.strings.sourcedFrom", locale,),
+		theInternet: localise("music.options.now.strings.theInternet", locale)(),
+	}),
+	songNotFound: ({ localise, locale }) => ({
+		title: localise("music.options.play.strings.notFound.title", locale)(),
+		description: {
+			notFound: localise("music.options.play.strings.notFound.description.notFound", locale)(),
+			tryDifferentQuery: localise("music.options.play.strings.notFound.description.tryDifferentQuery", locale)(),
+		},
+	}),
+	musicPaused: ({ localise, locale }) => ({
+		title: localise("music.options.pause.strings.paused.title", locale)(),
+		description: localise("music.options.pause.strings.paused.description", locale)(),
+	}),
+	stream: ({ localise, locale }) => ({
+		stream: localise("music.options.play.strings.stream", locale)(),
+	}),
+	failedToRemoveSong: ({ localise, locale }) => ({
+		title: localise("music.options.remove.strings.failed.title", locale)(),
+		description: localise("music.options.remove.strings.failed.description", locale)(),
+	}),
+	removedSong: ({ localise, locale }) => ({
+		title: localise("music.options.remove.strings.removed.title", locale)(),
+		description: localise("music.options.remove.strings.removed.description", locale),
+	}),
+	noSongToReplay: ({ localise, locale }) => ({
+		title: localise("music.options.replay.strings.noSong.title", locale)(),
+		description: localise("music.options.replay.strings.noSong.description", locale)(),
+	}),
+	noSongCollectionToReplay: ({ localise, locale }) => ({
+		title: localise("music.options.replay.strings.noSongCollection.title", locale)(),
+		description: {
+			noSongCollection: localise("music.options.replay.strings.noSongCollection.description.noSongCollection", locale)(),
+			trySongInstead: localise("music.options.replay.strings.noSongCollection.description.trySongInstead", locale)(),
+		},
+	}),
+	replaying: ({ localise, locale }) => ({
+		title: localise("music.options.replay.strings.replaying.title", locale)(),
+		description: localise("music.options.replay.strings.replaying.description", locale)(),
+	}),
+	notPaused: ({ localise, locale }) => ({
+		title: localise("music.options.resume.strings.notPaused.title", locale)(),
+		description: localise("music.options.resume.strings.notPaused.description", locale)(),
+	}),
+	resumed: ({ localise, locale }) => ({
+		title: localise("music.options.resume.strings.resumed.title", locale)(),
+		description: localise("music.options.resume.strings.resumed.description", locale)(),
+	}),
+	noSongToRewind: ({ localise, locale }) => ({
+		title: localise("music.options.rewind.strings.noSong.title", locale)(),
+		description: localise("music.options.rewind.strings.noSong.description", locale)(),
+	}),
+	rewound: ({ localise, locale }) => ({
+		title: localise("music.options.rewind.strings.rewound.title", locale)(),
+		description: localise("music.options.rewind.strings.rewound.description", locale)(),
+	}),
+	invalidRewindTimestamp: ({ localise, locale }) => ({
+		title: localise("music.options.rewind.strings.invalidTimestamp.title", locale)(),
+		description: localise("music.options.rewind.strings.invalidTimestamp.description", locale)(),
+	}),
+	noSongToSkipToTimestampInside: ({ localise, locale }) => ({
+		title: localise("music.options.skip-to.strings.noSong.title", locale)(),
+		description: localise("music.options.skip-to.strings.noSong.description", locale)(),
+	}),
+	skippedTo: ({ localise, locale }) => ({
+		title: localise("music.options.skip-to.strings.skippedTo.title", locale)(),
+		description: localise("music.options.skip-to.strings.skippedTo.description", locale)(),
+	}),
+	invalidSkipToTimestamp: ({ localise, locale }) => ({
+		title: localise("music.options.skip-to.strings.invalidTimestamp.title", locale)(),
+		description: localise("music.options.skip-to.strings.invalidTimestamp.description", locale)(),
+	}),
+	noSongToSkip: ({ localise, locale }) => ({
+		title: localise("music.options.skip.strings.noSong.title", locale)(),
+		description: localise("music.options.skip.strings.noSong.description", locale)(),
+	}),
+	noSongCollectionToSkip: ({ localise, locale }) => ({
+		title: localise("music.options.skip.strings.noSongCollection.title", locale)(),
+		description: {
+			noSongCollection: localise("music.options.skip.strings.noSongCollection.description.noSongCollection", locale)(),
+			trySongInstead: localise("music.options.skip.strings.noSongCollection.description.trySongInstead", locale)(),
+		},
+	}),
+	tooManySkipArguments: ({ localise, locale }) => ({
+		title: localise("music.strings.skips.tooManyArguments.title", locale)(),
+		description: localise("music.strings.skips.tooManyArguments.description", locale)(),
+	}),
+	invalidSkipArgument: ({ localise, locale }) => ({
+		title: localise("music.strings.skips.invalid.title", locale)(),
+		description: localise("music.strings.skips.invalid.description", locale)(),
+	}),
+	skippedSong: ({ localise, locale }) => ({
+		title: localise("music.options.skip.strings.skippedSong.title", locale)(),
+		description: localise("music.options.skip.strings.skippedSong.description", locale)(),
+	}),
+	skippedSongCollection: ({ localise, locale }) => ({
+		title: localise("music.options.skip.strings.skippedSongCollection.title", locale)(),
+		description: localise("music.options.skip.strings.skippedSongCollection.description", locale)(),
+	}),
+	stopped: ({ localise, locale }) => ({
+		title: localise("music.options.stop.strings.stopped.title", locale)(),
+		description: localise("music.options.stop.strings.stopped.description", locale)(),
+	}),
+	unskipHistoryEmpty: ({ localise, locale }) => ({
+		title: localise("music.options.unskip.strings.historyEmpty.title", locale)(),
+		description: localise("music.options.unskip.strings.historyEmpty.description", locale)(),
+	}),
+	unskipQueueFull: ({ localise, locale }) => ({
+		title: localise("music.options.unskip.strings.queueFull.title", locale)(),
+		description: localise("music.options.unskip.strings.queueFull.description", locale)(),
+	}),
+	noSongCollectionToUnskip: ({ localise, locale }) => ({
+		title: localise("music.options.unskip.strings.noSongCollection.title", locale)(),
+		description: {
+			noSongCollection: localise("music.options.unskip.strings.noSongCollection.description.noSongCollection", locale)(),
+			trySongInstead: localise("music.options.unskip.strings.noSongCollection.description.trySongInstead", locale)(),
+		},
+	}),
+	tooManyUnskipArguments: ({ localise, locale }) => ({
+		title: localise("music.strings.skips.tooManyArguments.title", locale)(),
+		description: localise("music.strings.skips.tooManyArguments.description", locale)(),
+	}),
+	unskipped: ({ localise, locale }) => ({
+		title: localise("music.options.unskip.strings.unskipped.title", locale)(),
+		description: localise("music.options.unskip.strings.unskipped.description", locale)(),
 	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

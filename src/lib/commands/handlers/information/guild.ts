@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { mention, timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
@@ -59,7 +58,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 						},
 						{
 							name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
-							value: formatDistribution(client, getProficiencyRoleDistribution(client, guild)),
+							value: formatDistribution(client, interaction, getProficiencyRoleDistribution(client, guild)),
 							inline: false,
 						},
 				  ]
@@ -165,19 +164,14 @@ function formatFrequency(frequency: number, percentage: string, roleMention: str
 
 function formatDistribution(
 	client: Client,
+	interaction: Logos.Interaction,
 	distribution: ProficiencyRoleDistribution,
-	{ locale }: { locale: Locale },
 ): string {
 	const [roleFrequencies, withoutRole] = distribution;
 
 	const total = roleFrequencies.map(([_, value]) => value).reduce((a, b) => a + b, withoutRole);
 
-	const strings = {
-		withoutProficiency: client.localise(
-			"information.options.server.strings.information.description.withoutProficiency",
-			locale,
-		)(),
-	};
+	const strings = constants.contexts.withoutProficiency({ localise: client.localise, locale: interaction.locale });
 
 	const stringParts: string[] = [
 		formatFrequency(withoutRole, getPercentageComposition(withoutRole, total), strings.withoutProficiency),

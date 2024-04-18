@@ -17,11 +17,7 @@ async function handleLoopPlayback(
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.loop.strings.noSong.title", locale)(),
-			description: client.localise("music.options.loop.strings.noSong.description", locale)(),
-		};
+		const strings = constants.contexts.noSongToLoop({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -33,20 +29,7 @@ async function handleLoopPlayback(
 
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
-			const locale = interaction.locale;
-			const strings = {
-				title: client.localise("music.options.loop.strings.noSongCollection.title", locale)(),
-				description: {
-					noSongCollection: client.localise(
-						"music.options.loop.strings.noSongCollection.description.noSongCollection",
-						locale,
-					)(),
-					trySongInstead: client.localise(
-						"music.options.loop.strings.noSongCollection.description.trySongInstead",
-						locale,
-					)(),
-				},
-			};
+			const strings = constants.contexts.noSongCollectionToLoop({ localise: client.localise, locale: interaction.locale });
 
 			await client.warning(interaction, {
 				title: strings.title,
@@ -65,10 +48,7 @@ async function handleLoopPlayback(
 
 	if (interaction.parameters.collection) {
 		if (!musicService.session.queueable.isLooping) {
-			const strings = {
-				title: client.localise("music.options.loop.strings.disabled.title", locale)(),
-				description: client.localise("music.options.loop.strings.disabled.description.songCollection", locale)(),
-			};
+			const strings = constants.contexts.loopDisabledForSongCollection({ localise: client.localise, locale });
 
 			await client.success(
 				interaction,
@@ -82,10 +62,7 @@ async function handleLoopPlayback(
 			return;
 		}
 
-		const strings = {
-			title: client.localise("music.options.loop.strings.enabled.title", locale)(),
-			description: client.localise("music.options.loop.strings.enabled.description.songCollection", locale)(),
-		};
+		const strings = constants.contexts.loopEnabledForSongCollection({ localise: client.localise, locale });
 
 		await client.success(
 			interaction,
@@ -100,10 +77,7 @@ async function handleLoopPlayback(
 	}
 
 	if (!musicService.session.playable.isLooping) {
-		const strings = {
-			title: client.localise("music.options.loop.strings.disabled.title", locale)(),
-			description: client.localise("music.options.loop.strings.disabled.description.song", locale)(),
-		};
+		const strings = constants.contexts.loopDisabledForSong({ localise: client.localise, locale });
 
 		await client.success(
 			interaction,
@@ -117,10 +91,7 @@ async function handleLoopPlayback(
 		return;
 	}
 
-	const strings = {
-		title: client.localise("music.options.loop.strings.enabled.title", locale)(),
-		description: client.localise("music.options.loop.strings.enabled.description.song", locale)(),
-	};
+	const strings = constants.contexts.loopEnabledForSong({ localise: client.localise, locale });
 
 	await client.success(
 		interaction,

@@ -1,8 +1,6 @@
 import { Client } from "logos/client";
 
 async function handleResumePlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.guildLocale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -13,28 +11,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
-			},
-		};
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description.toManage,
-		});
-
-		return;
-	}
-
-	if (!musicService.session.player.paused) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.resume.strings.notPaused.title", locale)(),
-			description: client.localise("music.options.resume.strings.notPaused.description", locale)(),
-		};
+		const strings = constants.contexts.notPlayingMusicToManage({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -44,12 +21,20 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	musicService.session.setPaused(false);
+	if (!musicService.session.player.paused) {
+		const strings = constants.contexts.notPaused({ localise: client.localise, locale: interaction.locale });
 
-	const strings = {
-		title: client.localise("music.options.resume.strings.resumed.title", locale)(),
-		description: client.localise("music.options.resume.strings.resumed.description", locale)(),
-	};
+		await client.warning(interaction, {
+			title: strings.title,
+			description: strings.description,
+		});
+
+		return;
+	}
+
+	await musicService.session.setPaused(false);
+
+	const strings = constants.contexts.resumed({ localise: client.localise, locale: interaction.guildLocale });
 
 	await client.success(
 		interaction,

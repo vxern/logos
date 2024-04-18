@@ -16,29 +16,17 @@ async function handleDisplayVolume(
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toCheck: client.localise("music.strings.notPlaying.description.toCheck", locale)(),
-			},
-		};
+		const strings = constants.contexts.notPlayingMusicToCheck({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: strings.description.toCheck,
+			description: strings.description,
 		});
 
 		return;
 	}
 
-	const strings = {
-		title: client.localise("music.options.volume.options.display.strings.volume.title", locale)(),
-		description: client.localise(
-			"music.options.volume.options.display.strings.volume.description",
-			locale,
-		)({ volume: musicService.session.player.volume }),
-	};
+	const strings = constants.contexts.volume({ localise: client.localise, locale });
 
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
@@ -55,7 +43,7 @@ async function handleDisplayVolume(
 			embeds: [
 				{
 					title: `${constants.emojis.music.volume} ${strings.title}`,
-					description: strings.description,
+					description: strings.description({ volume: musicService.session.player.volume }),
 				},
 			],
 			components,

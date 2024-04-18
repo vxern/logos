@@ -1,8 +1,6 @@
 import { Client } from "logos/client";
 
 async function handleSetVolume(client: Client, interaction: Logos.Interaction<any, { volume: number }>): Promise<void> {
-	const locale = interaction.guildLocale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -13,17 +11,11 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toManage: client.localise("music.strings.notPlaying.description.toManage", locale)(),
-			},
-		};
+		const strings = constants.contexts.notPlayingMusicToManage({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: strings.description.toManage,
+			description: strings.description,
 		});
 
 		return;
@@ -34,38 +26,22 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 	}
 
 	if (interaction.parameters.volume < 0 || interaction.parameters.volume > constants.MAXIMUM_VOLUME) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.volume.options.set.strings.invalid.title", locale)(),
-			description: client.localise(
-				"music.options.volume.options.set.strings.invalid.description",
-				locale,
-			)({ volume: constants.MAXIMUM_VOLUME }),
-		};
+		const strings = constants.contexts.volumeInvalid({ localise: client.localise, locale: interaction.locale })
 
-		await client.error(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		await client.error(interaction, {title: strings.title, description: strings.description({ volume: constants.MAXIMUM_VOLUME }),});
 
 		return;
 	}
 
-	musicService.session.setVolume(interaction.parameters.volume);
+	await musicService.session.setVolume(interaction.parameters.volume);
 
-	const strings = {
-		title: client.localise("music.options.volume.options.set.strings.set.title", locale)(),
-		description: client.localise(
-			"music.options.volume.options.set.strings.set.description",
-			locale,
-		)({ volume: interaction.parameters.volume }),
-	};
+	const strings = constants.contexts.volumeSet({ localise: client.localise, locale: interaction.locale });
 
 	await client.success(
 		interaction,
 		{
 			title: `${constants.emojis.music.volume} ${strings.title}`,
-			description: strings.description,
+			description: strings.description({ volume: interaction.parameters.volume }),
 		},
 		{ visible: true },
 	);

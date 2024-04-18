@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { parseTimeExpression } from "logos/commands/interactions";
@@ -11,9 +10,7 @@ async function handleSkipToTimestampAutocomplete(
 
 	const timestamp = parseTimeExpression(client, interaction.parameters.timestamp, { locale });
 	if (timestamp === undefined) {
-		const strings = {
-			autocomplete: client.localise("autocomplete.timestamp", locale)(),
-		};
+		const strings = constants.contexts.autocompleteTimestamp({ localise: client.localise, locale: interaction.locale });
 
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
@@ -26,8 +23,6 @@ async function handleSkipToTimestamp(
 	client: Client,
 	interaction: Logos.Interaction<any, { timestamp: string }>,
 ): Promise<void> {
-	const locale = interaction.guildLocale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -38,11 +33,7 @@ async function handleSkipToTimestamp(
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.skip-to.strings.noSong.title", locale)(),
-			description: client.localise("music.options.skip-to.strings.noSong.description", locale)(),
-		};
+		const strings = constants.contexts.noSongToSkipToTimestampInside({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -54,16 +45,13 @@ async function handleSkipToTimestamp(
 
 	const timestamp = Number(interaction.parameters.timestamp);
 	if (!Number.isSafeInteger(timestamp)) {
-		await displayInvalidTimestampError(client, interaction, { locale });
+		await displayInvalidTimestampError(client, interaction);
 		return;
 	}
 
 	await musicService.session.skipTo({ timestamp });
 
-	const strings = {
-		title: client.localise("music.options.skip-to.strings.skippedTo.title", locale)(),
-		description: client.localise("music.options.skip-to.strings.skippedTo.description", locale)(),
-	};
+	const strings = constants.contexts.skippedTo({ localise: client.localise, locale: interaction.guildLocale });
 
 	await client.success(
 		interaction,
@@ -78,17 +66,10 @@ async function handleSkipToTimestamp(
 async function displayInvalidTimestampError(
 	client: Client,
 	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
 ): Promise<void> {
-	const strings = {
-		title: client.localise("music.options.skip-to.strings.invalidTimestamp.title", locale)(),
-		description: client.localise("music.options.skip-to.strings.invalidTimestamp.description", locale)(),
-	};
+	const strings = constants.contexts.invalidSkipToTimestamp({ localise: client.localise, locale: interaction.locale });
 
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	await client.error(interaction, { title: strings.title, description: strings.description });
 }
 
 export { handleSkipToTimestamp, handleSkipToTimestampAutocomplete };

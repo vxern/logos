@@ -8,8 +8,6 @@ async function handleSkipAction(
 		{ collection: boolean | undefined; by: number | undefined; to: number | undefined }
 	>,
 ): Promise<void> {
-	const locale = interaction.guildLocale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -20,11 +18,7 @@ async function handleSkipAction(
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.options.skip.strings.noSong.title", locale)(),
-			description: client.localise("music.options.skip.strings.noSong.description", locale)(),
-		};
+		const strings = constants.contexts.noSongToSkip({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -36,20 +30,7 @@ async function handleSkipAction(
 
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
-			const locale = interaction.locale;
-			const strings = {
-				title: client.localise("music.options.skip.strings.noSongCollection.title", locale)(),
-				description: {
-					noSongCollection: client.localise(
-						"music.options.skip.strings.noSongCollection.description.noSongCollection",
-						locale,
-					)(),
-					trySongInstead: client.localise(
-						"music.options.skip.strings.noSongCollection.description.trySongInstead",
-						locale,
-					)(),
-				},
-			};
+			const strings = constants.contexts.noSongCollectionToSkip({ localise: client.localise, locale: interaction.locale });
 
 			await client.warning(interaction, {
 				title: strings.title,
@@ -62,11 +43,7 @@ async function handleSkipAction(
 
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (interaction.parameters.by !== undefined && interaction.parameters.to !== undefined) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.strings.skips.tooManyArguments.title", locale)(),
-			description: client.localise("music.strings.skips.tooManyArguments.description", locale)(),
-		};
+		const strings = constants.contexts.tooManySkipArguments({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -81,11 +58,7 @@ async function handleSkipAction(
 		(interaction.parameters.by !== undefined && interaction.parameters.by <= 0) ||
 		(interaction.parameters.to !== undefined && interaction.parameters.to <= 0)
 	) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.strings.skips.invalid.title", locale)(),
-			description: client.localise("music.strings.skips.invalid.description", locale)(),
-		};
+		const strings = constants.contexts.invalidSkipArgument({ localise: client.localise, locale: interaction.locale });
 
 		await client.error(interaction, {
 			title: strings.title,
@@ -96,15 +69,13 @@ async function handleSkipAction(
 	}
 
 	const isSkippingCollection = interaction.parameters.collection ?? false;
-	const strings = isSkippingCollection
-		? {
-				title: client.localise("music.options.skip.strings.skippedSongCollection.title", locale)(),
-				description: client.localise("music.options.skip.strings.skippedSongCollection.description", locale)(),
-		  }
-		: {
-				title: client.localise("music.options.skip.strings.skippedSong.title", locale)(),
-				description: client.localise("music.options.skip.strings.skippedSong.description", locale)(),
-		  };
+
+	let strings: { title: string; description: string };
+	if (isSkippingCollection) {
+		strings = constants.contexts.skippedSongCollection({ localise: client.localise, locale: interaction.guildLocale });
+	} else {
+		strings = constants.contexts.skippedSong({ localise: client.localise, locale: interaction.guildLocale });
+	}
 
 	await client.success(
 		interaction,

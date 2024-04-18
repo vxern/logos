@@ -14,25 +14,17 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 	}
 
 	if (!musicService.hasSession) {
-		const locale = interaction.locale;
-		const strings = {
-			title: client.localise("music.strings.notPlaying.title", locale)(),
-			description: {
-				toCheck: client.localise("music.strings.notPlaying.description.toCheck", locale)(),
-			},
-		};
+		const strings = constants.contexts.notPlayingMusicToCheck({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
-			description: strings.description.toCheck,
+			description: strings.description,
 		});
 
 		return;
 	}
 
-	const strings = {
-		title: client.localise("music.options.history.strings.playbackHistory", locale)(),
-	};
+	const strings = constants.contexts.musicHistory({ localise: client.localise, locale });
 
 	const view = new SongListingView(client, {
 		interaction,

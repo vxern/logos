@@ -7,13 +7,9 @@ async function handleRequestStreamPlayback(
 	client: Client,
 	interaction: Logos.Interaction<any, { url: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	await client.acknowledge(interaction);
 
-	const strings = {
-		stream: client.localise("music.options.play.strings.stream", locale)(),
-	};
+	const strings = constants.contexts.stream({ localise: client.localise, locale: interaction.locale });
 
 	const listing: SongListing = new SongListing({
 		queueable: new AudioStream({ title: strings.stream, url: interaction.parameters.url }),
@@ -42,28 +38,8 @@ async function handleRequestQueryPlayback(
 	}
 
 	const listing = await resolveToSongListing(client, interaction, { query: interaction.parameters.query });
-
-	await handleRequestPlayback(client, interaction, listing);
-}
-
-async function handleRequestPlayback(
-	client: Client,
-	interaction: Logos.Interaction,
-	listing: SongListing | undefined,
-): Promise<void> {
-	const locale = interaction.locale;
-
 	if (listing === undefined) {
-		const strings = {
-			title: client.localise("music.options.play.strings.notFound.title", locale)(),
-			description: {
-				notFound: client.localise("music.options.play.strings.notFound.description.notFound", locale)(),
-				tryDifferentQuery: client.localise(
-					"music.options.play.strings.notFound.description.tryDifferentQuery",
-					locale,
-				)(),
-			},
-		};
+		const strings = constants.contexts.songNotFound({ localise: client.localise, locale: interaction.locale });
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -73,6 +49,14 @@ async function handleRequestPlayback(
 		return;
 	}
 
+	await handleRequestPlayback(client, interaction, listing);
+}
+
+async function handleRequestPlayback(
+	client: Client,
+	interaction: Logos.Interaction,
+	listing: SongListing,
+): Promise<void> {
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
