@@ -87,20 +87,16 @@ function getChannelInformationSection(client: Client, interaction: Logos.Interac
 	return `${constants.emojis.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.emojis.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
-function getLanguageInformationSection(client: Client, interaction: Logos.Interaction, _guildDocument: Guild): string {
+function getLanguageInformationSection(client: Client, interaction: Logos.Interaction, guildDocument: Guild): string {
 	const strings = constants.contexts.languageTypes({ localise: client.localise, locale: interaction.locale });
 
-	// TODO(vxern): Fix.
-	/**
-	localisationLanguage: ({ localisationLanguage }: { localisationLanguage: LocalisationLanguage }) => localise(
-		constants.localisations.languages[localisationLanguage],
-		locale,
-	)(),
-		featureLanguage: ({ featureLanguage }: { featureLanguage: FeatureLanguage }) => localise(constants.localisations.languages[featureLanguage], locale)(),*/
-
-	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.localisationLanguage()}\n${
-		constants.emojis.guild.languages.feature
-	} ${strings.target} – ${strings.featureLanguage}`;
+	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${client.localise(
+		constants.localisations.languages[guildDocument.localisationLanguage],
+		interaction.locale,
+	)()}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${client.localise(
+		constants.localisations.languages[guildDocument.featureLanguage],
+		interaction.locale,
+	)()}`;
 }
 
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];
