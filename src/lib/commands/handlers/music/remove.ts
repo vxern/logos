@@ -1,4 +1,4 @@
-import {mention} from "logos:core/formatting";
+import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { RemoveSongListingView } from "logos/commands/components/paginated-views/remove-song-listing-view";
 
@@ -13,7 +13,10 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.notPlayingMusicToManage({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.notPlayingMusicToManage({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -57,7 +60,10 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			buttonPress,
 			{
 				title: `${constants.emojis.music.removed} ${strings.title}`,
-				description: strings.description({ title: listing.queueable.title, user_mention: mention(buttonPress.user.id, { type: "user" }) }),
+				description: strings.description({
+					title: listing.queueable.title,
+					user_mention: mention(buttonPress.user.id, { type: "user" }),
+				}),
 			},
 			{ visible: true },
 		);

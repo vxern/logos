@@ -30,7 +30,10 @@ async function handleSkipAction(
 
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
-			const strings = constants.contexts.noSongCollectionToSkip({ localise: client.localise, locale: interaction.locale });
+			const strings = constants.contexts.noSongCollectionToSkip({
+				localise: client.localise,
+				locale: interaction.locale,
+			});
 
 			await client.warning(interaction, {
 				title: strings.title,

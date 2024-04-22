@@ -72,16 +72,11 @@ async function handleWarnUser(
 	}
 
 	if (interaction.parameters.rule !== constants.components.none && !isValidRule(interaction.parameters.rule)) {
-		const strings = {
-			title: client.localise("warn.strings.invalidRule.title", locale)(),
-			description: client.localise("warn.strings.invalidRule.description", locale)(),
-		};
-
+		const strings = constants.contexts.invalidRule({ localise: client.localise, locale: interaction.locale });
 		await client.error(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -136,22 +131,16 @@ async function handleWarnUser(
 		timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
 	});
 
-	const strings = {
-		title: client.localise("warn.strings.warned.title", locale)(),
-		description: client.localise(
-			"warn.strings.warned.description",
-			locale,
-		)({
+	const strings = constants.contexts.userWarned({ localise: client.localise, locale: interaction.locale });
+
+	await client.success(interaction, {
+		title: strings.title,
+		description: strings.description({
 			user_mention: mention(member.id, { type: "user" }),
 			warnings: client.pluralise("warn.strings.warned.description.warnings", locale, {
 				quantity: warningDocumentsActive.length,
 			}),
 		}),
-	};
-
-	await client.success(interaction, {
-		title: strings.title,
-		description: strings.description,
 	});
 
 	const surpassedLimit = warningDocumentsActive.length > configuration.limit;

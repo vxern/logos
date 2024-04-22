@@ -8,25 +8,14 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const ruleChannelId = BigInt(this.configuration.ruleChannelId);
-
-		const guildLocale = this.guildLocale;
-		const strings = {
-			title: this.client.localise("entry.welcome.title", guildLocale)({ server_name: this.guild.name }),
-			description: {
-				toEnter: this.client.localise(
-					"entry.welcome.description.toEnter",
-					guildLocale,
-				)({ information_channel_mention: mention(ruleChannelId, { type: "channel" }) }),
-				acceptedRules: this.client.localise("entry.welcome.description.acceptedRules", guildLocale)(),
-			},
-		};
-
+		const strings = constants.contexts.welcomeNotice({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
 				{
-					title: strings.title,
-					description: strings.description.toEnter,
+					title: strings.title({ server_name: this.guild.name }),
+					description: strings.description.toEnter({
+						information_channel_mention: mention(this.configuration.ruleChannelId, { type: "channel" }),
+					}),
 					image: { url: constants.gifs.followRules },
 					color: constants.colours.orange,
 				},

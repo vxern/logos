@@ -46,7 +46,10 @@ abstract class PaginatedView<T> {
 		}
 
 		if (!this.#isOnLastPage) {
-			const strings = constants.contexts.continuedOnNextPage({ localise: this.client.localise, locale: this.#_anchor.locale });
+			const strings = constants.contexts.continuedOnNextPage({
+				localise: this.client.localise,
+				locale: this.#_anchor.locale,
+			});
 
 			return { embed: { ...embed, title, footer: { text: strings.continuedOnNextPage } }, components };
 		}

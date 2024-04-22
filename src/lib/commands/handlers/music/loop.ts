@@ -29,7 +29,10 @@ async function handleLoopPlayback(
 
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
-			const strings = constants.contexts.noSongCollectionToLoop({ localise: client.localise, locale: interaction.locale });
+			const strings = constants.contexts.noSongCollectionToLoop({
+				localise: client.localise,
+				locale: interaction.locale,
+			});
 
 			await client.warning(interaction, {
 				title: strings.title,

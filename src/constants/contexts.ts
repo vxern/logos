@@ -48,7 +48,10 @@ export default Object.freeze({
 		},
 	}),
 	withoutProficiency: ({ localise, locale }) => ({
-		withoutProficiency: localise("information.options.server.strings.information.description.withoutProficiency", locale)()
+		withoutProficiency: localise(
+			"information.options.server.strings.information.description.withoutProficiency",
+			locale,
+		)(),
 	}),
 	channelTypes: ({ localise, locale }) => ({
 		text: localise("information.options.server.strings.channelTypes.text", locale)(),
@@ -387,7 +390,7 @@ export default Object.freeze({
 	}),
 	notPlayingMusicToManage: ({ localise, locale }) => ({
 		title: localise("music.strings.notPlaying.title", locale)(),
-		description: localise("music.strings.notPlaying.description.toManage", locale)()
+		description: localise("music.strings.notPlaying.description.toManage", locale)(),
 	}),
 	volume: ({ localise, locale }) => ({
 		title: localise("music.options.volume.options.display.strings.volume.title", locale)(),
@@ -395,7 +398,7 @@ export default Object.freeze({
 	}),
 	volumeInvalid: ({ localise, locale }) => ({
 		title: localise("music.options.volume.options.set.strings.invalid.title", locale)(),
-		description: localise("music.options.volume.options.set.strings.invalid.description", locale ),
+		description: localise("music.options.volume.options.set.strings.invalid.description", locale),
 	}),
 	volumeSet: ({ localise, locale }) => ({
 		title: localise("music.options.volume.options.set.strings.set.title", locale)(),
@@ -428,7 +431,7 @@ export default Object.freeze({
 		description: {
 			noSongCollection: localise("music.options.loop.strings.noSongCollection.description.noSongCollection", locale)(),
 			trySongInstead: localise("music.options.loop.strings.noSongCollection.description.trySongInstead", locale)(),
-		}
+		},
 	}),
 	loopDisabledForSong: ({ localise, locale }) => ({
 		title: localise("music.options.loop.strings.disabled.title", locale)(),
@@ -468,8 +471,8 @@ export default Object.freeze({
 		title: localise("music.options.now.strings.title", locale)(),
 		requestedBy: localise("music.options.now.strings.requestedBy", locale)(),
 		runningTime: localise("music.options.now.strings.runningTime", locale)(),
-		playingSince: localise("music.options.now.strings.playingSince", locale,),
-		sourcedFrom: localise("music.options.now.strings.sourcedFrom", locale,),
+		playingSince: localise("music.options.now.strings.playingSince", locale),
+		sourcedFrom: localise("music.options.now.strings.sourcedFrom", locale),
 		theInternet: localise("music.options.now.strings.theInternet", locale)(),
 	}),
 	songNotFound: ({ localise, locale }) => ({
@@ -501,7 +504,10 @@ export default Object.freeze({
 	noSongCollectionToReplay: ({ localise, locale }) => ({
 		title: localise("music.options.replay.strings.noSongCollection.title", locale)(),
 		description: {
-			noSongCollection: localise("music.options.replay.strings.noSongCollection.description.noSongCollection", locale)(),
+			noSongCollection: localise(
+				"music.options.replay.strings.noSongCollection.description.noSongCollection",
+				locale,
+			)(),
 			trySongInstead: localise("music.options.replay.strings.noSongCollection.description.trySongInstead", locale)(),
 		},
 	}),
@@ -583,7 +589,10 @@ export default Object.freeze({
 	noSongCollectionToUnskip: ({ localise, locale }) => ({
 		title: localise("music.options.unskip.strings.noSongCollection.title", locale)(),
 		description: {
-			noSongCollection: localise("music.options.unskip.strings.noSongCollection.description.noSongCollection", locale)(),
+			noSongCollection: localise(
+				"music.options.unskip.strings.noSongCollection.description.noSongCollection",
+				locale,
+			)(),
 			trySongInstead: localise("music.options.unskip.strings.noSongCollection.description.trySongInstead", locale)(),
 		},
 	}),
@@ -594,6 +603,168 @@ export default Object.freeze({
 	unskipped: ({ localise, locale }) => ({
 		title: localise("music.options.unskip.strings.unskipped.title", locale)(),
 		description: localise("music.options.unskip.strings.unskipped.description", locale)(),
+	}),
+	cannotUseMessageForTranslation: ({ localise, locale }) => ({
+		title: localise("translate.strings.cannotUse.title", locale)(),
+		description: localise("translate.strings.cannotUse.description", locale)(),
+	}),
+	bothLanguagesInvalid: ({ localise, locale }) => ({
+		title: localise("translate.strings.invalid.both.title", locale)(),
+		description: localise("translate.strings.invalid.both.description", locale)(),
+	}),
+	sourceLanguageInvalid: ({ localise, locale }) => ({
+		title: localise("translate.strings.invalid.source.title", locale)(),
+		description: localise("translate.strings.invalid.source.description", locale)(),
+	}),
+	targetLanguageInvalid: ({ localise, locale }) => ({
+		title: localise("translate.strings.invalid.target.title", locale)(),
+		description: localise("translate.strings.invalid.target.description", locale)(),
+	}),
+	languagesNotDifferent: ({ localise, locale }) => ({
+		title: localise("translate.strings.languagesNotDifferent.title", locale)(),
+		description: localise("translate.strings.languagesNotDifferent.description", locale)(),
+	}),
+	cannotDetermineTargetLanguage: ({ localise, locale }) => ({
+		title: localise("translate.strings.cannotDetermine.target.title", locale)(),
+		description: {
+			cannotDetermine: localise("translate.strings.cannotDetermine.target.description.cannotDetermine", locale)(),
+			tryAgain: localise("translate.strings.cannotDetermine.target.description.tryAgain", locale)(),
+		},
+	}),
+	noTranslationAdapters: ({ localise, locale }) => ({
+		title: localise("translate.strings.noTranslationAdapters.title", locale)(),
+		description: localise("translate.strings.noTranslationAdapters.description", locale)(),
+	}),
+	failedToTranslate: ({ localise, locale }) => ({
+		title: localise("translate.strings.failed.title", locale)(),
+		description: localise("translate.strings.failed.description", locale)(),
+	}),
+	cannotDetermineSourceLanguage: ({ localise, locale }) => ({
+		title: localise("translate.strings.cannotDetermine.source.title", locale)(),
+		description: {
+			cannotDetermine: localise("translate.strings.cannotDetermine.source.description.cannotDetermine", locale)(),
+			tryAgain: localise("translate.strings.cannotDetermine.source.description.tryAgain", locale)(),
+		},
+	}),
+	languageNotSupported: ({ localise, locale }) => ({
+		title: localise("translate.strings.languageNotSupported.title", locale)(),
+		description: localise("translate.strings.languageNotSupported.description", locale),
+	}),
+	invalidRule: ({ localise, locale }) => ({
+		title: localise("warn.strings.invalidRule.title", locale)(),
+		description: localise("warn.strings.invalidRule.description", locale)(),
+	}),
+	userWarned: ({ localise, locale }) => ({
+		title: localise("warn.strings.warned.title", locale)(),
+		description: localise("warn.strings.warned.description", locale),
+	}),
+	selectSong: ({ localise, locale }) => ({
+		title: localise("music.options.play.strings.selectSong.title", locale)(),
+		description: localise("music.options.play.strings.selectSong.description", locale)(),
+	}),
+	howToSelectRoles: ({ localise, locale }) => ({
+		title: localise("roles.selection.title", locale)(),
+		description: {
+			usingCommand: localise("roles.selection.description.usingCommand", locale),
+			runAnywhere: localise("roles.selection.description.runAnywhere", locale)(),
+			pressButton: localise("roles.selection.description.pressButton", locale)(),
+			clickHere: localise("roles.selection.description.clickHere", locale)(),
+		},
+	}),
+	welcomeNotice: ({ localise, locale }) => ({
+		title: localise("entry.welcome.title", locale),
+		description: {
+			toEnter: localise("entry.welcome.description.toEnter", locale),
+			acceptedRules: localise("entry.welcome.description.acceptedRules", locale)(),
+		},
+	}),
+	reportPrompt: ({ localise, locale }) => ({
+		report: {
+			submittedBy: localise("submittedBy", locale)(),
+			submittedAt: localise("submittedAt", locale)(),
+			users: localise("reports.users", locale)(),
+			reason: localise("reports.reason", locale)(),
+			link: localise("reports.link", locale)(),
+			noLinkProvided: localise("reports.noLinkProvided", locale)(),
+		},
+		previousInfractions: {
+			title: localise("reports.previousInfractions", locale),
+		},
+		markResolved: localise("markResolved", locale)(),
+		markUnresolved: localise("markUnresolved", locale)(),
+		close: localise("close", locale)(),
+	}),
+	alreadyMarkedResolved: ({ localise, locale }) => ({
+		title: localise("alreadyMarkedResolved.title", locale)(),
+		description: localise("alreadyMarkedResolved.description", locale)(),
+	}),
+	alreadyMarkedUnresolved: ({ localise, locale }) => ({
+		title: localise("alreadyMarkedUnresolved.title", locale)(),
+		description: localise("alreadyMarkedUnresolved.description", locale)(),
+	}),
+	promptControls: ({ localise, locale }) => ({
+		markResolved: localise("markResolved", locale)(),
+		markUnresolved: localise("markUnresolved", locale)(),
+		close: localise("close", locale)(),
+		remove: localise("remove", locale)(),
+	}),
+	cannotRemovePrompt: ({ localise, locale }) => ({
+		title: localise("cannotRemovePrompt.title", locale)(),
+		description: localise("cannotRemovePrompt.description", locale)(),
+	}),
+	cannotCloseIssue: ({ localise, locale }) => ({
+		title: localise("cannotCloseIssue.title", locale)(),
+		description: localise("cannotCloseIssue.description", locale)(),
+	}),
+	entryRequestPrompt: ({ localise, locale }) => ({
+		requestedRoles: localise("entry.verification.requestedRoles", locale)(),
+		accountCreated: localise("entry.verification.accountCreated", locale)(),
+		answersSubmitted: localise("entry.verification.answersSubmitted", locale)(),
+		votesFor: localise("entry.verification.votesFor", locale)(),
+		votesAgainst: localise("entry.verification.votesAgainst", locale)(),
+		noneYet: localise("entry.verification.noneYet", locale)(),
+		accept: localise("entry.verification.vote.accept", locale)(),
+		acceptMultiple: localise("entry.verification.vote.acceptMultiple", locale),
+		reject: localise("entry.verification.vote.reject", locale)(),
+		rejectMultiple: localise("entry.verification.vote.rejectMultiple", locale),
+		inquiry: localise("entry.verification.inquiry.inquiry", locale)(),
+		open: localise("entry.verification.inquiry.open", locale)(),
+	}),
+	sureToForceAccept: ({ localise, locale }) => ({
+		title: localise("entry.verification.vote.sureToForce.accept.title", locale)(),
+		description: localise("entry.verification.vote.sureToForce.accept.description", locale)(),
+		yes: localise("entry.verification.vote.sureToForce.yes", locale)(),
+		no: localise("entry.verification.vote.sureToForce.no", locale)(),
+	}),
+	alreadyVotedInFavour: ({ localise, locale }) => ({
+		title: localise("entry.verification.vote.alreadyVoted.inFavour.title", locale)(),
+		description: localise("entry.verification.vote.alreadyVoted.inFavour.description", locale)(),
+	}),
+	sureToForceReject: ({ localise, locale }) => ({
+		title: localise("entry.verification.vote.sureToForce.reject.title", locale)(),
+		description: localise("entry.verification.vote.sureToForce.reject.description", locale)(),
+		yes: localise("entry.verification.vote.sureToForce.yes", locale)(),
+		no: localise("entry.verification.vote.sureToForce.no", locale)(),
+	}),
+	alreadyVotedAgainst: ({ localise, locale }) => ({
+		title: localise("entry.verification.vote.alreadyVoted.against.title", locale)(),
+		description: localise("entry.verification.vote.alreadyVoted.against.description", locale)(),
+	}),
+	stanceChanged: ({ localise, locale }) => ({
+		title: localise("entry.verification.vote.stanceChanged.title", locale)(),
+		description: localise("entry.verification.vote.stanceChanged.description", locale)(),
+	}),
+	inquiryFailed: ({ localise, locale }) => ({
+		title: localise("entry.verification.inquiry.failed.title", locale)(),
+		description: localise("entry.verification.inquiry.failed.description", locale)(),
+	}),
+	inquiryOpened: ({ localise, locale }) => ({
+		title: localise("entry.verification.inquiry.opened.title", locale)(),
+		description: localise("entry.verification.inquiry.opened.description", locale),
+	}),
+	voteFailed: ({ localise, locale }) => ({
+		title: localise("entry.verification.vote.failed.title", locale)(),
+		description: localise("entry.verification.vote.failed.description", locale)(),
 	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

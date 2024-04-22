@@ -11,7 +11,10 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.notPlayingMusicToManage({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.notPlayingMusicToManage({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,

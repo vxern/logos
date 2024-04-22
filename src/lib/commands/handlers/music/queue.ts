@@ -14,7 +14,10 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.notPlayingMusicToCheck({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.notPlayingMusicToCheck({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,

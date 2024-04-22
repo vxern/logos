@@ -31,13 +31,7 @@ class ResourcePromptService extends PromptService<{
 	}
 
 	getPromptContent(user: Logos.User, resourceDocument: Resource): Discord.CreateMessageOptions | undefined {
-		const guildLocale = this.guildLocale;
-		const strings = {
-			markResolved: this.client.localise("markResolved", guildLocale)(),
-			markUnresolved: this.client.localise("markUnresolved", guildLocale)(),
-			remove: this.client.localise("remove", guildLocale)(),
-		};
-
+		const strings = constants.contexts.promptControls({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
 				{
@@ -83,8 +77,6 @@ class ResourcePromptService extends PromptService<{
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Resource | null | undefined> {
-		const locale = interaction.locale;
-
 		const resourceDocument = this.documents.get(interaction.metadata[0]);
 		if (resourceDocument === undefined) {
 			return undefined;
@@ -93,11 +85,10 @@ class ResourcePromptService extends PromptService<{
 		const isResolved = interaction.metadata[1] === "true";
 
 		if (isResolved && resourceDocument.isResolved) {
-			const strings = {
-				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
-				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
-			};
-
+			const strings = constants.contexts.alreadyMarkedResolved({
+				localise: this.client.localise,
+				locale: interaction.locale,
+			});
 			await this.client.warning(interaction, {
 				title: strings.title,
 				description: strings.description,
@@ -106,16 +97,14 @@ class ResourcePromptService extends PromptService<{
 		}
 
 		if (!(isResolved || resourceDocument.isResolved)) {
-			const strings = {
-				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
-				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
-			};
-
+			const strings = constants.contexts.alreadyMarkedUnresolved({
+				localise: this.client.localise,
+				locale: interaction.locale,
+			});
 			await this.client.warning(interaction, {
 				title: strings.title,
 				description: strings.description,
 			});
-
 			return;
 		}
 

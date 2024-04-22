@@ -25,8 +25,6 @@ async function resolveYouTubeSongListings(
 }
 
 async function search(client: Client, interaction: Logos.Interaction, query: string): Promise<SongListing | undefined> {
-	const locale = interaction.locale;
-
 	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: "all", safeSearch: false });
 	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element)) as Array<
 		YouTubeSearch.Playlist | YouTubeSearch.Video
@@ -72,12 +70,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 
 	selectMenuSelection.onDone(() => resolve(undefined));
 
-	client.registerInteractionCollector(selectMenuSelection);
-
-	const strings = {
-		title: client.localise("music.options.play.strings.selectSong.title", locale)(),
-		description: client.localise("music.options.play.strings.selectSong.description", locale)(),
-	};
+	await client.registerInteractionCollector(selectMenuSelection);
 
 	const options = [];
 	for (const [result, index] of results.map<[YouTubeSearch.Playlist | YouTubeSearch.Video, number]>((result, index) => [
@@ -96,6 +89,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		});
 	}
 
+	const strings = constants.contexts.selectSong({ localise: client.localise, locale: interaction.locale });
 	await client.notice(interaction, {
 		embeds: [
 			{

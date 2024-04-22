@@ -43,13 +43,7 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const guildLocale = this.guildLocale;
-		const strings = {
-			markResolved: this.client.localise("markResolved", guildLocale)(),
-			markUnresolved: this.client.localise("markUnresolved", guildLocale)(),
-			close: this.client.localise("close", guildLocale)(),
-		};
-
+		const strings = constants.contexts.promptControls({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
 				{

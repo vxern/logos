@@ -27,30 +27,11 @@ class ReportPromptService extends PromptService<{
 	}
 
 	async getUserDocument(reportDocument: Report): Promise<User> {
-		const userDocument = await User.getOrCreate(this.client, { userId: reportDocument.authorId });
-
-		return userDocument;
+		return await User.getOrCreate(this.client, { userId: reportDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
-		const guildLocale = this.guildLocale;
-		const strings = {
-			report: {
-				submittedBy: this.client.localise("submittedBy", guildLocale)(),
-				submittedAt: this.client.localise("submittedAt", guildLocale)(),
-				users: this.client.localise("reports.users", guildLocale)(),
-				reason: this.client.localise("reports.reason", guildLocale)(),
-				link: this.client.localise("reports.link", guildLocale)(),
-				noLinkProvided: this.client.localise("reports.noLinkProvided", guildLocale)(),
-			},
-			previousInfractions: {
-				title: this.client.localise("reports.previousInfractions", guildLocale),
-			},
-			markResolved: this.client.localise("markResolved", guildLocale)(),
-			markUnresolved: this.client.localise("markUnresolved", guildLocale)(),
-			close: this.client.localise("close", guildLocale)(),
-		};
-
+		const strings = constants.contexts.reportPrompt({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
 				{
@@ -131,8 +112,6 @@ class ReportPromptService extends PromptService<{
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Report | null | undefined> {
-		const locale = interaction.locale;
-
 		const reportDocument = this.documents.get(interaction.metadata[0]);
 		if (reportDocument === undefined) {
 			return undefined;
@@ -141,30 +120,26 @@ class ReportPromptService extends PromptService<{
 		const isResolved = interaction.metadata[1] === "true";
 
 		if (isResolved && reportDocument.isResolved) {
-			const strings = {
-				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
-				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
-			};
-
+			const strings = constants.contexts.alreadyMarkedResolved({
+				localise: this.client.localise,
+				locale: interaction.locale,
+			});
 			await this.client.warning(interaction, {
 				title: strings.title,
 				description: strings.description,
 			});
-
 			return;
 		}
 
 		if (!(isResolved || reportDocument.isResolved)) {
-			const strings = {
-				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
-				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
-			};
-
+			const strings = constants.contexts.alreadyMarkedUnresolved({
+				localise: this.client.localise,
+				locale: interaction.locale,
+			});
 			await this.client.warning(interaction, {
 				title: strings.title,
 				description: strings.description,
 			});
-
 			return;
 		}
 

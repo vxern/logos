@@ -33,7 +33,10 @@ async function handleSkipToTimestamp(
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToSkipToTimestampInside({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.noSongToSkipToTimestampInside({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -63,10 +66,7 @@ async function handleSkipToTimestamp(
 	);
 }
 
-async function displayInvalidTimestampError(
-	client: Client,
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = constants.contexts.invalidSkipToTimestamp({ localise: client.localise, locale: interaction.locale });
 
 	await client.error(interaction, { title: strings.title, description: strings.description });

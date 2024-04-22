@@ -60,10 +60,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 	);
 }
 
-async function displayInvalidTimestampError(
-	client: Client,
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = constants.contexts.invalidRewindTimestamp({ localise: client.localise, locale: interaction.locale });
 
 	await client.error(interaction, {

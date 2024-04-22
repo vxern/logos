@@ -11,7 +11,10 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.notPlayingMusicToManage({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.notPlayingMusicToManage({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,

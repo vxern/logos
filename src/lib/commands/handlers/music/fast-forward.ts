@@ -51,7 +51,10 @@ async function handleFastForward(
 
 	await musicService.session.skipTo({ timestamp: musicService.session.player.position + timestamp });
 
-	const strings = constants.contexts.noSongToFastForward({ localise: client.localise, locale: interaction.guildLocale });
+	const strings = constants.contexts.noSongToFastForward({
+		localise: client.localise,
+		locale: interaction.guildLocale,
+	});
 
 	await client.success(
 		interaction,
@@ -63,11 +66,11 @@ async function handleFastForward(
 	);
 }
 
-async function displayInvalidTimestampError(
-	client: Client,
-	interaction: Logos.Interaction,
-): Promise<void> {
-	const strings = constants.contexts.invalidFastForwardTimestamp({ localise: client.localise, locale: interaction.locale });
+async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
+	const strings = constants.contexts.invalidFastForwardTimestamp({
+		localise: client.localise,
+		locale: interaction.locale,
+	});
 
 	await client.error(interaction, {
 		title: strings.title,

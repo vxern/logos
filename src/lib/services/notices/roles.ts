@@ -33,27 +33,15 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const guildLocale = this.guildLocale;
-		const strings = {
-			title: this.client.localise("roles.selection.title", guildLocale)(),
-			description: {
-				usingCommand: this.client.localise(
-					"roles.selection.description.usingCommand",
-					guildLocale,
-				)({
-					command: "`/profile roles`",
-				}),
-				runAnywhere: this.client.localise("roles.selection.description.runAnywhere", guildLocale)(),
-				pressButton: this.client.localise("roles.selection.description.pressButton", guildLocale)(),
-				clickHere: this.client.localise("roles.selection.description.clickHere", guildLocale)(),
-			},
-		};
+		const strings = constants.contexts.howToSelectRoles({ localise: this.client.localise, locale: this.guildLocale });
 
 		return {
 			embeds: [
 				{
 					title: strings.title,
-					description: `${strings.description.usingCommand} ${strings.description.runAnywhere}\n\n${strings.description.pressButton}`,
+					description: `${strings.description.usingCommand({
+						command: this.client.localiseCommand("profile.options.roles", this.guildLocale),
+					})} ${strings.description.runAnywhere}\n\n${strings.description.pressButton}`,
 					color: constants.colours.murrey,
 				},
 			],

@@ -243,33 +243,27 @@ abstract class PromptService<
 				member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
 				(userIds?.includes(buttonPress.user.id) ?? false);
 			if (!isAuthorised) {
-				const locale = buttonPress.locale;
-
 				if (this.#deleteMode === "delete") {
-					const strings = {
-						title: this.client.localise("cannotRemovePrompt.title", locale)(),
-						description: this.client.localise("cannotRemovePrompt.description", locale)(),
-					};
-
+					const strings = constants.contexts.cannotRemovePrompt({
+						localise: this.client.localise,
+						locale: buttonPress.locale,
+					});
 					await this.client.warning(buttonPress, {
 						title: strings.title,
 						description: strings.description,
 					});
-
 					return;
 				}
 
 				if (this.#deleteMode === "close") {
-					const strings = {
-						title: this.client.localise("cannotCloseIssue.title", locale)(),
-						description: this.client.localise("cannotCloseIssue.description", locale)(),
-					};
-
+					const strings = constants.contexts.cannotCloseIssue({
+						localise: this.client.localise,
+						locale: buttonPress.locale,
+					});
 					await this.client.warning(buttonPress, {
 						title: strings.title,
 						description: strings.description,
 					});
-
 					return;
 				}
 

@@ -26,7 +26,10 @@ async function handleUnskipAction(
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.notPlayingMusicToManage({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.notPlayingMusicToManage({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -75,7 +78,10 @@ async function handleUnskipAction(
 	}
 
 	if (interaction.parameters.collection !== undefined && !(musicService.session.queueable instanceof SongCollection)) {
-		const strings = constants.contexts.noSongCollectionToUnskip({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.noSongCollectionToUnskip({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -87,7 +93,10 @@ async function handleUnskipAction(
 
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (interaction.parameters.by !== undefined && interaction.parameters.to !== undefined) {
-		const strings = constants.contexts.tooManyUnskipArguments({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.tooManyUnskipArguments({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -112,7 +121,10 @@ async function handleUnskipAction(
 		return;
 	}
 
-	const strings = constants.contexts.invalidSkipArgument({ localise: client.localise, locale: interaction.guildLocale });
+	const strings = constants.contexts.invalidSkipArgument({
+		localise: client.localise,
+		locale: interaction.guildLocale,
+	});
 
 	await client.success(
 		interaction,
