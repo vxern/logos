@@ -168,14 +168,15 @@ async function setup(): Promise<void> {
 	readEnvironment({ envConfiguration, templateEnvConfiguration });
 
 	const environmentProvisional: Record<keyof Environment, string | boolean | undefined> = {
-		isDebug: process.env.DEBUG !== undefined && process.env.DEBUG === "true",
+		isDebug: process.env.DEBUG === "true",
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
+		database: process.env.DATABASE,
 		ravendbHost: process.env.RAVENDB_HOST,
 		ravendbPort: process.env.RAVENDB_PORT,
 		ravendbDatabase: process.env.RAVENDB_DATABASE,
-		ravendbSecure: process.env.RAVENDB_SECURE !== undefined && process.env.RAVENDB_SECURE === "true",
+		ravendbSecure: process.env.RAVENDB_SECURE === "true",
 		redisHost: process.env.REDIS_HOST,
 		redisPort: process.env.REDIS_PORT,
 		redisPassword: process.env.REDIS_PASSWORD,

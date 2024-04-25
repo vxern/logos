@@ -2,7 +2,7 @@ import { Collection, isValidCollection } from "logos:constants/database";
 import { capitalise, decapitalise } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { RateLimit, timeStructToMilliseconds } from "logos/database/guild";
-import { Database } from "logos/stores/database";
+import { DatabaseAdapter } from "logos/stores/database";
 
 interface DocumentMetadata {
 	readonly "@id": string;
@@ -20,7 +20,7 @@ type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: stri
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
 type MetadataOrIdentifierData<M extends Model> = { "@metadata": DocumentMetadata } | IdentifierData<M>;
 
-type ClientOrDatabase = Client | Database;
+type ClientOrDatabase = Client | DatabaseAdapter;
 
 abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	declare readonly id: string;
@@ -163,7 +163,7 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	}
 }
 
-function getDatabase(clientOrDatabase: ClientOrDatabase): Database {
+function getDatabase(clientOrDatabase: ClientOrDatabase): DatabaseAdapter {
 	if (clientOrDatabase instanceof Client) {
 		return clientOrDatabase.database;
 	}

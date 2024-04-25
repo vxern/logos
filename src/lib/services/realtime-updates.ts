@@ -4,7 +4,7 @@ import { Guild } from "logos/database/guild";
 import { Model, RawDocument } from "logos/database/model";
 import { ActionLock } from "logos/helpers/action-lock";
 import { GlobalService } from "logos/services/service";
-import { DocumentSession } from "logos/stores/database";
+import { DocumentSessionAdapter } from "logos/stores/database";
 import * as ravendb from "ravendb";
 
 class RealtimeUpdateService extends GlobalService {
@@ -50,7 +50,7 @@ class RealtimeUpdateService extends GlobalService {
 				.whereEquals("id", data.id)
 				.waitForNonStaleResults();
 			const rawDocument = (await query.first()) as RawDocument;
-			const guildDocument = DocumentSession.instantiateModel<Guild>(rawDocument);
+			const guildDocument = DocumentSessionAdapter.instantiateModel<Guild>(rawDocument);
 
 			this.client.database.cacheDocument(guildDocument);
 

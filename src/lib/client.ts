@@ -14,7 +14,7 @@ import { RealtimeUpdateService } from "logos/services/realtime-updates";
 import { StatusService } from "logos/services/status";
 import { AdapterStore } from "logos/stores/adapters";
 import { CommandStore } from "logos/stores/commands";
-import { Database } from "logos/stores/database";
+import { DatabaseStore } from "logos/stores/database";
 import { EventStore } from "logos/stores/events";
 import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
@@ -26,10 +26,11 @@ interface Environment {
 	readonly discordSecret: string;
 	readonly deeplSecret: string;
 	readonly rapidApiSecret: string;
+	readonly database: string;
 	readonly ravendbHost: string;
-	readonly ravendbPort: string;
-	readonly ravendbDatabase: string;
-	readonly ravendbSecure: boolean;
+	readonly ravendbPort?: string;
+	readonly ravendbDatabase?: string;
+	readonly ravendbSecure?: boolean;
 	readonly redisHost?: string;
 	readonly redisPort?: string;
 	readonly redisPassword?: string;
@@ -43,7 +44,7 @@ class Client {
 
 	readonly environment: Environment;
 	readonly log: Logger;
-	readonly database: Database;
+	readonly database: DatabaseStore;
 	readonly cache: Cache;
 	readonly diagnostics: Diagnostics;
 
@@ -62,7 +63,7 @@ class Client {
 	readonly #_interactionCollector: InteractionCollector;
 	readonly #_channelDeleteCollector: Collector<"channelDelete">;
 
-	get documents(): Database["cache"] {
+	get documents(): DatabaseStore["cache"] {
 		return this.database.cache;
 	}
 
@@ -279,7 +280,7 @@ class Client {
 	}) {
 		this.environment = environment;
 		this.log = log;
-		this.database = new Database(this, { certificate });
+		this.database = new DatabaseStore(this, { certificate });
 		this.cache = new Cache(this);
 		this.diagnostics = new Diagnostics(this);
 

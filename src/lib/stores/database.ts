@@ -1,5 +1,7 @@
-import { randomUUID } from "node:crypto";
 import { Collection, isValidCollection } from "logos:constants/database";
+import { DatabaseAdapter } from "logos/adapters/databases/adapter";
+import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
+import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
 import { Client } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
@@ -13,9 +15,8 @@ import { Ticket } from "logos/database/ticket";
 import { User } from "logos/database/user";
 import { Warning } from "logos/database/warning";
 import { Logger } from "logos/logger";
-import * as ravendb from "ravendb";
 
-class Database extends ravendb.DocumentStore {
+class DatabaseStore {
 	readonly cache: {
 		readonly entryRequests: Map<string, EntryRequest>;
 		readonly guildStats: Map<string, GuildStats>;
@@ -45,14 +46,9 @@ class Database extends ravendb.DocumentStore {
 		Warnings: Warning,
 	} as const);
 
-	constructor(client: Client, { certificate }: { certificate?: Buffer }) {
-		const hostWithPort = `${client.environment.ravendbHost}:${client.environment.ravendbPort}`;
-		if (certificate !== undefined) {
-			super(hostWithPort, client.environment.ravendbDatabase, { certificate, type: "pfx" });
-		} else {
-			super(hostWithPort, client.environment.ravendbDatabase);
-		}
+	readonly #_adapter: DatabaseAdapter;
 
+	private constructor(client: Client, { adapter }: { adapter: DatabaseAdapter }) {
 		this.cache = {
 			entryRequests: new Map(),
 			guildStats: new Map(),
@@ -67,21 +63,62 @@ class Database extends ravendb.DocumentStore {
 			warningsByTarget: new Map(),
 		};
 
-		this.#log = Logger.create({ identifier: "Client/Database", isDebug: client.environment.isDebug });
+		this.#log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: client.environment.isDebug });
 
-		this.initialize();
+		this.#_adapter = adapter;
+	}
+
+	static create(client: Client): DatabaseStore {
+		let adapter: DatabaseAdapter;
+		switch (client.environment.database) {
+			case "none": {
+				adapter = new InMemoryAdapter();
+				break;
+			}
+			case "ravendb": {
+				adapter = new RavenDBAdapter({
+					database: client.environment.ravendbDatabase!,
+					host: client.environment.ravendbHost,
+					port: client.environment.ravendbPort,
+				});
+				break;
+			}
+			default: {
+				throw "The `DATABASE` configuration option is invalid or missing.";
+			}
+		}
+
+		return new DatabaseStore(client, { adapter });
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): { new (data: any): Model } {
-		return Database.#_classes[collection];
+		return DatabaseStore.#_classes[collection];
+	}
+
+	static instantiateModel<M extends Model>(payload: RawDocument): M {
+		if (payload["@metadata"]["@collection"] === "@empty") {
+			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
+		}
+
+		if (!isValidCollection(payload["@metadata"]["@collection"])) {
+			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
+		}
+
+		const Class = DatabaseStore.getModelClassByCollection({
+			collection: payload["@metadata"]["@collection"] as Collection,
+		});
+
+		return new Class(payload) as M;
 	}
 
 	async start(): Promise<void> {
+		await this.#_adapter.start();
+
 		await this.#prefetchDocuments();
 	}
 
-	stop(): void {
-		this.dispose();
+	async stop(): Promise<void> {
+		await this.#_adapter.stop();
 	}
 
 	async #prefetchDocuments(): Promise<void> {
@@ -224,102 +261,6 @@ class Database extends ravendb.DocumentStore {
 			}
 		}
 	}
-
-	/**
-	 * @deprecated
-	 * Do not use as this doesn't auto-dispose the session. Use {@link Database.withSession} instead.
-	 *
-	 * @privateRemarks
-	 * This method was reconstructed from the original implementation of the RavenDB `DocumentStore.openSession()`.
-	 */
-	openSession(): DocumentSession {
-		this.assertInitialized();
-		this._ensureNotDisposed();
-
-		const session = new DocumentSession({ database: this, id: randomUUID(), options: { noCaching: false } });
-		this.registerEvents(session);
-		this.emit("sessionCreated", { session });
-
-		return session;
-	}
-
-	async withSession<T>(callback: (session: DocumentSession) => Promise<T>): Promise<T> {
-		const session = this.openSession();
-
-		const result = await callback(session);
-
-		session.dispose();
-
-		return result;
-	}
 }
 
-class DocumentSession extends ravendb.DocumentSession {
-	readonly #database: Database;
-
-	constructor({ database, id, options }: { database: Database; id: string; options: ravendb.SessionOptions }) {
-		super(database, id, options);
-
-		this.#database = database;
-
-		// ! This logic needs to be turned off as Logos performs model operations and conversions on its own.
-		// ! The following line prevents the RavenDB client from trying to convert raw documents to an entity.
-		this.entityToJson.convertToEntity = (_, __, document, ____) => document;
-	}
-
-	static instantiateModel<M extends Model>(payload: RawDocument): M {
-		if (payload["@metadata"]["@collection"] === "@empty") {
-			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
-		}
-
-		if (!isValidCollection(payload["@metadata"]["@collection"])) {
-			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
-		}
-
-		const Class = Database.getModelClassByCollection({ collection: payload["@metadata"]["@collection"] as Collection });
-
-		return new Class(payload) as M;
-	}
-
-	async get<M extends Model>(id: string): Promise<M | undefined>;
-	async get<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
-	async get<M extends Model>(idOrIds: string | string[]): Promise<M | undefined | (M | undefined)[]> {
-		const ids = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
-		const result = await this.load(ids);
-
-		const documents: (M | undefined)[] = [];
-		for (const documentRaw of Object.values(result) as (RawDocument | null)[]) {
-			if (documentRaw === null) {
-				documents.push(undefined);
-				continue;
-			}
-
-			const document = DocumentSession.instantiateModel(documentRaw) as M;
-
-			documents.push(document);
-			this.#database.cacheDocument(document);
-		}
-
-		if (Array.isArray(idOrIds)) {
-			return documents;
-		}
-
-		return documents.at(0)!;
-	}
-
-	async set<M extends Model>(document: M): Promise<M> {
-		await this.store<M>(document, document["@metadata"]["@id"]);
-
-		this.#database.cacheDocument(document);
-
-		return document;
-	}
-
-	async remove<M extends Model>(document: M): Promise<void> {
-		// We don't call `delete()` here because we don't actually delete from the database.
-
-		this.#database.unloadDocument(document);
-	}
-}
-
-export { Database, DocumentSession };
+export { DatabaseStore };
