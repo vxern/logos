@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages/localisation";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
@@ -18,10 +17,10 @@ class SongCollectionView extends PaginatedView<Song> {
 		this.#collection = collection;
 	}
 
-	build(page: Song[], pageIndex: number, { locale }: { locale: Locale }): View {
+	build(interaction: Logos.Interaction, page: Song[], pageIndex: number): View {
 		if (page.length === 0) {
 			const strings = {
-				listEmpty: this.client.localise("music.strings.listEmpty", locale)(),
+				listEmpty: this.client.localise("music.strings.listEmpty", interaction.locale)(),
 			};
 
 			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colours.notice } };

@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages/localisation";
 import { Client } from "logos/client";
 import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
 
@@ -14,7 +13,7 @@ class SoftwareLicenceView extends PaginatedView<string> {
 		this.#title = title;
 	}
 
-	build(page: string[], _: number, { locale: __ }: { locale: Locale }): View {
+	build(_interaction: Logos.Interaction, page: string[], _: number): View {
 		return { embed: { title: this.#title, description: `*${page}*` } };
 	}
 }
