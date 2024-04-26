@@ -79,10 +79,7 @@ class User extends Model<{ idParts: ["userId"] }> {
 				return userDocument;
 			}
 
-			const newUserDocument = await session.set(new User(data));
-			await session.saveChanges();
-
-			return newUserDocument;
+			return session.set(new User(data));
 		});
 	}
 

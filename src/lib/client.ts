@@ -27,7 +27,7 @@ interface Environment {
 	readonly deeplSecret: string;
 	readonly rapidApiSecret: string;
 	readonly database: string;
-	readonly ravendbHost: string;
+	readonly ravendbHost?: string;
 	readonly ravendbPort?: string;
 	readonly ravendbDatabase?: string;
 	readonly ravendbSecure?: boolean;

@@ -51,12 +51,7 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 				return guildStatsDocument;
 			}
 
-			const newGuildStatsDocument = new GuildStats(data);
-
-			await session.set(newGuildStatsDocument);
-			await session.saveChanges();
-
-			return newGuildStatsDocument;
+			return session.set(new GuildStats(data));
 		});
 	}
 

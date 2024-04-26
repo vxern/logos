@@ -6,9 +6,9 @@ class RavenDBAdapter extends DatabaseAdapter {
 	readonly #_store: ravendb.DocumentStore;
 
 	constructor({
-		database,
 		host,
 		port,
+		database,
 		certificate,
 	}: { database: string; host: string; port: string; certificate?: Buffer }) {
 		super();
@@ -46,7 +46,7 @@ class RavenDBDocumentSession extends DocumentSession {
 
 		// ! This logic needs to be turned off as Logos performs model operations and conversions on its own.
 		// ! The following line prevents the RavenDB client from trying to convert raw documents to an entity.
-		this.#_session.advanced.entityToJson.convertToEntity = (_, __, document, ____) => document;
+		this.#_session.advanced.entityToJson.convertToEntity = (_, __, document, ___) => document;
 	}
 
 	async load(id: string): Promise<object | undefined | null> {
@@ -59,6 +59,7 @@ class RavenDBDocumentSession extends DocumentSession {
 
 	async store(object: object): Promise<void> {
 		await this.#_session.store(object);
+		await this.#_session.saveChanges();
 	}
 
 	async dispose(): Promise<void> {}

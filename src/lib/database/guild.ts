@@ -402,12 +402,7 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		}
 
 		return await client.database.withSession(async (session) => {
-			const guildDocument = await session.get<Guild>(Model.buildId(data, { collection: "Guilds" }));
-			if (guildDocument === undefined) {
-				return undefined;
-			}
-
-			return guildDocument;
+			return session.get<Guild>(Model.buildId(data, { collection: "Guilds" }));
 		});
 	}
 
@@ -418,10 +413,7 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		}
 
 		return await client.database.withSession(async (session) => {
-			const guildDocument = await session.set(new Guild(data));
-			await session.saveChanges();
-
-			return guildDocument;
+			return session.set(new Guild(data));
 		});
 	}
 

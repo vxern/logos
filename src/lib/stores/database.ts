@@ -1,5 +1,5 @@
 import { Collection, isValidCollection } from "logos:constants/database";
-import { DatabaseAdapter } from "logos/adapters/databases/adapter";
+import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
 import { Client } from "logos/client";
@@ -48,6 +48,10 @@ class DatabaseStore {
 
 	readonly #_adapter: DatabaseAdapter;
 
+	get withSession(): <T>(callback: (session: DocumentSession) => Promise<T>) => Promise<T> {
+		return (callback) => this.#_adapter.withSession(callback, { store: this });
+	}
+
 	private constructor(client: Client, { adapter }: { adapter: DatabaseAdapter }) {
 		this.cache = {
 			entryRequests: new Map(),
@@ -77,14 +81,14 @@ class DatabaseStore {
 			}
 			case "ravendb": {
 				adapter = new RavenDBAdapter({
+					host: client.environment.ravendbHost!,
+					port: client.environment.ravendbPort!,
 					database: client.environment.ravendbDatabase!,
-					host: client.environment.ravendbHost,
-					port: client.environment.ravendbPort,
 				});
 				break;
 			}
 			default: {
-				throw "The `DATABASE` configuration option is invalid or missing.";
+				throw "The `DATABASE` environment variable is invalid or missing.";
 			}
 		}
 

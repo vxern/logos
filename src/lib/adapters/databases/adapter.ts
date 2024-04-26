@@ -5,13 +5,6 @@ abstract class DatabaseAdapter {
 	abstract start(): Promise<void>;
 	abstract stop(): Promise<void>;
 
-	/**
-	 * @deprecated
-	 * Do not use as this does not auto-dispose the session. Use {@link Database.withSession} instead.
-	 *
-	 * @privateRemarks
-	 * This method was reconstructed from the original implementation of the RavenDB `DocumentStore.openSession()`.
-	 */
 	abstract openSession({ store }: { store: DatabaseStore }): Promise<DocumentSession>;
 
 	async withSession<T>(

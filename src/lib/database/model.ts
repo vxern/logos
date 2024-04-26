@@ -2,7 +2,7 @@ import { Collection, isValidCollection } from "logos:constants/database";
 import { capitalise, decapitalise } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { RateLimit, timeStructToMilliseconds } from "logos/database/guild";
-import { DatabaseAdapter } from "logos/stores/database";
+import { DatabaseStore } from "logos/stores/database";
 
 interface DocumentMetadata {
 	readonly "@id": string;
@@ -20,7 +20,7 @@ type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: stri
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
 type MetadataOrIdentifierData<M extends Model> = { "@metadata": DocumentMetadata } | IdentifierData<M>;
 
-type ClientOrDatabase = Client | DatabaseAdapter;
+type ClientOrDatabase = Client | DatabaseStore;
 
 abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	declare readonly id: string;
@@ -139,7 +139,6 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 	async create(clientOrDatabase: ClientOrDatabase): Promise<void> {
 		await getDatabase(clientOrDatabase).withSession(async (session) => {
 			await session.set(this);
-			await session.saveChanges();
 		});
 	}
 
@@ -147,7 +146,6 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 		await getDatabase(clientOrDatabase).withSession(async (session) => {
 			callback();
 			await session.set(this);
-			await session.saveChanges();
 		});
 	}
 
@@ -158,12 +156,11 @@ abstract class Model<Generic extends { idParts: readonly string[] } = any> {
 
 		await getDatabase(clientOrDatabase).withSession(async (session) => {
 			await session.remove(this);
-			await session.saveChanges();
 		});
 	}
 }
 
-function getDatabase(clientOrDatabase: ClientOrDatabase): DatabaseAdapter {
+function getDatabase(clientOrDatabase: ClientOrDatabase): DatabaseStore {
 	if (clientOrDatabase instanceof Client) {
 		return clientOrDatabase.database;
 	}

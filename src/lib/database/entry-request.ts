@@ -84,11 +84,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 		}
 
 		return await client.database.withSession(async (session) => {
-			const entryRequestDocument = await session.get<EntryRequest>(
-				Model.buildId(data, { collection: "EntryRequests" }),
-			);
-
-			return entryRequestDocument;
+			return session.get<EntryRequest>(Model.buildId(data, { collection: "EntryRequests" }));
 		});
 	}
 
