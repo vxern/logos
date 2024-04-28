@@ -1,5 +1,6 @@
 import { Client } from "logos/client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 interface EntryRequestFormData {
 	readonly reason: string;
@@ -20,7 +21,7 @@ interface ForcedVerdict {
 	readonly verdict: VoteVerdict;
 }
 
-class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
+class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -46,27 +47,28 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 		return this.votes?.against ?? [];
 	}
 
-	constructor({
-		createdAt,
-		requestedRoleId,
-		formData,
-		isFinalised,
-		forcedVerdict,
-		ticketChannelId,
-		votes,
-		...data
-	}: {
-		createdAt?: number;
-		requestedRoleId: string;
-		formData: EntryRequestFormData;
-		isFinalised?: boolean;
-		forcedVerdict?: ForcedVerdict;
-		ticketChannelId?: string;
-		votes?: VoteStats;
-	} & MetadataOrIdentifierData<EntryRequest>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "EntryRequests" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{
+			createdAt,
+			requestedRoleId,
+			formData,
+			isFinalised,
+			forcedVerdict,
+			ticketChannelId,
+			votes,
+			...data
+		}: {
+			createdAt?: number;
+			requestedRoleId: string;
+			formData: EntryRequestFormData;
+			isFinalised?: boolean;
+			forcedVerdict?: ForcedVerdict;
+			ticketChannelId?: string;
+			votes?: VoteStats;
+		} & IdentifierData<EntryRequest>,
+	) {
+		super(database, data, { collection: "EntryRequests" });
 
 		this.createdAt = createdAt ?? Date.now();
 		this.requestedRoleId = requestedRoleId;
@@ -89,7 +91,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 	}
 
 	static async getAll(
-		clientOrDatabase: ClientOrDatabase,
+		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<EntryRequest>> },
 	): Promise<EntryRequest[]> {
 		return await Model.all<EntryRequest>(clientOrDatabase, {
@@ -102,7 +104,7 @@ class EntryRequest extends Model<{ idParts: ["guildId", "authorId"] }> {
 		client: Client,
 		data: IdentifierData<EntryRequest> & { requestedRoleId: string; formData: EntryRequestFormData },
 	): Promise<EntryRequest> {
-		const entryRequestDocument = new EntryRequest(data);
+		const entryRequestDocument = new EntryRequest(client.database, data);
 
 		await entryRequestDocument.create(client);
 

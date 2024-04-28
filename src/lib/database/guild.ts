@@ -1,10 +1,11 @@
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
 import { TimeUnit } from "logos:constants/time";
 import { Client } from "logos/client";
-import { IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 /** @since v3.0.0 */
-class Guild extends Model<{ idParts: ["guildId"] }> {
+class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -373,21 +374,22 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		return this.isEnabled.bind(this);
 	}
 
-	constructor({
-		createdAt,
-		languages,
-		features,
-		isNative,
-		...data
-	}: {
-		createdAt?: number;
-		languages?: GuildLanguages;
-		features?: GuildFeatures;
-		isNative?: boolean;
-	} & MetadataOrIdentifierData<Guild>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "Guilds" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{
+			createdAt,
+			languages,
+			features,
+			isNative,
+			...data
+		}: {
+			createdAt?: number;
+			languages?: GuildLanguages;
+			features?: GuildFeatures;
+			isNative?: boolean;
+		} & IdentifierData<Guild>,
+	) {
+		super(database, data, { collection: "Guilds" });
 
 		this.createdAt = createdAt ?? Date.now();
 		this.languages = languages;
@@ -413,7 +415,7 @@ class Guild extends Model<{ idParts: ["guildId"] }> {
 		}
 
 		return await client.database.withSession(async (session) => {
-			return session.set(new Guild(data));
+			return session.set(new Guild(client.database, data));
 		});
 	}
 

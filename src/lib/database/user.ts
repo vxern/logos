@@ -1,7 +1,8 @@
 import { Locale, LocalisationLanguage } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { GameType } from "logos/database/guild-stats";
-import { IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 interface Account {
 	/** User's Discord ID. */
@@ -28,7 +29,7 @@ interface GameScores {
 
 type AuthorisationStatus = "authorised" | "rejected";
 
-class User extends Model<{ idParts: ["userId"] }> {
+class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 	static readonly #_initialScores: GameScores = { totalScore: 0, sessionCount: 1 };
 
 	get userId(): string {
@@ -48,19 +49,20 @@ class User extends Model<{ idParts: ["userId"] }> {
 		this.account.language = language;
 	}
 
-	constructor({
-		createdAt,
-		account,
-		scores,
-		...data
-	}: {
-		createdAt?: number;
-		account?: Account;
-		scores?: Partial<Record<Locale, Partial<Record<GameType, GameScores>>>>;
-	} & MetadataOrIdentifierData<User>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "Users" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{
+			createdAt,
+			account,
+			scores,
+			...data
+		}: {
+			createdAt?: number;
+			account?: Account;
+			scores?: Partial<Record<Locale, Partial<Record<GameType, GameScores>>>>;
+		} & IdentifierData<User>,
+	) {
+		super(database, data, { collection: "Users" });
 
 		this.createdAt = createdAt ?? Date.now();
 		this.account = account ?? { id: this.userId };
@@ -79,7 +81,7 @@ class User extends Model<{ idParts: ["userId"] }> {
 				return userDocument;
 			}
 
-			return session.set(new User(data));
+			return session.set(new User(client.database, data));
 		});
 	}
 

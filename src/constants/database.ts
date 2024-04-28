@@ -1,3 +1,6 @@
+const databaseProviders = Object.freeze(["none", "ravendb"]);
+type DatabaseProvider = (typeof databaseProviders)[number];
+
 const collections = Object.freeze([
 	"EntryRequests",
 	"GuildStats",
@@ -18,7 +21,9 @@ function isValidCollection(collection: string): collection is Collection {
 
 /**
  * @privateRemarks
- * ! These are ordered by their position in document IDs. Changing the order could cause severe breakage and possibly even data loss.
+ * ! These are ordered by their position in document IDs. Changing the order could cause severe breakage and possibly
+ * ! even data loss.
+ *
  * ! Do not change the order unless you know what you are doing and have a good reason to.
  */
 const identifierParts = Object.freeze([
@@ -32,4 +37,4 @@ const identifierParts = Object.freeze([
 
 export default Object.freeze({ collections, identifierParts } as const);
 export { isValidCollection };
-export type { Collection };
+export type { Collection, DatabaseProvider };

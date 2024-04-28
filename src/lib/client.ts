@@ -22,11 +22,11 @@ import { LocalisationStore, RawLocalisations } from "logos/stores/localisations"
 import { ServiceStore } from "logos/stores/services";
 
 interface Environment {
-	readonly isDebug: boolean;
-	readonly discordSecret: string;
-	readonly deeplSecret: string;
-	readonly rapidApiSecret: string;
-	readonly database: string;
+	readonly isDebug?: boolean;
+	readonly discordSecret?: string;
+	readonly deeplSecret?: string;
+	readonly rapidApiSecret?: string;
+	readonly databaseSolution?: string;
 	readonly ravendbHost?: string;
 	readonly ravendbPort?: string;
 	readonly ravendbDatabase?: string;
@@ -34,9 +34,9 @@ interface Environment {
 	readonly redisHost?: string;
 	readonly redisPort?: string;
 	readonly redisPassword?: string;
-	readonly lavalinkHost: string;
-	readonly lavalinkPort: string;
-	readonly lavalinkPassword: string;
+	readonly lavalinkHost?: string;
+	readonly lavalinkPort?: string;
+	readonly lavalinkPassword?: string;
 }
 
 class Client {
@@ -280,7 +280,7 @@ class Client {
 	}) {
 		this.environment = environment;
 		this.log = log;
-		this.database = new DatabaseStore(this, { certificate });
+		this.database = DatabaseStore.create(this, { certificate });
 		this.cache = new Cache(this);
 		this.diagnostics = new Diagnostics(this);
 
@@ -434,7 +434,7 @@ class Client {
 		await this.#_guildReloadLock.dispose();
 
 		this.cache.stop();
-		this.database.stop();
+		await this.database.stop();
 		await this.#services.stop();
 		this.#journalling.stop();
 		this.#teardownCollectors();

@@ -1,8 +1,9 @@
 import { Rule } from "logos:constants/rules";
 import { Client } from "logos/client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
-class Warning extends Model<{ idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
+class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -24,17 +25,18 @@ class Warning extends Model<{ idParts: ["guildId", "authorId", "targetId", "crea
 	/** @since v3.37.0 */
 	rule?: Rule;
 
-	constructor({ reason, rule, ...data }: { reason: string; rule?: Rule } & MetadataOrIdentifierData<Warning>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "Warnings" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{ reason, rule, ...data }: { reason: string; rule?: Rule } & IdentifierData<Warning>,
+	) {
+		super(database, data, { collection: "Warnings" });
 
 		this.reason = reason;
 		this.rule = rule;
 	}
 
 	static async getAll(
-		clientOrDatabase: ClientOrDatabase,
+		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Warning>> },
 	): Promise<Warning[]> {
 		return await Model.all<Warning>(clientOrDatabase, {
@@ -50,7 +52,7 @@ class Warning extends Model<{ idParts: ["guildId", "authorId", "targetId", "crea
 		client: Client,
 		data: Omit<IdentifierData<Warning>, "createdAt"> & { reason: string; rule?: Rule },
 	): Promise<Warning> {
-		const warningDocument = new Warning({ ...data, createdAt: Date.now().toString() });
+		const warningDocument = new Warning(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await warningDocument.create(client);
 
@@ -58,7 +60,7 @@ class Warning extends Model<{ idParts: ["guildId", "authorId", "targetId", "crea
 	}
 
 	static async getActiveWarnings(
-		clientOrDatabase: ClientOrDatabase,
+		clientOrDatabase: ClientOrDatabaseStore,
 		{ timeRangeMilliseconds }: { timeRangeMilliseconds: number },
 	): Promise<Warning[]> {
 		const warnings = await Warning.getAll(clientOrDatabase);

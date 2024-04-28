@@ -1,6 +1,7 @@
 import { Locale } from "logos:constants/languages";
 import { Client } from "logos/client";
-import { IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 type GameType =
 	/** @since v3.42.0 */
@@ -12,7 +13,7 @@ interface GameStats {
 	uniquePlayers: number;
 }
 
-class GuildStats extends Model<{ idParts: ["guildId"] }> {
+class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] }> {
 	static readonly #_initialStats: GameStats = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
 
 	get guildId(): string {
@@ -23,17 +24,18 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 
 	stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
 
-	constructor({
-		createdAt,
-		stats,
-		...data
-	}: {
-		createdAt?: number;
-		stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
-	} & MetadataOrIdentifierData<GuildStats>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "GuildStats" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{
+			createdAt,
+			stats,
+			...data
+		}: {
+			createdAt?: number;
+			stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
+		} & IdentifierData<GuildStats>,
+	) {
+		super(database, data, { collection: "GuildStats" });
 
 		this.createdAt = createdAt ?? Date.now();
 		this.stats = stats;
@@ -51,7 +53,7 @@ class GuildStats extends Model<{ idParts: ["guildId"] }> {
 				return guildStatsDocument;
 			}
 
-			return session.set(new GuildStats(data));
+			return session.set(new GuildStats(client.database, data));
 		});
 	}
 

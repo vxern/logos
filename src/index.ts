@@ -172,7 +172,7 @@ async function setup(): Promise<void> {
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
-		database: process.env.DATABASE,
+		databaseSolution: process.env.DATABASE_SOLUTION,
 		ravendbHost: process.env.RAVENDB_HOST,
 		ravendbPort: process.env.RAVENDB_PORT,
 		ravendbDatabase: process.env.RAVENDB_DATABASE,
@@ -205,4 +205,4 @@ async function setup(): Promise<void> {
 	await client.start();
 }
 
-setup();
+await setup();

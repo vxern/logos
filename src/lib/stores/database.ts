@@ -1,4 +1,4 @@
-import { Collection, isValidCollection } from "logos:constants/database";
+import { Collection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
@@ -6,7 +6,7 @@ import { Client } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
-import { Model, RawDocument } from "logos/database/model";
+import { Model, ModelConstructor } from "logos/database/model";
 import { Praise } from "logos/database/praise";
 import { Report } from "logos/database/report";
 import { Resource } from "logos/database/resource";
@@ -33,7 +33,7 @@ class DatabaseStore {
 
 	readonly #log: Logger;
 
-	static readonly #_classes: Record<Collection, { new (data: any): Model }> = Object.freeze({
+	static readonly #_classes: Record<Collection, ModelConstructor> = Object.freeze({
 		EntryRequests: EntryRequest,
 		GuildStats: GuildStats,
 		Guilds: Guild,
@@ -47,6 +47,10 @@ class DatabaseStore {
 	} as const);
 
 	readonly #_adapter: DatabaseAdapter;
+
+	get conventionsFor(): DatabaseAdapter["conventionsFor"] {
+		return this.#_adapter.conventionsFor.bind(this.#_adapter);
+	}
 
 	get withSession(): <T>(callback: (session: DocumentSession) => Promise<T>) => Promise<T> {
 		return (callback) => this.#_adapter.withSession(callback, { store: this });
@@ -72,9 +76,9 @@ class DatabaseStore {
 		this.#_adapter = adapter;
 	}
 
-	static create(client: Client): DatabaseStore {
+	static create(client: Client, { certificate }: { certificate?: Buffer } = {}): DatabaseStore {
 		let adapter: DatabaseAdapter;
-		switch (client.environment.database) {
+		switch (client.environment.databaseSolution) {
 			case "none": {
 				adapter = new InMemoryAdapter();
 				break;
@@ -84,6 +88,7 @@ class DatabaseStore {
 					host: client.environment.ravendbHost!,
 					port: client.environment.ravendbPort!,
 					database: client.environment.ravendbDatabase!,
+					certificate,
 				});
 				break;
 			}
@@ -95,24 +100,8 @@ class DatabaseStore {
 		return new DatabaseStore(client, { adapter });
 	}
 
-	static getModelClassByCollection({ collection }: { collection: Collection }): { new (data: any): Model } {
+	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {
 		return DatabaseStore.#_classes[collection];
-	}
-
-	static instantiateModel<M extends Model>(payload: RawDocument): M {
-		if (payload["@metadata"]["@collection"] === "@empty") {
-			throw `Document ${payload["@metadata"]["@collection"]} is not part of any collection.`;
-		}
-
-		if (!isValidCollection(payload["@metadata"]["@collection"])) {
-			throw `Document ${payload.id} is part of unknown collection: "${payload["@metadata"]["@collection"]}"`;
-		}
-
-		const Class = DatabaseStore.getModelClassByCollection({
-			collection: payload["@metadata"]["@collection"] as Collection,
-		});
-
-		return new Class(payload) as M;
 	}
 
 	async start(): Promise<void> {

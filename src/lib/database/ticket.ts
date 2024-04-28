@@ -1,5 +1,6 @@
 import { Client } from "logos/client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 type TicketType = "standalone" | "inquiry";
 
@@ -7,7 +8,7 @@ interface TicketFormData {
 	readonly topic: string;
 }
 
-class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
+class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "authorId", "channelId"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -26,21 +27,22 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 
 	isResolved: boolean;
 
-	constructor({
-		createdAt,
-		type,
-		formData,
-		isResolved,
-		...data
-	}: {
-		createdAt?: number;
-		type: TicketType;
-		formData: TicketFormData;
-		isResolved?: boolean;
-	} & MetadataOrIdentifierData<Ticket>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "Tickets" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{
+			createdAt,
+			type,
+			formData,
+			isResolved,
+			...data
+		}: {
+			createdAt?: number;
+			type: TicketType;
+			formData: TicketFormData;
+			isResolved?: boolean;
+		} & IdentifierData<Ticket>,
+	) {
+		super(database, data, { collection: "Tickets" });
 
 		this.createdAt = createdAt ?? Date.now();
 		this.type = type;
@@ -49,7 +51,7 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 	}
 
 	static async getAll(
-		clientOrDatabase: ClientOrDatabase,
+		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Ticket>> },
 	): Promise<Ticket[]> {
 		return await Model.all<Ticket>(clientOrDatabase, {
@@ -62,7 +64,7 @@ class Ticket extends Model<{ idParts: ["guildId", "authorId", "channelId"] }> {
 		client: Client,
 		data: IdentifierData<Ticket> & { type: TicketType; formData: TicketFormData },
 	): Promise<Ticket> {
-		const ticketDocument = new Ticket(data);
+		const ticketDocument = new Ticket(client.database, data);
 
 		await ticketDocument.create(client);
 

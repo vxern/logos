@@ -1,9 +1,13 @@
-import { Model } from "logos/database/model";
+import { Collection } from "logos:constants/database";
+import { Model, ModelConventions } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 
 abstract class DatabaseAdapter {
 	abstract start(): Promise<void>;
+
 	abstract stop(): Promise<void>;
+
+	abstract conventionsFor({ model }: { model: Model }): ModelConventions;
 
 	abstract openSession({ store }: { store: DatabaseStore }): Promise<DocumentSession>;
 
@@ -28,31 +32,29 @@ abstract class DocumentSession {
 		this.#_store = store;
 	}
 
-	abstract load(id: string): Promise<object | undefined | null>;
+	abstract load<M extends Model>(id: string): Promise<M | undefined>;
 	async get<M extends Model>(id: string): Promise<M | undefined> {
-		const result = await this.load(id);
-		if (result == null) {
+		const document = await this.load<M>(id);
+		if (document === undefined) {
 			return undefined;
 		}
 
-		const document = DatabaseStore.instantiateModel(result) as M;
 		this.#_store.cacheDocument(document);
 
 		return document;
 	}
 
-	abstract loadMany(ids: string[]): Promise<(object | undefined | null)[]>;
+	abstract loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
 	async getMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
-		const results = await this.loadMany(ids);
+		const results = await this.loadMany<M>(ids);
 
 		const documents: (M | undefined)[] = [];
-		for (const result of Object.values(results)) {
-			if (result == null) {
+		for (const document of Object.values(results)) {
+			if (document === undefined) {
 				documents.push(undefined);
 				continue;
 			}
 
-			const document = DatabaseStore.instantiateModel(result) as M;
 			this.#_store.cacheDocument(document);
 			documents.push(document);
 		}
@@ -60,7 +62,7 @@ abstract class DocumentSession {
 		return documents;
 	}
 
-	abstract store(object: object): Promise<void>;
+	abstract store<M extends Model>(document: M): Promise<void>;
 	async set<M extends Model>(document: M): Promise<M> {
 		await this.store(document);
 		this.#_store.cacheDocument(document);
@@ -69,12 +71,23 @@ abstract class DocumentSession {
 	}
 
 	async remove<M extends Model>(document: M): Promise<void> {
-		// We don't call `delete()` here because we don't actually delete from the database.
+		// We don't call any methods to delete a document here because we don't actually delete anything from the
+		// database; we merely *mark* documents as deleted.
 
 		this.#_store.unloadDocument(document);
 	}
 
+	abstract query<M extends Model>({ collection }: { collection: Collection }): DocumentQuery<M>;
+
 	abstract dispose(): Promise<void>;
 }
 
-export { DatabaseAdapter, DocumentSession };
+abstract class DocumentQuery<M extends Model> {
+	abstract whereRegex(property: string, pattern: RegExp): DocumentQuery<M>;
+
+	abstract whereEquals(property: string, value: unknown): DocumentQuery<M>;
+
+	abstract execute(): Promise<M[]>;
+}
+
+export { DatabaseAdapter, DocumentSession, DocumentQuery };

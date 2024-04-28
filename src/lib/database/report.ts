@@ -1,5 +1,6 @@
 import { Client } from "logos/client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 interface ReportFormData {
 	readonly reason: string;
@@ -7,7 +8,7 @@ interface ReportFormData {
 	messageLink?: string;
 }
 
-class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
+class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -24,21 +25,18 @@ class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 
 	isResolved: boolean;
 
-	constructor({
-		formData,
-		isResolved,
-		...data
-	}: { formData: ReportFormData; isResolved?: boolean } & MetadataOrIdentifierData<Report>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "Reports" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{ formData, isResolved, ...data }: { formData: ReportFormData; isResolved?: boolean } & IdentifierData<Report>,
+	) {
+		super(database, data, { collection: "Reports" });
 
 		this.formData = formData;
 		this.isResolved = isResolved ?? false;
 	}
 
 	static async getAll(
-		clientOrDatabase: ClientOrDatabase,
+		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Report>> },
 	): Promise<Report[]> {
 		return await Model.all<Report>(clientOrDatabase, {
@@ -51,7 +49,7 @@ class Report extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
 		client: Client,
 		data: Omit<IdentifierData<Report>, "createdAt"> & { formData: ReportFormData },
 	): Promise<Report> {
-		const reportDocument = new Report({ ...data, createdAt: Date.now().toString() });
+		const reportDocument = new Report(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await reportDocument.create(client);
 

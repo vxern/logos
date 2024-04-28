@@ -1,40 +1,47 @@
-import { Collection } from "logos:constants/database";
+// import { Collection } from "logos:constants/database";
 import { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
-import { Model, RawDocument } from "logos/database/model";
+// import { Guild } from "logos/database/guild";
+// import { Model } from "logos/database/model";
 import { ActionLock } from "logos/helpers/action-lock";
 import { GlobalService } from "logos/services/service";
-import { DocumentSessionAdapter } from "logos/stores/database";
-import * as ravendb from "ravendb";
+// import * as ravendb from "ravendb";
 
 class RealtimeUpdateService extends GlobalService {
 	readonly lock: ActionLock;
-	readonly changes: ravendb.IDatabaseChanges;
-	readonly streamSubscription: ravendb.IChangesObservable<ravendb.DocumentChange>;
+	// readonly changes: ravendb.IDatabaseChanges;
+	// readonly streamSubscription: ravendb.IChangesObservable<ravendb.DocumentChange>;
 
 	constructor(client: Client) {
 		super(client, { identifier: "RealtimeUpdateService" });
 
 		this.lock = new ActionLock();
-		this.changes = client.database.changes();
-		this.streamSubscription = this.changes.forDocumentsInCollection("Guilds");
+		/*
+			this.changes = client.database.changes();
+			this.streamSubscription = this.changes.forDocumentsInCollection("Guilds");
+		*/
 	}
 
 	async start(): Promise<void> {
 		this.log.info("Streaming updates...");
 
-		this.streamSubscription.on("data", this.#_receiveGuildConfigurationUpdate);
-		this.streamSubscription.on("error", this.#_handleError);
+		/*
+			this.streamSubscription.on("data", this.#_receiveGuildConfigurationUpdate);
+			this.streamSubscription.on("error", this.#_handleError);
+		*/
 	}
 
 	async stop(): Promise<void> {
 		await this.lock.dispose();
-		this.changes.dispose();
 
-		this.streamSubscription.off("data", this.#_receiveGuildConfigurationUpdate);
-		this.streamSubscription.off("error", this.#_handleError);
+		/*
+			this.changes.dispose();
+
+			this.streamSubscription.off("data", this.#_receiveGuildConfigurationUpdate);
+			this.streamSubscription.off("error", this.#_handleError);
+		*/
 	}
 
+	/*
 	#_receiveGuildConfigurationUpdate = async (data: ravendb.DocumentChange): Promise<void> => {
 		const [_, [guildId]] = Model.getDataFromId<Guild>(data.id);
 
@@ -63,6 +70,7 @@ class RealtimeUpdateService extends GlobalService {
 	#_handleError = (error: Error): void => {
 		this.log.info(`Guild document stream closed: ${error}`);
 	};
+	*/
 }
 
 export { RealtimeUpdateService };

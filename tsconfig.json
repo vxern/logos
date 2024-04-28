@@ -6,6 +6,7 @@
     "moduleDetection": "force",
     "moduleResolution": "Bundler",
     "outDir": "dist/",
+    "skipLibCheck": true,
     "allowJs": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
@@ -38,7 +39,8 @@
       "logos:core/constants/*": ["./?"],
       "logos:core/lib/*": ["./?"],
       "logos:core/index": ["./?"]
-    }
+    },
+    "types": ["bun"]
   },
   "compileOnSave": true,
   "exclude": ["dist/", "node_modules/"],

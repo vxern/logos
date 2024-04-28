@@ -1,11 +1,12 @@
 import { Client } from "logos/client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 interface ResourceFormData {
 	readonly resource: string;
 }
 
-class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
+class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -22,21 +23,18 @@ class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> 
 
 	isResolved: boolean;
 
-	constructor({
-		formData,
-		isResolved,
-		...data
-	}: { formData: ResourceFormData; isResolved?: boolean } & MetadataOrIdentifierData<Resource>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "Resources" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{ formData, isResolved, ...data }: { formData: ResourceFormData; isResolved?: boolean } & IdentifierData<Resource>,
+	) {
+		super(database, data, { collection: "Resources" });
 
 		this.formData = formData;
 		this.isResolved = isResolved ?? false;
 	}
 
 	static async getAll(
-		clientOrDatabase: ClientOrDatabase,
+		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Resource>> },
 	): Promise<Resource[]> {
 		return await Model.all<Resource>(clientOrDatabase, {
@@ -49,7 +47,7 @@ class Resource extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> 
 		client: Client,
 		data: Omit<IdentifierData<Resource>, "createdAt"> & { formData: ResourceFormData },
 	): Promise<Resource> {
-		const resourceDocument = new Resource({ ...data, createdAt: Date.now().toString() });
+		const resourceDocument = new Resource(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await resourceDocument.create(client);
 

@@ -1,11 +1,12 @@
 import { Client } from "logos/client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 interface SuggestionFormData {
 	readonly suggestion: string;
 }
 
-class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }> {
+class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -22,21 +23,22 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }
 
 	isResolved: boolean;
 
-	constructor({
-		formData,
-		isResolved,
-		...data
-	}: { formData: SuggestionFormData; isResolved?: boolean } & MetadataOrIdentifierData<Suggestion>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "Suggestions" }),
-		});
+	constructor(
+		database: DatabaseStore,
+		{
+			formData,
+			isResolved,
+			...data
+		}: { formData: SuggestionFormData; isResolved?: boolean } & IdentifierData<Suggestion>,
+	) {
+		super(database, data, { collection: "Suggestions" });
 
 		this.formData = formData;
 		this.isResolved = isResolved ?? false;
 	}
 
 	static async getAll(
-		clientOrDatabase: ClientOrDatabase,
+		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Suggestion>> },
 	): Promise<Suggestion[]> {
 		return await Model.all<Suggestion>(clientOrDatabase, {
@@ -49,7 +51,7 @@ class Suggestion extends Model<{ idParts: ["guildId", "authorId", "createdAt"] }
 		client: Client,
 		data: Omit<IdentifierData<Suggestion>, "createdAt"> & { formData: SuggestionFormData },
 	): Promise<Suggestion> {
-		const suggestionDocument = new Suggestion({ ...data, createdAt: Date.now().toString() });
+		const suggestionDocument = new Suggestion(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await suggestionDocument.create(client);
 

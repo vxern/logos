@@ -1,7 +1,8 @@
 import { Client } from "logos/client";
-import { ClientOrDatabase, IdentifierData, MetadataOrIdentifierData, Model } from "logos/database/model";
+import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
-class Praise extends Model<{ idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
+class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -20,16 +21,14 @@ class Praise extends Model<{ idParts: ["guildId", "authorId", "targetId", "creat
 
 	comment?: string;
 
-	constructor({ comment, ...data }: { comment?: string } & MetadataOrIdentifierData<Praise>) {
-		super({
-			"@metadata": Model.buildMetadata(data, { collection: "Praises" }),
-		});
+	constructor(database: DatabaseStore, { comment, ...data }: { comment?: string } & IdentifierData<Praise>) {
+		super(database, data, { collection: "Praises" });
 
 		this.comment = comment;
 	}
 
 	static async getAll(
-		clientOrDatabase: ClientOrDatabase,
+		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Praise>> },
 	): Promise<Praise[]> {
 		return await Model.all<Praise>(clientOrDatabase, {
@@ -45,7 +44,7 @@ class Praise extends Model<{ idParts: ["guildId", "authorId", "targetId", "creat
 		client: Client,
 		data: Omit<IdentifierData<Praise>, "createdAt"> & { comment?: string },
 	): Promise<Praise> {
-		const praiseDocument = new Praise({ ...data, createdAt: Date.now().toString() });
+		const praiseDocument = new Praise(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await praiseDocument.create(client);
 
