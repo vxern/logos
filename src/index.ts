@@ -1,59 +1,6 @@
 import * as fs from "node:fs/promises";
 import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "logos:constants/languages";
-import * as dotenv from "dotenv";
 import { Client, Environment } from "logos/client";
-
-async function readDotEnvFile(fileUri: string, isTemplate = false): Promise<Record<string, string> | undefined> {
-	const kind = isTemplate ? "environment template" : "environment";
-
-	let contents: string;
-	try {
-		contents = await fs.readFile(fileUri, { encoding: "utf-8" });
-	} catch (error: unknown) {
-		if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-			console.error(`Missing ${kind} file.`);
-			if (!isTemplate) {
-				return undefined;
-			}
-		}
-
-		console.error(`Unknown error while reading ${kind} file: ${error}`);
-
-		process.exit(1);
-	}
-
-	try {
-		return dotenv.parse(contents);
-	} catch (error) {
-		console.error(`Unknown error while parsing ${kind} file: ${error}`);
-		process.exit(1);
-	}
-}
-
-function readEnvironment({
-	envConfiguration,
-	templateEnvConfiguration,
-}: {
-	envConfiguration: Record<string, string> | undefined;
-	templateEnvConfiguration: Record<string, string>;
-}): void {
-	const requiredKeys = Object.keys(templateEnvConfiguration);
-
-	const presentKeys = Object.keys(envConfiguration !== undefined ? envConfiguration : process.env);
-
-	const missingKeys = requiredKeys.filter((requiredKey) => !presentKeys.includes(requiredKey));
-	if (missingKeys.length !== 0) {
-		throw `Missing one or more required environment variables: ${missingKeys.join(", ")}`;
-	}
-
-	if (envConfiguration === undefined) {
-		return;
-	}
-
-	for (const [key, value] of Object.entries(envConfiguration) as [key: string, value: string][]) {
-		process.env[key] = value;
-	}
-}
 
 const decoder = new TextDecoder();
 
@@ -156,18 +103,15 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 async function setup(): Promise<void> {
 	console.info("[Setup] Setting up...");
 
-	const [envConfiguration, templateEnvConfiguration] = await Promise.all([
-		readDotEnvFile(".env"),
-		readDotEnvFile(".env.example", true),
-	]);
-
-	if (templateEnvConfiguration === undefined) {
-		throw "No template environment file found.";
+	if (process.env.SECRET_DISCORD === undefined) {
+		console.error(
+			"[Setup] Logos cannot start without a Discord token. " +
+				"Make sure you've included one in the environment variables with the key `DISCORD_SECRET`.",
+		);
+		return;
 	}
 
-	readEnvironment({ envConfiguration, templateEnvConfiguration });
-
-	const environmentProvisional: Record<keyof Environment, string | boolean | undefined> = {
+	const environment: Environment = {
 		isDebug: process.env.DEBUG === "true",
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
@@ -184,14 +128,6 @@ async function setup(): Promise<void> {
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
 	};
-
-	for (const [key, value] of Object.entries(environmentProvisional)) {
-		if (value === undefined) {
-			throw `Value for environment variable '${key}' not provided.`;
-		}
-	}
-
-	const environment = environmentProvisional as Environment;
 
 	const localisations = await loadLocalisations("./assets/localisations");
 
