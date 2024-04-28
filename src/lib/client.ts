@@ -23,7 +23,7 @@ import { ServiceStore } from "logos/stores/services";
 
 interface Environment {
 	readonly isDebug?: boolean;
-	readonly discordSecret?: string;
+	readonly discordSecret: string;
 	readonly deeplSecret?: string;
 	readonly rapidApiSecret?: string;
 	readonly databaseSolution?: string;

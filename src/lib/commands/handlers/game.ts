@@ -1,6 +1,7 @@
 import { Locale, getLocaleByLearningLanguage } from "logos:constants/languages";
 import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
+import { SentencePair } from "logos/cache";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { GuildStats } from "logos/database/guild-stats";
@@ -25,7 +26,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	const locale = interaction.locale;
 	const learningLocale = getLocaleByLearningLanguage(interaction.learningLanguage);
 
-	const sentencePairCount = await client.cache.redis.scard(`${learningLocale}:index`);
+	const sentencePairCount = await client.cache.getSentencePairCount({ learningLocale });
 	if (sentencePairCount === 0) {
 		const strings = {
 			title: client.localise("game.strings.noSentencesAvailable.title", locale)(),
@@ -73,7 +74,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	guessButton.onInteraction(async (buttonPress) => {
 		await client.acknowledge(buttonPress);
 
-		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0] === buttonPress.metadata[1]);
+		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
 		const isCorrect = pick === data.sentenceSelection.correctPick;
 
 		await guildStatsDocument.update(client, () => {
@@ -87,7 +88,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		if (isCorrect) {
 			data.sessionScore += 1;
 			data.embedColour = constants.colours.lightGreen;
-			data.sentenceSelection = await getSentenceSelection(client, learningLocale);
+			data.sentenceSelection = await getSentenceSelection(client, { learningLocale });
 
 			await client.editReply(
 				interaction,
@@ -107,7 +108,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		await client.acknowledge(buttonPress);
 
 		data.embedColour = constants.colours.blue;
-		data.sentenceSelection = await getSentenceSelection(client, learningLocale);
+		data.sentenceSelection = await getSentenceSelection(client, { learningLocale });
 
 		await client.editReply(
 			interaction,
@@ -121,7 +122,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	const data: GameData = {
 		guessButton,
 		skipButton,
-		sentenceSelection: await getSentenceSelection(client, learningLocale),
+		sentenceSelection: await getSentenceSelection(client, { learningLocale }),
 		embedColour: constants.colours.blue,
 		sessionScore: 0,
 	};
@@ -200,7 +201,7 @@ async function getGameView(
 
 					let customId: string;
 					if (mode === "hide") {
-						customId = data.guessButton.encodeId([pick[0]]);
+						customId = data.guessButton.encodeId([pick[0].toString()]);
 					} else {
 						customId = InteractionCollector.noneId;
 					}
@@ -234,54 +235,6 @@ async function getGameView(
 			},
 		],
 	};
-}
-
-async function getRandomIds(client: Client, locale: Locale): Promise<string[]> {
-	const pipeline = client.cache.redis.pipeline();
-	for (const _ of Array(constants.PICK_MISSING_WORD_CHOICES).keys()) {
-		pipeline.srandmember(`${locale}:index`);
-	}
-
-	const results = (await pipeline.exec()) ?? undefined;
-	if (results === undefined) {
-		throw "StateError: Failed to get random indexes for sentence pairs.";
-	}
-
-	return results.map((result) => {
-		const [error, index] = result as [Error | null, string | null];
-		if ((error ?? undefined) !== undefined || (index ?? undefined) === undefined) {
-			throw `StateError: Failed to get random index for sentence pair: ${index}`;
-		}
-
-		return index as string;
-	});
-}
-
-/** Represents a pair of a sentence and its translation. */
-interface SentencePair {
-	readonly sentenceId: number;
-	readonly sentence: string;
-	readonly translationId: number;
-	readonly translation: string;
-}
-
-async function getSentencePairById(client: Client, locale: Locale, id: string): Promise<SentencePair> {
-	const pairRaw = await client.cache.redis.get(`${locale}:${id}`).then((sentencePair) => sentencePair ?? undefined);
-	if (pairRaw === undefined) {
-		throw `StateError: Failed to get sentence pair for locale ${locale} and index ${id}.`;
-	}
-
-	const [sentenceId, sentence, translationId, translation] = JSON.parse(pairRaw) as [number, string, number, string];
-	return { sentenceId, sentence, translationId, translation };
-}
-
-async function getSentencePairsByIds(client: Client, locale: Locale, ids: string[]): Promise<SentencePair[]> {
-	const promises: Promise<SentencePair>[] = [];
-	for (const id of ids) {
-		promises.push(getSentencePairById(client, locale, id));
-	}
-
-	return await Promise.all(promises);
 }
 
 function getWords(...sentences: string[]): string[] {
@@ -367,30 +320,25 @@ function camouflageDecoys(likeness: string, decoys: string[]): string[] {
 	return results;
 }
 
-type Selection = [id: string, word: string];
+type Selection = [id: number, word: string];
 interface SentenceSelection {
 	correctPick: Selection;
 	allPicks: Selection[];
 	sentencePair: SentencePair;
 }
 
-async function getSentenceSelection(client: Client, locale: Locale): Promise<SentenceSelection> {
-	// Pick random IDs of sentences to take words from.
-	const ids = await getRandomIds(client, locale);
-	const sentencePairs = await getSentencePairsByIds(client, locale, ids);
+async function getSentenceSelection(
+	client: Client,
+	{ learningLocale }: { learningLocale: Locale },
+): Promise<SentenceSelection> {
+	const sentencePairs = await client.cache.getRandomSentencePairs({
+		learningLocale,
+		count: constants.PICK_MISSING_WORD_CHOICES,
+	});
 
 	const mainSentencePair = sentencePairs.splice(random(sentencePairs.length), 1).at(0);
 	if (mainSentencePair === undefined) {
 		throw "StateError: Failed to select main sentence pair.";
-	}
-	const mainId = ids
-		.splice(
-			ids.findIndex((id) => Number.parseInt(id) === mainSentencePair.sentenceId),
-			1,
-		)
-		.at(0);
-	if (mainId === undefined) {
-		throw "StateError: Failed to select main sentence pair ID.";
 	}
 
 	const mainSentenceWords = Array.from(new Set(getWords(mainSentencePair.sentence)));
@@ -425,15 +373,15 @@ async function getSentenceSelection(client: Client, locale: Locale): Promise<Sen
 
 	const decoys = camouflageDecoys(mainWord, decoysExposed);
 
-	const correctPick: Selection = [mainId, mainWord];
+	const correctPick: Selection = [mainSentencePair.sentenceId, mainWord];
 	const allPicksRaw: Selection[] = [correctPick];
-	for (const index of Array(ids.length).keys()) {
-		const [id, word] = [ids[index], decoys[index]];
-		if (id === undefined || word === undefined) {
+	for (const index of Array(sentencePairs.length).keys()) {
+		const [sentencePair, word] = [sentencePairs[index], decoys[index]];
+		if (sentencePair === undefined || word === undefined) {
 			throw "StateError: Failed to create pick.";
 		}
 
-		allPicksRaw.push([id, word]);
+		allPicksRaw.push([sentencePair.sentenceId, word]);
 	}
 	const allPicks = allPicksRaw
 		.map((pick) => ({ pick, sort: Math.random() }))
