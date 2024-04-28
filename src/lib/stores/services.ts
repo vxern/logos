@@ -224,7 +224,7 @@ class ServiceStore {
 		}
 
 		if (guildDocument.areEnabled("socialFeatures")) {
-			if (guildDocument.isEnabled("music")) {
+			if (guildDocument.isEnabled("music") && client.lavalinkService.isBootstrapped) {
 				const service = new MusicService(client, { guildId });
 				services.push(service);
 

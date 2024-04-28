@@ -12,16 +12,16 @@ class InMemoryAdapter extends DatabaseAdapter {
 		return new InMemoryConventions({ model });
 	}
 
-	async openSession({ store }: { store: DatabaseStore }): Promise<InMemoryDocumentSession> {
-		return new InMemoryDocumentSession({ store });
+	async openSession({ database }: { database: DatabaseStore }): Promise<InMemoryDocumentSession> {
+		return new InMemoryDocumentSession({ database });
 	}
 }
 
 class InMemoryDocumentSession extends DocumentSession {
 	readonly #_documents: Record<Collection, Map<string, Model>>;
 
-	constructor({ store }: { store: DatabaseStore }) {
-		super({ store });
+	constructor({ database }: { database: DatabaseStore }) {
+		super({ database });
 
 		this.#_documents = Object.fromEntries(
 			constants.database.collections.map((collection) => [collection, new Map()]),

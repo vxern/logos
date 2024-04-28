@@ -399,7 +399,7 @@ class CommandStore {
 				commands.push(this.commands.cefr);
 			}
 
-			if (guildDocument.isEnabled("game")) {
+			if (guildDocument.isEnabled("game") && this.#client.cache.isBootstrapped) {
 				commands.push(this.commands.game);
 			}
 
@@ -464,7 +464,7 @@ class CommandStore {
 		}
 
 		if (guildDocument.areEnabled("socialFeatures")) {
-			if (guildDocument.isEnabled("music")) {
+			if (guildDocument.isEnabled("music") && this.#client.lavalinkService.isBootstrapped) {
 				commands.push(this.commands.music);
 			}
 

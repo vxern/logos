@@ -20,12 +20,20 @@ interface GoogleTranslationResult {
 class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> {
 	constructor(client: Client) {
 		super(client, { identifier: "GoogleTranslate" });
+
+		if (client.environment.rapidApiSecret === undefined) {
+			this.log.warn("`SECRET_RAPID_API` was not provided. Logos will run without a Google Translate integration.");
+		}
 	}
 
 	async translate({
 		text,
 		languages,
 	}: { text: string; languages: Languages<GoogleTranslateLanguage> }): Promise<TranslationResult | undefined> {
+		if (this.client.environment.rapidApiSecret === undefined) {
+			return undefined;
+		}
+
 		const sourceLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.source);
 		const targetLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.target);
 

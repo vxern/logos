@@ -11,12 +11,20 @@ import { Client } from "logos/client";
 class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 	constructor(client: Client) {
 		super(client, { identifier: "DeepL" });
+
+		if (client.environment.deeplSecret === undefined) {
+			this.log.warn("`SECRET_DEEPL` was not provided. Logos will run without a DeepL integration.");
+		}
 	}
 
 	async translate({
 		text,
 		languages,
 	}: { text: string; languages: Languages<DeepLLanguage> }): Promise<TranslationResult | undefined> {
+		if (this.client.environment.deeplSecret === undefined) {
+			return undefined;
+		}
+
 		const sourceLocaleComplete = getDeepLLocaleByTranslationLanguage(languages.source);
 		const targetLocale = getDeepLLocaleByTranslationLanguage(languages.target);
 
@@ -67,10 +75,9 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 			return undefined;
 		}
 
-		const detectedSourceLanguage =
-			detectedSourceLocale === undefined || !isDeepLLocale(detectedSourceLocale)
-				? undefined
-				: getDeepLTranslationLanguageByLocale(detectedSourceLocale);
+		const detectedSourceLanguage = !isDeepLLocale(detectedSourceLocale)
+			? undefined
+			: getDeepLTranslationLanguageByLocale(detectedSourceLocale);
 
 		return { detectedSourceLanguage, text: translation.text };
 	}

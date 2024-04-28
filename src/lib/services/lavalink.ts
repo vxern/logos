@@ -70,11 +70,33 @@ class ClientConnector extends shoukaku.Connector {
 }
 
 class LavalinkService extends GlobalService {
-	readonly connector: ClientConnector;
-	readonly manager: shoukaku.Shoukaku;
+	readonly isBootstrapped: boolean;
+
+	readonly #_connector?: ClientConnector;
+	readonly #_manager?: shoukaku.Shoukaku;
+
+	get connector(): ClientConnector {
+		return this.#_connector!;
+	}
+
+	get manager(): shoukaku.Shoukaku {
+		return this.#_manager!;
+	}
 
 	constructor(client: Client) {
 		super(client, { identifier: "LavalinkService" });
+
+		if (
+			client.environment.lavalinkHost === undefined ||
+			client.environment.lavalinkPort === undefined ||
+			client.environment.lavalinkPassword === undefined
+		) {
+			this.log.warn(
+				"One or more of `LAVALINK_HOST`, `LAVALINK_PORT` or `LAVALINK_PASSWORD` have not been provided. Logos will not serve audio sessions.",
+			);
+			this.isBootstrapped = false;
+			return;
+		}
 
 		const nodes: shoukaku.NodeOption[] = [
 			{
@@ -84,8 +106,8 @@ class LavalinkService extends GlobalService {
 			},
 		];
 
-		this.connector = new ClientConnector(client, { nodes });
-		this.manager = new shoukaku.Shoukaku(this.connector, nodes, {
+		this.#_connector = new ClientConnector(client, { nodes });
+		this.#_manager = new shoukaku.Shoukaku(this.#_connector, nodes, {
 			resume: true,
 			resumeTimeout: constants.time.minute / 1000,
 			resumeByLibrary: true,
@@ -94,10 +116,15 @@ class LavalinkService extends GlobalService {
 			restTimeout: (5 * constants.time.second) / 1000,
 			userAgent: constants.USER_AGENT,
 		});
-		this.manager.setMaxListeners(0);
+		this.#_manager.setMaxListeners(0);
+		this.isBootstrapped = true;
 	}
 
 	async start(): Promise<void> {
+		if (!this.isBootstrapped) {
+			return;
+		}
+
 		this.manager.on("error", (_, error) => {
 			if (error.message.includes("ECONNREFUSED")) {
 				return;
@@ -118,6 +145,10 @@ class LavalinkService extends GlobalService {
 	}
 
 	async stop(): Promise<void> {
+		if (!this.isBootstrapped) {
+			return;
+		}
+
 		this.manager.removeAllListeners();
 
 		for (const player of Object.values(this.manager.players) as shoukaku.Player[]) {

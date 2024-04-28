@@ -5,7 +5,7 @@ import { DatabaseStore } from "logos/stores/database";
 import * as ravendb from "ravendb";
 
 class RavenDBAdapter extends DatabaseAdapter {
-	readonly #_store: ravendb.DocumentStore;
+	readonly #_database: ravendb.DocumentStore;
 
 	constructor({
 		host,
@@ -17,28 +17,28 @@ class RavenDBAdapter extends DatabaseAdapter {
 
 		const hostWithPort = `${host}:${port}`;
 		if (certificate !== undefined) {
-			this.#_store = new ravendb.DocumentStore(hostWithPort, database, { certificate, type: "pfx" });
+			this.#_database = new ravendb.DocumentStore(hostWithPort, database, { certificate, type: "pfx" });
 		} else {
-			this.#_store = new ravendb.DocumentStore(hostWithPort, database);
+			this.#_database = new ravendb.DocumentStore(hostWithPort, database);
 		}
 	}
 
 	async start(): Promise<void> {
-		this.#_store.initialize();
+		this.#_database.initialize();
 	}
 
 	async stop(): Promise<void> {
-		this.#_store.dispose();
+		this.#_database.dispose();
 	}
 
 	conventionsFor({ model }: { model: Model }): ModelConventions {
 		return new RavenDBModelConventions({ model });
 	}
 
-	async openSession({ store }: { store: DatabaseStore }): Promise<RavenDBDocumentSession> {
-		const rawSession = this.#_store.openSession();
+	async openSession({ database }: { database: DatabaseStore }): Promise<RavenDBDocumentSession> {
+		const rawSession = this.#_database.openSession();
 
-		return new RavenDBDocumentSession({ store, session: rawSession });
+		return new RavenDBDocumentSession({ database, session: rawSession });
 	}
 }
 
@@ -59,8 +59,8 @@ interface RavenDBDocumentMetadata {
 class RavenDBDocumentSession extends DocumentSession {
 	readonly #_session: ravendb.IDocumentSession;
 
-	constructor({ store, session }: { store: DatabaseStore; session: ravendb.IDocumentSession }) {
-		super({ store });
+	constructor({ database, session }: { database: DatabaseStore; session: ravendb.IDocumentSession }) {
+		super({ database });
 
 		this.#_session = session;
 
@@ -75,7 +75,7 @@ class RavenDBDocumentSession extends DocumentSession {
 			return undefined;
 		}
 
-		return RavenDBModelConventions.instantiateModel<M>(rawDocument as RavenDBDocument);
+		return RavenDBModelConventions.instantiateModel<M>(this.database, rawDocument as RavenDBDocument);
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
@@ -87,7 +87,7 @@ class RavenDBDocumentSession extends DocumentSession {
 				continue;
 			}
 
-			documents.push(RavenDBModelConventions.instantiateModel<M>(rawDocument as RavenDBDocument));
+			documents.push(RavenDBModelConventions.instantiateModel<M>(this.database, rawDocument as RavenDBDocument));
 		}
 
 		return documents;
@@ -136,7 +136,7 @@ class RavenDBModelConventions extends ModelConventions<RavenDBDocumentMetadataCo
 		return this.model["@metadata"]["@collection"];
 	}
 
-	static instantiateModel<M extends Model>(payload: RavenDBDocument): M {
+	static instantiateModel<M extends Model>(database: DatabaseStore, payload: RavenDBDocument): M {
 		if (!isValidCollection(payload["@metadata"]["@collection"])) {
 			throw `Document ${payload.id} is part of an unknown collection: "${payload["@metadata"]["@collection"]}"`;
 		}
@@ -145,7 +145,7 @@ class RavenDBModelConventions extends ModelConventions<RavenDBDocumentMetadataCo
 			collection: payload["@metadata"]["@collection"] as Collection,
 		});
 
-		return new Class(payload) as M;
+		return new Class(database, payload) as M;
 	}
 
 	hasMetadata(data: IdentifierDataOrMetadata<Model, RavenDBDocumentMetadataContainer>): boolean {

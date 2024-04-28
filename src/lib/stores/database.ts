@@ -53,7 +53,7 @@ class DatabaseStore {
 	}
 
 	get withSession(): <T>(callback: (session: DocumentSession) => Promise<T>) => Promise<T> {
-		return (callback) => this.#_adapter.withSession(callback, { store: this });
+		return (callback) => this.#_adapter.withSession(callback, { database: this });
 	}
 
 	private constructor(client: Client, { adapter }: { adapter: DatabaseAdapter }) {
@@ -79,21 +79,38 @@ class DatabaseStore {
 	static create(client: Client, { certificate }: { certificate?: Buffer } = {}): DatabaseStore {
 		let adapter: DatabaseAdapter;
 		switch (client.environment.databaseSolution) {
-			case "none": {
-				adapter = new InMemoryAdapter();
-				break;
-			}
 			case "ravendb": {
+				if (
+					client.environment.ravendbHost === undefined ||
+					client.environment.ravendbPort === undefined ||
+					client.environment.ravendbDatabase === undefined
+				) {
+					client.log.error(
+						"One or more of `RAVENDB_HOST`, `RAVENDB_PORT` or `RAVENDB_DATABASE` have not been provided. Logos will run in memory.",
+					);
+					adapter = new InMemoryAdapter();
+					break;
+				}
+
 				adapter = new RavenDBAdapter({
-					host: client.environment.ravendbHost!,
-					port: client.environment.ravendbPort!,
-					database: client.environment.ravendbDatabase!,
+					host: client.environment.ravendbHost,
+					port: client.environment.ravendbPort,
+					database: client.environment.ravendbDatabase,
 					certificate,
 				});
 				break;
 			}
 			default: {
-				throw "The `DATABASE` environment variable is invalid or missing.";
+				if (client.environment.databaseSolution === undefined) {
+					client.log.error(
+						"`DATABASE_SOLUTION` was not provided. Logos will run in memory. If this was intentional, explicitly define `DATABASE_SOLUTION` as 'none'.",
+					);
+				}
+
+				client.log.info("Logos is running in memory. Data will not persist in-between sessions.");
+
+				adapter = new InMemoryAdapter();
+				break;
 			}
 		}
 

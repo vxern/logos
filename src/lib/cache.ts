@@ -12,6 +12,8 @@ interface SentencePair {
 type SentencePairEncoded = [sentenceId: number, sentence: string, translationId: number, translation: string];
 
 class Cache {
+	readonly isBootstrapped: boolean;
+
 	readonly #log: Logger;
 
 	readonly #_redis?: Redis;
@@ -25,8 +27,9 @@ class Cache {
 
 		if (client.environment.redisHost === undefined || client.environment.redisPort === undefined) {
 			this.#log.warn(
-				"Either `REDIS_HOST` and `REDIS_PORT` has not been provided. Logos will run without a Redis connection.",
+				"One of `REDIS_HOST` or `REDIS_PORT` have not been provided. Logos will run without a Redis integration.",
 			);
+			this.isBootstrapped = false;
 			return;
 		}
 
@@ -37,10 +40,11 @@ class Cache {
 			reconnectOnError: (_) => true,
 			lazyConnect: true,
 		});
+		this.isBootstrapped = true;
 	}
 
 	async start(): Promise<void> {
-		if (this.#_redis === undefined) {
+		if (!this.isBootstrapped) {
 			return;
 		}
 
@@ -48,7 +52,7 @@ class Cache {
 	}
 
 	stop(): void {
-		if (this.#_redis === undefined) {
+		if (!this.isBootstrapped) {
 			return;
 		}
 

@@ -9,13 +9,13 @@ abstract class DatabaseAdapter {
 
 	abstract conventionsFor({ model }: { model: Model }): ModelConventions;
 
-	abstract openSession({ store }: { store: DatabaseStore }): Promise<DocumentSession>;
+	abstract openSession({ database }: { database: DatabaseStore }): Promise<DocumentSession>;
 
 	async withSession<T>(
 		callback: (session: DocumentSession) => Promise<T>,
-		{ store }: { store: DatabaseStore },
+		{ database }: { database: DatabaseStore },
 	): Promise<T> {
-		const session = await this.openSession({ store });
+		const session = await this.openSession({ database });
 
 		const result = await callback(session);
 
@@ -26,10 +26,10 @@ abstract class DatabaseAdapter {
 }
 
 abstract class DocumentSession {
-	readonly #_store: DatabaseStore;
+	readonly database: DatabaseStore;
 
-	constructor({ store }: { store: DatabaseStore }) {
-		this.#_store = store;
+	constructor({ database }: { database: DatabaseStore }) {
+		this.database = database;
 	}
 
 	abstract load<M extends Model>(id: string): Promise<M | undefined>;
@@ -39,7 +39,7 @@ abstract class DocumentSession {
 			return undefined;
 		}
 
-		this.#_store.cacheDocument(document);
+		this.database.cacheDocument(document);
 
 		return document;
 	}
@@ -55,7 +55,7 @@ abstract class DocumentSession {
 				continue;
 			}
 
-			this.#_store.cacheDocument(document);
+			this.database.cacheDocument(document);
 			documents.push(document);
 		}
 
@@ -65,7 +65,7 @@ abstract class DocumentSession {
 	abstract store<M extends Model>(document: M): Promise<void>;
 	async set<M extends Model>(document: M): Promise<M> {
 		await this.store(document);
-		this.#_store.cacheDocument(document);
+		this.database.cacheDocument(document);
 
 		return document;
 	}
@@ -74,7 +74,7 @@ abstract class DocumentSession {
 		// We don't call any methods to delete a document here because we don't actually delete anything from the
 		// database; we merely *mark* documents as deleted.
 
-		this.#_store.unloadDocument(document);
+		this.database.unloadDocument(document);
 	}
 
 	abstract query<M extends Model>({ collection }: { collection: Collection }): DocumentQuery<M>;
