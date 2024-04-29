@@ -151,12 +151,11 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 
 abstract class ModelConventions<Metadata = any> {
 	readonly model: Model & Metadata;
+	collection!: Collection;
 	partialId!: string;
 	idParts!: string[];
 
 	abstract get id(): string;
-
-	abstract get collection(): Collection;
 
 	constructor({ model }: { model: Model }) {
 		this.model = model as Model & Metadata;
@@ -175,6 +174,7 @@ abstract class ModelConventions<Metadata = any> {
 		const partialId = Model.buildPartialId(data as IdentifierData<Model>);
 		Object.assign(this.model, this.buildMetadata({ id: Model.composeId(partialId, { collection }), collection }));
 
+		this.collection = collection;
 		this.partialId = partialId;
 		this.idParts = partialId.split(constants.special.database.separator);
 	}

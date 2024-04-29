@@ -42,10 +42,6 @@ class RavenDBAdapter extends DatabaseAdapter {
 	}
 }
 
-interface RavenDBDocument extends RavenDBDocumentMetadataContainer {
-	[key: string]: unknown;
-}
-
 interface RavenDBDocumentMetadataContainer {
 	"@metadata": RavenDBDocumentMetadata;
 }
@@ -56,6 +52,10 @@ interface RavenDBDocumentMetadata {
 	"@is-deleted"?: boolean;
 }
 
+interface RavenDBDocument extends RavenDBDocumentMetadataContainer {
+	[key: string]: unknown;
+}
+
 class RavenDBDocumentSession extends DocumentSession {
 	readonly #_session: ravendb.IDocumentSession;
 
@@ -64,8 +64,7 @@ class RavenDBDocumentSession extends DocumentSession {
 
 		this.#_session = session;
 
-		// ! This logic needs to be turned off as Logos performs model operations and conversions on its own.
-		// ! The following line prevents the RavenDB client from trying to convert raw documents to an entity.
+		// ! The following line prevents the RavenDB client from trying to convert raw documents to an entity by itself.
 		this.#_session.advanced.entityToJson.convertToEntity = (_, __, document, ___) => document;
 	}
 
@@ -106,7 +105,7 @@ class RavenDBDocumentSession extends DocumentSession {
 }
 
 class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
-	readonly #_query: ravendb.IDocumentQuery<M>;
+	#_query: ravendb.IDocumentQuery<M>;
 
 	constructor({ query }: { query: ravendb.IDocumentQuery<M> }) {
 		super();
@@ -115,14 +114,17 @@ class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}
 
 	whereRegex(property: string, pattern: RegExp): RavenDBDocumentQuery<M> {
-		return new RavenDBDocumentQuery({ query: this.#_query.whereRegex(property, pattern.toString()) });
+		this.#_query = this.#_query.whereRegex(property, pattern.toString());
+		return this;
 	}
 
 	whereEquals(property: string, value: unknown): RavenDBDocumentQuery<M> {
-		return new RavenDBDocumentQuery<M>({ query: this.#_query.whereEquals(property, value) });
+		this.#_query = this.#_query.whereEquals(property, value);
+		return this;
 	}
 
 	async execute(): Promise<M[]> {
+		// TODO(vxern): Instantiate models.
 		return await this.#_query.all();
 	}
 }
@@ -132,20 +134,16 @@ class RavenDBModelConventions extends ModelConventions<RavenDBDocumentMetadataCo
 		return this.model["@metadata"]["@id"];
 	}
 
-	get collection(): Collection {
-		return this.model["@metadata"]["@collection"];
-	}
-
 	static instantiateModel<M extends Model>(database: DatabaseStore, payload: RavenDBDocument): M {
 		if (!isValidCollection(payload["@metadata"]["@collection"])) {
 			throw `Document ${payload.id} is part of an unknown collection: "${payload["@metadata"]["@collection"]}"`;
 		}
 
-		const Model = DatabaseStore.getModelClassByCollection({
+		const ModelClass = DatabaseStore.getModelClassByCollection({
 			collection: payload["@metadata"]["@collection"] as Collection,
 		});
 
-		return new Model(database, payload) as M;
+		return new ModelClass(database, payload) as M;
 	}
 
 	hasMetadata(data: IdentifierDataOrMetadata<Model, RavenDBDocumentMetadataContainer>): boolean {

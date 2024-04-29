@@ -50,7 +50,7 @@ class InMemoryDocumentSession extends DocumentSession {
 }
 
 class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
-	readonly #_documents: Map<string, M>;
+	#_documents: Map<string, M>;
 
 	constructor({ documents }: { documents: Map<string, M> }) {
 		super();
@@ -66,7 +66,8 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 			}
 		}
 
-		return new InMemoryDocumentQuery({ documents: newDocuments });
+		this.#_documents = newDocuments;
+		return this;
 	}
 
 	whereRegex(property: string, pattern: RegExp): InMemoryDocumentQuery<M> {
@@ -86,7 +87,8 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 			}
 		}
 
-		return new InMemoryDocumentQuery({ documents: newDocuments });
+		this.#_documents = newDocuments;
+		return this;
 	}
 
 	#_whereIdEquals(value: unknown): InMemoryDocumentQuery<M> {
@@ -97,7 +99,8 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 			}
 		}
 
-		return new InMemoryDocumentQuery({ documents: newDocuments });
+		this.#_documents = newDocuments;
+		return this;
 	}
 
 	whereEquals(property: string, value: unknown): InMemoryDocumentQuery<M> {
@@ -116,7 +119,8 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 			}
 		}
 
-		return new InMemoryDocumentQuery({ documents: newDocuments });
+		this.#_documents = newDocuments;
+		return this;
 	}
 
 	async execute(): Promise<M[]> {
@@ -126,7 +130,6 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 
 interface InMemoryMetadata {
 	readonly _id: string;
-	readonly _collection: Collection;
 	_isDeleted?: boolean;
 }
 
@@ -135,16 +138,12 @@ class InMemoryConventions extends ModelConventions<InMemoryMetadata> {
 		return this.model._id;
 	}
 
-	get collection(): Collection {
-		return this.model._collection;
-	}
-
 	hasMetadata(data: IdentifierDataOrMetadata<Model, InMemoryMetadata>): boolean {
 		return "_id" in data;
 	}
 
-	buildMetadata({ id, collection }: { id: string; collection: Collection }): InMemoryMetadata {
-		return { _id: id, _collection: collection };
+	buildMetadata({ id, collection: _ }: { id: string; collection: Collection }): InMemoryMetadata {
+		return { _id: id };
 	}
 
 	markDeleted(): void {
