@@ -94,7 +94,7 @@ class CouchDBDocumentSession extends DocumentSession {
 class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
     readonly #_documents: nano.DocumentScope<unknown>;
     readonly #_session: CouchDBDocumentSession;
-    #_query: nano.MangoQuery;
+    readonly #_query: nano.MangoQuery;
 
     constructor({ documents, session }: { documents: nano.DocumentScope<unknown>; session: CouchDBDocumentSession }) {
         super();
@@ -105,12 +105,12 @@ class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
     }
 
     whereRegex(property: string, pattern: RegExp): CouchDBDocumentQuery<M> {
-        Object.assign(this.#_query.selector, { [property]: { $regex: pattern }});
+        Object.assign(this.#_query.selector, { [property === "id" ? "_id" : property]: { $regex: pattern }});
         return this;
     }
 
     whereEquals(property: string, value: unknown): CouchDBDocumentQuery<M> {
-        Object.assign(this.#_query.selector, { [property]: { $eq: value }});
+        Object.assign(this.#_query.selector, { [property === "id" ? "_id" : property]: { $eq: value }});
         return this;
     }
 
