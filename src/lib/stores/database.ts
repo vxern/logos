@@ -15,6 +15,7 @@ import { Ticket } from "logos/database/ticket";
 import { User } from "logos/database/user";
 import { Warning } from "logos/database/warning";
 import { Logger } from "logos/logger";
+import {CouchDBAdapter} from "logos/adapters/databases/couchdb";
 
 class DatabaseStore {
 	readonly cache: {
@@ -97,6 +98,29 @@ class DatabaseStore {
 					port: client.environment.ravendbPort,
 					database: client.environment.ravendbDatabase,
 					certificate,
+				});
+				break;
+			}
+			case "couchdb": {
+				if (
+					client.environment.couchdbHost === undefined ||
+					client.environment.couchdbPort === undefined ||
+					client.environment.couchdbDatabase === undefined
+				) {
+					client.log.error(
+						"One or more of `COUCHDB_HOST`, `COUCHDB_PORT` or `COUCHDB_DATABASE` have not been provided. Logos will run in memory.",
+					);
+					adapter = new InMemoryAdapter();
+					break;
+				}
+
+				adapter = new CouchDBAdapter({
+					username: client.environment.couchdbUsername,
+					password: client.environment.couchdbPassword,
+					protocol: client.environment.couchdbProtocol,
+					host: client.environment.couchdbHost,
+					port: client.environment.couchdbPort,
+					database: client.environment.couchdbDatabase,
 				});
 				break;
 			}

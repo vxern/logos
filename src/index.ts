@@ -123,6 +123,7 @@ async function setup(): Promise<void> {
 		ravendbSecure: process.env.RAVENDB_SECURE === "true",
 		couchdbUsername: process.env.COUCHDB_USERNAME,
 		couchdbPassword: process.env.COUCHDB_PASSWORD,
+		couchdbProtocol: process.env.COUCHDB_PROTOCOL,
 		couchdbHost: process.env.COUCHDB_HOST,
 		couchdbPort: process.env.COUCHDB_PORT,
 		couchdbDatabase: process.env.COUCHDB_DATABASE,

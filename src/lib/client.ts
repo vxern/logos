@@ -33,6 +33,7 @@ interface Environment {
 	readonly ravendbSecure?: boolean;
 	readonly couchdbUsername?: string;
 	readonly couchdbPassword?: string;
+	readonly couchdbProtocol?: string;
 	readonly couchdbHost?: string;
 	readonly couchdbPort?: string;
 	readonly couchdbDatabase?: string;

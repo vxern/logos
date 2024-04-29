@@ -10,21 +10,24 @@ class CouchDBAdapter extends DatabaseAdapter {
     constructor({
         username,
         password,
+        protocol,
         host,
         port,
         database,
-    }: { username?: string; password?: string; host: string; port: string; database: string }) {
+    }: { username?: string; password?: string; protocol?: string; host: string; port: string; database: string }) {
         super();
+
+        protocol ??= "http";
 
         let url: string;
         if (username !== undefined) {
             if (password !== undefined) {
-                url = `${username}:${password}@${host}:${port}`;
+                url = `${protocol}://${username}:${password}@${host}:${port}`;
             } else {
-                url = `${username}@${host}:${port}`;
+                url = `${protocol}://${username}@${host}:${port}`;
             }
         } else {
-            url = `${host}:${port}`;
+            url = `${protocol}://${host}:${port}`;
         }
 
         const server = nano({ url, requestDefaults: { agent: constants.USER_AGENT } });
@@ -60,27 +63,38 @@ class CouchDBDocumentSession extends DocumentSession {
     }
 
     async load<M extends Model>(id: string): Promise<M | undefined> {
-        const rawDocument = await this.#_documents.get(id);
+        const rawDocument = await this.#_documents.get(id).catch(() => undefined);
+        if (rawDocument === undefined) {
+            return undefined;
+        }
 
         return CouchDBModelConventions.instantiateModel<M>(this.database, rawDocument as CouchDBDocumentMetadata);
     }
 
     async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
+        const response = await this.#_documents.fetch({ keys: ids }, { conflicts: false, include_docs: true }).catch(() => undefined);
+        if (response === undefined) {
+            return [];
+        }
+
         const documents: (M | undefined)[] = [];
-        const rawDocuments = await this.#_documents.fetch({ keys: ids }, { conflicts: false, include_docs: true });
-        for (const rawDocument of Object.values(rawDocuments)) {
-            if (rawDocument === null) {
+        for (const result of response.rows) {
+            if (result.error !== undefined) {
                 documents.push(undefined);
                 continue;
             }
 
-            documents.push(CouchDBModelConventions.instantiateModel<M>(this.database, rawDocument as CouchDBDocument));
+            const row = result as nano.DocumentResponseRow<CouchDBDocument>;
+            const rowDocument = row.doc!;
+
+            documents.push(CouchDBModelConventions.instantiateModel<M>(this.database, rowDocument));
         }
 
         return documents;
     }
 
     async store<M extends Model>(document: M): Promise<void> {
+        // TODO(vxern): Need to pass in the document revision here, otherwise it will throw.
         await this.#_documents.insert(document as unknown as nano.IdentifiedDocument);
     }
 
@@ -105,7 +119,7 @@ class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
     }
 
     whereRegex(property: string, pattern: RegExp): CouchDBDocumentQuery<M> {
-        Object.assign(this.#_query.selector, { [property === "id" ? "_id" : property]: { $regex: pattern }});
+        Object.assign(this.#_query.selector, { [property === "id" ? "_id" : property]: { $regex: pattern.toString() }});
         return this;
     }
 
