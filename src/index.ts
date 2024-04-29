@@ -106,7 +106,7 @@ async function setup(): Promise<void> {
 	if (process.env.SECRET_DISCORD === undefined) {
 		console.error(
 			"[Setup] Logos cannot start without a Discord token. " +
-				"Make sure you've included one in the environment variables with the key `DISCORD_SECRET`.",
+				"Make sure you've included one in the environment variables with the key `SECRET_DISCORD`.",
 		);
 		return;
 	}
@@ -132,7 +132,7 @@ async function setup(): Promise<void> {
 	const localisations = await loadLocalisations("./assets/localisations");
 
 	let certificate: Buffer | undefined;
-	if (environment.ravendbSecure) {
+	if (environment.databaseSolution === "ravendb" && environment.ravendbSecure) {
 		certificate = await fs.readFile(".cert.pfx");
 	}
 
