@@ -97,20 +97,24 @@ class RavenDBDocumentSession extends DocumentSession {
 		await this.#_session.saveChanges();
 	}
 
-	query<M extends Model>({ collection }: { collection: Collection }): RavenDBDocumentQuery<M> {
-		return new RavenDBDocumentQuery<M>({ query: this.#_session.query<M>({ collection }) });
+	query<M extends Model>(_: { collection: Collection }): RavenDBDocumentQuery<M> {
+		return new RavenDBDocumentQuery<M>({ database: this.database, session: this.#_session });
 	}
 
 	async dispose(): Promise<void> {}
 }
 
 class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
-	#_query: ravendb.IDocumentQuery<M>;
+	readonly #_database: DatabaseStore;
+	readonly #_session: ravendb.IDocumentSession;
+	#_query: ravendb.IDocumentQuery<RavenDBDocument>;
 
-	constructor({ query }: { query: ravendb.IDocumentQuery<M> }) {
+	constructor({ database, session }: { database: DatabaseStore, session: ravendb.IDocumentSession }) {
 		super();
 
-		this.#_query = query;
+		this.#_database = database;
+		this.#_session = session;
+		this.#_query = this.#_session.query({});
 	}
 
 	whereRegex(property: string, pattern: RegExp): RavenDBDocumentQuery<M> {
@@ -124,8 +128,8 @@ class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}
 
 	async execute(): Promise<M[]> {
-		// TODO(vxern): Instantiate models.
-		return await this.#_query.all();
+		const rawDocuments = await this.#_query.all();
+		return rawDocuments.map((document) => RavenDBModelConventions.instantiateModel(this.#_database, document));
 	}
 }
 

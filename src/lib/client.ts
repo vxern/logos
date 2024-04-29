@@ -31,6 +31,11 @@ interface Environment {
 	readonly ravendbPort?: string;
 	readonly ravendbDatabase?: string;
 	readonly ravendbSecure?: boolean;
+	readonly couchdbUsername?: string;
+	readonly couchdbPassword?: string;
+	readonly couchdbHost?: string;
+	readonly couchdbPort?: string;
+	readonly couchdbDatabase?: string;
 	readonly redisHost?: string;
 	readonly redisPort?: string;
 	readonly redisPassword?: string;
