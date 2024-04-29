@@ -15,11 +15,11 @@ class RavenDBAdapter extends DatabaseAdapter {
 	}: { database: string; host: string; port: string; certificate?: Buffer }) {
 		super();
 
-		const hostWithPort = `${host}:${port}`;
+		const url = `${host}:${port}`;
 		if (certificate !== undefined) {
-			this.#_database = new ravendb.DocumentStore(hostWithPort, database, { certificate, type: "pfx" });
+			this.#_database = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
 		} else {
-			this.#_database = new ravendb.DocumentStore(hostWithPort, database);
+			this.#_database = new ravendb.DocumentStore(url, database);
 		}
 	}
 
@@ -141,11 +141,11 @@ class RavenDBModelConventions extends ModelConventions<RavenDBDocumentMetadataCo
 			throw `Document ${payload.id} is part of an unknown collection: "${payload["@metadata"]["@collection"]}"`;
 		}
 
-		const Class = DatabaseStore.getModelClassByCollection({
+		const Model = DatabaseStore.getModelClassByCollection({
 			collection: payload["@metadata"]["@collection"] as Collection,
 		});
 
-		return new Class(database, payload) as M;
+		return new Model(database, payload) as M;
 	}
 
 	hasMetadata(data: IdentifierDataOrMetadata<Model, RavenDBDocumentMetadataContainer>): boolean {
