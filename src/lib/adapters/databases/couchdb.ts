@@ -34,7 +34,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 			url = `${protocol}://${host}:${port}`;
 		}
 
-		const server = nano({ url, requestDefaults: { agent: constants.USER_AGENT } });
+		const server = nano({ url, requestDefaults: { agent: constants.USER_AGENT, headers: { "User-Agent": constants.USER_AGENT} } });
 		this.#_documents = server.db.use(database);
 	}
 
@@ -70,8 +70,11 @@ class CouchDBDocumentSession extends DocumentSession {
 	}
 
 	async load<M extends Model>(id: string): Promise<M | undefined> {
-		const rawDocument = await this.#_documents.get(id).catch((reason) => {
-			this.log.error(`Failed to get object: ${reason}`);
+		const rawDocument = await this.#_documents.get(id).catch((error) => {
+			if (error.statusCode !== 404) {
+				this.log.error(`Failed to get document ${id}: ${error}`);
+			}
+
 			return undefined;
 		});
 		if (rawDocument === undefined) {
@@ -82,10 +85,14 @@ class CouchDBDocumentSession extends DocumentSession {
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
+		if (ids.length === 0) {
+			return [];
+		}
+
 		const response = await this.#_documents
 			.fetch({ keys: ids }, { conflicts: false, include_docs: true })
-			.catch((reason) => {
-				this.log.error(`Failed to get multiple objects: ${reason}`);
+			.catch((error) => {
+				this.log.error(`Failed to get ${ids.length} documents: ${error}`);
 				return undefined;
 			});
 		if (response === undefined) {
@@ -110,8 +117,15 @@ class CouchDBDocumentSession extends DocumentSession {
 
 	async store<M extends Model>(document: M): Promise<void> {
 		const result = await this.#_documents.insert(document as unknown as nano.IdentifiedDocument, { rev: document.revision })
-			.catch((reason) => {
-				this.log.error(`Failed to store object: ${reason}`);
+			.catch((error) => {
+				// Conflict during insertion. This happens when a document is attempted to be saved twice at the same
+				// time.
+				if (error.statusCode === 409) {
+					this.log.debug(`Encountered conflict when saving document ${document.id}. Ignoring...`);
+					return undefined;
+				}
+
+				this.log.error(`Failed to store document ${document.id}: ${error}`);
 				return undefined;
 			});
 		if (result === undefined) {

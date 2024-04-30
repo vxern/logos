@@ -85,7 +85,7 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 
 	static composeId(partialId: string, { collection }: { collection: Collection }): string {
-		return `${collection}${constants.special.database.separator}${partialId}`;
+		return `${decapitalise(collection)}${constants.special.database.separator}${partialId}`;
 	}
 
 	static decomposeId(id: string): [collection: Collection, partialId: string] {
