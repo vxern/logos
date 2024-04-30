@@ -1,6 +1,6 @@
 import { chunk } from "logos:core/utilities";
 import * as Discord from "@discordeno/bot";
-import log from "loglevel";
+import winston from "winston";
 
 Array.prototype.toChunked = function <T>(this, size: number) {
 	return Array.from<T[]>(chunk(this, size));
@@ -41,4 +41,11 @@ Promise.createRace = async function* <T, R>(
 (globalThis as any).constants = await import("./constants/constants").then((module) => module.default);
 (globalThis as any).defaults = await import("./constants/defaults").then((module) => module.default);
 
-log.enableAll();
+winston.configure({
+	format: winston.format.combine(
+		winston.format.cli(),
+		winston.format.colorize({ all: true }),
+		winston.format.timestamp(),
+	),
+	transports: new winston.transports.Console(),
+});

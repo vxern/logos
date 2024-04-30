@@ -1,4 +1,4 @@
-import log from "loglevel";
+import winston from "winston";
 
 class Logger {
 	static readonly #_instances = new Map<string, Logger>();
@@ -6,12 +6,12 @@ class Logger {
 	readonly #identifierDisplayed: string;
 	readonly #isDebug: boolean;
 
-	private constructor({ identifier, isDebug = false }: { identifier: string; isDebug?: boolean }) {
+	private constructor({ identifier, isDebug = false }: { identifier: string; isDebug: boolean | undefined }) {
 		this.#identifierDisplayed = `[${identifier}]`;
 		this.#isDebug = isDebug;
 	}
 
-	static create({ identifier, isDebug = false }: { identifier: string; isDebug?: boolean }): Logger {
+	static create({ identifier, isDebug = false }: { identifier: string; isDebug: boolean | undefined }): Logger {
 		if (Logger.#_instances.has(identifier)) {
 			return Logger.#_instances.get(identifier)!;
 		}
@@ -28,19 +28,19 @@ class Logger {
 			return;
 		}
 
-		log.debug(this.#identifierDisplayed, ...args);
+		winston.debug(`${this.#identifierDisplayed} ${args.join(" ")}`);
 	}
 
 	info(...args: unknown[]): void {
-		log.info(this.#identifierDisplayed, ...args);
+		winston.info(`${this.#identifierDisplayed} ${args.join(" ")}`);
 	}
 
 	warn(...args: unknown[]): void {
-		log.warn(this.#identifierDisplayed, ...args);
+		winston.warn(`${this.#identifierDisplayed} ${args.join(" ")}`);
 	}
 
 	error(...args: unknown[]): void {
-		log.error(this.#identifierDisplayed, ...args);
+		winston.error(`${this.#identifierDisplayed} ${args.join(" ")}`);
 	}
 }
 

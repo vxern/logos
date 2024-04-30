@@ -1,11 +1,12 @@
 import * as fs from "node:fs/promises";
 import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "logos:constants/languages";
 import { Client, Environment } from "logos/client";
+import winston from "winston";
 
 const decoder = new TextDecoder();
 
 async function loadLocalisations(directoryPath: string): Promise<Map<string, Map<LocalisationLanguage, string>>> {
-	console.info("[Setup/Localisations] Loading localisations...");
+	winston.info("[Setup/Localisations] Loading localisations...");
 
 	const directoryPaths: string[] = [];
 	for (const entryPath of await fs.readdir(directoryPath)) {
@@ -17,7 +18,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 		directoryPaths.push(combinedPath);
 	}
 
-	console.info(`[Setup/Localisations] Detected ${directoryPaths.length} localisation director(y/ies). Reading...`);
+	winston.debug(`[Setup/Localisations] Detected ${directoryPaths.length} localisation director(y/ies). Reading...`);
 
 	const localisationFiles: [language: LocalisationLanguage, path: string, normalise: boolean][] = [];
 	for (const directoryPath of directoryPaths) {
@@ -65,7 +66,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 						continue;
 					}
 
-					console.warn(`[Setup/Localisations] ${language}: '${key}' is not normalised. Normalising...`);
+					winston.warn(`[Setup/Localisations] ${language}: '${key}' is not normalised. Normalising...`);
 
 					const valueNormalised = value.toLowerCase().split(" ").join("-").replaceAll("/", "-").replaceAll("'", "-");
 					localisations.get(key)?.set(language, valueNormalised);
@@ -78,7 +79,7 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 					`${key.replace(/\.description$/, ".name")}` in strings &&
 					value.length > 100
 				) {
-					console.warn(`[Setup/Localisations] ${language}: '${key}' is too long (>100 characters). Normalising...`);
+					winston.warn(`[Setup/Localisations] ${language}: '${key}' is too long (>100 characters). Normalising...`);
 
 					const valueNormalised = value.slice(0, 100);
 					localisations.get(key)?.set(language, valueNormalised);
@@ -95,16 +96,16 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 		.flatMap((map) => map.values())
 		.flat().length;
 
-	console.info(`[Setup/Localisations] Loaded ${stringCount} strings.`);
+	winston.info(`[Setup/Localisations] Loaded ${stringCount} strings.`);
 
 	return localisations;
 }
 
 async function setup(): Promise<void> {
-	console.info("[Setup] Setting up...");
+	winston.info("[Setup] Setting up...");
 
 	if (process.env.SECRET_DISCORD === undefined) {
-		console.error(
+		winston.error(
 			"[Setup] Logos cannot start without a Discord token. " +
 				"Make sure you've included one in the environment variables with the key `SECRET_DISCORD`.",
 		);
@@ -112,7 +113,7 @@ async function setup(): Promise<void> {
 	}
 
 	const environment: Environment = {
-		isDebug: process.env.DEBUG === "true",
+		isDebug: process.env.IS_DEBUG === "true",
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,

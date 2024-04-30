@@ -34,7 +34,10 @@ class CouchDBAdapter extends DatabaseAdapter {
 			url = `${protocol}://${host}:${port}`;
 		}
 
-		const server = nano({ url, requestDefaults: { agent: constants.USER_AGENT, headers: { "User-Agent": constants.USER_AGENT} } });
+		const server = nano({
+			url,
+			requestDefaults: { agent: constants.USER_AGENT, headers: { "User-Agent": constants.USER_AGENT } },
+		});
 		this.#_documents = server.db.use(database);
 	}
 
@@ -116,7 +119,8 @@ class CouchDBDocumentSession extends DocumentSession {
 	}
 
 	async store<M extends Model>(document: M): Promise<void> {
-		const result = await this.#_documents.insert(document as unknown as nano.IdentifiedDocument, { rev: document.revision })
+		const result = await this.#_documents
+			.insert(document as unknown as nano.IdentifiedDocument, { rev: document.revision })
 			.catch((error) => {
 				// Conflict during insertion. This happens when a document is attempted to be saved twice at the same
 				// time.

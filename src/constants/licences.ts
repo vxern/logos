@@ -69,7 +69,6 @@ const licences = Object.freeze({
 		"fastest-levenshtein": mit("Copyright (c) 2020 Kasper Unn Weihe"),
 		ioredis: mit("Copyright (c) 2015-2022 Zihua Li"),
 		lavaclient: apache("Copyright 2023 Dimensional Fun & Contributors"),
-		loglevel: mit("Copyright (c) 2013 Tim Perry"),
 		nanoid: mit("Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>"),
 		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
 		"parse-wiktionary": mit(
@@ -77,6 +76,7 @@ const licences = Object.freeze({
 		),
 		ravendb: mit("Copyright (c) 2017 Hibernating Rhinos LTD"),
 		tinyld: mit("Copyright (c) 2021 Komodo"),
+		winston: mit("Copyright (c) 2010 Charlie Robbins"),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
 } as const);
