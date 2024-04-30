@@ -33,12 +33,20 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 		return this.#_conventions.collection;
 	}
 
+	get revision(): string | undefined {
+		return this.#_conventions.revision;
+	}
+
 	set revision(value: string) {
 		this.#_conventions.revision = value;
 	}
 
-	get revision(): string | undefined {
-		return this.#_conventions.revision;
+	get isDeleted(): boolean | undefined {
+		return this.#_conventions.isDeleted;
+	}
+
+	set isDeleted(value: boolean) {
+		this.#_conventions.isDeleted = value;
 	}
 
 	constructor(database: DatabaseStore, data: Record<string, unknown>, { collection }: { collection: Collection }) {
@@ -148,7 +156,7 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 
 	async delete(clientOrDatabase: ClientOrDatabaseStore): Promise<void> {
 		await this.update(clientOrDatabase, () => {
-			this.#_conventions.isDeleted = true;
+			this.isDeleted = true;
 		});
 
 		await getDatabase(clientOrDatabase).withSession(async (session) => {
@@ -171,8 +179,8 @@ abstract class ModelConventions<Metadata = any> {
 
 	set revision(_: string) {}
 
-	get isDeleted(): boolean {
-		return false;
+	get isDeleted(): boolean | undefined {
+		return undefined;
 	}
 
 	set isDeleted(_: boolean) {}

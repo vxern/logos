@@ -145,8 +145,8 @@ class RavenDBModelConventions extends ModelConventions<RavenDBDocumentMetadataCo
 		this.model["@metadata"]["@change-vector"] = value;
 	}
 
-	get isDeleted(): boolean {
-		return this.model["@metadata"]["@is-deleted"] ?? false;
+	get isDeleted(): boolean | undefined {
+		return this.model["@metadata"]["@is-deleted"];
 	}
 
 	set isDeleted(value: boolean) {

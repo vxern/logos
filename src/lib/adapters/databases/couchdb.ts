@@ -119,7 +119,7 @@ class CouchDBDocumentSession extends DocumentSession {
 		}
 
 		if (result.rev !== document.revision) {
-
+			document.revision = result.rev;
 		}
 	}
 
@@ -165,16 +165,16 @@ class CouchDBModelConventions extends ModelConventions<CouchDBDocumentMetadata> 
 		return this.model._id;
 	}
 
-	set revision(value: string) {
-		this.model._rev = value;
-	}
-
 	get revision(): string | undefined {
 		return this.model._rev;
 	}
 
-	get isDeleted(): boolean {
-		return this.model._deleted ?? false;
+	set revision(value: string) {
+		this.model._rev = value;
+	}
+
+	get isDeleted(): boolean | undefined {
+		return this.model._deleted;
 	}
 
 	set isDeleted(value: boolean) {

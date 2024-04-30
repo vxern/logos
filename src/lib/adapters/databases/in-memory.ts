@@ -143,8 +143,8 @@ class InMemoryConventions extends ModelConventions<InMemoryMetadata> {
 		return this.model._id;
 	}
 
-	get isDeleted(): boolean {
-		return this.model._isDeleted ?? false;
+	get isDeleted(): boolean | undefined {
+		return this.model._isDeleted;
 	}
 
 	set isDeleted(value: boolean) {
