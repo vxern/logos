@@ -102,12 +102,14 @@ class DatabaseStore {
 			}
 			case "couchdb": {
 				if (
+					client.environment.couchdbUsername === undefined ||
+					client.environment.couchdbPassword === undefined ||
 					client.environment.couchdbHost === undefined ||
 					client.environment.couchdbPort === undefined ||
 					client.environment.couchdbDatabase === undefined
 				) {
 					client.log.error(
-						"One or more of `COUCHDB_HOST`, `COUCHDB_PORT` or `COUCHDB_DATABASE` have not been provided. Logos will run in memory.",
+						"One or more of `COUCHDB_USERNAME`, `COUCHDB_PASSWORD`, `COUCHDB_HOST`, `COUCHDB_PORT` or `COUCHDB_DATABASE` have not been provided. Logos will run in memory.",
 					);
 					break;
 				}

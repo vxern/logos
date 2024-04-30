@@ -2,6 +2,7 @@ import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/roles";
 import { HashableMessageContents, NoticeService } from "logos/services/notices/service";
+import {code} from "logos:core/formatting";
 
 class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	readonly #_selectRolesButton: InteractionCollector;
@@ -40,7 +41,7 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 				{
 					title: strings.title,
 					description: `${strings.description.usingCommand({
-						command: this.client.localiseCommand("profile.options.roles", this.guildLocale),
+						command: code(this.client.localiseCommand("profile.options.roles", this.guildLocale)),
 					})} ${strings.description.runAnywhere}\n\n${strings.description.pressButton}`,
 					color: constants.colours.murrey,
 				},

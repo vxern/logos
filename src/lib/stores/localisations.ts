@@ -198,9 +198,9 @@ class LocalisationStore {
 		}
 
 		const parts: string[] = [];
-		for (const index of Array(keyParts).keys()) {
-			const key = keyParts.slice(0, index + 1).join(".options.");
-			parts.push(this.localise(key, locale)());
+		for (const index of Array(keyParts.length).keys()) {
+			const part = keyParts.slice(0, index + 1).join(".options.");
+			parts.push(this.localise(`${part}.name`, locale)());
 		}
 		const commandName = parts.join(" ");
 
