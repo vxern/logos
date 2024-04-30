@@ -1,5 +1,6 @@
 import { Collection, isValidCollection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
+import { Client } from "logos/client";
 import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 import * as ravendb from "ravendb";
@@ -7,13 +8,11 @@ import * as ravendb from "ravendb";
 class RavenDBAdapter extends DatabaseAdapter {
 	readonly #_database: ravendb.DocumentStore;
 
-	constructor({
-		host,
-		port,
-		database,
-		certificate,
-	}: { database: string; host: string; port: string; certificate?: Buffer }) {
-		super();
+	constructor(
+		client: Client,
+		{ host, port, database, certificate }: { database: string; host: string; port: string; certificate?: Buffer },
+	) {
+		super(client, { identifier: "RavenDB" });
 
 		const url = `${host}:${port}`;
 		if (certificate !== undefined) {
@@ -38,7 +37,7 @@ class RavenDBAdapter extends DatabaseAdapter {
 	async openSession({ database }: { database: DatabaseStore }): Promise<RavenDBDocumentSession> {
 		const rawSession = this.#_database.openSession();
 
-		return new RavenDBDocumentSession({ database, session: rawSession });
+		return new RavenDBDocumentSession(this.client, { database, session: rawSession });
 	}
 }
 
@@ -46,7 +45,7 @@ interface RavenDBDocumentMetadataContainer {
 	"@metadata": RavenDBDocumentMetadata;
 }
 
-interface RavenDBDocumentMetadata {
+interface RavenDBDocumentMetadata extends WithRequired<ravendb.MetadataObject, "@id"> {
 	readonly "@id": string;
 	readonly "@collection": Collection;
 	"@is-deleted"?: boolean;
@@ -59,8 +58,8 @@ interface RavenDBDocument extends RavenDBDocumentMetadataContainer {
 class RavenDBDocumentSession extends DocumentSession {
 	readonly #_session: ravendb.IDocumentSession;
 
-	constructor({ database, session }: { database: DatabaseStore; session: ravendb.IDocumentSession }) {
-		super({ database });
+	constructor(client: Client, { database, session }: { database: DatabaseStore; session: ravendb.IDocumentSession }) {
+		super(client, { identifier: "RavenDB", database });
 
 		this.#_session = session;
 
@@ -109,7 +108,7 @@ class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	readonly #_session: ravendb.IDocumentSession;
 	#_query: ravendb.IDocumentQuery<RavenDBDocument>;
 
-	constructor({ database, session }: { database: DatabaseStore, session: ravendb.IDocumentSession }) {
+	constructor({ database, session }: { database: DatabaseStore; session: ravendb.IDocumentSession }) {
 		super();
 
 		this.#_database = database;
@@ -138,6 +137,22 @@ class RavenDBModelConventions extends ModelConventions<RavenDBDocumentMetadataCo
 		return this.model["@metadata"]["@id"];
 	}
 
+	get revision(): string | undefined {
+		return this.model["@metadata"]["@change-vector"];
+	}
+
+	set revision(value: string) {
+		this.model["@metadata"]["@change-vector"] = value;
+	}
+
+	get isDeleted(): boolean {
+		return this.model["@metadata"]["@is-deleted"] ?? false;
+	}
+
+	set isDeleted(value: boolean) {
+		this.model["@metadata"]["@is-deleted"] = value;
+	}
+
 	static instantiateModel<M extends Model>(database: DatabaseStore, payload: RavenDBDocument): M {
 		if (!isValidCollection(payload["@metadata"]["@collection"])) {
 			throw `Document ${payload.id} is part of an unknown collection: "${payload["@metadata"]["@collection"]}"`;
@@ -156,10 +171,6 @@ class RavenDBModelConventions extends ModelConventions<RavenDBDocumentMetadataCo
 
 	buildMetadata({ id, collection }: { id: string; collection: Collection }): RavenDBDocumentMetadataContainer {
 		return { "@metadata": { "@id": id, "@collection": collection } };
-	}
-
-	markDeleted(): void {
-		this.model["@metadata"]["@is-deleted"] = true;
 	}
 }
 

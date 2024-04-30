@@ -1,8 +1,18 @@
 import { Collection } from "logos:constants/database";
+import { Client } from "logos/client";
 import { Model, ModelConventions } from "logos/database/model";
+import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 
 abstract class DatabaseAdapter {
+	readonly log: Logger;
+	readonly client: Client;
+
+	constructor(client: Client, { identifier }: { identifier: string }) {
+		this.log = Logger.create({ identifier: `DatabaseAdapter(${identifier})`, isDebug: client.environment.isDebug });
+		this.client = client;
+	}
+
 	abstract start(): Promise<void>;
 
 	abstract stop(): Promise<void>;
@@ -26,9 +36,11 @@ abstract class DatabaseAdapter {
 }
 
 abstract class DocumentSession {
+	readonly log: Logger;
 	readonly database: DatabaseStore;
 
-	constructor({ database }: { database: DatabaseStore }) {
+	constructor(client: Client, { identifier, database }: { identifier: string; database: DatabaseStore }) {
+		this.log = Logger.create({ identifier: `DocumentSession(${identifier})`, isDebug: client.environment.isDebug });
 		this.database = database;
 	}
 

@@ -33,6 +33,14 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 		return this.#_conventions.collection;
 	}
 
+	set revision(value: string) {
+		this.#_conventions.revision = value;
+	}
+
+	get revision(): string | undefined {
+		return this.#_conventions.revision;
+	}
+
 	constructor(database: DatabaseStore, data: Record<string, unknown>, { collection }: { collection: Collection }) {
 		this.#_conventions = database.conventionsFor({ model: this });
 		this.#_conventions.assignMetadata(data, { collection });
@@ -140,7 +148,7 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 
 	async delete(clientOrDatabase: ClientOrDatabaseStore): Promise<void> {
 		await this.update(clientOrDatabase, () => {
-			this.#_conventions.markDeleted();
+			this.#_conventions.isDeleted = true;
 		});
 
 		await getDatabase(clientOrDatabase).withSession(async (session) => {
@@ -156,6 +164,18 @@ abstract class ModelConventions<Metadata = any> {
 	idParts!: string[];
 
 	abstract get id(): string;
+
+	get revision(): string | undefined {
+		return undefined;
+	}
+
+	set revision(_: string) {}
+
+	get isDeleted(): boolean {
+		return false;
+	}
+
+	set isDeleted(_: boolean) {}
 
 	constructor({ model }: { model: Model }) {
 		this.model = model as Model & Metadata;
@@ -178,8 +198,6 @@ abstract class ModelConventions<Metadata = any> {
 		this.partialId = partialId;
 		this.idParts = partialId.split(constants.special.database.separator);
 	}
-
-	abstract markDeleted(): void;
 }
 
 function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {

@@ -1,5 +1,6 @@
 import { Collection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
+import { CouchDBAdapter } from "logos/adapters/databases/couchdb";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
 import { Client } from "logos/client";
@@ -15,7 +16,6 @@ import { Ticket } from "logos/database/ticket";
 import { User } from "logos/database/user";
 import { Warning } from "logos/database/warning";
 import { Logger } from "logos/logger";
-import {CouchDBAdapter} from "logos/adapters/databases/couchdb";
 
 class DatabaseStore {
 	readonly cache: {
@@ -78,7 +78,7 @@ class DatabaseStore {
 	}
 
 	static create(client: Client, { certificate }: { certificate?: Buffer } = {}): DatabaseStore {
-		let adapter: DatabaseAdapter;
+		let adapter: DatabaseAdapter | undefined;
 		switch (client.environment.databaseSolution) {
 			case "ravendb": {
 				if (
@@ -89,11 +89,10 @@ class DatabaseStore {
 					client.log.error(
 						"One or more of `RAVENDB_HOST`, `RAVENDB_PORT` or `RAVENDB_DATABASE` have not been provided. Logos will run in memory.",
 					);
-					adapter = new InMemoryAdapter();
 					break;
 				}
 
-				adapter = new RavenDBAdapter({
+				adapter = new RavenDBAdapter(client, {
 					host: client.environment.ravendbHost,
 					port: client.environment.ravendbPort,
 					database: client.environment.ravendbDatabase,
@@ -110,11 +109,10 @@ class DatabaseStore {
 					client.log.error(
 						"One or more of `COUCHDB_HOST`, `COUCHDB_PORT` or `COUCHDB_DATABASE` have not been provided. Logos will run in memory.",
 					);
-					adapter = new InMemoryAdapter();
 					break;
 				}
 
-				adapter = new CouchDBAdapter({
+				adapter = new CouchDBAdapter(client, {
 					username: client.environment.couchdbUsername,
 					password: client.environment.couchdbPassword,
 					protocol: client.environment.couchdbProtocol,
@@ -132,10 +130,12 @@ class DatabaseStore {
 				}
 
 				client.log.info("Logos is running in memory. Data will not persist in-between sessions.");
-
-				adapter = new InMemoryAdapter();
 				break;
 			}
+		}
+
+		if (adapter === undefined) {
+			adapter = new InMemoryAdapter(client);
 		}
 
 		return new DatabaseStore(client, { adapter });
