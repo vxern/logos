@@ -194,13 +194,14 @@ abstract class ModelConventions<Metadata = any> {
 	abstract buildMetadata({ id, collection }: { id: string; collection: Collection }): Metadata;
 
 	assignMetadata(data: IdentifierDataOrMetadata<Model, Metadata>, { collection }: { collection: Collection }): void {
+		let partialId: string;
 		if (this.hasMetadata(data)) {
 			Object.assign(this.model, data);
-			return;
+			[, partialId] = Model.decomposeId(this.id);
+		} else {
+			partialId = Model.buildPartialId(data as IdentifierData<Model>);
+			Object.assign(this.model, this.buildMetadata({ id: Model.composeId(partialId, { collection }), collection }));
 		}
-
-		const partialId = Model.buildPartialId(data as IdentifierData<Model>);
-		Object.assign(this.model, this.buildMetadata({ id: Model.composeId(partialId, { collection }), collection }));
 
 		this.collection = collection;
 		this.partialId = partialId;
