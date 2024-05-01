@@ -12,6 +12,7 @@ class DiscordConnection {
 			readonly latest: Map<bigint, Logos.Message>;
 			readonly previous: Map<bigint, Logos.Message>;
 		};
+		readonly roles: Map<bigint, Logos.Role>;
 	};
 
 	readonly #log: Logger;
@@ -27,6 +28,7 @@ class DiscordConnection {
 				latest: new Map(),
 				previous: new Map(),
 			},
+			roles: new Map(),
 		};
 
 		this.#log = Logger.create({ identifier: "Client/DiscordConnection", isDebug: client.environment.isDebug });
@@ -152,6 +154,7 @@ class DiscordConnection {
 	#transformRole(_: Discord.Bot, payload: Parameters<Discord.Transformers["role"]>[1]): Discord.Role {
 		const result = Discord.transformRole(this.bot, payload);
 
+		this.cache.roles.set(result.id, result);
 		this.cache.guilds.get(result.guildId)?.roles.set(result.id, result);
 
 		return result;

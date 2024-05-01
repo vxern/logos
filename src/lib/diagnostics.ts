@@ -1,11 +1,18 @@
 import { Client } from "logos/client";
 
 type ID = bigint | string;
-type Indexable<T> = T | ID;
+type IndexOr<T> = T | ID;
 
-function isId<T>(object: Indexable<T>): object is bigint | string {
+function isId<T>(object: IndexOr<T>): object is bigint | string {
 	return typeof object === "bigint" || typeof object === "string";
 }
+
+type UserLike = Logos.User | Discord.User | Discord.CamelizedDiscordUser;
+type MemberLike = Logos.Member | Discord.Member | Discord.CamelizedDiscordMember;
+type RoleLike = Logos.Role | Discord.Role | Discord.CamelizedDiscordRole;
+type GuildLike = Logos.Guild | Discord.Guild | Discord.CamelizedDiscordGuild
+type MessageLike = Logos.Message | Discord.Message | Discord.CamelizedDiscordMessage
+type ChannelLike = Logos.Channel | Discord.Channel | Discord.CamelizedDiscordChannel
 
 class Diagnostics {
 	readonly #client: Client;
@@ -14,94 +21,159 @@ class Diagnostics {
 		this.#client = client;
 	}
 
-	user(
-		userOrId: Indexable<Logos.User | Discord.User | Discord.CamelizedDiscordUser>,
-		options?: { prettify?: boolean; includeId?: boolean },
-	): string {
-		if (isId(userOrId)) {
-			return `unnamed user (ID ${userOrId})`;
-		}
-
-		const { username, discriminator, id } = userOrId;
-
-		const tag = discriminator === "0" ? `@${username}` : `${username}#${discriminator}`;
-
-		if (!(options?.includeId ?? false)) {
-			return tag;
-		}
-
-		if (options?.prettify ?? false) {
-			return `${tag} · ${id}`;
-		}
-
-		return `${tag} (${id})`;
-	}
-
-	member({ user, id }: Logos.Member | Discord.Member): string {
-		if (user !== undefined) {
-			return this.user(user);
-		}
-
-		return `unidentified member (ID ${id})`;
-	}
-
-	role(roleOrId: Indexable<Logos.Role | Discord.Role | Discord.CamelizedDiscordRole>): string {
-		if (isId(roleOrId)) {
-			return `unnamed role (ID ${roleOrId})`;
-		}
-
-		const { name, id } = roleOrId;
-
-		return `role "${name}" (ID ${id})`;
-	}
-
-	guild(guildOrId: Indexable<Logos.Guild | Discord.Guild | Discord.CamelizedDiscordGuild>): string {
-		if (isId(guildOrId)) {
-			return `unnamed guild (ID ${guildOrId})`;
-		}
-
-		const { name, id } = guildOrId;
-
-		return `"${name}" (ID ${id})`;
-	}
-
-	message(messageOrId: Indexable<Logos.Message | Discord.Message | Discord.CamelizedDiscordMessage>): string {
-		if (isId(messageOrId)) {
-			return `unidentified message (ID ${messageOrId})`;
-		}
-
-		const { id } = messageOrId;
-
-		return `message (ID ${id})`;
-	}
-
-	channel(channelOrId: Indexable<Logos.Channel | Discord.Channel | Discord.CamelizedDiscordChannel>): string {
-		if (isId(channelOrId)) {
-			return `unidentified channel (ID ${channelOrId})`;
-		}
-
-		const { name, id, type } = channelOrId;
-
-		if (name === undefined) {
-			return `unnamed channel (ID ${id})`;
-		}
-
-		switch (type) {
-			case Discord.ChannelTypes.DM:
-			case Discord.ChannelTypes.GroupDm: {
-				return `DM "${name}" (ID ${id})`;
+	user(userOrId: IndexOr<UserLike>, options?: { prettify?: boolean }): string {
+		let user: UserLike;
+		if (!isId(userOrId)) {
+			user = userOrId;
+		} else {
+			if (!this.#client.entities.users.has(BigInt(userOrId))) {
+				return `uncached user (ID ${userOrId})`;
 			}
-			case Discord.ChannelTypes.GuildVoice:
-			case Discord.ChannelTypes.GuildStageVoice: {
-				return `VC "${name}" (ID ${id})`;
-			}
-			case Discord.ChannelTypes.PublicThread:
-			case Discord.ChannelTypes.PrivateThread: {
-				return `Thread "${name}" (ID ${id})`;
-			}
-			default:
-				return `#${name} (ID ${id})`;
+
+			user = this.#client.entities.users.get(BigInt(userOrId))!;
 		}
+
+		const tag = user.discriminator === "0" ? `@${user.username}` : `${user.username}#${user.discriminator}`;
+
+		if (options?.prettify) {
+			return `${tag} · ID ${user.id}`;
+		}
+
+		return `${tag} (ID ${user.id})`;
+	}
+
+	member(member: MemberLike): string {
+		let userFormatted: string;
+		if (member.user !== undefined) {
+			userFormatted = this.user(member.user);
+		} else if ("id" in member) {
+			userFormatted = this.user(member.id);
+		} else {
+			userFormatted = "unknown user";
+		}
+
+		let guildFormatted: string;
+		if ("guildId" in member) {
+			guildFormatted = this.guild(member.guildId);
+		} else {
+			guildFormatted = "unknown guild";
+		}
+
+		return `${userFormatted} @ ${guildFormatted}`;
+	}
+
+	role(roleOrId: IndexOr<RoleLike>): string {
+		let role: RoleLike;
+		if (!isId(roleOrId)) {
+			role = roleOrId;
+		} else {
+			if (!this.#client.entities.roles.has(BigInt(roleOrId))) {
+				return `uncached role (ID ${roleOrId})`;
+			}
+
+			role = this.#client.entities.roles.get(BigInt(roleOrId))!;
+		}
+
+		return `role "${role.name}" (ID ${role.id})`;
+	}
+
+	guild(guildOrId: IndexOr<GuildLike>): string {
+		let guild: GuildLike;
+		if (!isId(guildOrId)) {
+			guild = guildOrId;
+		} else {
+			if (!this.#client.entities.guilds.has(BigInt(guildOrId))) {
+				return `uncached guild (ID ${guildOrId})`;
+			}
+
+			guild = this.#client.entities.guilds.get(BigInt(guildOrId))!;
+		}
+
+		return `guild "${guild.name}" (ID ${guild.id})`;
+	}
+
+	message(messageOrId: IndexOr<MessageLike>): string {
+		let message: MessageLike;
+		if (!isId(messageOrId)) {
+			message = messageOrId;
+		} else {
+			if (!this.#client.entities.messages.latest.has(BigInt(messageOrId))) {
+				return `uncached guild (ID ${messageOrId})`;
+			}
+
+			message = this.#client.entities.messages.latest.get(BigInt(messageOrId))!;
+		}
+
+		const contentLength = message.content?.length ?? 0;
+		const embedCount = message.embeds?.length ?? 0;
+		const userFormatted = this.user(message.author.id);
+
+		return `message of length ${contentLength} with ${embedCount} embeds (ID ${message.id}) posted by ${userFormatted}`;
+	}
+
+	channel(channelOrId: IndexOr<ChannelLike>): string {
+		let channel: ChannelLike;
+		if (!isId(channelOrId)) {
+			channel = channelOrId;
+		} else {
+			if (!this.#client.entities.channels.has(BigInt(channelOrId))) {
+				return `uncached channel (ID ${channelOrId})`;
+			}
+
+			channel = this.#client.entities.channels.get(BigInt(channelOrId))!;
+		}
+
+		let guildFormatted: string;
+		if (channel.guildId !== undefined) {
+			guildFormatted = this.guild(channel.guildId);
+		} else {
+			guildFormatted = "unknown guild";
+		}
+
+		let channelTypeFormatted: string;
+		switch (channel.type) {
+		case Discord.ChannelTypes.DM: {
+			channelTypeFormatted = "DM channel";
+			break;
+		}
+		case Discord.ChannelTypes.GroupDm: {
+			channelTypeFormatted = "group DM channel";
+			break;
+		}
+		case Discord.ChannelTypes.GuildVoice: {
+			channelTypeFormatted = "voice channel";
+			break;
+		}
+		case Discord.ChannelTypes.GuildStageVoice: {
+			channelTypeFormatted = "stage channel";
+			break;
+		}
+		case Discord.ChannelTypes.GuildAnnouncement: {
+			channelTypeFormatted = "guild announcement";
+			break;
+		}
+		case Discord.ChannelTypes.AnnouncementThread: {
+			channelTypeFormatted = "announcement thread";
+			break;
+		}
+		case Discord.ChannelTypes.PublicThread: {
+			channelTypeFormatted = "public thread";
+			break;
+		}
+		case Discord.ChannelTypes.PrivateThread: {
+			channelTypeFormatted = "private thread";
+			break;
+		}
+		default:
+			channelTypeFormatted = `unknown channel type (ID ${channel.type})`;
+			break;
+		}
+
+		if (channel.name === undefined) {
+			return `unnamed ${channelTypeFormatted} (ID ${channel.id}) @ ${guildFormatted}`;
+		}
+
+		return `${channelTypeFormatted} "${channel.name}" (ID ${channel.id}) @ ${guildFormatted}`;
 	}
 }
 
