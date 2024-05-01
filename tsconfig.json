@@ -40,7 +40,7 @@
       "logos:core/lib/*": ["./?"],
       "logos:core/index": ["./?"]
     },
-    "types": ["bun"]
+    "types": ["bun", "mocha"]
   },
   "compileOnSave": true,
   "exclude": ["dist/", "node_modules/"],
