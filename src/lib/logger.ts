@@ -23,24 +23,30 @@ class Logger {
 		return instance;
 	}
 
-	debug(...args: unknown[]): void {
+	#_formatMessage(pieces: unknown[]): string {
+		const piecesFormatted = pieces.map((piece) => typeof piece === "object" ? JSON.stringify(piece) : piece).join(" ");
+
+		return `${this.#identifierDisplayed} ${piecesFormatted}`;
+	}
+
+	debug(...pieces: unknown[]): void {
 		if (!this.#isDebug) {
 			return;
 		}
 
-		winston.debug(`${this.#identifierDisplayed} ${args.join(" ")}`);
+		winston.debug(this.#_formatMessage(pieces));
 	}
 
-	info(...args: unknown[]): void {
-		winston.info(`${this.#identifierDisplayed} ${args.join(" ")}`);
+	info(...pieces: unknown[]): void {
+		winston.info(this.#_formatMessage(pieces));
 	}
 
-	warn(...args: unknown[]): void {
-		winston.warn(`${this.#identifierDisplayed} ${args.join(" ")}`);
+	warn(...pieces: unknown[]): void {
+		winston.warn(this.#_formatMessage(pieces));
 	}
 
-	error(...args: unknown[]): void {
-		winston.error(`${this.#identifierDisplayed} ${args.join(" ")}`);
+	error(...pieces: unknown[]): void {
+		winston.error(this.#_formatMessage(pieces));
 	}
 }
 
