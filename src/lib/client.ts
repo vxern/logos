@@ -37,6 +37,11 @@ interface Environment {
 	readonly couchdbHost?: string;
 	readonly couchdbPort?: string;
 	readonly couchdbDatabase?: string;
+	readonly rethinkdbUsername?: string;
+	readonly rethinkdbPassword?: string;
+	readonly rethinkdbHost?: string;
+	readonly rethinkdbPort?: string;
+	readonly rethinkdbDatabase?: string;
 	readonly redisHost?: string;
 	readonly redisPort?: string;
 	readonly redisPassword?: string;

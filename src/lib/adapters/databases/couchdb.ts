@@ -84,7 +84,7 @@ class CouchDBDocumentSession extends DocumentSession {
 			return undefined;
 		}
 
-		return CouchDBModelConventions.instantiateModel<M>(this.database, rawDocument as CouchDBDocumentMetadata);
+		return CouchDBModelConventions.instantiateModel<M>(this.database, rawDocument as CouchDBDocument);
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
