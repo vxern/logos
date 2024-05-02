@@ -61,7 +61,10 @@ class RethinkDBAdapter extends DatabaseAdapter {
     }
 }
 
-type RethinkDBDocumentMetadata = any;
+interface RethinkDBDocumentMetadata {
+    readonly id: string;
+    _isDeleted?: boolean;
+}
 
 interface RethinkDBDocument extends RethinkDBDocumentMetadata {
     [key: string]: unknown;
@@ -81,40 +84,61 @@ class RethinkDBDocumentSession extends DocumentSession {
 
     async load<M extends Model>(id: string): Promise<M | undefined> {
         const [collection, partialId] = Model.decomposeId(id);
-        // TODO(vxern): What is returned here? Can it be undefined? Does it throw?
-        const rawDocument = await rethinkdb.r.get<RethinkDBDocument>(rethinkdb.r.table(collection), partialId).run(this.#_connection);
+        const rawDocument = await rethinkdb.r.get<RethinkDBDocument | null>(rethinkdb.r.table(collection), partialId).run(this.#_connection);
+        if (rawDocument === null) {
+            return undefined;
+        }
 
         return RethinkDBModelConventions.instantiateModel<M>(this.database, rawDocument);
     }
 
     async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
-        const response = await this.#_documents
-            .fetch({ keys: ids }, { conflicts: false, include_docs: true })
-            .catch((error) => {
-                this.log.error(`Failed to get ${ids.length} documents: ${error}`);
-                return undefined;
-            });
-        if (response === undefined) {
+        if (ids.length === 0) {
             return [];
         }
 
-        const documents: (M | undefined)[] = [];
-        for (const result of response.rows) {
-            if (result.error !== undefined) {
-                documents.push(undefined);
+        const idsWithIndex = ids.map<[string, number]>((id, index) => [id, index]);
+        const partialIdsWithIndexByCollection = new Map<Collection, [partialId: string, index: number][]>();
+        for (const [id, index] of idsWithIndex) {
+            const [collection, partialId] = Model.decomposeId(id);
+            if (!partialIdsWithIndexByCollection.has(collection)) {
+                partialIdsWithIndexByCollection.set(collection, [[partialId, index]]);
                 continue;
             }
 
-            const row = result as nano.DocumentResponseRow<CouchDBDocument>;
-            const rowDocument = row.doc!;
-
-            documents.push(RethinkDBModelConventions.instantiateModel<M>(this.database, rowDocument));
+            partialIdsWithIndexByCollection.get(collection)!.push([partialId, index]);
         }
 
-        return documents;
+        const promises: Promise<[rawDocument: RethinkDBDocument, index: number][]>[] = [];
+        for (const [collection, partialIdsWithIndexes] of partialIdsWithIndexByCollection) {
+            const partialIds = partialIdsWithIndexes.map(([partialId, _]) => partialId);
+            const indexes = partialIdsWithIndexes.map(([_, index]) => index);
+
+            promises.push(
+                rethinkdb.r
+                    // @ts-expect-error: The type signature of `getAll()` is invalid; The underlying JS code supports an
+                    // indefinite number of IDs, so this call is completely fine.
+                    //
+                    // https://github.com/rethinkdb/rethinkdb-ts/issues/126
+                    .getAll<RethinkDBDocument>(rethinkdb.r.table(collection), ...partialIds)
+                    .run(this.#_connection)
+                    .then(
+                        (rawDocuments) => rawDocuments.map<[RethinkDBDocument, number]>(
+                            (rawDocument, index) => [rawDocument, indexes[index]!],
+                        )
+                    )
+            );
+        }
+
+        const resultsUnsorted = await Promise.all(promises).then((results) => results.flat());
+        const resultsSorted = resultsUnsorted.sort(([_, a], [__, b]) => a - b);
+
+        return resultsSorted.map(([rawDocument, _]) => RethinkDBModelConventions.instantiateModel<M>(this.database, rawDocument));
     }
 
     async store<M extends Model>(document: M): Promise<void> {
+        await rethinkdb.r.insert(rethinkdb.r.table());
+
         const result = await this.#_documents
             .insert(document as unknown as nano.IdentifiedDocument, { rev: document.revision })
             .catch((error) => {
@@ -176,38 +200,30 @@ class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 
 class RethinkDBModelConventions extends ModelConventions<RethinkDBDocumentMetadata> {
     get id(): string {
-        return this.model._id;
-    }
-
-    get revision(): string | undefined {
-        return this.model._rev;
-    }
-
-    set revision(value: string) {
-        this.model._rev = value;
+        return Model.composeId(this.model.id, { collection: this.collection });
     }
 
     get isDeleted(): boolean | undefined {
-        return this.model._deleted;
+        return this.model._isDeleted;
     }
 
     set isDeleted(value: boolean) {
-        this.model._deleted = value;
+        this.model._isDeleted = value;
     }
 
     static instantiateModel<M extends Model>(database: DatabaseStore, payload: RethinkDBDocument): M {
-        const [collection, _] = Model.getDataFromId(payload._id);
+        const [collection, _] = Model.getDataFromId(payload.id);
         const ModelClass = DatabaseStore.getModelClassByCollection({ collection: collection });
 
         return new ModelClass(database, payload) as M;
     }
 
     hasMetadata(data: IdentifierDataOrMetadata<Model, RethinkDBDocumentMetadata>): boolean {
-        return "_id" in data;
+        return "id" in data;
     }
 
     buildMetadata({ id, collection: _ }: { id: string; collection: Collection }): RethinkDBDocumentMetadata {
-        return { _id: id };
+        return { id };
     }
 }
 

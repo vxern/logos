@@ -167,9 +167,10 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 
 abstract class ModelConventions<Metadata = any> {
 	readonly model: Model & Metadata;
-	collection!: Collection;
-	partialId!: string;
-	idParts!: string[];
+
+	declare partialId: string;
+	declare idParts: string[];
+	declare collection: Collection;
 
 	abstract get id(): string;
 
@@ -197,7 +198,7 @@ abstract class ModelConventions<Metadata = any> {
 		let partialId: string;
 		if (this.hasMetadata(data)) {
 			Object.assign(this.model, data);
-			[, partialId] = Model.decomposeId(this.id);
+			partialId = Model.decomposeId(this.id)[1];
 		} else {
 			partialId = Model.buildPartialId(data as IdentifierData<Model>);
 			Object.assign(this.model, this.buildMetadata({ id: Model.composeId(partialId, { collection }), collection }));
