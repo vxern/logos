@@ -226,7 +226,7 @@ class RethinkDBModelConventions extends ModelConventions<RethinkDBDocumentMetada
 	 * model by default, since in most cases the property stored on the model is not `id` verbatim, but rather something
 	 * like `_id` or `@id`. In the case of RethinkDB, however, the document ID property *is* `id`, so we ought to omit this
 	 * getter assignment.
- 	 */
+	 */
 	assignAccessorsToModel(): void {}
 }
 

@@ -257,8 +257,17 @@ abstract class ModelConventions<Metadata = any> {
 		});
 	}
 
+	/**
+	 * Determines whether the given data object contains document metadata, which would be characteristic of a document
+	 * that already exists, or just identifier data, which would be characteristic of a document that is only just
+	 * getting created.
+	 */
 	abstract hasMetadata(data: IdentifierDataOrMetadata<Model, Metadata>): boolean;
 
+	/**
+	 * Given the {@link id} of the document and the {@link collection} it belongs to, builds out the metadata stored on
+	 * documents in the database employing this set of conventions.
+	 */
 	abstract buildMetadata({ id, collection }: { id: string; collection: Collection }): Metadata;
 }
 
