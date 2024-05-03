@@ -3,6 +3,7 @@ import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapt
 import { CouchDBAdapter } from "logos/adapters/databases/couchdb";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
+import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb";
 import { Client } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
@@ -121,6 +122,27 @@ class DatabaseStore {
 					host: client.environment.couchdbHost,
 					port: client.environment.couchdbPort,
 					database: client.environment.couchdbDatabase,
+				});
+				break;
+			}
+			case "rethinkdb": {
+				if (
+					client.environment.rethinkdbHost === undefined ||
+					client.environment.rethinkdbPort === undefined ||
+					client.environment.rethinkdbDatabase === undefined
+				) {
+					client.log.error(
+						"One or more of `RETHINKDB_USERNAME`, `RETHINKDB_PASSWORD`, `RETHINKDB_HOST`, `RETHINKDB_PORT` or `RETHINKDB_DATABASE` have not been provided. Logos will run in memory.",
+					);
+					break;
+				}
+
+				adapter = new RethinkDBAdapter(client, {
+					username: client.environment.rethinkdbUsername,
+					password: client.environment.rethinkdbPassword,
+					host: client.environment.rethinkdbHost,
+					port: client.environment.rethinkdbPort,
+					database: client.environment.rethinkdbDatabase,
 				});
 				break;
 			}
