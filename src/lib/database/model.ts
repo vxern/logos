@@ -168,9 +168,7 @@ abstract class ModelConventions<Metadata = any> {
 	readonly idParts: string[];
 	readonly collection: Collection;
 
-	get id(): string {
-		throw "UnimplementedError: The `id` is not utilised with these model conventions.";
-	}
+	abstract get id(): string;
 
 	get revision(): string | undefined {
 		return undefined;
@@ -191,14 +189,14 @@ abstract class ModelConventions<Metadata = any> {
 	}: { model: Model; data: IdentifierDataOrMetadata<Model, Metadata>; collection: Collection }) {
 		this.model = model as Model & Metadata;
 
+		this.assignAccessorsToModel();
+
 		this.#_populateModelData(data, { collection });
 
 		const partialId = this.#_getPartialIdFromData(data);
 		this.collection = collection;
 		this.partialId = partialId;
 		this.idParts = partialId.split(constants.special.database.separator);
-
-		this.assignAccessorsToModel();
 	}
 
 	#_getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {

@@ -193,6 +193,10 @@ class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 }
 
 class RethinkDBModelConventions extends ModelConventions<RethinkDBDocumentMetadata> {
+	get id(): string {
+		return this.model.id;
+	}
+
 	get isDeleted(): boolean | undefined {
 		return this.model._isDeleted;
 	}
