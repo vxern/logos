@@ -1,8 +1,8 @@
+import { code } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/roles";
 import { HashableMessageContents, NoticeService } from "logos/services/notices/service";
-import {code} from "logos:core/formatting";
 
 class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	readonly #_selectRolesButton: InteractionCollector;

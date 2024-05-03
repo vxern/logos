@@ -13,8 +13,16 @@ class InMemoryAdapter extends DatabaseAdapter {
 
 	async stop(): Promise<void> {}
 
-	conventionsFor({ model }: { model: Model }): ModelConventions {
-		return new InMemoryConventions({ model });
+	conventionsFor({
+		model,
+		data,
+		collection,
+	}: {
+		model: Model;
+		data: IdentifierDataOrMetadata<Model, InMemoryDocumentMetadata>;
+		collection: Collection;
+	}): ModelConventions {
+		return new InMemoryConventions({ model, data, collection });
 	}
 
 	async openSession({ database }: { database: DatabaseStore }): Promise<InMemoryDocumentSession> {
@@ -133,12 +141,12 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}
 }
 
-interface InMemoryMetadata {
+interface InMemoryDocumentMetadata {
 	readonly _id: string;
 	_isDeleted?: boolean;
 }
 
-class InMemoryConventions extends ModelConventions<InMemoryMetadata> {
+class InMemoryConventions extends ModelConventions<InMemoryDocumentMetadata> {
 	get id(): string {
 		return this.model._id;
 	}
@@ -151,11 +159,11 @@ class InMemoryConventions extends ModelConventions<InMemoryMetadata> {
 		this.model._isDeleted = value;
 	}
 
-	hasMetadata(data: IdentifierDataOrMetadata<Model, InMemoryMetadata>): boolean {
+	hasMetadata(data: IdentifierDataOrMetadata<Model, InMemoryDocumentMetadata>): boolean {
 		return "_id" in data;
 	}
 
-	buildMetadata({ id, collection: _ }: { id: string; collection: Collection }): InMemoryMetadata {
+	buildMetadata({ id, collection: _ }: { id: string; collection: Collection }): InMemoryDocumentMetadata {
 		return { _id: id };
 	}
 }

@@ -45,8 +45,16 @@ class CouchDBAdapter extends DatabaseAdapter {
 
 	async stop(): Promise<void> {}
 
-	conventionsFor({ model }: { model: Model }): ModelConventions {
-		return new CouchDBModelConventions({ model });
+	conventionsFor({
+		model,
+		data,
+		collection,
+	}: {
+		model: Model;
+		data: IdentifierDataOrMetadata<Model, CouchDBDocumentMetadata>;
+		collection: Collection;
+	}): ModelConventions {
+		return new CouchDBModelConventions({ model, data, collection });
 	}
 
 	async openSession({ database }: { database: DatabaseStore }): Promise<CouchDBDocumentSession> {

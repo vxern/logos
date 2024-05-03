@@ -1,4 +1,5 @@
 import { Locale } from "logos:constants/languages";
+import { code } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { EntryRequestComposer } from "logos/commands/components/modal-composers/entry-request-composer";
@@ -6,7 +7,6 @@ import { EntryRequest } from "logos/database/entry-request";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { User } from "logos/database/user";
 import { LocalService } from "logos/services/service";
-import {code} from "logos:core/formatting";
 
 class EntryService extends LocalService {
 	readonly #_acceptedRulesButton: InteractionCollector;
@@ -66,7 +66,9 @@ class EntryService extends LocalService {
 					buttonPress.locale,
 				)({
 					// @ts-ignore: This is fine for now.
-					command: code(this.client.localiseCommand(this.client.commands.profile.options.roles.key, buttonPress.locale)),
+					command: code(
+						this.client.localiseCommand(this.client.commands.profile.options.roles.key, buttonPress.locale),
+					),
 				}),
 			},
 		};

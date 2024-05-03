@@ -10,9 +10,9 @@ function isId<T>(object: IndexOr<T>): object is bigint | string {
 type UserLike = Logos.User | Discord.User | Discord.CamelizedDiscordUser;
 type MemberLike = Logos.Member | Discord.Member | Discord.CamelizedDiscordMember;
 type RoleLike = Logos.Role | Discord.Role | Discord.CamelizedDiscordRole;
-type GuildLike = Logos.Guild | Discord.Guild | Discord.CamelizedDiscordGuild
-type MessageLike = Logos.Message | Discord.Message | Discord.CamelizedDiscordMessage
-type ChannelLike = Logos.Channel | Discord.Channel | Discord.CamelizedDiscordChannel
+type GuildLike = Logos.Guild | Discord.Guild | Discord.CamelizedDiscordGuild;
+type MessageLike = Logos.Message | Discord.Message | Discord.CamelizedDiscordMessage;
+type ChannelLike = Logos.Channel | Discord.Channel | Discord.CamelizedDiscordChannel;
 
 class Diagnostics {
 	readonly #client: Client;
@@ -132,41 +132,41 @@ class Diagnostics {
 
 		let channelTypeFormatted: string;
 		switch (channel.type) {
-		case Discord.ChannelTypes.DM: {
-			channelTypeFormatted = "DM channel";
-			break;
-		}
-		case Discord.ChannelTypes.GroupDm: {
-			channelTypeFormatted = "group DM channel";
-			break;
-		}
-		case Discord.ChannelTypes.GuildVoice: {
-			channelTypeFormatted = "voice channel";
-			break;
-		}
-		case Discord.ChannelTypes.GuildStageVoice: {
-			channelTypeFormatted = "stage channel";
-			break;
-		}
-		case Discord.ChannelTypes.GuildAnnouncement: {
-			channelTypeFormatted = "guild announcement";
-			break;
-		}
-		case Discord.ChannelTypes.AnnouncementThread: {
-			channelTypeFormatted = "announcement thread";
-			break;
-		}
-		case Discord.ChannelTypes.PublicThread: {
-			channelTypeFormatted = "public thread";
-			break;
-		}
-		case Discord.ChannelTypes.PrivateThread: {
-			channelTypeFormatted = "private thread";
-			break;
-		}
-		default:
-			channelTypeFormatted = `unknown channel type (ID ${channel.type})`;
-			break;
+			case Discord.ChannelTypes.DM: {
+				channelTypeFormatted = "DM channel";
+				break;
+			}
+			case Discord.ChannelTypes.GroupDm: {
+				channelTypeFormatted = "group DM channel";
+				break;
+			}
+			case Discord.ChannelTypes.GuildVoice: {
+				channelTypeFormatted = "voice channel";
+				break;
+			}
+			case Discord.ChannelTypes.GuildStageVoice: {
+				channelTypeFormatted = "stage channel";
+				break;
+			}
+			case Discord.ChannelTypes.GuildAnnouncement: {
+				channelTypeFormatted = "guild announcement";
+				break;
+			}
+			case Discord.ChannelTypes.AnnouncementThread: {
+				channelTypeFormatted = "announcement thread";
+				break;
+			}
+			case Discord.ChannelTypes.PublicThread: {
+				channelTypeFormatted = "public thread";
+				break;
+			}
+			case Discord.ChannelTypes.PrivateThread: {
+				channelTypeFormatted = "private thread";
+				break;
+			}
+			default:
+				channelTypeFormatted = `unknown channel type (ID ${channel.type})`;
+				break;
 		}
 
 		if (channel.name === undefined) {

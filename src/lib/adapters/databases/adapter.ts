@@ -1,6 +1,6 @@
 import { Collection } from "logos:constants/database";
 import { Client } from "logos/client";
-import { Model, ModelConventions } from "logos/database/model";
+import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
 import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 
@@ -17,7 +17,11 @@ abstract class DatabaseAdapter {
 
 	abstract stop(): Promise<void>;
 
-	abstract conventionsFor({ model }: { model: Model }): ModelConventions;
+	abstract conventionsFor({
+		model,
+		data,
+		collection,
+	}: { model: Model; data: IdentifierDataOrMetadata<Model>; collection: Collection }): ModelConventions;
 
 	abstract openSession({ database }: { database: DatabaseStore }): Promise<DocumentSession>;
 

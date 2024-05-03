@@ -17,16 +17,14 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 
 	abstract get createdAt(): number;
 
-	get idParts(): Generic["idParts"] {
-		return this.#_conventions.idParts;
-	}
-
-	get id(): string {
-		return this.#_conventions.id;
-	}
+	declare id: string;
 
 	get partialId(): string {
 		return this.#_conventions.partialId;
+	}
+
+	get idParts(): Generic["idParts"] {
+		return this.#_conventions.idParts;
 	}
 
 	get collection(): Collection {
@@ -50,8 +48,7 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 
 	constructor(database: DatabaseStore, data: Record<string, unknown>, { collection }: { collection: Collection }) {
-		this.#_conventions = database.conventionsFor({ model: this });
-		this.#_conventions.assignMetadata(data, { collection });
+		this.#_conventions = database.conventionsFor({ model: this, data, collection });
 	}
 
 	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {
@@ -167,12 +164,13 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 
 abstract class ModelConventions<Metadata = any> {
 	readonly model: Model & Metadata;
+	readonly partialId: string;
+	readonly idParts: string[];
+	readonly collection: Collection;
 
-	declare partialId: string;
-	declare idParts: string[];
-	declare collection: Collection;
-
-	abstract get id(): string;
+	get id(): string {
+		throw "UnimplementedError: The `id` is not utilised with these model conventions.";
+	}
 
 	get revision(): string | undefined {
 		return undefined;
@@ -186,28 +184,58 @@ abstract class ModelConventions<Metadata = any> {
 
 	set isDeleted(_: boolean) {}
 
-	constructor({ model }: { model: Model }) {
+	constructor({
+		model,
+		data,
+		collection,
+	}: { model: Model; data: IdentifierDataOrMetadata<Model, Metadata>; collection: Collection }) {
 		this.model = model as Model & Metadata;
+
+		this.#_populateModelData(data, { collection });
+
+		const partialId = this.#_getPartialIdFromData(data);
+		this.collection = collection;
+		this.partialId = partialId;
+		this.idParts = partialId.split(constants.special.database.separator);
+
+		this.assignAccessorsToModel();
+	}
+
+	#_getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {
+		let partialId: string;
+		if (this.hasMetadata(data)) {
+			partialId = Model.decomposeId(this.id)[1];
+		} else {
+			partialId = Model.buildPartialId(data as IdentifierData<Model>);
+		}
+
+		return partialId;
+	}
+
+	#_populateModelData(
+		data: IdentifierDataOrMetadata<Model, Metadata>,
+		{ collection }: { collection: Collection },
+	): void {
+		if (this.hasMetadata(data)) {
+			Object.assign(this.model, data);
+		} else {
+			const id = Model.buildId(data as IdentifierData<Model>, { collection });
+			Object.assign(this.model, this.buildMetadata({ id, collection }));
+		}
+	}
+
+	assignAccessorsToModel(): void {
+		const conventions = this;
+		Object.assign(this.model, {
+			get id(): string {
+				return conventions.id;
+			},
+		});
 	}
 
 	abstract hasMetadata(data: IdentifierDataOrMetadata<Model, Metadata>): boolean;
 
 	abstract buildMetadata({ id, collection }: { id: string; collection: Collection }): Metadata;
-
-	assignMetadata(data: IdentifierDataOrMetadata<Model, Metadata>, { collection }: { collection: Collection }): void {
-		let partialId: string;
-		if (this.hasMetadata(data)) {
-			Object.assign(this.model, data);
-			partialId = Model.decomposeId(this.id)[1];
-		} else {
-			partialId = Model.buildPartialId(data as IdentifierData<Model>);
-			Object.assign(this.model, this.buildMetadata({ id: Model.composeId(partialId, { collection }), collection }));
-		}
-
-		this.collection = collection;
-		this.partialId = partialId;
-		this.idParts = partialId.split(constants.special.database.separator);
-	}
 }
 
 function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {

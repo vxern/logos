@@ -30,8 +30,16 @@ class RavenDBAdapter extends DatabaseAdapter {
 		this.#_database.dispose();
 	}
 
-	conventionsFor({ model }: { model: Model }): ModelConventions {
-		return new RavenDBModelConventions({ model });
+	conventionsFor({
+		model,
+		data,
+		collection,
+	}: {
+		model: Model;
+		data: IdentifierDataOrMetadata<Model, RavenDBDocumentMetadataContainer>;
+		collection: Collection;
+	}): ModelConventions {
+		return new RavenDBModelConventions({ model, data, collection });
 	}
 
 	async openSession({ database }: { database: DatabaseStore }): Promise<RavenDBDocumentSession> {
