@@ -162,6 +162,14 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 }
 
+/**
+ * Represents the set of document storage conventions used by a given database solution.
+ *
+ * Different database solutions define their own conventions and defaults for storing documents. For example, MongoDB
+ * and CouchDB stores the document ID under `_id`, RavenDB stores it under `@metadata.@id`, and RethinkDB stores it as
+ * just `id`. These kinds of differences between give birth to the need for having an object that works alongside models
+ * in accordance to a set of predefined conventions.
+ */
 abstract class ModelConventions<Metadata = any> {
 	readonly model: Model & Metadata;
 	readonly partialId: string;
@@ -170,16 +178,34 @@ abstract class ModelConventions<Metadata = any> {
 
 	abstract get id(): string;
 
+	/**
+	 * @privateRemarks
+	 * Can optionally be overridden by the concrete convention, and by default does not retrieve any underlying value
+	 * for a revision. This is okay because only certain databases have to keep track of revisions, and most of them
+	 * never consult with this value.
+	 */
 	get revision(): string | undefined {
 		return undefined;
 	}
 
+	/**
+	 * @privateRemarks
+	 * Same remarks as for the getter; only some conventions have a use for the revision.
+	 */
 	set revision(_: string) {}
 
+	/**
+	 * @privateRemarks
+	 * Same remarks as for revision.
+	 */
 	get isDeleted(): boolean | undefined {
 		return undefined;
 	}
 
+	/**
+	 * @privateRemarks
+	 * Same remarks as for revision.
+	 */
 	set isDeleted(_: boolean) {}
 
 	constructor({

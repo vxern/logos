@@ -220,7 +220,14 @@ class RethinkDBModelConventions extends ModelConventions<RethinkDBDocumentMetada
 		return { id };
 	}
 
-	assignAccessorsToModel() {}
+	/**
+	 * @privateRemarks
+	 * This method is intentionally empty: The base implementation of this method applies an `id` getter on the managed
+	 * model by default, since in most cases the property stored on the model is not `id` verbatim, but rather something
+	 * like `_id` or `@id`. In the case of RethinkDB, however, the document ID property *is* `id`, so we ought to omit this
+	 * getter assignment.
+ 	 */
+	assignAccessorsToModel(): void {}
 }
 
 export { RethinkDBAdapter, RethinkDBDocumentSession };
