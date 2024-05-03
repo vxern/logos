@@ -27,6 +27,11 @@ interface Environment {
 	readonly deeplSecret?: string;
 	readonly rapidApiSecret?: string;
 	readonly databaseSolution?: string;
+	readonly mongodbUsername?: string;
+	readonly mongodbPassword?: string;
+	readonly mongodbHost?: string;
+	readonly mongodbPort?: string;
+	readonly mongodbDatabase?: string;
 	readonly ravendbHost?: string;
 	readonly ravendbPort?: string;
 	readonly ravendbDatabase?: string;

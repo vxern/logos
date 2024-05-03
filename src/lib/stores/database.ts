@@ -2,6 +2,7 @@ import { Collection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBAdapter } from "logos/adapters/databases/couchdb";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
+import { MongoDBAdapter } from "logos/adapters/databases/mongodb";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb";
 import { Client } from "logos/client";
@@ -81,6 +82,27 @@ class DatabaseStore {
 	static create(client: Client, { certificate }: { certificate?: Buffer } = {}): DatabaseStore {
 		let adapter: DatabaseAdapter | undefined;
 		switch (client.environment.databaseSolution) {
+			case "mongodb": {
+				if (
+					client.environment.mongodbHost === undefined ||
+					client.environment.mongodbPort === undefined ||
+					client.environment.mongodbDatabase === undefined
+				) {
+					client.log.error(
+						"One or more of `MONGODB_HOST`, `MONGODB_PORT` or `MONGODB_DATABASE` have not been provided. Logos will run in memory.",
+					);
+					break;
+				}
+
+				adapter = new MongoDBAdapter(client, {
+					username: client.environment.mongodbUsername,
+					password: client.environment.mongodbPassword,
+					host: client.environment.mongodbHost,
+					port: client.environment.mongodbPort,
+					database: client.environment.mongodbDatabase,
+				});
+				break;
+			}
 			case "ravendb": {
 				if (
 					client.environment.ravendbHost === undefined ||
@@ -132,7 +154,7 @@ class DatabaseStore {
 					client.environment.rethinkdbDatabase === undefined
 				) {
 					client.log.error(
-						"One or more of `RETHINKDB_USERNAME`, `RETHINKDB_PASSWORD`, `RETHINKDB_HOST`, `RETHINKDB_PORT` or `RETHINKDB_DATABASE` have not been provided. Logos will run in memory.",
+						"One or more of `RETHINKDB_HOST`, `RETHINKDB_PORT` or `RETHINKDB_DATABASE` have not been provided. Logos will run in memory.",
 					);
 					break;
 				}
