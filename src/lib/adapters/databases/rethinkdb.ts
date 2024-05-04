@@ -1,7 +1,8 @@
 import { Collection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 
@@ -9,19 +10,37 @@ class RethinkDBAdapter extends DatabaseAdapter {
 	readonly #_connectionOptions: rethinkdb.RConnectionOptions;
 	#_connection!: rethinkdb.Connection;
 
-	constructor(
-		client: Client,
-		{
-			username,
-			password,
-			host,
-			port,
-			database,
-		}: { username?: string; password?: string; host: string; port: string; database: string },
-	) {
-		super(client, { identifier: "RethinkDB" });
+	private constructor({
+		environment,
+		username,
+		password,
+		host,
+		port,
+		database,
+	}: { environment: Environment; username?: string; password?: string; host: string; port: string; database: string }) {
+		super({ environment, identifier: "RethinkDB" });
 
 		this.#_connectionOptions = { host, port: Number(port), db: database, user: username, password };
+	}
+
+	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): RethinkDBAdapter | undefined {
+		if (
+			environment.rethinkdbHost === undefined ||
+			environment.rethinkdbPort === undefined ||
+			environment.rethinkdbDatabase === undefined
+		) {
+			log.error("One or more of `RETHINKDB_HOST`, `RETHINKDB_PORT` or `RETHINKDB_DATABASE` have not been provided.");
+			return undefined;
+		}
+
+		return new RethinkDBAdapter({
+			environment,
+			username: environment.rethinkdbUsername,
+			password: environment.rethinkdbPassword,
+			host: environment.rethinkdbHost,
+			port: environment.rethinkdbPort,
+			database: environment.rethinkdbDatabase,
+		});
 	}
 
 	async start(): Promise<void> {
@@ -45,8 +64,8 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		return new RethinkDBModelConventions({ model, data, collection });
 	}
 
-	async openSession({ database }: { database: DatabaseStore }): Promise<RethinkDBDocumentSession> {
-		return new RethinkDBDocumentSession(this.client, { database, connection: this.#_connection });
+	async openSession({ environment, database }: { environment: Environment; database: DatabaseStore }): Promise<RethinkDBDocumentSession> {
+		return new RethinkDBDocumentSession({ environment, database, connection: this.#_connection });
 	}
 
 	async #_createMissingTables(): Promise<void> {
@@ -83,8 +102,12 @@ interface RethinkDBDocument extends RethinkDBDocumentMetadata {
 class RethinkDBDocumentSession extends DocumentSession {
 	readonly #_connection: rethinkdb.Connection;
 
-	constructor(client: Client, { database, connection }: { database: DatabaseStore; connection: rethinkdb.Connection }) {
-		super(client, { identifier: "RethinkDB", database });
+	constructor({
+		environment,
+		database,
+		connection,
+	}: { environment: Environment; database: DatabaseStore; connection: rethinkdb.Connection }) {
+		super({ identifier: "RethinkDB", environment, database });
 
 		this.#_connection = connection;
 	}

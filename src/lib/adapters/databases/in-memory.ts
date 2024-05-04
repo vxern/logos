@@ -1,12 +1,12 @@
 import { Collection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 
 class InMemoryAdapter extends DatabaseAdapter {
-	constructor(client: Client) {
-		super(client, { identifier: "InMemory" });
+	constructor({ environment }: { environment: Environment }) {
+		super({ environment, identifier: "InMemory" });
 	}
 
 	async start(): Promise<void> {}
@@ -25,16 +25,19 @@ class InMemoryAdapter extends DatabaseAdapter {
 		return new InMemoryConventions({ model, data, collection });
 	}
 
-	async openSession({ database }: { database: DatabaseStore }): Promise<InMemoryDocumentSession> {
-		return new InMemoryDocumentSession(this.client, { database });
+	async openSession({
+		environment,
+		database,
+	}: { environment: Environment; database: DatabaseStore }): Promise<InMemoryDocumentSession> {
+		return new InMemoryDocumentSession({ environment, database });
 	}
 }
 
 class InMemoryDocumentSession extends DocumentSession {
 	readonly #_documents: Record<Collection, Map<string, Model>>;
 
-	constructor(client: Client, { database }: { database: DatabaseStore }) {
-		super(client, { identifier: "InMemory", database });
+	constructor({ environment, database }: { environment: Environment; database: DatabaseStore }) {
+		super({ environment, identifier: "InMemory", database });
 
 		this.#_documents = Object.fromEntries(
 			constants.database.collections.map((collection) => [collection, new Map()]),

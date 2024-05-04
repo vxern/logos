@@ -5,7 +5,7 @@ import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
 import { MongoDBAdapter } from "logos/adapters/databases/mongodb";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
@@ -49,6 +49,7 @@ class DatabaseStore {
 		Warnings: Warning,
 	} as const);
 
+	readonly #_environment: Environment;
 	readonly #_adapter: DatabaseAdapter;
 
 	get conventionsFor(): DatabaseAdapter["conventionsFor"] {
@@ -56,10 +57,10 @@ class DatabaseStore {
 	}
 
 	get withSession(): <T>(callback: (session: DocumentSession) => Promise<T>) => Promise<T> {
-		return (callback) => this.#_adapter.withSession(callback, { database: this });
+		return (callback) => this.#_adapter.withSession(callback, { environment: this.#_environment, database: this });
 	}
 
-	private constructor(client: Client, { adapter }: { adapter: DatabaseAdapter }) {
+	private constructor({ environment, adapter }: { environment: Environment; adapter: DatabaseAdapter }) {
 		this.cache = {
 			entryRequests: new Map(),
 			guildStats: new Map(),
@@ -74,117 +75,48 @@ class DatabaseStore {
 			warningsByTarget: new Map(),
 		};
 
-		this.#log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: client.environment.isDebug });
+		this.#log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: environment.isDebug });
 
+		this.#_environment = environment;
 		this.#_adapter = adapter;
 	}
 
-	static create(client: Client, { certificate }: { certificate?: Buffer } = {}): DatabaseStore {
-		let adapter: DatabaseAdapter | undefined;
-		switch (client.environment.databaseSolution) {
-			case "mongodb": {
-				if (
-					client.environment.mongodbHost === undefined ||
-					client.environment.mongodbPort === undefined ||
-					client.environment.mongodbDatabase === undefined
-				) {
-					client.log.error(
-						"One or more of `MONGODB_HOST`, `MONGODB_PORT` or `MONGODB_DATABASE` have not been provided. Logos will run in memory.",
-					);
-					break;
-				}
+	static async create({ environment }: { environment: Environment }): Promise<DatabaseStore> {
+		const log = Logger.create({ identifier: "DatabaseStore", isDebug: environment.isDebug });
 
-				adapter = new MongoDBAdapter(client, {
-					username: client.environment.mongodbUsername,
-					password: client.environment.mongodbPassword,
-					host: client.environment.mongodbHost,
-					port: client.environment.mongodbPort,
-					database: client.environment.mongodbDatabase,
-				});
+		let adapter: DatabaseAdapter | undefined;
+		switch (environment.databaseSolution) {
+			case "mongodb": {
+				adapter = MongoDBAdapter.tryCreate({ environment, log });
 				break;
 			}
 			case "ravendb": {
-				if (
-					client.environment.ravendbHost === undefined ||
-					client.environment.ravendbPort === undefined ||
-					client.environment.ravendbDatabase === undefined
-				) {
-					client.log.error(
-						"One or more of `RAVENDB_HOST`, `RAVENDB_PORT` or `RAVENDB_DATABASE` have not been provided. Logos will run in memory.",
-					);
-					break;
-				}
-
-				adapter = new RavenDBAdapter(client, {
-					host: client.environment.ravendbHost,
-					port: client.environment.ravendbPort,
-					database: client.environment.ravendbDatabase,
-					certificate,
-				});
+				adapter = await RavenDBAdapter.tryCreate({ environment, log });
 				break;
 			}
 			case "couchdb": {
-				if (
-					client.environment.couchdbUsername === undefined ||
-					client.environment.couchdbPassword === undefined ||
-					client.environment.couchdbHost === undefined ||
-					client.environment.couchdbPort === undefined ||
-					client.environment.couchdbDatabase === undefined
-				) {
-					client.log.error(
-						"One or more of `COUCHDB_USERNAME`, `COUCHDB_PASSWORD`, `COUCHDB_HOST`, `COUCHDB_PORT` or `COUCHDB_DATABASE` have not been provided. Logos will run in memory.",
-					);
-					break;
-				}
-
-				adapter = new CouchDBAdapter(client, {
-					username: client.environment.couchdbUsername,
-					password: client.environment.couchdbPassword,
-					protocol: client.environment.couchdbProtocol,
-					host: client.environment.couchdbHost,
-					port: client.environment.couchdbPort,
-					database: client.environment.couchdbDatabase,
-				});
+				adapter = CouchDBAdapter.tryCreate({ environment, log });
 				break;
 			}
 			case "rethinkdb": {
-				if (
-					client.environment.rethinkdbHost === undefined ||
-					client.environment.rethinkdbPort === undefined ||
-					client.environment.rethinkdbDatabase === undefined
-				) {
-					client.log.error(
-						"One or more of `RETHINKDB_HOST`, `RETHINKDB_PORT` or `RETHINKDB_DATABASE` have not been provided. Logos will run in memory.",
-					);
-					break;
-				}
-
-				adapter = new RethinkDBAdapter(client, {
-					username: client.environment.rethinkdbUsername,
-					password: client.environment.rethinkdbPassword,
-					host: client.environment.rethinkdbHost,
-					port: client.environment.rethinkdbPort,
-					database: client.environment.rethinkdbDatabase,
-				});
-				break;
-			}
-			default: {
-				if (client.environment.databaseSolution === undefined) {
-					client.log.error(
-						"`DATABASE_SOLUTION` was not provided. Logos will run in memory. If this was intentional, explicitly define `DATABASE_SOLUTION` as 'none'.",
-					);
-				}
-
-				client.log.info("Logos is running in memory. Data will not persist in-between sessions.");
+				adapter = RethinkDBAdapter.tryCreate({ environment, log });
 				break;
 			}
 		}
 
 		if (adapter === undefined) {
-			adapter = new InMemoryAdapter(client);
+			if (environment.databaseSolution !== undefined) {
+				log.error(
+					"`DATABASE_SOLUTION` was not provided. If this was intentional, explicitly define `DATABASE_SOLUTION` as 'none'.",
+				);
+			}
+
+			log.info("Logos is running in memory. Data will not persist in-between sessions.");
+
+			adapter = new InMemoryAdapter({ environment });
 		}
 
-		return new DatabaseStore(client, { adapter });
+		return new DatabaseStore({ environment, adapter });
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {

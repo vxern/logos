@@ -1,16 +1,14 @@
 import { Collection } from "logos:constants/database";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
 import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 
 abstract class DatabaseAdapter {
 	readonly log: Logger;
-	readonly client: Client;
 
-	constructor(client: Client, { identifier }: { identifier: string }) {
-		this.log = Logger.create({ identifier: `DatabaseAdapter(${identifier})`, isDebug: client.environment.isDebug });
-		this.client = client;
+	constructor({ identifier, environment }: { identifier: string; environment: Environment }) {
+		this.log = Logger.create({ identifier: `DatabaseAdapter(${identifier})`, isDebug: environment.isDebug });
 	}
 
 	abstract start(): Promise<void>;
@@ -23,13 +21,16 @@ abstract class DatabaseAdapter {
 		collection,
 	}: { model: Model; data: IdentifierDataOrMetadata<Model>; collection: Collection }): ModelConventions;
 
-	abstract openSession({ database }: { database: DatabaseStore }): Promise<DocumentSession>;
+	abstract openSession({
+		environment,
+		database,
+	}: { environment: Environment; database: DatabaseStore }): Promise<DocumentSession>;
 
 	async withSession<T>(
 		callback: (session: DocumentSession) => Promise<T>,
-		{ database }: { database: DatabaseStore },
+		{ environment, database }: { environment: Environment; database: DatabaseStore },
 	): Promise<T> {
-		const session = await this.openSession({ database });
+		const session = await this.openSession({ environment, database });
 
 		const result = await callback(session);
 
@@ -43,8 +44,12 @@ abstract class DocumentSession {
 	readonly log: Logger;
 	readonly database: DatabaseStore;
 
-	constructor(client: Client, { identifier, database }: { identifier: string; database: DatabaseStore }) {
-		this.log = Logger.create({ identifier: `DocumentSession(${identifier})`, isDebug: client.environment.isDebug });
+	constructor({
+		identifier,
+		environment,
+		database,
+	}: { environment: Environment; identifier: string; database: DatabaseStore }) {
+		this.log = Logger.create({ identifier: `DocumentSession(${identifier})`, isDebug: environment.isDebug });
 		this.database = database;
 	}
 

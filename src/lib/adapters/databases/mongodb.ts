@@ -1,7 +1,8 @@
 import { Collection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 import mongodb from "mongodb";
 
@@ -9,17 +10,15 @@ class MongoDBAdapter extends DatabaseAdapter {
 	readonly #_mongoClient: mongodb.MongoClient;
 	readonly #_database: string;
 
-	constructor(
-		client: Client,
-		{
-			username,
-			password,
-			host,
-			port,
-			database,
-		}: { username?: string; password?: string; host: string; port: string; database: string },
-	) {
-		super(client, { identifier: "MongoDB" });
+	constructor({
+		environment,
+		username,
+		password,
+		host,
+		port,
+		database,
+	}: { environment: Environment; username?: string; password?: string; host: string; port: string; database: string }) {
+		super({ environment, identifier: "MongoDB" });
 
 		this.#_mongoClient = new mongodb.MongoClient(`mongodb://${host}:${port}`, {
 			auth: {
@@ -28,6 +27,28 @@ class MongoDBAdapter extends DatabaseAdapter {
 			},
 		});
 		this.#_database = database;
+	}
+
+	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): MongoDBAdapter | undefined {
+		if (
+			environment.mongodbHost === undefined ||
+			environment.mongodbPort === undefined ||
+			environment.mongodbDatabase === undefined
+		) {
+			log.error(
+				"One or more of `MONGODB_HOST`, `MONGODB_PORT` or `MONGODB_DATABASE` have not been provided. Logos will run in memory.",
+			);
+			return undefined;
+		}
+
+		return new MongoDBAdapter({
+			environment,
+			username: environment.mongodbUsername,
+			password: environment.mongodbPassword,
+			host: environment.mongodbHost,
+			port: environment.mongodbPort,
+			database: environment.mongodbDatabase,
+		});
 	}
 
 	async start(): Promise<void> {
@@ -50,9 +71,12 @@ class MongoDBAdapter extends DatabaseAdapter {
 		return new MongoDBModelConventions({ model, data, collection });
 	}
 
-	async openSession({ database }: { database: DatabaseStore }): Promise<MongoDBDocumentSession> {
+	async openSession({
+		environment,
+		database,
+	}: { environment: Environment; database: DatabaseStore }): Promise<MongoDBDocumentSession> {
 		const mongoDatabase = this.#_mongoClient.db(this.#_database);
-		return new MongoDBDocumentSession(this.client, { database, mongoDatabase });
+		return new MongoDBDocumentSession({ environment, database, mongoDatabase });
 	}
 }
 
@@ -68,8 +92,12 @@ interface MongoDBDocument extends MongoDBDocumentMetadata {
 class MongoDBDocumentSession extends DocumentSession {
 	readonly #_mongoDatabase: mongodb.Db;
 
-	constructor(client: Client, { database, mongoDatabase }: { database: DatabaseStore; mongoDatabase: mongodb.Db }) {
-		super(client, { identifier: "MongoDB", database });
+	constructor({
+		environment,
+		database,
+		mongoDatabase,
+	}: { environment: Environment; database: DatabaseStore; mongoDatabase: mongodb.Db }) {
+		super({ identifier: "MongoDB", environment, database });
 
 		this.#_mongoDatabase = mongoDatabase;
 	}
@@ -94,7 +122,9 @@ class MongoDBDocumentSession extends DocumentSession {
 
 	async store<M extends Model>(document: M): Promise<void> {
 		const [collection, _] = Model.decomposeId(document.id);
-		await this.#_mongoDatabase.collection<MongoDBDocument>(collection).updateOne({ _id: document.id }, { $set: document as unknown as MongoDBDocument }, { upsert: true });
+		await this.#_mongoDatabase
+			.collection<MongoDBDocument>(collection)
+			.updateOne({ _id: document.id }, { $set: document as unknown as MongoDBDocument }, { upsert: true });
 	}
 
 	query<M extends Model>({ collection }: { collection: Collection }): MongoDBDocumentQuery<M> {

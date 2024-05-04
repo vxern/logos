@@ -38,7 +38,7 @@ interface Environment {
 	readonly ravendbSecure?: boolean;
 	readonly couchdbUsername?: string;
 	readonly couchdbPassword?: string;
-	readonly couchdbProtocol?: string;
+	readonly couchdbProtocol: string;
 	readonly couchdbHost?: string;
 	readonly couchdbPort?: string;
 	readonly couchdbDatabase?: string;
@@ -283,20 +283,20 @@ class Client {
 
 	private constructor({
 		environment,
-		certificate,
 		log,
+		database,
 		bot,
 		localisations,
 	}: {
 		environment: Environment;
-		certificate?: Buffer;
 		log: Logger;
+		database: DatabaseStore;
 		bot: Discord.Bot;
 		localisations: RawLocalisations;
 	}) {
 		this.environment = environment;
 		this.log = log;
-		this.database = DatabaseStore.create(this, { certificate });
+		this.database = database;
 		this.cache = new Cache(this);
 		this.diagnostics = new Diagnostics(this);
 
@@ -326,11 +326,9 @@ class Client {
 	static async create({
 		environment,
 		localisations,
-		certificate,
 	}: {
 		environment: Environment;
 		localisations: RawLocalisations;
-		certificate?: Buffer;
 	}): Promise<Client> {
 		if (Client.#client !== undefined) {
 			return Client.#client;
@@ -362,7 +360,9 @@ class Client {
 			},
 		});
 
-		const client = new Client({ environment, certificate, log, bot, localisations });
+		const database = await DatabaseStore.create({ environment });
+
+		const client = new Client({ environment, log, database, bot, localisations });
 
 		Client.#client = client;
 

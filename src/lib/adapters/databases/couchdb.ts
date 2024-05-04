@@ -1,27 +1,32 @@
 import { Collection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 import nano from "nano";
 
 class CouchDBAdapter extends DatabaseAdapter {
 	readonly #_documents: nano.DocumentScope<unknown>;
 
-	constructor(
-		client: Client,
-		{
-			username,
-			password,
-			protocol,
-			host,
-			port,
-			database,
-		}: { username?: string; password?: string; protocol?: string; host: string; port: string; database: string },
-	) {
-		super(client, { identifier: "CouchDB" });
-
-		protocol ??= "http";
+	private constructor({
+		environment,
+		username,
+		password,
+		protocol,
+		host,
+		port,
+		database,
+	}: {
+		environment: Environment;
+		username: string;
+		password: string;
+		protocol: string;
+		host: string;
+		port: string;
+		database: string;
+	}) {
+		super({ identifier: "CouchDB", environment });
 
 		let url: string;
 		if (username !== undefined) {
@@ -41,6 +46,31 @@ class CouchDBAdapter extends DatabaseAdapter {
 		this.#_documents = server.db.use(database);
 	}
 
+	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): CouchDBAdapter | undefined {
+		if (
+			environment.couchdbUsername === undefined ||
+			environment.couchdbPassword === undefined ||
+			environment.couchdbHost === undefined ||
+			environment.couchdbPort === undefined ||
+			environment.couchdbDatabase === undefined
+		) {
+			log.error(
+				"One or more of `COUCHDB_USERNAME`, `COUCHDB_PASSWORD`, `COUCHDB_HOST`, `COUCHDB_PORT` or `COUCHDB_DATABASE` have not been provided.",
+			);
+			return undefined;
+		}
+
+		return new CouchDBAdapter({
+			environment,
+			username: environment.couchdbUsername,
+			password: environment.couchdbPassword,
+			protocol: environment.couchdbProtocol,
+			host: environment.couchdbHost,
+			port: environment.couchdbPort,
+			database: environment.couchdbDatabase,
+		});
+	}
+
 	async start(): Promise<void> {}
 
 	async stop(): Promise<void> {}
@@ -57,8 +87,11 @@ class CouchDBAdapter extends DatabaseAdapter {
 		return new CouchDBModelConventions({ model, data, collection });
 	}
 
-	async openSession({ database }: { database: DatabaseStore }): Promise<CouchDBDocumentSession> {
-		return new CouchDBDocumentSession(this.client, { database, documents: this.#_documents });
+	async openSession({
+		environment,
+		database,
+	}: { environment: Environment; database: DatabaseStore }): Promise<CouchDBDocumentSession> {
+		return new CouchDBDocumentSession({ environment, database, documents: this.#_documents });
 	}
 }
 
@@ -71,11 +104,12 @@ interface CouchDBDocument extends CouchDBDocumentMetadata {
 class CouchDBDocumentSession extends DocumentSession {
 	readonly #_documents: nano.DocumentScope<unknown>;
 
-	constructor(
-		client: Client,
-		{ database, documents }: { database: DatabaseStore; documents: nano.DocumentScope<unknown> },
-	) {
-		super(client, { identifier: "CouchDB", database });
+	constructor({
+		environment,
+		database,
+		documents,
+	}: { environment: Environment; database: DatabaseStore; documents: nano.DocumentScope<unknown> }) {
+		super({ identifier: "CouchDB", environment, database });
 
 		this.#_documents = documents;
 	}

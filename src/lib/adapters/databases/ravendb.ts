@@ -1,18 +1,23 @@
+import fs from "node:fs/promises";
 import { Collection, isValidCollection } from "logos:constants/database";
 import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 import * as ravendb from "ravendb";
 
 class RavenDBAdapter extends DatabaseAdapter {
 	readonly #_database: ravendb.DocumentStore;
 
-	constructor(
-		client: Client,
-		{ host, port, database, certificate }: { database: string; host: string; port: string; certificate?: Buffer },
-	) {
-		super(client, { identifier: "RavenDB" });
+	private constructor({
+		environment,
+		host,
+		port,
+		database,
+		certificate,
+	}: { environment: Environment; host: string; port: string; database: string; certificate?: Buffer }) {
+		super({ identifier: "RavenDB", environment });
 
 		const url = `${host}:${port}`;
 		if (certificate !== undefined) {
@@ -20,6 +25,33 @@ class RavenDBAdapter extends DatabaseAdapter {
 		} else {
 			this.#_database = new ravendb.DocumentStore(url, database);
 		}
+	}
+
+	static async tryCreate({
+		environment,
+		log,
+	}: { environment: Environment; log: Logger }): Promise<RavenDBAdapter | undefined> {
+		if (
+			environment.ravendbHost === undefined ||
+			environment.ravendbPort === undefined ||
+			environment.ravendbDatabase === undefined
+		) {
+			log.error("One or more of `RAVENDB_HOST`, `RAVENDB_PORT` or `RAVENDB_DATABASE` have not been provided.");
+			return undefined;
+		}
+
+		let certificate: Buffer | undefined;
+		if (environment.ravendbSecure) {
+			certificate = await fs.readFile(".cert.pfx");
+		}
+
+		return new RavenDBAdapter({
+			environment,
+			host: environment.ravendbHost,
+			port: environment.ravendbPort,
+			database: environment.ravendbDatabase,
+			certificate,
+		});
 	}
 
 	async start(): Promise<void> {
@@ -42,10 +74,13 @@ class RavenDBAdapter extends DatabaseAdapter {
 		return new RavenDBModelConventions({ model, data, collection });
 	}
 
-	async openSession({ database }: { database: DatabaseStore }): Promise<RavenDBDocumentSession> {
+	async openSession({
+		environment,
+		database,
+	}: { environment: Environment; database: DatabaseStore }): Promise<RavenDBDocumentSession> {
 		const rawSession = this.#_database.openSession();
 
-		return new RavenDBDocumentSession(this.client, { database, session: rawSession });
+		return new RavenDBDocumentSession({ environment, database, session: rawSession });
 	}
 }
 
@@ -66,8 +101,12 @@ interface RavenDBDocument extends RavenDBDocumentMetadataContainer {
 class RavenDBDocumentSession extends DocumentSession {
 	readonly #_session: ravendb.IDocumentSession;
 
-	constructor(client: Client, { database, session }: { database: DatabaseStore; session: ravendb.IDocumentSession }) {
-		super(client, { identifier: "RavenDB", database });
+	constructor({
+		environment,
+		database,
+		session,
+	}: { environment: Environment; database: DatabaseStore; session: ravendb.IDocumentSession }) {
+		super({ identifier: "RavenDB", environment, database });
 
 		this.#_session = session;
 

@@ -118,8 +118,8 @@ async function setup(): Promise<void> {
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
 		databaseSolution: process.env.DATABASE_SOLUTION,
-		mongodbUsername: process.env.MONGODB_USERNAME,
-		mongodbPassword: process.env.MONGODB_PASSWORD,
+		mongodbUsername: process.env.MONGODB_USERNAME || undefined,
+		mongodbPassword: process.env.MONGODB_PASSWORD || undefined,
 		mongodbHost: process.env.MONGODB_HOST,
 		mongodbPort: process.env.MONGODB_PORT,
 		mongodbDatabase: process.env.MONGODB_DATABASE,
@@ -129,12 +129,12 @@ async function setup(): Promise<void> {
 		ravendbSecure: process.env.RAVENDB_SECURE === "true",
 		couchdbUsername: process.env.COUCHDB_USERNAME,
 		couchdbPassword: process.env.COUCHDB_PASSWORD,
-		couchdbProtocol: process.env.COUCHDB_PROTOCOL,
+		couchdbProtocol: process.env.COUCHDB_PROTOCOL ?? "http",
 		couchdbHost: process.env.COUCHDB_HOST,
 		couchdbPort: process.env.COUCHDB_PORT,
 		couchdbDatabase: process.env.COUCHDB_DATABASE,
-		rethinkdbUsername: process.env.RETHINKDB_USERNAME,
-		rethinkdbPassword: process.env.RETHINKDB_PASSWORD,
+		rethinkdbUsername: process.env.RETHINKDB_USERNAME || undefined,
+		rethinkdbPassword: process.env.RETHINKDB_PASSWORD || undefined,
 		rethinkdbHost: process.env.RETHINKDB_HOST,
 		rethinkdbPort: process.env.RETHINKDB_PORT,
 		rethinkdbDatabase: process.env.RETHINKDB_DATABASE,
@@ -148,12 +148,7 @@ async function setup(): Promise<void> {
 
 	const localisations = await loadLocalisations("./assets/localisations");
 
-	let certificate: Buffer | undefined;
-	if (environment.databaseSolution === "ravendb" && environment.ravendbSecure) {
-		certificate = await fs.readFile(".cert.pfx");
-	}
-
-	const client = await Client.create({ environment, localisations, certificate });
+	const client = await Client.create({ environment, localisations });
 
 	await client.start();
 }
