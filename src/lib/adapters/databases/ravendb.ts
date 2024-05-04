@@ -71,7 +71,7 @@ class RavenDBAdapter extends DatabaseAdapter {
 		data: IdentifierDataOrMetadata<Model, RavenDBDocumentMetadataContainer>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new RavenDBModelConventions({ document, data, collection });
+		return new RavenDBDocumentConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -120,7 +120,7 @@ class RavenDBDocumentSession extends DocumentSession {
 			return undefined;
 		}
 
-		return RavenDBModelConventions.instantiateModel<M>(this.database, rawDocument as RavenDBDocument);
+		return RavenDBDocumentConventions.instantiateModel<M>(this.database, rawDocument as RavenDBDocument);
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
@@ -132,7 +132,7 @@ class RavenDBDocumentSession extends DocumentSession {
 				continue;
 			}
 
-			documents.push(RavenDBModelConventions.instantiateModel<M>(this.database, rawDocument as RavenDBDocument));
+			documents.push(RavenDBDocumentConventions.instantiateModel<M>(this.database, rawDocument as RavenDBDocument));
 		}
 
 		return documents;
@@ -177,11 +177,11 @@ class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 
 	async execute(): Promise<M[]> {
 		const rawDocuments = await this.#_query.all();
-		return rawDocuments.map((document) => RavenDBModelConventions.instantiateModel(this.#_database, document));
+		return rawDocuments.map((document) => RavenDBDocumentConventions.instantiateModel(this.#_database, document));
 	}
 }
 
-class RavenDBModelConventions extends DocumentConventions<RavenDBDocumentMetadataContainer> {
+class RavenDBDocumentConventions extends DocumentConventions<RavenDBDocumentMetadataContainer> {
 	get id(): string {
 		return this.document["@metadata"]["@id"];
 	}

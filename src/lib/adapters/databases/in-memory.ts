@@ -22,7 +22,7 @@ class InMemoryAdapter extends DatabaseAdapter {
 		data: IdentifierDataOrMetadata<Model, InMemoryDocumentMetadata>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new InMemoryConventions({ document, data, collection });
+		return new InMemoryDocumentConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -149,7 +149,7 @@ interface InMemoryDocumentMetadata {
 	_isDeleted?: boolean;
 }
 
-class InMemoryConventions extends DocumentConventions<InMemoryDocumentMetadata> {
+class InMemoryDocumentConventions extends DocumentConventions<InMemoryDocumentMetadata> {
 	get id(): string {
 		return this.document._id;
 	}

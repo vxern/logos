@@ -84,7 +84,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		data: IdentifierDataOrMetadata<Model, CouchDBDocumentMetadata>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new CouchDBModelConventions({ document, data, collection });
+		return new CouchDBDocumentConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -126,7 +126,7 @@ class CouchDBDocumentSession extends DocumentSession {
 			return undefined;
 		}
 
-		return CouchDBModelConventions.instantiateModel<M>(this.database, rawDocument as CouchDBDocument);
+		return CouchDBDocumentConventions.instantiateModel<M>(this.database, rawDocument as CouchDBDocument);
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
@@ -154,7 +154,7 @@ class CouchDBDocumentSession extends DocumentSession {
 			const row = result as nano.DocumentResponseRow<CouchDBDocument>;
 			const rowDocument = row.doc!;
 
-			documents.push(CouchDBModelConventions.instantiateModel<M>(this.database, rowDocument));
+			documents.push(CouchDBDocumentConventions.instantiateModel<M>(this.database, rowDocument));
 		}
 
 		return documents;
@@ -220,7 +220,7 @@ class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}
 }
 
-class CouchDBModelConventions extends DocumentConventions<CouchDBDocumentMetadata> {
+class CouchDBDocumentConventions extends DocumentConventions<CouchDBDocumentMetadata> {
 	get id(): string {
 		return this.document._id;
 	}

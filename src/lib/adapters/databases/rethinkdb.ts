@@ -61,7 +61,7 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		data: IdentifierDataOrMetadata<Model, RethinkDBDocumentMetadata>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new RethinkDBModelConventions({ document, data, collection });
+		return new RethinkDBDocumentConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -124,7 +124,7 @@ class RethinkDBDocumentSession extends DocumentSession {
 			return undefined;
 		}
 
-		return RethinkDBModelConventions.instantiateModel<M>(this.database, rawDocument);
+		return RethinkDBDocumentConventions.instantiateModel<M>(this.database, rawDocument);
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
@@ -137,7 +137,7 @@ class RethinkDBDocumentSession extends DocumentSession {
 					// https://github.com/rethinkdb/rethinkdb-ts/issues/126
 					.getAll<RethinkDBDocument>(rethinkdb.r.table(collection), ...ids)
 					.run(this.#_connection),
-			instantiateModel: (database, rawDocument) => RethinkDBModelConventions.instantiateModel<M>(database, rawDocument),
+			instantiateModel: (database, rawDocument) => RethinkDBDocumentConventions.instantiateModel<M>(database, rawDocument),
 		});
 	}
 
@@ -198,12 +198,12 @@ class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	async execute(): Promise<M[]> {
 		const rawDocuments = await this.#_query.run(this.#_connection);
 		return rawDocuments.map((rawDocument) =>
-			RethinkDBModelConventions.instantiateModel<M>(this.#_database, rawDocument),
+			RethinkDBDocumentConventions.instantiateModel<M>(this.#_database, rawDocument),
 		);
 	}
 }
 
-class RethinkDBModelConventions extends DocumentConventions<RethinkDBDocumentMetadata> {
+class RethinkDBDocumentConventions extends DocumentConventions<RethinkDBDocumentMetadata> {
 	get id(): string {
 		return this.document.id;
 	}

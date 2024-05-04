@@ -68,7 +68,7 @@ class MongoDBAdapter extends DatabaseAdapter {
 		data: IdentifierDataOrMetadata<Model, MongoDBDocumentMetadata>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new MongoDBModelConventions({ document, data, collection });
+		return new MongoDBDocumentConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -109,14 +109,14 @@ class MongoDBDocumentSession extends DocumentSession {
 			return undefined;
 		}
 
-		return MongoDBModelConventions.instantiateModel<M>(this.database, rawDocument as MongoDBDocument);
+		return MongoDBDocumentConventions.instantiateModel<M>(this.database, rawDocument as MongoDBDocument);
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
 		return this.loadManyTabulated<M, MongoDBDocument>(ids, {
 			loadMany: (ids, { collection }) =>
 				this.#_mongoDatabase.collection<MongoDBDocument>(collection).find({ _id: ids }).toArray(),
-			instantiateModel: (database, rawDocument) => MongoDBModelConventions.instantiateModel<M>(database, rawDocument),
+			instantiateModel: (database, rawDocument) => MongoDBDocumentConventions.instantiateModel<M>(database, rawDocument),
 		});
 	}
 
@@ -173,12 +173,12 @@ class MongoDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 			.find(this.#_filter)
 			.toArray();
 		return rawDocuments.map((rawDocument) =>
-			MongoDBModelConventions.instantiateModel(this.#_session.database, rawDocument),
+			MongoDBDocumentConventions.instantiateModel(this.#_session.database, rawDocument),
 		);
 	}
 }
 
-class MongoDBModelConventions extends DocumentConventions<MongoDBDocumentMetadata> {
+class MongoDBDocumentConventions extends DocumentConventions<MongoDBDocumentMetadata> {
 	get id(): string {
 		return this.document._id;
 	}
