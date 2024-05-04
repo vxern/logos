@@ -8,12 +8,17 @@ services:
   #     RAVEN_ServerUrl_Tcp: "tcp://0.0.0.0:38888"
   #   ports:
   #     - "8080:8080"
-  couchdb:
-    image: "couchdb:latest"
+  # couchdb:
+  #   image: "couchdb:latest"
+  #   ports:
+  #     - "5984:5984"
+  #   volumes:
+  #     - ./local.ini:/opt/couchdb/etc/local.ini
+  rethinkdb:
+    image: "rethinkdb:2.4.4-bookworm-slim"
     ports:
-      - "5984:5984"
-    volumes:
-      - ./local.ini:/opt/couchdb/etc/local.ini
+      - "8080:8080"
+      - "28015:28015"
   redis:
     image: "redis:alpine"
     ports:
