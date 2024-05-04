@@ -94,7 +94,7 @@ class MongoDBDocumentSession extends DocumentSession {
 
 	async store<M extends Model>(document: M): Promise<void> {
 		const [collection, _] = Model.decomposeId(document.id);
-		await this.#_mongoDatabase.collection(collection).insertOne(document);
+		await this.#_mongoDatabase.collection<MongoDBDocument>(collection).updateOne({ _id: document.id }, { $set: document as unknown as MongoDBDocument }, { upsert: true });
 	}
 
 	query<M extends Model>({ collection }: { collection: Collection }): MongoDBDocumentQuery<M> {
