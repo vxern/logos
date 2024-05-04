@@ -1,7 +1,7 @@
 import { Collection } from "logos:constants/database";
-import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
+import { DatabaseAdapter, DocumentConventions, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
 import { Environment } from "logos/client";
-import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 import mongodb from "mongodb";
@@ -67,7 +67,7 @@ class MongoDBAdapter extends DatabaseAdapter {
 		model: Model;
 		data: IdentifierDataOrMetadata<Model, MongoDBDocumentMetadata>;
 		collection: Collection;
-	}): ModelConventions {
+	}): DocumentConventions {
 		return new MongoDBModelConventions({ model, data, collection });
 	}
 
@@ -178,7 +178,7 @@ class MongoDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}
 }
 
-class MongoDBModelConventions extends ModelConventions<MongoDBDocumentMetadata> {
+class MongoDBModelConventions extends DocumentConventions<MongoDBDocumentMetadata> {
 	get id(): string {
 		return this.model._id;
 	}

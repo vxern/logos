@@ -1,7 +1,7 @@
 import { Collection } from "logos:constants/database";
-import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
+import { DatabaseAdapter, DocumentConventions, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
 import { Environment } from "logos/client";
-import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 
 class InMemoryAdapter extends DatabaseAdapter {
@@ -21,7 +21,7 @@ class InMemoryAdapter extends DatabaseAdapter {
 		model: Model;
 		data: IdentifierDataOrMetadata<Model, InMemoryDocumentMetadata>;
 		collection: Collection;
-	}): ModelConventions {
+	}): DocumentConventions {
 		return new InMemoryConventions({ model, data, collection });
 	}
 
@@ -149,7 +149,7 @@ interface InMemoryDocumentMetadata {
 	_isDeleted?: boolean;
 }
 
-class InMemoryConventions extends ModelConventions<InMemoryDocumentMetadata> {
+class InMemoryConventions extends DocumentConventions<InMemoryDocumentMetadata> {
 	get id(): string {
 		return this.model._id;
 	}

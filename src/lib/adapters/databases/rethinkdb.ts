@@ -1,7 +1,7 @@
 import { Collection } from "logos:constants/database";
-import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
+import { DatabaseAdapter, DocumentConventions, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
 import { Environment } from "logos/client";
-import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
@@ -60,11 +60,14 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		model: Model;
 		data: IdentifierDataOrMetadata<Model, RethinkDBDocumentMetadata>;
 		collection: Collection;
-	}): ModelConventions {
+	}): DocumentConventions {
 		return new RethinkDBModelConventions({ model, data, collection });
 	}
 
-	async openSession({ environment, database }: { environment: Environment; database: DatabaseStore }): Promise<RethinkDBDocumentSession> {
+	async openSession({
+		environment,
+		database,
+	}: { environment: Environment; database: DatabaseStore }): Promise<RethinkDBDocumentSession> {
 		return new RethinkDBDocumentSession({ environment, database, connection: this.#_connection });
 	}
 
@@ -200,7 +203,7 @@ class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}
 }
 
-class RethinkDBModelConventions extends ModelConventions<RethinkDBDocumentMetadata> {
+class RethinkDBModelConventions extends DocumentConventions<RethinkDBDocumentMetadata> {
 	get id(): string {
 		return this.model.id;
 	}

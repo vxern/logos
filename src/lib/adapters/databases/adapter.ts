@@ -1,6 +1,6 @@
 import { Collection } from "logos:constants/database";
 import { Environment } from "logos/client";
-import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { IdentifierData, IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 
@@ -19,7 +19,7 @@ abstract class DatabaseAdapter {
 		model,
 		data,
 		collection,
-	}: { model: Model; data: IdentifierDataOrMetadata<Model>; collection: Collection }): ModelConventions;
+	}: { model: Model; data: IdentifierDataOrMetadata<Model>; collection: Collection }): DocumentConventions;
 
 	abstract openSession({
 		environment,
@@ -158,4 +158,113 @@ abstract class DocumentQuery<M extends Model> {
 	abstract execute(): Promise<M[]>;
 }
 
-export { DatabaseAdapter, DocumentSession, DocumentQuery };
+/**
+ * Represents the set of document storage conventions used by a given database solution.
+ *
+ * Different database solutions define their own conventions and defaults for storing documents. For example, MongoDB
+ * and CouchDB stores the document ID under `_id`, RavenDB stores it under `@metadata.@id`, and RethinkDB stores it as
+ * just `id`. These kinds of differences between give birth to the need for having an object that works alongside models
+ * in accordance to a set of predefined conventions.
+ */
+abstract class DocumentConventions<Metadata = any> {
+	readonly model: Model & Metadata;
+	readonly partialId: string;
+	readonly idParts: string[];
+	readonly collection: Collection;
+
+	abstract get id(): string;
+
+	/**
+	 * @privateRemarks
+	 * Can optionally be overridden by the concrete convention, and by default does not retrieve any underlying value
+	 * for a revision. This is okay because only certain databases have to keep track of revisions, and most of them
+	 * never consult with this value.
+	 */
+	get revision(): string | undefined {
+		return undefined;
+	}
+
+	/**
+	 * @privateRemarks
+	 * Same remarks as for the getter; only some conventions have a use for the revision.
+	 */
+	set revision(_: string) {}
+
+	/**
+	 * @privateRemarks
+	 * Same remarks as for revision.
+	 */
+	get isDeleted(): boolean | undefined {
+		return undefined;
+	}
+
+	/**
+	 * @privateRemarks
+	 * Same remarks as for revision.
+	 */
+	set isDeleted(_: boolean) {}
+
+	constructor({
+		model,
+		data,
+		collection,
+	}: { model: Model; data: IdentifierDataOrMetadata<Model, Metadata>; collection: Collection }) {
+		this.model = model as Model & Metadata;
+
+		this.assignAccessorsToModel();
+
+		this.#_populateModelData(data, { collection });
+
+		const partialId = this.#_getPartialIdFromData(data);
+		this.collection = collection;
+		this.partialId = partialId;
+		this.idParts = partialId.split(constants.special.database.separator);
+	}
+
+	#_getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {
+		let partialId: string;
+		if (this.hasMetadata(data)) {
+			partialId = Model.decomposeId(this.id)[1];
+		} else {
+			partialId = Model.buildPartialId(data as IdentifierData<Model>);
+		}
+
+		return partialId;
+	}
+
+	#_populateModelData(
+		data: IdentifierDataOrMetadata<Model, Metadata>,
+		{ collection }: { collection: Collection },
+	): void {
+		if (this.hasMetadata(data)) {
+			Object.assign(this.model, data);
+		} else {
+			const id = Model.buildId(data as IdentifierData<Model>, { collection });
+			Object.assign(this.model, this.buildMetadata({ id, collection }));
+		}
+	}
+
+	assignAccessorsToModel(): void {
+		const conventions = this;
+		Object.defineProperty(this.model, "id", {
+			get(): string {
+				return conventions.id;
+			},
+		});
+	}
+
+	/**
+	 * Determines whether the given data object contains document metadata, which would be characteristic of a document
+	 * that already exists, or just identifier data, which would be characteristic of a document that is only just
+	 * getting created.
+	 */
+	abstract hasMetadata(data: IdentifierDataOrMetadata<Model, Metadata>): boolean;
+
+	/**
+	 * Given the {@link id} of the document and the {@link collection} it belongs to, builds out the metadata stored on
+	 * documents in the database employing this set of conventions.
+	 */
+	abstract buildMetadata({ id, collection }: { id: string; collection: Collection }): Metadata;
+}
+
+export { DatabaseAdapter, DocumentSession, DocumentQuery, DocumentConventions };

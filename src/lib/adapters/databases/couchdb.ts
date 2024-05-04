@@ -1,7 +1,7 @@
 import { Collection } from "logos:constants/database";
-import { DatabaseAdapter, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
+import { DatabaseAdapter, DocumentConventions, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
 import { Environment } from "logos/client";
-import { IdentifierDataOrMetadata, Model, ModelConventions } from "logos/database/model";
+import { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";
 import nano from "nano";
@@ -83,7 +83,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		model: Model;
 		data: IdentifierDataOrMetadata<Model, CouchDBDocumentMetadata>;
 		collection: Collection;
-	}): ModelConventions {
+	}): DocumentConventions {
 		return new CouchDBModelConventions({ model, data, collection });
 	}
 
@@ -220,7 +220,7 @@ class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}
 }
 
-class CouchDBModelConventions extends ModelConventions<CouchDBDocumentMetadata> {
+class CouchDBModelConventions extends DocumentConventions<CouchDBDocumentMetadata> {
 	get id(): string {
 		return this.model._id;
 	}
