@@ -126,7 +126,7 @@ class RethinkDBDocumentSession extends DocumentSession {
 		if (!alreadyExists) {
 			query = rethinkdb.r.insert(rethinkdb.r.table(document.collection), document);
 		} else {
-			query = rethinkdb.r.update(rethinkdb.r.table(document.collection), document);
+			query = rethinkdb.r.replace(rethinkdb.r.table(document.collection), document);
 		}
 
 		await query.run(this.#_connection);
