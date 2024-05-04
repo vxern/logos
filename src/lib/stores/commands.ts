@@ -108,6 +108,7 @@ class CommandStore {
 			builtCommand.key = key;
 			builtCommand.built = built;
 
+			// @ts-ignore: This is fine for now.
 			commands[identifier as CommandName] = builtCommand;
 			namesWithMetadata.push(...namesWithMetadataPart);
 		}

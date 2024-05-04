@@ -65,9 +65,12 @@ class EntryService extends LocalService {
 					"entry.proficiency.description.canChangeLater",
 					buttonPress.locale,
 				)({
-					// @ts-ignore: This is fine for now.
 					command: code(
-						this.client.localiseCommand(this.client.commands.profile.options.roles.key, buttonPress.locale),
+						this.client.localiseCommand(
+							// @ts-ignore: This is fine for now.
+							this.client.commands.profile.options.roles.key,
+							buttonPress.locale,
+						),
 					),
 				}),
 			},
