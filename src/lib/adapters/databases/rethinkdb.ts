@@ -65,6 +65,8 @@ class RethinkDBAdapter extends DatabaseAdapter {
 			return;
 		}
 
+		this.log.info(`Creating missing tables (${queries.length} to create). This may take a moment...`);
+
 		await rethinkdb.r.expr(queries).run(this.#_connection);
 	}
 }
@@ -113,8 +115,21 @@ class RethinkDBDocumentSession extends DocumentSession {
 		});
 	}
 
+	async #_alreadyExists(id: string, { collection }: { collection: Collection }): Promise<boolean> {
+		return await rethinkdb.r.table(collection).getAll(id).count().eq(1).run(this.#_connection);
+	}
+
 	async store<M extends Model>(document: M): Promise<void> {
-		await rethinkdb.r.insert(rethinkdb.r.table(document.collection), document).run(this.#_connection);
+		const alreadyExists = await this.#_alreadyExists(document.id, { collection: document.collection });
+
+		let query: rethinkdb.RDatum;
+		if (!alreadyExists) {
+			query = rethinkdb.r.insert(rethinkdb.r.table(document.collection), document);
+		} else {
+			query = rethinkdb.r.update(rethinkdb.r.table(document.collection), document);
+		}
+
+		await query.run(this.#_connection);
 	}
 
 	query<M extends Model>({ collection }: { collection: Collection }): RethinkDBDocumentQuery<M> {
