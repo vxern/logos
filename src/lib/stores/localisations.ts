@@ -5,7 +5,7 @@ import {
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 } from "logos:constants/languages";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { Logger } from "logos/logger";
 
 type RawLocalisationBuilder = (data?: Record<string, unknown>) => string | undefined;
@@ -33,8 +33,8 @@ class LocalisationStore {
 	readonly #log: Logger;
 	readonly #localisations: Localisations;
 
-	constructor(client: Client, { localisations }: { localisations: RawLocalisations }) {
-		this.#log = Logger.create({ identifier: "Client/LocalisationStore", isDebug: client.environment.isDebug });
+	constructor({ environment, localisations }: { environment: Environment; localisations: RawLocalisations }) {
+		this.#log = Logger.create({ identifier: "Client/LocalisationStore", isDebug: environment.isDebug });
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
 	}
 

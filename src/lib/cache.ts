@@ -1,6 +1,6 @@
 import { Locale } from "logos:constants/languages";
 import Redis from "ioredis";
-import { Client } from "logos/client";
+import { Environment } from "logos/client";
 import { Logger } from "logos/logger";
 
 interface SentencePair {
@@ -22,10 +22,10 @@ class Cache {
 		return this.#_redis!;
 	}
 
-	constructor(client: Client) {
-		this.#log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: client.environment.isDebug });
+	constructor({ environment }: { environment: Environment }) {
+		this.#log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: environment.isDebug });
 
-		if (client.environment.redisHost === undefined || client.environment.redisPort === undefined) {
+		if (environment.redisHost === undefined || environment.redisPort === undefined) {
 			this.#log.warn(
 				"One of `REDIS_HOST` or `REDIS_PORT` have not been provided. Logos will run without a Redis integration.",
 			);
@@ -34,9 +34,9 @@ class Cache {
 		}
 
 		this.#_redis = new Redis({
-			host: client.environment.redisHost,
-			port: Number(client.environment.redisPort),
-			password: client.environment.redisPassword,
+			host: environment.redisHost,
+			port: Number(environment.redisPort),
+			password: environment.redisPassword,
 			reconnectOnError: (_) => true,
 			lazyConnect: true,
 		});

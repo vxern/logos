@@ -297,10 +297,10 @@ class Client {
 		this.environment = environment;
 		this.log = log;
 		this.database = database;
-		this.cache = new Cache(this);
+		this.cache = new Cache({ environment });
 		this.diagnostics = new Diagnostics(this);
 
-		this.#localisations = new LocalisationStore(this, { localisations });
+		this.#localisations = new LocalisationStore({ environment, localisations });
 		this.#commands = CommandStore.create(this, {
 			localisations: this.#localisations,
 			templates: commands,
