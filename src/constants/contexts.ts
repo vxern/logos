@@ -766,5 +766,29 @@ export default Object.freeze({
 		title: localise("entry.verification.vote.failed.title", locale)(),
 		description: localise("entry.verification.vote.failed.description", locale)(),
 	}),
+	cannotClearSettings: ({ localise, locale }) => ({
+		title: localise("settings.strings.cannotClear.title", locale)(),
+		description: localise("settings.strings.cannotClear.description", locale)(),
+	}),
+	settingsCleared: ({ localise, locale }) => ({
+		title: localise("settings.strings.cleared.title", locale)(),
+		description: localise("settings.strings.cleared.description", locale)(),
+	}),
+	tooManyTickets: ({ localise, locale }) => ({
+		title: localise("ticket.strings.tooMany.title", locale)(),
+		description: localise("ticket.strings.tooMany.description", locale)(),
+	}),
+	ticketSent: ({ localise, locale }) => ({
+		title: localise("ticket.strings.sent.title", locale)(),
+		description: localise("ticket.strings.sent.description", locale)(),
+	}),
+	notTimedOut: ({ localise, locale }) => ({
+		title: localise("timeout.strings.notTimedOut.title", locale)(),
+		description: localise("timeout.strings.notTimedOut.description", locale),
+	}),
+	timeoutCleared: ({ localise, locale }) => ({
+		title: localise("timeout.strings.timeoutCleared.title", locale)(),
+		description: localise("timeout.strings.timeoutCleared.description", locale),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

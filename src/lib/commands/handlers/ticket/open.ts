@@ -4,8 +4,6 @@ import { Guild } from "logos/database/guild";
 import { Ticket } from "logos/database/ticket";
 
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.tickets;
@@ -28,11 +26,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		configuration.rateLimit ?? constants.defaults.TICKET_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = {
-			title: client.localise("ticket.strings.tooMany.title", locale)(),
-			description: client.localise("ticket.strings.tooMany.description", locale)(),
-		};
-
+		const strings = constants.contexts.tooManyTickets({ localise: client.localise, locale: interaction.locale });
 		await client.pushback(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -60,12 +54,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 			return;
 		}
 
-		const locale = submission.locale;
-		const strings = {
-			title: client.localise("ticket.strings.sent.title", locale)(),
-			description: client.localise("ticket.strings.sent.description", locale)(),
-		};
-
+		const strings = constants.contexts.ticketSent({ localise: client.localise, locale: submission.locale });
 		await client.succeeded(submission, {
 			title: strings.title,
 			description: strings.description,
