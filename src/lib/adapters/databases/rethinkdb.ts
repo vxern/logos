@@ -100,47 +100,17 @@ class RethinkDBDocumentSession extends DocumentSession {
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
-		if (ids.length === 0) {
-			return [];
-		}
-
-		const idsWithIndex = ids.map<[string, number]>((id, index) => [id, index]);
-		const idsWithIndexByCollection = new Map<Collection, [id: string, index: number][]>();
-		for (const [id, index] of idsWithIndex) {
-			const [collection, _] = Model.decomposeId(id);
-			if (!idsWithIndexByCollection.has(collection)) {
-				idsWithIndexByCollection.set(collection, [[id, index]]);
-				continue;
-			}
-
-			idsWithIndexByCollection.get(collection)!.push([id, index]);
-		}
-
-		const promises: Promise<[rawDocument: RethinkDBDocument, index: number][]>[] = [];
-		for (const [collection, idsWithIndexes] of idsWithIndexByCollection) {
-			const ids = idsWithIndexes.map(([id, _]) => id);
-			const indexes = idsWithIndexes.map(([_, index]) => index);
-
-			promises.push(
+		return this.loadManyTabulated(ids, {
+			loadMany: (ids, { collection }) =>
 				rethinkdb.r
 					// @ts-expect-error: The type signature of `getAll()` is invalid; The underlying JS code supports an
 					// indefinite number of IDs, so this call is completely fine.
 					//
 					// https://github.com/rethinkdb/rethinkdb-ts/issues/126
 					.getAll<RethinkDBDocument>(rethinkdb.r.table(collection), ...ids)
-					.run(this.#_connection)
-					.then((rawDocuments) =>
-						rawDocuments.map<[RethinkDBDocument, number]>((rawDocument, index) => [rawDocument, indexes[index]!]),
-					),
-			);
-		}
-
-		const resultsUnsorted = await Promise.all(promises).then((results) => results.flat());
-		const resultsSorted = resultsUnsorted.sort(([_, a], [__, b]) => a - b);
-
-		return resultsSorted.map(([rawDocument, _]) =>
-			RethinkDBModelConventions.instantiateModel<M>(this.database, rawDocument),
-		);
+					.run(this.#_connection),
+			instantiateModel: (database, rawDocument) => RethinkDBModelConventions.instantiateModel<M>(database, rawDocument),
+		});
 	}
 
 	async store<M extends Model>(document: M): Promise<void> {

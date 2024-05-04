@@ -58,6 +58,7 @@ class MongoDBAdapter extends DatabaseAdapter {
 
 interface MongoDBDocumentMetadata {
 	readonly _id: string;
+	_isDeleted?: boolean;
 }
 
 interface MongoDBDocument extends MongoDBDocumentMetadata {
@@ -75,7 +76,7 @@ class MongoDBDocumentSession extends DocumentSession {
 
 	async load<M extends Model>(id: string): Promise<M | undefined> {
 		const [collection, _] = Model.decomposeId(id);
-		const rawDocument = await this.#_mongoDatabase.collection(collection).findOne({ _id: id });
+		const rawDocument = await this.#_mongoDatabase.collection<MongoDBDocument>(collection).findOne({ _id: id });
 		if (rawDocument === null) {
 			return undefined;
 		}
@@ -84,89 +85,66 @@ class MongoDBDocumentSession extends DocumentSession {
 	}
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
-		const response = await this.#_documents
-			.fetch({ keys: ids }, { conflicts: false, include_docs: true })
-			.catch((error) => {
-				this.log.error(`Failed to get ${ids.length} documents: ${error}`);
-				return undefined;
-			});
-		if (response === undefined) {
-			return [];
-		}
-
-		const documents: (M | undefined)[] = [];
-		for (const result of response.rows) {
-			if (result.error !== undefined) {
-				documents.push(undefined);
-				continue;
-			}
-
-			const row = result as nano.DocumentResponseRow<MongoDBDocument>;
-			const rowDocument = row.doc!;
-
-			documents.push(MongoDBModelConventions.instantiateModel<M>(this.database, rowDocument));
-		}
-
-		return documents;
+		return this.loadManyTabulated<M, MongoDBDocument>(ids, {
+			loadMany: (ids, { collection }) =>
+				this.#_mongoDatabase.collection<MongoDBDocument>(collection).find({ _id: ids }).toArray(),
+			instantiateModel: (database, rawDocument) => MongoDBModelConventions.instantiateModel<M>(database, rawDocument),
+		});
 	}
 
 	async store<M extends Model>(document: M): Promise<void> {
-		const result = await this.#_documents
-			.insert(document as unknown as nano.IdentifiedDocument, { rev: document.revision })
-			.catch((error) => {
-				// Conflict during insertion. This happens when a document is attempted to be saved twice at the same
-				// time.
-				if (error.statusCode === 409) {
-					this.log.debug(`Encountered conflict when saving document ${document.id}. Ignoring...`);
-					return undefined;
-				}
-
-				this.log.error(`Failed to store document ${document.id}: ${error}`);
-				return undefined;
-			});
-		if (result === undefined) {
-			return;
-		}
-
-		if (result.rev !== document.revision) {
-			document.revision = result.rev;
-		}
+		const [collection, _] = Model.decomposeId(document.id);
+		await this.#_mongoDatabase.collection(collection).insertOne(document);
 	}
 
-	query<M extends Model>(_: { collection: Collection }): MongoDBDocumentQuery<M> {
-		return new MongoDBDocumentQuery<M>({ documents: this.#_documents, session: this });
+	query<M extends Model>({ collection }: { collection: Collection }): MongoDBDocumentQuery<M> {
+		return new MongoDBDocumentQuery<M>({ mongoDatabase: this.#_mongoDatabase, session: this, collection });
 	}
 
 	async dispose(): Promise<void> {}
 }
 
 class MongoDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
-	readonly #_documents: nano.DocumentScope<unknown>;
+	readonly #_mongoDatabase: mongodb.Db;
 	readonly #_session: MongoDBDocumentSession;
-	readonly #_query: nano.MangoQuery;
+	readonly #_collection: Collection;
+	readonly #_filter: mongodb.Filter<MongoDBDocument>;
 
-	constructor({ documents, session }: { documents: nano.DocumentScope<unknown>; session: MongoDBDocumentSession }) {
+	constructor({
+		mongoDatabase,
+		session,
+		collection,
+	}: {
+		mongoDatabase: mongodb.Db;
+		session: MongoDBDocumentSession;
+		collection: Collection;
+	}) {
 		super();
 
-		this.#_documents = documents;
+		this.#_mongoDatabase = mongoDatabase;
 		this.#_session = session;
-		this.#_query = { selector: {} };
+		this.#_collection = collection;
+		this.#_filter = {};
 	}
 
 	whereRegex(property: string, pattern: RegExp): MongoDBDocumentQuery<M> {
-		Object.assign(this.#_query.selector, { [property === "id" ? "_id" : property]: { $regex: pattern.toString() } });
+		Object.assign(this.#_filter, { [property === "id" ? "_id" : property]: { $regex: pattern } });
 		return this;
 	}
 
 	whereEquals(property: string, value: unknown): MongoDBDocumentQuery<M> {
-		Object.assign(this.#_query.selector, { [property === "id" ? "_id" : property]: { $eq: value } });
+		Object.assign(this.#_filter, { [property === "id" ? "_id" : property]: { $eq: value } });
 		return this;
 	}
 
 	async execute(): Promise<M[]> {
-		const result = await this.#_documents.find(this.#_query);
-		const ids = result.docs.map((document) => document._id);
-		return (await this.#_session.loadMany(ids)) as M[];
+		const rawDocuments = await this.#_mongoDatabase
+			.collection<MongoDBDocument>(this.#_collection)
+			.find(this.#_filter)
+			.toArray();
+		return rawDocuments.map((rawDocument) =>
+			MongoDBModelConventions.instantiateModel(this.#_session.database, rawDocument),
+		);
 	}
 }
 
@@ -175,20 +153,12 @@ class MongoDBModelConventions extends ModelConventions<MongoDBDocumentMetadata> 
 		return this.model._id;
 	}
 
-	get revision(): string | undefined {
-		return this.model._rev;
-	}
-
-	set revision(value: string) {
-		this.model._rev = value;
-	}
-
 	get isDeleted(): boolean | undefined {
-		return this.model._deleted;
+		return this.model._isDeleted;
 	}
 
 	set isDeleted(value: boolean) {
-		this.model._deleted = value;
+		this.model._isDeleted = value;
 	}
 
 	static instantiateModel<M extends Model>(database: DatabaseStore, payload: MongoDBDocument): M {

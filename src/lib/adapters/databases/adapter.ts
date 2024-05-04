@@ -96,6 +96,53 @@ abstract class DocumentSession {
 	abstract query<M extends Model>({ collection }: { collection: Collection }): DocumentQuery<M>;
 
 	abstract dispose(): Promise<void>;
+
+	async loadManyTabulated<M extends Model, RawDocument>(
+		ids: string[],
+		{
+			loadMany,
+			instantiateModel,
+		}: {
+			loadMany: (ids: string[], { collection }: { collection: Collection }) => Promise<RawDocument[]>;
+			instantiateModel: (database: DatabaseStore, rawDocument: RawDocument) => M;
+		},
+	): Promise<(M | undefined)[]> {
+		if (ids.length === 0) {
+			return [];
+		}
+
+		const idsWithIndex = ids.map<[string, number]>((id, index) => [id, index]);
+		const idsWithIndexByCollection = new Map<Collection, [id: string, index: number][]>();
+		for (const [id, index] of idsWithIndex) {
+			const [collection, _] = Model.decomposeId(id);
+			if (!idsWithIndexByCollection.has(collection)) {
+				idsWithIndexByCollection.set(collection, [[id, index]]);
+				continue;
+			}
+
+			idsWithIndexByCollection.get(collection)!.push([id, index]);
+		}
+
+		const promises: Promise<[rawDocument: RawDocument, index: number][]>[] = [];
+		for (const [collection, idsWithIndexes] of idsWithIndexByCollection) {
+			const ids = idsWithIndexes.map(([id, _]) => id);
+			const indexes = idsWithIndexes.map(([_, index]) => index);
+
+			promises.push(
+				loadMany(ids, { collection }).then((rawDocuments) =>
+					rawDocuments.map<[rawDocument: RawDocument, index: number]>((rawDocument, index) => [
+						rawDocument,
+						indexes[index]!,
+					]),
+				),
+			);
+		}
+
+		const resultsUnsorted = await Promise.all(promises).then((results) => results.flat());
+		const resultsSorted = resultsUnsorted.sort(([_, a], [__, b]) => a - b);
+
+		return resultsSorted.map(([rawDocument, _]) => instantiateModel(this.database, rawDocument));
+	}
 }
 
 abstract class DocumentQuery<M extends Model> {
