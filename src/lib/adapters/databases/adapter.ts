@@ -16,10 +16,10 @@ abstract class DatabaseAdapter {
 	abstract stop(): Promise<void>;
 
 	abstract conventionsFor({
-		model,
+		document,
 		data,
 		collection,
-	}: { model: Model; data: IdentifierDataOrMetadata<Model>; collection: Collection }): DocumentConventions;
+	}: { document: Model; data: IdentifierDataOrMetadata<Model>; collection: Collection }): DocumentConventions;
 
 	abstract openSession({
 		environment,
@@ -167,7 +167,7 @@ abstract class DocumentQuery<M extends Model> {
  * in accordance to a set of predefined conventions.
  */
 abstract class DocumentConventions<Metadata = any> {
-	readonly model: Model & Metadata;
+	readonly document: Model & Metadata;
 	readonly partialId: string;
 	readonly idParts: string[];
 	readonly collection: Collection;
@@ -205,11 +205,11 @@ abstract class DocumentConventions<Metadata = any> {
 	set isDeleted(_: boolean) {}
 
 	constructor({
-		model,
+		document,
 		data,
 		collection,
-	}: { model: Model; data: IdentifierDataOrMetadata<Model, Metadata>; collection: Collection }) {
-		this.model = model as Model & Metadata;
+	}: { document: Model; data: IdentifierDataOrMetadata<Model, Metadata>; collection: Collection }) {
+		this.document = document as Model & Metadata;
 
 		this.assignAccessorsToModel();
 
@@ -237,16 +237,16 @@ abstract class DocumentConventions<Metadata = any> {
 		{ collection }: { collection: Collection },
 	): void {
 		if (this.hasMetadata(data)) {
-			Object.assign(this.model, data);
+			Object.assign(this.document, data);
 		} else {
 			const id = Model.buildId(data as IdentifierData<Model>, { collection });
-			Object.assign(this.model, this.buildMetadata({ id, collection }));
+			Object.assign(this.document, this.buildMetadata({ id, collection }));
 		}
 	}
 
 	assignAccessorsToModel(): void {
 		const conventions = this;
-		Object.defineProperty(this.model, "id", {
+		Object.defineProperty(this.document, "id", {
 			get(): string {
 				return conventions.id;
 			},

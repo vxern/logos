@@ -49,7 +49,7 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 
 	constructor(database: DatabaseStore, data: Record<string, unknown>, { collection }: { collection: Collection }) {
-		this.#_conventions = database.conventionsFor({ model: this, data, collection });
+		this.#_conventions = database.conventionsFor({ document: this, data, collection });
 	}
 
 	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {

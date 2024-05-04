@@ -60,15 +60,15 @@ class MongoDBAdapter extends DatabaseAdapter {
 	}
 
 	conventionsFor({
-		model,
+		document,
 		data,
 		collection,
 	}: {
-		model: Model;
+		document: Model;
 		data: IdentifierDataOrMetadata<Model, MongoDBDocumentMetadata>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new MongoDBModelConventions({ model, data, collection });
+		return new MongoDBModelConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -180,15 +180,15 @@ class MongoDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 
 class MongoDBModelConventions extends DocumentConventions<MongoDBDocumentMetadata> {
 	get id(): string {
-		return this.model._id;
+		return this.document._id;
 	}
 
 	get isDeleted(): boolean | undefined {
-		return this.model._isDeleted;
+		return this.document._isDeleted;
 	}
 
 	set isDeleted(value: boolean) {
-		this.model._isDeleted = value;
+		this.document._isDeleted = value;
 	}
 
 	static instantiateModel<M extends Model>(database: DatabaseStore, payload: MongoDBDocument): M {

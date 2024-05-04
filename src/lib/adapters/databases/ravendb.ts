@@ -63,15 +63,15 @@ class RavenDBAdapter extends DatabaseAdapter {
 	}
 
 	conventionsFor({
-		model,
+		document,
 		data,
 		collection,
 	}: {
-		model: Model;
+		document: Model;
 		data: IdentifierDataOrMetadata<Model, RavenDBDocumentMetadataContainer>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new RavenDBModelConventions({ model, data, collection });
+		return new RavenDBModelConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -183,23 +183,23 @@ class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 
 class RavenDBModelConventions extends DocumentConventions<RavenDBDocumentMetadataContainer> {
 	get id(): string {
-		return this.model["@metadata"]["@id"];
+		return this.document["@metadata"]["@id"];
 	}
 
 	get revision(): string | undefined {
-		return this.model["@metadata"]["@change-vector"];
+		return this.document["@metadata"]["@change-vector"];
 	}
 
 	set revision(value: string) {
-		this.model["@metadata"]["@change-vector"] = value;
+		this.document["@metadata"]["@change-vector"] = value;
 	}
 
 	get isDeleted(): boolean | undefined {
-		return this.model["@metadata"]["@is-deleted"];
+		return this.document["@metadata"]["@is-deleted"];
 	}
 
 	set isDeleted(value: boolean) {
-		this.model["@metadata"]["@is-deleted"] = value;
+		this.document["@metadata"]["@is-deleted"] = value;
 	}
 
 	static instantiateModel<M extends Model>(database: DatabaseStore, payload: RavenDBDocument): M {

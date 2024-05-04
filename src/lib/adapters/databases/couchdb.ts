@@ -76,15 +76,15 @@ class CouchDBAdapter extends DatabaseAdapter {
 	async stop(): Promise<void> {}
 
 	conventionsFor({
-		model,
+		document,
 		data,
 		collection,
 	}: {
-		model: Model;
+		document: Model;
 		data: IdentifierDataOrMetadata<Model, CouchDBDocumentMetadata>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new CouchDBModelConventions({ model, data, collection });
+		return new CouchDBModelConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -222,23 +222,23 @@ class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 
 class CouchDBModelConventions extends DocumentConventions<CouchDBDocumentMetadata> {
 	get id(): string {
-		return this.model._id;
+		return this.document._id;
 	}
 
 	get revision(): string | undefined {
-		return this.model._rev;
+		return this.document._rev;
 	}
 
 	set revision(value: string) {
-		this.model._rev = value;
+		this.document._rev = value;
 	}
 
 	get isDeleted(): boolean | undefined {
-		return this.model._deleted;
+		return this.document._deleted;
 	}
 
 	set isDeleted(value: boolean) {
-		this.model._deleted = value;
+		this.document._deleted = value;
 	}
 
 	static instantiateModel<M extends Model>(database: DatabaseStore, payload: CouchDBDocument): M {

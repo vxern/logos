@@ -14,15 +14,15 @@ class InMemoryAdapter extends DatabaseAdapter {
 	async stop(): Promise<void> {}
 
 	conventionsFor({
-		model,
+		document,
 		data,
 		collection,
 	}: {
-		model: Model;
+		document: Model;
 		data: IdentifierDataOrMetadata<Model, InMemoryDocumentMetadata>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new InMemoryConventions({ model, data, collection });
+		return new InMemoryConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -151,15 +151,15 @@ interface InMemoryDocumentMetadata {
 
 class InMemoryConventions extends DocumentConventions<InMemoryDocumentMetadata> {
 	get id(): string {
-		return this.model._id;
+		return this.document._id;
 	}
 
 	get isDeleted(): boolean | undefined {
-		return this.model._isDeleted;
+		return this.document._isDeleted;
 	}
 
 	set isDeleted(value: boolean) {
-		this.model._isDeleted = value;
+		this.document._isDeleted = value;
 	}
 
 	hasMetadata(data: IdentifierDataOrMetadata<Model, InMemoryDocumentMetadata>): boolean {

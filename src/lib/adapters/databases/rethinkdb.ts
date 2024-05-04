@@ -53,15 +53,15 @@ class RethinkDBAdapter extends DatabaseAdapter {
 	}
 
 	conventionsFor({
-		model,
+		document,
 		data,
 		collection,
 	}: {
-		model: Model;
+		document: Model;
 		data: IdentifierDataOrMetadata<Model, RethinkDBDocumentMetadata>;
 		collection: Collection;
 	}): DocumentConventions {
-		return new RethinkDBModelConventions({ model, data, collection });
+		return new RethinkDBModelConventions({ document, data, collection });
 	}
 
 	async openSession({
@@ -205,15 +205,15 @@ class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 
 class RethinkDBModelConventions extends DocumentConventions<RethinkDBDocumentMetadata> {
 	get id(): string {
-		return this.model.id;
+		return this.document.id;
 	}
 
 	get isDeleted(): boolean | undefined {
-		return this.model._isDeleted;
+		return this.document._isDeleted;
 	}
 
 	set isDeleted(value: boolean) {
-		this.model._isDeleted = value;
+		this.document._isDeleted = value;
 	}
 
 	static instantiateModel<M extends Model>(database: DatabaseStore, payload: RethinkDBDocument): M {
