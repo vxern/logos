@@ -250,8 +250,8 @@ abstract class ModelConventions<Metadata = any> {
 
 	assignAccessorsToModel(): void {
 		const conventions = this;
-		Object.assign(this.model, {
-			get id(): string {
+		Object.defineProperty(this.model, "id", {
+			get(): string {
 				return conventions.id;
 			},
 		});
