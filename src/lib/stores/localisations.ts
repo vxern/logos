@@ -228,7 +228,7 @@ class LocalisationStore {
 		return pluralised;
 	}
 
-	async context<T extends object, R>(
+	async withContext<T extends object, R>(
 		interaction: Logos.Interaction,
 		{ contexts, visibility }: { contexts: ContextBuilder<T>[]; visibility?: ReplyVisibility },
 		scope: (strings: T) => Promise<R>,

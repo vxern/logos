@@ -12,7 +12,7 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 		return;
 	}
 
-	await client.context(interaction, { contexts: [constants.contexts.botInformation] }, async (context) => {
+	await client.withContext(interaction, { contexts: [constants.contexts.botInformation] }, async (context) => {
 		const featuresFormatted = list([
 			`${constants.emojis.bot.features.definitions} ${context.function.features.definitions}`,
 			`${constants.emojis.bot.features.translations} ${context.function.features.translations}`,
