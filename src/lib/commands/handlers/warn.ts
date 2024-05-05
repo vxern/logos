@@ -80,17 +80,13 @@ async function handleWarnUser(
 		return;
 	}
 
-	const member = client.resolveInteractionToMember(
-		interaction,
-		{
-			identifier: interaction.parameters.user,
-			options: {
-				restrictToNonSelf: true,
-				excludeModerators: true,
-			},
+	const member = client.resolveInteractionToMember(interaction, {
+		identifier: interaction.parameters.user,
+		options: {
+			restrictToNonSelf: true,
+			excludeModerators: true,
 		},
-		{ locale },
-	);
+	});
 	if (member === undefined) {
 		return;
 	}
@@ -157,7 +153,10 @@ async function handleWarnUser(
 					})
 					.catch(() => client.log.warn(`Failed to edit timeout state of ${client.diagnostics.member(member)}.`));
 
-				const strings = constants.contexts.warningLimitSurpassedAndTimedOut({ localise: client.localise, locale: interaction.guildLocale });
+				const strings = constants.contexts.warningLimitSurpassedAndTimedOut({
+					localise: client.localise,
+					locale: interaction.guildLocale,
+				});
 				alertService?.alert({
 					embeds: [
 						{
@@ -173,7 +172,10 @@ async function handleWarnUser(
 					],
 				});
 			} else {
-				const strings = constants.contexts.warningLimitSurpassed({ localise: client.localise, locale: interaction.guildLocale });
+				const strings = constants.contexts.warningLimitSurpassed({
+					localise: client.localise,
+					locale: interaction.guildLocale,
+				});
 				alertService?.alert({
 					embeds: [
 						{
@@ -202,7 +204,10 @@ async function handleWarnUser(
 				embeds: [
 					{
 						title: `${constants.emojis.indicators.warning} ${strings.title}`,
-						description: strings.description({ user_mention: mention(user.id, { type: "user" }), limit: constants.defaults.WARN_LIMIT }),
+						description: strings.description({
+							user_mention: mention(user.id, { type: "user" }),
+							limit: constants.defaults.WARN_LIMIT,
+						}),
 						color: constants.colours.yellow,
 					},
 				],

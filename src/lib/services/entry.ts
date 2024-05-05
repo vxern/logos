@@ -99,8 +99,6 @@ class EntryService extends LocalService {
 		buttonPress: Logos.Interaction<[index: string]>,
 		{ collector }: { collector: InteractionCollector<[index: string]> },
 	): Promise<void> {
-		const _locale = buttonPress.locale;
-
 		const index = Number.parseInt(buttonPress.metadata[1]);
 		const snowflake = (
 			Object.values(constants.roles.language.categories.proficiency.collection.list)[index]?.snowflakes as

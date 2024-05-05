@@ -188,8 +188,6 @@ class MusicService extends LocalService {
 	}
 
 	#_canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
-		const _locale = interaction.locale;
-
 		if (this.session.isDisconnected) {
 			const strings = constants.contexts.cannotManageDuringOutage({
 				localise: this.client.localise,

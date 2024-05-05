@@ -1,4 +1,4 @@
-import {mention} from "logos:core/formatting";
+import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { Warning } from "logos/database/warning";
@@ -7,8 +7,6 @@ async function handlePardonUserAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; warning: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.warns;
@@ -32,17 +30,13 @@ async function handlePardonUserAutocomplete(
 			break;
 		}
 		case "warning": {
-			const member = client.resolveInteractionToMember(
-				interaction,
-				{
-					identifier: interaction.parameters.user,
-					options: {
-						restrictToNonSelf: true,
-						excludeModerators: true,
-					},
+			const member = client.resolveInteractionToMember(interaction, {
+				identifier: interaction.parameters.user,
+				options: {
+					restrictToNonSelf: true,
+					excludeModerators: true,
 				},
-				{ locale },
-			);
+			});
 			if (member === undefined) {
 				await client.respond(interaction, []);
 				return;
@@ -70,8 +64,6 @@ async function handlePardonUser(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; warning: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.warns;
@@ -79,17 +71,13 @@ async function handlePardonUser(
 		return;
 	}
 
-	const member = client.resolveInteractionToMember(
-		interaction,
-		{
-			identifier: interaction.parameters.user,
-			options: {
-				restrictToNonSelf: true,
-				excludeModerators: true,
-			},
+	const member = client.resolveInteractionToMember(interaction, {
+		identifier: interaction.parameters.user,
+		options: {
+			restrictToNonSelf: true,
+			excludeModerators: true,
 		},
-		{ locale },
-	);
+	});
 	if (member === undefined) {
 		return;
 	}
@@ -129,10 +117,7 @@ async function handlePardonUser(
 	});
 }
 
-async function displayInvalidWarningError(
-	client: Client,
-	interaction: Logos.Interaction,
-): Promise<void> {
+async function displayInvalidWarningError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = constants.contexts.invalidWarning({ localise: client.localise, locale: interaction.locale });
 	await client.error(interaction, {
 		title: strings.title,

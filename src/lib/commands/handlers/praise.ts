@@ -1,4 +1,4 @@
-import {mention} from "logos:core/formatting";
+import { mention } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 import { Praise } from "logos/database/praise";
@@ -14,8 +14,6 @@ async function handlePraiseUser(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; comment: string | undefined }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.praises;
@@ -23,11 +21,7 @@ async function handlePraiseUser(
 		return;
 	}
 
-	const member = client.resolveInteractionToMember(
-		interaction,
-		{ identifier: interaction.parameters.user },
-		{ locale },
-	);
+	const member = client.resolveInteractionToMember(interaction, { identifier: interaction.parameters.user });
 	if (member === undefined) {
 		return;
 	}

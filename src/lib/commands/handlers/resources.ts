@@ -31,7 +31,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 	];
 
 	if (!interaction.parameters.show) {
-		buttons.push(client.interactionRepetitionService.getShowButton(interaction, { locale }));
+		buttons.push(client.interactionRepetitionService.getShowButton(interaction));
 	}
 
 	await client.reply(

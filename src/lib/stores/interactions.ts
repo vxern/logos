@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages/localisation";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
@@ -436,7 +435,6 @@ class InteractionStore {
 			identifier: string;
 			options?: Partial<MemberNarrowingOptions>;
 		},
-		{ locale }: { locale: Locale },
 	): Logos.Member | undefined {
 		const result = this.#_resolveIdentifierToMembers({
 			guildId: interaction.guildId,
@@ -459,11 +457,7 @@ class InteractionStore {
 				interaction.type === Discord.InteractionTypes.MessageComponent ||
 				interaction.type === Discord.InteractionTypes.ModalSubmit
 			) {
-				const strings = {
-					title: this.#client.localise("interactions.invalidUser.title", locale)(),
-					description: this.#client.localise("interactions.invalidUser.description", locale)(),
-				};
-
+				const strings = constants.contexts.invalidUser({ localise: this.#client.localise, locale: interaction.locale });
 				this.error(interaction, {
 					title: strings.title,
 					description: strings.description,

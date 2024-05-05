@@ -16,13 +16,10 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 	readonly #_anchor: Logos.Interaction;
 
 	get #view(): View {
-		const locale = this.#_anchor.parameters.show ? this.#_anchor.guildLocale : this.#_anchor.locale;
 		const view = this.build(this.#_anchor, { tabs: this.#tabs });
 
 		if (this.#showable && !this.#_anchor.parameters.show) {
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor, {
-				locale,
-			});
+			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor);
 
 			for (const { components } of view.components ?? []) {
 				if (components.length >= 5) {

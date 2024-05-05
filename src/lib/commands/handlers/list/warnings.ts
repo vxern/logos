@@ -31,8 +31,6 @@ async function handleDisplayWarnings(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string | undefined }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const permissions = interaction.member?.permissions;
 	if (permissions === undefined) {
 		return;
@@ -40,17 +38,13 @@ async function handleDisplayWarnings(
 
 	const isModerator = permissions.has("MODERATE_MEMBERS");
 
-	const member = client.resolveInteractionToMember(
-		interaction,
-		{
-			identifier: interaction.parameters.user ?? interaction.user.id.toString(),
-			options: {
-				// Stops normal members from viewing other people's warnings.
-				restrictToSelf: !isModerator,
-			},
+	const member = client.resolveInteractionToMember(interaction, {
+		identifier: interaction.parameters.user ?? interaction.user.id.toString(),
+		options: {
+			// Stops normal members from viewing other people's warnings.
+			restrictToSelf: !isModerator,
 		},
-		{ locale },
-	);
+	});
 	if (member === undefined) {
 		return;
 	}

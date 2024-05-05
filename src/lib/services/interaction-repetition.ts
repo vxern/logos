@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { GlobalService } from "logos/services/service";
@@ -110,8 +109,8 @@ class InteractionRepetitionService extends GlobalService {
 		});
 	}
 
-	getShowButton(interaction: Logos.Interaction, { locale }: { locale: Locale }): Discord.ButtonComponent {
-		const strings = constants.contexts.show({ localise: this.client.localise, locale });
+	getShowButton(interaction: Logos.Interaction): Discord.ButtonComponent {
+		const strings = constants.contexts.show({ localise: this.client.localise, locale: interaction.locale });
 		return {
 			type: Discord.MessageComponentTypes.Button,
 			style: Discord.ButtonStyles.Primary,

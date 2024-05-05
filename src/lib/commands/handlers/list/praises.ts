@@ -32,13 +32,9 @@ async function handleDisplayPraises(
 	interaction: Logos.Interaction<any, { user: string | undefined }>,
 	{ mode }: { mode: PraiseSearchMode },
 ): Promise<void> {
-	const locale = interaction.locale;
-
-	const member = client.resolveInteractionToMember(
-		interaction,
-		{ identifier: interaction.parameters.user ?? interaction.user.id.toString() },
-		{ locale },
-	);
+	const member = client.resolveInteractionToMember(interaction, {
+		identifier: interaction.parameters.user ?? interaction.user.id.toString(),
+	});
 	if (member === undefined) {
 		return;
 	}

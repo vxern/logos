@@ -14,13 +14,9 @@ async function handleDisplayProfile(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string | undefined }>,
 ): Promise<void> {
-	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
-
-	const member = client.resolveInteractionToMember(
-		interaction,
-		{ identifier: interaction.parameters.user ?? interaction.user.id.toString() },
-		{ locale },
-	);
+	const member = client.resolveInteractionToMember(interaction, {
+		identifier: interaction.parameters.user ?? interaction.user.id.toString(),
+	});
 	if (member === undefined) {
 		return;
 	}
@@ -42,7 +38,7 @@ async function handleDisplayProfile(
 		: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [client.interactionRepetitionService.getShowButton(interaction, { locale })],
+					components: [client.interactionRepetitionService.getShowButton(interaction)],
 				},
 		  ];
 

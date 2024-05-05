@@ -6,9 +6,7 @@ async function handleRewindAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { timestamp: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
-	const timestamp = parseTimeExpression(client, interaction.parameters.timestamp, { locale });
+	const timestamp = parseTimeExpression(client, interaction, interaction.parameters.timestamp);
 	if (timestamp === undefined) {
 		const strings = constants.contexts.autocompleteTimestamp({ localise: client.localise, locale: interaction.locale });
 

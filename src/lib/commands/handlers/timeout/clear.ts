@@ -16,8 +16,6 @@ async function handleClearTimeout(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.timeouts;
@@ -25,14 +23,10 @@ async function handleClearTimeout(
 		return;
 	}
 
-	const member = client.resolveInteractionToMember(
-		interaction,
-		{
-			identifier: interaction.parameters.user,
-			options: { restrictToNonSelf: true, excludeModerators: true },
-		},
-		{ locale },
-	);
+	const member = client.resolveInteractionToMember(interaction, {
+		identifier: interaction.parameters.user,
+		options: { restrictToNonSelf: true, excludeModerators: true },
+	});
 	if (member === undefined) {
 		return;
 	}

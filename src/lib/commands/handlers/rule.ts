@@ -52,7 +52,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [client.interactionRepetitionService.getShowButton(interaction, { locale })],
+					components: [client.interactionRepetitionService.getShowButton(interaction)],
 				},
 		  ];
 

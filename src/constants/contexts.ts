@@ -1176,5 +1176,9 @@ export default Object.freeze({
 		title: localise("music.options.play.strings.failedToLoad.title", locale)(),
 		description: localise("music.options.play.strings.failedToLoad.description", locale),
 	}),
+	invalidUser: ({ localise, locale }) => ({
+		title: localise("interactions.invalidUser.title", locale)(),
+		description: localise("interactions.invalidUser.description", locale)(),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

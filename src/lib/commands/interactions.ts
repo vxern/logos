@@ -1,11 +1,10 @@
-import { Locale } from "logos:constants/languages";
 import { TimeUnit } from "logos:constants/time";
 import { Client } from "logos/client";
 
 function parseTimeExpression(
 	client: Client,
+	interaction: Logos.Interaction,
 	expression: string,
-	{ locale }: { locale: Locale },
 ): [correctedExpression: string, period: number] | undefined {
 	const conciseMatch = constants.patterns.conciseTimeExpression.exec(expression) ?? undefined;
 	if (conciseMatch !== undefined) {
@@ -14,16 +13,16 @@ function parseTimeExpression(
 			throw `StateError: The expression '${expression}' was matched to the concise timestamp regular expression, but the seconds part was \`undefined\`.`;
 		}
 
-		return parseConciseTimeExpression(client, [hours, minutes, seconds], { locale });
+		return parseConciseTimeExpression(client, interaction, [hours, minutes, seconds]);
 	}
 
-	return parseVerboseTimeExpressionPhrase(client, expression, { locale });
+	return parseVerboseTimeExpressionPhrase(client, interaction, expression);
 }
 
 function parseConciseTimeExpression(
 	client: Client,
+	interaction: Logos.Interaction,
 	parts: [hours: string | undefined, minutes: string | undefined, seconds: string],
-	{ locale }: { locale: Locale },
 ): ReturnType<typeof parseTimeExpression> {
 	const [seconds, minutes, hours] = parts.map((part) => (part !== undefined ? Number(part) : undefined)).reverse() as [
 		number,
@@ -34,7 +33,7 @@ function parseConciseTimeExpression(
 
 	if (seconds !== 0) {
 		const strings = {
-			second: client.pluralise("units.second.word", locale, { quantity: seconds }),
+			second: client.pluralise("units.second.word", interaction.locale, { quantity: seconds }),
 		};
 
 		verboseExpressionParts.push(strings.second);
@@ -42,7 +41,7 @@ function parseConciseTimeExpression(
 
 	if (minutes !== undefined && minutes !== 0) {
 		const strings = {
-			minute: client.pluralise("units.minute.word", locale, { quantity: minutes }),
+			minute: client.pluralise("units.minute.word", interaction.locale, { quantity: minutes }),
 		};
 
 		verboseExpressionParts.push(strings.minute);
@@ -50,14 +49,14 @@ function parseConciseTimeExpression(
 
 	if (hours !== undefined && hours !== 0) {
 		const strings = {
-			hour: client.pluralise("units.hour.word", locale, { quantity: hours }),
+			hour: client.pluralise("units.hour.word", interaction.locale, { quantity: hours }),
 		};
 
 		verboseExpressionParts.push(strings.hour);
 	}
 	const verboseExpression = verboseExpressionParts.join(" ");
 
-	const expressionParsed = parseVerboseTimeExpressionPhrase(client, verboseExpression, { locale });
+	const expressionParsed = parseVerboseTimeExpressionPhrase(client, interaction, verboseExpression);
 	if (expressionParsed === undefined) {
 		return undefined;
 	}
@@ -76,10 +75,10 @@ const timeUnitsWithAliasesLocalised = new Map<string, Record<TimeUnit, string[]>
 
 function parseVerboseTimeExpressionPhrase(
 	client: Client,
+	interaction: Logos.Interaction,
 	expression: string,
-	{ locale }: { locale: Locale },
 ): ReturnType<typeof parseTimeExpression> {
-	if (!timeUnitsWithAliasesLocalised.has(locale)) {
+	if (!timeUnitsWithAliasesLocalised.has(interaction.locale)) {
 		const timeUnits = Object.keys(constants.time) as TimeUnit[];
 		const timeUnitAliasTuples: [TimeUnit, string[]][] = [];
 
@@ -92,16 +91,19 @@ function parseVerboseTimeExpressionPhrase(
 					`units.${timeUnit}.many`,
 					`units.${timeUnit}.short`,
 					`units.${timeUnit}.shortest`,
-				].map((key) => client.localise(key, locale)()),
+				].map((key) => client.localise(key, interaction.locale)()),
 			]);
 		}
 
-		timeUnitsWithAliasesLocalised.set(locale, Object.fromEntries(timeUnitAliasTuples) as Record<TimeUnit, string[]>);
+		timeUnitsWithAliasesLocalised.set(
+			interaction.locale,
+			Object.fromEntries(timeUnitAliasTuples) as Record<TimeUnit, string[]>,
+		);
 	}
 
-	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(locale);
+	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(interaction.locale);
 	if (timeUnitsWithAliases === undefined) {
-		throw `Failed to get time unit aliases for locale '${locale}'.`;
+		throw `Failed to get time unit aliases for locale '${interaction.locale}'.`;
 	}
 
 	function extractNumbers(expression: string): number[] {
@@ -156,7 +158,7 @@ function parseVerboseTimeExpressionPhrase(
 		quantifiers[index],
 	])) {
 		if (quantifier === undefined) {
-			throw `Failed to get quantifier for time unit '${timeUnit}' and locale '${locale}'.`;
+			throw `Failed to get quantifier for time unit '${timeUnit}' and locale '${interaction.locale}'.`;
 		}
 
 		timeUnitQuantifierTuples.push([timeUnit, quantifier]);
@@ -167,7 +169,7 @@ function parseVerboseTimeExpressionPhrase(
 	let total = 0;
 	for (const [timeUnit, quantifier] of timeUnitQuantifierTuples) {
 		const strings = {
-			unit: client.pluralise(`units.${timeUnit}.word`, locale, { quantity: quantifier }),
+			unit: client.pluralise(`units.${timeUnit}.word`, interaction.locale, { quantity: quantifier }),
 		};
 
 		timeExpressions.push(strings.unit);

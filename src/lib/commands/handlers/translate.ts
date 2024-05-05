@@ -349,7 +349,7 @@ async function translateText(
 		: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [client.interactionRepetitionService.getShowButton(interaction, { locale })],
+					components: [client.interactionRepetitionService.getShowButton(interaction)],
 				},
 		  ];
 

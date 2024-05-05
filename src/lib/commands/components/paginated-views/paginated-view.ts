@@ -76,10 +76,7 @@ abstract class PaginatedView<T> {
 		];
 
 		if (this.#showable && !this.#_anchor.parameters.show) {
-			const locale = this.#_anchor.parameters.show ? this.#_anchor.guildLocale : this.#_anchor.locale;
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor, {
-				locale,
-			});
+			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor);
 
 			return [
 				{

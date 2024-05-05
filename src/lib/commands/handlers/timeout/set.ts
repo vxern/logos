@@ -20,9 +20,12 @@ async function handleSetTimeoutAutocomplete(
 			return;
 		}
 		case "duration": {
-			const timestamp = parseTimeExpression(client, interaction.parameters.duration, { locale: interaction.locale });
+			const timestamp = parseTimeExpression(client, interaction, interaction.parameters.duration);
 			if (timestamp === undefined) {
-				const strings = constants.contexts.autocompleteTimestamp({ localise: client.localise, locale: interaction.locale });
+				const strings = constants.contexts.autocompleteTimestamp({
+					localise: client.localise,
+					locale: interaction.locale,
+				});
 
 				await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 				return;
@@ -37,8 +40,6 @@ async function handleSetTimeout(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; duration: string; reason: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.timeouts;
@@ -46,24 +47,20 @@ async function handleSetTimeout(
 		return;
 	}
 
-	const member = client.resolveInteractionToMember(
-		interaction,
-		{
-			identifier: interaction.parameters.user,
-			options: {
-				restrictToNonSelf: true,
-				excludeModerators: true,
-			},
+	const member = client.resolveInteractionToMember(interaction, {
+		identifier: interaction.parameters.user,
+		options: {
+			restrictToNonSelf: true,
+			excludeModerators: true,
 		},
-		{ locale },
-	);
+	});
 	if (member === undefined) {
 		return;
 	}
 
 	let durationParsed = Number(interaction.parameters.duration);
 	if (!Number.isSafeInteger(durationParsed)) {
-		const timestamp = parseTimeExpression(client, interaction.parameters.duration, { locale });
+		const timestamp = parseTimeExpression(client, interaction, interaction.parameters.duration);
 		if (timestamp === undefined) {
 			await displayDurationInvalidError(client, interaction);
 			return;

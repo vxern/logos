@@ -33,14 +33,10 @@ async function handlePurgeMessages(
 
 	let authorId: bigint | undefined;
 	if (interaction.parameters.author !== undefined) {
-		const authorMember = client.resolveInteractionToMember(
-			interaction,
-			{
-				identifier: interaction.parameters.author,
-				options: { includeBots: true },
-			},
-			{ locale: interaction.locale },
-		);
+		const authorMember = client.resolveInteractionToMember(interaction, {
+			identifier: interaction.parameters.author,
+			options: { includeBots: true },
+		});
 		if (authorMember === undefined) {
 			return;
 		}
