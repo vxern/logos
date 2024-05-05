@@ -228,18 +228,18 @@ class LocalisationStore {
 		return pluralised;
 	}
 
-	async context<T extends object>(
+	async context<T extends object, R>(
 		interaction: Logos.Interaction,
 		{ contexts, visibility }: { contexts: ContextBuilder<T>[]; visibility?: ReplyVisibility },
-		scope: (context: T) => Promise<void>,
-	): Promise<void> {
+		scope: (strings: T) => Promise<R>,
+	): Promise<R> {
 		const locale = visibility === "public" ? interaction.guildLocale : interaction.locale;
 
-		const context = contexts
+		const strings = contexts
 			.map((builder) => builder({ localise: this.localise, locale }))
 			.reduce<T>((combined, context) => Object.assign(combined, context), {} as T);
 
-		await scope(context);
+		return await scope(strings);
 	}
 }
 
