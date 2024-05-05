@@ -1,3 +1,4 @@
+import { ContextBuilder } from "logos:constants/contexts";
 import {
 	Locale,
 	LocalisationLanguage,
@@ -7,6 +8,7 @@ import {
 } from "logos:constants/languages";
 import { Environment } from "logos/client";
 import { Logger } from "logos/logger";
+import { ReplyVisibility } from "logos/stores/interactions";
 
 type RawLocalisationBuilder = (data?: Record<string, unknown>) => string | undefined;
 type LocalisationBuilder = (data?: Record<string, unknown>) => string;
@@ -224,6 +226,20 @@ class LocalisationStore {
 		}
 
 		return pluralised;
+	}
+
+	async context<T extends object>(
+		interaction: Logos.Interaction,
+		{ contexts, visibility }: { contexts: ContextBuilder<T>[]; visibility?: ReplyVisibility },
+		scope: (context: T) => Promise<void>,
+	): Promise<void> {
+		const locale = visibility === "public" ? interaction.guildLocale : interaction.locale;
+
+		const context = contexts
+			.map((builder) => builder({ localise: this.localise, locale }))
+			.reduce<T>((combined, context) => Object.assign(combined, context), {} as T);
+
+		await scope(context);
 	}
 }
 

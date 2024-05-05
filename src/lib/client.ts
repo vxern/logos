@@ -99,6 +99,10 @@ class Client {
 		return this.#localisations.pluralise.bind(this.#localisations);
 	}
 
+	get context(): LocalisationStore["context"] {
+		return this.#localisations.context.bind(this.#localisations);
+	}
+
 	get commands(): CommandStore["commands"] {
 		return this.#commands.commands;
 	}

@@ -1,16 +1,5 @@
-import { ContextBuilder } from "logos:constants/contexts";
-import { Locale } from "logos:constants/languages";
 import { list } from "logos:core/formatting";
 import { Client } from "logos/client";
-
-async function withContext<T>(
-	{ localise, locale, builder }: { localise: Client["localise"]; locale: Locale; builder: ContextBuilder<T> },
-	action: ({ strings }: { strings: T }) => Promise<void>,
-): Promise<void> {
-	const strings = builder({ localise, locale });
-
-	await action({ strings });
-}
 
 async function handleDisplayBotInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const botUser =
@@ -23,46 +12,39 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 		return;
 	}
 
-	await withContext(
-		{
-			localise: client.localise,
-			locale: interaction.locale,
-			builder: constants.contexts.botInformation,
-		},
-		async ({ strings }) => {
-			const featuresFormatted = list([
-				`${constants.emojis.bot.features.definitions} ${strings.function.features.definitions}`,
-				`${constants.emojis.bot.features.translations} ${strings.function.features.translations}`,
-				`${constants.emojis.bot.features.games} ${strings.function.features.games}`,
-				`${constants.emojis.bot.features.messages} ${strings.function.features.messages}`,
-				`${constants.emojis.bot.features.guides} ${strings.function.features.guides}`,
-			]);
+	await client.context(interaction, { contexts: [constants.contexts.botInformation] }, async (context) => {
+		const featuresFormatted = list([
+			`${constants.emojis.bot.features.definitions} ${context.function.features.definitions}`,
+			`${constants.emojis.bot.features.translations} ${context.function.features.translations}`,
+			`${constants.emojis.bot.features.games} ${context.function.features.games}`,
+			`${constants.emojis.bot.features.messages} ${context.function.features.messages}`,
+			`${constants.emojis.bot.features.guides} ${context.function.features.guides}`,
+		]);
 
-			await client.notice(interaction, {
-				author: {
-					iconUrl: Discord.avatarUrl(client.bot.id, botUser.discriminator, {
-						avatar: botUser.avatar ?? undefined,
-						format: "png",
-					}),
-					name: botUser.username,
+		await client.notice(interaction, {
+			author: {
+				iconUrl: Discord.avatarUrl(client.bot.id, botUser.discriminator, {
+					avatar: botUser.avatar ?? undefined,
+					format: "png",
+				}),
+				name: botUser.username,
+			},
+			fields: [
+				{
+					name: `${constants.emojis.information.bot} ${context.concept.title}`,
+					value: context.concept.description,
 				},
-				fields: [
-					{
-						name: `${constants.emojis.information.bot} ${strings.concept.title}`,
-						value: strings.concept.description,
-					},
-					{
-						name: `${constants.emojis.information.function} ${strings.function.title}`,
-						value: `${strings.function.description}\n${featuresFormatted}`,
-					},
-					{
-						name: `${constants.emojis.information.languages} ${strings.languages.title}`,
-						value: strings.languages.description,
-					},
-				],
-			});
-		},
-	);
+				{
+					name: `${constants.emojis.information.function} ${context.function.title}`,
+					value: `${context.function.description}\n${featuresFormatted}`,
+				},
+				{
+					name: `${constants.emojis.information.languages} ${context.languages.title}`,
+					value: context.languages.description,
+				},
+			],
+		});
+	});
 }
 
 export { handleDisplayBotInformation };

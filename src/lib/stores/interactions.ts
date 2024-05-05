@@ -562,3 +562,4 @@ function setCallbackColour(embedOrData: EmbedOrCallbackData, { colour }: { colou
 }
 
 export { InteractionStore };
+export type { ReplyVisibility };

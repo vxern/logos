@@ -28,7 +28,7 @@ async function handleCiteRuleAutocomplete(
 }
 
 async function handleCiteRule(client: Client, interaction: Logos.Interaction<any, { rule: Rule }>): Promise<void> {
-	const locale = ;
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	if (!isValidRule(interaction.parameters.rule)) {
 		await displayError(client, interaction);

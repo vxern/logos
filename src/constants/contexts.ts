@@ -1,7 +1,7 @@
 import { Locale } from "logos:constants/languages/localisation";
 import { Client } from "logos/client";
 
-type ContextBuilder<T> = ({ localise, locale }: { localise: Client["localise"]; locale: Locale }) => T;
+type ContextBuilder<T extends object> = ({ localise, locale }: { localise: Client["localise"]; locale: Locale }) => T;
 
 export default Object.freeze({
 	botInformation: ({ localise, locale }) => ({
