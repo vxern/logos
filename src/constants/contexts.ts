@@ -946,10 +946,6 @@ export default Object.freeze({
 		title: localise("slowmode.strings.enabled.title", locale)(),
 		description: localise("slowmode.strings.enabled.description", locale)(),
 	}),
-	textEmpty: ({ localise, locale }) => ({
-		title: localise("translate.strings.textEmpty.title", locale)(),
-		description: localise("translate.strings.textEmpty.description", locale)(),
-	}),
 	warningLimitSurpassedAndTimedOut: ({ localise, locale }) => ({
 		title: localise("warn.strings.limitSurpassedTimedOut.title", locale)(),
 		description: localise("warn.strings.limitSurpassedTimedOut.description", locale),
@@ -1032,6 +1028,112 @@ export default Object.freeze({
 	}),
 	show: ({ localise, locale }) => ({
 		show: localise("interactions.show", locale)(),
+	}),
+	purge: ({ localise, locale }) => ({
+		start: localise("purge.strings.start", locale)(),
+		end: localise("purge.strings.end", locale)(),
+		posted: localise("purge.strings.posted", locale),
+		embedPosted: localise("purge.strings.embedPosted", locale),
+		messagesFound: localise("purge.strings.messagesFound", locale)(),
+	}),
+	indexing: ({ localise, locale }) => ({
+		title: localise("purge.strings.indexing.title", locale)(),
+		description: localise("purge.strings.indexing.description", locale)(),
+	}),
+	rangeTooBig: ({ localise, locale }) => ({
+		title: localise("purge.strings.rangeTooBig.title", locale)(),
+		description: {
+			rangeTooBig: localise("purge.strings.rangeTooBig.description.rangeTooBig", locale),
+			trySmaller: localise("purge.strings.rangeTooBig.description.trySmaller", locale)(),
+		},
+	}),
+	indexedNoResults: ({ localise, locale }) => ({
+		title: localise("purge.strings.indexed.title", locale)(),
+		description: {
+			none: localise("purge.strings.indexed.description.none", locale)(),
+			tryDifferentQuery: localise("purge.strings.indexed.description.tryDifferentQuery", locale)(),
+		},
+	}),
+	indexedFoundMessagesToDelete: ({ localise, locale }) => ({
+		indexed: {
+			title: localise("purge.strings.indexed.title", locale)(),
+			description: {
+				some: localise("purge.strings.indexed.description.some", locale),
+			},
+		},
+		sureToPurge: {
+			title: localise("purge.strings.sureToPurge.title", locale)(),
+			description: localise("purge.strings.sureToPurge.description", locale),
+		},
+		yes: localise("purge.strings.yes", locale)(),
+		no: localise("purge.strings.no", locale)(),
+	}),
+	tooManyMessagesToDelete: ({ localise, locale }) => ({
+		indexed: {
+			title: localise("purge.strings.indexed.title", locale)(),
+			description: {
+				tooMany: localise("purge.strings.indexed.description.tooMany", locale),
+				limited: localise("purge.strings.indexed.description.limited", locale),
+			},
+		},
+		continue: {
+			title: localise("purge.strings.continue.title", locale)(),
+			description: localise("purge.strings.continue.description", locale),
+		},
+		yes: localise("purge.strings.yes", locale)(),
+		no: localise("purge.strings.no", locale)(),
+	}),
+	purging: ({ localise, locale }) => ({
+		title: localise("purge.strings.purging.title", locale)(),
+		description: {
+			purging: localise("purge.strings.purging.description.purging", locale),
+			mayTakeTime: localise("purge.strings.purging.description.mayTakeTime", locale)(),
+			onceComplete: localise("purge.strings.purging.description.onceComplete", locale)(),
+		},
+	}),
+	purged: ({ localise, locale }) => ({
+		title: localise("purge.strings.purged.title", locale)(),
+		description: localise("purge.strings.purged.description", locale),
+	}),
+	invalidPurgeParameters: ({ localise, locale }) => ({
+		start: {
+			title: localise("purge.strings.invalid.start.title", locale)(),
+			description: localise("purge.strings.invalid.start.description", locale)(),
+		},
+		end: {
+			title: localise("purge.strings.invalid.end.title", locale)(),
+			description: localise("purge.strings.invalid.end.description", locale)(),
+		},
+		both: {
+			title: localise("purge.strings.invalid.both.title", locale)(),
+			description: localise("purge.strings.invalid.both.description", locale)(),
+		},
+	}),
+	idsNotDifferent: ({ localise, locale }) => ({
+		title: localise("purge.strings.idsNotDifferent.title", locale)(),
+		description: localise("purge.strings.idsNotDifferent.description", locale)(),
+	}),
+	purgeFailed: ({ localise, locale }) => ({
+		title: localise("purge.strings.failed.title", locale)(),
+		description: localise("purge.strings.failed.description", locale)(),
+	}),
+	purgeNoContent: ({ localise, locale }) => ({
+		noContent: localise("purge.strings.noContent", locale)(),
+	}),
+	cannotUseForRecognition: ({ localise, locale }) => ({
+		title: localise("recognize.strings.cannotUse.title", locale)(),
+		description: localise("recognize.strings.cannotUse.description", locale)(),
+	}),
+	textEmpty: ({ localise, locale }) => ({
+		title: localise("recognize.strings.textEmpty.title", locale)(),
+		description: localise("recognize.strings.textEmpty.description", locale)(),
+	}),
+	unknownLanguage: ({ localise, locale }) => ({
+		title: localise("recognize.strings.unknown.title", locale)(),
+		description: {
+			text: localise("recognize.strings.unknown.description.text", locale)(),
+			message: localise("recognize.strings.unknown.description.message", locale)(),
+		},
 	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

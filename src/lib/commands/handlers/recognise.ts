@@ -26,11 +26,10 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 
 	const hasEmbeds = message.embeds !== undefined && message.embeds.length !== 0;
 	if (hasEmbeds) {
-		const strings = {
-			title: client.localise("recognize.strings.cannotUse.title", locale)(),
-			description: client.localise("recognize.strings.cannotUse.description", locale)(),
-		};
-
+		const strings = constants.contexts.cannotUseForRecognition({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -52,11 +51,7 @@ async function handleRecogniseLanguage(
 ): Promise<void> {
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
-		const strings = {
-			title: client.localise("recognize.strings.textEmpty.title", locale)(),
-			description: client.localise("recognize.strings.textEmpty.description", locale)(),
-		};
-
+		const strings = constants.contexts.textEmpty({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -69,14 +64,7 @@ async function handleRecogniseLanguage(
 
 	const detectedLanguages = await client.adapters.detectors.detectLanguages({ text });
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
-		const strings = {
-			title: client.localise("recognize.strings.unknown.title", locale)(),
-			description: {
-				text: client.localise("recognize.strings.unknown.description.text", locale)(),
-				message: client.localise("recognize.strings.unknown.description.message", locale)(),
-			},
-		};
-
+		const strings = constants.contexts.unknownLanguage({ localise: client.localise, locale: interaction.locale });
 		await client.unsupported(interaction, {
 			title: strings.title,
 			description: isMessage ? strings.description.message : strings.description.text,
