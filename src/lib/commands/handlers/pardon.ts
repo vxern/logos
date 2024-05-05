@@ -1,5 +1,4 @@
-import { Locale } from "logos:constants/languages";
-import { mention } from "logos:core/formatting";
+import {mention} from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild, timeStructToMilliseconds } from "logos/database/guild";
 import { Warning } from "logos/database/warning";
@@ -103,7 +102,7 @@ async function handlePardonUser(
 		(warningDocument) => warningDocument.partialId === interaction.parameters.warning,
 	);
 	if (warningDocument === undefined) {
-		await displayInvalidWarningError(client, interaction, { locale });
+		await displayInvalidWarningError(client, interaction);
 		return;
 	}
 
@@ -120,33 +119,21 @@ async function handlePardonUser(
 		args: [member, warningDocument, interaction.user],
 	});
 
-	const strings = {
-		title: client.localise("pardon.strings.pardoned.title", locale)(),
-		description: client.localise(
-			"pardon.strings.pardoned.description",
-			locale,
-		)({
+	const strings = constants.contexts.pardoned({ localise: client.localise, locale: interaction.locale });
+	await client.success(interaction, {
+		title: strings.title,
+		description: strings.description({
 			user_mention: mention(member.id, { type: "user" }),
 			reason: warningDocument.reason,
 		}),
-	};
-
-	await client.success(interaction, {
-		title: strings.title,
-		description: strings.description,
 	});
 }
 
 async function displayInvalidWarningError(
 	client: Client,
 	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
 ): Promise<void> {
-	const strings = {
-		title: client.localise("pardon.strings.invalidWarning.title", locale)(),
-		description: client.localise("pardon.strings.invalidWarning.description", locale)(),
-	};
-
+	const strings = constants.contexts.invalidWarning({ localise: client.localise, locale: interaction.locale });
 	await client.error(interaction, {
 		title: strings.title,
 		description: strings.description,

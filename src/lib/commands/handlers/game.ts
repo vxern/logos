@@ -1,4 +1,4 @@
-import { Locale, getLocaleByLearningLanguage } from "logos:constants/languages";
+import { Locale, } from "logos:constants/languages";
 import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
 import { SentencePair } from "logos/cache";
@@ -23,16 +23,9 @@ interface GameData {
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function handleStartGame(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-	const learningLocale = getLocaleByLearningLanguage(interaction.learningLanguage);
-
-	const sentencePairCount = await client.cache.getSentencePairCount({ learningLocale });
+	const sentencePairCount = await client.cache.getSentencePairCount({ learningLocale: interaction.learningLocale });
 	if (sentencePairCount === 0) {
-		const strings = {
-			title: client.localise("game.strings.noSentencesAvailable.title", locale)(),
-			description: client.localise("game.strings.noSentencesAvailable.description", locale)(),
-		};
-
+		const strings = constants.contexts.noSentencesAvailable({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -55,13 +48,13 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	await guildStatsDocument.update(client, () => {
 		guildStatsDocument.registerSession({
 			game: "pickMissingWord",
-			learningLocale,
-			isUnique: userDocument.getGameScores({ game: "pickMissingWord", learningLocale }) === undefined,
+	        learningLocale: interaction.learningLocale,
+			isUnique: userDocument.getGameScores({ game: "pickMissingWord", learningLocale: interaction.learningLocale }) === undefined,
 		});
 	});
 
 	await userDocument.update(client, () => {
-		userDocument.registerSession({ game: "pickMissingWord", learningLocale });
+		userDocument.registerSession({ game: "pickMissingWord", learningLocale: interaction.learningLocale });
 	});
 
 	await client.postponeReply(interaction);
@@ -78,28 +71,28 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		const isCorrect = pick === data.sentenceSelection.correctPick;
 
 		await guildStatsDocument.update(client, () => {
-			guildStatsDocument.incrementScore({ game: "pickMissingWord", learningLocale });
+			guildStatsDocument.incrementScore({ game: "pickMissingWord", learningLocale: interaction.learningLocale });
 		});
 
 		await userDocument.update(client, () => {
-			userDocument.incrementScore({ game: "pickMissingWord", learningLocale });
+			userDocument.incrementScore({ game: "pickMissingWord", learningLocale: interaction.learningLocale  });
 		});
 
 		if (isCorrect) {
 			data.sessionScore += 1;
 			data.embedColour = constants.colours.lightGreen;
-			data.sentenceSelection = await getSentenceSelection(client, { learningLocale });
+			data.sentenceSelection = await getSentenceSelection(client, { learningLocale: interaction.learningLocale  });
 
 			await client.editReply(
 				interaction,
-				await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+				await getGameView(client, interaction, data, userDocument, "hide"),
 			);
 		} else {
 			data.embedColour = constants.colours.red;
 
 			await client.editReply(
 				interaction,
-				await getGameView(client, data, userDocument, "reveal", { locale, learningLocale }),
+				await getGameView(client, interaction, data, userDocument, "reveal"),
 			);
 		}
 	});
@@ -108,11 +101,11 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		await client.acknowledge(buttonPress);
 
 		data.embedColour = constants.colours.blue;
-		data.sentenceSelection = await getSentenceSelection(client, { learningLocale });
+		data.sentenceSelection = await getSentenceSelection(client, { learningLocale: interaction.learningLocale });
 
 		await client.editReply(
 			interaction,
-			await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+			await getGameView(client, interaction, data, userDocument, "hide"),
 		);
 	});
 
@@ -122,38 +115,25 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	const data: GameData = {
 		guessButton,
 		skipButton,
-		sentenceSelection: await getSentenceSelection(client, { learningLocale }),
+		sentenceSelection: await getSentenceSelection(client, { learningLocale: interaction.learningLocale }),
 		embedColour: constants.colours.blue,
 		sessionScore: 0,
 	};
 
 	await client.editReply(
 		interaction,
-		await getGameView(client, data, userDocument, "hide", { locale, learningLocale }),
+		await getGameView(client, interaction, data, userDocument, "hide"),
 	);
 }
 
 async function getGameView(
 	client: Client,
+	interaction: Logos.Interaction,
 	data: GameData,
 	userDocument: User,
 	mode: "hide" | "reveal",
-	{ locale, learningLocale }: { locale: Locale; learningLocale: Locale },
 ): Promise<Discord.InteractionCallbackData> {
-	const totalScore = userDocument.getGameScores({ game: "pickMissingWord", learningLocale })?.totalScore ?? 0;
-
-	const strings = {
-		sentence: client.localise("game.strings.sentence", locale)(),
-		translation: client.localise("game.strings.translation", locale)(),
-		skip: client.localise("game.strings.skip", locale)(),
-		sourcedFrom: client.localise(
-			"game.strings.sourcedFrom",
-			locale,
-		)({ source: constants.licences.dictionaries.tatoeba.name }),
-		correctGuesses: client.localise("game.strings.correctGuesses", locale)({ number: data.sessionScore }),
-		allTime: client.localise("game.strings.allTime", locale)({ number: totalScore }),
-		next: client.localise("game.strings.next", locale)(),
-	};
+	const totalScore = userDocument.getGameScores({ game: "pickMissingWord", learningLocale: interaction.learningLocale })?.totalScore ?? 0;
 
 	const sentenceSource = constants.links.tatoebaSentence(data.sentenceSelection.sentencePair.sentenceId.toString());
 	const translationSource = constants.links.tatoebaSentence(
@@ -163,12 +143,13 @@ async function getGameView(
 	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]);
 	const mask = constants.special.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
 
+	const strings = constants.contexts.game({ localise: client.localise, locale: interaction.locale });
 	return {
 		embeds: [
 			{
 				description: `${constants.emojis.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
 				color: constants.colours.peach,
-				footer: { text: strings.sourcedFrom },
+				footer: { text: strings.sourcedFrom({ source: constants.licences.dictionaries.tatoeba.name }) },
 			},
 			{
 				title:
@@ -180,7 +161,7 @@ async function getGameView(
 						: data.sentenceSelection.sentencePair.sentence.replaceAll(wholeWordPattern, mask),
 				description: data.sentenceSelection.sentencePair.translation,
 				color: data.embedColour,
-				footer: { text: `${strings.correctGuesses} · ${strings.allTime}` },
+				footer: { text: `${strings.correctGuesses({ number: data.sessionScore })} · ${strings.allTime({ number: totalScore })}` },
 			},
 		],
 		components: [

@@ -98,8 +98,6 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		submission: Logos.Interaction,
 		{ error }: { error: ValidationError },
 	): Promise<Logos.Interaction | undefined> {
-		const locale = submission.locale;
-
 		const { promise, resolve } = Promise.withResolvers<Logos.Interaction | undefined>();
 
 		const continueButton = new InteractionCollector(this.client, { only: [submission.user.id], isSingle: true });
@@ -133,13 +131,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 				resolve(undefined);
 			});
 
-			const strings = {
-				title: this.client.localise("report.strings.sureToCancel.title", locale)(),
-				description: this.client.localise("report.strings.sureToCancel.description", locale)(),
-				stay: this.client.localise("prompts.stay", locale)(),
-				leave: this.client.localise("prompts.leave", locale)(),
-			};
-
+			const strings = constants.contexts.sureToCancelReport({ localise: this.client.localise, locale: submission.locale });
 			await this.client.warning(cancelButtonPress, {
 				embeds: [
 					{

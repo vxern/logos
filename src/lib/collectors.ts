@@ -1,8 +1,8 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
 import {
 	LearningLanguage,
-	getDiscordLocalisationLanguageByLocale,
-	getLocaleByLocalisationLanguage,
+	getDiscordLocalisationLanguageByLocale,getLocaleByLearningLanguage,
+	getLocaleByLocalisationLanguage, 
 } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
@@ -237,7 +237,7 @@ class InteractionCollector<
 	/**
 	 * @deprecated
 	 * Do not use as this receives raw Discord interaction events, rather than Logos ones.
-	 * Use {@link InteractionCollector.onInteraction} instead.
+	 * Use {@link InteractionCollector.onInteraction()} instead.
 	 */
 	onCollect(_: CollectEvent<"interactionCreate">) {
 		throw "UnimplementedError: Do not use `onCollect()` on interaction controllers. Use `onInteraction()` instead.";
@@ -275,10 +275,11 @@ class InteractionCollector<
 		const member = this.#client.entities.members.get(interaction.guildId!)?.get(interaction.user.id);
 		if (member === undefined) {
 			return {
-				language: constants.defaults.LOCALISATION_LANGUAGE,
 				locale: constants.defaults.LOCALISATION_LOCALE,
-				guildLanguage: constants.defaults.LOCALISATION_LANGUAGE,
+				language: constants.defaults.LOCALISATION_LANGUAGE,
 				guildLocale: constants.defaults.LOCALISATION_LOCALE,
+				guildLanguage: constants.defaults.LOCALISATION_LANGUAGE,
+				learningLocale: constants.defaults.LEARNING_LOCALE,
 				learningLanguage: constants.defaults.LEARNING_LANGUAGE,
 				featureLanguage: constants.defaults.FEATURE_LANGUAGE,
 			};
@@ -291,6 +292,7 @@ class InteractionCollector<
 
 		const targetLanguage = guildDocument.targetLanguage;
 		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
+		const learningLocale = getLocaleByLearningLanguage(learningLanguage);
 
 		const guildLanguage = guildDocument.isTargetLanguageOnly(interaction.channelId!.toString())
 			? targetLanguage
@@ -303,7 +305,7 @@ class InteractionCollector<
 			if (userDocument.preferredLanguage !== undefined) {
 				const language = userDocument.preferredLanguage;
 				const locale = getLocaleByLocalisationLanguage(language);
-				return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
+				return { locale, language, guildLocale, guildLanguage, learningLocale, learningLanguage, featureLanguage };
 			}
 		}
 
@@ -311,7 +313,7 @@ class InteractionCollector<
 		const appLocale = interaction.locale;
 		const language = getDiscordLocalisationLanguageByLocale(appLocale) ?? constants.defaults.LOCALISATION_LANGUAGE;
 		const locale = getLocaleByLocalisationLanguage(language);
-		return { language, locale, learningLanguage, guildLanguage, guildLocale, featureLanguage };
+		return { locale, language, guildLocale, guildLanguage, learningLocale, learningLanguage, featureLanguage };
 	}
 
 	#getMetadata(interaction: Discord.Interaction): Logos.Interaction<Metadata>["metadata"] {

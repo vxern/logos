@@ -790,5 +790,177 @@ export default Object.freeze({
 		title: localise("timeout.strings.timeoutCleared.title", locale)(),
 		description: localise("timeout.strings.timeoutCleared.description", locale),
 	}),
+	timedOut: ({ localise, locale }) => ({
+		title: localise("timeout.strings.timedOut.title", locale)(),
+		description: localise("timeout.strings.timedOut.description", locale),
+	}),
+	timeoutDurationInvalid: ({ localise, locale }) => ({
+		title: localise("timeout.strings.durationInvalid.title", locale)(),
+		description: localise("timeout.strings.durationInvalid.description", locale)(),
+	}),
+	timeoutDurationTooShort: ({ localise, locale }) => ({
+		title: localise("timeout.strings.tooShort.title", locale)(),
+		description: localise("timeout.strings.tooShort.description", locale)(),
+	}),
+	timeoutDurationTooLong: ({ localise, locale }) => ({
+		title: localise("timeout.strings.tooLong.title", locale)(),
+		description: localise("timeout.strings.tooLong.description", locale)(),
+	}),
+	verificationModal: ({ localise, locale }) => ({
+		title: localise("verification.title", locale)(),
+		fields: {
+			reason: localise("verification.fields.reason", locale),
+			aim: localise("verification.fields.aim", locale)(),
+			whereFound: localise("verification.fields.whereFound", locale)(),
+		},
+	}),
+	sureToCancelReport: ({ localise, locale }) => ({
+		title: localise("report.strings.sureToCancel.title", locale)(),
+		description: localise("report.strings.sureToCancel.description", locale)(),
+		stay: localise("prompts.stay", locale)(),
+		leave: localise("prompts.leave", locale)(),
+	}),
+	listEmpty: ({ localise, locale }) => ({
+		listEmpty: localise("music.strings.listEmpty", locale)(),
+	}),
+	profile: ({ localise, locale }) => ({
+		title: localise("profile.options.view.strings.information.title", locale),
+		roles: localise("profile.options.view.strings.information.description.roles", locale)(),
+		statistics: localise("profile.options.view.strings.information.description.statistics", locale)(),
+		praises: localise("profile.options.view.strings.information.description.praises", locale)(),
+		warnings: localise("profile.options.view.strings.information.description.warnings", locale)(),
+		received: localise("profile.options.view.strings.information.description.received", locale)(),
+		sent: localise("profile.options.view.strings.information.description.sent", locale)(),
+	}),
+	settings: ({ localise, locale }) => ({
+		title: localise("settings.strings.settings.title", locale)(),
+		description: {
+			language: {
+				title: localise("settings.strings.settings.fields.language.title", locale)(),
+				noLanguageSet: localise(
+					"settings.strings.settings.fields.language.description.noLanguageSet.noLanguageSet",
+					locale,
+				)(),
+				defaultShown: localise(
+					"settings.strings.settings.fields.language.description.noLanguageSet.defaultShown",
+					locale,
+				)(),
+			},
+		},
+	}),
+	acknowledgements: ({ localise, locale }) => ({
+		acknowledgements: localise("acknowledgements.strings.acknowledgements", locale)()
+	}),
+	credits: ({ localise, locale }) => ({
+		translation: localise("credits.strings.translation", locale)(),
+	}),
+	noSentencesAvailable: ({ localise, locale }) => ({
+		title: localise("game.strings.noSentencesAvailable.title", locale)(),
+		description: localise("game.strings.noSentencesAvailable.description", locale)(),
+	}),
+	game: ({ localise, locale }) => ({
+		sentence: localise("game.strings.sentence", locale)(),
+		translation: localise("game.strings.translation", locale)(),
+		skip: localise("game.strings.skip", locale)(),
+		sourcedFrom: localise("game.strings.sourcedFrom", locale),
+		correctGuesses: localise("game.strings.correctGuesses", locale),
+		allTime: localise("game.strings.allTime", locale),
+		next: localise("game.strings.next", locale)(),
+	}),
+	pardoned: ({ localise, locale }) => ({
+		title: localise("pardon.strings.pardoned.title", locale)(),
+		description: localise("pardon.strings.pardoned.description", locale),
+	}),
+	invalidWarning: ({ localise, locale }) => ({
+		title: localise("pardon.strings.invalidWarning.title", locale)(),
+		description: localise("pardon.strings.invalidWarning.description", locale)(),
+	}),
+	moderationPolicy: ({ localise, locale }) => ({
+		title: localise("policies.moderation.title", locale)(),
+		points: {
+			introduction: {
+				title: localise("policies.moderation.points.introduction.title", locale)(),
+				description: localise("policies.moderation.points.introduction.description", locale)(),
+			},
+			breach: {
+				title: localise("policies.moderation.points.breach.title", locale)(),
+				description: localise("policies.moderation.points.breach.description", locale)(),
+			},
+			warnings: {
+				title: localise("policies.moderation.points.warnings.title", locale)(),
+				description: localise("policies.moderation.points.warnings.description", locale)(),
+			},
+			furtherAction: {
+				title: localise("policies.moderation.points.furtherAction.title", locale)(),
+				description: localise("policies.moderation.points.furtherAction.description", locale)(),
+			},
+			ban: {
+				title: localise("policies.moderation.points.ban.title", locale)(),
+				description: localise("policies.moderation.points.ban.description", locale)(),
+			},
+		},
+	}),
+	cannotPraiseSelf: ({ localise, locale }) => ({
+		title: localise("praise.strings.cannotPraiseSelf.title", locale)(),
+		description: localise("praise.strings.cannotPraiseSelf.description", locale)(),
+	}),
+	tooManyPraises: ({ localise, locale }) => ({
+		title: localise("praise.strings.tooMany.title", locale)(),
+		description: localise("praise.strings.tooMany.description", locale)(),
+	}),
+	praised: ({ localise, locale }) => ({
+		title: localise("praise.strings.praised.title", locale)(),
+		description: localise("praise.strings.praised.description", locale),
+	}),
+	invalidSlowmodeLevel: ({ localise, locale }) => ({
+		title: localise("slowmode.strings.invalid.title", locale)(),
+		description: localise("slowmode.strings.invalid.description", locale)(),
+	}),
+	slowmodeDowngraded: ({ localise, locale }) => ({
+		title: localise("slowmode.strings.downgraded.title", locale)(),
+		description: localise("slowmode.strings.downgraded.description", locale)(),
+	}),
+	slowmodeUpgraded: ({ localise, locale }) => ({
+		title: localise("slowmode.strings.upgraded.title", locale)(),
+		description: localise("slowmode.strings.upgraded.description", locale)(),
+	}),
+	theSameSlowmodeLevel: ({ localise, locale }) => ({
+		title: localise("slowmode.strings.theSame.title", locale)(),
+		description: {
+			theSame: localise("slowmode.strings.theSame.description.theSame", locale)(),
+			chooseDifferent: localise("slowmode.strings.theSame.description.chooseDifferent", locale)(),
+		},
+	}),
+	slowmodeTooSoon: ({ localise, locale }) => ({
+		title: localise("slowmode.strings.tooSoon.title", locale)(),
+		description: {
+			justEnabled: localise("slowmode.strings.tooSoon.description.justEnabled", locale)(),
+			canDisableIn: localise("slowmode.strings.tooSoon.description.canDisableIn", locale),
+		},
+	}),
+	slowmodeDisabled: ({ localise, locale }) => ({
+		title: localise("slowmode.strings.disabled.title", locale)(),
+		description: localise("slowmode.strings.disabled.description", locale)(),
+	}),
+	slowmodeEnabled: ({ localise, locale }) => ({
+		title: localise("slowmode.strings.enabled.title", locale)(),
+		description: localise("slowmode.strings.enabled.description", locale)(),
+	}),
+	textEmpty: ({ localise, locale }) => ({
+		title: localise("translate.strings.textEmpty.title", locale)(),
+		description: localise("translate.strings.textEmpty.description", locale)(),
+	}),
+	warningLimitSurpassedAndTimedOut: ({ localise, locale }) => ({
+		title: localise("warn.strings.limitSurpassedTimedOut.title", locale)(),
+		description: localise("warn.strings.limitSurpassedTimedOut.description", locale),
+	}),
+	warningLimitSurpassed: ({ localise, locale }) => ({
+		title: localise("warn.strings.limitSurpassed.title", locale)(),
+		description: localise("warn.strings.limitSurpassed.description", locale),
+	}),
+	limitReached: ({ localise, locale }) => ({
+		title: localise("warn.strings.limitReached.title", locale)(),
+		description: localise("warn.strings.limitReached.description", locale),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

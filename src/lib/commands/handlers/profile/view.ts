@@ -36,21 +36,7 @@ async function handleDisplayProfile(
 		Warning.getAll(client, { where: { targetId: member.id.toString() } }),
 	]);
 
-	const strings = {
-		title: client.localise(
-			"profile.options.view.strings.information.title",
-			locale,
-		)({
-			username: target.username,
-		}),
-		roles: client.localise("profile.options.view.strings.information.description.roles", locale)(),
-		statistics: client.localise("profile.options.view.strings.information.description.statistics", locale)(),
-		praises: client.localise("profile.options.view.strings.information.description.praises", locale)(),
-		warnings: client.localise("profile.options.view.strings.information.description.warnings", locale)(),
-		received: client.localise("profile.options.view.strings.information.description.received", locale)(),
-		sent: client.localise("profile.options.view.strings.information.description.sent", locale)(),
-	};
-
+	const strings = constants.contexts.profile({ localise: client.localise, locale: interaction.locale });
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [
@@ -63,7 +49,7 @@ async function handleDisplayProfile(
 	await client.notice(
 		interaction,
 		{
-			title: strings.title,
+			title: strings.title({ username: target.username }),
 			thumbnail: (() => {
 				const iconURL = Discord.avatarUrl(target.id, target.discriminator, {
 					avatar: target.avatar,

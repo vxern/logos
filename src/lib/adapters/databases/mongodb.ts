@@ -116,7 +116,8 @@ class MongoDBDocumentSession extends DocumentSession {
 		return this.loadManyTabulated<M, MongoDBDocument>(ids, {
 			loadMany: (ids, { collection }) =>
 				this.#_mongoDatabase.collection<MongoDBDocument>(collection).find({ _id: ids }).toArray(),
-			instantiateModel: (database, rawDocument) => MongoDBDocumentConventions.instantiateModel<M>(database, rawDocument),
+			instantiateModel: (database, rawDocument) =>
+				MongoDBDocumentConventions.instantiateModel<M>(database, rawDocument),
 		});
 	}
 

@@ -1,14 +1,12 @@
 import { Translation } from "logos:constants/contributions";
-import { Locale, LocalisationLanguage } from "logos:constants/languages";
+import { LocalisationLanguage } from "logos:constants/languages";
 import { Client } from "logos/client";
 
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-
-	await client.notice(interaction, getTranslationView(client, { locale }));
+	await client.notice(interaction, getTranslationView(client, interaction));
 }
 
-function getTranslationView(client: Client, { locale }: { locale: Locale }): Discord.CamelizedDiscordEmbed {
+function getTranslationView(client: Client, interaction: Logos.Interaction): Discord.CamelizedDiscordEmbed {
 	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 	for (const [language, data] of (
@@ -26,7 +24,7 @@ function getTranslationView(client: Client, { locale }: { locale: Locale }): Dis
 			.join("\n");
 
 		const strings = {
-			language: client.localise(constants.localisations.languages[language], locale)(),
+			language: client.localise(constants.localisations.languages[language], interaction.locale)(),
 		};
 
 		fields.push({
@@ -36,10 +34,7 @@ function getTranslationView(client: Client, { locale }: { locale: Locale }): Dis
 		});
 	}
 
-	const strings = {
-		translation: client.localise("credits.strings.translation", locale)(),
-	};
-
+	const strings = constants.contexts.credits({ localise: client.localise, locale: interaction.locale });
 	return { title: strings.translation, fields };
 }
 

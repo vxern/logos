@@ -19,10 +19,7 @@ class SongCollectionView extends PaginatedView<Song> {
 
 	build(interaction: Logos.Interaction, page: Song[], pageIndex: number): View {
 		if (page.length === 0) {
-			const strings = {
-				listEmpty: this.client.localise("music.strings.listEmpty", interaction.locale)(),
-			};
-
+			const strings = constants.contexts.listEmpty({ localise: this.client.localise, locale: interaction.locale });
 			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colours.notice } };
 		}
 

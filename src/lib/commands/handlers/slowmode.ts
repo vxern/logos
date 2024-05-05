@@ -1,5 +1,5 @@
 import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "logos:constants/slowmode";
-import { timestamp } from "logos:core/formatting";
+import {timestamp} from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 
@@ -28,14 +28,8 @@ async function handleToggleSlowmode(
 	client: Client,
 	interaction: Logos.Interaction<any, { level: string | undefined }>,
 ): Promise<void> {
-	const locale = interaction.guildLocale;
-
 	if (interaction.parameters.level !== undefined && !isValidSlowmodeLevel(interaction.parameters.level)) {
-		const strings = {
-			title: client.localise("slowmode.strings.invalid.title", locale)(),
-			description: client.localise("slowmode.strings.invalid.description", locale)(),
-		};
-
+		const strings = constants.contexts.invalidSlowmodeLevel({ localise: client.localise, locale: interaction.locale });
 		await client.error(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -80,11 +74,7 @@ async function handleToggleSlowmode(
 					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
 				});
 
-				const strings = {
-					title: client.localise("slowmode.strings.downgraded.title", locale)(),
-					description: client.localise("slowmode.strings.downgraded.description", locale)(),
-				};
-
+				const strings = constants.contexts.slowmodeDowngraded({ localise: client.localise, locale: interaction.guildLocale });
 				await client.success(
 					interaction,
 					{
@@ -108,11 +98,7 @@ async function handleToggleSlowmode(
 					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
 				});
 
-				const strings = {
-					title: client.localise("slowmode.strings.upgraded.title", locale)(),
-					description: client.localise("slowmode.strings.upgraded.description", locale)(),
-				};
-
+				const strings = constants.contexts.slowmodeUpgraded({ localise: client.localise, locale: interaction.guildLocale });
 				await client.success(
 					interaction,
 					{
@@ -126,15 +112,7 @@ async function handleToggleSlowmode(
 			}
 
 			{
-				const locale = interaction.locale;
-				const strings = {
-					title: client.localise("slowmode.strings.theSame.title", locale)(),
-					description: {
-						theSame: client.localise("slowmode.strings.theSame.description.theSame", locale)(),
-						chooseDifferent: client.localise("slowmode.strings.theSame.description.chooseDifferent", locale)(),
-					},
-				};
-
+				const strings = constants.contexts.theSameSlowmodeLevel({ localise: client.localise, locale: interaction.locale });
 				await client.warning(interaction, {
 					title: strings.title,
 					description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
@@ -151,21 +129,10 @@ async function handleToggleSlowmode(
 			if (timeElapsedSinceUse < constants.SLOWMODE_COLLISION_TIMEOUT) {
 				const canDisableIn = now + (constants.SLOWMODE_COLLISION_TIMEOUT - timeElapsedSinceUse);
 
-				const locale = interaction.locale;
-				const strings = {
-					title: client.localise("slowmode.strings.tooSoon.title", locale)(),
-					description: {
-						justEnabled: client.localise("slowmode.strings.tooSoon.description.justEnabled", locale)(),
-						canDisableIn: client.localise(
-							"slowmode.strings.tooSoon.description.canDisableIn",
-							locale,
-						)({ relative_timestamp: timestamp(canDisableIn, { format: "relative" }) }),
-					},
-				};
-
+				const strings = constants.contexts.slowmodeTooSoon({ localise: client.localise, locale: interaction.locale });
 				await client.pushback(interaction, {
 					title: strings.title,
-					description: `${strings.description.justEnabled} ${strings.description.canDisableIn}`,
+					description: `${strings.description.justEnabled} ${strings.description.canDisableIn(({ relative_timestamp: timestamp(canDisableIn, { format: "relative" }) }))}`,
 				});
 
 				return;
@@ -182,11 +149,7 @@ async function handleToggleSlowmode(
 			args: [interaction.user, channel],
 		});
 
-		const strings = {
-			title: client.localise("slowmode.strings.disabled.title", locale)(),
-			description: client.localise("slowmode.strings.disabled.description", locale)(),
-		};
-
+		const strings = constants.contexts.slowmodeDisabled({ localise: client.localise, locale: interaction.guildLocale });
 		await client.notice(
 			interaction,
 			{
@@ -213,11 +176,7 @@ async function handleToggleSlowmode(
 		args: [interaction.user, channel, interaction.parameters.level ?? "lowest"],
 	});
 
-	const strings = {
-		title: client.localise("slowmode.strings.enabled.title", locale)(),
-		description: client.localise("slowmode.strings.enabled.description", locale)(),
-	};
-
+	const strings = constants.contexts.slowmodeEnabled({ localise: client.localise, locale: interaction.guildLocale });
 	await client.notice(
 		interaction,
 		{

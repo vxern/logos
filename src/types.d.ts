@@ -69,10 +69,11 @@ declare global {
 		interface InteractionLocaleData {
 			locale: Locale;
 			language: LocalisationLanguage;
-			learningLanguage: LearningLanguage;
-			featureLanguage: FeatureLanguage;
 			guildLocale: Locale;
 			guildLanguage: LocalisationLanguage;
+			learningLocale: Locale;
+			learningLanguage: LearningLanguage;
+			featureLanguage: FeatureLanguage;
 		}
 
 		type InteractionParameters<Parameters> = Parameters & {

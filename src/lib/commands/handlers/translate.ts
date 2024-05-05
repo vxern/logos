@@ -104,13 +104,7 @@ async function handleTranslate(
 
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
-		const locale = interaction.locale;
-
-		const strings = {
-			title: client.localise("translate.strings.textEmpty.title", locale)(),
-			description: client.localise("translate.strings.textEmpty.description", locale)(),
-		};
-
+		const strings = constants.contexts.textEmpty({ localise: client.localise, locale: interaction.locale });
 		await client.error(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -124,8 +118,6 @@ async function handleTranslate(
 	if (from !== undefined || to !== undefined) {
 		const isSourceInvalid = from !== undefined && !isTranslationLanguage(from);
 		const isTargetInvalid = to !== undefined && !isTranslationLanguage(to);
-
-		const locale = interaction.locale;
 
 		if (isSourceInvalid && isTargetInvalid) {
 			const strings = constants.contexts.bothLanguagesInvalid({

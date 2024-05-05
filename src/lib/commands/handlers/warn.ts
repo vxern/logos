@@ -145,57 +145,49 @@ async function handleWarnUser(
 
 	const surpassedLimit = warningDocumentsActive.length > configuration.limit;
 	if (surpassedLimit) {
-		let strings: { title: string; description: string };
-		if (configuration.autoTimeout?.enabled) {
-			const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
-
-			const locale = interaction.guildLocale;
-			strings = {
-				title: client.localise("warn.strings.limitSurpassedTimedOut.title", locale)(),
-				description: client.localise(
-					"warn.strings.limitSurpassedTimedOut.description",
-					locale,
-				)({
-					user_mention: mention(user.id, { type: "user" }),
-					limit: configuration.limit,
-					number: warningDocumentsActive.length,
-					period: client.pluralise(`units.${timeout[1]}.word`, locale, { quantity: timeout[0] }),
-				}),
-			};
-
-			const timeoutMilliseconds = timeStructToMilliseconds(timeout);
-
-			client.bot.rest
-				.editMember(guild.id, member.id, {
-					communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
-				})
-				.catch(() => client.log.warn(`Failed to edit timeout state of ${client.diagnostics.member(member)}.`));
-		} else {
-			const locale = interaction.guildLocale;
-			strings = {
-				title: client.localise("warn.strings.limitSurpassed.title", locale)(),
-				description: client.localise(
-					"warn.strings.limitSurpassed.description",
-					locale,
-				)({
-					user_mention: mention(user.id, { type: "user" }),
-					limit: configuration.limit,
-					number: warningDocumentsActive.length,
-				}),
-			};
-		}
-
 		if (guildDocument.areEnabled("alerts")) {
 			const alertService = client.getAlertService(guild.id);
-			alertService?.alert({
-				embeds: [
-					{
-						title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
-						description: strings.description,
-						color: constants.colours.red,
-					},
-				],
-			});
+			if (configuration.autoTimeout?.enabled) {
+				const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
+				const timeoutMilliseconds = timeStructToMilliseconds(timeout);
+
+				client.bot.rest
+					.editMember(guild.id, member.id, {
+						communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
+					})
+					.catch(() => client.log.warn(`Failed to edit timeout state of ${client.diagnostics.member(member)}.`));
+
+				const strings = constants.contexts.warningLimitSurpassedAndTimedOut({ localise: client.localise, locale: interaction.guildLocale });
+				alertService?.alert({
+					embeds: [
+						{
+							title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
+							description: strings.description({
+								user_mention: mention(user.id, { type: "user" }),
+								limit: configuration.limit,
+								number: warningDocumentsActive.length,
+								period: client.pluralise(`units.${timeout[1]}.word`, locale, { quantity: timeout[0] }),
+							}),
+							color: constants.colours.red,
+						},
+					],
+				});
+			} else {
+				const strings = constants.contexts.warningLimitSurpassed({ localise: client.localise, locale: interaction.guildLocale });
+				alertService?.alert({
+					embeds: [
+						{
+							title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
+							description: strings.description({
+								user_mention: mention(user.id, { type: "user" }),
+								limit: configuration.limit,
+								number: warningDocumentsActive.length,
+							}),
+							color: constants.colours.red,
+						},
+					],
+				});
+			}
 		}
 
 		return;
@@ -203,22 +195,14 @@ async function handleWarnUser(
 
 	const reachedLimit = warningDocumentsActive.length === constants.defaults.WARN_LIMIT;
 	if (reachedLimit) {
-		const locale = interaction.guildLocale;
-		const strings = {
-			title: client.localise("warn.strings.limitReached.title", locale)(),
-			description: client.localise(
-				"warn.strings.limitReached.description",
-				locale,
-			)({ user_mention: mention(user.id, { type: "user" }), limit: constants.defaults.WARN_LIMIT }),
-		};
-
+		const strings = constants.contexts.limitReached({ localise: client.localise, locale: interaction.guildLocale });
 		if (guildDocument.areEnabled("alerts")) {
 			const alertService = client.getAlertService(guild.id);
 			alertService?.alert({
 				embeds: [
 					{
 						title: `${constants.emojis.indicators.warning} ${strings.title}`,
-						description: strings.description,
+						description: strings.description({ user_mention: mention(user.id, { type: "user" }), limit: constants.defaults.WARN_LIMIT }),
 						color: constants.colours.yellow,
 					},
 				],

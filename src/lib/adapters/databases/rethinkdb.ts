@@ -137,7 +137,8 @@ class RethinkDBDocumentSession extends DocumentSession {
 					// https://github.com/rethinkdb/rethinkdb-ts/issues/126
 					.getAll<RethinkDBDocument>(rethinkdb.r.table(collection), ...ids)
 					.run(this.#_connection),
-			instantiateModel: (database, rawDocument) => RethinkDBDocumentConventions.instantiateModel<M>(database, rawDocument),
+			instantiateModel: (database, rawDocument) =>
+				RethinkDBDocumentConventions.instantiateModel<M>(database, rawDocument),
 		});
 	}
 

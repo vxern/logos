@@ -1,4 +1,4 @@
-import { mention } from "logos:core/formatting";
+import {mention} from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 import { Praise } from "logos/database/praise";
@@ -33,11 +33,7 @@ async function handlePraiseUser(
 	}
 
 	if (member.id === interaction.member?.id) {
-		const strings = {
-			title: client.localise("praise.strings.cannotPraiseSelf.title", locale)(),
-			description: client.localise("praise.strings.cannotPraiseSelf.description", locale)(),
-		};
-
+		const strings = constants.contexts.cannotPraiseSelf({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -53,11 +49,7 @@ async function handlePraiseUser(
 		configuration.rateLimit ?? constants.defaults.PRAISE_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = {
-			title: client.localise("praise.strings.tooMany.title", locale)(),
-			description: client.localise("praise.strings.tooMany.description", locale)(),
-		};
-
+		const strings = constants.contexts.tooManyPraises({ localise: client.localise, locale: interaction.locale });
 		await client.pushedBack(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -84,17 +76,10 @@ async function handlePraiseUser(
 		args: [member, praiseDocument, interaction.user],
 	});
 
-	const strings = {
-		title: client.localise("praise.strings.praised.title", locale)(),
-		description: client.localise(
-			"praise.strings.praised.description",
-			locale,
-		)({ user_mention: mention(member.id, { type: "user" }) }),
-	};
-
+	const strings = constants.contexts.praised({ localise: client.localise, locale: interaction.locale });
 	await client.succeeded(interaction, {
 		title: strings.title,
-		description: strings.description,
+		description: strings.description({ user_mention: mention(member.id, { type: "user" }) }),
 	});
 }
 

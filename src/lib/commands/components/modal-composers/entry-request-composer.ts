@@ -7,17 +7,7 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 		submission: Logos.Interaction,
 		{ formData }: { formData: EntryRequestFormData },
 	): Promise<Modal<EntryRequestFormData>> {
-		const locale = submission.locale;
-		const featureLanguage = submission.featureLanguage;
-		const strings = {
-			title: this.client.localise("verification.title", locale)(),
-			fields: {
-				reason: this.client.localise("verification.fields.reason", locale)({ language: featureLanguage }),
-				aim: this.client.localise("verification.fields.aim", locale)(),
-				whereFound: this.client.localise("verification.fields.whereFound", locale)(),
-			},
-		};
-
+		const strings = constants.contexts.verificationModal({ localise: this.client.localise, locale: submission.locale });
 		return {
 			title: strings.title,
 			elements: [
@@ -27,7 +17,7 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 						{
 							customId: "reason",
 							type: Discord.MessageComponentTypes.InputText,
-							label: trim(strings.fields.reason, 45),
+							label: trim(strings.fields.reason({ language: submission.featureLanguage }), 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,
 							value: formData.reason,
