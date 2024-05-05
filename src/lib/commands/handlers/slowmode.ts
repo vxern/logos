@@ -82,7 +82,7 @@ async function handleToggleSlowmode(
 						title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
 						description: strings.description,
 					},
-					{ visible: true },
+					{ visibility: "public" },
 				);
 
 				return;
@@ -109,7 +109,7 @@ async function handleToggleSlowmode(
 						title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
 						description: strings.description,
 					},
-					{ visible: true },
+					{ visibility: "public" },
 				);
 
 				return;
@@ -165,7 +165,7 @@ async function handleToggleSlowmode(
 				title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
 				description: strings.description,
 			},
-			{ visible: true },
+			{ visibility: "public" },
 		);
 
 		return;
@@ -192,7 +192,7 @@ async function handleToggleSlowmode(
 			title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 }
 

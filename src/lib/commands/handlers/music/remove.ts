@@ -65,7 +65,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 					user_mention: mention(buttonPress.user.id, { type: "user" }),
 				}),
 			},
-			{ visible: true },
+			{ visibility: "public" },
 		);
 	});
 

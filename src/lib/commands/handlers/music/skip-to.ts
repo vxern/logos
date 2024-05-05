@@ -60,7 +60,7 @@ async function handleSkipToTimestamp(
 			title: `${constants.emojis.music.skippedTo} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 }
 

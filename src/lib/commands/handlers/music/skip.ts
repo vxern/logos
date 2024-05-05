@@ -86,7 +86,7 @@ async function handleSkipAction(
 			title: `${constants.emojis.music.skipped} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 
 	await musicService.session.skip({

@@ -40,7 +40,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 			title: `${constants.emojis.music.paused} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 }
 

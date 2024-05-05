@@ -54,7 +54,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 			title: `${constants.emojis.music.rewound} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 }
 

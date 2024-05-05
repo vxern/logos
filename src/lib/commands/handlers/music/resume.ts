@@ -45,7 +45,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 			title: `${constants.emojis.music.resumed} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 }
 

@@ -25,7 +25,7 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 
 	await withContext(
 		{
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 			builder: constants.contexts.botInformation,
 		},

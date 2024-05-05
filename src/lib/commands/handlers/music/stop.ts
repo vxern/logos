@@ -33,7 +33,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 			title: `${constants.emojis.music.stopped} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 }
 

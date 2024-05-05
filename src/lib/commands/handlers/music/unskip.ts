@@ -132,7 +132,7 @@ async function handleUnskipAction(
 			title: `${constants.emojis.music.unskipped} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 
 	await musicService.session.unskip({

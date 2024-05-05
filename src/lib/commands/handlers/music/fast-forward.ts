@@ -60,7 +60,7 @@ async function handleFastForward(
 			title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 }
 

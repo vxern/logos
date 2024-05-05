@@ -42,14 +42,13 @@ async function handleReplayAction(
 	}
 
 	const strings = constants.contexts.replaying({ localise: client.localise, locale: interaction.guildLocale });
-
 	await client.success(
 		interaction,
 		{
 			title: `${constants.emojis.music.replaying} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 
 	await musicService.session.replay({

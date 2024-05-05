@@ -8,6 +8,7 @@ type EmbedOrCallbackData = Discord.CamelizedDiscordEmbed | InteractionCallbackDa
 interface ReplyData {
 	readonly ephemeral: boolean;
 }
+type ReplyVisibility = "public" | "private";
 class InteractionStore {
 	readonly log: Logger;
 
@@ -40,7 +41,7 @@ class InteractionStore {
 	 */
 	get success(): InteractionStore["reply"] {
 		return async (interaction, embedOrData, flags) => {
-			if (flags?.visible) {
+			if (flags?.visibility === "public") {
 				return await this.notice(interaction, embedOrData, flags);
 			}
 
@@ -210,15 +211,15 @@ class InteractionStore {
 	async reply(
 		interaction: Logos.Interaction,
 		embedOrData: EmbedOrCallbackData,
-		{ visible = false } = {},
+		{ visibility = "private" }: { visibility?: ReplyVisibility } = {},
 	): Promise<void> {
 		const data = getInteractionCallbackData(embedOrData);
 
-		if (!visible) {
+		if (visibility === "private") {
 			data.flags = Discord.MessageFlags.Ephemeral;
 		}
 
-		this.#_replies.set(interaction.token, { ephemeral: !visible });
+		this.#_replies.set(interaction.token, { ephemeral: visibility === "private" });
 
 		if (interaction.parameters["@repeat"]) {
 			const message = await this.#client.bot.rest.sendMessage(interaction.channelId!, data).catch((reason) => {

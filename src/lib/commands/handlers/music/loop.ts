@@ -60,7 +60,7 @@ async function handleLoopPlayback(
 					title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
 					description: strings.description,
 				},
-				{ visible: true },
+				{ visibility: "public" },
 			);
 
 			return;
@@ -70,14 +70,13 @@ async function handleLoopPlayback(
 			localise: client.localise,
 			locale: interaction.guildLocale,
 		});
-
 		await client.success(
 			interaction,
 			{
 				title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
 				description: strings.description,
 			},
-			{ visible: true },
+			{ visibility: "public" },
 		);
 
 		return;
@@ -88,28 +87,26 @@ async function handleLoopPlayback(
 			localise: client.localise,
 			locale: interaction.guildLocale,
 		});
-
 		await client.success(
 			interaction,
 			{
 				title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
 				description: strings.description,
 			},
-			{ visible: true },
+			{ visibility: "public" },
 		);
 
 		return;
 	}
 
 	const strings = constants.contexts.loopEnabledForSong({ localise: client.localise, locale: interaction.guildLocale });
-
 	await client.success(
 		interaction,
 		{
 			title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visible: true },
+		{ visibility: "public" },
 	);
 }
 
