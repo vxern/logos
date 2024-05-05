@@ -496,18 +496,16 @@ class Client {
 					format: "relative",
 				});
 
-				const locale = interaction.locale;
-
 				const strings = {
-					title: this.localise("interactions.rateLimited.title", locale)(),
+					title: this.localise("interactions.rateLimited.title", interaction.locale)(),
 					description: {
 						tooManyUses: this.localise(
 							"interactions.rateLimited.description.tooManyUses",
-							locale,
+							interaction.locale,
 						)({ times: constants.defaults.COMMAND_RATE_LIMIT.uses }),
 						cannotUseUntil: this.localise(
 							"interactions.rateLimited.description.cannotUseAgainUntil",
-							locale,
+							interaction.locale,
 						)({ relative_timestamp: nextAllowedUsageTimestampFormatted }),
 					},
 				};

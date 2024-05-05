@@ -33,10 +33,8 @@ async function handleWarnUserAutocomplete(
 			break;
 		}
 		case "rule": {
-			const locale = interaction.locale;
-
 			const strings = {
-				other: client.localise("warn.options.rule.strings.other", locale)(),
+				other: client.localise("warn.options.rule.strings.other", interaction.locale)(),
 			};
 
 			const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
@@ -62,8 +60,6 @@ async function handleWarnUser(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.warns;
@@ -133,7 +129,7 @@ async function handleWarnUser(
 		title: strings.title,
 		description: strings.description({
 			user_mention: mention(member.id, { type: "user" }),
-			warnings: client.pluralise("warn.strings.warned.description.warnings", locale, {
+			warnings: client.pluralise("warn.strings.warned.description.warnings", interaction.locale, {
 				quantity: warningDocumentsActive.length,
 			}),
 		}),
@@ -165,7 +161,7 @@ async function handleWarnUser(
 								user_mention: mention(user.id, { type: "user" }),
 								limit: configuration.limit,
 								number: warningDocumentsActive.length,
-								period: client.pluralise(`units.${timeout[1]}.word`, locale, { quantity: timeout[0] }),
+								period: client.pluralise(`units.${timeout[1]}.word`, interaction.locale, { quantity: timeout[0] }),
 							}),
 							color: constants.colours.red,
 						},

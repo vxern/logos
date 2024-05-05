@@ -1,5 +1,5 @@
 import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "logos:constants/slowmode";
-import {timestamp} from "logos:core/formatting";
+import { timestamp } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 
@@ -9,13 +9,11 @@ async function handleToggleSlowmodeAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { level: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const levelLowercase = interaction.parameters.level.trim().toLowerCase();
 	const choices = constants.slowmode.levels
 		.map((level, index) => {
 			return {
-				name: client.localise(`slowmode.strings.levels.${level}`, locale)(),
+				name: client.localise(`slowmode.strings.levels.${level}`, interaction.locale)(),
 				value: index.toString(),
 			};
 		})
@@ -74,7 +72,10 @@ async function handleToggleSlowmode(
 					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
 				});
 
-				const strings = constants.contexts.slowmodeDowngraded({ localise: client.localise, locale: interaction.guildLocale });
+				const strings = constants.contexts.slowmodeDowngraded({
+					localise: client.localise,
+					locale: interaction.guildLocale,
+				});
 				await client.success(
 					interaction,
 					{
@@ -98,7 +99,10 @@ async function handleToggleSlowmode(
 					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
 				});
 
-				const strings = constants.contexts.slowmodeUpgraded({ localise: client.localise, locale: interaction.guildLocale });
+				const strings = constants.contexts.slowmodeUpgraded({
+					localise: client.localise,
+					locale: interaction.guildLocale,
+				});
 				await client.success(
 					interaction,
 					{
@@ -112,7 +116,10 @@ async function handleToggleSlowmode(
 			}
 
 			{
-				const strings = constants.contexts.theSameSlowmodeLevel({ localise: client.localise, locale: interaction.locale });
+				const strings = constants.contexts.theSameSlowmodeLevel({
+					localise: client.localise,
+					locale: interaction.locale,
+				});
 				await client.warning(interaction, {
 					title: strings.title,
 					description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
@@ -132,7 +139,9 @@ async function handleToggleSlowmode(
 				const strings = constants.contexts.slowmodeTooSoon({ localise: client.localise, locale: interaction.locale });
 				await client.pushback(interaction, {
 					title: strings.title,
-					description: `${strings.description.justEnabled} ${strings.description.canDisableIn(({ relative_timestamp: timestamp(canDisableIn, { format: "relative" }) }))}`,
+					description: `${strings.description.justEnabled} ${strings.description.canDisableIn({
+						relative_timestamp: timestamp(canDisableIn, { format: "relative" }),
+					})}`,
 				});
 
 				return;

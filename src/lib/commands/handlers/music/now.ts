@@ -7,8 +7,6 @@ async function handleDisplayCurrentlyPlaying(
 	client: Client,
 	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
 ): Promise<void> {
-	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -49,7 +47,10 @@ async function handleDisplayCurrentlyPlaying(
 
 		const collection = musicService.session.queueable as SongCollection;
 
-		const strings = constants.contexts.nowPlayingSong({ localise: client.localise, locale });
+		const strings = constants.contexts.nowPlayingSong({
+			localise: client.localise,
+			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+		});
 
 		const view = new SongCollectionView(client, {
 			interaction,
@@ -62,7 +63,10 @@ async function handleDisplayCurrentlyPlaying(
 		return;
 	}
 
-	const strings = constants.contexts.nowPlayingSongCollection({ localise: client.localise, locale });
+	const strings = constants.contexts.nowPlayingSongCollection({
+		localise: client.localise,
+		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+	});
 
 	await client.notice(
 		interaction,

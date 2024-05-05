@@ -623,11 +623,10 @@ class MusicSession extends EventEmitter {
 
 		await this.player.playTrack({ track: track.encoded });
 
-		const locale = this.service.guildLocale;
 		const strings = {
 			title: this.client.localise(
 				"music.options.play.strings.nowPlaying.title.nowPlaying",
-				locale,
+				this.service.guildLocale,
 			)({
 				listing_type: this.client.localise(
 					(() => {
@@ -646,16 +645,19 @@ class MusicSession extends EventEmitter {
 								return constants.special.missingString;
 						}
 					})(),
-					locale,
+					this.service.guildLocale,
 				)(),
 			}),
 			description: {
-				nowPlaying: this.client.localise("music.options.play.strings.nowPlaying.description.nowPlaying", locale),
+				nowPlaying: this.client.localise(
+					"music.options.play.strings.nowPlaying.description.nowPlaying",
+					this.service.guildLocale,
+				),
 				track:
 					this.queueable instanceof SongCollection
 						? this.client.localise(
 								"music.options.play.strings.nowPlaying.description.track",
-								locale,
+								this.service.guildLocale,
 						  )({
 								index: this.queueable.index + 1,
 								number: this.queueable.songs.length,

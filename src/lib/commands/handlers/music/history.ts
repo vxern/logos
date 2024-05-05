@@ -2,8 +2,6 @@ import { Client } from "logos/client";
 import { SongListingView } from "logos/commands/components/paginated-views/song-listing-view";
 
 async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -27,7 +25,10 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 		return;
 	}
 
-	const strings = constants.contexts.musicHistory({ localise: client.localise, locale });
+	const strings = constants.contexts.musicHistory({
+		localise: client.localise,
+		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+	});
 
 	const view = new SongListingView(client, {
 		interaction,

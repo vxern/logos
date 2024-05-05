@@ -7,12 +7,10 @@ async function handleSetLanguageAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const languageLowercase = interaction.parameters.language.trim().toLowerCase();
 	if (languageLowercase.length === 0) {
 		const strings = {
-			autocomplete: client.localise("autocomplete.language", locale)(),
+			autocomplete: client.localise("autocomplete.language", interaction.locale)(),
 		};
 
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
@@ -22,7 +20,7 @@ async function handleSetLanguageAutocomplete(
 	const choices = languages.languages.localisation
 		.map((language) => {
 			return {
-				name: client.localise(constants.localisations.languages[language], locale)(),
+				name: client.localise(constants.localisations.languages[language], interaction.locale)(),
 				value: language,
 			};
 		})

@@ -484,10 +484,8 @@ class InteractionStore {
 	): Promise<void> {
 		const identifierTrimmed = identifier.trim();
 		if (identifierTrimmed.length === 0) {
-			const locale = interaction.locale;
-
 			const strings = {
-				autocomplete: this.#client.localise("autocomplete.user", locale)(),
+				autocomplete: this.#client.localise("autocomplete.user", interaction.locale)(),
 			};
 
 			await this.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);

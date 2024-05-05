@@ -4,8 +4,6 @@ async function handleDisplayVolume(
 	client: Client,
 	interaction: Logos.Interaction<any, { show: boolean | undefined }>,
 ): Promise<void> {
-	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -29,7 +27,10 @@ async function handleDisplayVolume(
 		return;
 	}
 
-	const strings = constants.contexts.volume({ localise: client.localise, locale });
+	const strings = constants.contexts.volume({
+		localise: client.localise,
+		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+	});
 
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined

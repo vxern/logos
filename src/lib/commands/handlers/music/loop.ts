@@ -5,8 +5,6 @@ async function handleLoopPlayback(
 	client: Client,
 	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
 ): Promise<void> {
-	const locale = interaction.guildLocale;
-
 	const musicService = client.getMusicService(interaction.guildId);
 	if (musicService === undefined) {
 		return;
@@ -51,7 +49,10 @@ async function handleLoopPlayback(
 
 	if (interaction.parameters.collection) {
 		if (!musicService.session.queueable.isLooping) {
-			const strings = constants.contexts.loopDisabledForSongCollection({ localise: client.localise, locale });
+			const strings = constants.contexts.loopDisabledForSongCollection({
+				localise: client.localise,
+				locale: interaction.guildLocale,
+			});
 
 			await client.success(
 				interaction,
@@ -65,7 +66,10 @@ async function handleLoopPlayback(
 			return;
 		}
 
-		const strings = constants.contexts.loopEnabledForSongCollection({ localise: client.localise, locale });
+		const strings = constants.contexts.loopEnabledForSongCollection({
+			localise: client.localise,
+			locale: interaction.guildLocale,
+		});
 
 		await client.success(
 			interaction,
@@ -80,7 +84,10 @@ async function handleLoopPlayback(
 	}
 
 	if (!musicService.session.playable.isLooping) {
-		const strings = constants.contexts.loopDisabledForSong({ localise: client.localise, locale });
+		const strings = constants.contexts.loopDisabledForSong({
+			localise: client.localise,
+			locale: interaction.guildLocale,
+		});
 
 		await client.success(
 			interaction,
@@ -94,7 +101,7 @@ async function handleLoopPlayback(
 		return;
 	}
 
-	const strings = constants.contexts.loopEnabledForSong({ localise: client.localise, locale });
+	const strings = constants.contexts.loopEnabledForSong({ localise: client.localise, locale: interaction.guildLocale });
 
 	await client.success(
 		interaction,

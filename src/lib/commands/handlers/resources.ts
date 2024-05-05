@@ -3,8 +3,6 @@ import { Guild } from "logos/database/guild";
 
 /** Displays a message with information on where to find the resources for a given language. */
 async function handleDisplayResources(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
-
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const configuration = guildDocument.resources;
@@ -15,9 +13,12 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 	const strings = {
 		redirect: client.localise(
 			"resources.strings.redirect",
-			locale,
+			interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 		)({
-			language: client.localise(constants.localisations.languages[interaction.featureLanguage], locale)(),
+			language: client.localise(
+				constants.localisations.languages[interaction.featureLanguage],
+				interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+			)(),
 		}),
 	};
 
