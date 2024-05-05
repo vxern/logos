@@ -1135,5 +1135,46 @@ export default Object.freeze({
 			message: localise("recognize.strings.unknown.description.message", locale)(),
 		},
 	}),
+	musicHalted: ({ localise, locale }) => ({
+		title: localise("music.strings.outage.halted.title", locale)(),
+		description: {
+			outage: localise("music.strings.outage.halted.description.outage", locale)(),
+			noLoss: localise("music.strings.outage.halted.description.noLoss", locale)(),
+		},
+	}),
+	musicRestored: ({ localise, locale }) => ({
+		title: localise("music.strings.outage.restored.title", locale)(),
+		description: localise("music.strings.outage.restored.description", locale)(),
+	}),
+	cannotManageDuringOutage: ({ localise, locale }) => ({
+		title: localise("music.strings.outage.cannotManage.title", locale)(),
+		description: {
+			outage: localise("music.strings.outage.cannotManage.description.outage", locale)(),
+			backUpSoon: localise("music.strings.outage.cannotManage.description.backUpSoon", locale)(),
+		},
+	}),
+	notInVc: ({ localise, locale }) => ({
+		title: localise("music.strings.notInVc.title", locale)(),
+		description: {
+			toManage: localise("music.strings.notInVc.description.toManage", locale)(),
+			toCheck: localise("music.strings.notInVc.description.toCheck", locale)(),
+		},
+	}),
+	botInDifferentVc: ({ localise, locale }) => ({
+		title: localise("music.options.play.strings.inDifferentVc.title", locale)(),
+		description: localise("music.options.play.strings.inDifferentVc.description", locale)(),
+	}),
+	queueFull: ({ localise, locale }) => ({
+		title: localise("music.options.play.strings.queueFull.title", locale)(),
+		description: localise("music.options.play.strings.queueFull.description", locale)(),
+	}),
+	queued: ({ localise, locale }) => ({
+		title: localise("music.options.play.strings.queued.title", locale)(),
+		description: localise("music.options.play.strings.queued.description.public", locale),
+	}),
+	failedToLoadTrack: ({ localise, locale }) => ({
+		title: localise("music.options.play.strings.failedToLoad.title", locale)(),
+		description: localise("music.options.play.strings.failedToLoad.description", locale),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

@@ -27,7 +27,6 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 	await musicService.stop();
 
 	const strings = constants.contexts.stopped({ localise: client.localise, locale: interaction.guildLocale });
-
 	await client.success(
 		interaction,
 		{
