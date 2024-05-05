@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { Rule, isValidRule } from "logos:constants/rules";
 import { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
@@ -32,7 +31,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	if (!isValidRule(interaction.parameters.rule)) {
-		await displayError(client, interaction, { locale: interaction.locale });
+		await displayError(client, interaction);
 		return;
 	}
 
@@ -73,14 +72,10 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 	);
 }
 
-async function displayError(
-	client: Client,
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Promise<void> {
+async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = {
-		title: client.localise("rule.strings.invalid.title", locale)(),
-		description: client.localise("rule.strings.invalid.description", locale)(),
+		title: client.localise("rule.strings.invalid.title", interaction.locale)(),
+		description: client.localise("rule.strings.invalid.description", interaction.locale)(),
 	};
 
 	await client.error(interaction, {

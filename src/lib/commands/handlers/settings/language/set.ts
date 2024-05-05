@@ -1,4 +1,4 @@
-import languages, { Locale, getLocaleByLocalisationLanguage, isLocalisationLanguage } from "logos:constants/languages";
+import languages, { getLocaleByLocalisationLanguage, isLocalisationLanguage } from "logos:constants/languages";
 import { trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { User } from "logos/database/user";
@@ -38,7 +38,7 @@ async function handleSetLanguage(
 	const localeBefore = interaction.locale;
 
 	if (!isLocalisationLanguage(interaction.parameters.language)) {
-		await displayError(client, interaction, { locale: interaction.locale });
+		await displayError(client, interaction);
 		return;
 	}
 
@@ -88,14 +88,10 @@ async function handleSetLanguage(
 	});
 }
 
-async function displayError(
-	client: Client,
-	interaction: Logos.Interaction,
-	{ locale }: { locale: Locale },
-): Promise<void> {
+async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = {
-		title: client.localise("settings.strings.invalid.title", locale)(),
-		description: client.localise("settings.strings.invalid.description", locale)(),
+		title: client.localise("settings.strings.invalid.title", interaction.locale)(),
+		description: client.localise("settings.strings.invalid.description", interaction.locale)(),
 	};
 
 	await client.error(interaction, {

@@ -1,6 +1,5 @@
 import languages, {
 	Languages,
-	Locale,
 	TranslationLanguage,
 	getTranslationLanguage,
 	isTranslationLanguage,
@@ -13,8 +12,6 @@ async function handleTranslateChatInputAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { to: string; from: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
@@ -30,7 +27,7 @@ async function handleTranslateChatInputAutocomplete(
 	const languageQueryTrimmed = interaction.parameters[interaction.parameters.focused].trim();
 	if (languageQueryTrimmed.length === 0) {
 		const strings = {
-			autocomplete: client.localise("autocomplete.language", locale)(),
+			autocomplete: client.localise("autocomplete.language", interaction.locale)(),
 		};
 
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
@@ -50,7 +47,7 @@ async function handleTranslateChatInputAutocomplete(
 			}
 
 			const strings = {
-				language: client.localise(languageStringKey, locale)(),
+				language: client.localise(languageStringKey, interaction.locale)(),
 			};
 
 			return {
@@ -100,7 +97,6 @@ async function handleTranslate(
 	{ text, from, to }: { text: string; from?: string; to?: string },
 ): Promise<void> {
 	const language = interaction.parameters.show ? interaction.guildLanguage : interaction.language;
-	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
@@ -174,7 +170,7 @@ async function handleTranslate(
 				return;
 			}
 
-			await translateText(client, interaction, { text, languages: { source: from, target: to } }, { locale });
+			await translateText(client, interaction, { text, languages: { source: from, target: to } });
 			return;
 		}
 
@@ -199,7 +195,7 @@ async function handleTranslate(
 
 	if (to !== undefined) {
 		if (to !== sourceLanguage) {
-			await translateText(client, interaction, { text, languages: { source: sourceLanguage, target: to } }, { locale });
+			await translateText(client, interaction, { text, languages: { source: sourceLanguage, target: to } });
 			return;
 		}
 	}
@@ -207,12 +203,10 @@ async function handleTranslate(
 	const learningTranslationLanguage = getTranslationLanguage(interaction.learningLanguage);
 	if (learningTranslationLanguage !== undefined) {
 		if (learningTranslationLanguage !== sourceLanguage) {
-			await translateText(
-				client,
-				interaction,
-				{ text, languages: { source: sourceLanguage, target: learningTranslationLanguage } },
-				{ locale },
-			);
+			await translateText(client, interaction, {
+				text,
+				languages: { source: sourceLanguage, target: learningTranslationLanguage },
+			});
 
 			return;
 		}
@@ -247,20 +241,19 @@ async function handleTranslate(
 		return;
 	}
 
-	await translateText(
-		client,
-		interaction,
-		{ text, languages: { source: sourceLanguage, target: translationLanguage } },
-		{ locale },
-	);
+	await translateText(client, interaction, {
+		text,
+		languages: { source: sourceLanguage, target: translationLanguage },
+	});
 }
 
 async function translateText(
 	client: Client,
 	interaction: Logos.Interaction,
 	{ text, languages }: { text: string; languages: Languages<TranslationLanguage> },
-	{ locale }: { locale: Locale },
 ): Promise<void> {
+	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
+
 	const adapters = client.adapters.translators.getTranslators({ languages });
 	if (adapters === undefined || adapters.length === 0) {
 		const strings = constants.contexts.noTranslationAdapters({ localise: client.localise, locale: interaction.locale });

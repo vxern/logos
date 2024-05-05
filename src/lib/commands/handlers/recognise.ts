@@ -1,4 +1,4 @@
-import { DetectionLanguage, Locale } from "logos:constants/languages";
+import { DetectionLanguage } from "logos:constants/languages";
 import { list } from "logos:core/formatting";
 import { Client } from "logos/client";
 
@@ -6,19 +6,10 @@ async function handleRecogniseLanguageChatInput(
 	client: Client,
 	interaction: Logos.Interaction<any, { text: string }>,
 ): Promise<void> {
-	const locale = interaction.locale;
-
-	await handleRecogniseLanguage(
-		client,
-		interaction,
-		{ text: interaction.parameters.text, isMessage: false },
-		{ locale },
-	);
+	await handleRecogniseLanguage(client, interaction, { text: interaction.parameters.text, isMessage: false });
 }
 
 async function handleRecogniseLanguageMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const locale = interaction.locale;
-
 	const message = interaction.data?.resolved?.messages?.array()?.at(0);
 	if (message === undefined) {
 		return;
@@ -40,14 +31,13 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 
 	const text = message.content;
 
-	await handleRecogniseLanguage(client, interaction, { text, isMessage: true }, { locale });
+	await handleRecogniseLanguage(client, interaction, { text, isMessage: true });
 }
 
 async function handleRecogniseLanguage(
 	client: Client,
 	interaction: Logos.Interaction,
 	{ text, isMessage }: { text: string; isMessage: boolean },
-	{ locale }: { locale: Locale },
 ): Promise<void> {
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
@@ -82,8 +72,8 @@ async function handleRecogniseLanguage(
 		const strings = {
 			description: client.localise(
 				"recognize.strings.fields.likelyMatches.description.single",
-				locale,
-			)({ language: client.localise(constants.localisations.languages[language], locale)() }),
+				interaction.locale,
+			)({ language: client.localise(constants.localisations.languages[language], interaction.locale)() }),
 		};
 
 		await client.noticed(interaction, { description: strings.description });
@@ -99,13 +89,13 @@ async function handleRecogniseLanguage(
 				throw "StateError: Likely detected language unexpectedly undefined.";
 			}
 
-			const languageNameLocalised = client.localise(constants.localisations.languages[language], locale)();
+			const languageNameLocalised = client.localise(constants.localisations.languages[language], interaction.locale)();
 
 			const strings = {
-				title: client.localise("recognize.strings.fields.likelyMatches.title", locale)(),
+				title: client.localise("recognize.strings.fields.likelyMatches.title", interaction.locale)(),
 				description: client.localise(
 					"recognize.strings.fields.likelyMatches.description.single",
-					locale,
+					interaction.locale,
 				)({ language: `**${languageNameLocalised}**` }),
 			};
 
@@ -116,13 +106,16 @@ async function handleRecogniseLanguage(
 			});
 		} else {
 			const languageNamesLocalised = detectedLanguages.likely.map((language) =>
-				client.localise(constants.localisations.languages[language], locale)(),
+				client.localise(constants.localisations.languages[language], interaction.locale)(),
 			);
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			const strings = {
-				title: client.localise("recognize.strings.fields.likelyMatches.title", locale)(),
-				description: client.localise("recognize.strings.fields.likelyMatches.description.multiple", locale)(),
+				title: client.localise("recognize.strings.fields.likelyMatches.title", interaction.locale)(),
+				description: client.localise(
+					"recognize.strings.fields.likelyMatches.description.multiple",
+					interaction.locale,
+				)(),
 			};
 
 			fields.push({
@@ -138,13 +131,13 @@ async function handleRecogniseLanguage(
 				throw "StateError: Possible detected language unexpectedly undefined.";
 			}
 
-			const languageNameLocalised = client.localise(constants.localisations.languages[language], locale)();
+			const languageNameLocalised = client.localise(constants.localisations.languages[language], interaction.locale)();
 
 			const strings = {
-				title: client.localise("recognize.strings.fields.possibleMatches.title", locale)(),
+				title: client.localise("recognize.strings.fields.possibleMatches.title", interaction.locale)(),
 				description: client.localise(
 					"recognize.strings.fields.possibleMatches.description.single",
-					locale,
+					interaction.locale,
 				)({ language: `**${languageNameLocalised}**` }),
 			};
 
@@ -155,13 +148,16 @@ async function handleRecogniseLanguage(
 			});
 		} else {
 			const languageNamesLocalised = detectedLanguages.possible.map((language) =>
-				client.localise(constants.localisations.languages[language], locale)(),
+				client.localise(constants.localisations.languages[language], interaction.locale)(),
 			);
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			const strings = {
-				title: client.localise("recognize.strings.fields.possibleMatches.title", locale)(),
-				description: client.localise("recognize.strings.fields.possibleMatches.description.multiple", locale)(),
+				title: client.localise("recognize.strings.fields.possibleMatches.title", interaction.locale)(),
+				description: client.localise(
+					"recognize.strings.fields.possibleMatches.description.multiple",
+					interaction.locale,
+				)(),
 			};
 
 			fields.push({
