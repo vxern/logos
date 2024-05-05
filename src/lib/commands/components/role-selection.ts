@@ -392,17 +392,12 @@ async function displaySelectMenu(
 		})
 		.join(` ${constants.emojis.indicators.arrowRight}  `);
 
-	const strings = {
-		description: client.localise(`${category.id}.description`, interaction.locale)(),
-		chooseCategory: client.localise("profile.options.roles.strings.chooseCategory", interaction.locale)(),
-		chooseRole: client.localise("profile.options.roles.strings.chooseRole", interaction.locale)(),
-	};
-
+	const strings = constants.contexts.roleMenu({ localise: client.localise, locale: interaction.locale });
 	return {
 		embeds: [
 			{
 				title,
-				description: strings.description,
+				description: client.localise(`${category.id}.description`, interaction.locale)(),
 				color: category.color,
 			},
 		],

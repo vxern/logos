@@ -89,7 +89,7 @@ class TicketPromptService extends PromptService<{
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Ticket | null | undefined> {
-		const locale = interaction.locale;
+		const _locale = interaction.locale;
 
 		const ticketDocument = this.documents.get(interaction.metadata[0]);
 		if (ticketDocument === undefined) {
@@ -99,11 +99,7 @@ class TicketPromptService extends PromptService<{
 		const isResolved = interaction.metadata[1] === "true";
 
 		if (isResolved && ticketDocument.isResolved) {
-			const strings = {
-				title: this.client.localise("alreadyMarkedResolved.title", locale)(),
-				description: this.client.localise("alreadyMarkedResolved.description", locale)(),
-			};
-
+			const strings = constants.contexts.alreadyMarkedResolved({ localise: this.client.localise, locale: interaction.locale });
 			await this.client.warning(interaction, {
 				title: strings.title,
 				description: strings.description,
@@ -113,11 +109,7 @@ class TicketPromptService extends PromptService<{
 		}
 
 		if (!(isResolved || ticketDocument.isResolved)) {
-			const strings = {
-				title: this.client.localise("alreadyMarkedUnresolved.title", locale)(),
-				description: this.client.localise("alreadyMarkedUnresolved.description", locale)(),
-			};
-
+			const strings = constants.contexts.alreadyMarkedResolved({ localise: this.client.localise, locale: interaction.locale });
 			await this.client.warning(interaction, {
 				title: strings.title,
 				description: strings.description,

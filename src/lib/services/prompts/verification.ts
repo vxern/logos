@@ -576,21 +576,15 @@ class VerificationPromptService extends PromptService<{
 			return;
 		}
 
-		const strings = {
-			inquiryChannel: this.client.localise(
-				"entry.verification.inquiry.channel",
-				this.guildLocale,
-			)({ user: entryRequestAuthor.username }),
-		};
-
 		const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
 		if (ticketService === undefined) {
 			return;
 		}
 
+		const strings = constants.contexts.inquiryChannel({ localise: this.client.localise, locale: this.guildLocale });
 		const ticketDocument = await ticketService.openTicket({
 			type: "standalone",
-			formData: { topic: strings.inquiryChannel },
+			formData: { topic: strings.inquiryChannel({ user: entryRequestAuthor.username }) },
 			user: entryRequestAuthor,
 		});
 		if (ticketDocument === undefined) {
@@ -617,7 +611,6 @@ class VerificationPromptService extends PromptService<{
 
 		{
 			const strings = constants.contexts.inquiryOpened({ localise: this.client.localise, locale: interaction.locale });
-
 			await this.client.succeeded(interaction, {
 				title: strings.title,
 				description: strings.description({ guild_name: this.guild.name }),

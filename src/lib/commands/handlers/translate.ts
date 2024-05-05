@@ -298,17 +298,15 @@ async function translateText(
 	// Ensures that an empty translation string does not result in embed failure.
 	const translatedText = translation.text.trim().length !== 0 ? translation.text : constants.special.meta.whitespace;
 
+	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
+
 	const strings = {
+		...constants.contexts.translation({ localise: client.localise, locale: interaction.locale }),
 		languages: {
 			source: client.localise(constants.localisations.languages[languages.source], locale)(),
 			target: client.localise(constants.localisations.languages[languages.target], locale)(),
 		},
-		sourceText: client.localise("translate.strings.sourceText", locale)(),
-		translation: client.localise("translate.strings.translation", locale)(),
 	};
-
-	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
-
 	let embeds: Discord.CamelizedDiscordEmbed[];
 	if (isLong) {
 		embeds = [

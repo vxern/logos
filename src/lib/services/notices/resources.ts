@@ -12,47 +12,16 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 			return;
 		}
 
-		const guildLocale = this.guildLocale;
-		const featureLanguage = this.guildDocument.featureLanguage;
-
-		const strings = {
-			title: this.client.localise("notices.resources.title", guildLocale)(),
-			description: {
-				storedInRepository: this.client.localise(
-					"notices.resources.description.storedInRepository",
-					guildLocale,
-				)({ link: resourceConfiguration.url }),
-				easierToManage: this.client.localise("notices.resources.description.easierToManage", guildLocale)(),
-				contributable: {
-					contributable: this.client.localise("notices.resources.description.contributable", guildLocale)(),
-					usingCommand: this.client.localise(
-						"notices.resources.description.contributable.usingCommand",
-						guildLocale,
-					)({ command: "`/resource`" }),
-					openingIssue: this.client.localise("notices.resources.description.contributable.openingIssue", guildLocale)(),
-					pullRequest: this.client.localise(
-						"notices.resources.description.contributable.makingPullRequest",
-						guildLocale,
-					)(),
-				},
-			},
-			redirect: this.client.localise(
-				"resources.strings.redirect",
-				guildLocale,
-			)({
-				language: this.client.localise(constants.localisations.languages[featureLanguage], guildLocale)(),
-			}),
-		};
-
+		const strings = constants.contexts.resourceNotice({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
 				{
 					title: strings.title,
 					description:
-						`${strings.description.storedInRepository}\n\n` +
+						`${strings.description.storedInRepository({ link: resourceConfiguration.url })}\n\n` +
 						`${strings.description.easierToManage}\n\n` +
 						`${strings.description.contributable.contributable}\n` +
-						`1. ${strings.description.contributable.usingCommand}\n` +
+						`1. ${strings.description.contributable.usingCommand({ command: "`/resource`" })}\n` +
 						`2. ${strings.description.contributable.openingIssue}\n` +
 						`3. ${strings.description.contributable.pullRequest}\n`,
 					color: constants.colours.gray,
@@ -64,7 +33,9 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 					components: [
 						{
 							type: Discord.MessageComponentTypes.Button,
-							label: strings.redirect,
+							label: strings.redirect({
+								language: this.client.localise(constants.localisations.languages[this.guildDocument.featureLanguage], this.guildLocale)(),
+							}),
 							style: Discord.ButtonStyles.Link,
 							url: resourceConfiguration.url,
 						},

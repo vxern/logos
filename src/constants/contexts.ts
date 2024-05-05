@@ -849,7 +849,7 @@ export default Object.freeze({
 		},
 	}),
 	acknowledgements: ({ localise, locale }) => ({
-		acknowledgements: localise("acknowledgements.strings.acknowledgements", locale)()
+		acknowledgements: localise("acknowledgements.strings.acknowledgements", locale)(),
 	}),
 	credits: ({ localise, locale }) => ({
 		translation: localise("credits.strings.translation", locale)(),
@@ -961,6 +961,77 @@ export default Object.freeze({
 	limitReached: ({ localise, locale }) => ({
 		title: localise("warn.strings.limitReached.title", locale)(),
 		description: localise("warn.strings.limitReached.description", locale),
+	}),
+	roleMenu: ({ localise, locale }) => ({
+		chooseCategory: localise("profile.options.roles.strings.chooseCategory", locale)(),
+		chooseRole: localise("profile.options.roles.strings.chooseRole", locale)(),
+	}),
+	translation: ({ localise, locale }) => ({
+		sourceText: localise("translate.strings.sourceText", locale)(),
+		translation: localise("translate.strings.translation", locale)(),
+	}),
+	resourceNotice: ({ localise, locale }) => ({
+		title: localise("notices.resources.title", locale)(),
+		description: {
+			storedInRepository: localise("notices.resources.description.storedInRepository", locale),
+			easierToManage: localise("notices.resources.description.easierToManage", locale)(),
+			contributable: {
+				contributable: localise("notices.resources.description.contributable", locale)(),
+				usingCommand: localise("notices.resources.description.contributable.usingCommand", locale),
+				openingIssue: localise("notices.resources.description.contributable.openingIssue", locale)(),
+				pullRequest: localise("notices.resources.description.contributable.makingPullRequest", locale)(),
+			},
+		},
+		redirect: localise("resources.strings.redirect", locale),
+	}),
+	inquiryChannel: ({ localise, locale }) => ({
+		inquiryChannel: localise("entry.verification.inquiry.channel", locale),
+	}),
+	chooseProficiency: ({ localise, locale }) => ({
+		title: localise("entry.proficiency.title", locale)(),
+		description: {
+			chooseProficiency: localise("entry.proficiency.description.chooseProficiency", locale),
+			canChangeLater: localise("entry.proficiency.description.canChangeLater", locale),
+		},
+	}),
+	getVerified: ({ localise, locale }) => ({
+		title: localise("entry.verification.getVerified.title", locale)(),
+		description: {
+			verificationRequired: localise("entry.verification.getVerified.description.verificationRequired", locale),
+			honestAnswers: localise("entry.verification.getVerified.description.honestAnswers", locale)(),
+			understood: localise("entry.verification.getVerified.description.understood", locale)(),
+		},
+	}),
+	alreadyAnswered: ({ localise, locale }) => ({
+		title: localise("entry.verification.answers.alreadyAnswered.title", locale)(),
+		description: localise("entry.verification.answers.alreadyAnswered.description", locale)(),
+	}),
+	verificationAnswersSubmitted: ({ localise, locale }) => ({
+		title: localise("entry.verification.answers.submitted.title", locale)(),
+		description: {
+			submitted: localise("entry.verification.answers.submitted.description.submitted", locale)(),
+			willBeReviewed: localise("entry.verification.answers.submitted.description.willBeReviewed", locale)(),
+		},
+	}),
+	rejectedBefore: ({ localise, locale }) => ({
+		title: localise("entry.verification.answers.rejectedBefore.title", locale)(),
+		description: localise("entry.verification.answers.rejectedBefore.description", locale)(),
+	}),
+	receivedAccess: ({ localise, locale }) => ({
+		title: localise("entry.proficiency.receivedAccess.title", locale)(),
+		description: {
+			nowMember: localise("entry.proficiency.receivedAccess.description.nowMember", locale),
+			toStart: localise("entry.proficiency.receivedAccess.description.toStart", locale)(),
+		},
+	}),
+	sureToShow: ({ localise, locale }) => ({
+		title: localise("interactions.show.sureToShow.title", locale)(),
+		description: localise("interactions.show.sureToShow.description", locale)(),
+		yes: localise("interactions.show.sureToShow.yes", locale)(),
+		no: localise("interactions.show.sureToShow.no", locale)(),
+	}),
+	show: ({ localise, locale }) => ({
+		show: localise("interactions.show", locale)(),
 	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

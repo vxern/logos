@@ -80,15 +80,7 @@ class InteractionRepetitionService extends GlobalService {
 		await this.client.registerInteractionCollector(confirmButton);
 		await this.client.registerInteractionCollector(cancelButton);
 
-		const locale = buttonPress.locale;
-
-		const strings = {
-			title: this.client.localise("interactions.show.sureToShow.title", locale)(),
-			description: this.client.localise("interactions.show.sureToShow.description", locale)(),
-			yes: this.client.localise("interactions.show.sureToShow.yes", locale)(),
-			no: this.client.localise("interactions.show.sureToShow.no", locale)(),
-		};
-
+		const strings = constants.contexts.sureToShow({ localise: this.client.localise, locale: buttonPress.locale });
 		await this.client.pushedBack(buttonPress, {
 			embeds: [
 				{
@@ -119,10 +111,7 @@ class InteractionRepetitionService extends GlobalService {
 	}
 
 	getShowButton(interaction: Logos.Interaction, { locale }: { locale: Locale }): Discord.ButtonComponent {
-		const strings = {
-			show: this.client.localise("interactions.show", locale)(),
-		};
-
+		const strings = constants.contexts.show({ localise: this.client.localise, locale });
 		return {
 			type: Discord.MessageComponentTypes.Button,
 			style: Discord.ButtonStyles.Primary,

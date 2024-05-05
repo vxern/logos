@@ -1,4 +1,3 @@
-import { Locale } from "logos:constants/languages";
 import { code } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
@@ -52,35 +51,25 @@ class EntryService extends LocalService {
 
 		await this.client.registerInteractionCollector(languageProficiencyButtons);
 
-		const strings = {
-			title: this.client.localise("entry.proficiency.title", buttonPress.locale)(),
-			description: {
-				chooseProficiency: this.client.localise(
-					"entry.proficiency.description.chooseProficiency",
-					buttonPress.locale,
-				)({
-					language: buttonPress.featureLanguage,
-				}),
-				canChangeLater: this.client.localise(
-					"entry.proficiency.description.canChangeLater",
-					buttonPress.locale,
-				)({
-					command: code(
-						this.client.localiseCommand(
-							// @ts-ignore: This is fine for now.
-							this.client.commands.profile.options.roles.key,
-							buttonPress.locale,
-						),
-					),
-				}),
-			},
-		};
-
+		const strings = constants.contexts.chooseProficiency({
+			localise: this.client.localise,
+			locale: buttonPress.locale,
+		});
 		await this.client.notice(buttonPress, {
 			embeds: [
 				{
 					title: strings.title,
-					description: `${strings.description.chooseProficiency}\n\n${strings.description.canChangeLater}`,
+					description: `${strings.description.chooseProficiency({
+						language: buttonPress.featureLanguage,
+					})}\n\n${strings.description.canChangeLater({
+						command: code(
+							this.client.localiseCommand(
+								// @ts-ignore: This is fine for now.
+								this.client.commands.profile.options.roles.key,
+								buttonPress.locale,
+							),
+						),
+					})}`,
 				},
 			],
 			components: [
@@ -110,7 +99,7 @@ class EntryService extends LocalService {
 		buttonPress: Logos.Interaction<[index: string]>,
 		{ collector }: { collector: InteractionCollector<[index: string]> },
 	): Promise<void> {
-		const locale = buttonPress.locale;
+		const _locale = buttonPress.locale;
 
 		const index = Number.parseInt(buttonPress.metadata[1]);
 		const snowflake = (
@@ -128,7 +117,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const canEnter = await this.#vetUser(buttonPress, { locale });
+		const canEnter = await this.#vetUser(buttonPress);
 		if (!canEnter) {
 			return;
 		}
@@ -153,25 +142,14 @@ class EntryService extends LocalService {
 
 			const isVerified = userDocument.isAuthorisedOn({ guildId: this.guildIdString });
 			if (!isVerified) {
-				const strings = {
-					title: this.client.localise("entry.verification.getVerified.title", locale)(),
-					description: {
-						verificationRequired: this.client.localise(
-							"entry.verification.getVerified.description.verificationRequired",
-							locale,
-						)({
-							server_name: this.guild.name,
-						}),
-						honestAnswers: this.client.localise("entry.verification.getVerified.description.honestAnswers", locale)(),
-						understood: this.client.localise("entry.verification.getVerified.description.understood", locale)(),
-					},
-				};
-
+				const strings = constants.contexts.getVerified({ localise: this.client.localise, locale: buttonPress.locale });
 				await this.client.notice(buttonPress, {
 					embeds: [
 						{
 							title: strings.title,
-							description: `${strings.description.verificationRequired}\n\n${strings.description.honestAnswers}`,
+							description: `${strings.description.verificationRequired({
+								server_name: this.guild.name,
+							})}\n\n${strings.description.honestAnswers}`,
 						},
 					],
 					components: [
@@ -194,22 +172,12 @@ class EntryService extends LocalService {
 			}
 		}
 
-		const strings = {
-			title: this.client.localise("entry.proficiency.receivedAccess.title", locale)(),
-			description: {
-				nowMember: this.client.localise(
-					"entry.proficiency.receivedAccess.description.nowMember",
-					locale,
-				)({
-					server_name: this.guild.name,
-				}),
-				toStart: this.client.localise("entry.proficiency.receivedAccess.description.toStart", locale)(),
-			},
-		};
-
+		const strings = constants.contexts.receivedAccess({ localise: this.client.localise, locale: buttonPress.locale });
 		await this.client.success(buttonPress, {
 			title: strings.title,
-			description: `${constants.emojis.responses.celebration} ${strings.description.nowMember}\n\n${strings.description.toStart}`,
+			description: `${constants.emojis.responses.celebration} ${strings.description.nowMember({
+				server_name: this.guild.name,
+			})}\n\n${strings.description.toStart}`,
 			image: { url: constants.gifs.welcome },
 		});
 
@@ -225,8 +193,6 @@ class EntryService extends LocalService {
 	}
 
 	async #handleRequestVerification(buttonPress: Logos.Interaction<[index: string]>): Promise<void> {
-		const locale = buttonPress.locale;
-
 		const index = Number.parseInt(buttonPress.metadata[1]);
 		const snowflake = (
 			Object.values(constants.roles.language.categories.proficiency.collection.list)[index]?.snowflakes as
@@ -245,11 +211,10 @@ class EntryService extends LocalService {
 		});
 
 		if (entryRequestDocument !== undefined) {
-			const strings = {
-				title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
-				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
-			};
-
+			const strings = constants.contexts.alreadyAnswered({
+				localise: this.client.localise,
+				locale: buttonPress.locale,
+			});
 			await this.client.pushback(buttonPress, {
 				title: strings.title,
 				description: strings.description,
@@ -272,11 +237,10 @@ class EntryService extends LocalService {
 
 		composer.onSubmit(async (submission, { formData }) => {
 			if (entryRequest !== undefined) {
-				const strings = {
-					title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
-					description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
-				};
-
+				const strings = constants.contexts.alreadyAnswered({
+					localise: this.client.localise,
+					locale: submission.locale,
+				});
 				await this.client.pushback(submission, {
 					title: strings.title,
 					description: strings.description,
@@ -313,17 +277,10 @@ class EntryService extends LocalService {
 			verificationService.registerPrompt(prompt, buttonPress.user.id, entryRequestDocument);
 			verificationService.registerHandler(entryRequestDocument);
 
-			const strings = {
-				title: this.client.localise("entry.verification.answers.submitted.title", locale)(),
-				description: {
-					submitted: this.client.localise("entry.verification.answers.submitted.description.submitted", locale)(),
-					willBeReviewed: this.client.localise(
-						"entry.verification.answers.submitted.description.willBeReviewed",
-						locale,
-					)(),
-				},
-			};
-
+			const strings = constants.contexts.verificationAnswersSubmitted({
+				localise: this.client.localise,
+				locale: submission.locale,
+			});
 			await this.client.succeeded(submission, {
 				title: strings.title,
 				description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
@@ -331,18 +288,17 @@ class EntryService extends LocalService {
 		});
 	}
 
-	async #vetUser(interaction: Logos.Interaction, { locale }: { locale: Locale }): Promise<boolean> {
+	async #vetUser(interaction: Logos.Interaction): Promise<boolean> {
 		const [userDocument, entryRequestDocument] = await Promise.all([
 			User.getOrCreate(this.client, { userId: interaction.user.id.toString() }),
 			EntryRequest.get(this.client, { guildId: this.guildIdString, authorId: interaction.user.id.toString() }),
 		]);
 
 		if (entryRequestDocument !== undefined && !entryRequestDocument.isFinalised) {
-			const strings = {
-				title: this.client.localise("entry.verification.answers.alreadyAnswered.title", locale)(),
-				description: this.client.localise("entry.verification.answers.alreadyAnswered.description", locale)(),
-			};
-
+			const strings = constants.contexts.alreadyAnswered({
+				localise: this.client.localise,
+				locale: interaction.locale,
+			});
 			await this.client.pushback(interaction, {
 				title: strings.title,
 				description: strings.description,
@@ -356,11 +312,7 @@ class EntryService extends LocalService {
 		}
 
 		if (userDocument.isRejectedOn({ guildId: this.guildIdString })) {
-			const strings = {
-				title: this.client.localise("entry.verification.answers.rejectedBefore.title", locale)(),
-				description: this.client.localise("entry.verification.answers.rejectedBefore.description", locale)(),
-			};
-
+			const strings = constants.contexts.rejectedBefore({ localise: this.client.localise, locale: interaction.locale });
 			await this.client.error(interaction, {
 				title: strings.title,
 				description: strings.description,
