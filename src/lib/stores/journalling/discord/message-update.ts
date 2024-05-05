@@ -10,16 +10,22 @@ const logger: EventLogger<"messageUpdate"> = async (client, message, _?) => {
 	return {
 		embeds: [
 			{
-				title: `${constants.emojis.events.message.updated} Message updated`,
+				title: `${constants.emojis.events.message.updated} ${strings.title}`,
 				color: constants.colours.notice,
-				description: `${client.diagnostics.user(message.author)} updated their message in ${mention(message.channelId, {
-					type: "channel",
-				})}.
-  
-  **BEFORE**
-  ${codeMultiline(oldMessage.content)}
-  **AFTER**
-  ${codeMultiline(message.content)}`,
+				description: strings.description({
+					user: client.diagnostics.user(message.author),
+					channel: mention(message.channelId, { type: "channel" }),
+				}),
+				fields: [
+					{
+						name: strings.fields.before,
+						value: codeMultiline(oldMessage.content),
+					},
+					{
+						name: strings.fields.after,
+						value: codeMultiline(message.content),
+					},
+				],
 			},
 		],
 	};

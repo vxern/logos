@@ -1,13 +1,16 @@
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"guildBanAdd"> = async (client, user, _) => ({
-	embeds: [
-		{
-			title: `${constants.emojis.events.user.banned} User banned`,
-			colour: constants.colours.failure,
-			description: `${client.diagnostics.user(user)} has been banned.`,
-		},
-	],
-});
+const logger: EventLogger<"guildBanAdd"> = async (client, user, _) => {
+	const strings = constants.contexts.banAdd({ localise: client.localise, locale: guildLocale });
+	return {
+		embeds: [
+			{
+				title: `${constants.emojis.events.user.banned} ${strings.title}`,
+				colour: constants.colours.failure,
+				description: strings.description({ user: client.diagnostics.user(user) }),
+			},
+		],
+	};
+};
 
 export default logger;

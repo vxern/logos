@@ -10,21 +10,29 @@ const logger: EventLogger<"entryRequestSubmit"> = async (client, user, entryRequ
 	const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
 	const featureLanguage = guildDocument.featureLanguage;
 
+	// TODO(vxern): This needs to be updated.
 	const strings = constants.contexts.verificationModal({ localise: client.localise, locale: guildLocale });
 
 	return {
 		embeds: [
 			{
-				title: `${constants.emojis.events.entryRequest.submitted} Entry request submitted`,
+				title: `${constants.emojis.events.entryRequest.submitted} ${strings.title}`,
 				colour: constants.colours.success,
-				description: `${client.diagnostics.user(user)} has submitted a request to join the server.
-
-        **${strings.fields.reason({ language: featureLanguage })}**
-        ${codeMultiline(entryRequest.formData.reason)}
-        **${strings.fields.aim}**
-        ${codeMultiline(entryRequest.formData.aim)}
-        **${strings.fields.whereFound}**
-        ${codeMultiline(entryRequest.formData.whereFound)}`,
+				description: strings.description({ user: client.diagnostics.user(user) }),
+				fields: [
+					{
+						name: strings.fields.reason({ language: featureLanguage }),
+						value: codeMultiline(entryRequest.formData.reason),
+					},
+					{
+						name: strings.fields.aim,
+						value: codeMultiline(entryRequest.formData.aim),
+					},
+					{
+						name: strings.fields.whereFound,
+						value: codeMultiline(entryRequest.formData.whereFound),
+					},
+				],
 			},
 		],
 	};

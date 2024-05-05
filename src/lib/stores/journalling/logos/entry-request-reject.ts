@@ -3,11 +3,12 @@ import { EventLogger } from "logos/stores/journalling/loggers";
 const logger: EventLogger<"entryRequestReject"> = async (client, user, author) => ({
 	embeds: [
 		{
-			title: `${constants.emojis.events.entryRequest.rejected} Entry request rejected`,
+			title: `${constants.emojis.events.entryRequest.rejected} ${strings.title}`,
 			colour: constants.colours.failure,
-			description: `${client.diagnostics.user(user)}'s entry request has been rejected by ${client.diagnostics.member(
-				author,
-			)}`,
+			description: strings.description({
+				user: client.diagnostics.user(user),
+				moderator: client.diagnostics.member(author),
+			}),
 		},
 	],
 });

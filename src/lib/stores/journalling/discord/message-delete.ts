@@ -10,14 +10,18 @@ const logger: EventLogger<"messageDelete"> = async (client, payload, _?) => {
 	return {
 		embeds: [
 			{
-				title: `${constants.emojis.events.message.deleted} Message deleted`,
+				title: `${constants.emojis.events.message.deleted} ${strings.title}`,
 				colour: constants.colours.failure,
-				description: `${client.diagnostics.user(message.author)} deleted their message in ${mention(message.channelId, {
-					type: "channel",
-				})}.
-
-**CONTENT**
-${codeMultiline(message.content)}`,
+				description: strings.description({
+					user: client.diagnostics.user(message.author),
+					channel: mention(message.channelId, { type: "channel" }),
+				}),
+				fields: [
+					{
+						name: strings.fields.content,
+						value: codeMultiline(message.content),
+					},
+				],
 			},
 		],
 	};
