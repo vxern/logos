@@ -1,5 +1,8 @@
 import { Language } from "logos:constants/languages";
 import { Locale } from "logos:constants/languages/localisation";
+import { RuleOrOther } from "logos:constants/rules";
+import { SlowmodeLevel } from "logos:constants/slowmode";
+import { TimeUnit } from "logos:constants/time";
 import { Client } from "logos/client";
 
 type ContextBuilder<T extends object> = ({
@@ -111,40 +114,6 @@ export default Object.freeze({
 	warnings: ({ localise, locale }) => ({
 		title: localise("list.options.warnings.strings.warnings.title", locale)(),
 		warning: localise("list.options.warnings.strings.warnings.description.warning", locale),
-	}),
-	behaviourRule: ({ localise, locale }) => ({
-		title: localise("rules.behaviour.title", locale)(),
-		summary: localise("rules.behaviour.summary", locale)(),
-		content: localise("rules.behaviour.content", locale)(),
-	}),
-	qualityRule: ({ localise, locale }) => ({
-		title: localise("rules.quality.title", locale)(),
-		summary: localise("rules.quality.summary", locale)(),
-		content: localise("rules.quality.content", locale)(),
-	}),
-	relevanceRule: ({ localise, locale }) => ({
-		title: localise("rules.relevance.title", locale)(),
-		summary: localise("rules.relevance.summary", locale)(),
-		content: localise("rules.relevance.content", locale)(),
-	}),
-	suitabilityRule: ({ localise, locale }) => ({
-		title: localise("rules.suitability.title", locale)(),
-		summary: localise("rules.suitability.summary", locale)(),
-		content: localise("rules.suitability.content", locale)(),
-	}),
-	exclusivityRule: ({ localise, locale }) => ({
-		title: localise("rules.exclusivity.title", locale)(),
-		summary: localise("rules.exclusivity.summary", locale)(),
-		content: localise("rules.exclusivity.content", locale)(),
-	}),
-	adherenceRule: ({ localise, locale }) => ({
-		title: localise("rules.adherence.title", locale)(),
-		summary: localise("rules.adherence.summary", locale)(),
-		content: localise("rules.adherence.content", locale)(),
-	}),
-	otherRule: ({ localise, locale }) => ({
-		title: localise("rules.other.title", locale)(),
-		summary: localise("rules.other.summary", locale)(),
 	}),
 	roleLimitReached: ({ localise, locale }) => ({
 		title: localise("warn.strings.limitReached.title", locale)(),
@@ -490,9 +459,6 @@ export default Object.freeze({
 	musicPaused: ({ localise, locale }) => ({
 		title: localise("music.options.pause.strings.paused.title", locale)(),
 		description: localise("music.options.pause.strings.paused.description", locale)(),
-	}),
-	stream: ({ localise, locale }) => ({
-		stream: localise("music.options.play.strings.stream", locale)(),
 	}),
 	failedToRemoveSong: ({ localise, locale }) => ({
 		title: localise("music.options.remove.strings.failed.title", locale)(),
@@ -1391,6 +1357,43 @@ export default Object.freeze({
 	possibleMatches: ({ localise, locale }) => ({
 		title: localise("recognize.strings.fields.possibleMatches.title", locale)(),
 		description: localise("recognize.strings.fields.possibleMatches.description.multiple", locale)(),
+	}),
+	redirect: ({ localise, locale }) => ({
+		redirect: localise("resources.strings.redirect", locale),
+	}),
+	tldr: ({ localise, locale }) => ({
+		tldr: localise("rules.tldr", locale)(),
+	}),
+	rule: ({ localise, locale }) => ({
+		title: (rule: RuleOrOther) => localise(`rules.${rule}.title`, locale)(),
+		summary: (rule: RuleOrOther) => localise(`rules.${rule}.summary`, locale)(),
+		content: (rule: RuleOrOther) => localise(`rules.${rule}.content`, locale)(),
+	}),
+	ruleInvalid: ({ localise, locale }) => ({
+		title: localise("rule.strings.invalid.title", locale)(),
+		description: localise("rule.strings.invalid.description", locale)(),
+	}),
+	slowmodeLevel: ({ localise, locale }) => ({
+		level: (level: SlowmodeLevel) => localise(`slowmode.strings.levels.${level}`, locale)(),
+	}),
+	timeUnit: ({ localise, locale }) => ({
+		one: (unit: TimeUnit) => localise(`units.${unit}.one`, locale)(),
+		two: (unit: TimeUnit) => localise(`units.${unit}.two`, locale)(),
+		many: (unit: TimeUnit) => localise(`units.${unit}.many`, locale)(),
+		short: (unit: TimeUnit) => localise(`units.${unit}.short`, locale)(),
+		shortest: (unit: TimeUnit) => localise(`units.${unit}.shortest`, locale)(),
+	}),
+	nowPlaying: ({ localise, locale }) => ({
+		title: {
+			nowPlaying: localise("music.options.play.strings.nowPlaying.title.nowPlaying", locale),
+			song: localise("music.options.play.strings.nowPlaying.title.type.song", locale)(),
+			stream: localise("music.options.play.strings.nowPlaying.title.type.stream", locale)(),
+			songCollection: localise("music.options.play.strings.nowPlaying.title.type.songCollection", locale)(),
+		},
+		description: {
+			nowPlaying: localise("music.options.play.strings.nowPlaying.description.nowPlaying", locale),
+			track: localise("music.options.play.strings.nowPlaying.description.track", locale),
+		},
 	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

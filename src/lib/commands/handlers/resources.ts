@@ -11,21 +11,20 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 	}
 
 	const strings = {
-		redirect: client.localise(
-			"resources.strings.redirect",
-			interaction.parameters.show ? interaction.guildLocale : interaction.locale,
-		)({
-			language: client.localise(
-				constants.localisations.languages[interaction.featureLanguage],
-				interaction.parameters.show ? interaction.guildLocale : interaction.locale,
-			)(),
+		...constants.contexts.redirect({
+			localise: client.localise,
+			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+		}),
+		...constants.contexts.language({
+			localise: client.localise,
+			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 		}),
 	};
 
 	const buttons: Discord.ButtonComponent[] = [
 		{
 			type: Discord.MessageComponentTypes.Button,
-			label: strings.redirect,
+			label: strings.redirect({ language: strings.language(interaction.featureLanguage) }),
 			style: Discord.ButtonStyles.Link,
 			url: configuration.url,
 		},
@@ -45,7 +44,7 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 				},
 			],
 		},
-		{ visible: interaction.parameters.show },
+		{ visibility: interaction.parameters.show ? "public" : "private" },
 	);
 }
 

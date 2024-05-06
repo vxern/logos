@@ -34,21 +34,9 @@ async function handleTranslateChatInputAutocomplete(
 	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
 	const choices = languages.languages.translation
 		.map((language) => {
-			const languageStringKey = constants.localisations.languages[language];
-
-			if (languageStringKey === undefined) {
-				return {
-					name: language,
-					value: language,
-				};
-			}
-
-			const strings = {
-				language: client.localise(languageStringKey, interaction.locale)(),
-			};
-
+			const strings = constants.contexts.language({ localise: client.localise, locale: interaction.locale });
 			return {
-				name: strings.language,
+				name: strings.language(language),
 				value: language,
 			};
 		})
@@ -249,7 +237,7 @@ async function translateText(
 	interaction: Logos.Interaction,
 	{ text, languages }: { text: string; languages: Languages<TranslationLanguage> },
 ): Promise<void> {
-	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
+	const _locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
 
 	const adapters = client.adapters.translators.getTranslators({ languages });
 	if (adapters === undefined || adapters.length === 0) {
@@ -292,10 +280,7 @@ async function translateText(
 
 	const strings = {
 		...constants.contexts.translation({ localise: client.localise, locale: interaction.locale }),
-		languages: {
-			source: client.localise(constants.localisations.languages[languages.source], locale)(),
-			target: client.localise(constants.localisations.languages[languages.target], locale)(),
-		},
+		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 	};
 	let embeds: Discord.CamelizedDiscordEmbed[];
 	if (isLong) {
@@ -308,7 +293,9 @@ async function translateText(
 				title: strings.translation,
 				description: translatedText,
 				footer: {
-					text: `${strings.languages.source} ${constants.emojis.indicators.arrowRight} ${strings.languages.target}`,
+					text: `${strings.language(languages.source)} ${constants.emojis.indicators.arrowRight} ${strings.language(
+						languages.target,
+					)}`,
 				},
 			},
 		];
@@ -328,7 +315,9 @@ async function translateText(
 					},
 				],
 				footer: {
-					text: `${strings.languages.source} ${constants.emojis.indicators.arrowRight} ${strings.languages.target}`,
+					text: `${strings.language(languages.source)} ${constants.emojis.indicators.arrowRight} ${strings.language(
+						languages.target,
+					)}`,
 				},
 			},
 		];
@@ -367,12 +356,13 @@ async function detectLanguage(
 	}
 
 	if (!isTranslationLanguage(detectedLanguage)) {
-		const strings = constants.contexts.languageNotSupported({ localise: client.localise, locale: interaction.locale });
+		const strings = {
+			...constants.contexts.languageNotSupported({ localise: client.localise, locale: interaction.locale }),
+			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
+		};
 		await client.unsupported(interaction, {
 			title: strings.title,
-			description: strings.description({
-				language: client.localise(constants.localisations.languages[detectedLanguage], interaction.locale)(),
-			}),
+			description: strings.description({ language: strings.language(detectedLanguage) }),
 		});
 
 		return undefined;

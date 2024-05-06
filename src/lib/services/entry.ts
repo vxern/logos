@@ -78,13 +78,10 @@ class EntryService extends LocalService {
 					components: Object.values(
 						constants.roles.language.categories.proficiency.collection.list,
 					).map<Discord.ButtonComponent>((proficiencyRole, index) => {
-						const strings = {
-							name: this.client.localise(`${proficiencyRole.id}.name`, buttonPress.locale)(),
-						};
-
+						const strings = constants.contexts.role({ localise: this.client.localise, locale: buttonPress.locale });
 						return {
 							type: Discord.MessageComponentTypes.Button,
-							label: strings.name,
+							label: strings.name({ id: proficiencyRole.id }),
 							customId: languageProficiencyButtons.encodeId([index.toString()]),
 							style: Discord.ButtonStyles.Secondary,
 							emoji: { name: proficiencyRole.emoji },

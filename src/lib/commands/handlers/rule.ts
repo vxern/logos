@@ -28,8 +28,6 @@ async function handleCiteRuleAutocomplete(
 }
 
 async function handleCiteRule(client: Client, interaction: Logos.Interaction<any, { rule: Rule }>): Promise<void> {
-	const locale = interaction.parameters.show ? interaction.guildLocale : interaction.locale;
-
 	if (!isValidRule(interaction.parameters.rule)) {
 		await displayError(client, interaction);
 		return;
@@ -40,12 +38,6 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		return;
 	}
 
-	const strings = {
-		tldr: client.localise("rules.tldr", locale)(),
-		summary: client.localise(`rules.${interaction.parameters.rule}.summary`, locale)(),
-		content: client.localise(`rules.${interaction.parameters.rule}.content`, locale)(),
-	};
-
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [
@@ -55,29 +47,35 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 				},
 		  ];
 
+	const strings = {
+		...constants.contexts.tldr({
+			localise: client.localise,
+			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+		}),
+		...constants.contexts.rule({
+			localise: client.localise,
+			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+		}),
+	};
 	await client.notice(
 		interaction,
 		{
 			embeds: [
 				{
 					title: getRuleTitleFormatted(client, interaction, { rule: interaction.parameters.rule, mode: "display" }),
-					description: strings.content,
-					footer: { text: `${strings.tldr}: ${strings.summary}` },
+					description: strings.content(interaction.parameters.rule),
+					footer: { text: `${strings.tldr}: ${strings.summary(interaction.parameters.rule)}` },
 					image: { url: constants.gifs.chaosWithoutRules },
 				},
 			],
 			components,
 		},
-		{ visible: interaction.parameters.show },
+		{ visibility: interaction.parameters.show ? "public" : "private" },
 	);
 }
 
 async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = {
-		title: client.localise("rule.strings.invalid.title", interaction.locale)(),
-		description: client.localise("rule.strings.invalid.description", interaction.locale)(),
-	};
-
+	const strings = constants.contexts.ruleInvalid({ localise: client.localise, locale: interaction.locale });
 	await client.error(interaction, {
 		title: strings.title,
 		description: strings.description,

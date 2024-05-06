@@ -9,14 +9,10 @@ async function handleToggleSlowmodeAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { level: string }>,
 ): Promise<void> {
+	const strings = constants.contexts.slowmodeLevel({ localise: client.localise, locale: interaction.locale });
 	const levelLowercase = interaction.parameters.level.trim().toLowerCase();
 	const choices = constants.slowmode.levels
-		.map((level, index) => {
-			return {
-				name: client.localise(`slowmode.strings.levels.${level}`, interaction.locale)(),
-				value: index.toString(),
-			};
-		})
+		.map((level, index) => ({ name: strings.level(level), value: index.toString() }))
 		.filter((choice) => choice.name.toLowerCase().includes(levelLowercase));
 
 	await client.respond(interaction, choices);

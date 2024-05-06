@@ -9,17 +9,20 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	generateNotice(): HashableMessageContents | undefined {
 		const informationFields = constants.rules.map((rule, index) => {
 			const strings = {
-				title: this.client.localise(`rules.${rule}.title`, this.guildLocale)(),
-				tldr: this.client.localise("rules.tldr", this.guildLocale)(),
-				summary: this.client.localise(`rules.${rule}.summary`, this.guildLocale)(),
-				content: this.client.localise(`rules.${rule}.content`, this.guildLocale)(),
+				...constants.contexts.tldr({
+					localise: this.client.localise,
+					locale: this.guildLocale,
+				}),
+				...constants.contexts.rule({
+					localise: this.client.localise,
+					locale: this.guildLocale,
+				}),
 			};
-
 			return {
-				name: `${constants.emojis.ruleBullet}  #${index + 1} ~ **${strings.title.toUpperCase()}**  ~  ${
+				name: `${constants.emojis.ruleBullet}  #${index + 1} ~ **${strings.title(rule).toUpperCase()}**  ~  ${
 					strings.tldr
-				}: *${strings.summary}*`,
-				value: strings.content,
+				}: *${strings.summary(rule)}*`,
+				value: strings.content(rule),
 				inline: false,
 			};
 		});

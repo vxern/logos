@@ -618,57 +618,38 @@ class MusicSession extends EventEmitter {
 
 		await this.player.playTrack({ track: track.encoded });
 
-		const strings = {
-			title: this.client.localise(
-				"music.options.play.strings.nowPlaying.title.nowPlaying",
-				this.service.guildLocale,
-			)({
-				listing_type: this.client.localise(
-					(() => {
-						const queueable = this.queueable;
-						switch (true) {
-							case queueable instanceof Song: {
-								return "music.options.play.strings.nowPlaying.title.type.song";
-							}
-							case queueable instanceof AudioStream: {
-								return "music.options.play.strings.nowPlaying.title.type.stream";
-							}
-							case queueable instanceof SongCollection: {
-								return "music.options.play.strings.nowPlaying.title.type.songCollection";
-							}
-							default:
-								return constants.special.missingString;
-						}
-					})(),
-					this.service.guildLocale,
-				)(),
-			}),
-			description: {
-				nowPlaying: this.client.localise(
-					"music.options.play.strings.nowPlaying.description.nowPlaying",
-					this.service.guildLocale,
-				),
-				track:
-					this.queueable instanceof SongCollection
-						? this.client.localise(
-								"music.options.play.strings.nowPlaying.description.track",
-								this.service.guildLocale,
-						  )({
-								index: this.queueable.index + 1,
-								number: this.queueable.songs.length,
-								title: this.queueable.title,
-						  })
-						: "",
-			},
-		};
-
+		const strings = constants.contexts.nowPlaying({ localise: this.client.localise, locale: this.service.guildLocale });
 		this.client.bot.rest
 			.sendMessage(this.channelId, {
 				embeds: [
 					{
-						title: `${this.queueable.emoji} ${strings.title}`,
+						title: `${this.queueable.emoji} ${strings.title.nowPlaying({
+							listing_type: (() => {
+								const queueable = this.queueable;
+								switch (true) {
+									case queueable instanceof Song: {
+										return strings.title.song;
+									}
+									case queueable instanceof AudioStream: {
+										return strings.title.stream;
+									}
+									case queueable instanceof SongCollection: {
+										return strings.title.songCollection;
+									}
+									default:
+										return constants.special.missingString;
+								}
+							})(),
+						})}`,
 						description: strings.description.nowPlaying({
-							song_information: strings.description.track,
+							song_information:
+								this.queueable instanceof SongCollection
+									? strings.description.track({
+											index: this.queueable.index + 1,
+											number: this.queueable.songs.length,
+											title: this.queueable.title,
+									  })
+									: "",
 							title: playable.title,
 							url: playable.url,
 							user_mention: mention(this.current.userId, { type: "user" }),
