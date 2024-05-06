@@ -406,6 +406,9 @@ class Client {
 		guild: Discord.Guild | Logos.Guild,
 		options: { isUpdate: boolean } = { isUpdate: false },
 	): Promise<void> {
+		// This check prevents the same guild being set up multiple times. This can happen when a shard managing a given
+		// guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event again for
+		// a guild that Logos would already have been managing.
 		if (this.entities.guilds.has(guild.id)) {
 			return;
 		}
