@@ -406,6 +406,10 @@ class Client {
 		guild: Discord.Guild | Logos.Guild,
 		options: { isUpdate: boolean } = { isUpdate: false },
 	): Promise<void> {
+		if (this.entities.guilds.has(guild.id)) {
+			return;
+		}
+
 		if (!options.isUpdate) {
 			this.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
 		}
