@@ -24,7 +24,7 @@ services:
     ports:
       - "6379:6379"
   lavalink:
-    image: "ghcr.io/lavalink-devs/lavalink:0aa718c-alpine"
+    image: "ghcr.io/lavalink-devs/lavalink:4"
     environment:
       SERVER_PORT: 2334
       LAVALINK_SERVER_PASSWORD: foo
