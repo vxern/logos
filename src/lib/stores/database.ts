@@ -1,11 +1,11 @@
 import { Collection } from "logos:constants/database";
+import { Environment } from "logos:core/environment";
 import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBAdapter } from "logos/adapters/databases/couchdb";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
 import { MongoDBAdapter } from "logos/adapters/databases/mongodb";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb";
-import { Environment } from "logos/client";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";

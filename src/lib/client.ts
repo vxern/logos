@@ -1,3 +1,4 @@
+import { Environment } from "logos:core/environment";
 import { timestamp } from "logos:core/formatting";
 import { Cache } from "logos/cache";
 import { Collector, InteractionCollector } from "logos/collectors";
@@ -21,40 +22,6 @@ import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationStore, RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
-
-interface Environment {
-	readonly isDebug?: boolean;
-	readonly discordSecret: string;
-	readonly deeplSecret?: string;
-	readonly rapidApiSecret?: string;
-	readonly databaseSolution?: string;
-	readonly mongodbUsername?: string;
-	readonly mongodbPassword?: string;
-	readonly mongodbHost?: string;
-	readonly mongodbPort?: string;
-	readonly mongodbDatabase?: string;
-	readonly ravendbHost?: string;
-	readonly ravendbPort?: string;
-	readonly ravendbDatabase?: string;
-	readonly ravendbSecure?: boolean;
-	readonly couchdbUsername?: string;
-	readonly couchdbPassword?: string;
-	readonly couchdbProtocol: string;
-	readonly couchdbHost?: string;
-	readonly couchdbPort?: string;
-	readonly couchdbDatabase?: string;
-	readonly rethinkdbUsername?: string;
-	readonly rethinkdbPassword?: string;
-	readonly rethinkdbHost?: string;
-	readonly rethinkdbPort?: string;
-	readonly rethinkdbDatabase?: string;
-	readonly redisHost?: string;
-	readonly redisPort?: string;
-	readonly redisPassword?: string;
-	readonly lavalinkHost?: string;
-	readonly lavalinkPort?: string;
-	readonly lavalinkPassword?: string;
-}
 
 class Client {
 	static #client?: Client;

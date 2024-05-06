@@ -1,8 +1,9 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
 import {
 	LearningLanguage,
-	getDiscordLocalisationLanguageByLocale,getLocaleByLearningLanguage,
-	getLocaleByLocalisationLanguage, 
+	getDiscordLocalisationLanguageByLocale,
+	getLocaleByLearningLanguage,
+	getLocaleByLocalisationLanguage,
 } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { Guild } from "logos/database/guild";

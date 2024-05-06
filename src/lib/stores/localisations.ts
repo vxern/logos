@@ -6,7 +6,7 @@ import {
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 } from "logos:constants/languages";
-import { Environment } from "logos/client";
+import { Environment } from "logos:core/environment";
 import { Logger } from "logos/logger";
 import { ReplyVisibility } from "logos/stores/interactions";
 

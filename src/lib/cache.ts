@@ -1,6 +1,6 @@
 import { Locale } from "logos:constants/languages";
+import { Environment } from "logos:core/environment";
 import Redis from "ioredis";
-import { Environment } from "logos/client";
 import { Logger } from "logos/logger";
 
 interface SentencePair {

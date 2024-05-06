@@ -11,14 +11,14 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 	}
 
 	readonly createdAt: number;
-	readonly languages?: GuildLanguages;
-	readonly features?: GuildFeatures;
 	/**
 	 * Whether the guild is native to Logos.
 	 *
 	 * Includes Learn Romanian and Learn Armenian.
 	 */
-	readonly isNative: boolean;
+	isNative: boolean;
+	languages?: GuildLanguages;
+	features?: GuildFeatures;
 
 	get localisationLanguage(): LocalisationLanguage {
 		return this.languages?.localisation ?? constants.defaults.LOCALISATION_LANGUAGE;

@@ -1,6 +1,6 @@
 import { Collection } from "logos:constants/database";
+import { Environment } from "logos:core/environment";
 import { DatabaseAdapter, DocumentConventions, DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
-import { Environment } from "logos/client";
 import { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 
