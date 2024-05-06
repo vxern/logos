@@ -1,4 +1,3 @@
-import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
 import { mention, trim } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { Ticket, TicketFormData, TicketType } from "logos/database/ticket";
@@ -161,11 +160,7 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const guildLocale = getLocaleByLocalisationLanguage(this.guildDocument.localisationLanguage);
-		const strings = {
-			inquiry: this.client.localise("entry.verification.inquiry.inquiry", guildLocale)(),
-		};
-
+		const strings = constants.contexts.inquiry({ localise: this.client.localise, locale: this.guildLocale });
 		const channel = await this.client.bot.helpers
 			.createChannel(this.guildId, {
 				parentId: this.configuration.categoryId,

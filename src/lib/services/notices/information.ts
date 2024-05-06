@@ -7,13 +7,12 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const guildLocale = this.guildLocale;
 		const informationFields = constants.rules.map((rule, index) => {
 			const strings = {
-				title: this.client.localise(`rules.${rule}.title`, guildLocale)(),
-				tldr: this.client.localise("rules.tldr", guildLocale)(),
-				summary: this.client.localise(`rules.${rule}.summary`, guildLocale)(),
-				content: this.client.localise(`rules.${rule}.content`, guildLocale)(),
+				title: this.client.localise(`rules.${rule}.title`, this.guildLocale)(),
+				tldr: this.client.localise("rules.tldr", this.guildLocale)(),
+				summary: this.client.localise(`rules.${rule}.summary`, this.guildLocale)(),
+				content: this.client.localise(`rules.${rule}.content`, this.guildLocale)(),
 			};
 
 			return {
@@ -25,10 +24,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 			};
 		});
 
-		const strings = {
-			invite: this.client.localise("notices.notices.information.invite", guildLocale)(),
-		};
-
+		const strings = constants.contexts.invite({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
 				{

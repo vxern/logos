@@ -70,13 +70,10 @@ async function handleRecogniseLanguage(
 		}
 
 		const strings = {
-			description: client.localise(
-				"recognize.strings.fields.likelyMatches.description.single",
-				interaction.locale,
-			)({ language: client.localise(constants.localisations.languages[language], interaction.locale)() }),
+			...constants.contexts.likelyMatch({ localise: client.localise, locale: interaction.locale }),
+			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 		};
-
-		await client.noticed(interaction, { description: strings.description });
+		await client.noticed(interaction, { description: strings.description({ language: strings.language(language) }) });
 		return;
 	}
 
@@ -89,34 +86,22 @@ async function handleRecogniseLanguage(
 				throw "StateError: Likely detected language unexpectedly undefined.";
 			}
 
-			const languageNameLocalised = client.localise(constants.localisations.languages[language], interaction.locale)();
-
 			const strings = {
-				title: client.localise("recognize.strings.fields.likelyMatches.title", interaction.locale)(),
-				description: client.localise(
-					"recognize.strings.fields.likelyMatches.description.single",
-					interaction.locale,
-				)({ language: `**${languageNameLocalised}**` }),
+				...constants.contexts.likelyMatch({ localise: client.localise, locale: interaction.locale }),
+				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
-
 			fields.push({
 				name: `${constants.emojis.detect.likely} ${strings.title}`,
-				value: strings.description,
+				value: strings.description({ language: `**${strings.language(language)}` }),
 				inline: false,
 			});
 		} else {
-			const languageNamesLocalised = detectedLanguages.likely.map((language) =>
-				client.localise(constants.localisations.languages[language], interaction.locale)(),
-			);
-			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
-
 			const strings = {
-				title: client.localise("recognize.strings.fields.likelyMatches.title", interaction.locale)(),
-				description: client.localise(
-					"recognize.strings.fields.likelyMatches.description.multiple",
-					interaction.locale,
-				)(),
+				...constants.contexts.likelyMatches({ localise: client.localise, locale: interaction.locale }),
+				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
+			const languageNamesLocalised = detectedLanguages.likely.map((language) => strings.language(language));
+			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			fields.push({
 				name: `${constants.emojis.detect.likely} ${strings.title}`,
@@ -131,34 +116,22 @@ async function handleRecogniseLanguage(
 				throw "StateError: Possible detected language unexpectedly undefined.";
 			}
 
-			const languageNameLocalised = client.localise(constants.localisations.languages[language], interaction.locale)();
-
 			const strings = {
-				title: client.localise("recognize.strings.fields.possibleMatches.title", interaction.locale)(),
-				description: client.localise(
-					"recognize.strings.fields.possibleMatches.description.single",
-					interaction.locale,
-				)({ language: `**${languageNameLocalised}**` }),
+				...constants.contexts.possibleMatch({ localise: client.localise, locale: interaction.locale }),
+				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
-
 			fields.push({
 				name: `${constants.emojis.detect.possible} ${strings.title}`,
-				value: strings.description,
+				value: strings.description({ language: `**${strings.language(language)}**` }),
 				inline: false,
 			});
 		} else {
-			const languageNamesLocalised = detectedLanguages.possible.map((language) =>
-				client.localise(constants.localisations.languages[language], interaction.locale)(),
-			);
-			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
-
 			const strings = {
-				title: client.localise("recognize.strings.fields.possibleMatches.title", interaction.locale)(),
-				description: client.localise(
-					"recognize.strings.fields.possibleMatches.description.multiple",
-					interaction.locale,
-				)(),
+				...constants.contexts.possibleMatches({ localise: client.localise, locale: interaction.locale }),
+				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
+			const languageNamesLocalised = detectedLanguages.possible.map((language) => strings.language(language));
+			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			fields.push({
 				name: `${constants.emojis.detect.possible} ${strings.title}`,

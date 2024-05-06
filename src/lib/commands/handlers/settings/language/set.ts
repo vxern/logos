@@ -9,21 +9,14 @@ async function handleSetLanguageAutocomplete(
 ): Promise<void> {
 	const languageLowercase = interaction.parameters.language.trim().toLowerCase();
 	if (languageLowercase.length === 0) {
-		const strings = {
-			autocomplete: client.localise("autocomplete.language", interaction.locale)(),
-		};
-
+		const strings = constants.contexts.autocompleteLanguage({ localise: client.localise, locale: interaction.locale });
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
+	const strings = constants.contexts.language({ localise: client.localise, locale: interaction.locale });
 	const choices = languages.languages.localisation
-		.map((language) => {
-			return {
-				name: client.localise(constants.localisations.languages[language], interaction.locale)(),
-				value: language,
-			};
-		})
+		.map((language) => ({ name: strings.language(language), value: language }))
 		.filter((choice) => choice.name.toLowerCase().includes(languageLowercase));
 
 	await client.respond(interaction, choices);
@@ -33,8 +26,6 @@ async function handleSetLanguage(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string }>,
 ): Promise<void> {
-	const localeBefore = interaction.locale;
-
 	if (!isLocalisationLanguage(interaction.parameters.language)) {
 		await displayError(client, interaction);
 		return;
@@ -47,18 +38,12 @@ async function handleSetLanguage(
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 	if (userDocument.preferredLanguage === language) {
 		const strings = {
-			title: client.localise("settings.strings.alreadySet.title", localeBefore)(),
-			description: client.localise(
-				"settings.strings.alreadySet.description",
-				localeBefore,
-			)({
-				language: client.localise(constants.localisations.languages[language], localeBefore)(),
-			}),
+			...constants.contexts.languageAlreadySet({ localise: client.localise, locale: interaction.locale }),
+			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 		};
-
 		await client.warned(interaction, {
 			title: strings.title,
-			description: strings.description,
+			description: strings.description({ language: strings.language(language) }),
 		});
 
 		return;
@@ -68,30 +53,19 @@ async function handleSetLanguage(
 		userDocument.preferredLanguage = language;
 	});
 
-	const localeAfter = getLocaleByLocalisationLanguage(language);
-
+	const newLocale = getLocaleByLocalisationLanguage(language);
 	const strings = {
-		title: client.localise("settings.strings.languageUpdated.title", localeAfter)(),
-		description: client.localise(
-			"settings.strings.languageUpdated.description",
-			localeAfter,
-		)({
-			language: client.localise(constants.localisations.languages[language], localeAfter)(),
-		}),
+		...constants.contexts.languageUpdated({ localise: client.localise, locale: newLocale }),
+		...constants.contexts.language({ localise: client.localise, locale: newLocale }),
 	};
-
 	await client.succeeded(interaction, {
 		title: strings.title,
-		description: strings.description,
+		description: strings.description({ language: strings.language(language) }),
 	});
 }
 
 async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = {
-		title: client.localise("settings.strings.invalid.title", interaction.locale)(),
-		description: client.localise("settings.strings.invalid.description", interaction.locale)(),
-	};
-
+	const strings = constants.contexts.languageInvalid({ localise: client.localise, locale: interaction.locale });
 	await client.error(interaction, {
 		title: strings.title,
 		description: strings.description,

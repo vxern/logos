@@ -1,7 +1,12 @@
+import { Language } from "logos:constants/languages";
 import { Locale } from "logos:constants/languages/localisation";
 import { Client } from "logos/client";
 
-type ContextBuilder<T extends object> = ({ localise, locale }: { localise: Client["localise"]; locale: Locale }) => T;
+type ContextBuilder<T extends object> = ({
+	localise,
+	localiseRaw,
+	locale,
+}: { localise: Client["localise"]; localiseRaw?: Client["localiseRaw"]; locale: Locale }) => T;
 
 export default Object.freeze({
 	botInformation: ({ localise, locale }) => ({
@@ -1322,6 +1327,70 @@ export default Object.freeze({
 		fields: {
 			topic: localise("events.ticketOpen.fields.topic", locale)(),
 		},
+	}),
+	autocompleteLanguage: ({ localise, locale }) => ({
+		autocomplete: localise("autocomplete.language", locale)(),
+	}),
+	languageAlreadySet: ({ localise, locale }) => ({
+		title: localise("settings.strings.alreadySet.title", locale)(),
+		description: localise("settings.strings.alreadySet.description", locale),
+	}),
+	languageUpdated: ({ localise, locale }) => ({
+		title: localise("settings.strings.languageUpdated.title", locale)(),
+		description: localise("settings.strings.languageUpdated.description", locale),
+	}),
+	languageInvalid: ({ localise, locale }) => ({
+		title: localise("settings.strings.invalid.title", locale)(),
+		description: localise("settings.strings.invalid.description", locale)(),
+	}),
+	likelyMatch: ({ localise, locale }) => ({
+		title: localise("recognize.strings.fields.likelyMatches.title", locale)(),
+		description: localise("recognize.strings.fields.likelyMatches.description.single", locale),
+	}),
+	likelyMatches: ({ localise, locale }) => ({
+		title: localise("recognize.strings.fields.likelyMatches.title", locale)(),
+		description: localise("recognize.strings.fields.likelyMatches.description.multiple", locale)(),
+	}),
+	otherRuleOption: ({ localise, locale }) => ({
+		option: localise("warn.options.rule.strings.other", locale)(),
+	}),
+	invite: ({ localise, locale }) => ({
+		invite: localise("notices.notices.information.invite", locale)(),
+	}),
+	inquiry: ({ localise, locale }) => ({
+		inquiry: localise("entry.verification.inquiry.inquiry", locale)(),
+	}),
+	failedToPlay: ({ localise, locale }) => ({
+		title: localise("music.options.play.strings.failedToPlay.title", locale)(),
+		description: localise("music.options.play.strings.failedToPlay.description", locale),
+	}),
+	thinking: ({ localise, locale }) => ({
+		thinking: localise("interactions.thinking", locale)(),
+	}),
+	autocompleteUser: ({ localise, locale }) => ({
+		autocomplete: localise("autocomplete.user", locale)(),
+	}),
+	roleCategory: ({ localise, locale }) => ({
+		name: ({ id }: { id: string }) => localise(`${id}.name`, locale)(),
+		description: ({ id }: { id: string }) => localise(`${id}.description`, locale)(),
+	}),
+	assignedRoles: ({ localise, locale }) => ({
+		assigned: localise("profile.options.roles.strings.assigned", locale)(),
+	}),
+	role: ({ localise, localiseRaw, locale }) => ({
+		name: ({ id }: { id: string }) => localise(`${id}.name`, locale)(),
+		description: ({ id }: { id: string }) => localiseRaw!(`${id}.description`, locale)(),
+	}),
+	language: ({ localise, locale }) => ({
+		language: (language: Language) => localise(constants.localisations.languages[language], locale)(),
+	}),
+	possibleMatch: ({ localise, locale }) => ({
+		title: localise("recognize.strings.fields.possibleMatches.title", locale)(),
+		description: localise("recognize.strings.fields.possibleMatches.description.single", locale),
+	}),
+	possibleMatches: ({ localise, locale }) => ({
+		title: localise("recognize.strings.fields.possibleMatches.title", locale)(),
+		description: localise("recognize.strings.fields.possibleMatches.description.multiple", locale)(),
 	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

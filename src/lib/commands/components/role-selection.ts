@@ -350,22 +350,19 @@ async function displaySelectMenu(
 		throw "StateError: Could not get the last role category.";
 	}
 
+	const strings = {
+		...constants.contexts.roleMenu({ localise: client.localise, locale: interaction.locale }),
+		...constants.contexts.role({ localise: client.localise, locale: interaction.locale }),
+	};
 	const title = (categories.length > 1 ? categories.slice(1) : categories)
-		.map((category) => {
-			const strings = {
-				categoryName: client.localise(`${category.id}.name`, interaction.locale)(),
-			};
-
-			return `${category.emoji}  ${strings.categoryName}`;
-		})
+		.map((category) => `${category.emoji}  ${strings.name({ id: category.id })}`)
 		.join(` ${constants.emojis.indicators.arrowRight}  `);
 
-	const strings = constants.contexts.roleMenu({ localise: client.localise, locale: interaction.locale });
 	return {
 		embeds: [
 			{
 				title,
-				description: client.localise(`${category.id}.description`, interaction.locale)(),
+				description: strings.description({ id: category.id }),
 				color: category.color,
 			},
 		],
@@ -395,15 +392,11 @@ function createSelectOptionsFromCategories(
 
 	const selections: Discord.SelectOption[] = [];
 	for (const [name, category] of Object.entries(categorySelections)) {
-		const strings = {
-			name: client.localise(`${category.id}.name`, interaction.locale)(),
-			description: client.localise(`${category.id}.description`, interaction.locale)(),
-		};
-
+		const strings = constants.contexts.roleCategory({ localise: client.localise, locale: interaction.locale });
 		selections.push({
-			label: trim(`${category.emoji} ${strings.name}`, 25),
+			label: trim(`${category.emoji} ${strings.name({ id: category.id })}`, 25),
 			value: name,
-			description: trim(strings.description, 100),
+			description: trim(strings.description({ id: category.id }), 100),
 			emoji: { name: constants.emojis.roles.folder },
 		});
 	}
@@ -432,15 +425,23 @@ function createSelectOptionsFromCollection(
 		const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
 		const strings = {
-			assigned: client.localise("profile.options.roles.strings.assigned", interaction.locale)(),
-			name: client.localise(`${role.id}.name`, interaction.locale)(),
-			description: client.localiseRaw(`${role.id}.description`, interaction.locale)(),
+			...constants.contexts.assignedRoles({ localise: client.localise, locale: interaction.locale }),
+			...constants.contexts.role({
+				localise: client.localise,
+				localiseRaw: client.localiseRaw,
+				locale: interaction.locale,
+			}),
 		};
-
 		selectOptions.push({
-			label: trim(memberHasRole ? `[${strings.assigned}] ${strings.name}` : strings.name, 25),
+			label: trim(
+				memberHasRole ? `[${strings.assigned}] ${strings.name({ id: role.id })}` : strings.name({ id: role.id }),
+				25,
+			),
 			value: name,
-			description: strings.description !== undefined ? trim(strings.description, 100) : undefined,
+			description:
+				strings.description({ id: role.id }) !== undefined
+					? trim(strings.description({ id: role.id })!, 100)
+					: undefined,
 			emoji: (() => {
 				if (role.emoji === undefined) {
 					return;

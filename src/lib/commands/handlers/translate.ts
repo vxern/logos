@@ -26,10 +26,7 @@ async function handleTranslateChatInputAutocomplete(
 
 	const languageQueryTrimmed = interaction.parameters[interaction.parameters.focused].trim();
 	if (languageQueryTrimmed.length === 0) {
-		const strings = {
-			autocomplete: client.localise("autocomplete.language", interaction.locale)(),
-		};
-
+		const strings = constants.contexts.autocompleteLanguage({ localise: client.localise, locale: interaction.locale });
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}

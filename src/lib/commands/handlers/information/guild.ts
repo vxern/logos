@@ -88,15 +88,16 @@ function getChannelInformationSection(client: Client, interaction: Logos.Interac
 }
 
 function getLanguageInformationSection(client: Client, interaction: Logos.Interaction, guildDocument: Guild): string {
-	const strings = constants.contexts.languageTypes({ localise: client.localise, locale: interaction.locale });
+	const strings = {
+		...constants.contexts.languageTypes({ localise: client.localise, locale: interaction.locale }),
+		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
+	};
 
-	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${client.localise(
-		constants.localisations.languages[guildDocument.localisationLanguage],
-		interaction.locale,
-	)()}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${client.localise(
-		constants.localisations.languages[guildDocument.featureLanguage],
-		interaction.locale,
-	)()}`;
+	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.language(
+		guildDocument.localisationLanguage,
+	)}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${strings.language(
+		guildDocument.featureLanguage,
+	)}`;
 }
 
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];

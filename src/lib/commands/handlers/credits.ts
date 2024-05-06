@@ -9,6 +9,10 @@ async function handleDisplayCredits(client: Client, interaction: Logos.Interacti
 function getTranslationView(client: Client, interaction: Logos.Interaction): Discord.CamelizedDiscordEmbed {
 	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
+	const strings = {
+		...constants.contexts.credits({ localise: client.localise, locale: interaction.locale }),
+		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
+	};
 	for (const [language, data] of (
 		Object.entries(constants.contributions.translation) as [LocalisationLanguage, Translation][]
 	).sort(([_, a], [__, b]) => b.completion - a.completion)) {
@@ -23,18 +27,13 @@ function getTranslationView(client: Client, interaction: Logos.Interaction): Dis
 			.map((contributor) => `- ${contributor}`)
 			.join("\n");
 
-		const strings = {
-			language: client.localise(constants.localisations.languages[language], interaction.locale)(),
-		};
-
 		fields.push({
-			name: `${data.flag} ${strings.language} (${data.completion * 10}%)`,
+			name: `${data.flag} ${strings.language(language)} (${data.completion * 10}%)`,
 			value: contributorsFormatted,
 			inline: true,
 		});
 	}
 
-	const strings = constants.contexts.credits({ localise: client.localise, locale: interaction.locale });
 	return { title: strings.translation, fields };
 }
 

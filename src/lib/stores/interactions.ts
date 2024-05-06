@@ -175,10 +175,7 @@ class InteractionStore {
 		this.#_replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
-			const strings = {
-				thinking: this.#client.localise("interactions.thinking", interaction.guildLocale)(),
-			};
-
+			const strings = constants.contexts.thinking({ localise: this.#client.localise, locale: interaction.guildLocale });
 			const message = await this.#client.bot.rest
 				.sendMessage(interaction.channelId!, {
 					embeds: [
@@ -485,12 +482,11 @@ class InteractionStore {
 	): Promise<void> {
 		const identifierTrimmed = identifier.trim();
 		if (identifierTrimmed.length === 0) {
-			const strings = {
-				autocomplete: this.#client.localise("autocomplete.user", interaction.locale)(),
-			};
-
+			const strings = constants.contexts.autocompleteUser({
+				localise: this.#client.localise,
+				locale: interaction.locale,
+			});
 			await this.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
-
 			return;
 		}
 

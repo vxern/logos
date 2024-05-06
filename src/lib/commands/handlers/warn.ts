@@ -33,10 +33,7 @@ async function handleWarnUserAutocomplete(
 			break;
 		}
 		case "rule": {
-			const strings = {
-				other: client.localise("warn.options.rule.strings.other", interaction.locale)(),
-			};
-
+			const strings = constants.contexts.otherRuleOption({ localise: client.localise, locale: interaction.locale });
 			const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
 			const choices = [
 				...constants.rules
@@ -47,7 +44,7 @@ async function handleWarnUserAutocomplete(
 						};
 					})
 					.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase)),
-				{ name: strings.other, value: constants.components.none },
+				{ name: strings.option, value: constants.components.none },
 			];
 
 			await client.respond(interaction, choices);

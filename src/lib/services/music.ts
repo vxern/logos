@@ -491,23 +491,18 @@ class MusicSession extends EventEmitter {
 
 		this.log.warn(`Failed to play track: ${event.exception}`);
 
-		const guildLocale = this.service.guildLocale;
-		const strings = {
-			title: this.client.localise("music.options.play.strings.failedToPlay.title", guildLocale)(),
-			description: this.client.localise(
-				"music.options.play.strings.failedToPlay.description",
-				guildLocale,
-			)({
-				title: this.playable.title,
-			}),
-		};
-
+		const strings = constants.contexts.failedToPlay({
+			localise: this.client.localise,
+			locale: this.service.guildLocale,
+		});
 		this.client.bot.rest
 			.sendMessage(this.channelId, {
 				embeds: [
 					{
 						title: strings.title,
-						description: strings.description,
+						description: strings.description({
+							title: this.playable.title,
+						}),
 						color: constants.colours.failure,
 					},
 				],
