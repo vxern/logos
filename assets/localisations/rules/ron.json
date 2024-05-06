@@ -6,7 +6,7 @@
     "rules.behaviour.content": "Este de așteptat ca membrii să se trateze reciproc cu respect, considerație și cu înțelegere. Comportamentul rău-intenționat sub formă de abuz verbal, discriminare, hărțuire și alte forme de comportament jignitor sau toxic nu vor fi tolerate.",
     "rules.quality.title": "Calitate",
     "rules.quality.summary": "Nu fi insuportabil/ă.",
-    "rules.quality.content": "Este de aștept ca contribuțiile făcute în server să fie de o calitate decentă. Trolling-ul, spamming-ul, flooding-ul, shitposting-ul (în afara canalului pentru meme-uri) și alte forme de comportament neplăcut sunt puternic descurajate.",
+    "rules.quality.content": "Este de așteptat ca contribuțiile făcute în server să fie de o calitate decentă. Trolling-ul, spamming-ul, flooding-ul, shitposting-ul (în afara canalului pentru meme-uri) și alte forme de comportament neplăcut sunt puternic descurajate.",
     "rules.relevance.title": "Relevanță",
     "rules.relevance.summary": "Postează conținut relevant.",
     "rules.relevance.content": "Este de așteptat ca contribuțiile făcute în server să fie plasate în canalul și categoria lor corespunzătoare. Contribuțiile făcute în canale nepotrivite pentru subiectul lor vor fi solicitate să fie mutate în canalul lor potrivit.",
@@ -18,5 +18,7 @@
     "rules.exclusivity.content": "Este de așteptat de la membrii serverului să nu se folosească de acest spațiu pentru a-și face reclamă. Încercările de a face publicitate (inclusiv mesajele private nesolicitate) sunt interzise.",
     "rules.adherence.title": "Aderență",
     "rules.adherence.summary": "Respectă regulamentul.",
-    "rules.adherence.content": "Membrii care nu arată nicio considerație față de regulament și cei care nu sunt deloc interesați în a face contribuții constructive pentru server, pot primi un ban permanent."
+    "rules.adherence.content": "Membrii care nu arată nicio considerație față de regulament și cei care nu sunt deloc interesați în a face contribuții constructive pentru server, pot primi un ban permanent.",
+    "rules.other.title": "Alta",
+    "rules.other.summary": "Justificat în motiv."
 }

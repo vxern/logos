@@ -15,12 +15,12 @@
     "report.fields.link": "Link către mesaj pentru context",
     "suggestion.title": "Sugestie",
     "suggestion.fields.suggestion": "Care este sugestia ta?",
-    "prompts.continue": "Înainte",
+    "prompts.continue": "Continuă",
     "prompts.cancel": "Anulează",
     "prompts.stay": "Ia-mă înapoi",
     "prompts.leave": "Părăsește",
     "resource.title": "Resursă",
-    "resource.fields.resource": "Care resursă ai vrea să trimiți?",
+    "resource.fields.resource": "Ce resursă ai vrea să trimiți?",
     "ticket.title": "Tichet de asistență",
     "ticket.fields.topic": "Care este subiectul tichetului tău?"
 }

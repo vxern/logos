@@ -9,7 +9,7 @@
     "correction.title": "Correctie",
     "correction.fields.original": "Oorspronkelijke tekst",
     "correction.fields.corrected": "Gecorrigeerde tekst",
-    "report.title": "User report",
+    "report.title": "Gebruikersrapport",
     "report.fields.reason": "Wat is de reden voor het rapport?",
     "report.fields.users": "Gebruikers om te rapporteren",
     "report.fields.link": "Link naar het bericht voor context",

@@ -2,7 +2,7 @@
     "roles.selection.title": "Cum să alegi rolurile",
     "roles.selection.description.usingCommand": "Poți selecta rolurile folosind comanda {command}, care deschide un meniu de selectat roluri.",
     "roles.selection.description.runAnywhere": "Această comandă poate fi folosită oriunde în server.",
-    "roles.selection.description.pressButton": "În mod alternativ, poți apăsa butonul de mai jos pentru a deschide meniul chiar aici.",
+    "roles.selection.description.pressButton": "Alternativ, poți apăsa butonul de mai jos pentru a deschide meniul aici.",
     "roles.selection.description.clickHere": "Apasă aici pentru a selecta rolurile",
     "roles.noCategory.name": "Nicio categorie selectată",
     "roles.noCategory.description": "Selectează o categorie pentru a primi lista cu rolurile disponibile.",
