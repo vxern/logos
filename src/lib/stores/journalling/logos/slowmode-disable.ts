@@ -2,7 +2,7 @@ import { mention } from "logos:core/formatting";
 import { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"slowmodeDisable"> = async (client, [user, channel], { guildLocale }) => {
-	const strings = constants.contexts.slowmodeDisable({ localise: client.localise, locale: guildLocale });
+	const strings = constants.contexts.slowmodeDisable({ localise: client.localise.bind(client), locale: guildLocale });
 	return {
 		embeds: [
 			{

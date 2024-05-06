@@ -26,7 +26,10 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		configuration.rateLimit ?? constants.defaults.TICKET_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = constants.contexts.tooManyTickets({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.tooManyTickets({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		await client.pushback(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -54,7 +57,10 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 			return;
 		}
 
-		const strings = constants.contexts.ticketSent({ localise: client.localise, locale: submission.locale });
+		const strings = constants.contexts.ticketSent({
+			localise: client.localise.bind(client),
+			locale: submission.locale,
+		});
 		await client.succeeded(submission, {
 			title: strings.title,
 			description: strings.description,

@@ -49,11 +49,11 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 
 	const strings = {
 		...constants.contexts.tldr({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 		}),
 		...constants.contexts.rule({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 		}),
 	};
@@ -70,12 +70,15 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 			],
 			components,
 		},
-		{ visibility: interaction.parameters.show ? "public" : "private" },
+		{ visible: interaction.parameters.show },
 	);
 }
 
 async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.ruleInvalid({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.ruleInvalid({
+		localise: client.localise.bind(client),
+		locale: interaction.locale,
+	});
 	await client.error(interaction, {
 		title: strings.title,
 		description: strings.description,

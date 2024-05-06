@@ -15,7 +15,10 @@ async function handleReplayAction(
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToReplay({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.noSongToReplay({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -28,7 +31,7 @@ async function handleReplayAction(
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const strings = constants.contexts.noSongCollectionToReplay({
-				localise: client.localise,
+				localise: client.localise.bind(client),
 				locale: interaction.locale,
 			});
 
@@ -41,14 +44,17 @@ async function handleReplayAction(
 		}
 	}
 
-	const strings = constants.contexts.replaying({ localise: client.localise, locale: interaction.guildLocale });
+	const strings = constants.contexts.replaying({
+		localise: client.localise.bind(client),
+		locale: interaction.guildLocale,
+	});
 	await client.success(
 		interaction,
 		{
 			title: `${constants.emojis.music.replaying} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visibility: "public" },
+		{ visible: true },
 	);
 
 	await musicService.session.replay({

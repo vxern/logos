@@ -64,7 +64,10 @@ function getWarningPage(
 ): Discord.CamelizedDiscordEmbed {
 	if (warnings.length === 0) {
 		if (isSelf) {
-			const strings = constants.contexts.noWarningsForSelf({ localise: client.localise, locale: interaction.locale });
+			const strings = constants.contexts.noWarningsForSelf({
+				localise: client.localise.bind(client),
+				locale: interaction.locale,
+			});
 
 			return {
 				title: strings.title,
@@ -72,7 +75,10 @@ function getWarningPage(
 			};
 		}
 
-		const strings = constants.contexts.noWarningsForOther({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.noWarningsForOther({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		return {
 			title: strings.title,
@@ -80,7 +86,7 @@ function getWarningPage(
 		};
 	}
 
-	const strings = constants.contexts.warnings({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.warnings({ localise: client.localise.bind(client), locale: interaction.locale });
 
 	return {
 		title: strings.title,

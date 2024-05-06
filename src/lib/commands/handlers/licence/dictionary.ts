@@ -29,7 +29,10 @@ async function handleDisplayDictionaryLicence(
 
 	const licence = getDictionaryLicenceByDictionary(interaction.parameters.dictionary);
 
-	const strings = constants.contexts.dictionaryLicence({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.dictionaryLicence({
+		localise: client.localise.bind(client),
+		locale: interaction.locale,
+	});
 
 	await client.notice(interaction, {
 		author: {
@@ -56,7 +59,10 @@ async function handleDisplayDictionaryLicence(
 }
 
 async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidLicence({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.invalidLicence({
+		localise: client.localise.bind(client),
+		locale: interaction.locale,
+	});
 
 	await client.error(interaction, {
 		title: strings.title,

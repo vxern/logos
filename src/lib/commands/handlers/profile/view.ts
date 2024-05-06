@@ -32,7 +32,7 @@ async function handleDisplayProfile(
 		Warning.getAll(client, { where: { targetId: member.id.toString() } }),
 	]);
 
-	const strings = constants.contexts.profile({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.profile({ localise: client.localise.bind(client), locale: interaction.locale });
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [
@@ -53,7 +53,7 @@ async function handleDisplayProfile(
 					format: "webp",
 				});
 				if (iconURL === undefined) {
-					return;
+					return undefined;
 				}
 
 				return { url: iconURL };

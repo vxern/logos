@@ -7,7 +7,7 @@ const logger: EventLogger<"messageUpdate"> = async (client, [message, _], { guil
 		return undefined;
 	}
 
-	const strings = constants.contexts.messageUpdate({ localise: client.localise, locale: guildLocale });
+	const strings = constants.contexts.messageUpdate({ localise: client.localise.bind(client), locale: guildLocale });
 	return {
 		embeds: [
 			{

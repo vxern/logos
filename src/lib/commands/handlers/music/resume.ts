@@ -12,7 +12,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToManage({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.locale,
 		});
 
@@ -25,7 +25,10 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 	}
 
 	if (!musicService.session.player.paused) {
-		const strings = constants.contexts.notPaused({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.notPaused({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -37,7 +40,10 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 
 	await musicService.session.setPaused(false);
 
-	const strings = constants.contexts.resumed({ localise: client.localise, locale: interaction.guildLocale });
+	const strings = constants.contexts.resumed({
+		localise: client.localise.bind(client),
+		locale: interaction.guildLocale,
+	});
 
 	await client.success(
 		interaction,
@@ -45,7 +51,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 			title: `${constants.emojis.music.resumed} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visibility: "public" },
+		{ visible: true },
 	);
 }
 

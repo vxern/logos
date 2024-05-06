@@ -1,7 +1,7 @@
 import { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"guildMemberAdd"> = async (client, [_, user], { guildLocale }) => {
-	const strings = constants.contexts.guildMemberAdd({ localise: client.localise, locale: guildLocale });
+	const strings = constants.contexts.guildMemberAdd({ localise: client.localise.bind(client), locale: guildLocale });
 	return {
 		embeds: [
 			{

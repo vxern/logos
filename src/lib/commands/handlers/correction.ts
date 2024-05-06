@@ -27,7 +27,10 @@ async function handleMakeCorrection(
 	}
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
-		const strings = constants.contexts.cannotCorrect({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.cannotCorrect({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -38,7 +41,10 @@ async function handleMakeCorrection(
 	}
 
 	if (message.author.id === interaction.user.id) {
-		const strings = constants.contexts.cannotCorrectOwn({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.cannotCorrectOwn({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -59,7 +65,7 @@ async function handleMakeCorrection(
 	if (doNotCorrectMeRoleId !== undefined) {
 		if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
 			const strings = constants.contexts.userDoesNotWantCorrections({
-				localise: client.localise,
+				localise: client.localise.bind(client),
 				locale: interaction.locale,
 			});
 
@@ -73,7 +79,10 @@ async function handleMakeCorrection(
 	}
 
 	if (message.content.length > constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH) {
-		const strings = constants.contexts.correctionTooLong({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.correctionTooLong({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -94,7 +103,10 @@ async function handleMakeCorrection(
 	composer.onSubmit(async (submission, { formData }) => {
 		await client.acknowledge(submission);
 
-		const strings = constants.contexts.correction({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.correction({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		client.bot.rest
 			.sendMessage(message.channelId, {

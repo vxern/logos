@@ -10,11 +10,11 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 		const informationFields = constants.rules.map((rule, index) => {
 			const strings = {
 				...constants.contexts.tldr({
-					localise: this.client.localise,
+					localise: this.client.localise.bind(this.client),
 					locale: this.guildLocale,
 				}),
 				...constants.contexts.rule({
-					localise: this.client.localise,
+					localise: this.client.localise.bind(this.client),
 					locale: this.guildLocale,
 				}),
 			};
@@ -27,7 +27,10 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 			};
 		});
 
-		const strings = constants.contexts.invite({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.invite({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		return {
 			embeds: [
 				{

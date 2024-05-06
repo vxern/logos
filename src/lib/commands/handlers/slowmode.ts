@@ -9,7 +9,10 @@ async function handleToggleSlowmodeAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { level: string }>,
 ): Promise<void> {
-	const strings = constants.contexts.slowmodeLevel({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.slowmodeLevel({
+		localise: client.localise.bind(client),
+		locale: interaction.locale,
+	});
 	const levelLowercase = interaction.parameters.level.trim().toLowerCase();
 	const choices = constants.slowmode.levels
 		.map((level, index) => ({ name: strings.level(level), value: index.toString() }))
@@ -23,7 +26,10 @@ async function handleToggleSlowmode(
 	interaction: Logos.Interaction<any, { level: string | undefined }>,
 ): Promise<void> {
 	if (interaction.parameters.level !== undefined && !isValidSlowmodeLevel(interaction.parameters.level)) {
-		const strings = constants.contexts.invalidSlowmodeLevel({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.invalidSlowmodeLevel({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		await client.error(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -69,7 +75,7 @@ async function handleToggleSlowmode(
 				});
 
 				const strings = constants.contexts.slowmodeDowngraded({
-					localise: client.localise,
+					localise: client.localise.bind(client),
 					locale: interaction.guildLocale,
 				});
 				await client.success(
@@ -78,7 +84,7 @@ async function handleToggleSlowmode(
 						title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
 						description: strings.description,
 					},
-					{ visibility: "public" },
+					{ visible: true },
 				);
 
 				return;
@@ -96,7 +102,7 @@ async function handleToggleSlowmode(
 				});
 
 				const strings = constants.contexts.slowmodeUpgraded({
-					localise: client.localise,
+					localise: client.localise.bind(client),
 					locale: interaction.guildLocale,
 				});
 				await client.success(
@@ -105,7 +111,7 @@ async function handleToggleSlowmode(
 						title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
 						description: strings.description,
 					},
-					{ visibility: "public" },
+					{ visible: true },
 				);
 
 				return;
@@ -113,7 +119,7 @@ async function handleToggleSlowmode(
 
 			{
 				const strings = constants.contexts.theSameSlowmodeLevel({
-					localise: client.localise,
+					localise: client.localise.bind(client),
 					locale: interaction.locale,
 				});
 				await client.warning(interaction, {
@@ -132,7 +138,10 @@ async function handleToggleSlowmode(
 			if (timeElapsedSinceUse < constants.SLOWMODE_COLLISION_TIMEOUT) {
 				const canDisableIn = now + (constants.SLOWMODE_COLLISION_TIMEOUT - timeElapsedSinceUse);
 
-				const strings = constants.contexts.slowmodeTooSoon({ localise: client.localise, locale: interaction.locale });
+				const strings = constants.contexts.slowmodeTooSoon({
+					localise: client.localise.bind(client),
+					locale: interaction.locale,
+				});
 				await client.pushback(interaction, {
 					title: strings.title,
 					description: `${strings.description.justEnabled} ${strings.description.canDisableIn({
@@ -154,14 +163,17 @@ async function handleToggleSlowmode(
 			args: [interaction.user, channel],
 		});
 
-		const strings = constants.contexts.slowmodeDisabled({ localise: client.localise, locale: interaction.guildLocale });
+		const strings = constants.contexts.slowmodeDisabled({
+			localise: client.localise.bind(client),
+			locale: interaction.guildLocale,
+		});
 		await client.notice(
 			interaction,
 			{
 				title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
 				description: strings.description,
 			},
-			{ visibility: "public" },
+			{ visible: true },
 		);
 
 		return;
@@ -181,14 +193,17 @@ async function handleToggleSlowmode(
 		args: [interaction.user, channel, interaction.parameters.level ?? "lowest"],
 	});
 
-	const strings = constants.contexts.slowmodeEnabled({ localise: client.localise, locale: interaction.guildLocale });
+	const strings = constants.contexts.slowmodeEnabled({
+		localise: client.localise.bind(client),
+		locale: interaction.guildLocale,
+	});
 	await client.notice(
 		interaction,
 		{
 			title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
 			description: strings.description,
 		},
-		{ visibility: "public" },
+		{ visible: true },
 	);
 }
 

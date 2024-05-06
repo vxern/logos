@@ -13,7 +13,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToCheck({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.locale,
 		});
 
@@ -26,7 +26,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 	}
 
 	const strings = constants.contexts.musicHistory({
-		localise: client.localise,
+		localise: client.localise.bind(client),
 		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 	});
 

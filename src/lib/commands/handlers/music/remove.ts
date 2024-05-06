@@ -14,7 +14,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToManage({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.locale,
 		});
 
@@ -44,7 +44,10 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 
 		const listing = musicService.session.listings.removeFromQueue({ index });
 		if (listing === undefined) {
-			const strings = constants.contexts.failedToRemoveSong({ localise: client.localise, locale: interaction.locale });
+			const strings = constants.contexts.failedToRemoveSong({
+				localise: client.localise.bind(client),
+				locale: interaction.locale,
+			});
 
 			await client.failed(buttonPress, {
 				title: strings.title,
@@ -54,7 +57,10 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			return;
 		}
 
-		const strings = constants.contexts.removedSong({ localise: client.localise, locale: interaction.guildLocale });
+		const strings = constants.contexts.removedSong({
+			localise: client.localise.bind(client),
+			locale: interaction.guildLocale,
+		});
 
 		await client.success(
 			buttonPress,
@@ -65,7 +71,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 					user_mention: mention(buttonPress.user.id, { type: "user" }),
 				}),
 			},
-			{ visibility: "public" },
+			{ visible: true },
 		);
 	});
 

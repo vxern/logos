@@ -31,7 +31,10 @@ class SuggestionPromptService extends PromptService<{
 	}
 
 	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
-		const strings = constants.contexts.promptControls({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.promptControls({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		return {
 			embeds: [
 				{
@@ -86,7 +89,7 @@ class SuggestionPromptService extends PromptService<{
 
 		if (isResolved && suggestionDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {
@@ -98,7 +101,7 @@ class SuggestionPromptService extends PromptService<{
 
 		if (!(isResolved || suggestionDocument.isResolved)) {
 			const strings = constants.contexts.alreadyMarkedUnresolved({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {

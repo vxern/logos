@@ -8,7 +8,10 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const strings = constants.contexts.welcomeNotice({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.welcomeNotice({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		return {
 			embeds: [
 				{

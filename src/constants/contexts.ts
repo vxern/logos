@@ -1395,5 +1395,8 @@ export default Object.freeze({
 			track: localise("music.options.play.strings.nowPlaying.description.track", locale),
 		},
 	}),
+	stream: ({ localise, locale }) => ({
+		stream: localise("music.options.play.strings.stream", locale)(),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

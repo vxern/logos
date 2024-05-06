@@ -52,7 +52,7 @@ class EntryService extends LocalService {
 		await this.client.registerInteractionCollector(languageProficiencyButtons);
 
 		const strings = constants.contexts.chooseProficiency({
-			localise: this.client.localise,
+			localise: this.client.localise.bind(this.client),
 			locale: buttonPress.locale,
 		});
 		await this.client.notice(buttonPress, {
@@ -78,7 +78,10 @@ class EntryService extends LocalService {
 					components: Object.values(
 						constants.roles.language.categories.proficiency.collection.list,
 					).map<Discord.ButtonComponent>((proficiencyRole, index) => {
-						const strings = constants.contexts.role({ localise: this.client.localise, locale: buttonPress.locale });
+						const strings = constants.contexts.role({
+							localise: this.client.localise.bind(this.client),
+							locale: buttonPress.locale,
+						});
 						return {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.name({ id: proficiencyRole.id }),
@@ -137,7 +140,10 @@ class EntryService extends LocalService {
 
 			const isVerified = userDocument.isAuthorisedOn({ guildId: this.guildIdString });
 			if (!isVerified) {
-				const strings = constants.contexts.getVerified({ localise: this.client.localise, locale: buttonPress.locale });
+				const strings = constants.contexts.getVerified({
+					localise: this.client.localise.bind(this.client),
+					locale: buttonPress.locale,
+				});
 				await this.client.notice(buttonPress, {
 					embeds: [
 						{
@@ -167,7 +173,10 @@ class EntryService extends LocalService {
 			}
 		}
 
-		const strings = constants.contexts.receivedAccess({ localise: this.client.localise, locale: buttonPress.locale });
+		const strings = constants.contexts.receivedAccess({
+			localise: this.client.localise.bind(this.client),
+			locale: buttonPress.locale,
+		});
 		await this.client.success(buttonPress, {
 			title: strings.title,
 			description: `${constants.emojis.responses.celebration} ${strings.description.nowMember({
@@ -207,7 +216,7 @@ class EntryService extends LocalService {
 
 		if (entryRequestDocument !== undefined) {
 			const strings = constants.contexts.alreadyAnswered({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: buttonPress.locale,
 			});
 			await this.client.pushback(buttonPress, {
@@ -233,7 +242,7 @@ class EntryService extends LocalService {
 		composer.onSubmit(async (submission, { formData }) => {
 			if (entryRequest !== undefined) {
 				const strings = constants.contexts.alreadyAnswered({
-					localise: this.client.localise,
+					localise: this.client.localise.bind(this.client),
 					locale: submission.locale,
 				});
 				await this.client.pushback(submission, {
@@ -273,7 +282,7 @@ class EntryService extends LocalService {
 			verificationService.registerHandler(entryRequestDocument);
 
 			const strings = constants.contexts.verificationAnswersSubmitted({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: submission.locale,
 			});
 			await this.client.succeeded(submission, {
@@ -291,7 +300,7 @@ class EntryService extends LocalService {
 
 		if (entryRequestDocument !== undefined && !entryRequestDocument.isFinalised) {
 			const strings = constants.contexts.alreadyAnswered({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.pushback(interaction, {
@@ -307,7 +316,10 @@ class EntryService extends LocalService {
 		}
 
 		if (userDocument.isRejectedOn({ guildId: this.guildIdString })) {
-			const strings = constants.contexts.rejectedBefore({ localise: this.client.localise, locale: interaction.locale });
+			const strings = constants.contexts.rejectedBefore({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
 			await this.client.error(interaction, {
 				title: strings.title,
 				description: strings.description,

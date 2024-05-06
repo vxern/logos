@@ -110,7 +110,10 @@ class VerificationPromptService extends PromptService<{
 		const votedForFormatted = entryRequestDocument.votersFor.map((userId) => mention(userId, { type: "user" }));
 		const votedAgainstFormatted = entryRequestDocument.votersAgainst.map((userId) => mention(userId, { type: "user" }));
 
-		const strings = constants.contexts.entryRequestPrompt({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.entryRequestPrompt({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		return {
 			embeds: [
 				{
@@ -294,7 +297,7 @@ class VerificationPromptService extends PromptService<{
 				await this.client.registerInteractionCollector(cancelButton);
 
 				const strings = constants.contexts.sureToForceAccept({
-					localise: this.client.localise,
+					localise: this.client.localise.bind(this.client),
 					locale: interaction.locale,
 				});
 				await this.client.pushback(interaction, {
@@ -329,7 +332,7 @@ class VerificationPromptService extends PromptService<{
 			}
 
 			const strings = constants.contexts.alreadyVotedInFavour({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {
@@ -381,7 +384,7 @@ class VerificationPromptService extends PromptService<{
 				await this.client.registerInteractionCollector(cancelButton);
 
 				const strings = constants.contexts.sureToForceReject({
-					localise: this.client.localise,
+					localise: this.client.localise.bind(this.client),
 					locale: interaction.locale,
 				});
 				await this.client.pushback(interaction, {
@@ -416,7 +419,7 @@ class VerificationPromptService extends PromptService<{
 			}
 
 			const strings = constants.contexts.alreadyVotedAgainst({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {
@@ -432,7 +435,10 @@ class VerificationPromptService extends PromptService<{
 		});
 
 		if (currentVote !== undefined) {
-			const strings = constants.contexts.stanceChanged({ localise: this.client.localise, locale: interaction.locale });
+			const strings = constants.contexts.stanceChanged({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
 			await this.client.notice(interaction, {
 				title: strings.title,
 				description: strings.description,
@@ -581,14 +587,20 @@ class VerificationPromptService extends PromptService<{
 			return;
 		}
 
-		const strings = constants.contexts.inquiryChannel({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.inquiryChannel({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		const ticketDocument = await ticketService.openTicket({
 			type: "standalone",
 			formData: { topic: strings.inquiryChannel({ user: entryRequestAuthor.username }) },
 			user: entryRequestAuthor,
 		});
 		if (ticketDocument === undefined) {
-			const strings = constants.contexts.inquiryFailed({ localise: this.client.localise, locale: interaction.locale });
+			const strings = constants.contexts.inquiryFailed({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
 			await this.client.failed(interaction, {
 				title: strings.title,
 				description: strings.description,
@@ -610,7 +622,10 @@ class VerificationPromptService extends PromptService<{
 			.catch(() => this.log.warn("Failed to delete prompt."));
 
 		{
-			const strings = constants.contexts.inquiryOpened({ localise: this.client.localise, locale: interaction.locale });
+			const strings = constants.contexts.inquiryOpened({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
 			await this.client.succeeded(interaction, {
 				title: strings.title,
 				description: strings.description({ guild_name: this.guild.name }),
@@ -657,7 +672,10 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async #displayVoteError(interaction: Logos.Interaction): Promise<void> {
-		const strings = constants.contexts.voteFailed({ localise: this.client.localise, locale: interaction.locale });
+		const strings = constants.contexts.voteFailed({
+			localise: this.client.localise.bind(this.client),
+			locale: interaction.locale,
+		});
 		await this.client.failure(interaction, {
 			title: strings.title,
 			description: strings.description,

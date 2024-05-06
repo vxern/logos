@@ -10,8 +10,8 @@ function getTranslationView(client: Client, interaction: Logos.Interaction): Dis
 	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 	const strings = {
-		...constants.contexts.credits({ localise: client.localise, locale: interaction.locale }),
-		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
+		...constants.contexts.credits({ localise: client.localise.bind(client), locale: interaction.locale }),
+		...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
 	};
 	for (const [language, data] of (
 		Object.entries(constants.contributions.translation) as [LocalisationLanguage, Translation][]

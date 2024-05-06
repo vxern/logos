@@ -7,7 +7,10 @@ class TicketComposer extends ModalComposer<TicketFormData, never> {
 		submission: Logos.Interaction<any, any>,
 		{ formData }: { formData: TicketFormData },
 	): Promise<Modal<TicketFormData>> {
-		const strings = constants.contexts.ticketModal({ localise: this.client.localise, locale: submission.locale });
+		const strings = constants.contexts.ticketModal({
+			localise: this.client.localise.bind(this.client),
+			locale: submission.locale,
+		});
 
 		return {
 			title: strings.title,

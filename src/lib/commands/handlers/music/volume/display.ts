@@ -15,7 +15,7 @@ async function handleDisplayVolume(
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToCheck({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.locale,
 		});
 
@@ -28,7 +28,7 @@ async function handleDisplayVolume(
 	}
 
 	const strings = constants.contexts.volume({
-		localise: client.localise,
+		localise: client.localise.bind(client),
 		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 	});
 

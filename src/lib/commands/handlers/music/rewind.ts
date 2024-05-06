@@ -8,7 +8,10 @@ async function handleRewindAutocomplete(
 ): Promise<void> {
 	const timestamp = parseTimeExpression(client, interaction, interaction.parameters.timestamp);
 	if (timestamp === undefined) {
-		const strings = constants.contexts.autocompleteTimestamp({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.autocompleteTimestamp({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
@@ -28,7 +31,10 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToRewind({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.noSongToRewind({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -46,7 +52,10 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 
 	await musicService.session.skipTo({ timestamp: musicService.session.playingTimeMilliseconds - timestamp });
 
-	const strings = constants.contexts.rewound({ localise: client.localise, locale: interaction.guildLocale });
+	const strings = constants.contexts.rewound({
+		localise: client.localise.bind(client),
+		locale: interaction.guildLocale,
+	});
 
 	await client.success(
 		interaction,
@@ -54,12 +63,15 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 			title: `${constants.emojis.music.rewound} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visibility: "public" },
+		{ visible: true },
 	);
 }
 
 async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidRewindTimestamp({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.invalidRewindTimestamp({
+		localise: client.localise.bind(client),
+		locale: interaction.locale,
+	});
 
 	await client.error(interaction, {
 		title: strings.title,

@@ -23,7 +23,10 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 		submission: Logos.Interaction,
 		{ formData }: { formData: CorrectionFormData },
 	): Promise<Modal<CorrectionFormData>> {
-		const strings = constants.contexts.correctionModal({ localise: this.client.localise, locale: submission.locale });
+		const strings = constants.contexts.correctionModal({
+			localise: this.client.localise.bind(this.client),
+			locale: submission.locale,
+		});
 
 		return {
 			title: strings.title,
@@ -73,7 +76,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 		switch (error) {
 			case "texts-not-different": {
 				const strings = constants.contexts.correctionTextsNotDifferent({
-					localise: this.client.localise,
+					localise: this.client.localise.bind(this.client),
 					locale: submission.locale,
 				});
 

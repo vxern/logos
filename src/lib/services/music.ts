@@ -120,7 +120,10 @@ class MusicService extends LocalService {
 	}
 
 	async #_handleSessionAbandoned(): Promise<void> {
-		const strings = constants.contexts.stopped({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.stopped({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		await this.client.bot.helpers
 			.sendMessage(this.session.channelId, {
 				embeds: [
@@ -149,7 +152,10 @@ class MusicService extends LocalService {
 			return;
 		}
 
-		const strings = constants.contexts.musicHalted({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.musicHalted({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		this.client.bot.rest
 			.sendMessage(this.session.channelId, {
 				embeds: [
@@ -173,7 +179,10 @@ class MusicService extends LocalService {
 
 		await this.session.restore();
 
-		const strings = constants.contexts.musicRestored({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.musicRestored({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		this.client.bot.rest
 			.sendMessage(this.session.channelId, {
 				embeds: [
@@ -190,7 +199,7 @@ class MusicService extends LocalService {
 	#_canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
 		if (this.session.isDisconnected) {
 			const strings = constants.contexts.cannotManageDuringOutage({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: this.guildLocale,
 			});
 			this.client.unsupported(interaction, {
@@ -204,7 +213,7 @@ class MusicService extends LocalService {
 		const userChannelId = this.guild.voiceStates.get(interaction.user.id)?.channelId;
 		if (userChannelId === undefined) {
 			const strings = constants.contexts.notInVc({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: this.guildLocale,
 			});
 			this.client.warning(interaction, {
@@ -217,7 +226,7 @@ class MusicService extends LocalService {
 
 		if (this.hasSession && userChannelId !== this.session.channelId) {
 			const strings = constants.contexts.botInDifferentVc({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: this.guildLocale,
 			});
 			this.client.warning(interaction, {
@@ -245,7 +254,10 @@ class MusicService extends LocalService {
 		}
 
 		if (this.session.listings.queue.isFull) {
-			const strings = constants.contexts.queueFull({ localise: this.client.localise, locale: interaction.locale });
+			const strings = constants.contexts.queueFull({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
 			this.client.warning(interaction, {
 				title: strings.title,
 				description: strings.description,
@@ -492,7 +504,7 @@ class MusicSession extends EventEmitter {
 		this.log.warn(`Failed to play track: ${event.exception}`);
 
 		const strings = constants.contexts.failedToPlay({
-			localise: this.client.localise,
+			localise: this.client.localise.bind(this.client),
 			locale: this.service.guildLocale,
 		});
 		this.client.bot.rest
@@ -520,7 +532,10 @@ class MusicSession extends EventEmitter {
 		this.listings.addToQueue(listing);
 
 		if (this.hasCurrent) {
-			const strings = constants.contexts.queued({ localise: this.client.localise, locale: this.service.guildLocale });
+			const strings = constants.contexts.queued({
+				localise: this.client.localise.bind(this.client),
+				locale: this.service.guildLocale,
+			});
 			await this.client.bot.rest
 				.sendMessage(this.channelId, {
 					embeds: [
@@ -618,7 +633,10 @@ class MusicSession extends EventEmitter {
 
 		await this.player.playTrack({ track: track.encoded });
 
-		const strings = constants.contexts.nowPlaying({ localise: this.client.localise, locale: this.service.guildLocale });
+		const strings = constants.contexts.nowPlaying({
+			localise: this.client.localise.bind(this.client),
+			locale: this.service.guildLocale,
+		});
 		this.client.bot.rest
 			.sendMessage(this.channelId, {
 				embeds: [
@@ -688,7 +706,7 @@ class MusicSession extends EventEmitter {
 				this.playable.reset();
 
 				const strings = constants.contexts.failedToLoadTrack({
-					localise: this.client.localise,
+					localise: this.client.localise.bind(this.client),
 					locale: this.service.guildLocale,
 				});
 				this.client.bot.rest

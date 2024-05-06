@@ -7,7 +7,10 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 		submission: Logos.Interaction,
 		{ formData }: { formData: EntryRequestFormData },
 	): Promise<Modal<EntryRequestFormData>> {
-		const strings = constants.contexts.verificationModal({ localise: this.client.localise, locale: submission.locale });
+		const strings = constants.contexts.verificationModal({
+			localise: this.client.localise.bind(this.client),
+			locale: submission.locale,
+		});
 		return {
 			title: strings.title,
 			elements: [

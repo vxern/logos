@@ -82,7 +82,7 @@ function parseVerboseTimeExpressionPhrase(
 		const timeUnits = Object.keys(constants.time) as TimeUnit[];
 		const timeUnitAliasTuples: [TimeUnit, string[]][] = [];
 
-		const strings = constants.contexts.timeUnit({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.timeUnit({ localise: client.localise.bind(client), locale: interaction.locale });
 		for (const timeUnit of timeUnits) {
 			timeUnitAliasTuples.push([
 				timeUnit,

@@ -1,7 +1,10 @@
 import { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"entryRequestAccept"> = async (client, [user, author], { guildLocale }) => {
-	const strings = constants.contexts.entryRequestAccept({ localise: client.localise, locale: guildLocale });
+	const strings = constants.contexts.entryRequestAccept({
+		localise: client.localise.bind(client),
+		locale: guildLocale,
+	});
 	return {
 		embeds: [
 			{

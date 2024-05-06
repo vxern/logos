@@ -15,7 +15,10 @@ async function handleLoopPlayback(
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToLoop({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.noSongToLoop({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -28,7 +31,7 @@ async function handleLoopPlayback(
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const strings = constants.contexts.noSongCollectionToLoop({
-				localise: client.localise,
+				localise: client.localise.bind(client),
 				locale: interaction.locale,
 			});
 
@@ -50,7 +53,7 @@ async function handleLoopPlayback(
 	if (interaction.parameters.collection) {
 		if (!musicService.session.queueable.isLooping) {
 			const strings = constants.contexts.loopDisabledForSongCollection({
-				localise: client.localise,
+				localise: client.localise.bind(client),
 				locale: interaction.guildLocale,
 			});
 
@@ -60,14 +63,14 @@ async function handleLoopPlayback(
 					title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
 					description: strings.description,
 				},
-				{ visibility: "public" },
+				{ visible: true },
 			);
 
 			return;
 		}
 
 		const strings = constants.contexts.loopEnabledForSongCollection({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.guildLocale,
 		});
 		await client.success(
@@ -76,7 +79,7 @@ async function handleLoopPlayback(
 				title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
 				description: strings.description,
 			},
-			{ visibility: "public" },
+			{ visible: true },
 		);
 
 		return;
@@ -84,7 +87,7 @@ async function handleLoopPlayback(
 
 	if (!musicService.session.playable.isLooping) {
 		const strings = constants.contexts.loopDisabledForSong({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.guildLocale,
 		});
 		await client.success(
@@ -93,20 +96,23 @@ async function handleLoopPlayback(
 				title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
 				description: strings.description,
 			},
-			{ visibility: "public" },
+			{ visible: true },
 		);
 
 		return;
 	}
 
-	const strings = constants.contexts.loopEnabledForSong({ localise: client.localise, locale: interaction.guildLocale });
+	const strings = constants.contexts.loopEnabledForSong({
+		localise: client.localise.bind(client),
+		locale: interaction.guildLocale,
+	});
 	await client.success(
 		interaction,
 		{
 			title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visibility: "public" },
+		{ visible: true },
 	);
 }
 

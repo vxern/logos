@@ -41,7 +41,7 @@ class InteractionStore {
 	 */
 	get success(): InteractionStore["reply"] {
 		return async (interaction, embedOrData, flags) => {
-			if (flags?.visibility === "public") {
+			if (flags?.visible) {
 				return await this.notice(interaction, embedOrData, flags);
 			}
 
@@ -175,7 +175,10 @@ class InteractionStore {
 		this.#_replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
-			const strings = constants.contexts.thinking({ localise: this.#client.localise, locale: interaction.guildLocale });
+			const strings = constants.contexts.thinking({
+				localise: this.#client.localise.bind(this.#client),
+				locale: interaction.guildLocale,
+			});
 			const message = await this.#client.bot.rest
 				.sendMessage(interaction.channelId!, {
 					embeds: [
@@ -208,15 +211,15 @@ class InteractionStore {
 	async reply(
 		interaction: Logos.Interaction,
 		embedOrData: EmbedOrCallbackData,
-		{ visibility = "private" }: { visibility?: ReplyVisibility } = {},
+		{ visible = false }: { visible?: boolean } = {},
 	): Promise<void> {
 		const data = getInteractionCallbackData(embedOrData);
 
-		if (visibility === "private") {
+		if (!visible) {
 			data.flags = Discord.MessageFlags.Ephemeral;
 		}
 
-		this.#_replies.set(interaction.token, { ephemeral: visibility === "private" });
+		this.#_replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
 			const message = await this.#client.bot.rest.sendMessage(interaction.channelId!, data).catch((reason) => {
@@ -455,7 +458,10 @@ class InteractionStore {
 				interaction.type === Discord.InteractionTypes.MessageComponent ||
 				interaction.type === Discord.InteractionTypes.ModalSubmit
 			) {
-				const strings = constants.contexts.invalidUser({ localise: this.#client.localise, locale: interaction.locale });
+				const strings = constants.contexts.invalidUser({
+					localise: this.#client.localise.bind(this.#client),
+					locale: interaction.locale,
+				});
 				this.error(interaction, {
 					title: strings.title,
 					description: strings.description,

@@ -12,7 +12,10 @@ class SuggestionComposer extends ModalComposer<SuggestionFormData, never> {
 		submission: Logos.Interaction,
 		{ formData }: { formData: SuggestionFormData },
 	): Promise<Modal<SuggestionFormData>> {
-		const strings = constants.contexts.suggestionModal({ localise: this.client.localise, locale: submission.locale });
+		const strings = constants.contexts.suggestionModal({
+			localise: this.client.localise.bind(this.client),
+			locale: submission.locale,
+		});
 
 		return {
 			title: strings.title,

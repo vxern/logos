@@ -236,7 +236,7 @@ class LocalisationStore {
 		const locale = visibility === "public" ? interaction.guildLocale : interaction.locale;
 
 		const strings = contexts
-			.map((builder) => builder({ localise: this.localise, locale }))
+			.map((builder) => builder({ localise: this.localise.bind(this), locale }))
 			.reduce<T>((combined, context) => Object.assign(combined, context), {} as T);
 
 		return await scope(strings);

@@ -12,7 +12,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToManage({
-			localise: client.localise,
+			localise: client.localise.bind(client),
 			locale: interaction.locale,
 		});
 
@@ -26,14 +26,17 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 
 	await musicService.stop();
 
-	const strings = constants.contexts.stopped({ localise: client.localise, locale: interaction.guildLocale });
+	const strings = constants.contexts.stopped({
+		localise: client.localise.bind(client),
+		locale: interaction.guildLocale,
+	});
 	await client.success(
 		interaction,
 		{
 			title: `${constants.emojis.music.stopped} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visibility: "public" },
+		{ visible: true },
 	);
 }
 

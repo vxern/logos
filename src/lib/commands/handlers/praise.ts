@@ -27,7 +27,10 @@ async function handlePraiseUser(
 	}
 
 	if (member.id === interaction.member?.id) {
-		const strings = constants.contexts.cannotPraiseSelf({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.cannotPraiseSelf({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -43,7 +46,10 @@ async function handlePraiseUser(
 		configuration.rateLimit ?? constants.defaults.PRAISE_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = constants.contexts.tooManyPraises({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.tooManyPraises({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		await client.pushedBack(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -70,7 +76,7 @@ async function handlePraiseUser(
 		args: [member, praiseDocument, interaction.user],
 	});
 
-	const strings = constants.contexts.praised({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.praised({ localise: client.localise.bind(client), locale: interaction.locale });
 	await client.succeeded(interaction, {
 		title: strings.title,
 		description: strings.description({ user_mention: mention(member.id, { type: "user" }) }),

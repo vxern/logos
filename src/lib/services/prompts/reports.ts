@@ -31,7 +31,10 @@ class ReportPromptService extends PromptService<{
 	}
 
 	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
-		const strings = constants.contexts.reportPrompt({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.reportPrompt({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		return {
 			embeds: [
 				{
@@ -121,7 +124,7 @@ class ReportPromptService extends PromptService<{
 
 		if (isResolved && reportDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {
@@ -133,7 +136,7 @@ class ReportPromptService extends PromptService<{
 
 		if (!(isResolved || reportDocument.isResolved)) {
 			const strings = constants.contexts.alreadyMarkedUnresolved({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {

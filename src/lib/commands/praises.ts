@@ -14,14 +14,14 @@ function getPraisePage(
 			switch (type) {
 				case "author": {
 					strings = constants.contexts.noPraisesForSelfAsAuthor({
-						localise: client.localise,
+						localise: client.localise.bind(client),
 						locale: interaction.locale,
 					});
 					break;
 				}
 				case "target": {
 					strings = constants.contexts.noPraisesForSelfAsTarget({
-						localise: client.localise,
+						localise: client.localise.bind(client),
 						locale: interaction.locale,
 					});
 					break;
@@ -38,14 +38,14 @@ function getPraisePage(
 		switch (type) {
 			case "author": {
 				strings = constants.contexts.noPraisesForOtherAsAuthor({
-					localise: client.localise,
+					localise: client.localise.bind(client),
 					locale: interaction.locale,
 				});
 				break;
 			}
 			case "target": {
 				strings = constants.contexts.noPraisesForOtherAsTarget({
-					localise: client.localise,
+					localise: client.localise.bind(client),
 					locale: interaction.locale,
 				});
 				break;
@@ -58,7 +58,7 @@ function getPraisePage(
 		};
 	}
 
-	const strings = constants.contexts.praise({ localise: client.localise, locale: interaction.locale });
+	const strings = constants.contexts.praise({ localise: client.localise.bind(client), locale: interaction.locale });
 
 	return {
 		title: strings.title,

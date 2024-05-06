@@ -34,7 +34,10 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const strings = constants.contexts.howToSelectRoles({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.howToSelectRoles({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 
 		return {
 			embeds: [

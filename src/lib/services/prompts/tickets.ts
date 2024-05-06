@@ -42,7 +42,10 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const strings = constants.contexts.promptControls({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.promptControls({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		return {
 			embeds: [
 				{
@@ -97,7 +100,7 @@ class TicketPromptService extends PromptService<{
 
 		if (isResolved && ticketDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {
@@ -110,7 +113,7 @@ class TicketPromptService extends PromptService<{
 
 		if (!(isResolved || ticketDocument.isResolved)) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise,
+				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {
@@ -160,7 +163,10 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const strings = constants.contexts.inquiry({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.inquiry({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
 		const channel = await this.client.bot.helpers
 			.createChannel(this.guildId, {
 				parentId: this.configuration.categoryId,

@@ -8,7 +8,10 @@ async function handleFastForwardAutocomplete(
 ): Promise<void> {
 	const timestamp = parseTimeExpression(client, interaction, interaction.parameters.timestamp);
 	if (timestamp === undefined) {
-		const strings = constants.contexts.autocompleteTimestamp({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.autocompleteTimestamp({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
@@ -31,7 +34,10 @@ async function handleFastForward(
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToFastForward({ localise: client.localise, locale: interaction.locale });
+		const strings = constants.contexts.noSongToFastForward({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 
 		await client.warning(interaction, {
 			title: strings.title,
@@ -50,7 +56,7 @@ async function handleFastForward(
 	await musicService.session.skipTo({ timestamp: musicService.session.player.position + timestamp });
 
 	const strings = constants.contexts.noSongToFastForward({
-		localise: client.localise,
+		localise: client.localise.bind(client),
 		locale: interaction.guildLocale,
 	});
 
@@ -60,13 +66,13 @@ async function handleFastForward(
 			title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
 			description: strings.description,
 		},
-		{ visibility: "public" },
+		{ visible: true },
 	);
 }
 
 async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = constants.contexts.invalidFastForwardTimestamp({
-		localise: client.localise,
+		localise: client.localise.bind(client),
 		locale: interaction.locale,
 	});
 
