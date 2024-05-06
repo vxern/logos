@@ -1,3 +1,4 @@
+import { FeatureLanguage, Locale } from "logos:constants/languages";
 import { Client } from "logos/client";
 import guildBanAdd from "logos/stores/journalling/discord/guild-ban-add";
 import guildBanRemove from "logos/stores/journalling/discord/guild-ban-remove";
@@ -56,7 +57,8 @@ const loggers = Object.freeze({
 type EventLoggers = { [Event in keyof Events]?: EventLogger<Event> };
 type EventLogger<Event extends keyof Events> = (
 	client: Client,
-	...args: Events[Event]
+	event: Events[Event],
+	{ guildLocale, featureLanguage }: { guildLocale: Locale; featureLanguage: FeatureLanguage },
 ) => Promise<Discord.CreateMessageOptions | undefined>;
 
 export default loggers;

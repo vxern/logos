@@ -1,15 +1,25 @@
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"memberWarnRemove"> = async (client, member, warning, author) => ({
-	embeds: [
-		{
-			title: `${constants.emojis.events.pardoned} Member pardoned`,
-			color: constants.colours.success,
-			description: `${client.diagnostics.member(member)} has been pardoned by ${client.diagnostics.user(
-				author,
-			)} regarding their warning for: ${warning.reason}`,
-		},
-	],
-});
+const logger: EventLogger<"memberWarnRemove"> = async (client, [member, warning, author], { guildLocale }) => {
+	const strings = constants.contexts.memberWarnRemove({ localise: client.localise, locale: guildLocale });
+	return {
+		embeds: [
+			{
+				title: `${constants.emojis.events.pardoned} ${strings.title}`,
+				color: constants.colours.success,
+				description: strings.description({
+					user: client.diagnostics.member(member),
+					moderator: client.diagnostics.user(author),
+				}),
+				fields: [
+					{
+						name: strings.fields.warning,
+						value: warning.reason,
+					},
+				],
+			},
+		],
+	};
+};
 
 export default logger;

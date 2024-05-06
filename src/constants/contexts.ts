@@ -1180,5 +1180,148 @@ export default Object.freeze({
 		title: localise("interactions.invalidUser.title", locale)(),
 		description: localise("interactions.invalidUser.description", locale)(),
 	}),
+	guildBanAdd: ({ localise, locale }) => ({
+		title: localise("events.banAdd.title", locale)(),
+		description: localise("events.banAdd.description", locale),
+	}),
+	guildBanRemove: ({ localise, locale }) => ({
+		title: localise("events.banRemove.title", locale)(),
+		description: localise("events.banRemove.description", locale),
+	}),
+	guildMemberAdd: ({ localise, locale }) => ({
+		title: localise("events.memberAdd.title", locale)(),
+		description: localise("events.memberAdd.description", locale),
+	}),
+	guildMemberRemove: ({ localise, locale }) => ({
+		title: localise("events.memberRemove.title", locale)(),
+		description: localise("events.memberRemove.description", locale),
+	}),
+	messageDelete: ({ localise, locale }) => ({
+		title: localise("events.messageDelete.title", locale)(),
+		description: localise("events.messageDelete.description", locale),
+		fields: {
+			content: localise("events.messageDelete.fields.content", locale)(),
+		},
+	}),
+	messageUpdate: ({ localise, locale }) => ({
+		title: localise("events.messageUpdate.title", locale)(),
+		description: localise("events.messageUpdate.description", locale),
+		fields: {
+			before: localise("events.messageUpdate.fields.before", locale)(),
+			after: localise("events.messageUpdate.fields.after", locale)(),
+		},
+	}),
+	entryRequestAccept: ({ localise, locale }) => ({
+		title: localise("events.entryRequestAccept.title", locale)(),
+		description: localise("events.entryRequestAccept.description", locale),
+	}),
+	entryRequestReject: ({ localise, locale }) => ({
+		title: localise("events.entryRequestReject.title", locale)(),
+		description: localise("events.entryRequestReject.description", locale),
+	}),
+	entryRequestSubmit: ({ localise, locale }) => ({
+		title: localise("events.entryRequestSubmit.title", locale)(),
+		description: localise("events.entryRequestSubmit.description", locale),
+	}),
+	inquiryOpen: ({ localise, locale }) => ({
+		title: localise("events.inquiryOpen.title", locale)(),
+		description: localise("events.inquiryOpen.description", locale),
+		fields: {
+			topic: localise("events.inquiryOpen.fields.topic", locale)(),
+		},
+	}),
+	memberTimeoutAdd: ({ localise, locale }) => ({
+		title: localise("events.memberTimeoutAdd.title", locale)(),
+		description: localise("events.memberTimeoutAdd.description", locale),
+		fields: {
+			reason: localise("events.memberTimeoutAdd.fields.reason", locale)(),
+			lastsUntil: localise("events.memberTimeoutAdd.fields.lastsUntil", locale)(),
+		},
+	}),
+	memberTimeoutRemove: ({ localise, locale }) => ({
+		title: localise("events.memberTimeoutRemove.title", locale)(),
+		description: localise("events.memberTimeoutRemove.description", locale),
+	}),
+	memberWarnAdd: ({ localise, locale }) => ({
+		title: localise("events.memberWarnAdd.title", locale)(),
+		description: localise("events.memberWarnAdd.description", locale),
+		fields: {
+			reason: localise("events.memberWarnAdd.fields.reason", locale)(),
+		},
+	}),
+	memberWarnRemove: ({ localise, locale }) => ({
+		title: localise("events.memberWarnRemove.title", locale)(),
+		description: localise("events.memberWarnRemove.description", locale),
+		fields: {
+			warning: localise("events.memberWarnRemove.fields.warning", locale)(),
+		},
+	}),
+	praiseAdd: ({ localise, locale }) => ({
+		title: localise("events.praiseAdd.title", locale)(),
+		description: localise("events.praiseAdd.description", locale),
+		fields: {
+			comment: localise("events.praiseAdd.fields.comment", locale)(),
+		},
+	}),
+	purgeBegin: ({ localise, locale }) => ({
+		title: localise("events.purgeBegin.title", locale)(),
+		description: localise("events.purgeBegin.description", locale),
+		fields: {
+			author: localise("events.purgeBegin.fields.author", locale)(),
+		},
+	}),
+	purgeEnd: ({ localise, locale }) => ({
+		title: localise("events.purgeEnd.title", locale)(),
+		description: localise("events.purgeEnd.description", locale),
+		fields: {
+			author: localise("events.purgeEnd.fields.author", locale)(),
+		},
+	}),
+	reportSubmit: ({ localise, locale }) => ({
+		title: localise("events.reportSubmit.title", locale)(),
+		description: localise("events.reportSubmit.description", locale),
+		fields: {
+			reason: localise("events.reportSubmit.fields.reason", locale)(),
+			reportedUsers: localise("events.reportSubmit.fields.reportedUsers", locale)(),
+			messageLink: localise("events.reportSubmit.fields.messageLink", locale)(),
+		},
+	}),
+	resourceSend: ({ localise, locale }) => ({
+		title: localise("events.resourceSend.title", locale)(),
+		description: localise("events.resourceSend.description", locale),
+		fields: {
+			resource: localise("events.resourceSend.fields.resource", locale)(),
+		},
+	}),
+	slowmodeDisable: ({ localise, locale }) => ({
+		title: localise("events.slowmodeDisable.title", locale)(),
+		description: localise("events.slowmodeDisable.description", locale),
+	}),
+	slowmodeDowngrade: ({ localise, locale }) => ({
+		title: localise("events.slowmodeDowngrade.title", locale)(),
+		description: localise("events.slowmodeDowngrade.description", locale),
+	}),
+	slowmodeEnable: ({ localise, locale }) => ({
+		title: localise("events.slowmodeEnable.title", locale)(),
+		description: localise("events.slowmodeEnable.description", locale),
+	}),
+	slowmodeUpgrade: ({ localise, locale }) => ({
+		title: localise("events.slowmodeUpgrade.title", locale)(),
+		description: localise("events.slowmodeUpgrade.description", locale),
+	}),
+	suggestionSend: ({ localise, locale }) => ({
+		title: localise("events.suggestionSend.title", locale)(),
+		description: localise("events.suggestionSend.description", locale),
+		fields: {
+			suggestion: localise("events.suggestionSend.fields.suggestion", locale)(),
+		},
+	}),
+	ticketOpen: ({ localise, locale }) => ({
+		title: localise("events.ticketOpen.title", locale)(),
+		description: localise("events.ticketOpen.description", locale),
+		fields: {
+			topic: localise("events.ticketOpen.fields.topic", locale)(),
+		},
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

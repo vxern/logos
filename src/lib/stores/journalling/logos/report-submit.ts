@@ -1,23 +1,31 @@
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"reportSubmit"> = async (client, author, report) => {
-	const messageLink = report.formData.messageLink ?? "*No message link*.";
-
+const logger: EventLogger<"reportSubmit"> = async (client, [author, report], { guildLocale }) => {
+	const strings = constants.contexts.reportSubmit({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{
-				title: `${constants.emojis.events.report} Report submitted`,
+				title: `${constants.emojis.events.report} ${strings.title}`,
 				color: constants.colours.failure,
-				description: `${client.diagnostics.member(author)} has submitted a report.
-
-**REASON**
-${report.formData.reason}
-
-**REPORTED USERS**
-${report.formData.users}
-
-**MESSAGE LINK**
-${messageLink}`,
+				description: strings.description({ user: client.diagnostics.member(author) }),
+				fields: [
+					{
+						name: strings.fields.reason,
+						value: report.formData.reason,
+					},
+					{
+						name: strings.fields.reportedUsers,
+						value: report.formData.users,
+					},
+					...(report.formData.messageLink !== undefined
+						? [
+								{
+									name: strings.fields.messageLink,
+									value: report.formData.messageLink,
+								},
+						  ]
+						: []),
+				],
 			},
 		],
 	};

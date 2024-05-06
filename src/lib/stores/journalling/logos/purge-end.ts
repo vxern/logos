@@ -1,18 +1,29 @@
 import { mention } from "logos:core/formatting";
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"purgeEnd"> = async (client, member, channel, messageCount, author?) => {
-	const authorMention = author !== undefined ? client.diagnostics.user(author) : undefined;
-	const channelMention = mention(channel.id, { type: "channel" });
-
+const logger: EventLogger<"purgeEnd"> = async (client, [member, channel, messageCount, author], { guildLocale }) => {
+	const strings = constants.contexts.purgeEnd({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{
-				title: `${constants.emojis.events.purging.end} Purging complete`,
+				title: `${constants.emojis.events.purging.end} ${strings.title}`,
 				color: constants.colours.success,
-				description: `The purging of ${messageCount} messages${
-					author !== undefined ? `sent by ${authorMention}` : ""
-				} in ${channelMention} initiated by ${client.diagnostics.member(member)} is complete.`,
+				description: strings.description({
+					moderator: client.diagnostics.member(member),
+					message_count: client.pluralise("events.purgeBegin.description.messages", guildLocale, {
+						quantity: messageCount,
+					}),
+					channel: mention(channel.id, { type: "channel" }),
+				}),
+				fields:
+					author !== undefined
+						? [
+								{
+									name: strings.fields.author,
+									value: client.diagnostics.user(author),
+								},
+						  ]
+						: undefined,
 			},
 		],
 	};

@@ -1,3 +1,4 @@
+import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
 import { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
@@ -107,7 +108,11 @@ class JournallingStore {
 			return;
 		}
 
-		const message = await generateMessage(this.#client, ...args);
+		const guildLocale = getLocaleByLocalisationLanguage(guildDocument.localisationLanguage);
+		const message = await generateMessage(this.#client, args, {
+			guildLocale,
+			featureLanguage: guildDocument.featureLanguage,
+		});
 		if (message === undefined) {
 			return;
 		}

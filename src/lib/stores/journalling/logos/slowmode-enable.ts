@@ -1,15 +1,21 @@
+import { mention } from "logos:core/formatting";
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"slowmodeEnable"> = async (client, user, channel, level) => ({
-	embeds: [
-		{
-			title: `${constants.emojis.events.slowmode.enabled} Slowmode enabled`,
-			color: constants.colours.warning,
-			description: `${client.diagnostics.user(user)} has enabled slowmode in ${client.diagnostics.channel(
-				channel,
-			)} with level "${level}".`,
-		},
-	],
-});
+const logger: EventLogger<"slowmodeEnable"> = async (client, [user, channel, level], { guildLocale }) => {
+	const strings = constants.contexts.slowmodeEnable({ localise: client.localise, locale: guildLocale });
+	return {
+		embeds: [
+			{
+				title: `${constants.emojis.events.slowmode.enabled} ${strings.title}`,
+				color: constants.colours.warning,
+				description: strings.description({
+					user: client.diagnostics.user(user),
+					channel: mention(channel.id, { type: "channel" }),
+					level,
+				}),
+			},
+		],
+	};
+};
 
 export default logger;

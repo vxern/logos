@@ -1,18 +1,15 @@
-import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
 import { codeMultiline } from "logos:core/formatting";
-import { Guild } from "logos/database/guild";
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"entryRequestSubmit"> = async (client, user, entryRequest) => {
-	const guildDocument = await Guild.getOrCreate(client, { guildId: entryRequest.guildId });
-
-	const guildLanguage = guildDocument.localisationLanguage;
-	const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
-	const featureLanguage = guildDocument.featureLanguage;
-
-	// TODO(vxern): This needs to be updated.
-	const strings = constants.contexts.verificationModal({ localise: client.localise, locale: guildLocale });
-
+const logger: EventLogger<"entryRequestSubmit"> = async (
+	client,
+	[user, entryRequest],
+	{ guildLocale, featureLanguage },
+) => {
+	const strings = {
+		...constants.contexts.verificationModal({ localise: client.localise, locale: guildLocale }),
+		...constants.contexts.entryRequestSubmit({ localise: client.localise, locale: guildLocale }),
+	};
 	return {
 		embeds: [
 			{

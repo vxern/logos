@@ -1,16 +1,25 @@
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"praiseAdd"> = async (client, member, praise, author) => {
-	const comment = praise.comment ?? "None.";
-
+const logger: EventLogger<"praiseAdd"> = async (client, [member, praise, author], { guildLocale }) => {
+	const strings = constants.contexts.praiseAdd({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{
-				title: `${constants.emojis.events.praised} Member praised`,
+				title: `${constants.emojis.events.praised} ${strings.title}`,
 				color: constants.colours.success,
-				description: `${client.diagnostics.member(member)} has been praised by ${client.diagnostics.user(
-					author,
-				)}. Comment: ${comment}`,
+				description: strings.description({
+					user: client.diagnostics.member(member),
+					moderator: client.diagnostics.user(author),
+				}),
+				fields:
+					praise.comment !== undefined
+						? [
+								{
+									name: strings.fields.comment,
+									value: praise.comment,
+								},
+						  ]
+						: undefined,
 			},
 		],
 	};

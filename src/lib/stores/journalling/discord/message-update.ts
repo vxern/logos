@@ -1,12 +1,13 @@
 import { codeMultiline, mention } from "logos:core/formatting";
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"messageUpdate"> = async (client, message, _?) => {
+const logger: EventLogger<"messageUpdate"> = async (client, [message, _], { guildLocale }) => {
 	const oldMessage = client.entities.messages.previous.get(message.id);
 	if (oldMessage === undefined) {
 		return undefined;
 	}
 
+	const strings = constants.contexts.messageUpdate({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

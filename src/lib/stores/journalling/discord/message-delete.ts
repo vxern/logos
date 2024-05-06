@@ -1,12 +1,13 @@
 import { codeMultiline, mention } from "logos:core/formatting";
 import { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"messageDelete"> = async (client, payload, _?) => {
+const logger: EventLogger<"messageDelete"> = async (client, [payload, _], { guildLocale }) => {
 	const message = client.entities.messages.latest.get(payload.id);
 	if (message === undefined) {
 		return undefined;
 	}
 
+	const strings = constants.contexts.messageDelete({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{
