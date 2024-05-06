@@ -1,89 +1,22 @@
-import * as Discord from "@discordeno/bot";
-import { Locale, getLocaleByLocalisationLanguage } from "../../constants/languages";
-import defaults from "../../defaults";
-import * as Logos from "../../types";
-import { Client } from "../client";
-import { Guild } from "../database/guild";
-import { getLocalisationLanguage } from "../interactions";
+import { Locale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
+import { Client } from "logos/client";
+import { Guild } from "logos/database/guild";
+import { Logger } from "logos/logger";
 
-type ServiceBase = {
-	[K in keyof Discord.EventHandlers]: (..._: Parameters<Discord.EventHandlers[K]>) => Promise<void>;
-};
-
-abstract class Service implements ServiceBase {
+abstract class Service {
+	readonly log: Logger;
 	readonly client: Client;
-	readonly bot: Discord.Bot;
 
-	constructor([client, bot]: [Client, Discord.Bot]) {
+	constructor(client: Client, { identifier }: { identifier: string }) {
+		this.log = Logger.create({
+			identifier: `Client/ServiceStore/${identifier}`,
+			isDebug: client.environment.isDebug,
+		});
 		this.client = client;
-		this.bot = bot;
 	}
 
 	abstract start(): Promise<void>;
 	abstract stop(): Promise<void>;
-
-	async debug(..._: Parameters<ServiceBase["debug"]>) {}
-	async applicationCommandPermissionsUpdate(..._: Parameters<ServiceBase["applicationCommandPermissionsUpdate"]>) {}
-	async guildAuditLogEntryCreate(..._: Parameters<ServiceBase["guildAuditLogEntryCreate"]>) {}
-	async automodRuleCreate(..._: Parameters<ServiceBase["automodRuleCreate"]>) {}
-	async automodRuleUpdate(..._: Parameters<ServiceBase["automodRuleUpdate"]>) {}
-	async automodRuleDelete(..._: Parameters<ServiceBase["automodRuleDelete"]>) {}
-	async automodActionExecution(..._: Parameters<ServiceBase["automodActionExecution"]>) {}
-	async threadCreate(..._: Parameters<ServiceBase["threadCreate"]>) {}
-	async threadDelete(..._: Parameters<ServiceBase["threadDelete"]>) {}
-	async threadMemberUpdate(..._: Parameters<ServiceBase["threadMemberUpdate"]>) {}
-	async threadMembersUpdate(..._: Parameters<ServiceBase["threadMembersUpdate"]>) {}
-	async threadUpdate(..._: Parameters<ServiceBase["threadUpdate"]>) {}
-	async scheduledEventCreate(..._: Parameters<ServiceBase["scheduledEventCreate"]>) {}
-	async scheduledEventUpdate(..._: Parameters<ServiceBase["scheduledEventUpdate"]>) {}
-	async scheduledEventDelete(..._: Parameters<ServiceBase["scheduledEventDelete"]>) {}
-	async scheduledEventUserAdd(..._: Parameters<ServiceBase["scheduledEventUserAdd"]>) {}
-	async scheduledEventUserRemove(..._: Parameters<ServiceBase["scheduledEventUserRemove"]>) {}
-	async ready(..._: Parameters<ServiceBase["ready"]>) {}
-	async interactionCreate(..._: Parameters<ServiceBase["interactionCreate"]>) {}
-	async integrationCreate(..._: Parameters<ServiceBase["integrationCreate"]>) {}
-	async integrationDelete(..._: Parameters<ServiceBase["integrationDelete"]>) {}
-	async integrationUpdate(..._: Parameters<ServiceBase["integrationUpdate"]>) {}
-	async inviteCreate(..._: Parameters<ServiceBase["inviteCreate"]>) {}
-	async inviteDelete(..._: Parameters<ServiceBase["inviteDelete"]>) {}
-	async guildMemberAdd(..._: Parameters<ServiceBase["guildMemberAdd"]>) {}
-	async guildMemberRemove(..._: Parameters<ServiceBase["guildMemberRemove"]>) {}
-	async guildMemberUpdate(..._: Parameters<ServiceBase["guildMemberUpdate"]>) {}
-	async guildStickersUpdate(..._: Parameters<ServiceBase["guildStickersUpdate"]>) {}
-	async messageCreate(..._: Parameters<ServiceBase["messageCreate"]>) {}
-	async messageDelete(..._: Parameters<ServiceBase["messageDelete"]>) {}
-	async messageDeleteBulk(..._: Parameters<ServiceBase["messageDeleteBulk"]>) {}
-	async messageUpdate(..._: Parameters<ServiceBase["messageUpdate"]>) {}
-	async reactionAdd(..._: Parameters<ServiceBase["reactionAdd"]>) {}
-	async reactionRemove(..._: Parameters<ServiceBase["reactionRemove"]>) {}
-	async reactionRemoveEmoji(..._: Parameters<ServiceBase["reactionRemoveEmoji"]>) {}
-	async reactionRemoveAll(..._: Parameters<ServiceBase["reactionRemoveAll"]>) {}
-	async presenceUpdate(..._: Parameters<ServiceBase["presenceUpdate"]>) {}
-	async voiceServerUpdate(..._: Parameters<ServiceBase["voiceServerUpdate"]>) {}
-	async voiceStateUpdate(..._: Parameters<ServiceBase["voiceStateUpdate"]>) {}
-	async channelCreate(..._: Parameters<ServiceBase["channelCreate"]>) {}
-	async dispatchRequirements(..._: Parameters<ServiceBase["dispatchRequirements"]>) {}
-	async channelDelete(..._: Parameters<ServiceBase["channelDelete"]>) {}
-	async channelPinsUpdate(..._: Parameters<ServiceBase["channelPinsUpdate"]>) {}
-	async channelUpdate(..._: Parameters<ServiceBase["channelUpdate"]>) {}
-	async stageInstanceCreate(..._: Parameters<ServiceBase["stageInstanceCreate"]>) {}
-	async stageInstanceDelete(..._: Parameters<ServiceBase["stageInstanceDelete"]>) {}
-	async stageInstanceUpdate(..._: Parameters<ServiceBase["stageInstanceUpdate"]>) {}
-	async guildEmojisUpdate(..._: Parameters<ServiceBase["guildEmojisUpdate"]>) {}
-	async guildBanAdd(..._: Parameters<ServiceBase["guildBanAdd"]>) {}
-	async guildBanRemove(..._: Parameters<ServiceBase["guildBanRemove"]>) {}
-	async guildCreate(..._: Parameters<ServiceBase["guildCreate"]>) {}
-	async guildDelete(..._: Parameters<ServiceBase["guildDelete"]>) {}
-	async guildUnavailable(..._: Parameters<ServiceBase["guildUnavailable"]>) {}
-	async guildUpdate(..._: Parameters<ServiceBase["guildUpdate"]>) {}
-	async raw(..._: Parameters<ServiceBase["raw"]>) {}
-	async roleCreate(..._: Parameters<ServiceBase["roleCreate"]>) {}
-	async roleDelete(..._: Parameters<ServiceBase["roleDelete"]>) {}
-	async roleUpdate(..._: Parameters<ServiceBase["roleUpdate"]>) {}
-	async webhooksUpdate(..._: Parameters<ServiceBase["webhooksUpdate"]>) {}
-	async botUpdate(..._: Parameters<ServiceBase["botUpdate"]>) {}
-	async typingStart(..._: Parameters<ServiceBase["typingStart"]>) {}
-	async threadListSync(..._: Parameters<ServiceBase["threadListSync"]>) {}
 }
 
 abstract class GlobalService extends Service {
@@ -92,37 +25,60 @@ abstract class GlobalService extends Service {
 }
 
 abstract class LocalService extends Service {
-	protected readonly guildId: bigint;
-	protected readonly guildIdString: string;
+	readonly guildId: bigint;
+	readonly guildIdString: string;
 
-	get guild(): Logos.Guild | undefined {
-		return this.client.cache.guilds.get(this.guildId);
+	get guild(): Logos.Guild {
+		return this.client.entities.guilds.get(this.guildId)!;
 	}
 
-	get guildDocument(): Guild | undefined {
-		return this.client.cache.documents.guilds.get(this.guildIdString);
+	get guildDocument(): Guild {
+		return this.client.documents.guilds.get(this.guildIdString)!;
 	}
 
 	get guildLocale(): Locale {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return defaults.LOCALISATION_LOCALE;
-		}
-
-		const guildLanguage = getLocalisationLanguage(guildDocument);
-		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage) ?? defaults.LOCALISATION_LOCALE;
-
-		return guildLocale;
+		return getLocaleByLocalisationLanguage(this.guildDocument.localisationLanguage);
 	}
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint) {
-		super([client, bot]);
+	constructor(client: Client, { identifier, guildId }: { identifier: string; guildId: bigint }) {
+		super(client, { identifier: `${identifier}@${guildId}` });
+
 		this.guildId = guildId;
 		this.guildIdString = guildId.toString();
 	}
 
 	abstract start(): Promise<void>;
 	abstract stop(): Promise<void>;
+
+	async getAllMessages({ channelId }: { channelId: bigint }): Promise<Discord.CamelizedDiscordMessage[] | undefined> {
+		const buffer: Discord.CamelizedDiscordMessage[] = [];
+
+		let isFinished = false;
+		while (!isFinished) {
+			const chunk = await this.client.bot.rest
+				.getMessages(channelId, {
+					limit: 100,
+					before: buffer.length === 0 ? undefined : buffer.at(-1)?.id,
+				})
+				.catch(() => {
+					this.client.log.warn(
+						`Failed to get all messages from ${this.client.diagnostics.channel(channelId)}.`,
+					);
+					return undefined;
+				});
+			if (chunk === undefined) {
+				return undefined;
+			}
+
+			if (chunk.length < 100) {
+				isFinished = true;
+			}
+
+			buffer.push(...chunk);
+		}
+
+		return buffer;
+	}
 }
 
-export { Service, GlobalService, LocalService, ServiceBase };
+export { Service, GlobalService, LocalService };

@@ -1,14 +1,64 @@
-interface Report {
-	id: string;
-	guildId: string;
-	authorId: string;
-	answers: {
-		users: string;
-		reason: string;
-		messageLink?: string;
-	};
-	isResolved: boolean;
-	createdAt: number;
+import { Client } from "logos/client";
+import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
+
+interface ReportFormData {
+	readonly reason: string;
+	readonly users: string;
+	messageLink?: string;
 }
 
-export type { Report };
+class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }> {
+	get guildId(): string {
+		return this.idParts[0];
+	}
+
+	get authorId(): string {
+		return this.idParts[1];
+	}
+
+	get createdAt(): number {
+		return Number(this.idParts[2]);
+	}
+
+	readonly formData: ReportFormData;
+
+	isResolved: boolean;
+
+	constructor(
+		database: DatabaseStore,
+		{ formData, isResolved, ...data }: { formData: ReportFormData; isResolved?: boolean } & IdentifierData<Report>,
+	) {
+		super(database, data, { collection: "Reports" });
+
+		this.formData = formData;
+		this.isResolved = isResolved ?? false;
+	}
+
+	static async getAll(
+		clientOrDatabase: ClientOrDatabaseStore,
+		clauses?: { where?: Partial<IdentifierData<Report>> },
+	): Promise<Report[]> {
+		return await Model.all<Report>(clientOrDatabase, {
+			collection: "Reports",
+			where: Object.assign(
+				{ ...clauses?.where },
+				{ guildId: undefined, authorId: undefined, createdAt: undefined },
+			),
+		});
+	}
+
+	static async create(
+		client: Client,
+		data: Omit<IdentifierData<Report>, "createdAt"> & { formData: ReportFormData },
+	): Promise<Report> {
+		const reportDocument = new Report(client.database, { ...data, createdAt: Date.now().toString() });
+
+		await reportDocument.create(client);
+
+		return reportDocument;
+	}
+}
+
+export { Report };
+export type { ReportFormData };

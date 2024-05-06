@@ -1,149 +1,153 @@
-import * as Discord from "@discordeno/bot";
-import constants from "../../../constants/constants";
-import * as Logos from "../../../types";
-import { Client, localise } from "../../client";
-import { Guild } from "../../database/guild";
-import { User } from "../../database/user";
-import diagnostics from "../../diagnostics";
-import { acknowledge, createInteractionCollector, decodeId, getLocaleData, reply } from "../../interactions";
-import { getAllMessages } from "../../utils";
-import { LocalService } from "../service";
+import { Client } from "logos/client";
+import { Collector, InteractionCollector } from "logos/collectors";
+import { Guild } from "logos/database/guild";
+import { Model } from "logos/database/model";
+import { User } from "logos/database/user";
+import { LocalService } from "logos/services/service";
+import { ServiceStore } from "logos/stores/services";
 
 interface Configurations {
-	verification: NonNullable<Guild["features"]["moderation"]["features"]>["verification"];
-	reports: NonNullable<Guild["features"]["moderation"]["features"]>["reports"];
-	resources: NonNullable<Guild["features"]["server"]["features"]>["resources"];
-	suggestions: NonNullable<Guild["features"]["server"]["features"]>["suggestions"];
-	tickets: NonNullable<Guild["features"]["server"]["features"]>["tickets"];
+	verification: Guild["verification"];
+	reports: Guild["reports"];
+	resources: Guild["resourceSubmissions"];
+	suggestions: Guild["suggestions"];
+	tickets: Guild["tickets"];
 }
 
 type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
-const configurationLocators: ConfigurationLocators = {
-	verification: (guildDocument) => guildDocument.features.moderation.features?.verification,
-	reports: (guildDocument) => guildDocument.features.moderation.features?.reports,
-	resources: (guildDocument) => guildDocument.features.server.features?.resources,
-	suggestions: (guildDocument) => guildDocument.features.server.features?.suggestions,
-	tickets: (guildDocument) => guildDocument.features.server.features?.tickets,
-};
-
 type CustomIDs = Record<keyof Configurations, string>;
 
-const customIds: CustomIDs = {
-	verification: constants.components.verification,
-	reports: constants.components.reports,
-	resources: constants.components.resources,
-	suggestions: constants.components.suggestions,
-	tickets: constants.components.tickets,
-};
+type PromptType = keyof ServiceStore["local"]["prompts"];
 
-type PromptTypes = keyof Client["services"]["prompts"];
-
-type DeleteMode = "delete" | "close" | "none";
+type PromptDeleteMode = "delete" | "close" | "none";
 
 abstract class PromptService<
-	PromptType extends PromptTypes,
-	DataType extends { id: string },
-	InteractionData extends [compositeId: string, ...data: string[]],
+	Generic extends {
+		type: PromptType;
+		model: Model;
+		metadata: [partialId: string, ...data: string[]];
+	} = {
+		type: PromptType;
+		model: Model;
+		metadata: [partialId: string, isResolve: string];
+	},
 > extends LocalService {
-	private readonly type: PromptType;
-	private readonly customId: string;
-	private readonly deleteMode: DeleteMode;
+	readonly documents: Map<string, Generic["model"]>;
+	readonly promptByPartialId: Map</*partialId: */ string, Discord.CamelizedDiscordMessage>;
+	readonly magicButton: InteractionCollector<Generic["metadata"]>;
+	readonly removeButton: InteractionCollector<[partialId: string]>;
 
-	protected readonly documents: Map<string, DataType>;
+	readonly #type: Generic["type"];
+	readonly #deleteMode: PromptDeleteMode;
+	readonly #handlerByPartialId: Map<
+		/*partialId: */ string,
+		(interaction: Logos.Interaction<Generic["metadata"]>) => void
+	>;
+	readonly #documentByPromptId: Map</*promptId: */ string, Generic["model"]>;
+	readonly #userIdByPromptId: Map</*promptId: */ string, bigint>;
 
-	private readonly handlerByCompositeId: Map<
-		/*compositeId: */ string,
-		(interaction: Discord.Interaction, data: InteractionData) => void
-	> = new Map();
-	protected readonly promptByCompositeId: Map</*compositeId: */ string, Discord.CamelizedDiscordMessage> = new Map();
-	private readonly documentByPromptId: Map</*promptId: */ string, DataType> = new Map();
-	private readonly userIdByPromptId: Map</*promptId: */ string, bigint> = new Map();
+	static readonly #_configurationLocators = Object.freeze({
+		verification: (guildDocument) => guildDocument.verification,
+		reports: (guildDocument) => guildDocument.reports,
+		resources: (guildDocument) => guildDocument.resourceSubmissions,
+		suggestions: (guildDocument) => guildDocument.suggestions,
+		tickets: (guildDocument) => guildDocument.tickets,
+	} as const satisfies ConfigurationLocators);
+	static readonly #_customIds = Object.freeze({
+		verification: constants.components.verification,
+		reports: constants.components.reports,
+		resources: constants.components.resources,
+		suggestions: constants.components.suggestions,
+		tickets: constants.components.tickets,
+	} as const satisfies CustomIDs);
 
-	private readonly collectingInteractions: Promise<void>;
-	private readonly removingPrompts: Promise<void>;
-	private stopCollectingInteractions: (() => void) | undefined;
-	private stopRemovingPrompts: (() => void) | undefined;
+	readonly #_configuration: ConfigurationLocators[Generic["type"]];
+	readonly #_messageUpdates: Collector<"messageUpdate">;
+	readonly #_messageDeletes: Collector<"messageDelete">;
 
-	private readonly _configuration: ConfigurationLocators[PromptType];
-
-	get configuration(): Configurations[PromptType] | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return this._configuration(guildDocument);
+	get configuration(): NonNullable<Configurations[Generic["type"]]> {
+		return this.#_configuration(this.guildDocument)!;
 	}
 
 	get channelId(): bigint | undefined {
-		const configuration = this.configuration;
-		if (configuration === undefined) {
-			return undefined;
-		}
-
-		if (!configuration.enabled) {
-			return undefined;
-		}
-
-		const channelId = BigInt(configuration.channelId);
-		if (channelId === undefined) {
-			return undefined;
-		}
-
-		return channelId;
+		return this.configuration.channelId !== undefined ? BigInt(this.configuration.channelId) : undefined;
 	}
 
 	constructor(
-		[client, bot]: [Client, Discord.Bot],
-		guildId: bigint,
-		{ type, deleteMode }: { type: PromptType; deleteMode: DeleteMode },
+		client: Client,
+		{ identifier, guildId }: { identifier: string; guildId: bigint },
+		{ type, deleteMode }: { type: Generic["type"]; deleteMode: PromptDeleteMode },
 	) {
-		super([client, bot], guildId);
-		this.type = type;
-		this.deleteMode = deleteMode;
-		this.customId = customIds[type];
-		this._configuration = configurationLocators[type];
-		this.documents = this.getAllDocuments();
-		this.collectingInteractions = new Promise((resolve) => {
-			this.stopCollectingInteractions = () => resolve();
+		super(client, { identifier, guildId });
+
+		const customId = PromptService.#_customIds[type];
+		this.magicButton = new InteractionCollector(client, { customId, isPermanent: true });
+		this.removeButton = new InteractionCollector(client, {
+			guildId,
+			customId: InteractionCollector.encodeCustomId([constants.components.removePrompt, customId]),
+			isPermanent: true,
 		});
-		this.removingPrompts = new Promise((resolve) => {
-			this.stopRemovingPrompts = () => resolve();
+
+		this.#type = type;
+		this.#deleteMode = deleteMode;
+
+		this.documents = new Map();
+		this.promptByPartialId = new Map();
+
+		this.#handlerByPartialId = new Map();
+		this.#documentByPromptId = new Map();
+		this.#userIdByPromptId = new Map();
+
+		this.#_configuration = PromptService.#_configurationLocators[type];
+		this.#_messageUpdates = new Collector<"messageUpdate">({ guildId });
+		this.#_messageDeletes = new Collector<"messageDelete">({ guildId });
+	}
+
+	static encodePartialIdInUserAvatar({ user, partialId }: { user: Logos.User; partialId: string }): string {
+		const iconUrl = Discord.avatarUrl(user.id, user.discriminator, {
+			avatar: user.avatar,
+			size: 64,
+			format: "png",
 		});
+
+		return `${iconUrl}&metadata=${partialId}`;
+	}
+
+	static encodePartialIdInGuildIcon({ guild, partialId }: { guild: Logos.Guild; partialId: string }): string {
+		const iconUrl = Discord.guildIconUrl(guild.id, guild.icon);
+
+		return `${iconUrl}&metadata=${partialId}`;
 	}
 
 	async start(): Promise<void> {
-		const [channelId, configuration, guild, guildDocument] = [
-			this.channelId,
-			this.configuration,
-			this.guild,
-			this.guildDocument,
-		];
-		if (channelId === undefined || configuration === undefined || guild === undefined || guildDocument === undefined) {
+		const channelId = this.channelId;
+		if (channelId === undefined) {
 			return;
 		}
 
-		const promptsAll = (await getAllMessages([this.client, this.bot], channelId)) ?? [];
-		const [validPrompts, invalidPrompts] = this.filterPrompts(promptsAll);
+		const documents = this.getAllDocuments();
+		for (const [partialId, document] of documents.entries()) {
+			documents.set(partialId, document);
+		}
+
+		const promptsAll = await this.getAllMessages({ channelId });
+		const [validPrompts, invalidPrompts] = this.filterPrompts(promptsAll ?? []);
 
 		const prompts = new Map(validPrompts);
 
-		for (const [compositeId, promptDocument] of this.documents) {
+		for (const [_, promptDocument] of this.documents) {
 			const userDocument = await this.getUserDocument(promptDocument);
-			if (userDocument === undefined) {
-				continue;
-			}
 
 			const userId = BigInt(userDocument.account.id);
 
-			let prompt = prompts.get(compositeId);
+			let prompt = prompts.get(promptDocument.partialId);
 			if (prompt !== undefined) {
-				prompts.delete(compositeId);
+				prompts.delete(promptDocument.partialId);
 			} else {
-				const user = this.client.cache.users.get(userId);
+				const user = this.client.entities.users.get(userId);
 				if (user === undefined) {
 					continue;
 				}
@@ -156,202 +160,153 @@ abstract class PromptService<
 				prompt = message;
 			}
 
-			this.registerPrompt(prompt, userId, compositeId, promptDocument);
-			this.registerDocument(compositeId, promptDocument);
-			this.registerHandler(compositeId);
+			this.registerPrompt(prompt, userId, promptDocument);
+			this.registerDocument(promptDocument);
+			this.registerHandler(promptDocument);
 		}
 
 		const expiredPrompts = Array.from(prompts.values());
 
 		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
-			await this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
-				this.client.log.warn("Failed to delete invalid or expired prompt.");
+			await this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
+				this.log.warn("Failed to delete invalid or expired prompt.");
 			});
 		}
 
-		createInteractionCollector([this.client, this.bot], {
-			type: Discord.InteractionTypes.MessageComponent,
-			customId: this.customId,
-			doesNotExpire: true,
-			onCollect: async (selection) => {
-				const customId = selection.data?.customId;
-				if (customId === undefined) {
-					return;
-				}
+		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
+		this.#_messageDeletes.onCollect(async (payload) => {
+			const message = this.client.entities.messages.latest.get(payload.id);
+			if (message === undefined) {
+				return;
+			}
 
-				const [_, compositeId, ...metadata] = decodeId<InteractionData>(customId);
-				if (compositeId === undefined) {
-					return;
-				}
-
-				const handle = this.handlerByCompositeId.get(compositeId);
-				if (handle === undefined) {
-					return;
-				}
-
-				handle(selection, [compositeId, ...metadata] as InteractionData);
-			},
-			end: this.collectingInteractions,
+			this.#handleMessageDelete(message);
 		});
 
-		if (this.deleteMode === "none") {
-			return;
-		}
+		this.magicButton.onInteraction(async (buttonPress) => {
+			const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
+			if (handle === undefined) {
+				return;
+			}
 
-		createInteractionCollector([this.client, this.bot], {
-			type: Discord.InteractionTypes.MessageComponent,
-			customId: `${constants.components.removePrompt}/${this.customId}/${this.guildId}`,
-			doesNotExpire: true,
-			onCollect: async (selection) => {
-				const customId = selection.data?.customId;
-				if (customId === undefined) {
-					return;
-				}
-
-				const guildId = selection.guildId;
-				if (guildId === undefined) {
-					return;
-				}
-
-				const member = selection.member;
-				if (member === undefined) {
-					return;
-				}
-
-				let management: { roles?: string[]; users?: string[] } | undefined;
-				switch (this.type) {
-					case "reports": {
-						management = (configuration as Configurations["reports"]).management;
-						break;
-					}
-					case "resources": {
-						management = (configuration as Configurations["resources"])?.management;
-						break;
-					}
-					case "suggestions": {
-						management = (configuration as Configurations["suggestions"]).management;
-						break;
-					}
-					case "tickets": {
-						management = (configuration as Configurations["tickets"])?.management;
-						break;
-					}
-					default: {
-						management = undefined;
-						break;
-					}
-				}
-
-				const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
-				const userIds = management?.users?.map((userId) => BigInt(userId));
-
-				const isAuthorised =
-					member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-					(userIds?.includes(selection.user.id) ?? false);
-				if (!isAuthorised) {
-					const localeData = await getLocaleData(this.client, selection);
-					const locale = localeData.locale;
-
-					if (this.deleteMode === "delete") {
-						const strings = {
-							title: localise(this.client, "cannotRemovePrompt.title", locale)(),
-							description: localise(this.client, "cannotRemovePrompt.description", locale)(),
-						};
-
-						reply([this.client, this.bot], selection, {
-							embeds: [
-								{
-									title: strings.title,
-									description: strings.description,
-									color: constants.colors.peach,
-								},
-							],
-						});
-					} else if (this.deleteMode === "close") {
-						const strings = {
-							title: localise(this.client, "cannotCloseIssue.title", locale)(),
-							description: localise(this.client, "cannotCloseIssue.description", locale)(),
-						};
-
-						reply([this.client, this.bot], selection, {
-							embeds: [
-								{
-									title: strings.title,
-									description: strings.description,
-									color: constants.colors.peach,
-								},
-							],
-						});
-					}
-
-					return;
-				}
-
-				acknowledge([this.client, this.bot], selection);
-
-				const [_, compositeId] = decodeId(customId);
-				if (compositeId === undefined) {
-					return;
-				}
-
-				this.handleDelete(compositeId);
-			},
-			end: this.removingPrompts,
+			handle(buttonPress);
 		});
+
+		this.removeButton.onInteraction(async (buttonPress) => {
+			const customId = buttonPress.data?.customId;
+			if (customId === undefined) {
+				return;
+			}
+
+			const guildId = buttonPress.guildId;
+			if (guildId === undefined) {
+				return;
+			}
+
+			const member = buttonPress.member;
+			if (member === undefined) {
+				return;
+			}
+
+			let management: { roles?: string[]; users?: string[] } | undefined;
+			switch (this.#type) {
+				case "verification": {
+					management = (this.configuration as Guild["verification"])?.management;
+					break;
+				}
+				case "reports": {
+					management = (this.configuration as Guild["reports"])?.management;
+					break;
+				}
+				case "resources": {
+					management = (this.configuration as Guild["resourceSubmissions"])?.management;
+					break;
+				}
+				case "suggestions": {
+					management = (this.configuration as Guild["suggestions"])?.management;
+					break;
+				}
+				case "tickets": {
+					management = (this.configuration as Guild["tickets"])?.management;
+					break;
+				}
+				default: {
+					management = undefined;
+					break;
+				}
+			}
+
+			const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
+			const userIds = management?.users?.map((userId) => BigInt(userId));
+
+			const isAuthorised =
+				member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+				(userIds?.includes(buttonPress.user.id) ?? false);
+			if (!isAuthorised) {
+				if (this.#deleteMode === "delete") {
+					const strings = constants.contexts.cannotRemovePrompt({
+						localise: this.client.localise.bind(this.client),
+						locale: buttonPress.locale,
+					});
+					await this.client.warning(buttonPress, {
+						title: strings.title,
+						description: strings.description,
+					});
+					return;
+				}
+
+				if (this.#deleteMode === "close") {
+					const strings = constants.contexts.cannotCloseIssue({
+						localise: this.client.localise.bind(this.client),
+						locale: buttonPress.locale,
+					});
+					await this.client.warning(buttonPress, {
+						title: strings.title,
+						description: strings.description,
+					});
+					return;
+				}
+
+				return;
+			}
+
+			await this.client.acknowledge(buttonPress);
+
+			const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
+			if (prompt === undefined) {
+				return;
+			}
+
+			const promptDocument = this.#documentByPromptId.get(prompt.id);
+			if (promptDocument === undefined) {
+				return;
+			}
+
+			await this.handleDelete(promptDocument);
+		});
+
+		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
+		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
+		await this.client.registerInteractionCollector(this.magicButton);
+		await this.client.registerInteractionCollector(this.removeButton);
 	}
 
 	async stop(): Promise<void> {
+		await this.#_messageUpdates.close();
+		await this.#_messageDeletes.close();
+		await this.magicButton.close();
+		await this.removeButton.close();
+
 		this.documents.clear();
-		this.handlerByCompositeId.clear();
-		this.promptByCompositeId.clear();
-		this.documentByPromptId.clear();
-		this.userIdByPromptId.clear();
+		this.promptByPartialId.clear();
 
-		this.stopCollectingInteractions?.();
-		this.stopRemovingPrompts?.();
-		await this.collectingInteractions;
-		await this.removingPrompts;
+		this.#handlerByPartialId.clear();
+		this.#documentByPromptId.clear();
+		this.#userIdByPromptId.clear();
 	}
 
-	// Anti-tampering feature; detects prompts being deleted.
-	async messageDelete(message: Discord.Message): Promise<void> {
-		// If the message was deleted from a channel not managed by this prompt manager.
-		if (message.channelId !== this.channelId) {
-			return;
-		}
-
-		const promptDocument = this.documentByPromptId.get(message.id.toString());
-		if (promptDocument === undefined) {
-			return;
-		}
-
-		const userId = this.userIdByPromptId.get(message.id.toString());
-		if (userId === undefined) {
-			return;
-		}
-
-		const user = this.client.cache.users.get(userId);
-		if (user === undefined) {
-			return;
-		}
-
-		const prompt = await this.savePrompt(user, promptDocument);
-		if (prompt === undefined) {
-			return;
-		}
-
-		const compositeId = this.getCompositeId(prompt);
-		if (compositeId === undefined) {
-			return;
-		}
-
-		this.registerPrompt(prompt, userId, compositeId, promptDocument);
-
-		this.documentByPromptId.delete(message.id.toString());
-		this.userIdByPromptId.delete(message.id.toString());
-	}
-
-	async messageUpdate(message: Discord.Message): Promise<void> {
+	// Anti-tampering feature; detects prompts being changed from the outside (embeds being deleted).
+	async #handleMessageUpdate(message: Discord.Message): Promise<void> {
 		// If the message was updated in a channel not managed by this prompt manager.
 		if (message.channelId !== this.channelId) {
 			return;
@@ -363,54 +318,100 @@ abstract class PromptService<
 		}
 
 		// Delete the message and allow the bot to handle the deletion.
-		this.bot.rest
+		this.client.bot.rest
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
-				this.client.log.warn(
-					`Failed to delete prompt ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
-						message.channelId,
-					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
+				this.log.warn(
+					`Failed to delete prompt ${this.client.diagnostics.message(
+						message,
+					)} from ${this.client.diagnostics.channel(message.channelId)} on ${this.client.diagnostics.guild(
+						message.guildId ?? 0n,
+					)}.`,
 				),
 			);
 	}
 
-	abstract getAllDocuments(): Map<string, DataType>;
-	abstract getUserDocument(promptDocument: DataType): Promise<User | undefined>;
+	// Anti-tampering feature; detects prompts being deleted.
+	async #handleMessageDelete(message: Logos.Message): Promise<void> {
+		// If the message was deleted from a channel not managed by this prompt manager.
+		if (message.channelId !== this.channelId) {
+			return;
+		}
 
-	abstract getPromptContent(user: Logos.User, promptDocument: DataType): Discord.CreateMessageOptions | undefined;
+		const promptDocument = this.#documentByPromptId.get(message.id.toString());
+		if (promptDocument === undefined) {
+			return;
+		}
 
-	getCompositeId(prompt: Discord.CamelizedDiscordMessage): string | undefined {
-		const compositeId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
-		if (compositeId === undefined) {
+		const userId = this.#userIdByPromptId.get(message.id.toString());
+		if (userId === undefined) {
+			return;
+		}
+
+		const user = this.client.entities.users.get(userId);
+		if (user === undefined) {
+			return;
+		}
+
+		const prompt = await this.savePrompt(user, promptDocument);
+		if (prompt === undefined) {
+			return;
+		}
+
+		const partialId = this.extractPartialId(prompt);
+		if (partialId === undefined) {
+			return;
+		}
+
+		this.registerPrompt(prompt, userId, promptDocument);
+
+		this.#documentByPromptId.delete(message.id.toString());
+		this.#userIdByPromptId.delete(message.id.toString());
+	}
+
+	abstract getAllDocuments(): Map<string, Generic["model"]>;
+	abstract getUserDocument(promptDocument: Generic["model"]): Promise<User>;
+
+	abstract getPromptContent(
+		user: Logos.User,
+		promptDocument: Generic["model"],
+	): Discord.CreateMessageOptions | undefined;
+
+	extractPartialId(prompt: Discord.CamelizedDiscordMessage): string | undefined {
+		const partialId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
+		if (partialId === undefined) {
 			return undefined;
 		}
 
-		return compositeId;
+		return partialId;
 	}
 
 	filterPrompts(
 		prompts: Discord.CamelizedDiscordMessage[],
 	): [
-		valid: [compositeId: string, prompt: Discord.CamelizedDiscordMessage][],
+		valid: [partialId: string, prompt: Discord.CamelizedDiscordMessage][],
 		invalid: Discord.CamelizedDiscordMessage[],
 	] {
-		const valid: [compositeId: string, prompt: Discord.CamelizedDiscordMessage][] = [];
+		const valid: [partialId: string, prompt: Discord.CamelizedDiscordMessage][] = [];
 		const invalid: Discord.CamelizedDiscordMessage[] = [];
 
 		for (const prompt of prompts) {
-			const compositeId = this.getCompositeId(prompt);
-			if (compositeId === undefined) {
+			const partialId = this.extractPartialId(prompt);
+			if (partialId === undefined) {
 				invalid.push(prompt);
 				continue;
 			}
 
-			valid.push([compositeId, prompt]);
+			valid.push([partialId, prompt]);
 		}
 
 		return [valid, invalid];
 	}
 
-	async savePrompt(user: Logos.User, promptDocument: DataType): Promise<Discord.CamelizedDiscordMessage | undefined> {
+	async savePrompt(
+		user: Logos.User,
+		promptDocument: Generic["model"],
+	): Promise<Discord.CamelizedDiscordMessage | undefined> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return undefined;
@@ -421,117 +422,83 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		const message = await this.bot.rest.sendMessage(channelId, content).catch(() => {
-			this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+		return await this.client.bot.rest.sendMessage(channelId, content).catch(() => {
+			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
+
 			return undefined;
 		});
-
-		return message;
 	}
 
-	registerDocument(compositeId: string, promptDocument: DataType): void {
-		this.documents.set(compositeId, promptDocument);
+	registerDocument(promptDocument: Generic["model"]): void {
+		this.documents.set(promptDocument.partialId, promptDocument);
 	}
 
-	unregisterDocument(compositeId: string): void {
-		this.documents.delete(compositeId);
+	unregisterDocument(promptDocument: Generic["model"]): void {
+		this.documents.delete(promptDocument.partialId);
 	}
 
-	registerPrompt(
-		prompt: Discord.CamelizedDiscordMessage,
-		userId: bigint,
-		compositeId: string,
-		promptDocument: DataType,
-	): void {
-		this.documentByPromptId.set(prompt.id, promptDocument);
-		this.userIdByPromptId.set(prompt.id, userId);
-		this.promptByCompositeId.set(compositeId, prompt);
+	registerPrompt(prompt: Discord.CamelizedDiscordMessage, userId: bigint, promptDocument: Generic["model"]): void {
+		this.promptByPartialId.set(promptDocument.partialId, prompt);
+
+		this.#documentByPromptId.set(prompt.id, promptDocument);
+		this.#userIdByPromptId.set(prompt.id, userId);
 	}
 
-	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, compositeId: string): void {
-		this.documentByPromptId.delete(prompt.id);
-		this.userIdByPromptId.delete(prompt.id);
-		this.promptByCompositeId.delete(compositeId);
+	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, promptDocument: Generic["model"]): void {
+		this.promptByPartialId.delete(promptDocument.partialId);
+
+		this.#documentByPromptId.delete(prompt.id);
+		this.#userIdByPromptId.delete(prompt.id);
 	}
 
-	registerHandler(compositeId: string): void {
-		this.handlerByCompositeId.set(compositeId, async (interaction) => {
-			const customId = interaction.data?.customId;
-			if (customId === undefined) {
-				return;
-			}
-
-			const [_, compositeId, ...metadata] = decodeId<InteractionData>(customId);
-
-			const updatedDocument = await this.handleInteraction(interaction, [compositeId, ...metadata] as InteractionData);
+	registerHandler(promptDocument: Generic["model"]): void {
+		this.#handlerByPartialId.set(promptDocument.partialId, async (interaction) => {
+			const updatedDocument = await this.handlePromptInteraction(interaction);
 			if (updatedDocument === undefined) {
 				return;
 			}
 
-			const prompt = this.promptByCompositeId.get(compositeId);
+			const prompt = this.promptByPartialId.get(interaction.metadata[1]);
 			if (prompt === undefined) {
 				return;
 			}
 
 			if (updatedDocument === null) {
-				this.unregisterDocument(compositeId);
-				this.unregisterPrompt(prompt, compositeId);
-				this.unregisterHandler(compositeId);
+				this.unregisterDocument(promptDocument);
+				this.unregisterPrompt(prompt, promptDocument);
+				this.unregisterHandler(promptDocument);
 			} else {
-				this.documentByPromptId.set(prompt.id, updatedDocument);
+				this.#documentByPromptId.set(prompt.id, updatedDocument);
 			}
 
-			this.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
-				this.client.log.warn("Failed to delete prompt.");
-			});
+			this.client.bot.rest
+				.deleteMessage(prompt.channelId, prompt.id)
+				.catch(() => this.log.warn("Failed to delete prompt."));
 		});
 	}
 
-	unregisterHandler(compositeId: string): void {
-		this.handlerByCompositeId.delete(compositeId);
+	unregisterHandler(promptDocument: Generic["model"]): void {
+		this.#handlerByPartialId.delete(promptDocument.partialId);
 	}
 
-	abstract handleInteraction(
-		interaction: Discord.Interaction,
-		data: InteractionData,
-	): Promise<DataType | undefined | null>;
+	abstract handlePromptInteraction(
+		interaction: Logos.Interaction<Generic["metadata"]>,
+	): Promise<Generic["model"] | undefined | null>;
 
-	protected async handleDelete(compositeId: string): Promise<void> {
-		const session = this.client.database.openSession();
+	async handleDelete(promptDocument: Generic["model"]): Promise<void> {
+		await promptDocument.delete(this.client);
 
-		switch (this.type) {
-			case "reports": {
-				await session.delete(`reports/${compositeId}`);
-				break;
-			}
-			case "resources": {
-				await session.delete(`resources/${compositeId}`);
-				break;
-			}
-			case "suggestions": {
-				await session.delete(`suggestions/${compositeId}`);
-				break;
-			}
-			case "tickets": {
-				await session.delete(`tickets/${compositeId}`);
-				break;
-			}
-		}
-
-		await session.saveChanges();
-		session.dispose();
-
-		const prompt = this.promptByCompositeId.get(compositeId);
+		const prompt = this.promptByPartialId.get(promptDocument.partialId);
 		if (prompt !== undefined) {
-			this.bot.rest
+			this.client.bot.rest
 				.deleteMessage(prompt.channelId, prompt.id)
-				.catch(() => this.client.log.warn("Failed to delete prompt after deleting document."));
-			this.unregisterPrompt(prompt, compositeId);
+				.catch(() => this.log.warn("Failed to delete prompt after deleting document."));
+			this.unregisterPrompt(prompt, promptDocument);
 		}
 
-		this.unregisterDocument(compositeId);
-		this.unregisterHandler(compositeId);
+		this.unregisterDocument(promptDocument);
+		this.unregisterHandler(promptDocument);
 	}
 }
 
-export { PromptService, Configurations };
+export { PromptService };

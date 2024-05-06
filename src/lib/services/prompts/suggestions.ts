@@ -1,0 +1,129 @@
+import { Client } from "logos/client";
+import { Suggestion } from "logos/database/suggestion";
+import { User } from "logos/database/user";
+import { PromptService } from "logos/services/prompts/service";
+
+class SuggestionPromptService extends PromptService<{
+	type: "suggestions";
+	model: Suggestion;
+	metadata: [partialId: string, isResolve: string];
+}> {
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(
+			client,
+			{ identifier: "SuggestionPromptService", guildId },
+			{ type: "suggestions", deleteMode: "delete" },
+		);
+	}
+
+	getAllDocuments(): Map<string, Suggestion> {
+		const suggestions = new Map<string, Suggestion>();
+
+		for (const [partialId, suggestionDocument] of this.client.documents.suggestions) {
+			if (suggestionDocument.guildId !== this.guildIdString) {
+				continue;
+			}
+
+			suggestions.set(partialId, suggestionDocument);
+		}
+
+		return suggestions;
+	}
+
+	async getUserDocument(suggestionDocument: Suggestion): Promise<User> {
+		return await User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
+	}
+
+	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
+		const strings = constants.contexts.promptControls({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+		return {
+			embeds: [
+				{
+					description: `*${suggestionDocument.formData.suggestion}*`,
+					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
+					footer: {
+						text: this.client.diagnostics.user(user),
+						iconUrl: PromptService.encodePartialIdInUserAvatar({
+							user,
+							partialId: suggestionDocument.partialId,
+						}),
+					},
+				},
+			],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: suggestionDocument.isResolved
+						? [
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Success,
+									label: strings.markUnresolved,
+									customId: this.magicButton.encodeId([suggestionDocument.partialId, `${false}`]),
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Danger,
+									label: strings.remove,
+									customId: this.removeButton.encodeId([suggestionDocument.partialId]),
+								},
+						  ]
+						: [
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Primary,
+									label: strings.markResolved,
+									customId: this.magicButton.encodeId([suggestionDocument.partialId, `${true}`]),
+								},
+						  ],
+				},
+			],
+		};
+	}
+
+	async handlePromptInteraction(
+		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
+	): Promise<Suggestion | null | undefined> {
+		const suggestionDocument = this.documents.get(interaction.metadata[0]);
+		if (suggestionDocument === undefined) {
+			return undefined;
+		}
+
+		const isResolved = interaction.metadata[1] === "true";
+
+		if (isResolved && suggestionDocument.isResolved) {
+			const strings = constants.contexts.alreadyMarkedResolved({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
+			});
+			return;
+		}
+
+		if (!(isResolved || suggestionDocument.isResolved)) {
+			const strings = constants.contexts.alreadyMarkedUnresolved({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
+			});
+			return;
+		}
+
+		await suggestionDocument.update(this.client, () => {
+			suggestionDocument.isResolved = isResolved;
+		});
+
+		return suggestionDocument;
+	}
+}
+
+export { SuggestionPromptService };

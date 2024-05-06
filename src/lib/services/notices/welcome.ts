@@ -1,0 +1,44 @@
+import { mention } from "logos:core/formatting";
+import { Client } from "logos/client";
+import { HashableMessageContents, NoticeService } from "logos/services/notices/service";
+
+class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
+	constructor(client: Client, { guildId }: { guildId: bigint }) {
+		super(client, { identifier: "WelcomeNoticeService", guildId }, { type: "welcome" });
+	}
+
+	generateNotice(): HashableMessageContents | undefined {
+		const strings = constants.contexts.welcomeNotice({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+		return {
+			embeds: [
+				{
+					title: strings.title({ server_name: this.guild.name }),
+					description: strings.description.toEnter({
+						information_channel_mention: mention(this.configuration.ruleChannelId, { type: "channel" }),
+					}),
+					image: { url: constants.gifs.followRules },
+					color: constants.colours.orange,
+				},
+			],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.Button,
+							style: Discord.ButtonStyles.Secondary,
+							label: strings.description.acceptedRules,
+							customId: constants.components.acceptedRules,
+							emoji: { name: constants.emojis.understood },
+						},
+					],
+				},
+			],
+		};
+	}
+}
+
+export { WelcomeNoticeService };

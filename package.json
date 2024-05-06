@@ -1,76 +1,75 @@
 {
-  "$schema": "https://json.schemastore.org/package",
-  "name": "logos",
-  "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
-  "license": "ISC",
-  "version": "3.42.1",
-  "type": "module",
-  "keywords": [
-    "discord",
-    "bot",
-    "definitions",
-    "translation",
-    "language-recognition",
-    "games",
-    "guides",
-    "language",
-    "linguistics",
-    "dictionaries",
-    "translators",
-    "detectors",
-    "localised"
-  ],
-  "homepage": "https://logos.wordcollector.co.uk",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/vxern/logos"
-  },
-  "bugs": {
-    "url": "https://github.com/vxern/logos",
-    "email": "vxern@wordcollector.co.uk"
-  },
-  "contributors": [
-    {
-      "name": "Dorian \"vxern\" Oszczęda",
-      "email": "vxern@wordcollector.co.uk",
-      "url": "https://github.com/vxern"
-    }
-  ],
-  "scripts": {
-    "get": "npm install && npm audit fix",
-    "provision": "tsx src/scripts/provision-sentence-pairs.ts",
-    "setup": "npm run get && npm run provision",
-    "#": "",
-    "dev": "pm2 start ecosystem.config.cjs --instances 1 --no-autorestart --no-daemon",
-    "format": "biome check src/ --apply-unsafe --organize-imports-enabled true",
-    "##": "",
-    "start": "pm2 start ecosystem.config.cjs --instances 1 --exp-backoff-restart-delay=500"
-  },
-  "dependencies": {
-    "@discordeno/bot": "^19.0.0-next",
-    "@sapphire/snowflake": "^3.5.1",
-    "cldpre": "^2.9.0",
-    "dexonline-scraper": "^0.1.0",
-    "dotenv": "^16.3.1",
-    "event-stream": "^4.0.1",
-    "fancy-log": "^2.0.0",
-    "fastest-levenshtein": "^1.0.16",
-    "ioredis": "^5.3.2",
-    "lavaclient": "^4.1.1",
-    "object-hash": "^3.0.0",
-    "parse-wiktionary": "^1.0.0",
-    "ravendb": "^5.4.1",
-    "tinyld": "^1.3.4",
-    "youtube-sr": "^4.3.4"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "1.1.2",
-    "@types/event-stream": "^4.0.5",
-    "@types/fancy-log": "^2.0.0",
-    "@types/node": "^20.6.0",
-    "@types/object-hash": "^3.0.4",
-    "pm2": "^5.3.0",
-    "tsx": "^3.12.8",
-    "typescript": "^5.2.2"
-  }
+	"$schema": "https://json.schemastore.org/package",
+	"name": "logos",
+	"description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
+	"license": "Apache-2.0",
+	"version": "3.42.1",
+	"type": "module",
+	"keywords": [
+		"discord",
+		"bot",
+		"definitions",
+		"translation",
+		"language-recognition",
+		"games",
+		"guides",
+		"language",
+		"linguistics",
+		"dictionaries",
+		"translators",
+		"detectors",
+		"localised"
+	],
+	"homepage": "https://logos.wordcollector.co.uk",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vxern/logos"
+	},
+	"bugs": {
+		"url": "https://github.com/vxern/logos",
+		"email": "vxern@wordcollector.co.uk"
+	},
+	"contributors": [
+		{
+			"name": "Dorian \"vxern\" Oszczęda",
+			"email": "vxern@wordcollector.co.uk",
+			"url": "https://github.com/vxern"
+		}
+	],
+	"scripts": {
+		"configure:guild": "bun run ./src/scripts/configure/guild.ts",
+		"load:sentence-pairs": "bun run ./src/scripts/load/sentence-pairs.ts",
+		"setup": "bun load:sentence-pairs",
+		"lint": "biome check --apply-unsafe --organize-imports-enabled true ./src/ && biome check --apply-unsafe --organize-imports-enabled true ./test/",
+		"start": "bun run ./src/index.ts"
+	},
+	"dependencies": {
+		"@discordeno/bot": "19.0.0-next.d81b28a",
+		"cldpre": "^2.9.0",
+		"dexonline-scraper": "^0.2.1",
+		"dotenv": "^16.4.1",
+		"event-stream": "^4.0.1",
+		"fastest-levenshtein": "^1.0.16",
+		"ioredis": "^5.3.2",
+		"mongodb": "^6.5.0",
+		"nano": "^10.1.3",
+		"nanoid": "^5.0.5",
+		"object-hash": "^3.0.0",
+		"parse-wiktionary": "^1.0.0",
+		"ravendb": "^5.4.2",
+		"rethinkdb-ts": "^2.6.0",
+		"shoukaku": "^4.0.1",
+		"tinyld": "^1.3.4",
+		"winston": "^3.13.0",
+		"youtube-sr": "^4.3.10"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "1.6.1",
+		"@types/bun": "^1.0.8",
+		"@types/chai": "^4.3.12",
+		"@types/event-stream": "^4.0.5",
+		"@types/object-hash": "^3.0.6",
+		"chai": "^5.1.0",
+		"typescript": "^5.4.3"
+	}
 }

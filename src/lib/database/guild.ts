@@ -1,288 +1,690 @@
-import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "../../constants/languages";
-import time from "../../constants/time";
+import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
+import { TimeUnit } from "logos:constants/time";
+import { Client } from "logos/client";
+import { IdentifierData, Model } from "logos/database/model";
+import { DatabaseStore } from "logos/stores/database";
 
 /** @since v3.0.0 */
-interface Guild {
-	id: string;
+class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
+	get guildId(): string {
+		return this.idParts[0];
+	}
 
-	/** This guild's ID. */
-	guildId: string;
-
+	readonly createdAt: number;
 	/**
 	 * Whether the guild is native to Logos.
 	 *
 	 * Includes Learn Romanian and Learn Armenian.
 	 */
 	isNative: boolean;
+	languages?: GuildLanguages;
+	features?: GuildFeatures;
 
-	/** @since v3.5.0 */
-	languages?: {
-		localisation: LocalisationLanguage;
-		/** @since v3.8.0 */
-		target?: LearningLanguage;
-		feature: FeatureLanguage;
-	};
+	get localisationLanguage(): LocalisationLanguage {
+		return this.languages?.localisation ?? constants.defaults.LOCALISATION_LANGUAGE;
+	}
 
-	/** The bot's features configured for this guild. */
-	features: {
-		/** Information section of features. */
-		information: Activatable<{
-			/** Features part of the information section. */
-			features: {
-				/** Logging events on the server. */
-				journaling: Activatable<{
-					/** The ID of the channel the events will be logged to. */
-					channelId: string;
-				}>;
+	get targetLanguage(): LocalisationLanguage {
+		return this.languages?.target ?? this.localisationLanguage;
+	}
 
-				/** Informational notices. */
-				notices: Activatable<{
-					features: {
-						information: Activatable<{
-							channelId: string;
-							inviteLink: string;
-						}>;
+	get featureLanguage(): FeatureLanguage {
+		return this.languages?.feature ?? constants.defaults.FEATURE_LANGUAGE;
+	}
 
-						/** @since v3.28.0 */
-						/** Relies on guild.features.language.features.resources.url */
-						resources?: Activatable<{
-							channelId: string;
-						}>;
+	get informationFeatures(): NonNullable<GuildFeatures["information"]>["features"] | undefined {
+		if (!this.features?.information?.enabled) {
+			return undefined;
+		}
 
-						roles: Activatable<{
-							channelId: string;
-						}>;
+		return this.features.information.features;
+	}
 
-						welcome: Activatable<{
-							channelId: string;
-							ruleChannelId: string;
-						}>;
-					};
-				}>;
-			};
-		}>;
+	get journalling(): Enabled<NonNullable<Guild["informationFeatures"]>["journaling"]> | undefined {
+		const informationFeatures = this.informationFeatures;
+		if (!informationFeatures?.journaling?.enabled) {
+			return undefined;
+		}
 
-		/** Language section of features. */
-		language: Activatable<{
-			features: {
-				/** @since v3.3.0 */
-				answers?: Activatable;
+		return informationFeatures.journaling;
+	}
 
-				/** @since v3.4.0 */
-				corrections?: Activatable;
+	get noticeFeatures(): NonNullable<NonNullable<Guild["informationFeatures"]>["notices"]>["features"] | undefined {
+		const informationFeatures = this.informationFeatures;
+		if (!informationFeatures?.notices?.enabled) {
+			return undefined;
+		}
 
-				/** @since v3.1.0 */
-				cefr?: Activatable<CefrConfiguration>;
+		return informationFeatures.notices?.features;
+	}
 
-				game: Activatable;
+	get informationNotice(): Enabled<NonNullable<Guild["noticeFeatures"]>["information"]> | undefined {
+		const noticeFeatures = this.noticeFeatures;
+		if (!noticeFeatures?.information?.enabled) {
+			return undefined;
+		}
 
-				resources: Activatable<{
-					url: string;
-				}>;
+		return noticeFeatures.information;
+	}
 
-				translate: Activatable;
+	get resourceNotice(): Enabled<NonNullable<Guild["noticeFeatures"]>["resources"]> | undefined {
+		const noticeFeatures = this.noticeFeatures;
+		if (!noticeFeatures?.resources?.enabled) {
+			return undefined;
+		}
 
-				word: Activatable;
+		return noticeFeatures.resources;
+	}
 
-				/** @since v3.8.0 */
-				targetOnly?: Activatable<{
-					channelIds: string[];
-				}>;
+	get roleNotice(): Enabled<NonNullable<Guild["noticeFeatures"]>["roles"]> | undefined {
+		const noticeFeatures = this.noticeFeatures;
+		if (!noticeFeatures?.roles?.enabled) {
+			return undefined;
+		}
 
-				/** @since v3.10.0 */
-				roleLanguages?: Activatable<{
-					ids: Record<string, LocalisationLanguage>;
-				}>;
-			};
-		}>;
+		return noticeFeatures.roles;
+	}
 
-		/** Moderation section of features. */
-		moderation: Activatable<{
-			/** Features part of the moderation section. */
-			features: {
-				alerts: Activatable<{
-					channelId: string;
-				}>;
+	get welcomeNotice(): Enabled<NonNullable<Guild["noticeFeatures"]>["welcome"]> | undefined {
+		const noticeFeatures = this.noticeFeatures;
+		if (!noticeFeatures?.welcome?.enabled) {
+			return undefined;
+		}
 
-				policy: Activatable;
+		return noticeFeatures.welcome;
+	}
 
-				rules: Activatable;
+	get languageFeatures(): NonNullable<GuildFeatures["language"]>["features"] | undefined {
+		if (!this.features?.language?.enabled) {
+			return undefined;
+		}
 
-				/** Message purging. */
-				purging: Activatable<{
-					journaling: boolean;
-				}>;
+		return this.features.language.features;
+	}
 
-				/** @since v3.2.0 */
-				slowmode?: Activatable<{
-					journaling: boolean;
-				}>;
+	get answers(): Enabled<NonNullable<Guild["languageFeatures"]>["answers"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.answers?.enabled) {
+			return undefined;
+		}
 
-				timeouts: Activatable<{
-					journaling: boolean;
-				}>;
+		return languageFeatures.answers;
+	}
 
-				/** Warning and pardoning users. */
-				warns: Activatable<{
-					journaling: boolean;
+	get corrections(): Enabled<NonNullable<Guild["languageFeatures"]>["corrections"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.corrections?.enabled) {
+			return undefined;
+		}
 
-					/**
-					 * Length of time after which warnings expire.
-					 *
-					 * If not set, warnings will never expire.
-					 */
-					expiration?: TimeStruct;
+		return languageFeatures.corrections;
+	}
 
-					/** The maximum number of warnings a given user can receive before being timed out. */
-					limit: number;
+	get cefr(): Enabled<NonNullable<Guild["languageFeatures"]>["cefr"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.cefr?.enabled) {
+			return undefined;
+		}
 
-					/**
-					 * Specifies auto-timeouts on limit being crossed.
-					 *
-					 * Implies `limit` being set to a specific value.
-					 */
-					autoTimeout: Activatable<{
-						duration?: TimeStruct;
-					}>;
-				}>;
+		return languageFeatures.cefr;
+	}
 
-				/** User reports. */
-				reports: Activatable<{
-					channelId: string;
-					journaling: boolean;
-					rateLimit?: RateLimit;
-					/** @since v3.28.0 */
-					management?: {
-						roles?: string[];
-						users?: string[];
-					};
-				}>;
+	get game(): Enabled<NonNullable<Guild["languageFeatures"]>["game"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.game?.enabled) {
+			return undefined;
+		}
 
-				/** User verification. */
-				/** Relies on guild.features.server.tickets.categoryId */
-				verification: Activatable<{
-					channelId: string;
+		return languageFeatures.game;
+	}
 
-					journaling: boolean;
+	get resources(): Enabled<NonNullable<Guild["languageFeatures"]>["resources"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.resources?.enabled) {
+			return undefined;
+		}
 
-					/** @since v3.35.0 */
-					management?: {
-						roles?: string[];
-						users?: string[];
-					};
+		return languageFeatures.resources;
+	}
 
-					/** Users that can partake in accepting / rejecting verification answers. */
-					voting: {
-						roles: string[];
-						users?: string[];
-						verdict: {
-							acceptance: VerificationVerdictRequirement;
-							rejection: VerificationVerdictRequirement;
-						};
-					};
+	get translate(): Enabled<NonNullable<Guild["languageFeatures"]>["translate"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.translate?.enabled) {
+			return undefined;
+		}
 
-					activation: VerificationActivationRule[];
-				}>;
-			};
-		}>;
+		return languageFeatures.translate;
+	}
 
-		/** Server section of features. */
-		server: Activatable<{
-			features: {
-				/** Automatic channel creation/deletion. */
-				dynamicVoiceChannels: Activatable<{
-					channels: DynamicVoiceChannel[];
-				}>;
+	get word(): Enabled<NonNullable<Guild["languageFeatures"]>["word"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.word?.enabled) {
+			return undefined;
+		}
 
-				entry: Activatable;
+		return languageFeatures.word;
+	}
 
-				/** @since v3.7.0 */
-				roleIndicators?: Activatable<{
-					limit: number;
-					roles: RoleWithIndicator[];
-				}>;
+	get targetOnly(): Enabled<NonNullable<Guild["languageFeatures"]>["targetOnly"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.targetOnly?.enabled) {
+			return undefined;
+		}
 
-				/** User suggestions for the server. */
-				suggestions: Activatable<{
-					channelId: string;
-					journaling: boolean;
-					rateLimit?: RateLimit;
-					/** @since v3.28.0 */
-					management?: {
-						roles?: string[];
-						users?: string[];
-					};
-				}>;
+		return languageFeatures.targetOnly;
+	}
 
-				/** @since v3.28.0 */
-				resources?: Activatable<{
-					channelId: string;
-					journaling: boolean;
-					rateLimit?: RateLimit;
-					management?: {
-						roles?: string[];
-						users?: string[];
-					};
-				}>;
+	get roleLanguages(): Enabled<NonNullable<Guild["languageFeatures"]>["roleLanguages"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.roleLanguages?.enabled) {
+			return undefined;
+		}
 
-				/** @since v3.29.0 */
-				tickets?: Activatable<{
-					channelId: string;
-					categoryId: string;
-					journaling: boolean;
-					rateLimit?: RateLimit;
-					limit?: number;
-					management?: {
-						roles?: string[];
-						users?: string[];
-					};
-				}>;
-			};
-		}>;
+		return languageFeatures.roleLanguages;
+	}
 
-		/** Social section of features. */
-		social: Activatable<{
-			features: {
-				music: Activatable<{
-					implicitVolume: number; // Increments of 5, 50 - 100.
-				}>;
+	get moderationFeatures(): NonNullable<GuildFeatures["moderation"]>["features"] | undefined {
+		if (!this.features?.moderation?.enabled) {
+			return undefined;
+		}
 
-				praises: Activatable<{
-					journaling: boolean;
-					rateLimit?: RateLimit;
-				}>;
+		return this.features.moderation.features;
+	}
 
-				profile: Activatable;
-			};
-		}>;
-	};
+	get alerts(): Enabled<NonNullable<Guild["moderationFeatures"]>["alerts"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.alerts?.enabled) {
+			return undefined;
+		}
 
-	/** A timestamp of when Logos began to manage this guild. */
-	createdAt: number;
+		return moderationFeatures.alerts;
+	}
+
+	get policy(): Enabled<NonNullable<Guild["moderationFeatures"]>["policy"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.policy?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.policy;
+	}
+
+	get rules(): Enabled<NonNullable<Guild["moderationFeatures"]>["rules"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.rules?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.rules;
+	}
+
+	get purging(): Enabled<NonNullable<Guild["moderationFeatures"]>["purging"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.purging?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.purging;
+	}
+
+	get slowmode(): Enabled<NonNullable<Guild["moderationFeatures"]>["slowmode"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.slowmode?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.slowmode;
+	}
+
+	get timeouts(): Enabled<NonNullable<Guild["moderationFeatures"]>["timeouts"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.timeouts?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.timeouts;
+	}
+
+	get warns(): Enabled<NonNullable<Guild["moderationFeatures"]>["warns"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.warns?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.warns;
+	}
+
+	get reports(): Enabled<NonNullable<Guild["moderationFeatures"]>["reports"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.reports?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.reports;
+	}
+
+	/** Relies on guild.features.server.tickets.categoryId */
+	get verification(): Enabled<NonNullable<Guild["moderationFeatures"]>["verification"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.verification?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.verification;
+	}
+
+	get serverFeatures(): NonNullable<GuildFeatures["server"]>["features"] | undefined {
+		if (!this.features?.server?.enabled) {
+			return undefined;
+		}
+
+		return this.features.server.features;
+	}
+
+	get dynamicVoiceChannels(): Enabled<NonNullable<Guild["serverFeatures"]>["dynamicVoiceChannels"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.dynamicVoiceChannels?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.dynamicVoiceChannels;
+	}
+
+	get entry(): Enabled<NonNullable<Guild["serverFeatures"]>["entry"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.entry?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.entry;
+	}
+
+	get roleIndicators(): Enabled<NonNullable<Guild["serverFeatures"]>["roleIndicators"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.roleIndicators?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.roleIndicators;
+	}
+
+	get suggestions(): Enabled<NonNullable<Guild["serverFeatures"]>["suggestions"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.suggestions?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.suggestions;
+	}
+
+	get resourceSubmissions(): Enabled<NonNullable<Guild["serverFeatures"]>["resources"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.resources?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.resources;
+	}
+
+	get tickets(): Enabled<NonNullable<Guild["serverFeatures"]>["tickets"]> | undefined {
+		const serverFeatures = this.serverFeatures;
+		if (!serverFeatures?.tickets?.enabled) {
+			return undefined;
+		}
+
+		return serverFeatures.tickets;
+	}
+
+	get socialFeatures(): NonNullable<GuildFeatures["social"]>["features"] | undefined {
+		if (!this.features?.social?.enabled) {
+			return undefined;
+		}
+
+		return this.features.social.features;
+	}
+
+	get music(): Enabled<NonNullable<Guild["socialFeatures"]>["music"]> | undefined {
+		const socialFeatures = this.socialFeatures;
+		if (!socialFeatures?.music?.enabled) {
+			return undefined;
+		}
+
+		return socialFeatures.music;
+	}
+
+	get praises(): Enabled<NonNullable<Guild["socialFeatures"]>["praises"]> | undefined {
+		const socialFeatures = this.socialFeatures;
+		if (!socialFeatures?.praises?.enabled) {
+			return undefined;
+		}
+
+		return socialFeatures.praises;
+	}
+
+	get profile(): Enabled<NonNullable<Guild["socialFeatures"]>["profile"]> | undefined {
+		const socialFeatures = this.socialFeatures;
+		if (!socialFeatures?.profile?.enabled) {
+			return undefined;
+		}
+
+		return socialFeatures.profile;
+	}
+
+	get areEnabled(): Guild["isEnabled"] {
+		return this.isEnabled.bind(this);
+	}
+
+	constructor(
+		database: DatabaseStore,
+		{
+			createdAt,
+			languages,
+			features,
+			isNative,
+			...data
+		}: {
+			createdAt?: number;
+			languages?: GuildLanguages;
+			features?: GuildFeatures;
+			isNative?: boolean;
+		} & IdentifierData<Guild>,
+	) {
+		super(database, data, { collection: "Guilds" });
+
+		this.createdAt = createdAt ?? Date.now();
+		this.languages = languages;
+		this.features = features;
+		this.isNative = isNative ?? false;
+	}
+
+	static async get(client: Client, data: IdentifierData<Guild>): Promise<Guild | undefined> {
+		const partialId = Model.buildPartialId(data);
+		if (client.documents.guilds.has(partialId)) {
+			return client.documents.guilds.get(partialId)!;
+		}
+
+		return await client.database.withSession(async (session) => {
+			return session.get<Guild>(Model.buildId(data, { collection: "Guilds" }));
+		});
+	}
+
+	static async getOrCreate(client: Client, data: IdentifierData<Guild>): Promise<Guild> {
+		const guildDocument = await Guild.get(client, data);
+		if (guildDocument !== undefined) {
+			return guildDocument;
+		}
+
+		return await client.database.withSession(async (session) => {
+			return session.set(new Guild(client.database, data));
+		});
+	}
+
+	isEnabled(feature: keyof Guild) {
+		return this[feature] !== undefined;
+	}
+
+	isTargetLanguageOnly(channelId: string): boolean {
+		return this.targetOnly?.channelIds?.includes(channelId) ?? false;
+	}
 }
 
-type TimeUnit = "second" | "minute" | "hour" | "day" | "week" | "month" | "year";
-type TimeStruct = [number: number, unit: TimeUnit];
+/** @since v3.5.0 */
+interface GuildLanguages {
+	/** @since v3.5.0 */
+	readonly localisation?: LocalisationLanguage;
+	/** @since v3.8.0 */
+	readonly target?: LearningLanguage;
+	/** @since v3.5.0 */
+	readonly feature?: FeatureLanguage;
+}
 
-const durationByTimeUnit = {
-	second: time.second,
-	minute: time.minute,
-	hour: time.hour,
-	day: time.day,
-	week: time.week,
-	month: time.month,
-	year: time.year,
-} satisfies Record<TimeUnit, number>;
+/** The bot's features configured for the guild. */
+/** @since v3.0.0 */
+interface GuildFeatures {
+	/** Information section of features. */
+	information?: Activatable<{
+		/** Features part of the information section. */
+		features: {
+			/** Logging events on the server. */
+			journaling?: Activatable<{
+				/** The ID of the channel the events will be logged to. */
+				channelId: string;
+			}>;
 
-function timeStructToMilliseconds([number, unit]: TimeStruct): number {
-	const duration = durationByTimeUnit[unit];
-	return duration * number;
+			/** Informational notices. */
+			notices?: Activatable<{
+				features: {
+					information?: Activatable<{
+						channelId: string;
+						inviteLink: string;
+					}>;
+
+					/** @since v3.28.0 */
+					/** Relies on guild.features.language.features.resources.url */
+					resources?: Activatable<{
+						channelId: string;
+					}>;
+
+					roles?: Activatable<{
+						channelId: string;
+					}>;
+
+					welcome?: Activatable<{
+						channelId: string;
+						ruleChannelId: string;
+					}>;
+				};
+			}>;
+		};
+	}>;
+
+	/** Language section of features. */
+	language?: Activatable<{
+		features: {
+			/** @since v3.3.0 */
+			answers?: Activatable;
+
+			/** @since v3.4.0 */
+			corrections?: Activatable;
+
+			/** @since v3.1.0 */
+			cefr?: Activatable<CefrConfiguration>;
+
+			game?: Activatable;
+
+			resources?: Activatable<{
+				url: string;
+			}>;
+
+			translate?: Activatable;
+
+			word?: Activatable;
+
+			/** @since v3.8.0 */
+			targetOnly?: Activatable<{
+				channelIds: string[];
+			}>;
+
+			/** @since v3.10.0 */
+			roleLanguages?: Activatable<{
+				ids: Record<string, LocalisationLanguage>;
+			}>;
+		};
+	}>;
+
+	/** Moderation section of features. */
+	moderation?: Activatable<{
+		/** Features part of the moderation section. */
+		features: {
+			alerts?: Activatable<{
+				channelId: string;
+			}>;
+
+			policy?: Activatable;
+
+			rules?: Activatable;
+
+			/** Message purging. */
+			purging?: Activatable<{
+				journaling: boolean;
+			}>;
+
+			/** @since v3.2.0 */
+			slowmode?: Activatable<{
+				journaling: boolean;
+			}>;
+
+			timeouts?: Activatable<{
+				journaling: boolean;
+			}>;
+
+			/** Warning and pardoning users. */
+			warns?: Activatable<{
+				journaling: boolean;
+
+				/**
+				 * Length of time after which warnings expire.
+				 *
+				 * If not set, warnings will never expire.
+				 */
+				expiration?: TimeStruct;
+
+				/** The maximum number of warnings a given user can receive before being timed out. */
+				limit: number;
+
+				/**
+				 * Specifies auto-timeouts on limit being crossed.
+				 *
+				 * Implies `limit` being set to a specific value.
+				 */
+				autoTimeout?: Activatable<{
+					duration?: TimeStruct;
+				}>;
+			}>;
+
+			/** User reports. */
+			reports?: Activatable<{
+				channelId: string;
+				journaling: boolean;
+				rateLimit?: RateLimit;
+				/** @since v3.28.0 */
+				management?: {
+					roles?: string[];
+					users?: string[];
+				};
+			}>;
+
+			/** User verification. */
+			/** Relies on guild.features.server.tickets.categoryId */
+			verification?: Activatable<{
+				channelId: string;
+
+				journaling: boolean;
+
+				/** @since v3.35.0 */
+				management?: {
+					roles?: string[];
+					users?: string[];
+				};
+
+				/** Users that can partake in accepting / rejecting verification answers. */
+				voting: {
+					roles: string[];
+					users?: string[];
+					verdict: {
+						acceptance: VerificationVerdictRequirement;
+						rejection: VerificationVerdictRequirement;
+					};
+				};
+
+				activation: VerificationActivationRule[];
+			}>;
+		};
+	}>;
+
+	/** Server section of features. */
+	server?: Activatable<{
+		features: {
+			/** Automatic channel creation/deletion. */
+			dynamicVoiceChannels?: Activatable<{
+				channels: DynamicVoiceChannel[];
+			}>;
+
+			entry?: Activatable;
+
+			/** @since v3.7.0 */
+			roleIndicators?: Activatable<{
+				limit: number;
+				roles: RoleWithIndicator[];
+			}>;
+
+			/** User suggestions for the server. */
+			suggestions?: Activatable<{
+				channelId: string;
+				journaling: boolean;
+				rateLimit?: RateLimit;
+				/** @since v3.28.0 */
+				management?: {
+					roles?: string[];
+					users?: string[];
+				};
+			}>;
+
+			/** @since v3.28.0 */
+			resources?: Activatable<{
+				channelId: string;
+				journaling: boolean;
+				rateLimit?: RateLimit;
+				management?: {
+					roles?: string[];
+					users?: string[];
+				};
+			}>;
+
+			/** @since v3.29.0 */
+			tickets?: Activatable<{
+				channelId: string;
+				categoryId: string;
+				journaling: boolean;
+				rateLimit?: RateLimit;
+				limit?: number;
+				management?: {
+					roles?: string[];
+					users?: string[];
+				};
+			}>;
+		};
+	}>;
+
+	/** Social section of features. */
+	social?: Activatable<{
+		features: {
+			music?: Activatable<{
+				implicitVolume: number; // Increments of 5, 50 - 100.
+			}>;
+
+			praises?: Activatable<{
+				journaling: boolean;
+				rateLimit?: RateLimit;
+			}>;
+
+			profile?: Activatable;
+		};
+	}>;
+}
+
+type TimeStruct = [quantity: number, unit: TimeUnit];
+
+function timeStructToMilliseconds([quantity, unit]: TimeStruct): number {
+	const duration = constants.time[unit];
+	return duration * quantity;
 }
 
 type Activatable<T extends Record<string, unknown> = Record<string, unknown>> = { enabled: boolean } & (
 	| ({ enabled: false } & Partial<T>)
 	| ({ enabled: true } & T)
 );
+type Enabled<T> = T & { enabled: true };
 
 type RateLimit = {
 	uses: number;
@@ -303,7 +705,7 @@ type CefrLevelExamplesExtended = CefrLevelExamples & {
 };
 type CefrConfiguration<Extended extends boolean = boolean> = {
 	extended: Extended;
-	examples: Activatable<{
+	examples?: Activatable<{
 		levels: true extends Extended ? CefrLevelExamplesExtended : CefrLevelExamples;
 	}>;
 };
@@ -321,16 +723,15 @@ type VerificationVerdictRequirement = {
 } & ({ type: "fraction"; value: number } | { type: "number"; value: number });
 
 type VerificationActivationRuleType = "account-age";
-type VerificationActivationRule =
-	| {
-			type: VerificationActivationRuleType;
-			value: unknown;
-	  } & {
-			type: "account-age";
-			value: TimeStruct;
-	  };
+type VerificationActivationRule = {
+	type: VerificationActivationRuleType;
+	value: unknown;
+} & {
+	type: "account-age";
+	value: TimeStruct;
+};
 
 type RoleWithIndicator = { roleId: string; indicator: string };
 
-export { timeStructToMilliseconds };
-export type { Guild, DynamicVoiceChannel, CefrConfiguration, TimeStruct, RoleWithIndicator };
+export { timeStructToMilliseconds, Guild };
+export type { DynamicVoiceChannel, TimeStruct, RoleWithIndicator, RateLimit };

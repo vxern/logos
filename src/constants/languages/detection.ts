@@ -1,6 +1,4 @@
-import { reverseObject } from "../../lib/utils";
-
-const languages = {
+const languages = Object.freeze({
 	cld: [
 		"Abkhazian",
 		"Afar",
@@ -240,9 +238,10 @@ const languages = {
 		"Volapuk",
 		"Yiddish",
 	],
-} as const;
+} as const);
+type Detector = keyof typeof languages;
 
-const languageToLocale = {
+const languageToLocale = Object.freeze({
 	cld: {
 		Abkhazian: "ab",
 		Afar: "aa",
@@ -482,19 +481,19 @@ const languageToLocale = {
 		Volapuk: "vol",
 		Yiddish: "yid",
 	} as const satisfies Record<TinyLDLanguage, string>,
-} as const;
+} as const);
 
-type CLDLanguage = typeof languages.cld[number];
-type TinyLDLanguage = typeof languages.tinyld[number];
+type CLDLanguage = (typeof languages.cld)[number];
+type TinyLDLanguage = (typeof languages.tinyld)[number];
 type Language = CLDLanguage | TinyLDLanguage;
 
-type CLDLocale = typeof languageToLocale.cld[keyof typeof languageToLocale.cld];
-type TinyLDLocale = typeof languageToLocale.tinyld[keyof typeof languageToLocale.tinyld];
+type CLDLocale = (typeof languageToLocale.cld)[keyof typeof languageToLocale.cld];
+type TinyLDLocale = (typeof languageToLocale.tinyld)[keyof typeof languageToLocale.tinyld];
 type Locale = CLDLocale | TinyLDLocale;
 
 const localeToLanguage = {
-	cld: reverseObject(languageToLocale.cld),
-	tinyld: reverseObject(languageToLocale.tinyld),
+	cld: Object.mirror(languageToLocale.cld),
+	tinyld: Object.mirror(languageToLocale.tinyld),
 };
 
 function isCLDLocale(locale: string): locale is CLDLocale {
@@ -514,4 +513,4 @@ function getTinyLDLanguageByLocale(locale: TinyLDLocale): TinyLDLanguage {
 }
 
 export { getTinyLDLanguageByLocale, isTinyLDLocale, isCLDLocale, getCLDLanguageByLocale };
-export type { Language, Locale, TinyLDLanguage, TinyLDLocale, CLDLanguage, CLDLocale };
+export type { Detector, Language, Locale, TinyLDLanguage, TinyLDLocale, CLDLanguage, CLDLocale };

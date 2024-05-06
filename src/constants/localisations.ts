@@ -1,7 +1,47 @@
-import { PartOfSpeech } from "../lib/commands/language/dictionaries/part-of-speech";
-import { Language } from "./languages";
+import { Language, LocalisationLanguage } from "logos:constants/languages";
+import armenian from "logos:constants/transformers/armenian";
+import danish from "logos:constants/transformers/danish";
+import dutch from "logos:constants/transformers/dutch";
+import english from "logos:constants/transformers/english";
+import finnish from "logos:constants/transformers/finnish";
+import french from "logos:constants/transformers/french";
+import german from "logos:constants/transformers/german";
+import greek from "logos:constants/transformers/greek";
+import hungarian from "logos:constants/transformers/hungarian";
+import norwegian from "logos:constants/transformers/norwegian";
+import polish from "logos:constants/transformers/polish";
+import romanian from "logos:constants/transformers/romanian";
+import russian from "logos:constants/transformers/russian";
+import silesian from "logos:constants/transformers/silesian";
+import spanish from "logos:constants/transformers/spanish";
+import swedish from "logos:constants/transformers/swedish";
+import turkish from "logos:constants/transformers/turkish";
 
-export default {
+type TransformerType = "pluralise";
+type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;
+
+const localisations = Object.freeze({
+	transformers: {
+		"Armenian/Western": armenian,
+		"Armenian/Eastern": armenian,
+		Danish: danish,
+		Dutch: dutch,
+		"English/American": english,
+		"English/British": english,
+		Finnish: finnish,
+		French: french,
+		German: german,
+		Greek: greek,
+		Hungarian: hungarian,
+		"Norwegian/Bokmål": norwegian,
+		Polish: polish,
+		Romanian: romanian,
+		Russian: russian,
+		Silesian: silesian,
+		Spanish: spanish,
+		Swedish: swedish,
+		Turkish: turkish,
+	} satisfies Record<LocalisationLanguage, Record<TransformerType, Transformer>>,
 	languages: {
 		Abkhazian: "languages.abkhazian",
 		Afar: "languages.afar",
@@ -196,30 +236,8 @@ export default {
 		Yoruba: "languages.yoruba",
 		Zhuang: "languages.zhuang",
 		Zulu: "languages.zulu",
-	} as const satisfies Record<Language, string>,
-	partsOfSpeech: {
-		noun: "words.noun",
-		verb: "words.verb",
-		adjective: "words.adjective",
-		adverb: "words.adverb",
-		adposition: "words.adposition",
-		article: "words.article",
-		"proper-noun": "words.properNoun",
-		letter: "words.letter",
-		character: "words.character",
-		phrase: "words.phrase",
-		idiom: "words.idiom",
-		symbol: "words.symbol",
-		syllable: "words.syllable",
-		numeral: "words.numeral",
-		initialism: "words.initialism",
-		particle: "words.particle",
-		punctuation: "words.punctuation",
-		affix: "words.affix",
-		pronoun: "words.pronoun",
-		determiner: "words.determiner",
-		conjunction: "words.conjunction",
-		interjection: "words.interjection",
-		unknown: "words.unknown",
-	} as const satisfies Record<PartOfSpeech, string>,
-};
+	} satisfies Record<Language, string>,
+} as const);
+
+export default localisations;
+export type { Transformer, TransformerType };

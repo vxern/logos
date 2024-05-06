@@ -1,8 +1,18 @@
-import apache from "./licences/apache";
-import bsd from "./licences/bsd";
-import mit from "./licences/mit";
+import apache from "logos:constants/licences/apache";
+import bsd from "logos:constants/licences/bsd";
+import mit from "logos:constants/licences/mit";
 
-const licences = {
+interface DictionaryLicence {
+	readonly name: string;
+	readonly link: string;
+	readonly faviconLink?: string;
+	readonly notices: {
+		readonly licence: string;
+		readonly copyright?: string;
+	};
+}
+
+const licences = Object.freeze({
 	dictionaries: {
 		dexonline: {
 			name: "dexonline.ro",
@@ -50,31 +60,39 @@ const licences = {
 					"You may cache and thus store API Data on your system for up to 24 hours, after which such cached API Data must be purged. Subject to that exception, you will not copy, store, archive, distribute to any third party (other than to End Users as contemplated in this Agreement) any API Data, any metadata or any Link. You agree that any cached API Data will be used by you only for the purpose of populating the Developer Application.",
 			},
 		},
-	},
+	} satisfies Record<string, DictionaryLicence>,
 	software: {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
-		"@sapphire/snowflake": mit("Copyright (c) 2020 The Sapphire Community and its contributors"),
-		cldpre: apache("Copyright [yyyy] [name of copyright owner]"),
+		cldpre: apache("Copyright (c) Authors of cldpre"),
 		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
 		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
 		"event-stream": mit("Copyright (c) 2011 Dominic Tarr"),
-		"fancy-log": mit(
-			"Copyright (c) 2014, 2015, 2018, 2021 Blaine Bublitz <blaine.bublitz@gmail.com> and Eric Schoffstall <yo@contra.io>",
-		),
 		"fastest-levenshtein": mit("Copyright (c) 2020 Kasper Unn Weihe"),
 		ioredis: mit("Copyright (c) 2015-2022 Zihua Li"),
-		lavaclient: apache("Copyright 2023 Dimensional Fun & Contributors"),
+		nano: apache("Copyright [2016-2018] The Apache Software Foundation"),
+		nanoid: mit("Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>"),
 		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
 		"parse-wiktionary": mit(
 			"Copyright (c) 2019 Suyash Behera <Suyash.behera458@gmail.com> 2022 Onsa <csinjan@gmail.com>",
 		),
+		"rethinkdb-ts": apache("Copyright (c) Authors of rethinkdb-ts"),
+		shoukaku: mit("Copyright (c) 2023 Deivu (Saya)"),
 		ravendb: mit("Copyright (c) 2017 Hibernating Rhinos LTD"),
 		tinyld: mit("Copyright (c) 2021 Komodo"),
+		winston: mit("Copyright (c) 2010 Charlie Robbins"),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
-};
+} as const);
+type Dictionary = keyof (typeof licences)["dictionaries"];
 
-type DictionaryLicence = typeof licences.dictionaries[keyof typeof licences.dictionaries];
+function isValidDictionary(dictionary: string): dictionary is Dictionary {
+	return dictionary in licences.dictionaries;
+}
+
+function getDictionaryLicenceByDictionary(dictionary: Dictionary): DictionaryLicence {
+	return licences.dictionaries[dictionary];
+}
 
 export default licences;
+export { isValidDictionary, getDictionaryLicenceByDictionary };
 export type { DictionaryLicence };

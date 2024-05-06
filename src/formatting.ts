@@ -1,58 +1,80 @@
-import constants from "./constants/constants";
+import {
+	MentionType,
+	TimestampFormat,
+	getSigilByMentionType,
+	getSigilByTimestampFormat,
+} from "logos:constants/formatting";
 
 /**
  * Capitalises the first letter of the given text.
  *
- * @param target - String of text to format.
+ * @param string - String of text to format.
  * @returns The formatted string of text.
  */
-function capitalise(target: string): string {
-	const [first, ...rest] = target;
+function capitalise(string: string): string {
+	const [first, ...rest] = string;
 	if (first === undefined) {
-		return target;
+		return string;
 	}
 
 	return first.toUpperCase() + rest.join("");
 }
 
 /**
- * Modifies a string of text to appear within Discord as an embedded code block.
+ * Makes the first letter of the given text lowercase, opposite of capitalising.
  *
- * @param target - String of text to format.
+ * @param string - String of text to format.
  * @returns The formatted string of text.
  */
-function code(target: string): string {
-	return `\`${target}\``;
+function decapitalise(string: string): string {
+	const [first, ...rest] = string;
+	if (first === undefined) {
+		return string;
+	}
+
+	return first.toLowerCase() + rest.join("");
+}
+
+/**
+ * Modifies a string of text to appear within Discord as an embedded code block.
+ *
+ * @param string - String of text to format.
+ * @returns The formatted string of text.
+ */
+function code(string: string): string {
+	if (string.length === 0) {
+		throw "ArgumentError: The string cannot be empty.";
+	}
+
+	return `\`${string}\``;
 }
 
 /**
  * Modifies a string of text to appear within Discord as a multi-line code block
  * which expands to fill up entire rows and columns within a text box.
  *
- * @param target - String of text to format.
+ * @param string - String of text to format.
  */
-function codeMultiline(target: string): string {
-	return `\`\`\`${target}\`\`\``;
+function codeMultiline(string: string): string {
+	if (string.length === 0) {
+		throw "ArgumentError: The string cannot be empty.";
+	}
+
+	return `\`\`\`${string}\`\`\``;
 }
 
 /**
- * Taking a list of items, puts them in a list format.
+ * Taking a list of items, formats them as a Discord list.
  *
  * @param items - Items in the list.
  * @returns The formatted string of text.
  */
 function list(items: string[]): string {
-	return items.map((item) => `${constants.symbols.bullet} ${item}`).join("\n");
-}
+	if (items.length === 0) {
+		throw "ArgumentError: The array cannot be empty.";
+	}
 
-enum TimestampFormat {
-	ShortTime = "t",
-	LongTime = "T",
-	ShortDate = "d",
-	LongDate = "D",
-	ShortDateTime = "f",
-	LongDateTime = "F",
-	Relative = "R",
+	return items.map((item) => `${constants.special.bullet} ${item}`).join("\n");
 }
 
 /**
@@ -62,15 +84,10 @@ enum TimestampFormat {
  * @param format - The format to use for displaying the timestamp.
  * @returns The formatted, human-readable time expression.
  */
-function timestamp(timestamp: number, format = TimestampFormat.Relative): string {
-	return `<t:${Math.floor(timestamp / 1000)}:${format}>`;
-}
-
-/** Defines the type of Discord mention. */
-enum MentionTypes {
-	Channel = "#",
-	Role = "@&",
-	User = "@",
+function timestamp(timestamp: number, { format }: { format: TimestampFormat }): string {
+	const timestampSeconds = Math.floor(timestamp / 1000);
+	const sigil = getSigilByTimestampFormat(format);
+	return `<t:${timestampSeconds}:${sigil}>`;
 }
 
 /**
@@ -80,8 +97,9 @@ enum MentionTypes {
  * @param type - What the mention mentions.
  * @returns The formatted string of text.
  */
-function mention(id: bigint | string, type: MentionTypes): string {
-	return `<${type}${id}>`;
+function mention(id: bigint | string, { type }: { type: MentionType }): string {
+	const sigil = getSigilByMentionType(type);
+	return `<${sigil}${id}>`;
 }
 
 /**
@@ -92,22 +110,24 @@ function mention(id: bigint | string, type: MentionTypes): string {
  * @returns The trimmed string.
  */
 function trim(string: string, length: number): string {
+	// If the string does not need to be trimmed, return.
 	if (string.length <= length) {
 		return string;
 	}
 
+	// If the string does not have any whitespacing, make the string trail off.
 	if (!string.includes(" ")) {
-		return string.slice(0, Math.max(length - constants.symbols.strings.trail.length)) + constants.symbols.strings.trail;
+		return `${string.slice(0, length).slice(0, -3)}${constants.special.strings.trail}`;
 	}
 
-	const slice = string.slice(0, length);
-	const indexOfLastSpace = slice.lastIndexOf(" ");
-	const gap = slice.length - (indexOfLastSpace + 1);
+	// Keep trying to make space for the continuation indicator until successful.
+	let trimmed = string.slice(0, length);
+	while (length - trimmed.length < constants.special.strings.continued.length + 1) {
+		const indexOfLastSpace = trimmed.lastIndexOf(" ");
+		trimmed = trimmed.slice(0, indexOfLastSpace).trim();
+	}
 
-	return (
-		slice.slice(0, slice.length - Math.max(gap, constants.symbols.strings.continued.length)) +
-		constants.symbols.strings.continued
-	);
+	return `${trimmed} ${constants.special.strings.continued}`;
 }
 
-export { capitalise, code, codeMultiline, list, mention, MentionTypes, timestamp, TimestampFormat, trim };
+export { capitalise, decapitalise, code, codeMultiline, list, mention, timestamp, trim };

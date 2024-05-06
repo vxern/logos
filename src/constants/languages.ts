@@ -3,34 +3,34 @@ import {
 	CLDLocale,
 	Language as DetectionLanguage,
 	Locale as DetectionLocale,
+	Detector,
 	TinyLDLanguage,
 	TinyLDLocale,
 	getCLDLanguageByLocale as getCLDDetectionLanguageByLocale,
 	getTinyLDLanguageByLocale as getTinyLDDetectionLanguageByLocale,
 	isCLDLocale,
 	isTinyLDLocale,
-} from "./languages/detection";
-import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "./languages/feature";
+} from "logos:constants/languages/detection";
+import { Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "logos:constants/languages/feature";
 import {
 	Language as LearningLanguage,
 	getLocaleByLanguage as getLocaleByLearningLanguage,
 	isLanguage as isLearningLanguage,
 	isLocale as isLearningLocale,
-} from "./languages/learning";
+} from "logos:constants/languages/learning";
 import {
 	DiscordLocale,
-	Language as LocalisationLanguage,
 	Locale,
-	getDiscordLanguageByLocale as getDiscordLocalisationLanguageByLocale,
+	Language as LocalisationLanguage,
 	getDiscordLocaleByLanguage as getDiscordLocaleByLocalisationLanguage,
-	getLanguageByLocale as getLocalisationLanguageByLocale,
-	getLocaleByLanguage as getLocaleByLocalisationLanguage,
+	getDiscordLanguageByLocale as getDiscordLocalisationLanguageByLocale,
+	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
+	getLogosLanguageByLocale as getLocalisationLanguageByLocale,
 	isDiscordLanguage as isDiscordLocalisationLanguage,
-	isLanguage as isLocalisationLanguage,
+	isLogosLanguage as isLocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
-	locales,
-} from "./languages/localisation";
+} from "logos:constants/languages/localisation";
 import {
 	DeepLLanguage,
 	DeepLLocale,
@@ -38,72 +38,58 @@ import {
 	GoogleTranslateLocale,
 	Language as TranslationLanguage,
 	Locale as TranslationLocale,
-	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
+	Translator,
 	getDeepLLocaleByLanguage as getDeepLLocaleByTranslationLanguage,
-	getGoogleTranslateLanguageByLocale as getGoogleTranslateTranslationLanguageByLocale,
+	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
 	getGoogleTranslateLocaleByLanguage as getGoogleTranslateLocaleByTranslationLanguage,
+	getGoogleTranslateLanguageByLocale as getGoogleTranslateTranslationLanguageByLocale,
 	isDeepLLocale,
 	isGoogleTranslateLocale,
 	isLanguage as isTranslationLanguage,
 	languages as translationLanguages,
-} from "./languages/translation";
+} from "logos:constants/languages/translation";
 
-const languages = {
+const languages = Object.freeze({
 	languages: {
 		localisation: [
-			...new Set([...localisationLanguages.discord, ...localisationLanguages.logos]),
-		].sort() satisfies LocalisationLanguage[] as LocalisationLanguage[],
+			...new Set<LocalisationLanguage>([...localisationLanguages.discord, ...localisationLanguages.logos]),
+		].sort(),
 		translation: [
-			...new Set([...translationLanguages.deepl, ...translationLanguages.google]),
-		].sort() satisfies TranslationLanguage[] as TranslationLanguage[],
+			...new Set<TranslationLanguage>([...translationLanguages.deepl, ...translationLanguages.google]),
+		].sort(),
 	},
 	locales: {
-		discord: Object.values(localisationLanguageToLocale.discord) satisfies DiscordLocale[] as DiscordLocale[],
+		discord: Object.values(localisationLanguageToLocale.discord) as DiscordLocale[],
 	},
-};
+});
 
-const translationLanguagesByBaseLanguage = languages.languages.translation.reduce<
-	Record<string, TranslationLanguage[]>
->((languages, language) => {
-	const baseLanguage = getBaseLanguage(language);
+const translationLanguagesByBaseLanguage = Object.freeze(
+	languages.languages.translation.reduce<Record<string, TranslationLanguage[]>>((languages, language) => {
+		const baseLanguage = getBaseLanguage(language);
 
-	if (baseLanguage === language) {
+		if (baseLanguage === language) {
+			return languages;
+		}
+
+		if (baseLanguage in languages) {
+			languages[baseLanguage]?.push(language);
+		} else {
+			languages[baseLanguage] = [language];
+		}
+
 		return languages;
-	}
-
-	if (baseLanguage in languages) {
-		languages[baseLanguage]?.push(language);
-	} else {
-		languages[baseLanguage] = [language];
-	}
-
-	return languages;
-}, {});
+	}, {}),
+);
 
 type Language = DetectionLanguage | FeatureLanguage | LearningLanguage | LocalisationLanguage | TranslationLanguage;
+type Base<Language> = Language extends `${infer Base}/${string}` ? Base : Language;
 
-type HasVariants<T> = T extends `${string}/${string}` ? T : never;
-
-function getBaseLanguage(language: string): string {
-	const baseLanguage = language.split("/").at(0);
-	if (baseLanguage === undefined) {
-		throw "StateError: Base language unexpectedly undefined when getting feature language.";
-	}
-
-	return baseLanguage;
+function getBaseLanguage<L extends Language>(language: L): Base<L> {
+	const baseLanguage = language.split("/").at(0)!;
+	return baseLanguage as Base<L>;
 }
 
-function getFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
-	const baseLanguage = getBaseLanguage(language);
-
-	if (isFeatureLanguage(baseLanguage)) {
-		return baseLanguage;
-	}
-
-	return undefined;
-}
-
-function getTranslationLanguage(language: string): TranslationLanguage | undefined {
+function getTranslationLanguage(language: Language): TranslationLanguage | undefined {
 	if (isTranslationLanguage(language)) {
 		return language;
 	}
@@ -138,7 +124,6 @@ export {
 	getLocaleByLearningLanguage,
 	isLearningLanguage,
 	isLearningLocale,
-	getFeatureLanguage,
 	isTranslationLanguage,
 	getDeepLLocaleByTranslationLanguage,
 	getGoogleTranslateLocaleByTranslationLanguage,
@@ -146,22 +131,23 @@ export {
 	getGoogleTranslateTranslationLanguageByLocale,
 	isGoogleTranslateLocale,
 	isDeepLLocale,
+	isFeatureLanguage,
 	getTinyLDDetectionLanguageByLocale,
 	isTinyLDLocale,
 	getCLDDetectionLanguageByLocale,
 	isCLDLocale,
 	getTranslationLanguage,
 	getBaseLanguage,
-	locales,
 };
 export type {
+	Detector,
+	Translator,
 	LearningLanguage,
 	FeatureLanguage,
 	LocalisationLanguage,
 	TranslationLanguage,
 	Language,
 	Locale,
-	HasVariants,
 	GoogleTranslateLanguage,
 	DeepLLanguage,
 	Languages,

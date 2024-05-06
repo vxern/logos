@@ -1,6 +1,4 @@
-import { reverseObject } from "../../lib/utils";
-
-const languages = {
+const languages = Object.freeze({
 	deepl: [
 		"Bulgarian",
 		"CzechoSlovak/Czech",
@@ -172,9 +170,10 @@ const languages = {
 		"Yoruba",
 		"Zulu",
 	],
-} as const;
+} as const);
+type Translator = keyof typeof languages;
 
-const languageToLocale = {
+const languageToLocale = Object.freeze({
 	deepl: {
 		Bulgarian: "BG",
 		"CzechoSlovak/Czech": "CS",
@@ -346,19 +345,19 @@ const languageToLocale = {
 		Yoruba: "yo",
 		Zulu: "zu",
 	} as const satisfies Record<GoogleTranslateLanguage, string>,
-} as const;
+} as const);
 
-type DeepLLanguage = typeof languages.deepl[number];
-type GoogleTranslateLanguage = typeof languages.google[number];
+type DeepLLanguage = (typeof languages.deepl)[number];
+type GoogleTranslateLanguage = (typeof languages.google)[number];
 type Language = DeepLLanguage | GoogleTranslateLanguage;
 
-type DeepLLocale = typeof languageToLocale.deepl[keyof typeof languageToLocale.deepl];
-type GoogleTranslateLocale = typeof languageToLocale.google[keyof typeof languageToLocale.google];
+type DeepLLocale = (typeof languageToLocale.deepl)[keyof typeof languageToLocale.deepl];
+type GoogleTranslateLocale = (typeof languageToLocale.google)[keyof typeof languageToLocale.google];
 type Locale = DeepLLocale | GoogleTranslateLocale;
 
 const localeToLanguage = {
-	deepl: reverseObject(languageToLocale.deepl),
-	google: reverseObject(languageToLocale.google),
+	deepl: Object.mirror(languageToLocale.deepl),
+	google: Object.mirror(languageToLocale.google),
 };
 
 function isLanguage(language: string): language is Language {
@@ -391,6 +390,7 @@ function getGoogleTranslateLanguageByLocale(locale: GoogleTranslateLocale): Goog
 
 export {
 	languages,
+	languageToLocale,
 	isLanguage,
 	getDeepLLocaleByLanguage,
 	getGoogleTranslateLocaleByLanguage,
@@ -399,4 +399,12 @@ export {
 	isDeepLLocale,
 	isGoogleTranslateLocale,
 };
-export type { Language, DeepLLanguage, DeepLLocale, GoogleTranslateLocale, GoogleTranslateLanguage, Locale };
+export type {
+	Translator,
+	Language,
+	Locale,
+	DeepLLanguage,
+	DeepLLocale,
+	GoogleTranslateLocale,
+	GoogleTranslateLanguage,
+};

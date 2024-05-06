@@ -1,86 +1,86 @@
-import * as Discord from "@discordeno/bot";
+import { Client } from "logos/client";
+import { Collector } from "logos/collectors";
+import { Guild } from "logos/database/guild";
+import { LocalService } from "logos/services/service";
+import { ServiceStore } from "logos/stores/services";
 import Hash from "object-hash";
-import { Client } from "../../client";
-import { Guild } from "../../database/guild";
-import diagnostics from "../../diagnostics";
-import { getAllMessages, getGuildIconURLFormatted } from "../../utils";
-import { LocalService } from "../service";
 
 type HashableProperties = "embeds" | "components";
 type HashableMessageContents = Pick<Discord.CreateMessageOptions, HashableProperties>;
 
 interface NoticeData {
-	id: bigint;
-	hash: string;
+	readonly id: bigint;
+	readonly hash: string;
 }
 
 interface Configurations {
-	information: NonNullable<
-		NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]
-	>["information"];
-	resources: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["resources"];
-	roles: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["roles"];
-	welcome: NonNullable<NonNullable<Guild["features"]["information"]["features"]>["notices"]["features"]>["welcome"];
+	information: Guild["informationNotice"];
+	resources: Guild["resourceNotice"];
+	roles: Guild["roleNotice"];
+	welcome: Guild["welcomeNotice"];
 }
 
 type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
-const configurationLocators: ConfigurationLocators = {
-	information: (guildDocument) => guildDocument.features.information.features?.notices.features?.information,
-	resources: (guildDocument) => guildDocument.features.information.features?.notices.features?.resources,
-	roles: (guildDocument) => guildDocument.features.information.features?.notices.features?.roles,
-	welcome: (guildDocument) => guildDocument.features.information.features?.notices.features?.welcome,
-};
+type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
-type NoticeTypes = keyof Client["services"]["notices"];
+abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
+	#noticeData: NoticeData | undefined;
 
-abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalService {
-	private noticeData: NoticeData | undefined;
+	static readonly #_configurationLocators = Object.freeze({
+		information: (guildDocument) => guildDocument.informationNotice,
+		resources: (guildDocument) => guildDocument.resourceNotice,
+		roles: (guildDocument) => guildDocument.roleNotice,
+		welcome: (guildDocument) => guildDocument.welcomeNotice,
+	} as const satisfies ConfigurationLocators);
+	readonly #_configuration: ConfigurationLocators[Generic["type"]];
+	readonly #_messageUpdates: Collector<"messageUpdate">;
+	readonly #_messageDeletes: Collector<"messageDelete">;
 
-	private readonly _configuration: ConfigurationLocators[NoticeType];
-	get configuration(): Configurations[NoticeType] | undefined {
-		const guildDocument = this.guildDocument;
-		if (guildDocument === undefined) {
-			return undefined;
-		}
-
-		return this._configuration(guildDocument);
+	get configuration(): NonNullable<Configurations[Generic["type"]]> {
+		return this.#_configuration(this.guildDocument)!;
 	}
 
 	get channelId(): bigint | undefined {
-		const configuration = this.configuration;
-		if (configuration === undefined) {
-			return undefined;
-		}
-
-		if (!configuration.enabled) {
-			return undefined;
-		}
-
-		const channelId = BigInt(configuration.channelId);
-		if (channelId === undefined) {
-			return undefined;
-		}
-
-		return channelId;
+		return this.configuration.channelId !== undefined ? BigInt(this.configuration.channelId) : undefined;
 	}
 
-	constructor([client, bot]: [Client, Discord.Bot], guildId: bigint, { type }: { type: NoticeType }) {
-		super([client, bot], guildId);
-		this.noticeData = undefined;
-		this._configuration = configurationLocators[type];
+	constructor(
+		client: Client,
+		{ identifier, guildId }: { identifier: string; guildId: bigint },
+		{ type }: { type: Generic["type"] },
+	) {
+		super(client, { identifier, guildId });
+
+		this.#_configuration = NoticeService.#_configurationLocators[type];
+		this.#_messageUpdates = new Collector<"messageUpdate">({ guildId });
+		this.#_messageDeletes = new Collector<"messageDelete">({ guildId });
+	}
+
+	static encodeHashInGuildIcon({ guild, hash }: { guild: Logos.Guild; hash: string }): string {
+		const iconUrl = Discord.guildIconUrl(guild.id, guild.icon);
+
+		return `${iconUrl}&hash=${hash}`;
 	}
 
 	async start(): Promise<void> {
-		const [channelId, configuration, guild, guildDocument] = [
-			this.channelId,
-			this.configuration,
-			this.guild,
-			this.guildDocument,
-		];
-		if (channelId === undefined || configuration === undefined || guild === undefined || guildDocument === undefined) {
+		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
+		this.#_messageDeletes.onCollect(async (payload) => {
+			const message = this.client.entities.messages.latest.get(payload.id);
+			if (message === undefined) {
+				return;
+			}
+
+			this.#handleMessageDelete(message);
+		});
+
+		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
+		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
+
+		const channelId = this.channelId;
+		if (channelId === undefined) {
 			return;
 		}
 
@@ -91,21 +91,8 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 		const expectedHash = NoticeService.hash(expectedContents);
 
-		const noticesAll = (await getAllMessages([this.client, this.bot], channelId)) ?? [];
-		if (noticesAll.length > 1) {
-			while (noticesAll.length !== 0) {
-				const notice = noticesAll.pop();
-				if (notice === undefined) {
-					return;
-				}
-
-				await this.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
-					this.client.log.warn("Failed to delete notice.");
-				});
-			}
-		}
-
-		if (noticesAll.length === 0) {
+		const noticesAll = await this.getAllMessages({ channelId });
+		if (noticesAll === undefined || noticesAll.length === 0) {
 			const notice = await this.saveNotice(expectedContents, expectedHash);
 			if (notice === undefined) {
 				return;
@@ -113,6 +100,19 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 			this.registerNotice(BigInt(notice.id), expectedHash);
 			return;
+		}
+
+		if (noticesAll.length > 1) {
+			while (noticesAll.length !== 0) {
+				const notice = noticesAll.pop();
+				if (notice === undefined) {
+					return;
+				}
+
+				await this.client.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
+					this.log.warn("Failed to delete notice.");
+				});
+			}
 		}
 
 		if (noticesAll.length === 1) {
@@ -126,8 +126,8 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 
 			const hash = contents.embeds?.at(-1)?.footer?.iconUrl?.split("&hash=").at(-1);
 			if (hash === undefined || hash !== expectedHash) {
-				await this.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
-					this.client.log.warn("Failed to delete notice.");
+				await this.client.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
+					this.log.warn("Failed to delete notice.");
 				});
 
 				const newNotice = await this.saveNotice(expectedContents, expectedHash);
@@ -145,12 +145,36 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 	}
 
 	async stop(): Promise<void> {
-		this.noticeData = undefined;
+		await this.#_messageUpdates.close();
+		await this.#_messageDeletes.close();
+
+		this.#noticeData = undefined;
+	}
+
+	// Anti-tampering feature; detects notices being changed from the outside (embeds being deleted).
+	async #handleMessageUpdate(message: Discord.Message): Promise<void> {
+		// If the message was updated in a channel not managed by this notice manager.
+		if (message.channelId !== this.channelId) {
+			return;
+		}
+
+		// Delete the message and allow the bot to handle the deletion.
+		this.client.bot.rest
+			.deleteMessage(message.channelId, message.id)
+			.catch(() =>
+				this.log.warn(
+					`Failed to delete notice ${this.client.diagnostics.message(
+						message,
+					)} from ${this.client.diagnostics.channel(message.channelId)} on ${this.client.diagnostics.guild(
+						message.guildId ?? 0n,
+					)}.`,
+				),
+			);
 	}
 
 	// Anti-tampering feature; detects notices being deleted.
-	async messageDelete(message: Discord.Message): Promise<void> {
-		const [channelId, noticeData] = [this.channelId, this.noticeData];
+	async #handleMessageDelete(message: Logos.Message): Promise<void> {
+		const [channelId, noticeData] = [this.channelId, this.#noticeData];
 		if (channelId === undefined || noticeData === undefined) {
 			return;
 		}
@@ -179,24 +203,6 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 		this.registerNotice(BigInt(notice.id), hash);
 	}
 
-	async messageUpdate(message: Discord.Message): Promise<void> {
-		// If the message was updated in a channel not managed by this prompt manager.
-		if (message.channelId !== this.channelId) {
-			return;
-		}
-
-		// Delete the message and allow the bot to handle the deletion.
-		this.bot.rest
-			.deleteMessage(message.channelId, message.id)
-			.catch(() =>
-				this.client.log.warn(
-					`Failed to delete notice ${diagnostics.display.message(message)} from ${diagnostics.display.channel(
-						message.channelId,
-					)} on ${diagnostics.display.guild(message.guildId ?? 0n)}.`,
-				),
-			);
-	}
-
 	abstract generateNotice(): HashableMessageContents | undefined;
 
 	async saveNotice(
@@ -213,18 +219,16 @@ abstract class NoticeService<NoticeType extends NoticeTypes> extends LocalServic
 			return undefined;
 		}
 
-		lastEmbed.footer = { text: guild.name, iconUrl: `${getGuildIconURLFormatted(guild)}&hash=${hash}` };
+		lastEmbed.footer = { text: guild.name, iconUrl: NoticeService.encodeHashInGuildIcon({ guild, hash }) };
 
-		const message = await this.bot.rest.sendMessage(channelId, contents).catch(() => {
-			this.client.log.warn(`Failed to send message to ${diagnostics.display.channel(channelId)}.`);
+		return await this.client.bot.rest.sendMessage(channelId, contents).catch(() => {
+			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 			return undefined;
 		});
-
-		return message;
 	}
 
 	registerNotice(noticeId: bigint, hash: string): void {
-		this.noticeData = { id: noticeId, hash };
+		this.#noticeData = { id: noticeId, hash };
 	}
 
 	static hash(contents: HashableMessageContents): string {
