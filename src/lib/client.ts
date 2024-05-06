@@ -5,6 +5,7 @@ import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
+import { Model } from "logos/database/model";
 import { Diagnostics } from "logos/diagnostics";
 import { ActionLock } from "logos/helpers/action-lock";
 import { Logger } from "logos/logger";
@@ -409,7 +410,7 @@ class Client {
 		// This check prevents the same guild being set up multiple times. This can happen when a shard managing a given
 		// guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event again for
 		// a guild that Logos would already have been managing.
-		if (this.entities.guilds.has(guild.id)) {
+		if (this.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
 			return;
 		}
 
