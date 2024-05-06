@@ -405,7 +405,12 @@ class Client {
 					return [];
 				});
 			for (const member of members) {
-				this.bot.transformers.member(this.bot, member as unknown as Discord.DiscordMember, guild.id, member.user.id);
+				this.bot.transformers.member(
+					this.bot,
+					member as unknown as Discord.DiscordMember,
+					guild.id,
+					member.user.id,
+				);
 			}
 
 			this.log.info(`Fetched ~${guild.memberCount} members of ${this.diagnostics.guild(guild)}.`);

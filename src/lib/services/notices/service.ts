@@ -163,9 +163,11 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
 				this.log.warn(
-					`Failed to delete notice ${this.client.diagnostics.message(message)} from ${this.client.diagnostics.channel(
-						message.channelId,
-					)} on ${this.client.diagnostics.guild(message.guildId ?? 0n)}.`,
+					`Failed to delete notice ${this.client.diagnostics.message(
+						message,
+					)} from ${this.client.diagnostics.channel(message.channelId)} on ${this.client.diagnostics.guild(
+						message.guildId ?? 0n,
+					)}.`,
 				),
 			);
 	}

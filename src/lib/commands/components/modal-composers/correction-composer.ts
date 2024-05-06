@@ -16,7 +16,10 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 			prefillCorrectedField,
 		}: { interaction: Logos.Interaction; text: string; prefillCorrectedField: boolean },
 	) {
-		super(client, { interaction, initialFormData: { original: text, corrected: prefillCorrectedField ? text : "" } });
+		super(client, {
+			interaction,
+			initialFormData: { original: text, corrected: prefillCorrectedField ? text : "" },
+		});
 	}
 
 	async buildModal(

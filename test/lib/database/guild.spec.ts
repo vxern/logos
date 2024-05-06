@@ -220,7 +220,9 @@ describe("Guild", () => {
 		it("returns true when the specified feature is enabled.", () => {
 			const model = new Guild({
 				guildId: `${123}`,
-				features: { information: { enabled: true, features: { journaling: { enabled: true, channelId: `${123}` } } } },
+				features: {
+					information: { enabled: true, features: { journaling: { enabled: true, channelId: `${123}` } } },
+				},
 			});
 			expect(model.isEnabled("journalling")).to.be.true;
 		});
@@ -243,7 +245,9 @@ describe("Guild", () => {
 		it("returns true when target-only channels are configured and the passed channel ID is defined as one.", () => {
 			const model = new Guild({
 				guildId: `${123}`,
-				features: { language: { enabled: true, features: { targetOnly: { enabled: true, channelIds: [`${456}`] } } } },
+				features: {
+					language: { enabled: true, features: { targetOnly: { enabled: true, channelIds: [`${456}`] } } },
+				},
 			});
 			expect(model.isTargetLanguageOnly(`${456}`)).to.be.true;
 		});

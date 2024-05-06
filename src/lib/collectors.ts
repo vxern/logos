@@ -306,7 +306,15 @@ class InteractionCollector<
 			if (userDocument.preferredLanguage !== undefined) {
 				const language = userDocument.preferredLanguage;
 				const locale = getLocaleByLocalisationLanguage(language);
-				return { locale, language, guildLocale, guildLanguage, learningLocale, learningLanguage, featureLanguage };
+				return {
+					locale,
+					language,
+					guildLocale,
+					guildLanguage,
+					learningLocale,
+					learningLanguage,
+					featureLanguage,
+				};
 			}
 		}
 

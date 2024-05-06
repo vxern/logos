@@ -160,7 +160,10 @@ class DiscordConnection {
 		return result;
 	}
 
-	#transformVoiceState(_: Discord.Bot, payload: Parameters<Discord.Transformers["voiceState"]>[1]): Discord.VoiceState {
+	#transformVoiceState(
+		_: Discord.Bot,
+		payload: Parameters<Discord.Transformers["voiceState"]>[1],
+	): Discord.VoiceState {
 		const result = Discord.transformVoiceState(this.bot, payload);
 
 		if (result.channelId !== undefined) {

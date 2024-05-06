@@ -132,7 +132,9 @@ class RavenDBDocumentSession extends DocumentSession {
 				continue;
 			}
 
-			documents.push(RavenDBDocumentConventions.instantiateModel<M>(this.database, rawDocument as RavenDBDocument));
+			documents.push(
+				RavenDBDocumentConventions.instantiateModel<M>(this.database, rawDocument as RavenDBDocument),
+			);
 		}
 
 		return documents;

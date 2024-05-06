@@ -127,8 +127,8 @@ async function getGameView(
 	mode: "hide" | "reveal",
 ): Promise<Discord.InteractionCallbackData> {
 	const totalScore =
-		userDocument.getGameScores({ game: "pickMissingWord", learningLocale: interaction.learningLocale })?.totalScore ??
-		0;
+		userDocument.getGameScores({ game: "pickMissingWord", learningLocale: interaction.learningLocale })
+			?.totalScore ?? 0;
 
 	const sentenceSource = constants.links.tatoebaSentence(data.sentenceSelection.sentencePair.sentenceId.toString());
 	const translationSource = constants.links.tatoebaSentence(
@@ -157,7 +157,9 @@ async function getGameView(
 				description: data.sentenceSelection.sentencePair.translation,
 				color: data.embedColour,
 				footer: {
-					text: `${strings.correctGuesses({ number: data.sessionScore })} · ${strings.allTime({ number: totalScore })}`,
+					text: `${strings.correctGuesses({ number: data.sessionScore })} · ${strings.allTime({
+						number: totalScore,
+					})}`,
 				},
 			},
 		],
@@ -240,16 +242,18 @@ function getWords(...sentences: string[]): string[] {
 			segmentsProcessedSeparate.push([segment]);
 		}
 
-		const segmentsProcessed = segmentsProcessedSeparate.map<{ segment: string; isWordLike: boolean }>((segments) => {
-			let isWordLike = false;
-			const segmentStrings: string[] = [];
-			for (const segment of segments) {
-				isWordLike ||= segment.isWordLike ?? false;
-				segmentStrings.push(segment.segment);
-			}
+		const segmentsProcessed = segmentsProcessedSeparate.map<{ segment: string; isWordLike: boolean }>(
+			(segments) => {
+				let isWordLike = false;
+				const segmentStrings: string[] = [];
+				for (const segment of segments) {
+					isWordLike ||= segment.isWordLike ?? false;
+					segmentStrings.push(segment.segment);
+				}
 
-			return { segment: segmentStrings.join(""), isWordLike };
-		});
+				return { segment: segmentStrings.join(""), isWordLike };
+			},
+		);
 
 		for (const segment of segmentsProcessed) {
 			if (!segment.isWordLike) {

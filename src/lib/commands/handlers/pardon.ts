@@ -43,7 +43,9 @@ async function handlePardonUserAutocomplete(
 			}
 
 			const warningDocumentsActive = await Warning.getActiveWarnings(client, {
-				timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
+				timeRangeMilliseconds: timeStructToMilliseconds(
+					configuration.expiration ?? constants.defaults.WARN_EXPIRY,
+				),
 			});
 
 			const warningLowercase = interaction.parameters.warning.toLowerCase();

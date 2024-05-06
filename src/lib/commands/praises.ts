@@ -67,7 +67,8 @@ function getPraisePage(
 				const user = client.entities.users.get(BigInt(type === "author" ? praise.targetId : praise.authorId));
 				const userDisplay = client.diagnostics.user(user ?? praise.authorId);
 
-				const commentFormatted = praise.comment !== undefined ? `– ${praise.comment}` : `*${strings.noComment}*`;
+				const commentFormatted =
+					praise.comment !== undefined ? `– ${praise.comment}` : `*${strings.noComment}*`;
 				const userFormatted =
 					type === "author" ? `${constants.emojis.indicators.arrowRight} ${userDisplay}` : userDisplay;
 

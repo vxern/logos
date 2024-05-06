@@ -276,7 +276,8 @@ class CommandStore {
 			for (const [optionNameLocalisations, metadata] of namesWithMetadataPart) {
 				const commandNamesLocalised: Partial<Record<Discord.Locales, string>> = {};
 				for (const [locale, string] of Object.entries(commandNamesLocalised) as [Discord.Locales, string][]) {
-					const localisedName = optionNameLocalisations.nameLocalizations?.[locale] ?? optionNameLocalisations.name;
+					const localisedName =
+						optionNameLocalisations.nameLocalizations?.[locale] ?? optionNameLocalisations.name;
 					commandNamesLocalised[locale] = `${string} ${localisedName}`;
 				}
 

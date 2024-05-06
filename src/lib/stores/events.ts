@@ -18,24 +18,29 @@ class EventStore {
 			ready: (payload, rawPayload) => this.collectEvent(undefined, "ready", { args: [payload, rawPayload] }),
 			interactionCreate: (interactionRaw) =>
 				this.collectEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] }),
-			guildMemberAdd: (member, user) => this.collectEvent(member.guildId, "guildMemberAdd", { args: [member, user] }),
-			guildMemberRemove: (user, guildId) => this.collectEvent(guildId, "guildMemberRemove", { args: [user, guildId] }),
+			guildMemberAdd: (member, user) =>
+				this.collectEvent(member.guildId, "guildMemberAdd", { args: [member, user] }),
+			guildMemberRemove: (user, guildId) =>
+				this.collectEvent(guildId, "guildMemberRemove", { args: [user, guildId] }),
 			guildMemberUpdate: (member, user) =>
 				this.collectEvent(member.guildId, "guildMemberUpdate", { args: [member, user] }),
 			messageCreate: (message) => this.collectEvent(message.guildId, "messageCreate", { args: [message] }),
 			messageDelete: (payload, message) =>
 				this.collectEvent(payload.guildId, "messageDelete", { args: [payload, message] }),
-			messageDeleteBulk: (payload) => this.collectEvent(payload.guildId, "messageDeleteBulk", { args: [payload] }),
+			messageDeleteBulk: (payload) =>
+				this.collectEvent(payload.guildId, "messageDeleteBulk", { args: [payload] }),
 			messageUpdate: (message, oldMessage) =>
 				this.collectEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] }),
-			voiceServerUpdate: (payload) => this.collectEvent(payload.guildId, "voiceServerUpdate", { args: [payload] }),
+			voiceServerUpdate: (payload) =>
+				this.collectEvent(payload.guildId, "voiceServerUpdate", { args: [payload] }),
 			voiceStateUpdate: (voiceState) =>
 				this.collectEvent(voiceState.guildId, "voiceStateUpdate", { args: [voiceState] }),
 			channelCreate: (channel) => this.collectEvent(channel.guildId, "channelCreate", { args: [channel] }),
 			channelDelete: (channel) => this.collectEvent(channel.guildId, "channelDelete", { args: [channel] }),
 			channelPinsUpdate: (data) => this.collectEvent(data.guildId, "channelPinsUpdate", { args: [data] }),
 			channelUpdate: (channel) => this.collectEvent(channel.guildId, "channelUpdate", { args: [channel] }),
-			guildEmojisUpdate: (payload) => this.collectEvent(payload.guildId, "guildEmojisUpdate", { args: [payload] }),
+			guildEmojisUpdate: (payload) =>
+				this.collectEvent(payload.guildId, "guildEmojisUpdate", { args: [payload] }),
 			guildBanAdd: (user, guildId) => this.collectEvent(guildId, "guildBanAdd", { args: [user, guildId] }),
 			guildBanRemove: (user, guildId) => this.collectEvent(guildId, "guildBanRemove", { args: [user, guildId] }),
 			guildCreate: (guild) => this.collectEvent(guild.id, "guildCreate", { args: [guild] }),

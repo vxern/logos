@@ -145,7 +145,9 @@ async function createRoleSelectionMenu(
 				viewData.category.minimum !== undefined &&
 				viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
 			) {
-				displayData = await traverseRoleTreeAndDisplay(client, interaction, displayData, { editResponse: true });
+				displayData = await traverseRoleTreeAndDisplay(client, interaction, displayData, {
+					editResponse: true,
+				});
 				return;
 			}
 
@@ -181,7 +183,9 @@ async function createRoleSelectionMenu(
 					description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
 				});
 
-				displayData = await traverseRoleTreeAndDisplay(client, interaction, displayData, { editResponse: true });
+				displayData = await traverseRoleTreeAndDisplay(client, interaction, displayData, {
+					editResponse: true,
+				});
 
 				return;
 			}
@@ -443,7 +447,9 @@ function createSelectOptionsFromCollection(
 		};
 		selectOptions.push({
 			label: trim(
-				memberHasRole ? `[${strings.assigned}] ${strings.name({ id: role.id })}` : strings.name({ id: role.id }),
+				memberHasRole
+					? `[${strings.assigned}] ${strings.name({ id: role.id })}`
+					: strings.name({ id: role.id }),
 				25,
 			),
 			value: name,

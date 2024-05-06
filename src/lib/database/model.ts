@@ -97,7 +97,9 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 		data: IdentifierDataWithDummies<M>,
 		{ value }: { value: string },
 	): IdentifierData<M> {
-		return Object.fromEntries(Object.entries(data).map(([key, value_]) => [key, value_ ?? value])) as IdentifierData<M>;
+		return Object.fromEntries(
+			Object.entries(data).map(([key, value_]) => [key, value_ ?? value]),
+		) as IdentifierData<M>;
 	}
 
 	static async all<M extends Model>(

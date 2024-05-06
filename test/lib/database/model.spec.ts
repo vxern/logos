@@ -55,7 +55,12 @@ describe("Model", () => {
 	describe("buildPartialId()", () => {
 		it("returns a partial document ID constructed from the passed data.", () => {
 			expect(
-				Model.buildPartialId<Warning>({ guildId: `${0}`, authorId: `${123}`, targetId: `${456}`, createdAt: `${789}` }),
+				Model.buildPartialId<Warning>({
+					guildId: `${0}`,
+					authorId: `${123}`,
+					targetId: `${456}`,
+					createdAt: `${789}`,
+				}),
 			).to.equal("0/123/456/789");
 		});
 
@@ -64,16 +69,36 @@ describe("Model", () => {
 			const PARTIAL_ID = "0/123/456/789";
 
 			expect(
-				Model.buildPartialId<Warning>({ guildId: `${0}`, authorId: `${123}`, targetId: `${456}`, createdAt: `${789}` }),
+				Model.buildPartialId<Warning>({
+					guildId: `${0}`,
+					authorId: `${123}`,
+					targetId: `${456}`,
+					createdAt: `${789}`,
+				}),
 			).to.equal(PARTIAL_ID);
 			expect(
-				Model.buildPartialId<Warning>({ createdAt: `${789}`, guildId: `${0}`, authorId: `${123}`, targetId: `${456}` }),
+				Model.buildPartialId<Warning>({
+					createdAt: `${789}`,
+					guildId: `${0}`,
+					authorId: `${123}`,
+					targetId: `${456}`,
+				}),
 			).to.equal(PARTIAL_ID);
 			expect(
-				Model.buildPartialId<Warning>({ targetId: `${456}`, createdAt: `${789}`, guildId: `${0}`, authorId: `${123}` }),
+				Model.buildPartialId<Warning>({
+					targetId: `${456}`,
+					createdAt: `${789}`,
+					guildId: `${0}`,
+					authorId: `${123}`,
+				}),
 			).to.equal(PARTIAL_ID);
 			expect(
-				Model.buildPartialId<Warning>({ authorId: `${123}`, targetId: `${456}`, createdAt: `${789}`, guildId: `${0}` }),
+				Model.buildPartialId<Warning>({
+					authorId: `${123}`,
+					targetId: `${456}`,
+					createdAt: `${789}`,
+					guildId: `${0}`,
+				}),
 			).to.equal(PARTIAL_ID);
 		});
 

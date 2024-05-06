@@ -42,7 +42,10 @@ class ResourcePromptService extends PromptService<{
 					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: resourceDocument.partialId }),
+						iconUrl: PromptService.encodePartialIdInUserAvatar({
+							user,
+							partialId: resourceDocument.partialId,
+						}),
 					},
 				},
 			],

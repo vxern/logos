@@ -73,10 +73,9 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	await client.registerInteractionCollector(selectMenuSelection);
 
 	const options = [];
-	for (const [result, index] of results.map<[YouTubeSearch.Playlist | YouTubeSearch.Video, number]>((result, index) => [
-		result,
-		index,
-	])) {
+	for (const [result, index] of results.map<[YouTubeSearch.Playlist | YouTubeSearch.Video, number]>(
+		(result, index) => [result, index],
+	)) {
 		const title = result.title;
 		if (title === undefined) {
 			continue;
@@ -89,7 +88,10 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		});
 	}
 
-	const strings = constants.contexts.selectSong({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.selectSong({
+		localise: client.localise.bind(client),
+		locale: interaction.locale,
+	});
 	await client.notice(interaction, {
 		embeds: [
 			{
@@ -146,7 +148,10 @@ function getSongListingFromPlaylist(playlist: YouTubeSearch.Playlist, requestedB
 		songs.push(new Song({ title, url }));
 	}
 
-	return new SongListing({ queueable: new SongCollection({ title, url: playlist.url!, songs }), userId: requestedBy });
+	return new SongListing({
+		queueable: new SongCollection({ title, url: playlist.url!, songs }),
+		userId: requestedBy,
+	});
 }
 
 function getSongListingFromVideo(video: YouTubeSearch.Video, requestedBy: bigint): SongListing | undefined {

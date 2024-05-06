@@ -22,7 +22,9 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 		super(client, { identifier: "GoogleTranslate" });
 
 		if (client.environment.rapidApiSecret === undefined) {
-			this.log.warn("`SECRET_RAPID_API` was not provided. Logos will run without a Google Translate integration.");
+			this.log.warn(
+				"`SECRET_RAPID_API` was not provided. Logos will run without a Google Translate integration.",
+			);
 		}
 	}
 

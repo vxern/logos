@@ -96,7 +96,10 @@ function getWarningPage(
 				relative_timestamp: timestamp(warning.createdAt, { format: "relative" }),
 			});
 
-			const ruleTitle = getRuleTitleFormatted(client, interaction, { rule: warning.rule ?? "other", mode: "option" });
+			const ruleTitle = getRuleTitleFormatted(client, interaction, {
+				rule: warning.rule ?? "other",
+				mode: "option",
+			});
 
 			return { name: warningString, value: `${ruleTitle}\n> *${warning.reason}*` };
 		}),

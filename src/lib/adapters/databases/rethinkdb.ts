@@ -17,7 +17,14 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		host,
 		port,
 		database,
-	}: { environment: Environment; username?: string; password?: string; host: string; port: string; database: string }) {
+	}: {
+		environment: Environment;
+		username?: string;
+		password?: string;
+		host: string;
+		port: string;
+		database: string;
+	}) {
 		super({ environment, identifier: "RethinkDB" });
 
 		this.#_connectionOptions = { host, port: Number(port), db: database, user: username, password };
@@ -29,7 +36,9 @@ class RethinkDBAdapter extends DatabaseAdapter {
 			environment.rethinkdbPort === undefined ||
 			environment.rethinkdbDatabase === undefined
 		) {
-			log.error("One or more of `RETHINKDB_HOST`, `RETHINKDB_PORT` or `RETHINKDB_DATABASE` have not been provided.");
+			log.error(
+				"One or more of `RETHINKDB_HOST`, `RETHINKDB_PORT` or `RETHINKDB_DATABASE` have not been provided.",
+			);
 			return undefined;
 		}
 

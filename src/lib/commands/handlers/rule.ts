@@ -62,7 +62,10 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		{
 			embeds: [
 				{
-					title: getRuleTitleFormatted(client, interaction, { rule: interaction.parameters.rule, mode: "display" }),
+					title: getRuleTitleFormatted(client, interaction, {
+						rule: interaction.parameters.rule,
+						mode: "display",
+					}),
 					description: strings.content(interaction.parameters.rule),
 					footer: { text: `${strings.tldr}: ${strings.summary(interaction.parameters.rule)}` },
 					image: { url: constants.gifs.chaosWithoutRules },

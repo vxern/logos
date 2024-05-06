@@ -9,7 +9,11 @@ class SuggestionPromptService extends PromptService<{
 	metadata: [partialId: string, isResolve: string];
 }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
-		super(client, { identifier: "SuggestionPromptService", guildId }, { type: "suggestions", deleteMode: "delete" });
+		super(
+			client,
+			{ identifier: "SuggestionPromptService", guildId },
+			{ type: "suggestions", deleteMode: "delete" },
+		);
 	}
 
 	getAllDocuments(): Map<string, Suggestion> {
@@ -42,7 +46,10 @@ class SuggestionPromptService extends PromptService<{
 					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: suggestionDocument.partialId }),
+						iconUrl: PromptService.encodePartialIdInUserAvatar({
+							user,
+							partialId: suggestionDocument.partialId,
+						}),
 					},
 				},
 			],

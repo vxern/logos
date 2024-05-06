@@ -217,8 +217,14 @@ const roles = Object.freeze({
 				"910929726418350110": {
 					western: { id: "roles.dialects.languages.armenian.roles.western", snowflake: "982407478761381898" },
 					eastern: { id: "roles.dialects.languages.armenian.roles.eastern", snowflake: "982407372733579305" },
-					karabakh: { id: "roles.dialects.languages.armenian.roles.karabakh", snowflake: "1041345453360423033" },
-					classical: { id: "roles.dialects.languages.armenian.roles.classical", snowflake: "1134470894530605076" },
+					karabakh: {
+						id: "roles.dialects.languages.armenian.roles.karabakh",
+						snowflake: "1041345453360423033",
+					},
+					classical: {
+						id: "roles.dialects.languages.armenian.roles.classical",
+						snowflake: "1134470894530605076",
+					},
 				},
 			},
 		},
@@ -323,29 +329,56 @@ const roles = Object.freeze({
 			type: "custom",
 			lists: {
 				"910929726418350110": {
-					aragatsotn: { id: "roles.regions.languages.armenian.roles.aragatsotn", snowflake: "910929726485434390" },
+					aragatsotn: {
+						id: "roles.regions.languages.armenian.roles.aragatsotn",
+						snowflake: "910929726485434390",
+					},
 					ararat: { id: "roles.regions.languages.armenian.roles.ararat", snowflake: "910929726485434389" },
 					armavir: { id: "roles.regions.languages.armenian.roles.armavir", snowflake: "910929726418350119" },
-					gegharkunik: { id: "roles.regions.languages.armenian.roles.gegharkunik", snowflake: "910929726418350118" },
+					gegharkunik: {
+						id: "roles.regions.languages.armenian.roles.gegharkunik",
+						snowflake: "910929726418350118",
+					},
 					kotayk: { id: "roles.regions.languages.armenian.roles.kotayk", snowflake: "910929726418350117" },
 					lorri: { id: "roles.regions.languages.armenian.roles.lorri", snowflake: "910929726418350116" },
 					shirak: { id: "roles.regions.languages.armenian.roles.shirak", snowflake: "910929726418350115" },
 					syunik: { id: "roles.regions.languages.armenian.roles.syunik", snowflake: "910929726418350114" },
 					tavush: { id: "roles.regions.languages.armenian.roles.tavush", snowflake: "910929726418350113" },
-					vayotsdzor: { id: "roles.regions.languages.armenian.roles.vayotsdzor", snowflake: "911049518110367814" },
+					vayotsdzor: {
+						id: "roles.regions.languages.armenian.roles.vayotsdzor",
+						snowflake: "911049518110367814",
+					},
 					yerevan: { id: "roles.regions.languages.armenian.roles.yerevan", snowflake: "911049617385332796" },
 				},
 				"432173040638623746": {
 					banat: { id: "roles.regions.languages.romanian.roles.banat", snowflake: "751155382428106814" },
-					basarabia: { id: "roles.regions.languages.romanian.roles.basarabia", snowflake: "828604051754844180" },
-					bucovina: { id: "roles.regions.languages.romanian.roles.bucovina", snowflake: "751155753846309035" },
+					basarabia: {
+						id: "roles.regions.languages.romanian.roles.basarabia",
+						snowflake: "828604051754844180",
+					},
+					bucovina: {
+						id: "roles.regions.languages.romanian.roles.bucovina",
+						snowflake: "751155753846309035",
+					},
 					crisana: { id: "roles.regions.languages.romanian.roles.crisana", snowflake: "751155320272978111" },
-					dobrogea: { id: "roles.regions.languages.romanian.roles.dobrogea", snowflake: "751157249262616598" },
-					maramures: { id: "roles.regions.languages.romanian.roles.maramures", snowflake: "751156107229266101" },
+					dobrogea: {
+						id: "roles.regions.languages.romanian.roles.dobrogea",
+						snowflake: "751157249262616598",
+					},
+					maramures: {
+						id: "roles.regions.languages.romanian.roles.maramures",
+						snowflake: "751156107229266101",
+					},
 					moldova: { id: "roles.regions.languages.romanian.roles.moldova", snowflake: "751155723836325908" },
-					muntenia: { id: "roles.regions.languages.romanian.roles.muntenia", snowflake: "751155609906446378" },
+					muntenia: {
+						id: "roles.regions.languages.romanian.roles.muntenia",
+						snowflake: "751155609906446378",
+					},
 					oltenia: { id: "roles.regions.languages.romanian.roles.oltenia", snowflake: "751155517199482892" },
-					transilvania: { id: "roles.regions.languages.romanian.roles.transilvania", snowflake: "751155021344669769" },
+					transilvania: {
+						id: "roles.regions.languages.romanian.roles.transilvania",
+						snowflake: "751155021344669769",
+					},
 				},
 			},
 		},
@@ -360,16 +393,28 @@ const roles = Object.freeze({
 			type: "custom",
 			lists: {
 				"910929726418350110": {
-					armenoTat: { id: "roles.ethnicity.languages.armenian.roles.armenoTat", snowflake: "910929726485434393" },
-					circassian: { id: "roles.ethnicity.languages.armenian.roles.circassian", snowflake: "910929726485434392" },
-					hemshin: { id: "roles.ethnicity.languages.armenian.roles.hemshin", snowflake: "910929726485434391" },
+					armenoTat: {
+						id: "roles.ethnicity.languages.armenian.roles.armenoTat",
+						snowflake: "910929726485434393",
+					},
+					circassian: {
+						id: "roles.ethnicity.languages.armenian.roles.circassian",
+						snowflake: "910929726485434392",
+					},
+					hemshin: {
+						id: "roles.ethnicity.languages.armenian.roles.hemshin",
+						snowflake: "910929726485434391",
+					},
 					cryptoArmenian: {
 						id: "roles.ethnicity.languages.armenian.roles.cryptoArmenian",
 						snowflake: "910929726418350112",
 					},
 				},
 				"432173040638623746": {
-					aromanian: { id: "roles.ethnicity.languages.romanian.roles.aromanian", snowflake: "778021019302101024" },
+					aromanian: {
+						id: "roles.ethnicity.languages.romanian.roles.aromanian",
+						snowflake: "778021019302101024",
+					},
 					istroRomanian: {
 						id: "roles.ethnicity.languages.romanian.roles.istroRomanian",
 						snowflake: "778020962482126858",
@@ -379,7 +424,10 @@ const roles = Object.freeze({
 						snowflake: "778021019180859413",
 					},
 					romani: { id: "roles.ethnicity.languages.romanian.roles.romani", snowflake: "1055458867200393216" },
-					hungarian: { id: "roles.ethnicity.languages.romanian.roles.hungarian", snowflake: "1055458896317255680" },
+					hungarian: {
+						id: "roles.ethnicity.languages.romanian.roles.hungarian",
+						snowflake: "1055458896317255680",
+					},
 					german: { id: "roles.ethnicity.languages.romanian.roles.german", snowflake: "1055458905792188518" },
 				},
 			},

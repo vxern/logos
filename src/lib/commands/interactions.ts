@@ -24,10 +24,9 @@ function parseConciseTimeExpression(
 	interaction: Logos.Interaction,
 	parts: [hours: string | undefined, minutes: string | undefined, seconds: string],
 ): ReturnType<typeof parseTimeExpression> {
-	const [seconds, minutes, hours] = parts.map((part) => (part !== undefined ? Number(part) : undefined)).reverse() as [
-		number,
-		...number[],
-	];
+	const [seconds, minutes, hours] = parts
+		.map((part) => (part !== undefined ? Number(part) : undefined))
+		.reverse() as [number, ...number[]];
 
 	const verboseExpressionParts = [];
 
@@ -82,7 +81,10 @@ function parseVerboseTimeExpressionPhrase(
 		const timeUnits = Object.keys(constants.time) as TimeUnit[];
 		const timeUnitAliasTuples: [TimeUnit, string[]][] = [];
 
-		const strings = constants.contexts.timeUnit({ localise: client.localise.bind(client), locale: interaction.locale });
+		const strings = constants.contexts.timeUnit({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		for (const timeUnit of timeUnits) {
 			timeUnitAliasTuples.push([
 				timeUnit,
@@ -139,7 +141,9 @@ function parseVerboseTimeExpressionPhrase(
 
 	const timeUnits: TimeUnit[] = [];
 	for (const timeUnitAlias of timeUnitAliases) {
-		const timeUnit = Object.entries(timeUnitsWithAliases).find(([_, aliases]) => aliases.includes(timeUnitAlias))?.[0];
+		const timeUnit = Object.entries(timeUnitsWithAliases).find(([_, aliases]) =>
+			aliases.includes(timeUnitAlias),
+		)?.[0];
 
 		if (timeUnit === undefined) {
 			return undefined;

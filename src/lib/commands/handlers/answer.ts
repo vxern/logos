@@ -45,7 +45,10 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 	composer.onSubmit(async (submission, { formData }) => {
 		await client.acknowledge(submission);
 
-		const strings = constants.contexts.answer({ localise: client.localise.bind(client), locale: submission.locale });
+		const strings = constants.contexts.answer({
+			localise: client.localise.bind(client),
+			locale: submission.locale,
+		});
 
 		await client.bot.rest
 			.sendMessage(message.channelId, {

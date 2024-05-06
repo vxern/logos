@@ -322,9 +322,11 @@ abstract class PromptService<
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
 				this.log.warn(
-					`Failed to delete prompt ${this.client.diagnostics.message(message)} from ${this.client.diagnostics.channel(
-						message.channelId,
-					)} on ${this.client.diagnostics.guild(message.guildId ?? 0n)}.`,
+					`Failed to delete prompt ${this.client.diagnostics.message(
+						message,
+					)} from ${this.client.diagnostics.channel(message.channelId)} on ${this.client.diagnostics.guild(
+						message.guildId ?? 0n,
+					)}.`,
 				),
 			);
 	}

@@ -25,7 +25,11 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 
 	constructor(
 		database: DatabaseStore,
-		{ formData, isResolved, ...data }: { formData: ResourceFormData; isResolved?: boolean } & IdentifierData<Resource>,
+		{
+			formData,
+			isResolved,
+			...data
+		}: { formData: ResourceFormData; isResolved?: boolean } & IdentifierData<Resource>,
 	) {
 		super(database, data, { collection: "Resources" });
 
@@ -39,7 +43,10 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 	): Promise<Resource[]> {
 		return await Model.all<Resource>(clientOrDatabase, {
 			collection: "Resources",
-			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, createdAt: undefined }),
+			where: Object.assign(
+				{ ...clauses?.where },
+				{ guildId: undefined, authorId: undefined, createdAt: undefined },
+			),
 		});
 	}
 

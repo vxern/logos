@@ -28,9 +28,9 @@ class AlertService extends LocalService {
 			.sendMessage(channelId, message)
 			.catch(() =>
 				this.log.warn(
-					`Failed to send alert to ${this.client.diagnostics.channel(channelId)} on ${this.client.diagnostics.guild(
-						this.guildId,
-					)}.`,
+					`Failed to send alert to ${this.client.diagnostics.channel(
+						channelId,
+					)} on ${this.client.diagnostics.guild(this.guildId)}.`,
 				),
 			);
 	}

@@ -61,7 +61,11 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 						},
 						{
 							name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
-							value: formatDistribution(client, interaction, getProficiencyRoleDistribution(client, guild)),
+							value: formatDistribution(
+								client,
+								interaction,
+								getProficiencyRoleDistribution(client, guild),
+							),
 							inline: false,
 						},
 				  ]
@@ -112,16 +116,16 @@ type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number
 function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): ProficiencyRoleDistribution {
 	const guildIdString = guild.id.toString();
 
-	const proficiencyRoleIdsUnsorted = Object.values(constants.roles.language.categories.proficiency.collection.list).map(
-		(role) => {
-			const snowflake = (role.snowflakes as Record<string, string>)[guildIdString];
-			if (snowflake === undefined) {
-				throw `StateError: Could not get the snowflake of ${client.diagnostics.role(role.id)}.`;
-			}
+	const proficiencyRoleIdsUnsorted = Object.values(
+		constants.roles.language.categories.proficiency.collection.list,
+	).map((role) => {
+		const snowflake = (role.snowflakes as Record<string, string>)[guildIdString];
+		if (snowflake === undefined) {
+			throw `StateError: Could not get the snowflake of ${client.diagnostics.role(role.id)}.`;
+		}
 
-			return BigInt(snowflake);
-		},
-	);
+		return BigInt(snowflake);
+	});
 	const proficiencyRoleIds = proficiencyRoleIdsUnsorted
 		.map((roleId) => {
 			const role = guild.roles.get(roleId);

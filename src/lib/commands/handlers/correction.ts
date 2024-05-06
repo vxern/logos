@@ -131,7 +131,9 @@ async function handleMakeCorrection(
 					},
 				],
 			})
-			.catch(() => client.log.warn(`Failed to send correction to ${client.diagnostics.channel(message.channelId)}.`));
+			.catch(() =>
+				client.log.warn(`Failed to send correction to ${client.diagnostics.channel(message.channelId)}.`),
+			);
 	});
 
 	await composer.open();

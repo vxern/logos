@@ -38,7 +38,11 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 
 	constructor(
 		client: Client,
-		{ interaction, tabs, showable }: { interaction: Logos.Interaction; tabs: Generic["groups"]; showable?: boolean },
+		{
+			interaction,
+			tabs,
+			showable,
+		}: { interaction: Logos.Interaction; tabs: Generic["groups"]; showable?: boolean },
 	) {
 		this.client = client;
 		this.buttonPresses = new InteractionCollector(client, { guildId: interaction.guildId });

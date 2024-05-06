@@ -69,7 +69,12 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 
 					winston.warn(`[Setup/Localisations] ${language}: '${key}' is not normalised. Normalising...`);
 
-					const valueNormalised = value.toLowerCase().split(" ").join("-").replaceAll("/", "-").replaceAll("'", "-");
+					const valueNormalised = value
+						.toLowerCase()
+						.split(" ")
+						.join("-")
+						.replaceAll("/", "-")
+						.replaceAll("'", "-");
 					localisations.get(key)?.set(language, valueNormalised);
 
 					continue;
@@ -80,7 +85,9 @@ async function loadLocalisations(directoryPath: string): Promise<Map<string, Map
 					`${key.replace(/\.description$/, ".name")}` in strings &&
 					value.length > 100
 				) {
-					winston.warn(`[Setup/Localisations] ${language}: '${key}' is too long (>100 characters). Normalising...`);
+					winston.warn(
+						`[Setup/Localisations] ${language}: '${key}' is too long (>100 characters). Normalising...`,
+					);
 
 					const valueNormalised = value.slice(0, 100);
 					localisations.get(key)?.set(language, valueNormalised);

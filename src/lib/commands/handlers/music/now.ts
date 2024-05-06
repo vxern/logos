@@ -86,12 +86,16 @@ async function handleDisplayCurrentlyPlaying(
 				{
 					name: strings.runningTime,
 					value: strings.playingSince({
-						relative_timestamp: timestamp(musicService.session.playingTimeMilliseconds, { format: "relative" }),
+						relative_timestamp: timestamp(musicService.session.playingTimeMilliseconds, {
+							format: "relative",
+						}),
 					}),
 					inline: false,
 				},
 			],
-			footer: { text: strings.sourcedFrom({ source: musicService.session.current.source ?? strings.theInternet }) },
+			footer: {
+				text: strings.sourcedFrom({ source: musicService.session.current.source ?? strings.theInternet }),
+			},
 		},
 		{ visible: interaction.parameters.show },
 	);

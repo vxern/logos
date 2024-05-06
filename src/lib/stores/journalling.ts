@@ -124,7 +124,9 @@ class JournallingStore {
 
 		await this.#client.bot.rest
 			.sendMessage(channelId, message)
-			.catch(() => this.#log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`));
+			.catch(() =>
+				this.#log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`),
+			);
 	}
 }
 

@@ -53,7 +53,10 @@ class TicketPromptService extends PromptService<{
 					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({ user, partialId: ticketDocument.partialId }),
+						iconUrl: PromptService.encodePartialIdInUserAvatar({
+							user,
+							partialId: ticketDocument.partialId,
+						}),
 					},
 				},
 			],

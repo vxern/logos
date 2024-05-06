@@ -470,7 +470,10 @@ class MusicSession extends EventEmitter {
 
 		this.setMaxListeners(0);
 
-		this.log = Logger.create({ identifier: `MusicSession@${service.guildId}`, isDebug: client.environment.isDebug });
+		this.log = Logger.create({
+			identifier: `MusicSession@${service.guildId}`,
+			isDebug: client.environment.isDebug,
+		});
 		this.client = client;
 		this.service = service;
 		this.player = player;

@@ -126,7 +126,10 @@ async function handleWarnUser(
 		timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
 	});
 
-	const strings = constants.contexts.userWarned({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.userWarned({
+		localise: client.localise.bind(client),
+		locale: interaction.locale,
+	});
 
 	await client.success(interaction, {
 		title: strings.title,
@@ -150,7 +153,9 @@ async function handleWarnUser(
 					.editMember(guild.id, member.id, {
 						communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
 					})
-					.catch(() => client.log.warn(`Failed to edit timeout state of ${client.diagnostics.member(member)}.`));
+					.catch(() =>
+						client.log.warn(`Failed to edit timeout state of ${client.diagnostics.member(member)}.`),
+					);
 
 				const strings = constants.contexts.warningLimitSurpassedAndTimedOut({
 					localise: client.localise.bind(client),
@@ -164,7 +169,9 @@ async function handleWarnUser(
 								user_mention: mention(user.id, { type: "user" }),
 								limit: configuration.limit,
 								number: warningDocumentsActive.length,
-								period: client.pluralise(`units.${timeout[1]}.word`, interaction.locale, { quantity: timeout[0] }),
+								period: client.pluralise(`units.${timeout[1]}.word`, interaction.locale, {
+									quantity: timeout[0],
+								}),
 							}),
 							color: constants.colours.red,
 						},

@@ -83,7 +83,10 @@ async function handleUnskipAction(
 		return;
 	}
 
-	if (interaction.parameters.collection !== undefined && !(musicService.session.queueable instanceof SongCollection)) {
+	if (
+		interaction.parameters.collection !== undefined &&
+		!(musicService.session.queueable instanceof SongCollection)
+	) {
 		const strings = constants.contexts.noSongCollectionToUnskip({
 			localise: client.localise.bind(client),
 			locale: interaction.locale,

@@ -79,7 +79,9 @@ async function handleRecogniseLanguage(
 			...constants.contexts.likelyMatch({ localise: client.localise.bind(client), locale: interaction.locale }),
 			...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
 		};
-		await client.noticed(interaction, { description: strings.description({ language: strings.language(language) }) });
+		await client.noticed(interaction, {
+			description: strings.description({ language: strings.language(language) }),
+		});
 		return;
 	}
 
@@ -93,7 +95,10 @@ async function handleRecogniseLanguage(
 			}
 
 			const strings = {
-				...constants.contexts.likelyMatch({ localise: client.localise.bind(client), locale: interaction.locale }),
+				...constants.contexts.likelyMatch({
+					localise: client.localise.bind(client),
+					locale: interaction.locale,
+				}),
 				...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
 			};
 			fields.push({
@@ -103,7 +108,10 @@ async function handleRecogniseLanguage(
 			});
 		} else {
 			const strings = {
-				...constants.contexts.likelyMatches({ localise: client.localise.bind(client), locale: interaction.locale }),
+				...constants.contexts.likelyMatches({
+					localise: client.localise.bind(client),
+					locale: interaction.locale,
+				}),
 				...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
 			};
 			const languageNamesLocalised = detectedLanguages.likely.map((language) => strings.language(language));
@@ -123,7 +131,10 @@ async function handleRecogniseLanguage(
 			}
 
 			const strings = {
-				...constants.contexts.possibleMatch({ localise: client.localise.bind(client), locale: interaction.locale }),
+				...constants.contexts.possibleMatch({
+					localise: client.localise.bind(client),
+					locale: interaction.locale,
+				}),
 				...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
 			};
 			fields.push({
@@ -133,7 +144,10 @@ async function handleRecogniseLanguage(
 			});
 		} else {
 			const strings = {
-				...constants.contexts.possibleMatches({ localise: client.localise.bind(client), locale: interaction.locale }),
+				...constants.contexts.possibleMatches({
+					localise: client.localise.bind(client),
+					locale: interaction.locale,
+				}),
 				...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
 			};
 			const languageNamesLocalised = detectedLanguages.possible.map((language) => strings.language(language));

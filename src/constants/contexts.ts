@@ -38,7 +38,10 @@ export default Object.freeze({
 		description: {
 			description: {
 				title: localise("information.options.server.strings.information.description.description", locale)(),
-				noDescription: localise("information.options.server.strings.information.description.noDescription", locale)(),
+				noDescription: localise(
+					"information.options.server.strings.information.description.noDescription",
+					locale,
+				)(),
 			},
 			members: localise("information.options.server.strings.information.description.members", locale)(),
 			created: localise("information.options.server.strings.information.description.created", locale)(),
@@ -403,8 +406,14 @@ export default Object.freeze({
 	noSongCollectionToLoop: ({ localise, locale }) => ({
 		title: localise("music.options.loop.strings.noSongCollection.title", locale)(),
 		description: {
-			noSongCollection: localise("music.options.loop.strings.noSongCollection.description.noSongCollection", locale)(),
-			trySongInstead: localise("music.options.loop.strings.noSongCollection.description.trySongInstead", locale)(),
+			noSongCollection: localise(
+				"music.options.loop.strings.noSongCollection.description.noSongCollection",
+				locale,
+			)(),
+			trySongInstead: localise(
+				"music.options.loop.strings.noSongCollection.description.trySongInstead",
+				locale,
+			)(),
 		},
 	}),
 	loopDisabledForSong: ({ localise, locale }) => ({
@@ -430,7 +439,10 @@ export default Object.freeze({
 	noSongCollectionToShowInformationAbout: ({ localise, locale }) => ({
 		title: localise("music.options.now.strings.noSongCollection.title", locale)(),
 		description: {
-			noSongCollection: localise("music.options.now.strings.noSongCollection.description.noSongCollection", locale)(),
+			noSongCollection: localise(
+				"music.options.now.strings.noSongCollection.description.noSongCollection",
+				locale,
+			)(),
 			trySongInstead: localise("music.options.now.strings.noSongCollection.description.trySongInstead", locale)(),
 		},
 	}),
@@ -479,7 +491,10 @@ export default Object.freeze({
 				"music.options.replay.strings.noSongCollection.description.noSongCollection",
 				locale,
 			)(),
-			trySongInstead: localise("music.options.replay.strings.noSongCollection.description.trySongInstead", locale)(),
+			trySongInstead: localise(
+				"music.options.replay.strings.noSongCollection.description.trySongInstead",
+				locale,
+			)(),
 		},
 	}),
 	replaying: ({ localise, locale }) => ({
@@ -525,8 +540,14 @@ export default Object.freeze({
 	noSongCollectionToSkip: ({ localise, locale }) => ({
 		title: localise("music.options.skip.strings.noSongCollection.title", locale)(),
 		description: {
-			noSongCollection: localise("music.options.skip.strings.noSongCollection.description.noSongCollection", locale)(),
-			trySongInstead: localise("music.options.skip.strings.noSongCollection.description.trySongInstead", locale)(),
+			noSongCollection: localise(
+				"music.options.skip.strings.noSongCollection.description.noSongCollection",
+				locale,
+			)(),
+			trySongInstead: localise(
+				"music.options.skip.strings.noSongCollection.description.trySongInstead",
+				locale,
+			)(),
 		},
 	}),
 	tooManySkipArguments: ({ localise, locale }) => ({
@@ -564,7 +585,10 @@ export default Object.freeze({
 				"music.options.unskip.strings.noSongCollection.description.noSongCollection",
 				locale,
 			)(),
-			trySongInstead: localise("music.options.unskip.strings.noSongCollection.description.trySongInstead", locale)(),
+			trySongInstead: localise(
+				"music.options.unskip.strings.noSongCollection.description.trySongInstead",
+				locale,
+			)(),
 		},
 	}),
 	tooManyUnskipArguments: ({ localise, locale }) => ({

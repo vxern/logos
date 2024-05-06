@@ -306,9 +306,9 @@ async function translateText(
 				title: strings.translation,
 				description: translatedText,
 				footer: {
-					text: `${strings.language(languages.source)} ${constants.emojis.indicators.arrowRight} ${strings.language(
-						languages.target,
-					)}`,
+					text: `${strings.language(languages.source)} ${
+						constants.emojis.indicators.arrowRight
+					} ${strings.language(languages.target)}`,
 				},
 			},
 		];
@@ -328,9 +328,9 @@ async function translateText(
 					},
 				],
 				footer: {
-					text: `${strings.language(languages.source)} ${constants.emojis.indicators.arrowRight} ${strings.language(
-						languages.target,
-					)}`,
+					text: `${strings.language(languages.source)} ${
+						constants.emojis.indicators.arrowRight
+					} ${strings.language(languages.target)}`,
 				},
 			},
 		];

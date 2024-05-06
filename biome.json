@@ -1,33 +1,44 @@
 {
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "all": true,
-      "nursery": {
-        "useImportRestrictions": "off"
-      },
-      "style": {
-        "noNonNullAssertion": "off",
-        "useImportType": "off",
-        "useExportType": "off"
-      },
-      "suspicious": {
-        "noExplicitAny": "off",
-        "noAssignInExpressions": "off"
-      },
-      "complexity": {
-        "noExcessiveCognitiveComplexity": "off"
-      }
-    }
-  },
-  "formatter": {
-    "enabled": true,
-    "formatWithErrors": true,
-    "indentWidth": 2,
-    "indentStyle": "tab",
-    "lineWidth": 120
-  },
-  "javascript": {
-    "globals": ["Discord", "Logos", "Events", "WithRequired", "Timer", "describe", "it", "expect", "constants", "defaults"]
-  }
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"all": true,
+			"nursery": {
+				"useImportRestrictions": "off"
+			},
+			"style": {
+				"noNonNullAssertion": "off",
+				"useImportType": "off",
+				"useExportType": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "off",
+				"noAssignInExpressions": "off"
+			},
+			"complexity": {
+				"noExcessiveCognitiveComplexity": "off"
+			}
+		}
+	},
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": true,
+		"indentWidth": 4,
+		"indentStyle": "tab",
+		"lineWidth": 120
+	},
+	"javascript": {
+		"globals": [
+			"Discord",
+			"Logos",
+			"Events",
+			"WithRequired",
+			"Timer",
+			"describe",
+			"it",
+			"expect",
+			"constants",
+			"defaults"
+		]
+	}
 }

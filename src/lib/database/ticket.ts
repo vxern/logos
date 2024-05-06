@@ -56,7 +56,10 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 	): Promise<Ticket[]> {
 		return await Model.all<Ticket>(clientOrDatabase, {
 			collection: "Tickets",
-			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, channelId: undefined }),
+			where: Object.assign(
+				{ ...clauses?.where },
+				{ guildId: undefined, authorId: undefined, channelId: undefined },
+			),
 		});
 	}
 

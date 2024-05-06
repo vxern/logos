@@ -72,7 +72,9 @@ class DynamicVoiceChannelService extends LocalService {
 				continue;
 			}
 
-			const configuration = channelIdConfigurationTuples.find(([channelId, _]) => channelId === parentChannel.id)?.[1];
+			const configuration = channelIdConfigurationTuples.find(
+				([channelId, _]) => channelId === parentChannel.id,
+			)?.[1];
 			if (configuration === undefined) {
 				continue;
 			}
@@ -215,7 +217,9 @@ class DynamicVoiceChannelService extends LocalService {
 				parentId: parent.channel.parentId,
 				position: parent.channel.position,
 			})
-			.catch(() => this.log.warn(`Failed to create voice channel on ${this.client.diagnostics.guild(this.guildId)}.`));
+			.catch(() =>
+				this.log.warn(`Failed to create voice channel on ${this.client.diagnostics.guild(this.guildId)}.`),
+			);
 	}
 
 	async #_handleDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
@@ -262,7 +266,9 @@ class DynamicVoiceChannelService extends LocalService {
 
 		this.client.bot.rest
 			.deleteChannel(lastVacantChannelId)
-			.catch(() => this.log.warn(`Failed to delete voice channel on ${this.client.diagnostics.guild(this.guildId)}.`));
+			.catch(() =>
+				this.log.warn(`Failed to delete voice channel on ${this.client.diagnostics.guild(this.guildId)}.`),
+			);
 	}
 }
 

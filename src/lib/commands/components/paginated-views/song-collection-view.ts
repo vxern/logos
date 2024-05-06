@@ -9,7 +9,11 @@ class SongCollectionView extends PaginatedView<Song> {
 
 	constructor(
 		client: Client,
-		{ interaction, title, collection }: { interaction: Logos.Interaction; title: string; collection: SongCollection },
+		{
+			interaction,
+			title,
+			collection,
+		}: { interaction: Logos.Interaction; title: string; collection: SongCollection },
 	) {
 		super(client, { interaction, elements: collection.songs, showable: true });
 

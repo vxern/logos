@@ -10,8 +10,12 @@ describe("The links object", () => {
 	});
 
 	it("generates links that are URI-encoded.", () => {
-		expect(links.tatoebaSentence(STRING_UNENCODED)).to.equal(`https://tatoeba.org/en/sentences/show/${STRING_ENCODED}`);
-		expect(links.dexonlineDefinition(STRING_UNENCODED)).to.equal(`https://dexonline.ro/definitie/${STRING_ENCODED}`);
+		expect(links.tatoebaSentence(STRING_UNENCODED)).to.equal(
+			`https://tatoeba.org/en/sentences/show/${STRING_ENCODED}`,
+		);
+		expect(links.dexonlineDefinition(STRING_UNENCODED)).to.equal(
+			`https://dexonline.ro/definitie/${STRING_ENCODED}`,
+		);
 		expect(links.wiktionaryDefinition(STRING_UNENCODED, STRING_UNENCODED)).to.equal(
 			`https://en.wiktionary.org/wiki/${STRING_ENCODED}#${STRING_ENCODED}`,
 		);

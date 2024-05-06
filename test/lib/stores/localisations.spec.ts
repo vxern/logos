@@ -126,7 +126,9 @@ describe("LocalisationStore", () => {
 
 	describe("has()", () => {
 		it("returns true if a string key is registered.", () => {
-			const instance = new LocalisationStore(mockClient, { localisations: new Map([["command.name", new Map()]]) });
+			const instance = new LocalisationStore(mockClient, {
+				localisations: new Map([["command.name", new Map()]]),
+			});
 			expect(instance.has("command.name")).to.be.true;
 		});
 

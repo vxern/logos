@@ -65,7 +65,9 @@ async function handleToggleSlowmode(
 				client.bot.rest
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
 					.catch(() =>
-						client.log.warn(`Failed to downgrade slowmode level on ${client.diagnostics.channel(channel)}.`),
+						client.log.warn(
+							`Failed to downgrade slowmode level on ${client.diagnostics.channel(channel)}.`,
+						),
 					);
 
 				await client.tryLog("slowmodeDowngrade", {
@@ -93,7 +95,9 @@ async function handleToggleSlowmode(
 			if (newRateLimitDuration > previousRateLimitDuration) {
 				client.bot.rest
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
-					.catch(() => client.log.warn(`Failed to upgrade slowmode level on ${client.diagnostics.channel(channel)}.`));
+					.catch(() =>
+						client.log.warn(`Failed to upgrade slowmode level on ${client.diagnostics.channel(channel)}.`),
+					);
 
 				await client.tryLog("slowmodeUpgrade", {
 					guildId: guild.id,
@@ -182,7 +186,9 @@ async function handleToggleSlowmode(
 	lastUseByGuildId.set(guild.id, Date.now());
 
 	client.bot.rest
-		.editChannel(channel.id, { rateLimitPerUser: getSlowmodeDelayByLevel(interaction.parameters.level ?? "lowest") })
+		.editChannel(channel.id, {
+			rateLimitPerUser: getSlowmodeDelayByLevel(interaction.parameters.level ?? "lowest"),
+		})
 		.catch((reason) =>
 			client.log.warn(`Failed to enable slowmode on ${client.diagnostics.channel(channel)}: ${reason}`),
 		);

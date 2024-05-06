@@ -8,7 +8,10 @@ abstract class Service {
 	readonly client: Client;
 
 	constructor(client: Client, { identifier }: { identifier: string }) {
-		this.log = Logger.create({ identifier: `Client/ServiceStore/${identifier}`, isDebug: client.environment.isDebug });
+		this.log = Logger.create({
+			identifier: `Client/ServiceStore/${identifier}`,
+			isDebug: client.environment.isDebug,
+		});
 		this.client = client;
 	}
 
@@ -58,7 +61,9 @@ abstract class LocalService extends Service {
 					before: buffer.length === 0 ? undefined : buffer.at(-1)?.id,
 				})
 				.catch(() => {
-					this.client.log.warn(`Failed to get all messages from ${this.client.diagnostics.channel(channelId)}.`);
+					this.client.log.warn(
+						`Failed to get all messages from ${this.client.diagnostics.channel(channelId)}.`,
+					);
 					return undefined;
 				});
 			if (chunk === undefined) {

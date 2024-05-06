@@ -11,7 +11,10 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 		return this.#_selectMenuSelection.onInteraction.bind(this);
 	}
 
-	constructor(client: Client, { interaction, listings }: { interaction: Logos.Interaction; listings: SongListing[] }) {
+	constructor(
+		client: Client,
+		{ interaction, listings }: { interaction: Logos.Interaction; listings: SongListing[] },
+	) {
 		super(client, { interaction, elements: listings, showable: true });
 
 		this.#_selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
@@ -45,7 +48,9 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 				locale: interaction.locale,
 			});
 
-			return { embed: { title: strings.title, description: strings.description, color: constants.colours.notice } };
+			return {
+				embed: { title: strings.title, description: strings.description, color: constants.colours.notice },
+			};
 		}
 
 		const selectMenu = this.#buildSelectMenu(page, pageIndex);

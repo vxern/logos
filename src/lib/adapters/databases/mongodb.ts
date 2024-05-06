@@ -17,7 +17,14 @@ class MongoDBAdapter extends DatabaseAdapter {
 		host,
 		port,
 		database,
-	}: { environment: Environment; username?: string; password?: string; host: string; port: string; database: string }) {
+	}: {
+		environment: Environment;
+		username?: string;
+		password?: string;
+		host: string;
+		port: string;
+		database: string;
+	}) {
 		super({ environment, identifier: "MongoDB" });
 
 		this.#_mongoClient = new mongodb.MongoClient(`mongodb://${host}:${port}`, {

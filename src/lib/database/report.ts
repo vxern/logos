@@ -41,7 +41,10 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 	): Promise<Report[]> {
 		return await Model.all<Report>(clientOrDatabase, {
 			collection: "Reports",
-			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined, createdAt: undefined }),
+			where: Object.assign(
+				{ ...clauses?.where },
+				{ guildId: undefined, authorId: undefined, createdAt: undefined },
+			),
 		});
 	}
 

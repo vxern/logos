@@ -123,18 +123,25 @@ async function handlePurgeMessages(
 	let messages: Discord.CamelizedDiscordMessage[] = [];
 
 	const getMessageFields = (): Discord.CamelizedDiscordEmbedField[] => {
-		const strings = constants.contexts.purge({ localise: client.localise.bind(client), locale: interaction.locale });
+		const strings = constants.contexts.purge({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		return [
 			{
 				name: strings.start,
 				value:
 					startMessageContent !== undefined
 						? `${startMessageContent}\n${strings.posted({
-								relative_timestamp: timestamp(Date.parse(startMessage.timestamp), { format: "relative" }),
+								relative_timestamp: timestamp(Date.parse(startMessage.timestamp), {
+									format: "relative",
+								}),
 								user_mention: mention(BigInt(startMessage.author.id), { type: "user" }),
 						  })}`
 						: strings.embedPosted({
-								relative_timestamp: timestamp(Date.parse(startMessage.timestamp), { format: "relative" }),
+								relative_timestamp: timestamp(Date.parse(startMessage.timestamp), {
+									format: "relative",
+								}),
 								user_mention: mention(BigInt(startMessage.author.id), { type: "user" }),
 						  }),
 			},
@@ -159,7 +166,10 @@ async function handlePurgeMessages(
 	};
 
 	const getIndexingProgressResponse = (): Discord.InteractionCallbackData => {
-		const strings = constants.contexts.indexing({ localise: client.localise.bind(client), locale: interaction.locale });
+		const strings = constants.contexts.indexing({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		return {
 			embeds: [
 				{
@@ -174,7 +184,10 @@ async function handlePurgeMessages(
 
 	await client.editReply(interaction, getIndexingProgressResponse());
 
-	const indexProgressIntervalId = setInterval(() => client.editReply(interaction, getIndexingProgressResponse()), 1500);
+	const indexProgressIntervalId = setInterval(
+		() => client.editReply(interaction, getIndexingProgressResponse()),
+		1500,
+	);
 
 	let isFinished = false;
 	while (!isFinished) {
@@ -188,9 +201,13 @@ async function handlePurgeMessages(
 			await client.warned(interaction, {
 				title: strings.title,
 				description: `${strings.description.rangeTooBig({
-					messages: client.pluralise("purge.strings.rangeTooBig.description.rangeTooBig.messages", interaction.locale, {
-						quantity: constants.MAXIMUM_INDEXABLE_MESSAGES,
-					}),
+					messages: client.pluralise(
+						"purge.strings.rangeTooBig.description.rangeTooBig.messages",
+						interaction.locale,
+						{
+							quantity: constants.MAXIMUM_INDEXABLE_MESSAGES,
+						},
+					),
 				})}\n\n${strings.description.trySmaller}`,
 			});
 
@@ -204,7 +221,10 @@ async function handlePurgeMessages(
 			})
 			.then((collection) => Array.from(collection.values()).reverse())
 			.catch((reason) => {
-				client.log.warn(`Failed to get messages starting with ${client.diagnostics.message(startMessage.id)}:`, reason);
+				client.log.warn(
+					`Failed to get messages starting with ${client.diagnostics.message(startMessage.id)}:`,
+					reason,
+				);
 
 				return [];
 			});
@@ -291,14 +311,22 @@ async function handlePurgeMessages(
 				{
 					title: strings.indexed.title,
 					description: `${strings.indexed.description.tooMany({
-						messages: client.pluralise("purge.strings.indexed.description.tooMany.messages", interaction.locale, {
-							quantity: messages.length,
-						}),
+						messages: client.pluralise(
+							"purge.strings.indexed.description.tooMany.messages",
+							interaction.locale,
+							{
+								quantity: messages.length,
+							},
+						),
 						maximum_deletable: constants.MAXIMUM_DELETABLE_MESSAGES,
 					})}\n\n${strings.indexed.description.limited({
-						messages: client.pluralise("purge.strings.indexed.description.limited.messages", interaction.locale, {
-							quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
-						}),
+						messages: client.pluralise(
+							"purge.strings.indexed.description.limited.messages",
+							interaction.locale,
+							{
+								quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
+							},
+						),
 					})}`,
 					color: constants.colours.pushback,
 					fields: getMessageFields(),
@@ -306,9 +334,13 @@ async function handlePurgeMessages(
 				{
 					title: strings.continue.title,
 					description: strings.continue.description({
-						messages: client.pluralise("purge.strings.indexed.description.limited.messages", interaction.locale, {
-							quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
-						}),
+						messages: client.pluralise(
+							"purge.strings.indexed.description.limited.messages",
+							interaction.locale,
+							{
+								quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
+							},
+						),
 					}),
 					color: constants.colours.pushback,
 				},
@@ -374,9 +406,13 @@ async function handlePurgeMessages(
 				{
 					title: strings.indexed.title,
 					description: strings.indexed.description.some({
-						messages: client.pluralise("purge.strings.indexed.description.some.messages", interaction.locale, {
-							quantity: messages.length,
-						}),
+						messages: client.pluralise(
+							"purge.strings.indexed.description.some.messages",
+							interaction.locale,
+							{
+								quantity: messages.length,
+							},
+						),
 					}),
 					color: constants.colours.notice,
 					fields: getMessageFields(),
@@ -384,9 +420,13 @@ async function handlePurgeMessages(
 				{
 					title: strings.sureToPurge.title,
 					description: strings.sureToPurge.description({
-						messages: client.pluralise("purge.strings.sureToPurge.description.messages", interaction.locale, {
-							quantity: messages.length,
-						}),
+						messages: client.pluralise(
+							"purge.strings.sureToPurge.description.messages",
+							interaction.locale,
+							{
+								quantity: messages.length,
+							},
+						),
 						channel_mention: channelMention,
 					}),
 					color: constants.colours.pushback,
@@ -421,15 +461,22 @@ async function handlePurgeMessages(
 	}
 
 	{
-		const strings = constants.contexts.purging({ localise: client.localise.bind(client), locale: interaction.locale });
+		const strings = constants.contexts.purging({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		await client.noticed(interaction, {
 			embeds: [
 				{
 					title: strings.title,
 					description: `${strings.description.purging({
-						messages: client.pluralise("purge.strings.purging.description.purging.messages", interaction.locale, {
-							quantity: messages.length,
-						}),
+						messages: client.pluralise(
+							"purge.strings.purging.description.purging.messages",
+							interaction.locale,
+							{
+								quantity: messages.length,
+							},
+						),
 						channel_mention: channelMention,
 					})} ${strings.description.mayTakeTime}\n\n${strings.description.onceComplete}`,
 				},
@@ -463,7 +510,8 @@ async function handlePurgeMessages(
 	const twoWeeksAgo = now - constants.time.week * 2 + constants.time.hour;
 
 	const firstBulkDeletableIndex = messages.findIndex((message) => Date.parse(message.timestamp) > twoWeeksAgo);
-	const bulkDeletable = firstBulkDeletableIndex !== -1 ? messages.slice(firstBulkDeletableIndex, messages.length) : [];
+	const bulkDeletable =
+		firstBulkDeletableIndex !== -1 ? messages.slice(firstBulkDeletableIndex, messages.length) : [];
 	const nonBulkDeletable = messages.slice(
 		0,
 		firstBulkDeletableIndex !== -1 ? firstBulkDeletableIndex : messages.length,
@@ -487,7 +535,9 @@ async function handlePurgeMessages(
 
 			await client.bot.rest.deleteMessages(interaction.channelId, messageIds).catch((reason) => {
 				client.log.warn(
-					`Failed to delete ${messageIds.length} message(s) from ${client.diagnostics.channel(interaction.channelId)}:`,
+					`Failed to delete ${messageIds.length} message(s) from ${client.diagnostics.channel(
+						interaction.channelId,
+					)}:`,
 					reason,
 				);
 			});
@@ -527,7 +577,10 @@ async function handlePurgeMessages(
 	}
 
 	{
-		const strings = constants.contexts.purged({ localise: client.localise.bind(client), locale: interaction.locale });
+		const strings = constants.contexts.purged({
+			localise: client.localise.bind(client),
+			locale: interaction.locale,
+		});
 		await client.succeeded(interaction, {
 			title: strings.title,
 			description: strings.description({

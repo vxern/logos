@@ -41,7 +41,10 @@ async function handleSetLanguage(
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 	if (userDocument.preferredLanguage === language) {
 		const strings = {
-			...constants.contexts.languageAlreadySet({ localise: client.localise.bind(client), locale: interaction.locale }),
+			...constants.contexts.languageAlreadySet({
+				localise: client.localise.bind(client),
+				locale: interaction.locale,
+			}),
 			...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
 		};
 		await client.warned(interaction, {

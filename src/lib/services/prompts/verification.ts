@@ -25,7 +25,11 @@ class VerificationPromptService extends PromptService<{
 	readonly #_openInquiry: InteractionCollector<[partialId: string]>;
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
-		super(client, { identifier: "VerificationPromptService", guildId }, { type: "verification", deleteMode: "none" });
+		super(
+			client,
+			{ identifier: "VerificationPromptService", guildId },
+			{ type: "verification", deleteMode: "none" },
+		);
 
 		this.#_openInquiry = new InteractionCollector(client, {
 			guildId,
@@ -104,11 +108,17 @@ class VerificationPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const accountCreatedRelativeTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), { format: "relative" });
-		const accountCreatedLongDateTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), { format: "long-date" });
+		const accountCreatedRelativeTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), {
+			format: "relative",
+		});
+		const accountCreatedLongDateTimestamp = timestamp(Discord.snowflakeToTimestamp(user.id), {
+			format: "long-date",
+		});
 
 		const votedForFormatted = entryRequestDocument.votersFor.map((userId) => mention(userId, { type: "user" }));
-		const votedAgainstFormatted = entryRequestDocument.votersAgainst.map((userId) => mention(userId, { type: "user" }));
+		const votedAgainstFormatted = entryRequestDocument.votersAgainst.map((userId) =>
+			mention(userId, { type: "user" }),
+		);
 
 		const strings = constants.contexts.entryRequestPrompt({
 			localise: this.client.localise.bind(this.client),
@@ -191,9 +201,13 @@ class VerificationPromptService extends PromptService<{
 								voteInformation.acceptance.remaining === 1
 									? strings.accept
 									: strings.acceptMultiple({
-											votes: this.client.pluralise("entry.verification.vote.acceptMultiple.votes", this.guildLocale, {
-												quantity: voteInformation.acceptance.remaining,
-											}),
+											votes: this.client.pluralise(
+												"entry.verification.vote.acceptMultiple.votes",
+												this.guildLocale,
+												{
+													quantity: voteInformation.acceptance.remaining,
+												},
+											),
 									  }),
 							customId: this.magicButton.encodeId([entryRequestDocument.partialId, `${true}`]),
 						},
@@ -204,9 +218,13 @@ class VerificationPromptService extends PromptService<{
 								voteInformation.rejection.remaining === 1
 									? strings.reject
 									: strings.rejectMultiple({
-											votes: this.client.pluralise("entry.verification.vote.rejectMultiple.votes", this.guildLocale, {
-												quantity: voteInformation.rejection.remaining,
-											}),
+											votes: this.client.pluralise(
+												"entry.verification.vote.rejectMultiple.votes",
+												this.guildLocale,
+												{
+													quantity: voteInformation.rejection.remaining,
+												},
+											),
 									  }),
 							customId: this.magicButton.encodeId([entryRequestDocument.partialId, `${false}`]),
 						},
@@ -264,8 +282,14 @@ class VerificationPromptService extends PromptService<{
 			if (isAuthorised) {
 				const { promise, resolve } = Promise.withResolvers<null | undefined>();
 
-				const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
-				const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+				const confirmButton = new InteractionCollector(this.client, {
+					only: [interaction.user.id],
+					isSingle: true,
+				});
+				const cancelButton = new InteractionCollector(this.client, {
+					only: [interaction.user.id],
+					isSingle: true,
+				});
 
 				confirmButton.onInteraction(async (_) => {
 					await this.client.deleteReply(interaction);
@@ -276,7 +300,10 @@ class VerificationPromptService extends PromptService<{
 					}
 
 					await entryRequestDocument.update(this.client, () => {
-						entryRequestDocument.forceVerdict({ userId: interaction.user.id.toString(), verdict: "accepted" });
+						entryRequestDocument.forceVerdict({
+							userId: interaction.user.id.toString(),
+							verdict: "accepted",
+						});
 					});
 
 					await this.#tryFinalise({ entryRequestDocument, voter });
@@ -351,8 +378,14 @@ class VerificationPromptService extends PromptService<{
 			if (isAuthorised) {
 				const { promise, resolve } = Promise.withResolvers<null | undefined>();
 
-				const confirmButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
-				const cancelButton = new InteractionCollector(this.client, { only: [interaction.user.id], isSingle: true });
+				const confirmButton = new InteractionCollector(this.client, {
+					only: [interaction.user.id],
+					isSingle: true,
+				});
+				const cancelButton = new InteractionCollector(this.client, {
+					only: [interaction.user.id],
+					isSingle: true,
+				});
 
 				confirmButton.onInteraction(async (_) => {
 					await this.client.deleteReply(interaction);
@@ -363,7 +396,10 @@ class VerificationPromptService extends PromptService<{
 					}
 
 					await entryRequestDocument.update(this.client, () => {
-						entryRequestDocument.forceVerdict({ userId: interaction.user.id.toString(), verdict: "rejected" });
+						entryRequestDocument.forceVerdict({
+							userId: interaction.user.id.toString(),
+							verdict: "rejected",
+						});
 					});
 
 					await this.#tryFinalise({ entryRequestDocument, voter });
@@ -497,20 +533,25 @@ class VerificationPromptService extends PromptService<{
 			});
 
 			this.log.info(
-				`Accepted ${this.client.diagnostics.user(authorDocument.account.id)} onto ${this.client.diagnostics.guild(
-					guild,
-				)}.`,
+				`Accepted ${this.client.diagnostics.user(
+					authorDocument.account.id,
+				)} onto ${this.client.diagnostics.guild(guild)}.`,
 			);
 
 			this.client.bot.rest
-				.addRole(this.guildId, author.id, BigInt(entryRequestDocument.requestedRoleId), "User-requested role addition.")
+				.addRole(
+					this.guildId,
+					author.id,
+					BigInt(entryRequestDocument.requestedRoleId),
+					"User-requested role addition.",
+				)
 				.catch(() =>
 					this.log.warn(
 						`Failed to add ${this.client.diagnostics.role(
 							entryRequestDocument.requestedRoleId,
-						)} to ${this.client.diagnostics.user(authorDocument.account.id)} on ${this.client.diagnostics.guild(
-							guild,
-						)}.`,
+						)} to ${this.client.diagnostics.user(
+							authorDocument.account.id,
+						)} on ${this.client.diagnostics.guild(guild)}.`,
 					),
 				);
 
@@ -521,9 +562,9 @@ class VerificationPromptService extends PromptService<{
 			});
 
 			this.log.info(
-				`Rejected ${this.client.diagnostics.user(authorDocument.account.id)} from ${this.client.diagnostics.guild(
-					guild,
-				)}.`,
+				`Rejected ${this.client.diagnostics.user(
+					authorDocument.account.id,
+				)} from ${this.client.diagnostics.guild(guild)}.`,
 			);
 
 			this.client.bot.rest
@@ -666,7 +707,11 @@ class VerificationPromptService extends PromptService<{
 		}
 
 		const acceptance = getVoteInformation("acceptance", this.configuration, entryRequestDocument.votersFor.length);
-		const rejection = getVoteInformation("rejection", this.configuration, entryRequestDocument.votersAgainst.length);
+		const rejection = getVoteInformation(
+			"rejection",
+			this.configuration,
+			entryRequestDocument.votersAgainst.length,
+		);
 
 		return { acceptance, rejection };
 	}
