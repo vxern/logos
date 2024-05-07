@@ -72,3 +72,4 @@ Once you've made your changes, create a pull request to merge them into `logos`,
   - For example, use 'request', 'transaction', 'diagnostics' and 'source' over 'req', 'tx', 'diag' or 'src'.
 - `+=` and `-=` are used over `++` and `--`.
   - These are more in line with other similar operations such as `*=`, `/=` and `**=`. The assignment is also explicit.
+- `[]` is used on tuples, `.at()` is used on arrays.
