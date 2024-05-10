@@ -24,4 +24,4 @@
 - 💢 Moderation tools, including user verification, user reports, a warning + pardoning system, fine-tunable slowmode, message purging, rule citation, policy viewing, and more.
 - 💐 Social features including viewing user profiles and thanking users for their contributions.
 
-### [Ready to contribute?](CONTRIBUTING.md)
+### Ready to [set up](SETUP.md) or [contribute](CONTRIBUTING)?
