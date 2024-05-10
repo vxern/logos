@@ -37,7 +37,9 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
 
 - <details>
     <summary>MongoDB (<a href="https://mongodb.com/products/platform/atlas-database">Official Website</a>, <a href="https://mongodb.com/docs/manual/administration/install-community/">Setup Guide</a>)</summary>
+
     To use MongoDB with Logos, add the following credentials to your `.env` file:
+
     ```
     DATABASE_SOLUTION=mongodb # Tell Logos to use MongoDB as its database driver.  
     # MONGODB_USERNAME=       # (optional for unsecured instances) Username for authorisation.
@@ -49,7 +51,9 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
   </details>
 - <details>
     <summary>RavenDB (<a href="https://ravendb.net">Official Website</a>, <a href="https://ravendb.net/docs/article-page/6.0/csharp/start/installation/setup-wizard">Setup Guide</a>)</summary>
+
     To use RavenDB with Logos, add the following credentials to your `.env` file:
+
     ```
     DATABASE_SOLUTION=ravendb # Tell Logos to use RavenDB as its database driver. 
     RAVENDB_HOST=127.0.0.1    # Address of your RavenDB instance.
@@ -61,7 +65,9 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
   </details>
 - <details>
     <summary>CouchDB (<a href="https://couchdb.apache.org">Official Website</a>, <a href="https://docs.couchdb.org/en/stable/install/index.html">Setup Guide</a>)</summary>
+
     To use CouchDB with Logos, add the following credentials to your `.env` file:
+
     ```
     DATABASE_SOLUTION=couchdb # Tell Logos to use CouchDB as its database driver.
     COUCHDB_USERNAME=admin    # Username for authorisation.
@@ -73,7 +79,9 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
   </details>
 - <details>
     <summary>RethinkDB (<a href="https://rethinkdb.com/">Official Website</a>, <a href="https://rethinkdb.com/docs/install/">Setup Guide</a>)</summary>
+    
     To use RethinkDB with Logos, add the following credentials to your `.env` file:
+
     ```
     DATABASE_SOLUTION=rethinkdb # Tell Logos to use RethinkDB as its database driver.
     # RETHINKDB_USERNAME=       # (optional for unsecured instances) Username for authorisation.
@@ -85,7 +93,9 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
   </details>
 - <details>
     <summary>In-memory database</summary>
+    
     To tell Logos you're fine with running an in-memory database, add the following record to your `.env` file:
+    
     ```
     DATABASE_SOLUTION=none # Tell Logos to store documents in memory.
     ```
