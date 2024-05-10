@@ -56,7 +56,7 @@ abstract class DocumentSession {
 	abstract load<M extends Model>(id: string): Promise<M | undefined>;
 	async get<M extends Model>(id: string): Promise<M | undefined> {
 		const document = await this.load<M>(id);
-		if (document === undefined) {
+		if (document === undefined || document.isDeleted) {
 			return undefined;
 		}
 
@@ -71,7 +71,7 @@ abstract class DocumentSession {
 
 		const documents: (M | undefined)[] = [];
 		for (const document of Object.values(results)) {
-			if (document === undefined) {
+			if (document === undefined || document.isDeleted) {
 				documents.push(undefined);
 				continue;
 			}
@@ -156,6 +156,10 @@ abstract class DocumentQuery<M extends Model> {
 	abstract whereEquals(property: string, value: unknown): DocumentQuery<M>;
 
 	abstract execute(): Promise<M[]>;
+	async run(): Promise<M[]> {
+		const documents = await this.execute();
+		return documents.filter((document) => !document.isDeleted);
+	}
 }
 
 /**

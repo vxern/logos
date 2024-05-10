@@ -116,9 +116,9 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 				query = query.whereRegex("id", new RegExp(Model.buildId(clause, { collection })));
 			}
 
-			const results = await query.execute();
+			const documents = await query.run();
 
-			resolve(results);
+			resolve(documents);
 		});
 
 		return promise;
