@@ -2,7 +2,9 @@
 
 ### Step 0: Download Logos.
 
-TODO(vxern): Add a guide for downloading Logos.
+You can always get the latest release of Logos [here](https://github.com/vxern/logos/releases/latest).
+
+To download the release, simply download your archive of choice (.zip, .tar.gz) under 'Assets', then unzip the files.
 
 ### Step 1: Let's start.
 
@@ -105,7 +107,7 @@ Logos will work with any Redis-compatible database, whether that's Redis itself,
 Regardless of your choice, the credentials to add to `.env` for all of these databases are as follows:
 ```
 REDIS_HOST=127.0.0.1 # Address of your database instance. 
-REDIS_PORT=6379      # Port your database instance is operating at.
+REDIS_PORT=6379      # Port your database instance is operating at. (Redis uses 6379 by default)
 # REDIS_PASSWORD=    # (optional for unsecured instances) Password for authorisation.
 ```
 
@@ -132,9 +134,64 @@ LAVALINK_PASSWORD=youshallnotpass # Password for authorisation.
 > 
 > If you'd like to set up third-party language integrations, the following steps will outline where to get each credential from, and what `.env` records to add to make each one work.
 > 
-> [*If not, then that's it! You're all set.*](#thats-it)
+> [*If not, then that's it! You're all set.*](#thats-all)
 
-TODO(vxern): Add guides for language integrations.
+### Step 5.1: RapidAPI
+
+> RapidAPI is a collection of APIs that are each queryable using the same API token. Logos uses a number of integrations via RapidAPI.
+
+1. Sign up / log in [here](https://rapidapi.com/auth).
+2. Create an app [here](https://rapidapi.com/developer/apps/new-app). Name the app 'Logos'. 
+3. Subscribe to APIs:
+   - Translators:
+     - [Google Translate](https://rapidapi.com/IRCTCAPI/api/google-translator9) (free plan @ 1,000 requests per month)
+     - [Lingvanex](https://rapidapi.com/dpventures/api/wordsapi) (free plan @ 500,000 characters per month)
+   - Dictionaries:
+     - [Dicolink](https://rapidapi.com/dicolink/api/dicolink) (free plan @ 500,000 requests per month (you heard right, *requests*))
+     - [WordsAPI](https://rapidapi.com/dpventures/api/wordsapi) (free plan @ 2,500 requests per day)
+4. Add a record for RapidAPI to your `.env` file:
+```
+SECRET_RAPID_API=<token goes here>
+```
+
+### Step 5.2: DeepL
+
+> Logos uses DeepL for providing its translation services. The free plan comes with a limit of 500,000 characters per month.
+
+To get a DeepL token, you will need to have a DeepL account.
+
+1. Sign up [here](https://deepl.com/signup).
+2. Create an API key [here](https://deepl.com/your-account/keys). Name the API key 'Logos'.
+3. Add a record for DeepL to your `.env` file:
+```
+SECRET_DEEPL=<token goes here>
+```
+
+### Step 5.3: Wordnik
+
+> Logos uses Wordnik to provide information about words in English. The free plan comes with a limit of 100 calls per hour.
+
+To get a Wordnik token, you will need to have a Wordnik account, and then request an API key.
+
+1. Sign up [here](https://wordnik.com/signup).
+2. Request an API key. The token will take a few days to arrive. You can speed up the process by donating.
+3. Add a record for Wordnik to your `.env` file:
+```
+SECRET_WORDNIK=<token goes here>
+```
+
+### Step 5.4: PONS
+
+> Logos uses PONS for its word services in several languages. The free plan comes with a limit of 1000 reference queries per month.
+
+To get a PONS token, you will need to have a PONS account, and then submit an API registration form.
+
+1. Sign up [here](https://account.pons.com/en/public/signup)
+2. Submit an API registration form [here]().
+3. Add a record for PONS to your `.env` file:
+```
+SECRET_PONS=<token goes here>
+```
 
 ### That's all!
 
