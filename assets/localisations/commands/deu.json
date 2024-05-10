@@ -381,7 +381,6 @@
     "music.options.pause.strings.paused.description": "Die Musikwiedergabe wurde pausiert.",
     "music.options.play.name": "abspielen",
     "music.options.play.description": "Ermöglicht dem Benuzter die Wiedergabe von Musik in einem Sprachkanal.",
-    "music.options.play.options.file.description": "Spielt eine externe Audiodatei ab.",
     "music.options.play.options.file.options.url.description": "Link zur Audiodatei.",
     "music.options.play.options.youtube.name": "youtube",
     "music.options.play.options.youtube.description": "Spielt ein Lied von Youtube ab.",

@@ -369,7 +369,6 @@
     "music.options.pause.strings.paused.description": "Het afspelen van muziek is onderbroken.",
     "music.options.play.name": "afspelen",
     "music.options.play.description": "Hiermee kan de gebruiker muziek afspelen in een spraakkanaal.",
-    "music.options.play.options.file.options.url.description": "Link naar het audiobestand.",
     "music.options.play.options.youtube.name": "youtube",
     "music.options.play.options.youtube.description": "Speelt een nummer van YouTube af.",
     "music.options.play.strings.selectSong.title": "Select an entry",
