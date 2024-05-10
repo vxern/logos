@@ -1,27 +1,143 @@
+## Logos Style Guidelines
 
-## Good-to-knows
+> Good to know: Time is stored and measured in milliseconds unless required otherwise.
 
-- Time is stored and measured in milliseconds by default.
+### Language and naming conventions
 
-## Style Guidelines
+#### Use British English spelling.
 
-- <u>British English</u> spelling is used for everything other than string keys (localisations), special `custom_id`s, as well as property names in objects stored or transferred out of Logos. This would include database documents and Redis entries.
-- All external packages are imported with an alias, for example `import * as package` or `import package`.
-- `===` is used over `==` for equality checks.
-    - `==` does type coalescing, which although is not an issue most of the time, those cases where it does make a difference need to be eliminated.
-- `??` is used over `||` for coalescing values.
-    - `||` coalesces falsy values over matching against exclusively `undefined` and `null`.
-- `value === undefined` is used over `!value`, similarly use `value !== undefined` over `!!value`.
-    - This is for the same reason as outlined in the mention of `==`.
-- `undefined` is used over `null`.
-    - `null` is only permitted when making the distinction between "no value" (`undefined`) and "remove this value" (`null`).
-- `#` is used for declaring private API members. Do not use TypeScript's `public`, `protected` and `private` keywords.
-    - `private` is permitted for hiding constructors.
-- `return undefined;` is used over `return;` when the return type can be `undefined`.
-- Union types are used with a clearly defined key->value mapping object over `enum`s.
-    - `enum`s do not exist in vanilla JavaScript, and similar deviations from TypeScript being a true superset should be avoided.
-- Complete forms of words are used whenever possible; Do not shorten words unless there's a good reason to other than simple brevity. Acronyms are fine. "ID" is also okay.
-    - For example, use 'request', 'transaction', 'diagnostics' and 'source' over 'req', 'tx', 'diag' or 'src'.
-- `+=` and `-=` are used over `++` and `--`.
-    - These are more in line with other similar operations such as `*=`, `/=` and `**=`. The assignment is also explicit.
-- `[]` is used on tuples, `.at()` is used on arrays.
+The codebase is written from start to end using British English spellings. To maintain the same degree of consistency, new code should also be written using British spelling.
+
+If you do not know British English spelling, and you don't have much time to learn them, **you can submit your changes anyway**. A reviewer will help out in updating the spellings to match the rest of the codebase.
+
+However, if you have a spare moment to learn the differences, please do.
+
+> ❌ `color`, `initialize`, `license`, `journaling`
+> 
+> ✅ `colour`, `initialise`, `licence`, `journalling`
+
+#### Use complete forms of words; Do not shorten words just for the sake of it.
+
+Acronyms are fine, the abbreviation 'id' is also fine.
+
+> ❌ `req`, `tx`, `diag`, `src`, `cert`, `conf`, ...
+> 
+> ✅ `request`, `transaction`, `diagnostics`, `source`, `certificate`, `configuration`, ...
+> 
+> 👌 `url`, `http`, `ip`, `tls`\
+> 👌 `id`
+
+### Transparency
+
+#### Use namespacing when importing libraries.
+
+Keeping external APIs under an alias makes it always abundantly clear where a given symbol comes from.
+
+Accessing all external APIs via a namespace also eliminates the need for future gymnastics with naming when the names of two imported members do, predictably, conflict.
+
+> ❌
+> ```typescript
+> import { Server as CarbonServer, ServerOptions as CarbonServerOptions } from "carbon";
+> import { Server as HydrogenServer, ServerOptions as HydrogenServerOptions } from "hydrogen";
+> 
+> new CarbonServer({ options: new CarbonServerOptions() });
+> new HydrogenServer({ options: new HydrogenServerOptions() });
+> ```
+> 
+> ✅
+> ```typescript
+> import * as carbon from "carbon";
+> import * as hydrogen from "hydrogen";
+> 
+> new carbon.Server({ options: new carbon.ServerOptions(...) });
+> new hydrogen.Server({ options: new hydrogen.ServerOptions(...) });
+> ```
+
+### Strictness
+
+#### Use non-coalescing operators
+
+Using the non-coalescing `===`, `??` over `==`, `||` prevents errors arising from oversights in type coalescing.
+
+Unless it makes sense in a given scenario to use an operator that does this kind of coalescing, whether to reduce verbosity or otherwise, use the non-coalescing operators instead.
+
+> ❌ `id == 123`, `option || fallback`
+> 
+> ✅ `id === 123`, `option ?? fallback`
+
+#### Use `undefined` over `null`
+
+To represent missing values, use `undefined`.
+
+`null` is fine to use *alongside* `undefined` when making a distinction such as 'this value does not exist' and 'delete this value'.
+
+> ❌ `async getUser(): Promise<User | null>`
+> 
+> ✅ `async getUser(): Promise<User | undefined>`
+>
+> 👌 `async updateProfile({ title?: string | null }): Promise<void>;`
+
+### Keeping code close to JS
+
+#### Do not use TypeScript's accessibility keywords; Use `#` to declare private API members.
+
+> ❌ `private readonly property: string;`
+> 
+> ✅ `readonly #property: string;`
+
+#### Do not use TypeScript's `enum` keyword.
+
+Instead, use a union type of strings.
+
+> ❌
+> ```typescript
+> enum MentionTypes {
+>   User,
+>   Channel,
+>   Role,
+> }
+> 
+> function mention(id: string, { type }: { type: MentionTypes }): string { ... }
+> 
+> mention(id, { type: MentionTypes.User });
+> ```
+> 
+> ✅
+> ```typescript
+> type MentionType = "user" | "channel" | "role";
+> 
+> function mention(id: string, { type }: { type: MentionType }): string { ... }
+> 
+> mention(id, { type: "user" });
+> ```
+
+### Idiosyncratic conventions
+
+#### Use `[]` when accessing tuples, `.at()` when accessing basic arrays.
+
+This originated as a preference as it's a nice and relatively fault-free way to make a distinction between tuple accesses and basic array accesses.
+
+> ```typescript
+> const tuple: [first: string, second: number, third: boolean] = ['string', 1, true];
+> const array: number[] = [10, 20, 30, 40, 50];
+> ```
+> 
+> ❌
+> ```typescript
+> tuple.at(0);
+> array[0];
+> ```
+> 
+> ✅
+> ```typescript
+> tuple[0];
+> array.at(0);
+> ```
+
+#### Use `+= 1` and `-= 1` over `++` and `--`.
+
+These are more in line with other similar operations such as `*=`, `/=` and `**=`.
+
+> ❌ `value++`, `value--`
+> 
+> ✅ `value += 1`, `value -= 1`
