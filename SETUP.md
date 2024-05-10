@@ -199,4 +199,4 @@ Hopefully, once you've reached this section, you would have a fully configured i
 
 If that's the case, congratulations, and welcome to the world of Logos!
 
-If not, and you've encountered difficulty along the way, [join the Logos support server to get a solution](https://discord.gg/TWdAjkTfah).
+If not, and you've encountered difficulty along the way, [join the Logos support server to get assistance](https://discord.gg/TWdAjkTfah).
