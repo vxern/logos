@@ -63,6 +63,8 @@ import {
 	handleTranslateMessage,
 } from "logos/commands/handlers/translate";
 import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
+import * as Discord from "@discordeno/bot";
+import {handleFindWord, handleFindWordAutocomplete} from "logos/commands/handlers/word";
 
 /**
  * @privateRemarks
@@ -213,6 +215,30 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleTranslateMessage,
 		flags: { isShowable: true },
+	},
+	word: {
+		identifier: "word",
+		type: Discord.ApplicationCommandTypes.ChatInput,
+		defaultMemberPermissions: ["VIEW_CHANNEL"],
+		handle: handleFindWord,
+		handleAutocomplete: handleFindWordAutocomplete,
+		options: {
+			word: {
+				identifier: "word",
+				type: Discord.ApplicationCommandOptionTypes.String,
+				required: true,
+			},
+			language: {
+				identifier: "language",
+				type: Discord.ApplicationCommandOptionTypes.String,
+				autocomplete: true,
+			},
+			verbose: {
+				identifier: "verbose",
+				type: Discord.ApplicationCommandOptionTypes.Boolean,
+			},
+		},
+		flags: { hasRateLimit: true, isShowable: true }
 	},
 	// Meta
 	acknowledgements: {
