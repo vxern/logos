@@ -67,12 +67,17 @@ declare global {
 		type VoiceState = Pick<Discord.VoiceState, keyof Properties["voiceState"]>;
 
 		interface InteractionLocaleData {
+			// Localisation
 			locale: Locale;
 			language: LocalisationLanguage;
 			guildLocale: Locale;
 			guildLanguage: LocalisationLanguage;
+			displayLocale: Locale;
+			displayLanguage: LocalisationLanguage;
+			// Learning
 			learningLocale: Locale;
 			learningLanguage: LearningLanguage;
+			// Feature
 			featureLanguage: FeatureLanguage;
 		}
 

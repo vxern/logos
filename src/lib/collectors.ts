@@ -263,6 +263,10 @@ class InteractionCollector<
 			const interaction: Logos.Interaction<Metadata, Parameters> = {
 				...(interactionRaw as unknown as Logos.Interaction),
 				...locales,
+				...{
+					displayLocale: parameters.show ? locales.guildLocale : locales.locale,
+					displayLanguage: parameters.show ? locales.guildLanguage : locales.language,
+				},
 				commandName: name,
 				metadata,
 				parameters,
@@ -272,7 +276,7 @@ class InteractionCollector<
 		});
 	}
 
-	async #getLocaleData(interaction: Discord.Interaction): Promise<Logos.InteractionLocaleData> {
+	async #getLocaleData(interaction: Discord.Interaction): Promise<Omit<Logos.InteractionLocaleData, "displayLocale" | "displayLanguage">> {
 		const member = this.#client.entities.members.get(interaction.guildId!)?.get(interaction.user.id);
 		if (member === undefined) {
 			return {
