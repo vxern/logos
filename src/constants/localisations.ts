@@ -16,6 +16,7 @@ import silesian from "logos:constants/transformers/silesian";
 import spanish from "logos:constants/transformers/spanish";
 import swedish from "logos:constants/transformers/swedish";
 import turkish from "logos:constants/transformers/turkish";
+import {PartOfSpeech} from "logos:constants/parts-of-speech";
 
 type TransformerType = "pluralise";
 type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;
@@ -237,6 +238,31 @@ const localisations = Object.freeze({
 		Zhuang: "languages.zhuang",
 		Zulu: "languages.zulu",
 	} satisfies Record<Language, string>,
+	partsOfSpeech: {
+		noun: "words.noun",
+		verb: "words.verb",
+		adjective: "words.adjective",
+		adverb: "words.adverb",
+		adposition: "words.adposition",
+		article: "words.article",
+		"proper-noun": "words.properNoun",
+		letter: "words.letter",
+		character: "words.character",
+		phrase: "words.phrase",
+		idiom: "words.idiom",
+		symbol: "words.symbol",
+		syllable: "words.syllable",
+		numeral: "words.numeral",
+		initialism: "words.initialism",
+		particle: "words.particle",
+		punctuation: "words.punctuation",
+		affix: "words.affix",
+		pronoun: "words.pronoun",
+		determiner: "words.determiner",
+		conjunction: "words.conjunction",
+		interjection: "words.interjection",
+		unknown: "words.unknown",
+	} as const satisfies Record<PartOfSpeech, string>,
 } as const);
 
 export default localisations;
