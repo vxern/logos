@@ -89,6 +89,16 @@ function getBaseLanguage<L extends Language>(language: L): Base<L> {
 	return baseLanguage as Base<L>;
 }
 
+function getFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
+	const baseLanguage = getBaseLanguage(language);
+
+	if (isFeatureLanguage(baseLanguage)) {
+		return baseLanguage;
+	}
+
+	return undefined;
+}
+
 function getTranslationLanguage(language: Language): TranslationLanguage | undefined {
 	if (isTranslationLanguage(language)) {
 		return language;
@@ -137,6 +147,7 @@ export {
 	getCLDDetectionLanguageByLocale,
 	isCLDLocale,
 	getTranslationLanguage,
+	getFeatureLanguage,
 	getBaseLanguage,
 };
 export type {
