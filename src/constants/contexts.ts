@@ -4,6 +4,7 @@ import { RuleOrOther } from "logos:constants/rules";
 import { SlowmodeLevel } from "logos:constants/slowmode";
 import { TimeUnit } from "logos:constants/time";
 import { Client } from "logos/client";
+import {PartOfSpeech} from "logos:constants/parts-of-speech";
 
 type ContextBuilder<T extends object> = ({
 	localise,
@@ -1421,6 +1422,135 @@ export default Object.freeze({
 	}),
 	stream: ({ localise, locale }) => ({
 		stream: localise("music.options.play.strings.stream", locale)(),
+	}),
+	dexonlinePronoun: ({ localise, locale }) => ({
+		title: localise("word.strings.nouns.cases.cases", locale)(),
+		singular: localise("word.strings.nouns.singular", locale)(),
+		plural: localise("word.strings.nouns.plural", locale)(),
+		nominativeAccusative: localise("word.strings.nouns.cases.nominativeAccusative", locale)(),
+		genitiveDative: localise("word.strings.nouns.cases.genitiveDative", locale)(),
+		vocative: localise("word.strings.nouns.cases.vocative", locale)(),
+	}),
+	dexonlineNoun: ({ localise, locale }) => ({
+		title: localise("word.strings.nouns.cases.cases", locale)(),
+		singular: localise("word.strings.nouns.singular", locale)(),
+		plural: localise("word.strings.nouns.plural", locale)(),
+		nominativeAccusative: localise("word.strings.nouns.cases.nominativeAccusative", locale)(),
+		genitiveDative: localise("word.strings.nouns.cases.genitiveDative", locale)(),
+		vocative: localise("word.strings.nouns.cases.vocative", locale)(),
+	}),
+	dexonlineVerb: ({ localise, locale }) => ({
+		moodsAndParticiples: {
+			title: localise("word.strings.verbs.moodsAndParticiples", locale)(),
+			infinitive: localise("word.strings.verbs.moods.infinitive", locale)(),
+			longInfinitive: localise("word.strings.verbs.moods.longInfinitive", locale)(),
+			imperative: localise("word.strings.verbs.moods.imperative", locale)(),
+			supine: localise("word.strings.verbs.moods.supine", locale)(),
+			present: localise("word.strings.verbs.participles.present", locale)(),
+			past: localise("word.strings.verbs.participles.past", locale)(),
+		},
+		indicative: {
+			title: localise("word.strings.verbs.moods.indicative", locale)(),
+			present: localise("word.strings.verbs.tenses.present", locale)(),
+			preterite: localise("word.strings.verbs.tenses.preterite", locale)(),
+			imperfect: localise("word.strings.verbs.tenses.imperfect", locale)(),
+			pluperfect: localise("word.strings.verbs.tenses.pluperfect", locale)(),
+			perfect: localise("word.strings.verbs.tenses.perfect", locale)(),
+			futureCertain: localise("word.strings.verbs.tenses.futureCertain", locale)(),
+			futurePlanned: localise("word.strings.verbs.tenses.futurePlanned", locale)(),
+			futureDecided: localise("word.strings.verbs.tenses.futureDecided", locale)(),
+			futureIntended: localise("word.strings.verbs.tenses.futureIntended", locale)(),
+			popular: localise("word.strings.verbs.popular", locale)(),
+			futureInThePast: localise("word.strings.verbs.tenses.futureInThePast", locale)(),
+			futurePerfect: localise("word.strings.verbs.tenses.futurePerfect", locale)(),
+		},
+		subjunctive: {
+			title: localise("word.strings.verbs.moods.subjunctive", locale)(),
+			present: localise("word.strings.verbs.tenses.present", locale)(),
+			perfect: localise("word.strings.verbs.tenses.perfect", locale)(),
+		},
+		conditional: {
+			title: localise("word.strings.verbs.moods.conditional", locale)(),
+			present: localise("word.strings.verbs.tenses.present", locale)(),
+			perfect: localise("word.strings.verbs.tenses.perfect", locale)(),
+		},
+		presumptive: {
+			title: localise("word.strings.verbs.moods.presumptive", locale)(),
+			present: localise("word.strings.verbs.tenses.present", locale)(),
+			presentContinuous: localise("word.strings.verbs.tenses.presentContinuous", locale)(),
+			perfect: localise("word.strings.verbs.tenses.perfect", locale)(),
+		},
+	}),
+	dexonlineAdjective: ({ localise, locale }) => ({
+		title: localise("word.strings.nouns.cases.cases", locale)(),
+		singular: localise("word.strings.nouns.singular", locale)(),
+		plural: localise("word.strings.nouns.plural", locale)(),
+		nominativeAccusative: localise("word.strings.nouns.cases.nominativeAccusative", locale)(),
+		genitiveDative: localise("word.strings.nouns.cases.genitiveDative", locale)(),
+	}),
+	dexonlineDeterminer: ({ localise, locale }) => ({
+		title: localise("word.strings.nouns.cases.cases", locale)(),
+		singular: localise("word.strings.nouns.singular", locale)(),
+		plural: localise("word.strings.nouns.plural", locale)(),
+		nominativeAccusative: localise("word.strings.nouns.cases.nominativeAccusative", locale)(),
+		genitiveDative: localise("word.strings.nouns.cases.genitiveDative", locale)(),
+	}),
+	invalidLanguage: ({ localise, locale }) => ({
+		title: localise("word.strings.invalid.language.title", locale)(),
+		description: localise("word.strings.invalid.language.description", locale)(),
+	}),
+	noDictionaryAdapters: ({ localise, locale }) => ({
+		title: localise("word.strings.noDictionaryAdapters.title", locale)(),
+		description: localise("word.strings.noDictionaryAdapters.description", locale)(),
+	}),
+	noResults: ({ localise, locale }) => ({
+		title: localise("word.strings.noResults.title", locale)(),
+		description: localise("word.strings.noResults.description", locale),
+	}),
+	wordPage: ({ localise, locale }) => ({
+		page: localise("word.strings.page", locale)(),
+	}),
+	definitionView: ({ localise, locale }) => ({
+		definitions: localise("word.strings.definitions", locale)(),
+	}),
+	inflectionView: ({ localise, locale }) => ({
+		inflection: localise("word.strings.inflection", locale)(),
+	}),
+	partOfSpeech: ({ localise, locale }) => ({
+		partOfSpeech: (partOfSpeech: PartOfSpeech) => localise(constants.localisations.partsOfSpeech[partOfSpeech], locale)(),
+	}),
+	partOfSpeechUnknown: ({ localise, locale }) => ({
+		unknown: localise("words.unknown", locale)(),
+	}),
+	nativeDefinitionsForWord: ({ localise, locale }) => ({
+		nativeDefinitionsForWord: localise("word.strings.nativeDefinitionsForWord", locale),
+	}),
+	nativeDefinitions: ({ localise, locale }) => ({
+		nativeDefinitions: localise("word.strings.fields.nativeDefinitions", locale)(),
+	}),
+	definitionsForWord: ({ localise, locale }) => ({
+		definitionsForWord: localise("word.strings.definitionsForWord", locale),
+	}),
+	definitions: ({ localise, locale }) => ({
+		definitions: localise("word.strings.fields.definitions", locale)(),
+	}),
+	expressions: ({ localise, locale }) => ({
+		expressions: localise("word.strings.fields.expressions", locale)(),
+	}),
+	etymology: ({ localise, locale }) => ({
+		etymology: localise("word.strings.fields.etymology", locale)(),
+	}),
+	sourcedFromDictionaries: ({ localise, locale }) => ({
+		sourcedResponsibly: localise("word.strings.sourcedResponsibly", locale),
+	}),
+	wordRelations: ({ localise, locale }) => ({
+		synonyms: localise("word.strings.relations.synonyms", locale)(),
+		antonyms: localise("word.strings.relations.antonyms", locale)(),
+		diminutives: localise("word.strings.relations.diminutives", locale)(),
+		augmentatives: localise("word.strings.relations.augmentatives", locale)(),
+	}),
+	definitionsOmitted: ({ localise, locale }) => ({
+		definitionsOmitted: localise("word.strings.definitionsOmitted", locale),
 	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };
