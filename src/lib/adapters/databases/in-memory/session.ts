@@ -1,5 +1,5 @@
 import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import { DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
 import { InMemoryDocumentQuery } from "logos/adapters/databases/in-memory/query";
 import { Model } from "logos/database/model";

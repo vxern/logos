@@ -1,5 +1,5 @@
 import { Locale } from "logos:constants/languages";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import Redis from "ioredis";
 import { Logger } from "logos/logger";
 
@@ -11,52 +11,59 @@ interface SentencePair {
 }
 type SentencePairEncoded = [sentenceId: number, sentence: string, translationId: number, translation: string];
 
-class Cache {
-	readonly isBootstrapped: boolean;
+class VolatileStore {
+	readonly log: Logger;
 
-	readonly #log: Logger;
+	readonly redis: Redis;
 
-	readonly #_redis?: Redis;
-
-	get redis(): Redis {
-		return this.#_redis!;
-	}
-
-	constructor({ environment }: { environment: Environment }) {
-		this.#log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: environment.isDebug });
-
-		if (environment.redisHost === undefined || environment.redisPort === undefined) {
-			this.#log.warn(
-				"One of `REDIS_HOST` or `REDIS_PORT` have not been provided. Logos will run without a Redis integration.",
-			);
-			this.isBootstrapped = false;
-			return;
-		}
-
-		this.#_redis = new Redis({
-			host: environment.redisHost,
-			port: Number(environment.redisPort),
-			password: environment.redisPassword,
+	private constructor({
+		log,
+		host,
+		port,
+		password,
+	}: { log: Logger; host: string; port: string; password: string | undefined }) {
+		this.log = log;
+		this.redis = new Redis({
+			host,
+			port: Number(port),
+			password,
 			reconnectOnError: (_) => true,
 			lazyConnect: true,
 		});
-		this.isBootstrapped = true;
+	}
+
+	static tryCreate({ environment }: { environment: Environment }): VolatileStore | undefined {
+		const log = Logger.create({ identifier: "Client/VolatileStore", isDebug: environment.isDebug });
+
+		if (environment.redisHost === undefined || environment.redisPort === undefined) {
+			log.warn(
+				"One of `REDIS_HOST` or `REDIS_PORT` have not been provided. Logos will run without a Redis integration.",
+			);
+			return undefined;
+		}
+
+		return new VolatileStore({
+			log,
+			host: environment.redisHost,
+			port: environment.redisPort,
+			password: environment.redisPassword,
+		});
 	}
 
 	async start(): Promise<void> {
-		if (!this.isBootstrapped) {
-			return;
-		}
+		this.log.info("Starting cache...");
 
+		this.log.info("Connecting to Redis instance...");
 		await this.redis.connect();
+		this.log.info("Connected to Redis instance.");
 	}
 
 	stop(): void {
-		if (!this.isBootstrapped) {
-			return;
-		}
+		this.log.info("Stopping cache...");
 
+		this.log.info("Disconnecting from Redis instance...");
 		this.redis.disconnect();
+		this.log.info("Disconnected from Redis instance...");
 	}
 
 	async getSentencePairCount({ learningLocale }: { learningLocale: Locale }): Promise<number> {
@@ -105,5 +112,5 @@ class Cache {
 	}
 }
 
-export { Cache };
+export { VolatileStore };
 export type { SentencePair };

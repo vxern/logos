@@ -1,5 +1,5 @@
 import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import { DatabaseAdapter, DocumentConventions } from "logos/adapters/databases/adapter";
 import { InMemoryDocumentConventions } from "logos/adapters/databases/in-memory/conventions";
 import { InMemoryDocumentMetadata } from "logos/adapters/databases/in-memory/document";

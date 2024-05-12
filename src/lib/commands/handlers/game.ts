@@ -1,11 +1,11 @@
 import { Locale } from "logos:constants/languages";
 import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
-import { SentencePair } from "logos/cache";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { GuildStats } from "logos/database/guild-stats";
 import { User } from "logos/database/user";
+import { SentencePair } from "logos/stores/volatile";
 
 function random(max: number): number {
 	return Math.floor(Math.random() * max);
@@ -23,8 +23,10 @@ interface GameData {
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
 async function handleStartGame(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const sentencePairCount = await client.cache.getSentencePairCount({ learningLocale: interaction.learningLocale });
-	if (sentencePairCount === 0) {
+	const sentencePairCount = await client.volatile?.getSentencePairCount({
+		learningLocale: interaction.learningLocale,
+	});
+	if (sentencePairCount === undefined || sentencePairCount === 0) {
 		const strings = constants.contexts.noSentencesAvailable({
 			localise: client.localise.bind(client),
 			locale: interaction.locale,
@@ -313,7 +315,7 @@ async function getSentenceSelection(
 	client: Client,
 	{ learningLocale }: { learningLocale: Locale },
 ): Promise<SentenceSelection> {
-	const sentencePairs = await client.cache.getRandomSentencePairs({
+	const sentencePairs = await client.volatile!.getRandomSentencePairs({
 		learningLocale,
 		count: constants.PICK_MISSING_WORD_CHOICES,
 	});

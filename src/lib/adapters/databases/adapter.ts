@@ -1,5 +1,5 @@
 import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import { IdentifierData, IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { Logger } from "logos/logger";
 import { DatabaseStore } from "logos/stores/database";

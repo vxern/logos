@@ -401,7 +401,7 @@ class CommandStore {
 				commands.push(this.commands.cefr);
 			}
 
-			if (guildDocument.isEnabled("game") && this.#client.cache.isBootstrapped) {
+			if (guildDocument.isEnabled("game") && this.#client.volatile) {
 				commands.push(this.commands.game);
 			}
 

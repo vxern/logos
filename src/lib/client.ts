@@ -1,6 +1,5 @@
-import { Environment } from "logos:core/environment";
 import { timestamp } from "logos:core/formatting";
-import { Cache } from "logos/cache";
+import { Environment } from "logos:core/loaders/environment";
 import { Collector, InteractionCollector } from "logos/collectors";
 import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
@@ -22,6 +21,7 @@ import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationStore, RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
+import { VolatileStore } from "logos/stores/volatile";
 
 class Client {
 	static #client?: Client;
@@ -29,7 +29,7 @@ class Client {
 	readonly environment: Environment;
 	readonly log: Logger;
 	readonly database: DatabaseStore;
-	readonly cache: Cache;
+	readonly volatile?: VolatileStore;
 	readonly diagnostics: Diagnostics;
 
 	readonly #localisations: LocalisationStore;
@@ -269,7 +269,7 @@ class Client {
 		this.environment = environment;
 		this.log = log;
 		this.database = database;
-		this.cache = new Cache({ environment });
+		this.volatile = VolatileStore.tryCreate({ environment });
 		this.diagnostics = new Diagnostics(this);
 
 		this.#localisations = new LocalisationStore({ environment, localisations });
@@ -422,7 +422,9 @@ class Client {
 	}
 
 	async start(): Promise<void> {
-		await this.cache.start();
+		this.log.info("Starting client...");
+
+		await this.volatile?.start();
 		await this.database.start({ prefetchDocuments: true });
 		await this.#services.start();
 		await this.#journalling.start();
@@ -433,7 +435,7 @@ class Client {
 	async stop(): Promise<void> {
 		await this.#_guildReloadLock.dispose();
 
-		this.cache.stop();
+		this.volatile?.stop();
 		await this.database.stop();
 		await this.#services.stop();
 		this.#journalling.stop();

@@ -1,5 +1,5 @@
 import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBAdapter } from "logos/adapters/databases/couchdb/database";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory/database";

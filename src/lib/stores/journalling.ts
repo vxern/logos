@@ -5,7 +5,8 @@ import { Logger } from "logos/logger";
 import loggers from "logos/stores/journalling/loggers";
 
 class JournallingStore {
-	readonly #log: Logger;
+	readonly log: Logger;
+
 	readonly #client: Client;
 
 	readonly #_guildBanAddCollector: Collector<"guildBanAdd">;
@@ -16,7 +17,8 @@ class JournallingStore {
 	readonly #_messageUpdateCollector: Collector<"messageUpdate">;
 
 	constructor(client: Client) {
-		this.#log = Logger.create({ identifier: "JournallingStore", isDebug: client.environment.isDebug });
+		this.log = Logger.create({ identifier: "JournallingStore", isDebug: client.environment.isDebug });
+
 		this.#client = client;
 
 		this.#_guildBanAddCollector = new Collector();
@@ -125,7 +127,7 @@ class JournallingStore {
 		await this.#client.bot.rest
 			.sendMessage(channelId, message)
 			.catch(() =>
-				this.#log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`),
+				this.log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`),
 			);
 	}
 }

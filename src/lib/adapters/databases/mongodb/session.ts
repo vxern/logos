@@ -1,5 +1,5 @@
 import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { MongoDBDocumentConventions } from "logos/adapters/databases/mongodb/conventions";
 import { MongoDBDocument } from "logos/adapters/databases/mongodb/document";

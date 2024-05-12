@@ -1,11 +1,11 @@
-import { mockClient } from "logos:test/mocks";
+import { mockEnvironment } from "logos:test/mocks";
 import { expect } from "chai";
-import { Cache } from "logos/cache";
+import { VolatileStore } from "logos/stores/volatile";
 
-describe("Cache", () => {
+describe("VolatileStore", () => {
 	describe("constructor()", () => {
 		it("creates an object.", () => {
-			expect(() => new Cache(mockClient)).to.not.throw;
+			expect(() => VolatileStore.tryCreate(mockEnvironment)).to.not.throw;
 		});
 	});
 

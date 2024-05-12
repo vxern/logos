@@ -1,5 +1,5 @@
 import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
 import { RavenDBDocument } from "logos/adapters/databases/ravendb/document";

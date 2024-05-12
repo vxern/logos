@@ -1,5 +1,5 @@
 import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
 import { RethinkDBDocument } from "logos/adapters/databases/rethinkdb/document";

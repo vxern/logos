@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/environment";
+import { Environment } from "logos:core/loaders/environment";
 import { DatabaseAdapter, DocumentConventions } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
 import { RavenDBDocumentMetadataContainer } from "logos/adapters/databases/ravendb/document";
