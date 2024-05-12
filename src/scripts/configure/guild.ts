@@ -7,9 +7,13 @@ import { DatabaseStore } from "logos/stores/database";
 const { values, positionals } = parseArgs({
 	args: bun.argv,
 	options: {
-		full: {
+		all: {
 			type: "boolean",
-			short: "f",
+			short: "a",
+		},
+		none: {
+			type: "boolean",
+			short: "n",
 		},
 	},
 	strict: true,
@@ -32,11 +36,10 @@ const database = await DatabaseStore.create({ environment });
 
 await database.start({ prefetchDocuments: false });
 
-if (values.full) {
+if (values.all) {
 	console.info(`Enabling all features for guild with ID ${id}...`);
 
 	const document = new Guild(database, { guildId: id });
-	await document.create(database);
 	await document.update(database, async () => {
 		document.isNative = true;
 		document.languages = {
@@ -260,6 +263,19 @@ if (values.full) {
 	});
 
 	console.info("Features enabled!");
+}
+
+if (values.none) {
+	console.info(`Disabling all features for guild with ID ${id}...`);
+
+	const document = new Guild(database, { guildId: id });
+	await document.update(database, async () => {
+		document.isNative = false;
+		document.languages = undefined;
+		document.features = undefined;
+	});
+
+	console.info("Features disabled!");
 }
 
 await database.stop();
