@@ -50,19 +50,35 @@ class VolatileStore {
 		});
 	}
 
-	async start(): Promise<void> {
-		this.log.info("Starting cache...");
+	async setup(): Promise<void> {
+		this.log.info("Setting up volatile store...");
 
+		await this.#connect();
+
+		this.log.info("Volatile store set up.");
+	}
+
+	teardown(): void {
+		this.log.info("Tearing down volatile store...");
+
+		this.#disconnect();
+
+		this.log.info("Volatile store torn down.");
+	}
+
+	async #connect(): Promise<void> {
 		this.log.info("Connecting to Redis instance...");
+
 		await this.redis.connect();
+
 		this.log.info("Connected to Redis instance.");
 	}
 
-	stop(): void {
-		this.log.info("Stopping cache...");
-
+	#disconnect(): void {
 		this.log.info("Disconnecting from Redis instance...");
+
 		this.redis.disconnect();
+
 		this.log.info("Disconnected from Redis instance...");
 	}
 

@@ -1,4 +1,5 @@
 import { Client } from "logos/client";
+import {code} from "logos:core/formatting";
 
 type ID = bigint | string;
 type IndexOr<T> = T | ID;
@@ -13,6 +14,7 @@ type RoleLike = Logos.Role | Discord.Role | Discord.CamelizedDiscordRole;
 type GuildLike = Logos.Guild | Discord.Guild | Discord.CamelizedDiscordGuild;
 type MessageLike = Logos.Message | Discord.Message | Discord.CamelizedDiscordMessage;
 type ChannelLike = Logos.Channel | Discord.Channel | Discord.CamelizedDiscordChannel;
+type InteractionLike = Logos.Interaction | Discord.Interaction;
 
 class Diagnostics {
 	readonly #client: Client;
@@ -33,7 +35,7 @@ class Diagnostics {
 			user = this.#client.entities.users.get(BigInt(userOrId))!;
 		}
 
-		const tag = user.discriminator === "0" ? `@${user.username}` : `${user.username}#${user.discriminator}`;
+		const tag = user.discriminator === "0" ? user.username : `${user.username}#${user.discriminator}`;
 
 		if (options?.prettify) {
 			return `${tag} · ID ${user.id}`;
@@ -174,6 +176,64 @@ class Diagnostics {
 		}
 
 		return `${channelTypeFormatted} "${channel.name}" (ID ${channel.id}) @ ${guildFormatted}`;
+	}
+
+	interaction(interaction: InteractionLike): string {
+		let guildFormatted: string;
+		if (interaction.guildId !== undefined) {
+			guildFormatted = this.guild(interaction.guildId);
+		} else {
+			guildFormatted = "unknown guild";
+		}
+
+		let memberFormatted: string;
+		if (interaction.member !== undefined) {
+			memberFormatted = this.member(interaction.member);
+		} else {
+			memberFormatted = "unknown member";
+		}
+
+		let interactionTypeFormatted: string;
+		switch (interaction.type) {
+			case Discord.InteractionTypes.Ping: {
+				interactionTypeFormatted = "ping interaction";
+				break;
+			}
+			case Discord.InteractionTypes.ApplicationCommand: {
+				if ("commandName" in interaction) {
+					interactionTypeFormatted = `command interaction (${code(interaction.commandName)})`;
+				} else {
+					interactionTypeFormatted = "command interaction (unknown command)";
+				}
+				break;
+			}
+			case Discord.InteractionTypes.MessageComponent: {
+				const customId = interaction.data?.customId;
+				if (customId !== undefined) {
+					interactionTypeFormatted = `component interaction (${code(customId)}})`;
+				} else {
+					interactionTypeFormatted = "component interaction (unknown custom ID)";
+				}
+				break;
+			}
+			case Discord.InteractionTypes.ApplicationCommandAutocomplete: {
+				if ("commandName" in interaction) {
+					interactionTypeFormatted = `autocomplete interaction (${code(interaction.commandName)})`;
+				} else {
+					interactionTypeFormatted = "autocomplete interaction (unknown command)";
+				}
+				break;
+			}
+			case Discord.InteractionTypes.ModalSubmit: {
+				interactionTypeFormatted = "modal interaction";
+				break;
+			}
+			default:
+				interactionTypeFormatted = `unknown interaction type (ID ${interaction.type})`;
+				break;
+		}
+
+		return `${interactionTypeFormatted} (ID ${interaction.id}) from ${memberFormatted} @ ${guildFormatted}`;
 	}
 }
 

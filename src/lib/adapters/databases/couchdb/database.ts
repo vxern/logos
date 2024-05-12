@@ -74,9 +74,9 @@ class CouchDBAdapter extends DatabaseAdapter {
 		});
 	}
 
-	async start(): Promise<void> {}
+	async setup(): Promise<void> {}
 
-	async stop(): Promise<void> {}
+	async teardown(): Promise<void> {}
 
 	conventionsFor({
 		document,

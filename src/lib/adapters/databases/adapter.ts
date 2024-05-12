@@ -11,9 +11,9 @@ abstract class DatabaseAdapter {
 		this.log = Logger.create({ identifier: `DatabaseAdapter(${identifier})`, isDebug: environment.isDebug });
 	}
 
-	abstract start(): Promise<void>;
+	abstract setup(): Promise<void>;
 
-	abstract stop(): Promise<void>;
+	abstract teardown(): Promise<void>;
 
 	abstract conventionsFor({
 		document,

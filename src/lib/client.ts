@@ -4,7 +4,6 @@ import { Collector, InteractionCollector } from "logos/collectors";
 import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
 import { Guild } from "logos/database/guild";
-import { GuildStats } from "logos/database/guild-stats";
 import { Model } from "logos/database/model";
 import { Diagnostics } from "logos/diagnostics";
 import { ActionLock } from "logos/helpers/action-lock";
@@ -344,9 +343,9 @@ class Client {
 	async #setupCollectors(): Promise<void> {
 		this.log.info("Setting up event collectors...");
 
-		this.#_guildCreateCollector.onCollect(this.#setupGuild.bind(this));
-		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild(guildId));
-		this.#_interactionCollector.onInteraction(this.handleInteraction.bind(this));
+		this.#_guildCreateCollector.onCollect((guild) => this.#setupGuild(guild));
+		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild({ guildId }));
+		this.#_interactionCollector.onInteraction(this.receiveInteraction.bind(this));
 		this.#_channelDeleteCollector.onCollect((channel) => {
 			this.entities.channels.delete(channel.id);
 
@@ -359,6 +358,8 @@ class Client {
 		await this.registerCollector("guildDelete", this.#_guildDeleteCollector);
 		await this.registerInteractionCollector(this.#_interactionCollector);
 		await this.registerCollector("channelDelete", this.#_channelDeleteCollector);
+
+		this.log.info("Event collectors set up.");
 	}
 
 	#teardownCollectors(): void {
@@ -368,34 +369,34 @@ class Client {
 		this.#_guildDeleteCollector.close();
 		this.#_channelDeleteCollector.close();
 		this.#_interactionCollector.close();
+
+		this.log.info("Event collectors torn down.");
 	}
 
 	async #setupGuild(
 		guild: Discord.Guild | Logos.Guild,
-		options: { isUpdate: boolean } = { isUpdate: false },
+		{ isReload = false }: { isReload?: boolean } = {},
 	): Promise<void> {
 		// This check prevents the same guild being set up multiple times. This can happen when a shard managing a given
 		// guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event again for
 		// a guild that Logos would already have been managing.
-		if (this.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
+		if (!isReload && this.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
 			return;
 		}
 
-		if (!options.isUpdate) {
-			this.log.info(`Logos added to "${guild.name}" (ID ${guild.id}).`);
+		if (!isReload) {
+			this.log.info(`Setting Logos up on ${this.diagnostics.guild(guild)}...`);
 		}
 
 		const guildDocument = await Guild.getOrCreate(this, { guildId: guild.id.toString() });
 
-		await GuildStats.getOrCreate(this, { guildId: guild.id.toString() });
-
-		await this.#services.startLocal(this, { guildId: guild.id, guildDocument });
+		await this.#services.setupGuildServices(this, { guildId: guild.id, guildDocument });
 
 		this.bot.rest
 			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
 			.catch((reason) => this.log.warn(`Failed to upsert commands on ${this.diagnostics.guild(guild)}:`, reason));
 
-		if (!options.isUpdate) {
+		if (!isReload) {
 			this.log.info(`Fetching ~${guild.memberCount} members of ${this.diagnostics.guild(guild)}...`);
 
 			const members = await this.bot.gateway
@@ -417,17 +418,17 @@ class Client {
 		}
 	}
 
-	async #teardownGuild(guildId: bigint): Promise<void> {
-		await this.#services.stopLocal(guildId);
+	async #teardownGuild({ guildId }: { guildId: bigint }): Promise<void> {
+		await this.#services.stopLocal(this, { guildId });
 	}
 
 	async start(): Promise<void> {
 		this.log.info("Starting client...");
 
-		await this.volatile?.start();
-		await this.database.start({ prefetchDocuments: true });
-		await this.#services.start();
-		await this.#journalling.start();
+		await this.volatile?.setup();
+		await this.database.setup({ prefetchDocuments: true });
+		await this.#services.setup();
+		await this.#journalling.setup();
 		await this.#setupCollectors();
 		await this.#connection.open();
 	}
@@ -435,10 +436,10 @@ class Client {
 	async stop(): Promise<void> {
 		await this.#_guildReloadLock.dispose();
 
-		this.volatile?.stop();
-		await this.database.stop();
-		await this.#services.stop();
-		this.#journalling.stop();
+		this.volatile?.teardown();
+		await this.database.teardown();
+		await this.#services.teardown();
+		this.#journalling.teardown();
 		this.#teardownCollectors();
 		await this.#connection.close();
 	}
@@ -450,26 +451,38 @@ class Client {
 	async #_handleGuildReload(guildId: bigint): Promise<void> {
 		const guild = this.entities.guilds.get(guildId);
 		if (guild === undefined) {
+			this.log.warn(`Tried to reload ${this.diagnostics.guild(guildId)}, but it wasn't cached.`);
 			return;
 		}
 
-		await this.#teardownGuild(guildId);
-		await this.#setupGuild(guild, { isUpdate: true });
+		this.log.info(`Reloading ${this.diagnostics.guild(guildId)}...`);
+
+		await this.#teardownGuild({ guildId });
+		await this.#setupGuild(guild, { isReload: true });
+
+		this.log.info(`${this.diagnostics.guild(guildId)} has been reloaded.`);
 	}
 
-	async handleInteraction(interaction: Logos.Interaction): Promise<void> {
+	async receiveInteraction(interaction: Logos.Interaction): Promise<void> {
 		// If it's a "none" message interaction, just acknowledge and good to go.
 		if (
 			interaction.type === Discord.InteractionTypes.MessageComponent &&
 			interaction.metadata[0] === constants.components.none
 		) {
+			this.log.info("Component interaction acknowledged.");
 			await this.acknowledge(interaction);
-
 			return;
 		}
 
+		if (interaction.type !== Discord.InteractionTypes.ApplicationCommand && interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete) {
+			return;
+		}
+
+		this.log.info(`Receiving ${this.diagnostics.interaction(interaction)}...`);
+
 		const handle = this.#commands.getHandler(interaction);
 		if (handle === undefined) {
+			this.log.warn(`Could not retrieve handler for ${this.diagnostics.interaction(interaction)}. Is the command registered?`);
 			return;
 		}
 
@@ -478,39 +491,26 @@ class Client {
 		if (this.#commands.hasRateLimit(interaction)) {
 			const rateLimit = this.#commands.getRateLimit(interaction, { executedAt });
 			if (rateLimit !== undefined) {
-				const nextAllowedUsageTimestampFormatted = timestamp(rateLimit.nextAllowedUsageTimestamp, {
-					format: "relative",
-				});
+				const nextUsable = rateLimit.nextAllowedUsageTimestamp - executedAt;
 
-				const strings = {
-					title: this.localise("interactions.rateLimited.title", interaction.locale)(),
-					description: {
-						tooManyUses: this.localise(
-							"interactions.rateLimited.description.tooManyUses",
-							interaction.locale,
-						)({ times: constants.defaults.COMMAND_RATE_LIMIT.uses }),
-						cannotUseUntil: this.localise(
-							"interactions.rateLimited.description.cannotUseAgainUntil",
-							interaction.locale,
-						)({ relative_timestamp: nextAllowedUsageTimestampFormatted }),
-					},
-				};
+				this.log.warn(`User rate-limited on ${this.diagnostics.interaction(interaction)}. Next usable in ${Math.ceil(nextUsable / 1000)} seconds.`);
 
-				setTimeout(
-					() => this.deleteReply(interaction),
-					rateLimit.nextAllowedUsageTimestamp - executedAt - constants.time.second,
-				);
-
+				const strings = constants.contexts.rateLimited({ localise: this.localise.bind(this), locale: interaction.locale });
 				await this.warning(interaction, {
 					title: strings.title,
-					description: `${strings.description.tooManyUses}\n\n${strings.description.cannotUseUntil}`,
+					description: `${strings.description.tooManyUses({ times: constants.defaults.COMMAND_RATE_LIMIT.uses })}\n\n${strings.description.cannotUseUntil({ relative_timestamp: timestamp(rateLimit.nextAllowedUsageTimestamp, {
+							format: "relative",
+						}) })}`,
 				});
+
+				setTimeout(() => this.deleteReply(interaction), nextUsable);
 
 				return;
 			}
 		}
 
 		try {
+			this.log.info(`Handling ${this.diagnostics.interaction(interaction)}...`);
 			await handle(this, interaction);
 		} catch (exception) {
 			this.log.error(exception);

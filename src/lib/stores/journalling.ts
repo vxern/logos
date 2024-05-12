@@ -29,7 +29,9 @@ class JournallingStore {
 		this.#_messageUpdateCollector = new Collector();
 	}
 
-	async start(): Promise<void> {
+	async setup(): Promise<void> {
+		this.log.info("Setting up journalling store...");
+
 		this.#_guildBanAddCollector.onCollect((user, guildId) =>
 			this.tryLog("guildBanAdd", { guildId, args: [user, guildId] }),
 		);
@@ -65,15 +67,21 @@ class JournallingStore {
 		await this.#client.registerCollector("guildMemberRemove", this.#_guildMemberRemoveCollector);
 		await this.#client.registerCollector("messageDelete", this.#_messageDeleteCollector);
 		await this.#client.registerCollector("messageUpdate", this.#_messageUpdateCollector);
+
+		this.log.info("Journalling store set up.");
 	}
 
-	stop(): void {
+	teardown(): void {
+		this.log.info("Tearing down journalling store...");
+
 		this.#_guildBanAddCollector.close();
 		this.#_guildBanRemoveCollector.close();
 		this.#_guildMemberAddCollector.close();
 		this.#_guildMemberRemoveCollector.close();
 		this.#_messageDeleteCollector.close();
 		this.#_messageUpdateCollector.close();
+
+		this.log.info("Journalling store torn down.");
 	}
 
 	async tryLog<Event extends keyof Events>(

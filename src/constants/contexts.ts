@@ -1553,5 +1553,12 @@ export default Object.freeze({
 	definitionsOmitted: ({ localise, locale }) => ({
 		definitionsOmitted: localise("word.strings.definitionsOmitted", locale),
 	}),
+	rateLimited: ({ localise, locale }) => ({
+		title: localise("interactions.rateLimited.title", locale)(),
+		description: {
+			tooManyUses: localise("interactions.rateLimited.description.tooManyUses", locale),
+			cannotUseUntil: localise("interactions.rateLimited.description.cannotUseAgainUntil", locale),
+		},
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

@@ -12,9 +12,9 @@ class InMemoryAdapter extends DatabaseAdapter {
 		super({ environment, identifier: "InMemory" });
 	}
 
-	async start(): Promise<void> {}
+	async setup(): Promise<void> {}
 
-	async stop(): Promise<void> {}
+	async teardown(): Promise<void> {}
 
 	conventionsFor({
 		document,

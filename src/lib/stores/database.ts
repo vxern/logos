@@ -125,31 +125,51 @@ class DatabaseStore {
 		return DatabaseStore.#_classes[collection];
 	}
 
-	async start({ prefetchDocuments }: { prefetchDocuments: boolean }): Promise<void> {
+	async setup({ prefetchDocuments }: { prefetchDocuments: boolean }): Promise<void> {
+		this.log.info("Setting up database store...");
+
 		await this.#_adapter.start();
 
 		if (prefetchDocuments) {
 			await this.#prefetchDocuments();
 		}
+
+		this.log.info("Database store set up.");
 	}
 
-	async stop(): Promise<void> {
+	async teardown(): Promise<void> {
 		await this.#_adapter.stop();
 	}
 
 	async #prefetchDocuments(): Promise<void> {
 		this.log.info("Prefetching documents...");
 
-		const result = await Promise.all([
+		const collections = await Promise.all([
 			EntryRequest.getAll(this),
 			Report.getAll(this),
 			Resource.getAll(this),
 			Suggestion.getAll(this),
 			Ticket.getAll(this),
 		]);
-		const documents = result.flat();
 
-		this.cacheDocuments(documents);
+		const totalCount = collections.map((documents) => documents.length).reduce((a, b) => a + b);
+		const counts = {
+			entryRequests: collections[0].length,
+			reports: collections[1].length,
+			resources: collections[2].length,
+			suggestions: collections[3].length,
+			tickets: collections[4].length,
+		}
+		this.log.info(`${totalCount} documents prefetched:`);
+		this.log.info(`- ${counts.entryRequests} entry requests.`);
+		this.log.info(`- ${counts.reports} reports.`);
+		this.log.info(`- ${counts.resources} resources.`);
+		this.log.info(`- ${counts.suggestions} suggestions.`);
+		this.log.info(`- ${counts.tickets} tickets.`);
+
+		for (const documents of collections) {
+			this.cacheDocuments<Model>(documents);
+		}
 	}
 
 	cacheDocuments<M extends Model>(documents: M[]): void {
@@ -157,7 +177,7 @@ class DatabaseStore {
 			return;
 		}
 
-		this.log.debug(`Caching ${documents.length} document(s)...`);
+		this.log.debug(`Caching ${documents.length} documents...`);
 
 		for (const document of documents) {
 			this.cacheDocument(document);

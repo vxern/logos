@@ -92,22 +92,38 @@ class ServiceStore {
 		this.#collection = { global: [], local: new Map() };
 	}
 
-	async start(): Promise<void> {
-		this.log.info("Starting global services...");
+	async setup(): Promise<void> {
+		this.log.info("Setting up service store...");
 
+		await this.#startGlobal();
+
+		this.log.info("Service store set up.");
+	}
+
+	async teardown(): Promise<void> {
+		this.log.info("Tearing down service store...");
+
+		await this.#stopGlobal();
+
+		this.log.info("Service store torn down.");
+	}
+
+	async #startGlobal(): Promise<void> {
 		const services = Object.values(this.global);
+		this.log.info(`Starting global services... (${services.length} services to start)`);
 
 		const promises = [];
 		for (const service of services) {
 			promises.push(service.start());
 		}
 		await Promise.all(promises);
+		this.log.info("Global services started.");
 
 		this.#collection.global.push(...services);
 	}
 
-	async stop(): Promise<void> {
-		this.log.info("Stopping services...");
+	async #stopGlobal(): Promise<void> {
+		this.log.info(`Stopping global services... (${this.#collection.local.size} services to stop)`);
 
 		const promises: Promise<void>[] = [];
 		for (const services of this.#collection.local.values()) {
@@ -116,9 +132,11 @@ class ServiceStore {
 		await Promise.all(promises);
 
 		await this.#stopServices(this.#collection.global);
+
+		this.log.info("Global services stopped.");
 	}
 
-	async startLocal(
+	async setupGuildServices(
 		client: Client,
 		{ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild },
 	): Promise<void> {
@@ -232,6 +250,17 @@ class ServiceStore {
 			}
 		}
 
+		await this.startLocal(client, { guildId, services });
+	}
+
+	async startLocal(client: Client, { guildId, services }: { guildId: bigint; services: Service[] }): Promise<void> {
+		if (services.length === 0) {
+			this.log.info(`There were no local services to start on ${client.diagnostics.guild(guildId)}.`);
+			return;
+		}
+
+		this.log.info(`Starting local services on ${client.diagnostics.guild(guildId)}... (${services.length} services to start)`);
+
 		this.#collection.local.set(guildId, services);
 
 		const promises = [];
@@ -239,18 +268,25 @@ class ServiceStore {
 			promises.push(service.start());
 		}
 		await Promise.all(promises);
+
+		this.log.info(`Local services on ${client.diagnostics.guild(guildId)} started.`);
 	}
 
-	async stopLocal(guildId: bigint): Promise<void> {
+	async stopLocal(client: Client, { guildId }: { guildId: bigint }): Promise<void> {
 		if (!this.#collection.local.has(guildId)) {
+			this.log.info(`There were no local services to stop on ${client.diagnostics.guild(guildId)}.`);
 			return;
 		}
 
 		const services = this.#collection.local.get(guildId)!;
 
+		this.log.info(`Stopping services on ${client.diagnostics.guild(guildId)}... (${services.length} services to stop)`);
+
 		this.#collection.local.delete(guildId);
 
 		await this.#stopServices(services);
+
+		this.log.info(`Local services on ${client.diagnostics.guild(guildId)} stopped.`);
 	}
 
 	async #stopServices(services: Service[]): Promise<void> {

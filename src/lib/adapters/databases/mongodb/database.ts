@@ -61,11 +61,11 @@ class MongoDBAdapter extends DatabaseAdapter {
 		});
 	}
 
-	async start(): Promise<void> {
+	async setup(): Promise<void> {
 		await this.#_mongoClient.connect();
 	}
 
-	async stop(): Promise<void> {
+	async teardown(): Promise<void> {
 		await this.#_mongoClient.close();
 	}
 

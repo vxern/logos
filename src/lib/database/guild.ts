@@ -3,6 +3,7 @@ import { TimeUnit } from "logos:constants/time";
 import { Client } from "logos/client";
 import { IdentifierData, Model } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
+import {GuildStats} from "logos/database/guild-stats";
 
 /** @since v3.0.0 */
 class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
@@ -408,15 +409,23 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		});
 	}
 
+	static async create(client: Client, data: IdentifierData<Guild>): Promise<Guild> {
+		const guildDocument = await client.database.withSession(async (session) => {
+			return session.set(new Guild(client.database, data));
+		});
+
+		await GuildStats.getOrCreate(client, { guildId: guildDocument.id.toString() });
+
+		return guildDocument;
+	}
+
 	static async getOrCreate(client: Client, data: IdentifierData<Guild>): Promise<Guild> {
 		const guildDocument = await Guild.get(client, data);
 		if (guildDocument !== undefined) {
 			return guildDocument;
 		}
 
-		return await client.database.withSession(async (session) => {
-			return session.set(new Guild(client.database, data));
-		});
+		return await Guild.create(client, data);
 	}
 
 	isEnabled(feature: keyof Guild) {

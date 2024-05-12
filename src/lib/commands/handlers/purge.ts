@@ -487,7 +487,7 @@ async function handlePurgeMessages(
 	}
 
 	client.log.info(
-		`Purging ${messages.length} message(s) in ${client.diagnostics.channel(
+		`Purging ${messages.length} messages in ${client.diagnostics.channel(
 			interaction.channelId,
 		)} as requested by ${client.diagnostics.user(interaction.user)}...`,
 	);
@@ -535,7 +535,7 @@ async function handlePurgeMessages(
 
 			await client.bot.rest.deleteMessages(interaction.channelId, messageIds).catch((reason) => {
 				client.log.warn(
-					`Failed to delete ${messageIds.length} message(s) from ${client.diagnostics.channel(
+					`Failed to delete ${messageIds.length} messages from ${client.diagnostics.channel(
 						interaction.channelId,
 					)}:`,
 					reason,
@@ -559,7 +559,7 @@ async function handlePurgeMessages(
 	}
 
 	client.log.info(
-		`Purged ${deletedCount}/${messages.length} message(s) in ${client.diagnostics.channel(
+		`Purged ${deletedCount}/${messages.length} messages in ${client.diagnostics.channel(
 			interaction.channelId,
 		)} as requested by ${client.diagnostics.user(interaction.user)}.`,
 	);

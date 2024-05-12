@@ -55,12 +55,12 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		});
 	}
 
-	async start(): Promise<void> {
+	async setup(): Promise<void> {
 		this.#_connection = await rethinkdb.r.connect(this.#_connectionOptions);
 		await this.#_createMissingTables();
 	}
 
-	async stop(): Promise<void> {
+	async teardown(): Promise<void> {
 		await this.#_connection.close();
 	}
 
