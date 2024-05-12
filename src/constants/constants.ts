@@ -39,6 +39,7 @@ const constants = Object.freeze({
 	SLOWMODE_COLLISION_TIMEOUT: 1000 * 20, // 20 seconds in milliseconds.
 	PICK_MISSING_WORD_CHOICES: 4,
 	SHORT_TEXT_LENGTH: 60,
+	LOCALISATIONS_DIRECTORY: "./assets/localisations",
 	SENTENCE_PAIRS_DIRECTORY: "./assets/sentences",
 } as const);
 

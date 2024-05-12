@@ -1,4 +1,4 @@
-import winston from "winston";
+import { Logger } from "logos/logger";
 
 interface Environment {
 	readonly isDebug?: boolean;
@@ -34,10 +34,12 @@ interface Environment {
 	readonly lavalinkPassword?: string;
 }
 
-function readEnvironment(): Environment {
+function loadEnvironment(): Environment {
+	const log = Logger.create({ identifier: "Loaders/Environment", isDebug: false });
+
 	if (process.env.SECRET_DISCORD === undefined) {
-		winston.error(
-			"[Setup] Logos cannot start without a Discord token. " +
+		log.error(
+			"Logos cannot start without a Discord token. " +
 				"Make sure you've included one in the environment variables with the key `SECRET_DISCORD`.",
 		);
 		process.exit(1);
@@ -78,5 +80,5 @@ function readEnvironment(): Environment {
 	};
 }
 
-export { readEnvironment };
+export { loadEnvironment };
 export type { Environment };

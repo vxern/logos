@@ -1,6 +1,6 @@
-import { readEnvironment } from "logos:core/environment";
-import * as bun from "bun";
 import { parseArgs } from "node:util";
+import { loadEnvironment } from "logos:core/loaders/environment";
+import * as bun from "bun";
 import { Guild } from "logos/database/guild";
 import { DatabaseStore } from "logos/stores/database";
 
@@ -31,7 +31,7 @@ if (!constants.patterns.discord.snowflake.test(id)) {
 	process.exit(1);
 }
 
-const environment = readEnvironment();
+const environment = loadEnvironment();
 const database = await DatabaseStore.create({ environment });
 
 await database.start({ prefetchDocuments: false });
