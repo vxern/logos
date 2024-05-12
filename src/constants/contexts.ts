@@ -1510,7 +1510,7 @@ export default Object.freeze({
 	wordPage: ({ localise, locale }) => ({
 		page: localise("word.strings.page", locale)(),
 	}),
-	definitionView: ({ localise, locale }) => ({
+	definitionsView: ({ localise, locale }) => ({
 		definitions: localise("word.strings.definitions", locale)(),
 	}),
 	inflectionView: ({ localise, locale }) => ({

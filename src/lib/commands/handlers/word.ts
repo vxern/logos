@@ -4,6 +4,7 @@ import defaults from "logos:constants/defaults";
 import {code, trim} from "logos:core/formatting";
 import {Definition, DictionaryEntry, Expression} from "logos/adapters/dictionaries/adapter";
 import {isUnknownPartOfSpeech, PartOfSpeech} from "logos:constants/parts-of-speech";
+import {InteractionCollector} from "logos/collectors";
 
 async function handleFindWordAutocomplete(client: Client, interaction: Logos.Interaction<any, { language: string | undefined }>): Promise<void> {
     const guildId = interaction.guildId;
@@ -212,7 +213,7 @@ async function displayMenu(
 
     await client.editReply(interaction, {
         embeds: generateEmbeds(client, interaction, data, entry),
-        components: generateButtons(client, interaction, data, entry),
+        components: await generateButtons(client, interaction, data, entry),
     });
 }
 
@@ -239,12 +240,12 @@ function generateEmbeds(
 
 type MenuButtonID = [index: string];
 
-function generateButtons(
+async function generateButtons(
     client: Client,
     interaction: Logos.Interaction,
     data: WordViewData,
     entry: DictionaryEntry,
-): Discord.MessageComponents {
+): Promise<Discord.MessageComponents> {
     const paginationControls: Discord.ButtonComponent[][] = [];
 
     switch (data.currentView) {
@@ -256,38 +257,43 @@ function generateButtons(
                 break;
             }
 
-            const previousPageButtonId = createInteractionCollector(client, {
-                type: Discord.InteractionTypes.MessageComponent,
-                onCollect: async (selection) => {
-                    await client.acknowledge(selection);
-
-                    if (!isFirst) {
-                        data.dictionaryEntryIndex--;
-                    }
-
-                    await displayMenu(client, interaction, data);
-                },
+            const previousPageButton = new InteractionCollector(client, {
+                only: interaction.parameters.show ? [interaction.user.id] : undefined,
             });
 
-            const nextPageButtonId = createInteractionCollector(client, {
-                type: Discord.InteractionTypes.MessageComponent,
-                onCollect: async (selection) => {
-                    await client.acknowledge(selection);
-
-                    if (!isLast) {
-                        data.dictionaryEntryIndex++;
-                    }
-
-                    await displayMenu(client, interaction, data);
-                },
+            const nextPageButton = new InteractionCollector(client, {
+                only: interaction.parameters.show ? [interaction.user.id] : undefined,
             });
+
+            previousPageButton.onInteraction(async (buttonPress) => {
+                await client.acknowledge(buttonPress);
+
+                if (!isFirst) {
+                    data.dictionaryEntryIndex--;
+                }
+
+                await displayMenu(client, interaction, data);
+            });
+
+            nextPageButton.onInteraction(async (buttonPress) => {
+                await client.acknowledge(buttonPress);
+
+                if (!isLast) {
+                    data.dictionaryEntryIndex++;
+                }
+
+                await displayMenu(client, interaction, data);
+            });
+
+            await client.registerInteractionCollector(previousPageButton);
+            await client.registerInteractionCollector(nextPageButton);
 
             const strings = constants.contexts.wordPage({ localise: client.localise.bind(client), locale: interaction.displayLocale });
             paginationControls.push([
                 {
                     type: Discord.MessageComponentTypes.Button,
                     label: constants.emojis.interactions.menu.controls.back,
-                    customId: previousPageButtonId,
+                    customId: previousPageButton.customId,
                     style: Discord.ButtonStyles.Secondary,
                     disabled: isFirst,
                 },
@@ -300,7 +306,7 @@ function generateButtons(
                 {
                     type: Discord.MessageComponentTypes.Button,
                     label: constants.emojis.interactions.menu.controls.forward,
-                    customId: nextPageButtonId,
+                    customId: nextPageButton.customId,
                     style: Discord.ButtonStyles.Secondary,
                     disabled: isLast,
                 },
@@ -315,31 +321,34 @@ function generateButtons(
 
             const rows = entry.inflectionTable.toChunked(5).reverse();
 
-            const buttonId = createInteractionCollector(client, {
-                type: Discord.InteractionTypes.MessageComponent,
-                onCollect: async (selection) => {
-                    await client.acknowledge(selection);
-
-                    if (entry.inflectionTable === undefined || selection.data === undefined) {
-                        await displayMenu(client, interaction, data);
-                        return;
-                    }
-
-                    const customId = selection.data?.customId;
-                    if (customId === undefined) {
-                        return;
-                    }
-
-                    const [__, indexString] = decodeId<MenuButtonID>(customId);
-                    const index = Number(indexString);
-
-                    if (index >= 0 && index <= entry.inflectionTable?.length) {
-                        data.inflectionTableIndex = index;
-                    }
-
-                    await displayMenu(client, interaction, data);
-                },
+            const button = new InteractionCollector<MenuButtonID>(client, {
+                only: interaction.parameters.show ? [interaction.user.id] : undefined,
             });
+
+            button.onInteraction(async (buttonPress) => {
+                await client.acknowledge(buttonPress);
+
+                if (entry.inflectionTable === undefined) {
+                    await displayMenu(client, interaction, data);
+                    return;
+                }
+
+                const customId = buttonPress.data?.customId;
+                if (customId === undefined) {
+                    return;
+                }
+
+                const [_, indexString] = InteractionCollector.decodeId<MenuButtonID>(customId);
+                const index = Number(indexString);
+
+                if (index >= 0 && index <= entry.inflectionTable?.length) {
+                    data.inflectionTableIndex = index;
+                }
+
+                await displayMenu(client, interaction, data);
+            });
+
+            await client.registerInteractionCollector(button);
 
             for (const [row, rowIndex] of rows.map<[typeof entry.inflectionTable, number]>((r, i) => [r, i])) {
                 const buttons = row.map<Discord.ButtonComponent>((table, index) => {
@@ -348,7 +357,7 @@ function generateButtons(
                     return {
                         type: Discord.MessageComponentTypes.Button,
                         label: table.title,
-                        customId: encodeId<MenuButtonID>(buttonId, [index_.toString()]),
+                        customId: button.encodeId([index_.toString()]),
                         disabled: data.inflectionTableIndex === index_,
                         style: Discord.ButtonStyles.Secondary,
                     };
@@ -363,36 +372,41 @@ function generateButtons(
 
     const row: Discord.ButtonComponent[] = [];
 
-    const definitionsMenuButtonId = createInteractionCollector(client, {
-        type: Discord.InteractionTypes.MessageComponent,
-        onCollect: async (selection) => {
-            await client.acknowledge(selection);
-
-            data.inflectionTableIndex = 0;
-            data.currentView = ContentTabs.Definitions;
-
-            await displayMenu(client, interaction, data);
-        },
+    const definitionsMenuButton = new InteractionCollector(client, {
+        only: interaction.parameters.show ? [interaction.user.id] : undefined,
     });
 
-    const inflectionMenuButtonId = createInteractionCollector(client, {
-        type: Discord.InteractionTypes.MessageComponent,
-        onCollect: async (selection) => {
-            await client.acknowledge(selection);
-
-            data.currentView = ContentTabs.Inflection;
-
-            await displayMenu(client, interaction, data);
-        },
+    const inflectionMenuButton = new InteractionCollector(client, {
+        only: interaction.parameters.show ? [interaction.user.id] : undefined,
     });
+
+    definitionsMenuButton.onInteraction(async (buttonPress) => {
+        await client.acknowledge(buttonPress);
+
+        data.inflectionTableIndex = 0;
+        data.currentView = ContentTabs.Definitions;
+
+        await displayMenu(client, interaction, data);
+    });
+
+    inflectionMenuButton.onInteraction(async (buttonPress) => {
+        await client.acknowledge(buttonPress);
+
+        data.currentView = ContentTabs.Inflection;
+
+        await displayMenu(client, interaction, data);
+    });
+
+    await client.registerInteractionCollector(definitionsMenuButton);
+    await client.registerInteractionCollector(inflectionMenuButton);
 
     if (entry.definitions !== undefined) {
-        const strings = constants.contexts.definitionView({ localise: client.localise.bind(client), locale: interaction.displayLocale });
+        const strings = constants.contexts.definitionsView({ localise: client.localise.bind(client), locale: interaction.displayLocale });
         row.push({
             type: Discord.MessageComponentTypes.Button,
             label: strings.definitions,
             disabled: data.currentView === ContentTabs.Definitions,
-            customId: definitionsMenuButtonId,
+            customId: definitionsMenuButton.customId,
             style: Discord.ButtonStyles.Primary,
         });
     }
@@ -403,7 +417,7 @@ function generateButtons(
             type: Discord.MessageComponentTypes.Button,
             label: strings.inflection,
             disabled: data.currentView === ContentTabs.Inflection,
-            customId: inflectionMenuButtonId,
+            customId: inflectionMenuButton.customId,
             style: Discord.ButtonStyles.Primary,
         });
     }
