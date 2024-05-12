@@ -1,9 +1,10 @@
 import { readEnvironment } from "logos:core/environment";
 import * as bun from "bun";
+import { parseArgs } from "node:util";
 import { Guild } from "logos/database/guild";
 import { DatabaseStore } from "logos/stores/database";
 
-const { values, positionals } = bun.parseArgs({
+const { values, positionals } = parseArgs({
 	args: bun.argv,
 	options: {
 		full: {
@@ -15,8 +16,13 @@ const { values, positionals } = bun.parseArgs({
 	allowPositionals: true,
 });
 
-const id = positionals.at(0);
-if (id === undefined || !constants.patterns.discord.snowflake.test(id)) {
+const id = positionals.at(2);
+if (id === undefined) {
+	console.error("You must provide a guild ID.");
+	process.exit(1);
+}
+
+if (!constants.patterns.discord.snowflake.test(id)) {
 	console.error("Guild ID invalid.");
 	process.exit(1);
 }
@@ -24,7 +30,7 @@ if (id === undefined || !constants.patterns.discord.snowflake.test(id)) {
 const environment = readEnvironment();
 const database = await DatabaseStore.create({ environment });
 
-await database.start();
+await database.start({ prefetchDocuments: false });
 
 if (values.full) {
 	console.info(`Enabling all features for guild with ID ${id}...`);

@@ -127,10 +127,12 @@ class DatabaseStore {
 		return DatabaseStore.#_classes[collection];
 	}
 
-	async start(): Promise<void> {
+	async start({ prefetchDocuments }: { prefetchDocuments: boolean }): Promise<void> {
 		await this.#_adapter.start();
 
-		await this.#prefetchDocuments();
+		if (prefetchDocuments) {
+			await this.#prefetchDocuments();
+		}
 	}
 
 	async stop(): Promise<void> {

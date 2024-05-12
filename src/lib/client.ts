@@ -423,7 +423,7 @@ class Client {
 
 	async start(): Promise<void> {
 		await this.cache.start();
-		await this.database.start();
+		await this.database.start({ prefetchDocuments: true });
 		await this.#services.start();
 		await this.#journalling.start();
 		await this.#setupCollectors();

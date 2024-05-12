@@ -166,7 +166,7 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 }
 
 function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {
-	if (clientOrDatabase instanceof Client) {
+	if ("database" in clientOrDatabase) {
 		return clientOrDatabase.database;
 	}
 
