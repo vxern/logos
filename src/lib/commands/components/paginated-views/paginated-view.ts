@@ -177,4 +177,5 @@ abstract class PaginatedView<T> {
 	}
 }
 
-export { PaginatedView, View };
+export { PaginatedView };
+export type { View };

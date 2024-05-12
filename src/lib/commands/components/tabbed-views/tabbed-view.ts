@@ -97,4 +97,5 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 	}
 }
 
-export { TabbedView, View };
+export { TabbedView };
+export type { View };

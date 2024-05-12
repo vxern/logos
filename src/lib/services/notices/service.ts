@@ -241,4 +241,5 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 	}
 }
 
-export { NoticeService, HashableMessageContents };
+export { NoticeService };
+export type { HashableMessageContents };

@@ -516,4 +516,4 @@ class Client {
 	}
 }
 
-export { Client, Environment };
+export { Client };

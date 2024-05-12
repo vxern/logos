@@ -243,4 +243,5 @@ class LocalisationStore {
 	}
 }
 
-export { LocalisationStore, LocalisationBuilder, RawLocalisations, NameLocalisations, DescriptionLocalisations };
+export { LocalisationStore };
+export type { LocalisationBuilder, RawLocalisations, NameLocalisations, DescriptionLocalisations };
