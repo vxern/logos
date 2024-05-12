@@ -107,7 +107,7 @@ class ServiceStore {
 	}
 
 	async stop(): Promise<void> {
-		this.#log.info("Stopping services...");
+		this.log.info("Stopping services...");
 
 		const promises: Promise<void>[] = [];
 		for (const services of this.#collection.local.values()) {
