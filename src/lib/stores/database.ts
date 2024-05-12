@@ -1,11 +1,11 @@
 import { Collection } from "logos:constants/database";
 import { Environment } from "logos:core/environment";
 import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
-import { CouchDBAdapter } from "logos/adapters/databases/couchdb";
-import { InMemoryAdapter } from "logos/adapters/databases/in-memory";
-import { MongoDBAdapter } from "logos/adapters/databases/mongodb";
-import { RavenDBAdapter } from "logos/adapters/databases/ravendb";
-import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb";
+import { CouchDBAdapter } from "logos/adapters/databases/couchdb/database";
+import { InMemoryAdapter } from "logos/adapters/databases/in-memory/database";
+import { MongoDBAdapter } from "logos/adapters/databases/mongodb/database";
+import { RavenDBAdapter } from "logos/adapters/databases/ravendb/database";
+import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
@@ -60,7 +60,11 @@ class DatabaseStore {
 		return (callback) => this.#_adapter.withSession(callback, { environment: this.#_environment, database: this });
 	}
 
-	private constructor({ environment, adapter }: { environment: Environment; adapter: DatabaseAdapter }) {
+	private constructor({
+		environment,
+		log,
+		adapter,
+	}: { environment: Environment; log: Logger; adapter: DatabaseAdapter }) {
 		this.cache = {
 			entryRequests: new Map(),
 			guildStats: new Map(),
@@ -75,14 +79,14 @@ class DatabaseStore {
 			warningsByTarget: new Map(),
 		};
 
-		this.#log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: environment.isDebug });
+		this.#log = log;
 
 		this.#_environment = environment;
 		this.#_adapter = adapter;
 	}
 
 	static async create({ environment }: { environment: Environment }): Promise<DatabaseStore> {
-		const log = Logger.create({ identifier: "DatabaseStore", isDebug: environment.isDebug });
+		const log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: environment.isDebug });
 
 		let adapter: DatabaseAdapter | undefined;
 		switch (environment.databaseSolution) {
@@ -116,7 +120,7 @@ class DatabaseStore {
 			adapter = new InMemoryAdapter({ environment });
 		}
 
-		return new DatabaseStore({ environment, adapter });
+		return new DatabaseStore({ environment, log, adapter });
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {

@@ -120,5 +120,5 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	): DictionaryEntry[];
 }
 
-export type { Definition, DictionaryEntry, Expression };
-export { DictionaryAdapter, DictionaryProvisions };
+export { DictionaryAdapter };
+export type { Definition, DictionaryEntry, Expression, DictionaryProvisions };
