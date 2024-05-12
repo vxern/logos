@@ -68,6 +68,11 @@ class CouchDBDocumentSession extends DocumentSession {
 	}
 
 	async store<M extends Model>(document: M): Promise<void> {
+		const existingDocument = await this.load(document.id);
+		if (existingDocument !== undefined) {
+			document.revision = existingDocument.revision!;
+		}
+
 		const result = await this.#_documents
 			.insert(document as unknown as nano.IdentifiedDocument, { rev: document.revision })
 			.catch((error) => {
