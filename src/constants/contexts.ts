@@ -1,10 +1,10 @@
 import { Language } from "logos:constants/languages";
 import { Locale } from "logos:constants/languages/localisation";
+import { PartOfSpeech } from "logos:constants/parts-of-speech";
 import { RuleOrOther } from "logos:constants/rules";
 import { SlowmodeLevel } from "logos:constants/slowmode";
 import { TimeUnit } from "logos:constants/time";
 import { Client } from "logos/client";
-import {PartOfSpeech} from "logos:constants/parts-of-speech";
 
 type ContextBuilder<T extends object> = ({
 	localise,
@@ -1517,7 +1517,8 @@ export default Object.freeze({
 		inflection: localise("word.strings.inflection", locale)(),
 	}),
 	partOfSpeech: ({ localise, locale }) => ({
-		partOfSpeech: (partOfSpeech: PartOfSpeech) => localise(constants.localisations.partsOfSpeech[partOfSpeech], locale)(),
+		partOfSpeech: (partOfSpeech: PartOfSpeech) =>
+			localise(constants.localisations.partsOfSpeech[partOfSpeech], locale)(),
 	}),
 	partOfSpeechUnknown: ({ localise, locale }) => ({
 		unknown: localise("words.unknown", locale)(),

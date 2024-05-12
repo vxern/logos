@@ -276,7 +276,9 @@ class InteractionCollector<
 		});
 	}
 
-	async #getLocaleData(interaction: Discord.Interaction): Promise<Omit<Logos.InteractionLocaleData, "displayLocale" | "displayLanguage">> {
+	async #getLocaleData(
+		interaction: Discord.Interaction,
+	): Promise<Omit<Logos.InteractionLocaleData, "displayLocale" | "displayLanguage">> {
 		const member = this.#client.entities.members.get(interaction.guildId!)?.get(interaction.user.id);
 		if (member === undefined) {
 			return {

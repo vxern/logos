@@ -82,11 +82,12 @@ const translationLanguagesByBaseLanguage = Object.freeze(
 );
 
 type Language = DetectionLanguage | FeatureLanguage | LearningLanguage | LocalisationLanguage | TranslationLanguage;
-type Base<Language> = Language extends `${infer Base}/${string}` ? Base : Language;
+type BaseLanguage<Language> = Language extends `${infer BaseLanguage}/${string}` ? BaseLanguage : Language;
+type WithBaseLanguage<Language> = Language extends BaseLanguage<Language> ? never : Language;
 
-function getBaseLanguage<L extends Language>(language: L): Base<L> {
+function getBaseLanguage<L extends Language>(language: L): BaseLanguage<L> {
 	const baseLanguage = language.split("/").at(0)!;
-	return baseLanguage as Base<L>;
+	return baseLanguage as BaseLanguage<L>;
 }
 
 function getFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
@@ -171,4 +172,5 @@ export type {
 	CLDLocale,
 	DetectionLanguage,
 	DetectionLocale,
+	WithBaseLanguage,
 };

@@ -7,11 +7,11 @@ interface SingleDetectionResult {
 }
 
 abstract class DetectorAdapter {
-	readonly logger: Logger;
+	readonly log: Logger;
 	readonly client: Client;
 
 	constructor(client: Client, { identifier }: { identifier: string }) {
-		this.logger = Logger.create({ identifier, isDebug: client.environment.isDebug });
+		this.log = Logger.create({ identifier, isDebug: client.environment.isDebug });
 		this.client = client;
 	}
 

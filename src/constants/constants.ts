@@ -5,6 +5,7 @@ import contexts from "logos:constants/contexts";
 import contributions from "logos:constants/contributions";
 import database from "logos:constants/database";
 import defaults from "logos:constants/defaults";
+import dictionaries from "logos:constants/dictionaries";
 import emojis from "logos:constants/emojis";
 import endpoints from "logos:constants/endpoints";
 import gifs from "logos:constants/gifs";
@@ -50,6 +51,7 @@ export default Object.freeze({
 	contributions,
 	database,
 	defaults,
+	dictionaries,
 	emojis,
 	endpoints,
 	gifs,

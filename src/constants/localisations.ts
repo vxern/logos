@@ -1,4 +1,5 @@
 import { Language, LocalisationLanguage } from "logos:constants/languages";
+import { PartOfSpeech } from "logos:constants/parts-of-speech";
 import armenian from "logos:constants/transformers/armenian";
 import danish from "logos:constants/transformers/danish";
 import dutch from "logos:constants/transformers/dutch";
@@ -16,7 +17,6 @@ import silesian from "logos:constants/transformers/silesian";
 import spanish from "logos:constants/transformers/spanish";
 import swedish from "logos:constants/transformers/swedish";
 import turkish from "logos:constants/transformers/turkish";
-import {PartOfSpeech} from "logos:constants/parts-of-speech";
 
 type TransformerType = "pluralise";
 type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;

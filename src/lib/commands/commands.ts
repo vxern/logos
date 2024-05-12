@@ -1,3 +1,4 @@
+import * as Discord from "@discordeno/bot";
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
 import { handleAnswer } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
@@ -63,8 +64,7 @@ import {
 	handleTranslateMessage,
 } from "logos/commands/handlers/translate";
 import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
-import * as Discord from "@discordeno/bot";
-import {handleFindWord, handleFindWordAutocomplete} from "logos/commands/handlers/word";
+import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
 
 /**
  * @privateRemarks
@@ -238,7 +238,7 @@ const commands = Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.Boolean,
 			},
 		},
-		flags: { hasRateLimit: true, isShowable: true }
+		flags: { hasRateLimit: true, isShowable: true },
 	},
 	// Meta
 	acknowledgements: {
