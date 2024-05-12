@@ -179,13 +179,6 @@ class Diagnostics {
 	}
 
 	interaction(interaction: InteractionLike): string {
-		let guildFormatted: string;
-		if (interaction.guildId !== undefined) {
-			guildFormatted = this.guild(interaction.guildId);
-		} else {
-			guildFormatted = "unknown guild";
-		}
-
 		let memberFormatted: string;
 		if (interaction.member !== undefined) {
 			memberFormatted = this.member(interaction.member);
@@ -233,7 +226,7 @@ class Diagnostics {
 				break;
 		}
 
-		return `${interactionTypeFormatted} (ID ${interaction.id}) from ${memberFormatted} @ ${guildFormatted}`;
+		return `${interactionTypeFormatted} (ID ${interaction.id}) from ${memberFormatted}`;
 	}
 }
 
