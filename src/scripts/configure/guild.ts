@@ -34,7 +34,7 @@ if (!constants.patterns.discord.snowflake.test(id)) {
 const environment = loadEnvironment();
 const database = await DatabaseStore.create({ environment });
 
-await database.start({ prefetchDocuments: false });
+await database.setup({ prefetchDocuments: false });
 
 if (values.all) {
 	console.info(`Enabling all features for guild with ID ${id}...`);
@@ -278,4 +278,4 @@ if (values.none) {
 	console.info("Features disabled!");
 }
 
-await database.stop();
+await database.teardown();

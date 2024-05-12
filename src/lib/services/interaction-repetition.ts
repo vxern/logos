@@ -71,7 +71,7 @@ class InteractionRepetitionService extends GlobalService {
 				parameters: { "@repeat": true, show: true },
 			});
 
-			await this.client.handleInteraction(interactionSpoofed);
+			await this.client.receiveInteraction(interactionSpoofed);
 		});
 
 		cancelButton.onInteraction(async (_) => this.client.deleteReply(buttonPress));

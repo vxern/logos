@@ -128,7 +128,7 @@ class DatabaseStore {
 	async setup({ prefetchDocuments }: { prefetchDocuments: boolean }): Promise<void> {
 		this.log.info("Setting up database store...");
 
-		await this.#_adapter.start();
+		await this.#_adapter.setup();
 
 		if (prefetchDocuments) {
 			await this.#prefetchDocuments();
@@ -138,7 +138,7 @@ class DatabaseStore {
 	}
 
 	async teardown(): Promise<void> {
-		await this.#_adapter.stop();
+		await this.#_adapter.teardown();
 	}
 
 	async #prefetchDocuments(): Promise<void> {
