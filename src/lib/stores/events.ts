@@ -4,11 +4,13 @@ import { Logger } from "logos/logger";
 
 type Event = keyof Discord.EventHandlers;
 class EventStore {
-	readonly #log: Logger;
+	readonly log: Logger;
+
 	readonly #collectors: Map<Event, Set<Collector<Event>>>;
 
 	constructor(client: Client) {
-		this.#log = Logger.create({ identifier: "Client/EventStore", isDebug: client.environment.isDebug });
+		this.log = Logger.create({ identifier: "Client/EventStore", isDebug: client.environment.isDebug });
+
 		this.#collectors = new Map();
 	}
 
@@ -75,7 +77,7 @@ class EventStore {
 	}
 
 	#registerCollector(event: Event, collector: Collector<Event>): void {
-		this.#log.debug(`Registering collector for '${event}'...`);
+		this.log.debug(`Registering collector for '${event}'...`);
 
 		const collectors = this.#collectors.get(event);
 		if (collectors === undefined) {

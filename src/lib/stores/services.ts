@@ -24,6 +24,7 @@ import { Service } from "logos/services/service";
 import { StatusService } from "logos/services/status";
 
 class ServiceStore {
+	readonly log: Logger;
 	readonly global: {
 		readonly lavalink: LavalinkService;
 		readonly interactionRepetition: InteractionRepetitionService;
@@ -51,7 +52,6 @@ class ServiceStore {
 		readonly roleIndicators: Map<bigint, RoleIndicatorService>;
 	};
 
-	readonly #log: Logger;
 	readonly #collection: {
 		/** Singular services running across all guilds. */
 		readonly global: Service[];
@@ -61,6 +61,7 @@ class ServiceStore {
 	};
 
 	constructor(client: Client) {
+		this.log = Logger.create({ identifier: "Client/ServiceStore", isDebug: client.environment.isDebug });
 		this.global = {
 			lavalink: new LavalinkService(client),
 			interactionRepetition: new InteractionRepetitionService(client),
@@ -88,12 +89,11 @@ class ServiceStore {
 			roleIndicators: new Map(),
 		};
 
-		this.#log = Logger.create({ identifier: "Client/ServiceStore", isDebug: client.environment.isDebug });
 		this.#collection = { global: [], local: new Map() };
 	}
 
 	async start(): Promise<void> {
-		this.#log.info("Starting global services...");
+		this.log.info("Starting global services...");
 
 		const services = Object.values(this.global);
 

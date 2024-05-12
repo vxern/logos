@@ -32,11 +32,13 @@ interface DescriptionLocalisations {
 	readonly descriptionLocalizations?: Partial<Record<Discord.Locales, string>>;
 }
 class LocalisationStore {
-	readonly #log: Logger;
+	readonly log: Logger;
+
 	readonly #localisations: Localisations;
 
 	constructor({ environment, localisations }: { environment: Environment; localisations: RawLocalisations }) {
-		this.#log = Logger.create({ identifier: "Client/LocalisationStore", isDebug: environment.isDebug });
+		this.log = Logger.create({ identifier: "Client/LocalisationStore", isDebug: environment.isDebug });
+
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
 	}
 
@@ -71,7 +73,7 @@ class LocalisationStore {
 	getOptionName({ key }: { key: string }): string | undefined {
 		const optionName = key.split(".").at(-1)!;
 		if (optionName.length === 0) {
-			this.#log.warn(`Failed to get option name from localisation key '${key}'.`);
+			this.log.warn(`Failed to get option name from localisation key '${key}'.`);
 			return undefined;
 		}
 
@@ -93,7 +95,7 @@ class LocalisationStore {
 
 		const name = localisation?.get(constants.defaults.LOCALISATION_LANGUAGE)?.();
 		if (name === undefined) {
-			this.#log.warn(`Could not get command name from string with key '${key}'.`);
+			this.log.warn(`Could not get command name from string with key '${key}'.`);
 			return undefined;
 		}
 
@@ -121,7 +123,7 @@ class LocalisationStore {
 
 		const description = localisation?.get(constants.defaults.LOCALISATION_LANGUAGE)?.({});
 		if (description === undefined) {
-			this.#log.warn(`Could not get command description from string with key '${key}'.`);
+			this.log.warn(`Could not get command description from string with key '${key}'.`);
 			return undefined;
 		}
 
@@ -167,7 +169,7 @@ class LocalisationStore {
 		return (data) => {
 			const localisation = this.#localisations.get(key);
 			if (localisation === undefined) {
-				this.#log.error(`Attempted to localise string with unregistered key '${key}'.`);
+				this.log.error(`Attempted to localise string with unregistered key '${key}'.`);
 				return undefined;
 			}
 
@@ -181,7 +183,7 @@ class LocalisationStore {
 			const buildLocalisation =
 				localisation.get(language) ?? localisation.get(constants.defaults.LOCALISATION_LANGUAGE);
 			if (buildLocalisation === undefined) {
-				this.#log.error(`Missing localisations for string with key '${key}'.`);
+				this.log.error(`Missing localisations for string with key '${key}'.`);
 				return undefined;
 			}
 
@@ -221,7 +223,7 @@ class LocalisationStore {
 
 		const pluralised = pluralise(`${quantity}`, { one, two, many });
 		if (pluralised === undefined) {
-			this.#log.warn(`Could not pluralise string with key '${key}' in ${language}.`);
+			this.log.warn(`Could not pluralise string with key '${key}' in ${language}.`);
 			return key;
 		}
 

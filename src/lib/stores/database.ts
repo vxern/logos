@@ -20,6 +20,7 @@ import { Warning } from "logos/database/warning";
 import { Logger } from "logos/logger";
 
 class DatabaseStore {
+	readonly log: Logger;
 	readonly cache: {
 		readonly entryRequests: Map<string, EntryRequest>;
 		readonly guildStats: Map<string, GuildStats>;
@@ -33,8 +34,6 @@ class DatabaseStore {
 		readonly users: Map<string, User>;
 		readonly warningsByTarget: Map<string, Map<string, Warning>>;
 	};
-
-	readonly #log: Logger;
 
 	static readonly #_classes: Record<Collection, ModelConstructor> = Object.freeze({
 		EntryRequests: EntryRequest,
@@ -65,6 +64,7 @@ class DatabaseStore {
 		log,
 		adapter,
 	}: { environment: Environment; log: Logger; adapter: DatabaseAdapter }) {
+		this.log = log;
 		this.cache = {
 			entryRequests: new Map(),
 			guildStats: new Map(),
@@ -78,8 +78,6 @@ class DatabaseStore {
 			users: new Map(),
 			warningsByTarget: new Map(),
 		};
-
-		this.#log = log;
 
 		this.#_environment = environment;
 		this.#_adapter = adapter;
@@ -140,7 +138,7 @@ class DatabaseStore {
 	}
 
 	async #prefetchDocuments(): Promise<void> {
-		this.#log.info("Prefetching documents...");
+		this.log.info("Prefetching documents...");
 
 		const result = await Promise.all([
 			EntryRequest.getAll(this),
@@ -159,7 +157,7 @@ class DatabaseStore {
 			return;
 		}
 
-		this.#log.debug(`Caching ${documents.length} document(s)...`);
+		this.log.debug(`Caching ${documents.length} document(s)...`);
 
 		for (const document of documents) {
 			this.cacheDocument(document);
