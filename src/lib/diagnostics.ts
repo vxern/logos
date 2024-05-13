@@ -134,6 +134,10 @@ class Diagnostics {
 
 		let channelTypeFormatted: string;
 		switch (channel.type) {
+			case Discord.ChannelTypes.GuildText: {
+				channelTypeFormatted = "text channel";
+				break;
+			}
 			case Discord.ChannelTypes.DM: {
 				channelTypeFormatted = "DM channel";
 				break;
