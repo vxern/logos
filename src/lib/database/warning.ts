@@ -61,9 +61,17 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 
 	static async getActiveWarnings(
 		clientOrDatabase: ClientOrDatabaseStore,
-		{ timeRangeMilliseconds }: { timeRangeMilliseconds: number },
+		{ guildId, authorId, timeRangeMilliseconds }: { guildId: string; authorId: string, timeRangeMilliseconds: number },
+	): Promise<Warning[]>;
+	static async getActiveWarnings(
+		clientOrDatabase: ClientOrDatabaseStore,
+		{ guildId, targetId, timeRangeMilliseconds }: { guildId: string; targetId: string, timeRangeMilliseconds: number },
+	): Promise<Warning[]>;
+	static async getActiveWarnings(
+		clientOrDatabase: ClientOrDatabaseStore,
+		{ guildId, authorId, targetId, timeRangeMilliseconds }: { guildId: string; authorId?: string, targetId?: string, timeRangeMilliseconds: number },
 	): Promise<Warning[]> {
-		const warnings = await Warning.getAll(clientOrDatabase);
+		const warnings = await Warning.getAll(clientOrDatabase, { where: { guildId, authorId, targetId } });
 
 		const now = Date.now();
 

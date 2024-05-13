@@ -43,6 +43,8 @@ async function handlePardonUserAutocomplete(
 			}
 
 			const warningDocumentsActive = await Warning.getActiveWarnings(client, {
+				guildId: interaction.guildId.toString(),
+				targetId: member.id.toString(),
 				timeRangeMilliseconds: timeStructToMilliseconds(
 					configuration.expiration ?? constants.defaults.WARN_EXPIRY,
 				),
@@ -85,6 +87,8 @@ async function handlePardonUser(
 	}
 
 	const warningDocumentsActive = await Warning.getActiveWarnings(client, {
+		guildId: interaction.guildId.toString(),
+		targetId: member.id.toString(),
 		timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
 	});
 
