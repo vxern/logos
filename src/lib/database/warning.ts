@@ -42,8 +42,8 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 		return await Model.all<Warning>(clientOrDatabase, {
 			collection: "Warnings",
 			where: Object.assign(
-				{ ...clauses?.where },
 				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },
+				{ ...clauses?.where },
 			),
 		});
 	}

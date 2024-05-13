@@ -42,8 +42,8 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 		return await Model.all<Report>(clientOrDatabase, {
 			collection: "Reports",
 			where: Object.assign(
-				{ ...clauses?.where },
 				{ guildId: undefined, authorId: undefined, createdAt: undefined },
+				{ ...clauses?.where },
 			),
 		});
 	}

@@ -44,8 +44,8 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 		return await Model.all<Resource>(clientOrDatabase, {
 			collection: "Resources",
 			where: Object.assign(
-				{ ...clauses?.where },
 				{ guildId: undefined, authorId: undefined, createdAt: undefined },
+				{ ...clauses?.where },
 			),
 		});
 	}

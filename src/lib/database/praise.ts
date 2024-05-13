@@ -34,8 +34,8 @@ class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "author
 		return await Model.all<Praise>(clientOrDatabase, {
 			collection: "Praises",
 			where: Object.assign(
-				{ ...clauses?.where },
 				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },
+				{ ...clauses?.where },
 			),
 		});
 	}

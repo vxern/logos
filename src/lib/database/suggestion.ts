@@ -44,8 +44,8 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 		return await Model.all<Suggestion>(clientOrDatabase, {
 			collection: "Suggestions",
 			where: Object.assign(
-				{ ...clauses?.where },
 				{ guildId: undefined, authorId: undefined, createdAt: undefined },
+				{ ...clauses?.where },
 			),
 		});
 	}

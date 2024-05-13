@@ -96,7 +96,7 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 	): Promise<EntryRequest[]> {
 		return await Model.all<EntryRequest>(clientOrDatabase, {
 			collection: "EntryRequests",
-			where: Object.assign({ ...clauses?.where }, { guildId: undefined, authorId: undefined }),
+			where: Object.assign({ guildId: undefined, authorId: undefined }, { ...clauses?.where }),
 		});
 	}
 
