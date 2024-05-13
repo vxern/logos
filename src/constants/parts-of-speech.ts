@@ -26,7 +26,6 @@ type PartOfSpeech =
 	| "determiner"
 	| "conjunction"
 	| "interjection"
-	// TODO(vxern): Remove unknown part of speech?
 	| "unknown";
 
 const partsOfSpeech = Object.freeze({

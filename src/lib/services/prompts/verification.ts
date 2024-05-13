@@ -16,7 +16,6 @@ type VoteInformation = {
 	};
 };
 
-// TODO(vxern): Reduce code duplication.
 class VerificationPromptService extends PromptService<{
 	type: "verification";
 	model: EntryRequest;
