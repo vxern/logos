@@ -106,7 +106,7 @@ async function handleRecogniseLanguage(
 				value: strings.description({ language: `**${strings.language(language)}` }),
 				inline: false,
 			});
-		} else {
+		} else if (detectedLanguages.likely.length !== 0) {
 			const strings = {
 				...constants.contexts.likelyMatches({
 					localise: client.localise.bind(client),
@@ -142,7 +142,7 @@ async function handleRecogniseLanguage(
 				value: strings.description({ language: `**${strings.language(language)}**` }),
 				inline: false,
 			});
-		} else {
+		} else if (detectedLanguages.possible.length !== 0) {
 			const strings = {
 				...constants.contexts.possibleMatches({
 					localise: client.localise.bind(client),
