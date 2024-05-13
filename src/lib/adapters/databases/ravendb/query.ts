@@ -19,7 +19,7 @@ class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}
 
 	whereRegex(property: string, pattern: RegExp): RavenDBDocumentQuery<M> {
-		this.#_query = this.#_query.whereRegex(property, pattern.toString());
+		this.#_query = this.#_query.whereRegex(property, pattern.source);
 		return this;
 	}
 

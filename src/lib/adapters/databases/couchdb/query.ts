@@ -18,7 +18,7 @@ class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 
 	whereRegex(property: string, pattern: RegExp): CouchDBDocumentQuery<M> {
 		Object.assign(this.#_query.selector, {
-			[property === "id" ? "_id" : property]: { $regex: pattern.toString() },
+			[property === "id" ? "_id" : property]: { $regex: pattern.source },
 		});
 		return this;
 	}
