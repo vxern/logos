@@ -368,7 +368,8 @@ async function detectLanguage(
 		return undefined;
 	}
 
-	if (!isTranslationLanguage(detectedLanguage)) {
+	const translationLanguage = getTranslationLanguage(detectedLanguage);
+	if (translationLanguage === undefined) {
 		const strings = {
 			...constants.contexts.languageNotSupported({
 				localise: client.localise.bind(client),
@@ -384,7 +385,7 @@ async function detectLanguage(
 		return undefined;
 	}
 
-	return detectedLanguage;
+	return translationLanguage;
 }
 
 export { handleTranslateChatInput, handleTranslateChatInputAutocomplete, handleTranslateMessage };
