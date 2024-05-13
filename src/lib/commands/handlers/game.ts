@@ -185,7 +185,7 @@ async function getGameView(
 					if (mode === "hide") {
 						customId = data.guessButton.encodeId([pick[0].toString()]);
 					} else {
-						customId = InteractionCollector.noneId;
+						customId = InteractionCollector.encodeCustomId([InteractionCollector.noneId, pick[0].toString()]);
 					}
 
 					return {
