@@ -159,7 +159,7 @@ class DatabaseStore {
 			resources: collections[2].length,
 			suggestions: collections[3].length,
 			tickets: collections[4].length,
-		}
+		};
 		this.log.info(`${totalCount} documents prefetched:`);
 		this.log.info(`- ${counts.entryRequests} entry requests.`);
 		this.log.info(`- ${counts.reports} reports.`);

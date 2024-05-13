@@ -51,7 +51,9 @@ async function handleDisplayWarnings(
 
 	const isSelf = member.id === interaction.user.id;
 
-	const warningDocuments = await Warning.getAll(client, { where: { guildId: interaction.guildId.toString(), targetId: member.id.toString() } });
+	const warningDocuments = await Warning.getAll(client, {
+		where: { guildId: interaction.guildId.toString(), targetId: member.id.toString() },
+	});
 
 	await client.notice(interaction, getWarningPage(client, interaction, warningDocuments, isSelf));
 }

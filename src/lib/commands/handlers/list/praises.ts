@@ -47,7 +47,9 @@ async function handleDisplayPraises(
 	const isSelf = member.id === interaction.user.id;
 
 	const propertyName = propertyByUserSearchMode[mode];
-	const praiseDocuments = await Praise.getAll(client, { where: { guildId: interaction.guildId.toString(), [propertyName]: member.id.toString() } });
+	const praiseDocuments = await Praise.getAll(client, {
+		where: { guildId: interaction.guildId.toString(), [propertyName]: member.id.toString() },
+	});
 
 	await client.notice(interaction, getPraisePage(client, interaction, praiseDocuments, isSelf, mode));
 }

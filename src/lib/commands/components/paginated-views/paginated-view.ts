@@ -99,12 +99,17 @@ abstract class PaginatedView<T> {
 
 	constructor(
 		client: Client,
-		{ interaction, elements, showable }: { interaction: Logos.Interaction; elements: T[]; showable?: boolean },
+		{
+			interaction,
+			elements,
+			showable,
+			entriesPerPage,
+		}: { interaction: Logos.Interaction; elements: T[]; showable?: boolean; entriesPerPage?: number },
 	) {
 		this.client = client;
 		this.#_anchor = interaction;
 
-		this.#pages = elements.toChunked(constants.RESULTS_PER_PAGE);
+		this.#pages = elements.toChunked(entriesPerPage ?? constants.RESULTS_PER_PAGE);
 		this.#showable = showable ?? false;
 		this.#index = 0;
 

@@ -1,9 +1,9 @@
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
 import { TimeUnit } from "logos:constants/time";
 import { Client } from "logos/client";
+import { GuildStats } from "logos/database/guild-stats";
 import { IdentifierData, Model } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
-import {GuildStats} from "logos/database/guild-stats";
 
 /** @since v3.0.0 */
 class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {

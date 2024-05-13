@@ -259,7 +259,9 @@ class ServiceStore {
 			return;
 		}
 
-		this.log.info(`Starting local services on ${client.diagnostics.guild(guildId)}... (${services.length} services to start)`);
+		this.log.info(
+			`Starting local services on ${client.diagnostics.guild(guildId)}... (${services.length} services to start)`,
+		);
 
 		this.#collection.local.set(guildId, services);
 
@@ -280,7 +282,9 @@ class ServiceStore {
 
 		const services = this.#collection.local.get(guildId)!;
 
-		this.log.info(`Stopping services on ${client.diagnostics.guild(guildId)}... (${services.length} services to stop)`);
+		this.log.info(
+			`Stopping services on ${client.diagnostics.guild(guildId)}... (${services.length} services to stop)`,
+		);
 
 		this.#collection.local.delete(guildId);
 

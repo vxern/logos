@@ -1,5 +1,5 @@
+import { code } from "logos:core/formatting";
 import { Client } from "logos/client";
-import {code} from "logos:core/formatting";
 
 type ID = bigint | string;
 type IndexOr<T> = T | ID;

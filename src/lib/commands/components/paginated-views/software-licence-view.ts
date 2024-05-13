@@ -8,13 +8,13 @@ class SoftwareLicenceView extends PaginatedView<string> {
 		client: Client,
 		{ interaction, title, sections }: { interaction: Logos.Interaction; title: string; sections: string[] },
 	) {
-		super(client, { interaction, elements: sections });
+		super(client, { interaction, elements: sections, entriesPerPage: 1 });
 
 		this.#title = title;
 	}
 
 	build(_interaction: Logos.Interaction, page: string[], _: number): View {
-		return { embed: { title: this.#title, description: `*${page}*` } };
+		return { embed: { title: this.#title, description: `*${page.at(0)}*` } };
 	}
 }
 

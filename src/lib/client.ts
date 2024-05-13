@@ -474,7 +474,10 @@ class Client {
 			return;
 		}
 
-		if (interaction.type !== Discord.InteractionTypes.ApplicationCommand && interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete) {
+		if (
+			interaction.type !== Discord.InteractionTypes.ApplicationCommand &&
+			interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete
+		) {
 			return;
 		}
 
@@ -482,7 +485,11 @@ class Client {
 
 		const handle = this.#commands.getHandler(interaction);
 		if (handle === undefined) {
-			this.log.warn(`Could not retrieve handler for ${this.diagnostics.interaction(interaction)}. Is the command registered?`);
+			this.log.warn(
+				`Could not retrieve handler for ${this.diagnostics.interaction(
+					interaction,
+				)}. Is the command registered?`,
+			);
 			return;
 		}
 
@@ -493,14 +500,25 @@ class Client {
 			if (rateLimit !== undefined) {
 				const nextUsable = rateLimit.nextAllowedUsageTimestamp - executedAt;
 
-				this.log.warn(`User rate-limited on ${this.diagnostics.interaction(interaction)}. Next usable in ${Math.ceil(nextUsable / 1000)} seconds.`);
+				this.log.warn(
+					`User rate-limited on ${this.diagnostics.interaction(interaction)}. Next usable in ${Math.ceil(
+						nextUsable / 1000,
+					)} seconds.`,
+				);
 
-				const strings = constants.contexts.rateLimited({ localise: this.localise.bind(this), locale: interaction.locale });
+				const strings = constants.contexts.rateLimited({
+					localise: this.localise.bind(this),
+					locale: interaction.locale,
+				});
 				await this.warning(interaction, {
 					title: strings.title,
-					description: `${strings.description.tooManyUses({ times: constants.defaults.COMMAND_RATE_LIMIT.uses })}\n\n${strings.description.cannotUseUntil({ relative_timestamp: timestamp(rateLimit.nextAllowedUsageTimestamp, {
+					description: `${strings.description.tooManyUses({
+						times: constants.defaults.COMMAND_RATE_LIMIT.uses,
+					})}\n\n${strings.description.cannotUseUntil({
+						relative_timestamp: timestamp(rateLimit.nextAllowedUsageTimestamp, {
 							format: "relative",
-						}) })}`,
+						}),
+					})}`,
 				});
 
 				setTimeout(() => this.deleteReply(interaction), nextUsable);
