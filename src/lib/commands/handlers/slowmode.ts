@@ -15,7 +15,7 @@ async function handleToggleSlowmodeAutocomplete(
 	});
 	const levelLowercase = interaction.parameters.level.trim().toLowerCase();
 	const choices = constants.slowmode.levels
-		.map((level, index) => ({ name: strings.level(level), value: index.toString() }))
+		.map((level) => ({ name: strings.level(level), value: level }))
 		.filter((choice) => choice.name.toLowerCase().includes(levelLowercase));
 
 	await client.respond(interaction, choices);
@@ -57,7 +57,7 @@ async function handleToggleSlowmode(
 	if (isEnabled) {
 		if (interaction.parameters.level !== undefined) {
 			const previousRateLimitDuration = channel.rateLimitPerUser ?? 0;
-			const newRateLimitDuration = Math.floor(getSlowmodeDelayByLevel(interaction.parameters.level) / 1000);
+			const newRateLimitDuration = getSlowmodeDelayByLevel(interaction.parameters.level);
 
 			const previousLevel = getSlowmodeLevelByDelay(previousRateLimitDuration) ?? "lowest";
 
