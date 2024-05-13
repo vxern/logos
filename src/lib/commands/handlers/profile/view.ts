@@ -27,9 +27,9 @@ async function handleDisplayProfile(
 	}
 
 	const [praiseDocumentsByAuthor, praiseDocumentsByTarget, warningDocuments] = await Promise.all([
-		Praise.getAll(client, { where: { authorId: member.id.toString() } }),
-		Praise.getAll(client, { where: { targetId: member.id.toString() } }),
-		Warning.getAll(client, { where: { targetId: member.id.toString() } }),
+		Praise.getAll(client, { where: { guildId: interaction.guildId.toString(), authorId: member.id.toString() } }),
+		Praise.getAll(client, { where: { guildId: interaction.guildId.toString(), targetId: member.id.toString() } }),
+		Warning.getAll(client, { where: { guildId: interaction.guildId.toString(), targetId: member.id.toString() } }),
 	]);
 
 	const strings = constants.contexts.profile({ localise: client.localise.bind(client), locale: interaction.locale });

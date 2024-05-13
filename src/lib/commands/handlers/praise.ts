@@ -42,7 +42,7 @@ async function handlePraiseUser(
 	await client.postponeReply(interaction);
 
 	const crossesRateLimit = Guild.crossesRateLimit(
-		await Praise.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+		await Praise.getAll(client, { where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() } }),
 		configuration.rateLimit ?? constants.defaults.PRAISE_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {

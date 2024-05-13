@@ -22,7 +22,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 	}
 
 	const crossesRateLimit = Guild.crossesRateLimit(
-		await Ticket.getAll(client, { where: { authorId: interaction.user.id.toString() } }),
+		await Ticket.getAll(client, { where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() } }),
 		configuration.rateLimit ?? constants.defaults.TICKET_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {

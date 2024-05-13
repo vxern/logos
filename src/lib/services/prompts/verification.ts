@@ -584,7 +584,7 @@ class VerificationPromptService extends PromptService<{
 			const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
 			if (ticketService !== undefined) {
 				const [ticketDocument] = await Ticket.getAll(this.client, {
-					where: { channelId: entryRequestDocument.ticketChannelId },
+					where: { guildId: this.guildIdString, channelId: entryRequestDocument.ticketChannelId },
 				});
 				if (ticketDocument === undefined) {
 					throw "StateError: Unable to find ticket document.";
