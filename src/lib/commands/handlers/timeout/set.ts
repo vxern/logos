@@ -14,7 +14,7 @@ async function handleSetTimeoutAutocomplete(
 	switch (interaction.parameters.focused) {
 		case "user": {
 			await client.autocompleteMembers(interaction, {
-				identifier: interaction.parameters.focused,
+				identifier: interaction.parameters.user,
 				options: { restrictToNonSelf: true, excludeModerators: true },
 			});
 			return;
