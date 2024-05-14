@@ -414,8 +414,7 @@ class CommandStore {
 			}
 
 			if (guildDocument.isEnabled("word")) {
-				// REMINDER(vxern): Re-enable
-				// commands.push(this.commands.word);
+				commands.push(this.commands.word);
 			}
 		}
 
