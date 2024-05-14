@@ -233,7 +233,7 @@ class ServiceStore {
 				this.local.prompts.tickets.set(guildId, service);
 			}
 
-			if (guildDocument.areEnabled("resources")) {
+			if (guildDocument.areEnabled("resourceSubmissions")) {
 				const service = new ResourcePromptService(client, { guildId });
 				services.push(service);
 

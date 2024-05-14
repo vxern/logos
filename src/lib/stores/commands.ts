@@ -459,7 +459,7 @@ class CommandStore {
 				commands.push(this.commands.ticket);
 			}
 
-			if (guildDocument.areEnabled("resources")) {
+			if (guildDocument.areEnabled("resourceSubmissions")) {
 				commands.push(this.commands.resource);
 			}
 		}

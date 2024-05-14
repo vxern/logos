@@ -129,47 +129,61 @@ abstract class PromptService<
 		}
 
 		const documents = this.getAllDocuments();
+
+		this.log.info(`Found ${documents.size} ${this.#type} documents on ${this.client.diagnostics.guild(this.guild)}.`);
+
 		for (const [partialId, document] of documents.entries()) {
 			this.documents.set(partialId, document);
 		}
 
-		const promptsAll = await this.getAllMessages({ channelId });
-		const [validPrompts, invalidPrompts] = this.filterPrompts(promptsAll ?? []);
+		const messages = await this.getAllMessages({ channelId }) ?? [];
+		const [validPrompts, invalidPrompts] = this.filterPrompts(messages);
+
+		this.log.info(`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}, of which ${invalidPrompts.length} aren't prompts or are invalid.`);
+
+		if (validPrompts.length !== 0) {
+			this.log.info(`Restoring state for ${documents.size} ${this.#type} documents...`);
+		}
 
 		const prompts = new Map(validPrompts);
-
-		for (const [_, promptDocument] of this.documents) {
-			const userDocument = await this.getUserDocument(promptDocument);
-
+		for (const [_, document] of this.documents) {
+			const userDocument = await this.getUserDocument(document);
 			const userId = BigInt(userDocument.account.id);
 
-			let prompt = prompts.get(promptDocument.partialId);
+			let prompt = prompts.get(document.partialId);
 			if (prompt !== undefined) {
-				prompts.delete(promptDocument.partialId);
+				prompts.delete(document.partialId);
 			} else {
+				this.log.warn(`Could not find existing prompt for ${document.id}. Has it been manually deleted? Recreating...`);
+
 				const user = this.client.entities.users.get(userId);
 				if (user === undefined) {
+					this.log.info(`Could not find the author object of ${document.id}. Skipping...`);
 					continue;
 				}
 
-				const message = await this.savePrompt(user, promptDocument);
+				const message = await this.savePrompt(user, document);
 				if (message === undefined) {
+					this.log.info(`Could not create prompt for ${document.id}. Skipping...`);
 					continue;
 				}
 
 				prompt = message;
 			}
 
-			this.registerPrompt(prompt, userId, promptDocument);
-			this.registerDocument(promptDocument);
-			this.registerHandler(promptDocument);
+			this.registerPrompt(prompt, userId, document);
+			this.registerDocument(document);
+			this.registerHandler(document);
 		}
 
 		const expiredPrompts = Array.from(prompts.values());
+		if (prompts.size !== 0) {
+			this.log.warn(`Could not restore the prompt-to-document link between ${prompts.size} prompts. Considering these prompts expired and deleting...`);
+		}
 
 		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
-			await this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch(() => {
-				this.log.warn("Failed to delete invalid or expired prompt.");
+			await this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch((reason) => {
+				this.log.warn("Failed to delete invalid or expired prompt:", reason);
 			});
 		}
 
