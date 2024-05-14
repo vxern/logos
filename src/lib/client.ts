@@ -377,26 +377,16 @@ class Client {
 		guild: Discord.Guild | Logos.Guild,
 		{ isReload = false }: { isReload?: boolean } = {},
 	): Promise<void> {
-		// This check prevents the same guild being set up multiple times. This can happen when a shard managing a given
-		// guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event again for
-		// a guild that Logos would already have been managing.
-		if (!isReload && this.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
-			return;
-		}
-
 		if (!isReload) {
+			// This check prevents the same guild being set up multiple times. This can happen when a shard managing a given
+			// guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event again for
+			// a guild that Logos would already have been managing.
+			if (this.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
+				return;
+			}
+
 			this.log.info(`Setting Logos up on ${this.diagnostics.guild(guild)}...`);
-		}
 
-		const guildDocument = await Guild.getOrCreate(this, { guildId: guild.id.toString() });
-
-		await this.#services.setupGuildServices(this, { guildId: guild.id, guildDocument });
-
-		this.bot.rest
-			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
-			.catch((reason) => this.log.warn(`Failed to upsert commands on ${this.diagnostics.guild(guild)}:`, reason));
-
-		if (!isReload) {
 			this.log.info(`Fetching ~${guild.memberCount} members of ${this.diagnostics.guild(guild)}...`);
 
 			const members = await this.bot.gateway
@@ -416,6 +406,14 @@ class Client {
 
 			this.log.info(`Fetched ~${guild.memberCount} members of ${this.diagnostics.guild(guild)}.`);
 		}
+
+		const guildDocument = await Guild.getOrCreate(this, { guildId: guild.id.toString() });
+
+		await this.#services.setupGuildServices(this, { guildId: guild.id, guildDocument });
+
+		this.bot.rest
+			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
+			.catch((reason) => this.log.warn(`Failed to upsert commands on ${this.diagnostics.guild(guild)}:`, reason));
 	}
 
 	async #teardownGuild({ guildId }: { guildId: bigint }): Promise<void> {
