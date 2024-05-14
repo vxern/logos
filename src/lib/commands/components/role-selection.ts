@@ -361,7 +361,11 @@ async function displaySelectMenu(
 
 	const strings = {
 		...constants.contexts.roleMenu({ localise: client.localise.bind(client), locale: interaction.locale }),
-		...constants.contexts.role({ localise: client.localise.bind(client), locale: interaction.locale }),
+		...constants.contexts.role({
+			localise: client.localise.bind(client),
+			localiseRaw: client.localiseRaw.bind(client),
+			locale: interaction.locale,
+		}),
 	};
 	const title = (categories.length > 1 ? categories.slice(1) : categories)
 		.map((category) => `${category.emoji}  ${strings.name({ id: category.id })}`)
@@ -440,7 +444,7 @@ function createSelectOptionsFromCollection(
 			...constants.contexts.assignedRoles({ localise: client.localise.bind(client), locale: interaction.locale }),
 			...constants.contexts.role({
 				localise: client.localise.bind(client),
-				localiseRaw: client.localiseRaw,
+				localiseRaw: client.localiseRaw.bind(client),
 				locale: interaction.locale,
 			}),
 		};
