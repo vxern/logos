@@ -188,14 +188,7 @@ abstract class PromptService<
 		}
 
 		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
-		this.#_messageDeletes.onCollect(async (payload) => {
-			const message = this.client.entities.messages.latest.get(payload.id);
-			if (message === undefined) {
-				return;
-			}
-
-			this.#handleMessageDelete(message);
-		});
+		this.#_messageDeletes.onCollect(this.#handleMessageDelete.bind(this));
 
 		this.magicButton.onInteraction(async (buttonPress) => {
 			const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
@@ -346,18 +339,18 @@ abstract class PromptService<
 	}
 
 	// Anti-tampering feature; detects prompts being deleted.
-	async #handleMessageDelete(message: Logos.Message): Promise<void> {
+	async #handleMessageDelete({ id, channelId }: { id: bigint; channelId: bigint }): Promise<void> {
 		// If the message was deleted from a channel not managed by this prompt manager.
-		if (message.channelId !== this.channelId) {
+		if (channelId !== this.channelId) {
 			return;
 		}
 
-		const promptDocument = this.#documentByPromptId.get(message.id.toString());
+		const promptDocument = this.#documentByPromptId.get(id.toString());
 		if (promptDocument === undefined) {
 			return;
 		}
 
-		const userId = this.#userIdByPromptId.get(message.id.toString());
+		const userId = this.#userIdByPromptId.get(id.toString());
 		if (userId === undefined) {
 			return;
 		}
@@ -379,8 +372,8 @@ abstract class PromptService<
 
 		this.registerPrompt(prompt, userId, promptDocument);
 
-		this.#documentByPromptId.delete(message.id.toString());
-		this.#userIdByPromptId.delete(message.id.toString());
+		this.#documentByPromptId.delete(id.toString());
+		this.#userIdByPromptId.delete(id.toString());
 	}
 
 	abstract getAllDocuments(): Map<string, Generic["model"]>;

@@ -124,7 +124,7 @@ class MusicService extends LocalService {
 			localise: this.client.localise.bind(this.client),
 			locale: this.guildLocale,
 		});
-		await this.client.bot.helpers
+		await this.client.bot.rest
 			.sendMessage(this.session.channelId, {
 				embeds: [
 					{
