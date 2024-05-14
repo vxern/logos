@@ -7,6 +7,10 @@ const logger: EventLogger<"messageDelete"> = async (client, [payload, _], { guil
 		return undefined;
 	}
 
+	if (message.content === undefined) {
+		return undefined;
+	}
+
 	const strings = constants.contexts.messageDelete({ localise: client.localise.bind(client), locale: guildLocale });
 	return {
 		embeds: [
