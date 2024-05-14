@@ -246,12 +246,12 @@ class VerificationPromptService extends PromptService<{
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isAccept: string]>,
 	): Promise<EntryRequest | null | undefined> {
-		const [guildId, userId] = interaction.metadata[0].split("/");
-		if (guildId === undefined || userId === undefined) {
+		const [guildId, authorId] = Model.getDataFromPartialId<EntryRequest>(interaction.metadata[1]);
+		if (guildId === undefined || authorId === undefined) {
 			return undefined;
 		}
 
-		const newVote: VoteType = interaction.metadata[1] === "true" ? "for" : "against";
+		const newVote: VoteType = interaction.metadata[2] === "true" ? "for" : "against";
 
 		const voter = interaction.member;
 		if (voter === undefined) {
@@ -259,7 +259,7 @@ class VerificationPromptService extends PromptService<{
 		}
 
 		const entryRequestDocument = this.client.documents.entryRequests.get(
-			Model.buildPartialId<EntryRequest>({ guildId, authorId: userId }),
+			Model.buildPartialId<EntryRequest>({ guildId, authorId }),
 		);
 		if (entryRequestDocument === undefined) {
 			await this.#displayVoteError(interaction);

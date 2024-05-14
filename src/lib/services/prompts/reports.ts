@@ -115,13 +115,12 @@ class ReportPromptService extends PromptService<{
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Report | null | undefined> {
-		const reportDocument = this.documents.get(interaction.metadata[0]);
+		const reportDocument = this.documents.get(interaction.metadata[1]);
 		if (reportDocument === undefined) {
 			return undefined;
 		}
 
-		const isResolved = interaction.metadata[1] === "true";
-
+		const isResolved = interaction.metadata[2] === "true";
 		if (isResolved && reportDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
 				localise: this.client.localise.bind(this.client),

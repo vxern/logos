@@ -83,13 +83,12 @@ class ResourcePromptService extends PromptService<{
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Resource | null | undefined> {
-		const resourceDocument = this.documents.get(interaction.metadata[0]);
+		const resourceDocument = this.documents.get(interaction.metadata[1]);
 		if (resourceDocument === undefined) {
 			return undefined;
 		}
 
-		const isResolved = interaction.metadata[1] === "true";
-
+		const isResolved = interaction.metadata[2] === "true";
 		if (isResolved && resourceDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
 				localise: this.client.localise.bind(this.client),

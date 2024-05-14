@@ -82,6 +82,10 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 		return [collection as Collection, data as IdentifierParts<M>];
 	}
 
+	static getDataFromPartialId<M extends Model>(partialId: string): IdentifierParts<M> {
+		return partialId.split(constants.special.database.separator) as string[] as IdentifierParts<M>;
+	}
+
 	static composeId(partialId: string, { collection }: { collection: Collection }): string {
 		return `${decapitalise(collection)}${constants.special.database.separator}${partialId}`;
 	}
