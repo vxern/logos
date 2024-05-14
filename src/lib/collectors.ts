@@ -349,8 +349,8 @@ class InteractionCollector<
 		}
 
 		return Object.assign(
-			InteractionCollector.#parseParameters(options),
 			InteractionCollector.#_defaultParameters,
+			InteractionCollector.#parseParameters(options),
 		) as Logos.InteractionParameters<Parameters>;
 	}
 
