@@ -233,7 +233,7 @@ class VerificationPromptService extends PromptService<{
 										type: Discord.MessageComponentTypes.Button,
 										style: Discord.ButtonStyles.Primary,
 										label: strings.open,
-										customId: this.removeButton.encodeId([entryRequestDocument.partialId]),
+										customId: this.#_openInquiry.encodeId([entryRequestDocument.partialId]),
 									},
 							  ]
 							: []) as Discord.ButtonComponent[]),
