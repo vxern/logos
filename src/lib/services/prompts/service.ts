@@ -130,7 +130,7 @@ abstract class PromptService<
 
 		const documents = this.getAllDocuments();
 		for (const [partialId, document] of documents.entries()) {
-			documents.set(partialId, document);
+			this.documents.set(partialId, document);
 		}
 
 		const promptsAll = await this.getAllMessages({ channelId });
