@@ -632,7 +632,7 @@ class VerificationPromptService extends PromptService<{
 			locale: this.guildLocale,
 		});
 		const ticketDocument = await ticketService.openTicket({
-			type: "standalone",
+			type: "inquiry",
 			formData: { topic: strings.inquiryChannel({ user: entryRequestAuthor.username }) },
 			user: entryRequestAuthor,
 		});
