@@ -42,7 +42,6 @@ class EntryService extends LocalService {
 		const languageProficiencyButtons = new InteractionCollector<[index: string]>(this.client, {
 			only: [buttonPress.user.id],
 			dependsOn: this.#_acceptedRulesButton,
-			isSingle: true,
 		});
 
 		languageProficiencyButtons.onInteraction((buttonPress) =>
@@ -290,6 +289,8 @@ class EntryService extends LocalService {
 				description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
 			});
 		});
+
+		await composer.open();
 	}
 
 	async #vetUser(interaction: Logos.Interaction): Promise<boolean> {
