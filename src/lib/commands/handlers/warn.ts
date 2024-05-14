@@ -171,7 +171,7 @@ async function handleWarnUser(
 								user_mention: mention(user.id, { type: "user" }),
 								limit: configuration.limit,
 								number: warningDocumentsActive.length,
-								period: client.pluralise(`units.${timeout[1]}.word`, interaction.locale, {
+								period: client.pluralise(`units.${timeout[1]}.word`, interaction.guildLocale, {
 									quantity: timeout[0],
 								}),
 							}),
