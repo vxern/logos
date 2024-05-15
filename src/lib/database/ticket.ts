@@ -8,6 +8,13 @@ interface TicketFormData {
 	readonly topic: string;
 }
 
+type CreateTicketOptions = {
+	createdAt?: number;
+	type: TicketType;
+	formData: TicketFormData;
+	isResolved?: boolean;
+} & IdentifierData<Ticket>;
+
 class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "authorId", "channelId"] }> {
 	get guildId(): string {
 		return this.idParts[0];
@@ -27,21 +34,7 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 
 	isResolved: boolean;
 
-	constructor(
-		database: DatabaseStore,
-		{
-			createdAt,
-			type,
-			formData,
-			isResolved,
-			...data
-		}: {
-			createdAt?: number;
-			type: TicketType;
-			formData: TicketFormData;
-			isResolved?: boolean;
-		} & IdentifierData<Ticket>,
-	) {
+	constructor(database: DatabaseStore, { createdAt, type, formData, isResolved, ...data }: CreateTicketOptions) {
 		super(database, data, { collection: "Tickets" });
 
 		this.createdAt = createdAt ?? Date.now();
@@ -63,10 +56,7 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 		});
 	}
 
-	static async create(
-		client: Client,
-		data: IdentifierData<Ticket> & { type: TicketType; formData: TicketFormData },
-	): Promise<Ticket> {
+	static async create(client: Client, data: CreateTicketOptions): Promise<Ticket> {
 		const ticketDocument = new Ticket(client.database, data);
 
 		await ticketDocument.create(client);
@@ -76,4 +66,4 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 }
 
 export { Ticket };
-export type { TicketType, TicketFormData };
+export type { CreateTicketOptions, TicketType, TicketFormData };

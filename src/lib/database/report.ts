@@ -8,6 +8,8 @@ interface ReportFormData {
 	messageLink?: string;
 }
 
+type CreateReportOptions = { formData: ReportFormData; isResolved?: boolean } & IdentifierData<Report>;
+
 class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
@@ -25,10 +27,7 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 
 	isResolved: boolean;
 
-	constructor(
-		database: DatabaseStore,
-		{ formData, isResolved, ...data }: { formData: ReportFormData; isResolved?: boolean } & IdentifierData<Report>,
-	) {
+	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateReportOptions) {
 		super(database, data, { collection: "Reports" });
 
 		this.formData = formData;
@@ -48,10 +47,7 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 		});
 	}
 
-	static async create(
-		client: Client,
-		data: Omit<IdentifierData<Report>, "createdAt"> & { formData: ReportFormData },
-	): Promise<Report> {
+	static async create(client: Client, data: Omit<CreateReportOptions, "createdAt">): Promise<Report> {
 		const reportDocument = new Report(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await reportDocument.create(client);
@@ -61,4 +57,4 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 }
 
 export { Report };
-export type { ReportFormData };
+export type { CreateReportOptions, ReportFormData };

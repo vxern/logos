@@ -13,6 +13,12 @@ interface GameStats {
 	uniquePlayers: number;
 }
 
+type CreateGuildStatsOptions = {
+	createdAt?: number;
+	stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
+} & IdentifierData<GuildStats>;
+
+// TODO(vxern): This needs renaming to "GuildStatistics" at some point.
 class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] }> {
 	static readonly #_initialStats: GameStats = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
 
@@ -24,31 +30,21 @@ class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] 
 
 	stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
 
-	constructor(
-		database: DatabaseStore,
-		{
-			createdAt,
-			stats,
-			...data
-		}: {
-			createdAt?: number;
-			stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
-		} & IdentifierData<GuildStats>,
-	) {
+	constructor(database: DatabaseStore, {createdAt, stats, ...data}: CreateGuildStatsOptions) {
 		super(database, data, { collection: "GuildStats" });
 
 		this.createdAt = createdAt ?? Date.now();
 		this.stats = stats;
 	}
 
-	static async getOrCreate(client: Client, data: IdentifierData<GuildStats>): Promise<GuildStats> {
-		const partialId = Model.buildPartialId(data);
+	static async getOrCreate(client: Client, data: CreateGuildStatsOptions): Promise<GuildStats> {
+		const partialId = Model.buildPartialId<GuildStats>(data);
 		if (client.documents.guildStats.has(partialId)) {
 			return client.documents.guildStats.get(partialId)!;
 		}
 
 		return await client.database.withSession(async (session) => {
-			const guildStatsDocument = await session.get<GuildStats>(Model.buildId(data, { collection: "GuildStats" }));
+			const guildStatsDocument = await session.get<GuildStats>(Model.buildId<GuildStats>(data, { collection: "GuildStats" }));
 			if (guildStatsDocument !== undefined) {
 				return guildStatsDocument;
 			}
@@ -99,4 +95,4 @@ class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] 
 }
 
 export { GuildStats };
-export type { GameStats, GameType };
+export type { CreateGuildStatsOptions, GameStats, GameType };

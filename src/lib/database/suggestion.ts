@@ -6,6 +6,8 @@ interface SuggestionFormData {
 	readonly suggestion: string;
 }
 
+type CreateSuggestionOptions = { formData: SuggestionFormData; isResolved?: boolean } & IdentifierData<Suggestion>;
+
 class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
@@ -23,14 +25,7 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 
 	isResolved: boolean;
 
-	constructor(
-		database: DatabaseStore,
-		{
-			formData,
-			isResolved,
-			...data
-		}: { formData: SuggestionFormData; isResolved?: boolean } & IdentifierData<Suggestion>,
-	) {
+	constructor(database: DatabaseStore, {formData, isResolved, ...data}: CreateSuggestionOptions) {
 		super(database, data, { collection: "Suggestions" });
 
 		this.formData = formData;
@@ -50,10 +45,7 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 		});
 	}
 
-	static async create(
-		client: Client,
-		data: Omit<IdentifierData<Suggestion>, "createdAt"> & { formData: SuggestionFormData },
-	): Promise<Suggestion> {
+	static async create(client: Client, data: Omit<CreateSuggestionOptions, "createdAt">): Promise<Suggestion> {
 		const suggestionDocument = new Suggestion(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await suggestionDocument.create(client);
@@ -63,4 +55,4 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 }
 
 export { Suggestion };
-export type { SuggestionFormData };
+export type { CreateSuggestionOptions, SuggestionFormData };

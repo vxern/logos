@@ -2,6 +2,8 @@ import { Client } from "logos/client";
 import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 
+type CreatePraiseOptions = { comment?: string } & IdentifierData<Praise>;
+
 class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
@@ -21,7 +23,7 @@ class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "author
 
 	comment?: string;
 
-	constructor(database: DatabaseStore, { comment, ...data }: { comment?: string } & IdentifierData<Praise>) {
+	constructor(database: DatabaseStore, { comment, ...data }: CreatePraiseOptions) {
 		super(database, data, { collection: "Praises" });
 
 		this.comment = comment;
@@ -40,10 +42,7 @@ class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "author
 		});
 	}
 
-	static async create(
-		client: Client,
-		data: Omit<IdentifierData<Praise>, "createdAt"> & { comment?: string },
-	): Promise<Praise> {
+	static async create(client: Client, data: Omit<CreatePraiseOptions, "createdAt">): Promise<Praise> {
 		const praiseDocument = new Praise(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await praiseDocument.create(client);
@@ -53,3 +52,4 @@ class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "author
 }
 
 export { Praise };
+export type { CreatePraiseOptions };

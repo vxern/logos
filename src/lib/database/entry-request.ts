@@ -21,6 +21,16 @@ interface ForcedVerdict {
 	readonly verdict: VoteVerdict;
 }
 
+type CreateEntryRequestOptions = {
+	createdAt?: number;
+	requestedRoleId: string;
+	formData: EntryRequestFormData;
+	isFinalised?: boolean;
+	forcedVerdict?: ForcedVerdict;
+	ticketChannelId?: string;
+	votes?: VoteStats;
+} & IdentifierData<EntryRequest>;
+
 class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guildId", "authorId"] }> {
 	get guildId(): string {
 		return this.idParts[0];
@@ -47,26 +57,7 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 		return this.votes?.against ?? [];
 	}
 
-	constructor(
-		database: DatabaseStore,
-		{
-			createdAt,
-			requestedRoleId,
-			formData,
-			isFinalised,
-			forcedVerdict,
-			ticketChannelId,
-			votes,
-			...data
-		}: {
-			createdAt?: number;
-			requestedRoleId: string;
-			formData: EntryRequestFormData;
-			isFinalised?: boolean;
-			forcedVerdict?: ForcedVerdict;
-			ticketChannelId?: string;
-			votes?: VoteStats;
-		} & IdentifierData<EntryRequest>,
+	constructor(database: DatabaseStore, {createdAt, requestedRoleId, formData, isFinalised, forcedVerdict, ticketChannelId, votes, ...data}: CreateEntryRequestOptions,
 	) {
 		super(database, data, { collection: "EntryRequests" });
 
@@ -100,10 +91,7 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 		});
 	}
 
-	static async create(
-		client: Client,
-		data: IdentifierData<EntryRequest> & { requestedRoleId: string; formData: EntryRequestFormData },
-	): Promise<EntryRequest> {
+	static async create(client: Client, data: CreateEntryRequestOptions): Promise<EntryRequest> {
 		const entryRequestDocument = new EntryRequest(client.database, data);
 
 		await entryRequestDocument.create(client);
@@ -195,4 +183,4 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 }
 
 export { EntryRequest };
-export type { EntryRequestFormData, VoteType };
+export type { CreateEntryRequestOptions, EntryRequestFormData, VoteType };

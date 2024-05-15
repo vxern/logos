@@ -3,6 +3,8 @@ import { Client } from "logos/client";
 import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 
+type CreateWarningOptions = { reason: string; rule?: Rule } & IdentifierData<Warning>;
+
 class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
@@ -25,10 +27,7 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 	/** @since v3.37.0 */
 	rule?: Rule;
 
-	constructor(
-		database: DatabaseStore,
-		{ reason, rule, ...data }: { reason: string; rule?: Rule } & IdentifierData<Warning>,
-	) {
+	constructor(database: DatabaseStore, { reason, rule, ...data }: CreateWarningOptions) {
 		super(database, data, { collection: "Warnings" });
 
 		this.reason = reason;
@@ -48,10 +47,7 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 		});
 	}
 
-	static async create(
-		client: Client,
-		data: Omit<IdentifierData<Warning>, "createdAt"> & { reason: string; rule?: Rule },
-	): Promise<Warning> {
+	static async create(client: Client, data: Omit<CreateWarningOptions, "createdAt">): Promise<Warning> {
 		const warningDocument = new Warning(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await warningDocument.create(client);
@@ -93,3 +89,4 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 }
 
 export { Warning };
+export type { CreateWarningOptions };

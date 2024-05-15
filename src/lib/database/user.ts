@@ -29,6 +29,12 @@ interface GameScores {
 
 type AuthorisationStatus = "authorised" | "rejected";
 
+type CreateUserOptions = {
+	createdAt?: number;
+	account?: Account;
+	scores?: Partial<Record<Locale, Partial<Record<GameType, GameScores>>>>;
+} & IdentifierData<User>;
+
 class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 	static readonly #_initialScores: GameScores = { totalScore: 0, sessionCount: 1 };
 
@@ -49,19 +55,7 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 		this.account.language = language;
 	}
 
-	constructor(
-		database: DatabaseStore,
-		{
-			createdAt,
-			account,
-			scores,
-			...data
-		}: {
-			createdAt?: number;
-			account?: Account;
-			scores?: Partial<Record<Locale, Partial<Record<GameType, GameScores>>>>;
-		} & IdentifierData<User>,
-	) {
+	constructor(database: DatabaseStore, { createdAt, account, scores, ...data }: CreateUserOptions) {
 		super(database, data, { collection: "Users" });
 
 		this.createdAt = createdAt ?? Date.now();
@@ -69,14 +63,14 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 		this.scores = scores;
 	}
 
-	static async getOrCreate(client: Client, data: IdentifierData<User>): Promise<User> {
-		const partialId = Model.buildPartialId(data);
+	static async getOrCreate(client: Client, data: CreateUserOptions): Promise<User> {
+		const partialId = Model.buildPartialId<User>(data);
 		if (client.documents.users.has(partialId)) {
 			return client.documents.users.get(partialId)!;
 		}
 
 		return await client.database.withSession(async (session) => {
-			const userDocument = await session.get<User>(Model.buildId(data, { collection: "Users" }));
+			const userDocument = await session.get<User>(Model.buildId<User>(data, { collection: "Users" }));
 			if (userDocument !== undefined) {
 				return userDocument;
 			}
@@ -196,3 +190,4 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 }
 
 export { User };
+export type { CreateUserOptions };

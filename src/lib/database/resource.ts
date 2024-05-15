@@ -6,6 +6,8 @@ interface ResourceFormData {
 	readonly resource: string;
 }
 
+type CreateResourceOptions = { formData: ResourceFormData; isResolved?: boolean } & IdentifierData<Resource>;
+
 class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
 		return this.idParts[0];
@@ -23,14 +25,7 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 
 	isResolved: boolean;
 
-	constructor(
-		database: DatabaseStore,
-		{
-			formData,
-			isResolved,
-			...data
-		}: { formData: ResourceFormData; isResolved?: boolean } & IdentifierData<Resource>,
-	) {
+	constructor(database: DatabaseStore, {formData, isResolved, ...data}: CreateResourceOptions) {
 		super(database, data, { collection: "Resources" });
 
 		this.formData = formData;
@@ -50,10 +45,7 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 		});
 	}
 
-	static async create(
-		client: Client,
-		data: Omit<IdentifierData<Resource>, "createdAt"> & { formData: ResourceFormData },
-	): Promise<Resource> {
+	static async create(client: Client, data: Omit<CreateResourceOptions, "createdAt">): Promise<Resource> {
 		const resourceDocument = new Resource(client.database, { ...data, createdAt: Date.now().toString() });
 
 		await resourceDocument.create(client);
@@ -63,4 +55,4 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 }
 
 export { Resource };
-export type { ResourceFormData };
+export type { CreateResourceOptions, ResourceFormData };
