@@ -57,7 +57,7 @@ async function handleClearTimeout(
 		return;
 	}
 
-	await client.bot.rest
+	await client.bot.helpers
 		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: null })
 		.catch(() => client.log.warn(`Failed to remove timeout of ${client.diagnostics.member(member)}.`));
 

@@ -55,7 +55,7 @@ async function handlePurgeMessages(
 
 	const end =
 		interaction.parameters.end ??
-		(await client.bot.rest
+		(await client.bot.helpers
 			.getMessages(interaction.channelId, { limit: 1 })
 			.catch(() => undefined)
 			.then((messages) => messages?.at(0)?.id?.toString()));
@@ -94,12 +94,12 @@ async function handlePurgeMessages(
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		client.bot.rest.getMessage(interaction.channelId, startMessageId).catch(() => {
+		client.bot.helpers.getMessage(interaction.channelId, startMessageId).catch(() => {
 			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
 
 			return undefined;
 		}),
-		client.bot.rest.getMessage(interaction.channelId, endMessageId).catch(() => {
+		client.bot.helpers.getMessage(interaction.channelId, endMessageId).catch(() => {
 			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
 
 			return undefined;
@@ -214,7 +214,7 @@ async function handlePurgeMessages(
 			return;
 		}
 
-		const newMessages = await client.bot.rest
+		const newMessages = await client.bot.helpers
 			.getMessages(interaction.channelId, {
 				after: messages.length === 0 ? startMessage.id : messages.at(-1)?.id,
 				limit: 100,
@@ -533,7 +533,7 @@ async function handlePurgeMessages(
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await client.bot.rest.deleteMessages(interaction.channelId, messageIds).catch((reason) => {
+			await client.bot.helpers.deleteMessages(interaction.channelId, messageIds).catch((reason) => {
 				client.log.warn(
 					`Failed to delete ${messageIds.length} messages from ${client.diagnostics.channel(
 						interaction.channelId,
@@ -549,7 +549,7 @@ async function handlePurgeMessages(
 	}
 
 	for (const message of nonBulkDeletable) {
-		await client.bot.rest
+		await client.bot.helpers
 			.deleteMessage(interaction.channelId, message.id)
 			.catch((reason) => client.log.warn(`Failed to delete ${client.diagnostics.message(message)}:`, reason));
 

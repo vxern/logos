@@ -150,7 +150,7 @@ async function createRoleSelectionMenu(
 				return;
 			}
 
-			client.bot.rest
+			client.bot.helpers
 				.removeRole(guild.id, member.id, role.id, "User-requested role removal.")
 				.catch(() =>
 					client.log.warn(
@@ -189,7 +189,7 @@ async function createRoleSelectionMenu(
 				return;
 			}
 
-			await client.bot.rest
+			await client.bot.helpers
 				.addRole(guild.id, member.id, role.id, "User-requested role addition.")
 				.catch(() =>
 					client.log.warn(
@@ -201,7 +201,7 @@ async function createRoleSelectionMenu(
 
 			if (viewData.category.maximum === 1) {
 				for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
-					client.bot.rest
+					client.bot.helpers
 						.removeRole(guild.id, member.id, memberRoleId)
 						.catch(() =>
 							client.log.warn(

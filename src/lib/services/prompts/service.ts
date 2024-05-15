@@ -182,7 +182,7 @@ abstract class PromptService<
 		}
 
 		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
-			await this.client.bot.rest.deleteMessage(prompt.channelId, prompt.id).catch((reason) => {
+			await this.client.bot.helpers.deleteMessage(prompt.channelId, prompt.id).catch((reason) => {
 				this.log.warn("Failed to delete invalid or expired prompt:", reason);
 			});
 		}
@@ -325,7 +325,7 @@ abstract class PromptService<
 		}
 
 		// Delete the message and allow the bot to handle the deletion.
-		this.client.bot.rest
+		this.client.bot.helpers
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
 				this.log.warn(
@@ -418,7 +418,7 @@ abstract class PromptService<
 	async savePrompt(
 		user: Logos.User,
 		promptDocument: Generic["model"],
-	): Promise<Discord.CamelizedDiscordMessage | undefined> {
+	): Promise<Discord.Message | undefined> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return undefined;
@@ -429,7 +429,7 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		return await this.client.bot.rest.sendMessage(channelId, content).catch(() => {
+		return await this.client.bot.helpers.sendMessage(channelId, content).catch(() => {
 			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 
 			return undefined;
@@ -478,7 +478,7 @@ abstract class PromptService<
 				this.#documentByPromptId.set(prompt.id, updatedDocument);
 			}
 
-			this.client.bot.rest
+			this.client.bot.helpers
 				.deleteMessage(prompt.channelId, prompt.id)
 				.catch(() => this.log.warn("Failed to delete prompt."));
 		});
@@ -497,7 +497,7 @@ abstract class PromptService<
 
 		const prompt = this.promptByPartialId.get(promptDocument.partialId);
 		if (prompt !== undefined) {
-			this.client.bot.rest
+			this.client.bot.helpers
 				.deleteMessage(prompt.channelId, prompt.id)
 				.catch(() => this.log.warn("Failed to delete prompt after deleting document."));
 			this.unregisterPrompt(prompt, promptDocument);

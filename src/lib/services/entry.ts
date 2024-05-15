@@ -184,7 +184,7 @@ class EntryService extends LocalService {
 			image: { url: constants.gifs.welcome },
 		});
 
-		this.client.bot.rest
+		this.client.bot.helpers
 			.addRole(this.guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
 			.catch(() =>
 				this.log.warn(

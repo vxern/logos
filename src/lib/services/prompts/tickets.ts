@@ -136,7 +136,7 @@ class TicketPromptService extends PromptService<{
 	async handleDelete(ticketDocument: Ticket): Promise<void> {
 		await super.handleDelete(ticketDocument);
 
-		await this.client.bot.rest.deleteChannel(ticketDocument.channelId).catch(() => {
+		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {
 			this.log.warn("Failed to delete ticket channel.");
 		});
 	}
@@ -169,7 +169,7 @@ class TicketPromptService extends PromptService<{
 			localise: this.client.localise.bind(this.client),
 			locale: this.guildLocale,
 		});
-		const channel = await this.client.bot.rest
+		const channel = await this.client.bot.helpers
 			.createChannel(this.guildId, {
 				parentId: this.configuration.categoryId,
 				name: trim(
@@ -194,12 +194,12 @@ class TicketPromptService extends PromptService<{
 
 		const memberMention = mention(user.id, { type: "user" });
 
-		this.client.bot.rest.sendMessage(channel.id, { content: memberMention }).catch(() => {
+		this.client.bot.helpers.sendMessage(channel.id, { content: memberMention }).catch(() => {
 			this.client.log.warn("Failed to mention participants in ticket.");
 			return undefined;
 		});
 
-		this.client.bot.rest
+		this.client.bot.helpers
 			.sendMessage(channel.id, {
 				embeds: [
 					{

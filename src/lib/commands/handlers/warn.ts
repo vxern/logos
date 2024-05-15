@@ -151,7 +151,7 @@ async function handleWarnUser(
 				const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
 				const timeoutMilliseconds = timeStructToMilliseconds(timeout);
 
-				client.bot.rest
+				client.bot.helpers
 					.editMember(guild.id, member.id, {
 						communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
 					})

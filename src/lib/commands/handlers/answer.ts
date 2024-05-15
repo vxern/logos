@@ -50,7 +50,7 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 			locale: submission.locale,
 		});
 
-		await client.bot.rest
+		await client.bot.helpers
 			.sendMessage(message.channelId, {
 				messageReference: {
 					messageId: message.id,

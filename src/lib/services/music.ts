@@ -124,7 +124,7 @@ class MusicService extends LocalService {
 			localise: this.client.localise.bind(this.client),
 			locale: this.guildLocale,
 		});
-		await this.client.bot.rest
+		await this.client.bot.helpers
 			.sendMessage(this.session.channelId, {
 				embeds: [
 					{
@@ -156,7 +156,7 @@ class MusicService extends LocalService {
 			localise: this.client.localise.bind(this.client),
 			locale: this.guildLocale,
 		});
-		this.client.bot.rest
+		this.client.bot.helpers
 			.sendMessage(this.session.channelId, {
 				embeds: [
 					{
@@ -183,7 +183,7 @@ class MusicService extends LocalService {
 			localise: this.client.localise.bind(this.client),
 			locale: this.guildLocale,
 		});
-		this.client.bot.rest
+		this.client.bot.helpers
 			.sendMessage(this.session.channelId, {
 				embeds: [
 					{
@@ -510,7 +510,7 @@ class MusicSession extends EventEmitter {
 			localise: this.client.localise.bind(this.client),
 			locale: this.service.guildLocale,
 		});
-		this.client.bot.rest
+		this.client.bot.helpers
 			.sendMessage(this.channelId, {
 				embeds: [
 					{
@@ -539,7 +539,7 @@ class MusicSession extends EventEmitter {
 				localise: this.client.localise.bind(this.client),
 				locale: this.service.guildLocale,
 			});
-			await this.client.bot.rest
+			await this.client.bot.helpers
 				.sendMessage(this.channelId, {
 					embeds: [
 						{
@@ -640,7 +640,7 @@ class MusicSession extends EventEmitter {
 			localise: this.client.localise.bind(this.client),
 			locale: this.service.guildLocale,
 		});
-		this.client.bot.rest
+		this.client.bot.helpers
 			.sendMessage(this.channelId, {
 				embeds: [
 					{
@@ -712,7 +712,7 @@ class MusicSession extends EventEmitter {
 					localise: this.client.localise.bind(this.client),
 					locale: this.service.guildLocale,
 				});
-				this.client.bot.rest
+				this.client.bot.helpers
 					.sendMessage(this.channelId, {
 						embeds: [
 							{

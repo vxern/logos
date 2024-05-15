@@ -411,7 +411,7 @@ class Client {
 
 		await this.#services.setupGuildServices(this, { guildId: guild.id, guildDocument });
 
-		this.bot.rest
+		this.bot.helpers
 			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
 			.catch((reason) => this.log.warn(`Failed to upsert commands on ${this.diagnostics.guild(guild)}:`, reason));
 	}

@@ -16,7 +16,7 @@ class InteractionStore {
 
 	readonly #_interactions: Map<bigint, Logos.Interaction>;
 	readonly #_replies: Map<string, ReplyData>;
-	readonly #_messages: Map<string, string>;
+	readonly #_messages: Map<string, bigint>;
 
 	/** ⬜ The action should have succeeded if not for the bot's limitations. */
 	get unsupported(): InteractionStore["reply"] {
@@ -149,7 +149,7 @@ class InteractionStore {
 		return interaction;
 	}
 
-	registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: string }): void {
+	registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: bigint }): void {
 		this.#_messages.set(interaction.token, messageId);
 	}
 
@@ -164,7 +164,7 @@ class InteractionStore {
 			return;
 		}
 
-		await this.#client.bot.rest
+		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
 			})
@@ -179,7 +179,7 @@ class InteractionStore {
 				localise: this.#client.localise.bind(this.#client),
 				locale: interaction.guildLocale,
 			});
-			const message = await this.#client.bot.rest
+			const message = await this.#client.bot.helpers
 				.sendMessage(interaction.channelId!, {
 					embeds: [
 						{
@@ -200,7 +200,7 @@ class InteractionStore {
 			return;
 		}
 
-		await this.#client.bot.rest
+		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
 				data: !visible ? { flags: Discord.MessageFlags.Ephemeral } : {},
@@ -222,7 +222,7 @@ class InteractionStore {
 		this.#_replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
-			const message = await this.#client.bot.rest.sendMessage(interaction.channelId!, data).catch((reason) => {
+			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId!, data).catch((reason) => {
 				this.log.warn("Failed to make message reply to repeated interaction:", reason);
 				return undefined;
 			});
@@ -234,7 +234,7 @@ class InteractionStore {
 			return;
 		}
 
-		await this.#client.bot.rest
+		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
 				data,
@@ -248,7 +248,7 @@ class InteractionStore {
 		if (interaction.parameters["@repeat"]) {
 			const messageId = this.#_messages.get(interaction.token)!;
 
-			await this.#client.bot.rest.editMessage(interaction.channelId!, messageId, data).catch((reason) => {
+			await this.#client.bot.helpers.editMessage(interaction.channelId!, messageId, data).catch((reason) => {
 				this.log.warn("Failed to edit message reply made to repeated interaction:", reason);
 				return undefined;
 			});
@@ -256,7 +256,7 @@ class InteractionStore {
 			return;
 		}
 
-		await this.#client.bot.rest
+		await this.#client.bot.helpers
 			.editOriginalInteractionResponse(interaction.token, data)
 			.catch((reason) => this.log.warn("Failed to edit reply to interaction:", reason));
 	}
@@ -267,7 +267,7 @@ class InteractionStore {
 
 			this.#_messages.delete(interaction.token);
 
-			await this.#client.bot.rest.deleteMessage(interaction.channelId!, messageId).catch((reason) => {
+			await this.#client.bot.helpers.deleteMessage(interaction.channelId!, messageId).catch((reason) => {
 				this.log.warn("Failed to delete message reply made to repeated interaction:", reason);
 				return undefined;
 			});
@@ -275,13 +275,13 @@ class InteractionStore {
 			return;
 		}
 
-		await this.#client.bot.rest
+		await this.#client.bot.helpers
 			.deleteOriginalInteractionResponse(interaction.token)
 			.catch((reason) => this.log.warn("Failed to delete reply to interaction:", reason));
 	}
 
 	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
-		return this.#client.bot.rest
+		return this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: { choices },
@@ -293,7 +293,7 @@ class InteractionStore {
 		interaction: Logos.Interaction,
 		data: Omit<Discord.InteractionCallbackData, "flags">,
 	): Promise<void> {
-		return this.#client.bot.rest
+		return this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.Modal,
 				data,

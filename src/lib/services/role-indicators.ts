@@ -60,7 +60,7 @@ class RoleIndicatorService extends LocalService {
 			}
 
 			const nickname = getNicknameWithRoleIndicators(user.username, applicableIndicators);
-			this.client.bot.rest
+			this.client.bot.helpers
 				.editMember(member.guildId, user.id, { nick: nickname })
 				.catch(() => this.log.warn("Failed to set member's role indicators."));
 
@@ -75,7 +75,7 @@ class RoleIndicatorService extends LocalService {
 			}
 
 			const nickname = getNicknameWithRoleIndicators(member.nick, applicableIndicators);
-			this.client.bot.rest
+			this.client.bot.helpers
 				.editMember(member.guildId, user.id, { nick: nickname })
 				.catch(() => this.log.warn("Failed to set member's role indicators."));
 
@@ -88,7 +88,7 @@ class RoleIndicatorService extends LocalService {
 		}
 
 		if (!hasApplicableIndicators) {
-			this.client.bot.rest
+			this.client.bot.helpers
 				.editMember(member.guildId, user.id, { nick: username })
 				.catch(() => this.log.warn("Failed to reset member's role indicators."));
 
@@ -104,7 +104,7 @@ class RoleIndicatorService extends LocalService {
 		}
 
 		const nicknameModified = getNicknameWithRoleIndicators(username, applicableIndicators);
-		this.client.bot.rest
+		this.client.bot.helpers
 			.editMember(member.guildId, user.id, { nick: nicknameModified })
 			.catch(() => this.log.warn("Failed to update member's role indicators."));
 	}

@@ -132,7 +132,7 @@ class JournallingStore {
 			return;
 		}
 
-		await this.#client.bot.rest
+		await this.#client.bot.helpers
 			.sendMessage(channelId, message)
 			.catch((reason) =>
 				this.log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}:`, reason),

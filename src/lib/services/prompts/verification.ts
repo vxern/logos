@@ -537,7 +537,7 @@ class VerificationPromptService extends PromptService<{
 				)} onto ${this.client.diagnostics.guild(guild)}.`,
 			);
 
-			this.client.bot.rest
+			this.client.bot.helpers
 				.addRole(
 					this.guildId,
 					author.id,
@@ -566,7 +566,7 @@ class VerificationPromptService extends PromptService<{
 				)} from ${this.client.diagnostics.guild(guild)}.`,
 			);
 
-			this.client.bot.rest
+			this.client.bot.helpers
 				.banMember(this.guildId, author.id, {}, "Voted to reject entry request.")
 				.catch(() =>
 					this.log.warn(
@@ -657,7 +657,7 @@ class VerificationPromptService extends PromptService<{
 			return;
 		}
 
-		await this.client.bot.rest
+		await this.client.bot.helpers
 			.deleteMessage(prompt.channelId, prompt.id)
 			.catch(() => this.log.warn("Failed to delete prompt."));
 

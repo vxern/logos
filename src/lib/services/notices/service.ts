@@ -109,7 +109,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 					return;
 				}
 
-				await this.client.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
+				await this.client.bot.helpers.deleteMessage(channelId, notice.id).catch(() => {
 					this.log.warn("Failed to delete notice.");
 				});
 			}
@@ -126,7 +126,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 			const hash = contents.embeds?.at(-1)?.footer?.iconUrl?.split("&hash=").at(-1);
 			if (hash === undefined || hash !== expectedHash) {
-				await this.client.bot.rest.deleteMessage(channelId, notice.id).catch(() => {
+				await this.client.bot.helpers.deleteMessage(channelId, notice.id).catch(() => {
 					this.log.warn("Failed to delete notice.");
 				});
 
@@ -159,7 +159,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		}
 
 		// Delete the message and allow the bot to handle the deletion.
-		this.client.bot.rest
+		this.client.bot.helpers
 			.deleteMessage(message.channelId, message.id)
 			.catch(() =>
 				this.log.warn(
@@ -208,7 +208,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 	async saveNotice(
 		contents: HashableMessageContents,
 		hash: string,
-	): Promise<Discord.CamelizedDiscordMessage | undefined> {
+	): Promise<Discord.Message | undefined> {
 		const [channelId, guild] = [this.channelId, this.guild];
 		if (channelId === undefined || guild === undefined) {
 			return undefined;
@@ -221,7 +221,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 		lastEmbed.footer = { text: guild.name, iconUrl: NoticeService.encodeHashInGuildIcon({ guild, hash }) };
 
-		return await this.client.bot.rest.sendMessage(channelId, contents).catch(() => {
+		return await this.client.bot.helpers.sendMessage(channelId, contents).catch(() => {
 			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 			return undefined;
 		});

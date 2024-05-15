@@ -86,7 +86,7 @@ async function handleSetTimeout(
 		return;
 	}
 
-	await client.bot.rest
+	await client.bot.helpers
 		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
 		.catch((reason) => client.log.warn(`Failed to time ${client.diagnostics.member(member)} out:`, reason));
 

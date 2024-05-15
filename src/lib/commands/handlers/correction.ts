@@ -108,7 +108,7 @@ async function handleMakeCorrection(
 			locale: interaction.locale,
 		});
 
-		client.bot.rest
+		client.bot.helpers
 			.sendMessage(message.channelId, {
 				messageReference: {
 					messageId: message.id,

@@ -24,7 +24,7 @@ class AlertService extends LocalService {
 			return;
 		}
 
-		this.client.bot.rest
+		this.client.bot.helpers
 			.sendMessage(channelId, message)
 			.catch(() =>
 				this.log.warn(
