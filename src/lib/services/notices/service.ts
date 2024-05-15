@@ -121,7 +121,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 				return;
 			}
 
-			const { embeds, components }: HashableMessageContents = notice as HashableMessageContents;
+			const { embeds, components }: HashableMessageContents = notice as unknown as HashableMessageContents;
 			const contents: HashableMessageContents = { embeds, components };
 
 			const hash = contents.embeds?.at(-1)?.footer?.iconUrl?.split("&hash=").at(-1);

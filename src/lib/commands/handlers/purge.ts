@@ -120,7 +120,7 @@ async function handlePurgeMessages(
 		getMessageContent(client, interaction, endMessage),
 	];
 
-	let messages: Discord.CamelizedDiscordMessage[] = [];
+	let messages: Discord.Message[] = [];
 
 	const getMessageFields = (): Discord.CamelizedDiscordEmbedField[] => {
 		const strings = constants.contexts.purge({
@@ -133,13 +133,13 @@ async function handlePurgeMessages(
 				value:
 					startMessageContent !== undefined
 						? `${startMessageContent}\n${strings.posted({
-								relative_timestamp: timestamp(Date.parse(startMessage.timestamp), {
+								relative_timestamp: timestamp(startMessage.timestamp, {
 									format: "relative",
 								}),
 								user_mention: mention(BigInt(startMessage.author.id), { type: "user" }),
 						  })}`
 						: strings.embedPosted({
-								relative_timestamp: timestamp(Date.parse(startMessage.timestamp), {
+								relative_timestamp: timestamp(startMessage.timestamp, {
 									format: "relative",
 								}),
 								user_mention: mention(BigInt(startMessage.author.id), { type: "user" }),
@@ -150,11 +150,11 @@ async function handlePurgeMessages(
 				value:
 					endMessageContent !== undefined
 						? `${endMessageContent}\n${strings.posted({
-								relative_timestamp: timestamp(Date.parse(endMessage.timestamp), { format: "relative" }),
+								relative_timestamp: timestamp(endMessage.timestamp, { format: "relative" }),
 								user_mention: mention(BigInt(endMessage.author.id), { type: "user" }),
 						  })}`
 						: strings.embedPosted({
-								relative_timestamp: timestamp(Date.parse(endMessage.timestamp), { format: "relative" }),
+								relative_timestamp: timestamp(endMessage.timestamp, { format: "relative" }),
 								user_mention: mention(BigInt(endMessage.author.id), { type: "user" }),
 						  }),
 			},
@@ -509,7 +509,7 @@ async function handlePurgeMessages(
 
 	const twoWeeksAgo = now - constants.time.week * 2 + constants.time.hour;
 
-	const firstBulkDeletableIndex = messages.findIndex((message) => Date.parse(message.timestamp) > twoWeeksAgo);
+	const firstBulkDeletableIndex = messages.findIndex((message) => message.timestamp > twoWeeksAgo);
 	const bulkDeletable =
 		firstBulkDeletableIndex !== -1 ? messages.slice(firstBulkDeletableIndex, messages.length) : [];
 	const nonBulkDeletable = messages.slice(
@@ -649,9 +649,9 @@ async function displayFailedError(client: Client, interaction: Logos.Interaction
 function getMessageContent(
 	client: Client,
 	interaction: Logos.Interaction,
-	message: Discord.CamelizedDiscordMessage,
+	message: Discord.Message,
 ): string | undefined {
-	if (message.content?.trim().length === 0 && message.embeds.length !== 0) {
+	if (message.content?.trim().length === 0 && message.embeds?.length !== 0) {
 		return undefined;
 	}
 

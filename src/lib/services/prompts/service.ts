@@ -36,7 +36,7 @@ abstract class PromptService<
 	},
 > extends LocalService {
 	readonly documents: Map<string, Generic["model"]>;
-	readonly promptByPartialId: Map</*partialId: */ string, Discord.CamelizedDiscordMessage>;
+	readonly promptByPartialId: Map</*partialId: */ string, Discord.Message>;
 	readonly magicButton: InteractionCollector<Generic["metadata"]>;
 	readonly removeButton: InteractionCollector<[partialId: string]>;
 
@@ -46,8 +46,8 @@ abstract class PromptService<
 		/*partialId: */ string,
 		(interaction: Logos.Interaction<Generic["metadata"]>) => void
 	>;
-	readonly #documentByPromptId: Map</*promptId: */ string, Generic["model"]>;
-	readonly #userIdByPromptId: Map</*promptId: */ string, bigint>;
+	readonly #documentByPromptId: Map</*promptId: */ bigint, Generic["model"]>;
+	readonly #userIdByPromptId: Map</*promptId: */ bigint, bigint>;
 
 	static readonly #_configurationLocators = Object.freeze({
 		verification: (guildDocument) => guildDocument.verification,
@@ -345,12 +345,12 @@ abstract class PromptService<
 			return;
 		}
 
-		const promptDocument = this.#documentByPromptId.get(id.toString());
+		const promptDocument = this.#documentByPromptId.get(id);
 		if (promptDocument === undefined) {
 			return;
 		}
 
-		const userId = this.#userIdByPromptId.get(id.toString());
+		const userId = this.#userIdByPromptId.get(id);
 		if (userId === undefined) {
 			return;
 		}
@@ -372,8 +372,8 @@ abstract class PromptService<
 
 		this.registerPrompt(prompt, userId, promptDocument);
 
-		this.#documentByPromptId.delete(id.toString());
-		this.#userIdByPromptId.delete(id.toString());
+		this.#documentByPromptId.delete(id);
+		this.#userIdByPromptId.delete(id);
 	}
 
 	abstract getAllDocuments(): Map<string, Generic["model"]>;
@@ -384,7 +384,7 @@ abstract class PromptService<
 		promptDocument: Generic["model"],
 	): Discord.CreateMessageOptions | undefined;
 
-	extractPartialId(prompt: Discord.CamelizedDiscordMessage): string | undefined {
+	extractPartialId(prompt: Discord.Message): string | undefined {
 		const partialId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
 		if (partialId === undefined) {
 			return undefined;
@@ -394,13 +394,13 @@ abstract class PromptService<
 	}
 
 	filterPrompts(
-		prompts: Discord.CamelizedDiscordMessage[],
+		prompts: Discord.Message[],
 	): [
-		valid: [partialId: string, prompt: Discord.CamelizedDiscordMessage][],
-		invalid: Discord.CamelizedDiscordMessage[],
+		valid: [partialId: string, prompt: Discord.Message][],
+		invalid: Discord.Message[],
 	] {
-		const valid: [partialId: string, prompt: Discord.CamelizedDiscordMessage][] = [];
-		const invalid: Discord.CamelizedDiscordMessage[] = [];
+		const valid: [partialId: string, prompt: Discord.Message][] = [];
+		const invalid: Discord.Message[] = [];
 
 		for (const prompt of prompts) {
 			const partialId = this.extractPartialId(prompt);
@@ -444,14 +444,14 @@ abstract class PromptService<
 		this.documents.delete(promptDocument.partialId);
 	}
 
-	registerPrompt(prompt: Discord.CamelizedDiscordMessage, userId: bigint, promptDocument: Generic["model"]): void {
+	registerPrompt(prompt: Discord.Message, userId: bigint, promptDocument: Generic["model"]): void {
 		this.promptByPartialId.set(promptDocument.partialId, prompt);
 
 		this.#documentByPromptId.set(prompt.id, promptDocument);
 		this.#userIdByPromptId.set(prompt.id, userId);
 	}
 
-	unregisterPrompt(prompt: Discord.CamelizedDiscordMessage, promptDocument: Generic["model"]): void {
+	unregisterPrompt(prompt: Discord.Message, promptDocument: Generic["model"]): void {
 		this.promptByPartialId.delete(promptDocument.partialId);
 
 		this.#documentByPromptId.delete(prompt.id);
