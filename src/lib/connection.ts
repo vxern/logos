@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import { Environment } from "logos:core/loaders/environment";
 import { Logger } from "logos/logger";
 
 class DiscordConnection {
@@ -16,8 +16,12 @@ class DiscordConnection {
 		readonly roles: Map<bigint, Logos.Role>;
 	};
 
-	constructor(client: Client, { bot, events }: { bot: Discord.Bot; events: Partial<Discord.EventHandlers> }) {
-		this.log = Logger.create({ identifier: "Client/DiscordConnection", isDebug: client.environment.isDebug });
+	constructor({
+		environment,
+		bot,
+		events,
+	}: { environment: Environment; bot: Discord.Bot; events: Partial<Discord.EventHandlers> }) {
+		this.log = Logger.create({ identifier: "Client/DiscordConnection", isDebug: environment.isDebug });
 		this.bot = bot;
 		this.cache = {
 			guilds: new Map(),

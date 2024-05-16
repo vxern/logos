@@ -281,7 +281,7 @@ class Client {
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);
 		this.#adapters = new AdapterStore(this);
-		this.#connection = new DiscordConnection(this, { bot, events: this.#events.buildEventHandlers() });
+		this.#connection = new DiscordConnection({ environment, bot, events: this.#events.buildEventHandlers() });
 
 		this.#_guildReloadLock = new ActionLock();
 		this.#_guildCreateCollector = new Collector<"guildCreate">();
