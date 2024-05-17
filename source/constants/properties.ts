@@ -50,6 +50,7 @@ const properties = {
 		content: true,
 		embeds: true,
 		author: true,
+		interactionMetadata: {},
 		interaction: {},
 		messageReference: {},
 	},
