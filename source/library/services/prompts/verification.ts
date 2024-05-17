@@ -79,7 +79,7 @@ class VerificationPromptService extends PromptService<{
 				requiredFor: voteInformation.acceptance.required,
 				requiredAgainst: voteInformation.rejection.required,
 			});
-			if (verdict === undefined) {
+			if (verdict !== undefined) {
 				continue;
 			}
 
