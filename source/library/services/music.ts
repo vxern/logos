@@ -48,11 +48,11 @@ class MusicService extends LocalService {
 	start(): void {
 		this.#voiceStateUpdates.onCollect(this.#handleVoiceStateUpdate.bind(this));
 
-		this.client.lavalinkService.manager.on(
+		this.client.lavalinkService!.manager.on(
 			"disconnect",
 			(this.#managerDisconnects = this.#handleConnectionLost.bind(this)),
 		);
-		this.client.lavalinkService.manager.on(
+		this.client.lavalinkService!.manager.on(
 			"ready",
 			(this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this)),
 		);
@@ -61,14 +61,14 @@ class MusicService extends LocalService {
 	async stop(): Promise<void> {
 		await this.#voiceStateUpdates.close();
 
-		this.client.lavalinkService.manager.off("disconnect", this.#managerDisconnects);
-		this.client.lavalinkService.manager.off("ready", this.#managerConnectionRestores);
+		this.client.lavalinkService!.manager.off("disconnect", this.#managerDisconnects);
+		this.client.lavalinkService!.manager.off("ready", this.#managerConnectionRestores);
 
 		await this.destroySession();
 	}
 
 	async createSession({ channelId }: { channelId: bigint }): Promise<MusicSession> {
-		const player = await this.client.lavalinkService.manager.joinVoiceChannel({
+		const player = await this.client.lavalinkService!.manager.joinVoiceChannel({
 			shardId: this.guild.shardId,
 			guildId: this.guildIdString,
 			channelId: channelId.toString(),

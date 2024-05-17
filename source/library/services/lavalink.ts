@@ -14,7 +14,6 @@ class ClientConnector extends shoukaku.Connector {
 		super(client);
 
 		this.#nodes = nodes;
-
 		this.#voiceStateUpdates = new Collector<"voiceStateUpdate">();
 		this.#voiceServerUpdates = new Collector<"voiceServerUpdate">();
 	}
@@ -35,8 +34,7 @@ class ClientConnector extends shoukaku.Connector {
 			return;
 		}
 
-		// unawaited
-		shard.send(payload, important);
+		shard.send(payload, important).then();
 	}
 
 	async setup(): Promise<void> {
@@ -69,44 +67,22 @@ class ClientConnector extends shoukaku.Connector {
 }
 
 class LavalinkService extends GlobalService {
-	readonly isBootstrapped: boolean;
+	readonly #connector: ClientConnector;
+	readonly manager: shoukaku.Shoukaku;
 
-	readonly #connector?: ClientConnector;
-	readonly #manager?: shoukaku.Shoukaku;
-
-	get connector(): ClientConnector {
-		return this.#connector!;
-	}
-
-	get manager(): shoukaku.Shoukaku {
-		return this.#manager!;
-	}
-
-	constructor(client: Client) {
+	constructor(client: Client, { host, port, password }: { host: string, port: string, password: string }) {
 		super(client, { identifier: "LavalinkService" });
-
-		if (
-			client.environment.lavalinkHost === undefined ||
-			client.environment.lavalinkPort === undefined ||
-			client.environment.lavalinkPassword === undefined
-		) {
-			this.log.warn(
-				"One or more of `LAVALINK_HOST`, `LAVALINK_PORT` or `LAVALINK_PASSWORD` have not been provided. Logos will not serve audio sessions.",
-			);
-			this.isBootstrapped = false;
-			return;
-		}
 
 		const nodes: shoukaku.NodeOption[] = [
 			{
 				name: "main",
-				url: `${client.environment.lavalinkHost}:${Number(client.environment.lavalinkPort)}`,
-				auth: client.environment.lavalinkPassword,
+				url: `${host}:${Number(port)}`,
+				auth: password,
 			},
 		];
 
 		this.#connector = new ClientConnector(client, { nodes });
-		this.#manager = new shoukaku.Shoukaku(this.#connector, nodes, {
+		this.manager = new shoukaku.Shoukaku(this.#connector, nodes, {
 			resume: true,
 			resumeTimeout: constants.time.minute / 1000,
 			resumeByLibrary: true,
@@ -115,15 +91,26 @@ class LavalinkService extends GlobalService {
 			restTimeout: (5 * constants.time.second) / 1000,
 			userAgent: constants.USER_AGENT,
 		});
-		this.#manager.setMaxListeners(0);
-		this.isBootstrapped = true;
+		this.manager.setMaxListeners(0);
+	}
+
+	static tryCreate(client: Client): LavalinkService | undefined {
+		if (
+			client.environment.lavalinkHost === undefined ||
+			client.environment.lavalinkPort === undefined ||
+			client.environment.lavalinkPassword === undefined
+		) {
+			return undefined;
+		}
+
+		return new LavalinkService(client, {
+			host: client.environment.lavalinkHost,
+			port: client.environment.lavalinkPort,
+			password: client.environment.lavalinkPassword,
+		});
 	}
 
 	async start(): Promise<void> {
-		if (!this.isBootstrapped) {
-			return;
-		}
-
 		this.manager.on("error", (_, error) => {
 			if (error.message.includes("ECONNREFUSED")) {
 				return;
@@ -140,21 +127,17 @@ class LavalinkService extends GlobalService {
 			}
 		});
 
-		await this.connector.setup();
+		await this.#connector.setup();
 	}
 
 	async stop(): Promise<void> {
-		if (!this.isBootstrapped) {
-			return;
-		}
-
 		this.manager.removeAllListeners();
 
 		for (const player of Object.values(this.manager.players) as shoukaku.Player[]) {
 			await player.destroy();
 		}
 
-		await this.connector.teardown();
+		await this.#connector.teardown();
 	}
 }
 

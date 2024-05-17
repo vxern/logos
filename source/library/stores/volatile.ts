@@ -16,7 +16,7 @@ class VolatileStore {
 
 	readonly redis: Redis;
 
-	private constructor({
+	constructor({
 		log,
 		host,
 		port,

@@ -112,8 +112,7 @@ const entryBuffer: EntryBuffer = {
 	},
 	flush() {
 		winston.info(`Flushing buffer (${this.size} entries)...`);
-		// unawaited
-		client.mset(this.entries);
+		client.mset(this.entries).then();
 		this.reset();
 	},
 };

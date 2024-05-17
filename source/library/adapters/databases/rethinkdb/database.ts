@@ -13,7 +13,7 @@ class RethinkDBAdapter extends DatabaseAdapter {
 	readonly #connectionOptions: rethinkdb.RConnectionOptions;
 	#connection!: rethinkdb.Connection;
 
-	private constructor({
+	constructor({
 		environment,
 		username,
 		password,

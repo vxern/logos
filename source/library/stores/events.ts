@@ -70,8 +70,7 @@ class EventStore {
 					continue;
 				}
 
-				// unawaited
-				collector.dispatchCollect?.(...args);
+				collector.dispatchCollect?.(...args)?.then();
 			}
 		}
 	}

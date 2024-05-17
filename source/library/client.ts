@@ -189,7 +189,7 @@ class Client {
 		return this.#journalling.tryLog.bind(this.#journalling);
 	}
 
-	get lavalinkService(): LavalinkService {
+	get lavalinkService(): LavalinkService | undefined {
 		return this.#services.global.lavalink;
 	}
 
@@ -251,7 +251,7 @@ class Client {
 		return this.#connection.cache;
 	}
 
-	private constructor({
+	constructor({
 		environment,
 		log,
 		database,

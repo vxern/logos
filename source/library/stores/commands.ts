@@ -46,7 +46,7 @@ class CommandStore {
 	};
 	readonly #defaultCommands: BuiltCommand[];
 
-	private constructor(
+	constructor(
 		client: Client,
 		{
 			commands,
@@ -464,7 +464,7 @@ class CommandStore {
 		}
 
 		if (guildDocument.hasEnabled("socialFeatures")) {
-			if (guildDocument.hasEnabled("music") && this.#client.lavalinkService.isBootstrapped) {
+			if (guildDocument.hasEnabled("music") && this.#client.lavalinkService !== undefined) {
 				commands.push(this.commands.music);
 			}
 

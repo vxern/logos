@@ -59,7 +59,7 @@ class DatabaseStore {
 		return (callback) => this.#adapter.withSession(callback, { environment: this.#environment, database: this });
 	}
 
-	private constructor({
+	constructor({
 		environment,
 		log,
 		adapter,

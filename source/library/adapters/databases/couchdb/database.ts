@@ -12,7 +12,7 @@ import nano from "nano";
 class CouchDBAdapter extends DatabaseAdapter {
 	readonly #documents: nano.DocumentScope<unknown>;
 
-	private constructor({
+	constructor({
 		environment,
 		username,
 		password,

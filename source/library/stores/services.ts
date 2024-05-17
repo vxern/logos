@@ -26,7 +26,7 @@ import { StatusService } from "logos/services/status";
 class ServiceStore {
 	readonly log: Logger;
 	readonly global: {
-		readonly lavalink: LavalinkService;
+		readonly lavalink?: LavalinkService;
 		readonly interactionRepetition: InteractionRepetitionService;
 		readonly realtimeUpdates: RealtimeUpdateService;
 		readonly status: StatusService;
@@ -62,8 +62,16 @@ class ServiceStore {
 
 	constructor(client: Client) {
 		this.log = Logger.create({ identifier: "Client/ServiceStore", isDebug: client.environment.isDebug });
+
+		const lavalinkService = LavalinkService.tryCreate(client);
+		if (lavalinkService === undefined) {
+			this.log.warn(
+				"One or more of `LAVALINK_HOST`, `LAVALINK_PORT` or `LAVALINK_PASSWORD` have not been provided. Logos will not serve audio sessions.",
+			);
+		}
+
 		this.global = {
-			lavalink: new LavalinkService(client),
+			lavalink: lavalinkService,
 			interactionRepetition: new InteractionRepetitionService(client),
 			realtimeUpdates: new RealtimeUpdateService(client),
 			status: new StatusService(client),
@@ -242,7 +250,7 @@ class ServiceStore {
 		}
 
 		if (guildDocument.hasEnabled("socialFeatures")) {
-			if (guildDocument.hasEnabled("music") && client.lavalinkService.isBootstrapped) {
+			if (guildDocument.hasEnabled("music") && this.global.lavalink !== undefined) {
 				const service = new MusicService(client, { guildId });
 				services.push(service);
 

@@ -6,7 +6,7 @@ class Logger {
 	readonly #identifierDisplayed: string;
 	readonly #isDebug: boolean;
 
-	private constructor({ identifier, isDebug = false }: { identifier: string; isDebug: boolean | undefined }) {
+	constructor({ identifier, isDebug = false }: { identifier: string; isDebug: boolean | undefined }) {
 		this.#identifierDisplayed = `[${identifier}]`;
 		this.#isDebug = isDebug;
 	}

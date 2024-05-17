@@ -13,7 +13,7 @@ import * as ravendb from "ravendb";
 class RavenDBAdapter extends DatabaseAdapter {
 	readonly #database: ravendb.DocumentStore;
 
-	private constructor({
+	constructor({
 		environment,
 		host,
 		port,

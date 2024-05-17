@@ -53,8 +53,7 @@ class ActionLock {
 		}
 
 		// Otherwise, jump straight onto the next action, marking the next run of the loop.
-		// unawaited
-		this.#doAction(nextAction);
+		this.#doAction(nextAction).then();
 	}
 
 	async dispose(): Promise<void> {
