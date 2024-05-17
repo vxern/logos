@@ -13,7 +13,7 @@ const logger: EventLogger<"slowmodeUpgrade"> = (
 				title: `${constants.emojis.events.slowmode.upgraded} ${strings.title}`,
 				color: constants.colours.warning,
 				description: strings.description({
-					user: client.diagnostics.user(user),
+					moderator: client.diagnostics.user(user),
 					channel: mention(channel.id, { type: "channel" }),
 					level_before: previousLevel,
 					level_after: currentLevel,

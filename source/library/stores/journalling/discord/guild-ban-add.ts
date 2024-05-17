@@ -6,7 +6,7 @@ const logger: EventLogger<"guildBanAdd"> = (client, [user, _], { guildLocale }) 
 		embeds: [
 			{
 				title: `${constants.emojis.events.user.banned} ${strings.title}`,
-				colour: constants.colours.failure,
+				color: constants.colours.failure,
 				description: strings.description({ user: client.diagnostics.user(user) }),
 			},
 		],

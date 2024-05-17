@@ -9,7 +9,7 @@ const logger: EventLogger<"entryRequestAccept"> = (client, [user, author], { gui
 		embeds: [
 			{
 				title: `${constants.emojis.events.entryRequest.accepted} ${strings.title}`,
-				colour: constants.colours.success,
+				color: constants.colours.success,
 				description: strings.description({
 					user: client.diagnostics.user(user),
 					moderator: client.diagnostics.member(author),

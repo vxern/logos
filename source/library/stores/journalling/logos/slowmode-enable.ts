@@ -9,7 +9,7 @@ const logger: EventLogger<"slowmodeEnable"> = (client, [user, channel, level], {
 				title: `${constants.emojis.events.slowmode.enabled} ${strings.title}`,
 				color: constants.colours.warning,
 				description: strings.description({
-					user: client.diagnostics.user(user),
+					moderator: client.diagnostics.user(user),
 					channel: mention(channel.id, { type: "channel" }),
 					level,
 				}),

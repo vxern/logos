@@ -10,7 +10,7 @@ const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest],
 		embeds: [
 			{
 				title: `${constants.emojis.events.entryRequest.submitted} ${strings.title}`,
-				colour: constants.colours.success,
+				color: constants.colours.success,
 				description: strings.description({ user: client.diagnostics.user(user) }),
 				fields: [
 					{

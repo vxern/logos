@@ -16,7 +16,7 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 		embeds: [
 			{
 				title: `${constants.emojis.events.message.deleted} ${strings.title}`,
-				colour: constants.colours.failure,
+				color: constants.colours.failure,
 				description: strings.description({
 					user: client.diagnostics.user(message.author),
 					channel: mention(message.channelId, { type: "channel" }),

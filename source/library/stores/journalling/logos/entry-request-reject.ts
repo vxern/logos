@@ -9,7 +9,7 @@ const logger: EventLogger<"entryRequestReject"> = (client, [user, author], { gui
 		embeds: [
 			{
 				title: `${constants.emojis.events.entryRequest.rejected} ${strings.title}`,
-				colour: constants.colours.failure,
+				color: constants.colours.failure,
 				description: strings.description({
 					user: client.diagnostics.user(user),
 					moderator: client.diagnostics.member(author),

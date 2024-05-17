@@ -9,7 +9,7 @@ const logger: EventLogger<"guildMemberRemove"> = (client, [user, _], { guildLoca
 		embeds: [
 			{
 				title: `${constants.emojis.events.user.left} ${strings.title}`,
-				colour: constants.colours.warning,
+				color: constants.colours.warning,
 				description: strings.description({ user: client.diagnostics.user(user) }),
 			},
 		],

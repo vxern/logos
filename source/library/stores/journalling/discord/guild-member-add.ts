@@ -6,7 +6,7 @@ const logger: EventLogger<"guildMemberAdd"> = (client, [_, user], { guildLocale 
 		embeds: [
 			{
 				title: `${constants.emojis.events.user.joined} ${strings.title}`,
-				colour: constants.colours.success,
+				color: constants.colours.success,
 				description: strings.description({ user: client.diagnostics.user(user) }),
 			},
 		],

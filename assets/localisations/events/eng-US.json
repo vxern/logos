@@ -21,7 +21,7 @@
 	"events.entryRequestSubmit.title": "Entry request submitted",
 	"events.entryRequestSubmit.description": "{user} has submitted a request to join the server.",
 	"events.inquiryOpen.title": "Inquiry opened",
-	"events.inquiryOpen.description": "{user} has opened a ticket.",
+	"events.inquiryOpen.description": "{moderator} has launched an inquiry.",
 	"events.inquiryOpen.fields.topic": "Topic",
 	"events.memberTimeoutAdd.title": "User timed out",
 	"events.memberTimeoutAdd.description": "{user} has been timed out by {moderator}.",

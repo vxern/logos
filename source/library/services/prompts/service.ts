@@ -148,7 +148,7 @@ abstract class PromptService<
 		);
 
 		if (validPrompts.length !== 0) {
-			this.log.info(`Restoring state for ${documents.size} ${this.#type} documents...`);
+			this.log.info(`Restoring state for ${validPrompts.length} ${this.#type} documents...`);
 		}
 
 		const prompts = new Map(validPrompts);
@@ -185,7 +185,7 @@ abstract class PromptService<
 		}
 
 		const expiredPrompts = Array.from(prompts.values());
-		if (prompts.size !== 0) {
+		if (expiredPrompts.length !== 0) {
 			this.log.warn(
 				`Could not restore the prompt-to-document link between ${prompts.size} prompts. Considering these prompts expired and deleting...`,
 			);
