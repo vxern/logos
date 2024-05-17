@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
-import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { Client } from "logos/client";
+import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 interface SuggestionFormData {
 	readonly suggestion: string;

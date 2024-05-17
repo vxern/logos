@@ -1,12 +1,12 @@
 import { trim } from "logos:core/formatting";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import { EntryRequestFormData } from "logos/database/entry-request";
+import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import type { EntryRequestFormData } from "logos/database/entry-request";
 
 class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
-	async buildModal(
+	buildModal(
 		submission: Logos.Interaction,
 		{ formData }: { formData: EntryRequestFormData },
-	): Promise<Modal<EntryRequestFormData>> {
+	): Modal<EntryRequestFormData> {
 		const strings = constants.contexts.verificationModal({
 			localise: this.client.localise.bind(this.client),
 			locale: submission.locale,

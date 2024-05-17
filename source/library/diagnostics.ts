@@ -1,5 +1,5 @@
 import { code } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 
 type ID = bigint | string;
 type IndexOr<T> = T | ID;
@@ -25,14 +25,14 @@ class Diagnostics {
 
 	user(userOrId: IndexOr<UserLike>, options?: { prettify?: boolean }): string {
 		let user: UserLike;
-		if (!isId(userOrId)) {
-			user = userOrId;
-		} else {
+		if (isId(userOrId)) {
 			if (!this.#client.entities.users.has(BigInt(userOrId))) {
 				return `uncached user (ID ${userOrId})`;
 			}
 
 			user = this.#client.entities.users.get(BigInt(userOrId))!;
+		} else {
+			user = userOrId;
 		}
 
 		const tag = user.discriminator === "0" ? user.username : `${user.username}#${user.discriminator}`;
@@ -66,14 +66,14 @@ class Diagnostics {
 
 	role(roleOrId: IndexOr<RoleLike>): string {
 		let role: RoleLike;
-		if (!isId(roleOrId)) {
-			role = roleOrId;
-		} else {
+		if (isId(roleOrId)) {
 			if (!this.#client.entities.roles.has(BigInt(roleOrId))) {
 				return `uncached role (ID ${roleOrId})`;
 			}
 
 			role = this.#client.entities.roles.get(BigInt(roleOrId))!;
+		} else {
+			role = roleOrId;
 		}
 
 		return `role "${role.name}" (ID ${role.id})`;
@@ -81,14 +81,14 @@ class Diagnostics {
 
 	guild(guildOrId: IndexOr<GuildLike>): string {
 		let guild: GuildLike;
-		if (!isId(guildOrId)) {
-			guild = guildOrId;
-		} else {
+		if (isId(guildOrId)) {
 			if (!this.#client.entities.guilds.has(BigInt(guildOrId))) {
 				return `uncached guild (ID ${guildOrId})`;
 			}
 
 			guild = this.#client.entities.guilds.get(BigInt(guildOrId))!;
+		} else {
+			guild = guildOrId;
 		}
 
 		return `guild "${guild.name}" (ID ${guild.id})`;
@@ -96,14 +96,14 @@ class Diagnostics {
 
 	message(messageOrId: IndexOr<MessageLike>): string {
 		let message: MessageLike;
-		if (!isId(messageOrId)) {
-			message = messageOrId;
-		} else {
+		if (isId(messageOrId)) {
 			if (!this.#client.entities.messages.latest.has(BigInt(messageOrId))) {
 				return `uncached guild (ID ${messageOrId})`;
 			}
 
 			message = this.#client.entities.messages.latest.get(BigInt(messageOrId))!;
+		} else {
+			message = messageOrId;
 		}
 
 		const contentLength = message.content?.length ?? 0;
@@ -115,14 +115,14 @@ class Diagnostics {
 
 	channel(channelOrId: IndexOr<ChannelLike>): string {
 		let channel: ChannelLike;
-		if (!isId(channelOrId)) {
-			channel = channelOrId;
-		} else {
+		if (isId(channelOrId)) {
 			if (!this.#client.entities.channels.has(BigInt(channelOrId))) {
 				return `uncached channel (ID ${channelOrId})`;
 			}
 
 			channel = this.#client.entities.channels.get(BigInt(channelOrId))!;
+		} else {
+			channel = channelOrId;
 		}
 
 		let guildFormatted: string;
@@ -170,9 +170,10 @@ class Diagnostics {
 				channelTypeFormatted = "private thread";
 				break;
 			}
-			default:
+			default: {
 				channelTypeFormatted = `unknown channel type (ID ${channel.type})`;
 				break;
+			}
 		}
 
 		if (channel.name === undefined) {
@@ -225,9 +226,10 @@ class Diagnostics {
 				interactionTypeFormatted = "modal interaction";
 				break;
 			}
-			default:
+			default: {
 				interactionTypeFormatted = `unknown interaction type (ID ${interaction.type})`;
 				break;
+			}
 		}
 
 		return `${interactionTypeFormatted} (ID ${interaction.id}) from ${memberFormatted}`;

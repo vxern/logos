@@ -1,12 +1,12 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
-import { RavenDBDocument } from "logos/adapters/databases/ravendb/document";
+import type { RavenDBDocument } from "logos/adapters/databases/ravendb/document";
 import { RavenDBDocumentQuery } from "logos/adapters/databases/ravendb/query";
-import { Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
-import * as ravendb from "ravendb";
+import type { Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
+import type * as ravendb from "ravendb";
 
 class RavenDBDocumentSession extends DocumentSession {
 	readonly #_session: ravendb.IDocumentSession;
@@ -59,7 +59,7 @@ class RavenDBDocumentSession extends DocumentSession {
 		return new RavenDBDocumentQuery<M>({ database: this.database, session: this.#_session });
 	}
 
-	async dispose(): Promise<void> {
+	dispose(): void {
 		this.#_session.dispose();
 	}
 }

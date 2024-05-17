@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
-import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { Client } from "logos/client";
+import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 type TicketType = "standalone" | "inquiry";
 
@@ -43,11 +43,11 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 		this.isResolved = isResolved ?? false;
 	}
 
-	static async getAll(
+	static getAll(
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Ticket>> },
 	): Promise<Ticket[]> {
-		return await Model.all<Ticket>(clientOrDatabase, {
+		return Model.all<Ticket>(clientOrDatabase, {
 			collection: "Tickets",
 			where: Object.assign(
 				{ guildId: undefined, authorId: undefined, channelId: undefined },

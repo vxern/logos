@@ -1,6 +1,6 @@
-import { Locale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
-import { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
+import { type Locale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
+import type { Client } from "logos/client";
+import type { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
 
 abstract class Service {
@@ -15,13 +15,13 @@ abstract class Service {
 		this.client = client;
 	}
 
-	abstract start(): Promise<void>;
-	abstract stop(): Promise<void>;
+	abstract start(): void | Promise<void>;
+	abstract stop(): void | Promise<void>;
 }
 
 abstract class GlobalService extends Service {
-	abstract start(): Promise<void>;
-	abstract stop(): Promise<void>;
+	abstract start(): void | Promise<void>;
+	abstract stop(): void | Promise<void>;
 }
 
 abstract class LocalService extends Service {
@@ -47,8 +47,8 @@ abstract class LocalService extends Service {
 		this.guildIdString = guildId.toString();
 	}
 
-	abstract start(): Promise<void>;
-	abstract stop(): Promise<void>;
+	abstract start(): void | Promise<void>;
+	abstract stop(): void | Promise<void>;
 
 	async getAllMessages({ channelId }: { channelId: bigint }): Promise<Discord.Message[] | undefined> {
 		const buffer: Discord.Message[] = [];

@@ -2,12 +2,12 @@ import { describe, it } from "bun:test";
 import { useDatabaseStore } from "logos:test/dependencies";
 import { praise, warning } from "logos:test/helpers";
 import { expect } from "chai";
-import { IdentifierData, Model } from "logos/database/model";
-import { Praise } from "logos/database/praise";
-import { Report } from "logos/database/report";
-import { Resource } from "logos/database/resource";
-import { Suggestion } from "logos/database/suggestion";
-import { Warning } from "logos/database/warning";
+import { type IdentifierData, Model } from "logos/database/model";
+import type { Praise } from "logos/database/praise";
+import type { Report } from "logos/database/report";
+import type { Resource } from "logos/database/resource";
+import type { Suggestion } from "logos/database/suggestion";
+import type { Warning } from "logos/database/warning";
 
 describe("Model", () => {
 	const database = useDatabaseStore();

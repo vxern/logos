@@ -1,5 +1,5 @@
-import { TimeUnit } from "logos:constants/time";
-import { Client } from "logos/client";
+import type { TimeUnit } from "logos:constants/time";
+import type { Client } from "logos/client";
 
 function parseTimeExpression(
 	client: Client,

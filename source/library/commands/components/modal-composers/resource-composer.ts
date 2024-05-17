@@ -1,17 +1,13 @@
 import { trim } from "logos:core/formatting";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import { ResourceFormData } from "logos/database/resource";
+import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import type { ResourceFormData } from "logos/database/resource";
 
 class ResourceComposer extends ModalComposer<ResourceFormData, never> {
-	async buildModal(
-		submission: Logos.Interaction,
-		{ formData }: { formData: ResourceFormData },
-	): Promise<Modal<ResourceFormData>> {
+	buildModal(submission: Logos.Interaction, { formData }: { formData: ResourceFormData }): Modal<ResourceFormData> {
 		const strings = constants.contexts.resourceModal({
 			localise: this.client.localise.bind(this.client),
 			locale: submission.locale,
 		});
-
 		return {
 			title: strings.title,
 			elements: [

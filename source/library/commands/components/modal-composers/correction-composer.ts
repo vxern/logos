@@ -1,6 +1,6 @@
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import type { Client } from "logos/client";
+import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
 
 interface CorrectionFormData {
 	readonly original: string;
@@ -22,10 +22,10 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 		});
 	}
 
-	async buildModal(
+	buildModal(
 		submission: Logos.Interaction,
 		{ formData }: { formData: CorrectionFormData },
-	): Promise<Modal<CorrectionFormData>> {
+	): Modal<CorrectionFormData> {
 		const strings = constants.contexts.correctionModal({
 			localise: this.client.localise.bind(this.client),
 			locale: submission.locale,
@@ -64,7 +64,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 		};
 	}
 
-	async validate({ formData }: { formData: CorrectionFormData }): Promise<ValidationError | undefined> {
+	validate({ formData }: { formData: CorrectionFormData }): ValidationError | undefined {
 		if (formData.corrected === formData.original) {
 			return "texts-not-different";
 		}

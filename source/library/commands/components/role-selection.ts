@@ -1,9 +1,9 @@
 import {
-	Role,
-	RoleCategory,
-	RoleCategoryGroup,
-	RoleCustom,
-	RoleImplicit,
+	type Role,
+	type RoleCategory,
+	type RoleCategoryGroup,
+	type RoleCustom,
+	type RoleImplicit,
 	getRoleCategories,
 	getRoles,
 	isCustom,
@@ -12,7 +12,7 @@ import {
 } from "logos:constants/roles";
 import { trim } from "logos:core/formatting";
 import { isDefined } from "logos:core/utilities";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
 /**

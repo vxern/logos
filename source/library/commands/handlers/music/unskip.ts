@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { SongCollection } from "logos/services/music";
 
 async function handleUnskipAction(

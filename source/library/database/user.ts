@@ -1,8 +1,8 @@
-import { Locale, LocalisationLanguage } from "logos:constants/languages";
-import { Client } from "logos/client";
-import { GameType } from "logos/database/guild-stats";
-import { IdentifierData, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { Locale, LocalisationLanguage } from "logos:constants/languages";
+import type { Client } from "logos/client";
+import type { GameType } from "logos/database/guild-stats";
+import { type IdentifierData, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 interface Account {
 	/** User's Discord ID. */
@@ -63,13 +63,13 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 		this.scores = scores;
 	}
 
-	static async getOrCreate(client: Client, data: CreateUserOptions): Promise<User> {
+	static getOrCreate(client: Client, data: CreateUserOptions): User | Promise<User> {
 		const partialId = Model.buildPartialId<User>(data);
 		if (client.documents.users.has(partialId)) {
 			return client.documents.users.get(partialId)!;
 		}
 
-		return await client.database.withSession(async (session) => {
+		return client.database.withSession(async (session) => {
 			const userDocument = await session.get<User>(Model.buildId<User>(data, { collection: "Users" }));
 			if (userDocument !== undefined) {
 				return userDocument;

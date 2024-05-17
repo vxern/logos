@@ -1,6 +1,6 @@
-import { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"memberTimeoutRemove"> = async (client, [member, author], { guildLocale }) => {
+const logger: EventLogger<"memberTimeoutRemove"> = (client, [member, author], { guildLocale }) => {
 	const strings = constants.contexts.memberTimeoutRemove({
 		localise: client.localise.bind(client),
 		locale: guildLocale,

@@ -1,6 +1,6 @@
 import {
-	MentionType,
-	TimestampFormat,
+	type MentionType,
+	type TimestampFormat,
 	getSigilByMentionType,
 	getSigilByTimestampFormat,
 } from "logos:constants/formatting";

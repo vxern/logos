@@ -1,17 +1,17 @@
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import { SuggestionFormData } from "logos/database/suggestion";
+import type { Client } from "logos/client";
+import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import type { SuggestionFormData } from "logos/database/suggestion";
 
 class SuggestionComposer extends ModalComposer<SuggestionFormData, never> {
 	constructor(client: Client, { interaction }: { interaction: Logos.Interaction }) {
 		super(client, { interaction, initialFormData: { suggestion: "" } });
 	}
 
-	async buildModal(
+	buildModal(
 		submission: Logos.Interaction,
 		{ formData }: { formData: SuggestionFormData },
-	): Promise<Modal<SuggestionFormData>> {
+	): Modal<SuggestionFormData> {
 		const strings = constants.contexts.suggestionModal({
 			localise: this.client.localise.bind(this.client),
 			locale: submission.locale,

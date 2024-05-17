@@ -1,7 +1,7 @@
-import { LearningLanguage } from "logos:constants/languages";
-import { DictionaryLicence } from "logos:constants/licences";
-import { PartOfSpeech } from "logos:constants/parts-of-speech";
-import { Client } from "logos/client";
+import type { LearningLanguage } from "logos:constants/languages";
+import type { DictionaryLicence } from "logos:constants/licences";
+import type { PartOfSpeech } from "logos:constants/parts-of-speech";
+import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
 type DictionaryProvisions =

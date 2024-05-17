@@ -1,11 +1,11 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
-import { DatabaseAdapter, DocumentConventions } from "logos/adapters/databases/adapter";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
+import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databases/adapter";
 import { InMemoryDocumentConventions } from "logos/adapters/databases/in-memory/conventions";
-import { InMemoryDocumentMetadata } from "logos/adapters/databases/in-memory/document";
+import type { InMemoryDocumentMetadata } from "logos/adapters/databases/in-memory/document";
 import { InMemoryDocumentSession } from "logos/adapters/databases/in-memory/session";
-import { IdentifierDataOrMetadata, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 class InMemoryAdapter extends DatabaseAdapter {
 	constructor({ environment }: { environment: Environment }) {
@@ -28,10 +28,10 @@ class InMemoryAdapter extends DatabaseAdapter {
 		return new InMemoryDocumentConventions({ document, data, collection });
 	}
 
-	async openSession({
+	openSession({
 		environment,
 		database,
-	}: { environment: Environment; database: DatabaseStore }): Promise<InMemoryDocumentSession> {
+	}: { environment: Environment; database: DatabaseStore }): InMemoryDocumentSession {
 		return new InMemoryDocumentSession({ environment, database });
 	}
 }

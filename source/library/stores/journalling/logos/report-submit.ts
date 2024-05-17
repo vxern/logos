@@ -1,6 +1,6 @@
-import { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"reportSubmit"> = async (client, [author, report], { guildLocale }) => {
+const logger: EventLogger<"reportSubmit"> = (client, [author, report], { guildLocale }) => {
 	const strings = constants.contexts.reportSubmit({ localise: client.localise.bind(client), locale: guildLocale });
 	return {
 		embeds: [

@@ -1,4 +1,4 @@
-import nano from "nano";
+import type nano from "nano";
 
 type CouchDBDocumentMetadata = Omit<nano.DocumentGetResponse, "_rev"> & { _rev?: string };
 

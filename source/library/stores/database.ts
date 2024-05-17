@@ -1,6 +1,6 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
-import { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
+import type { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBAdapter } from "logos/adapters/databases/couchdb/database";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory/database";
 import { MongoDBAdapter } from "logos/adapters/databases/mongodb/database";
@@ -9,7 +9,7 @@ import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
 import { GuildStats } from "logos/database/guild-stats";
-import { Model, ModelConstructor } from "logos/database/model";
+import type { Model, ModelConstructor } from "logos/database/model";
 import { Praise } from "logos/database/praise";
 import { Report } from "logos/database/report";
 import { Resource } from "logos/database/resource";
@@ -55,7 +55,7 @@ class DatabaseStore {
 		return this.#_adapter.conventionsFor.bind(this.#_adapter);
 	}
 
-	get withSession(): <T>(callback: (session: DocumentSession) => Promise<T>) => Promise<T> {
+	get withSession(): <T>(callback: (session: DocumentSession) => T | Promise<T>) => Promise<T> {
 		return (callback) => this.#_adapter.withSession(callback, { environment: this.#_environment, database: this });
 	}
 

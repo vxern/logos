@@ -1,6 +1,6 @@
 import { isValidSnowflake } from "logos:constants/patterns";
 import { mention, timestamp, trim } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { Guild } from "logos/database/guild";
 

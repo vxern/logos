@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 
 async function handleStopPlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const musicService = client.getMusicService(interaction.guildId);

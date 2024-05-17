@@ -1,5 +1,5 @@
 import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
 import loggers from "logos/stores/journalling/loggers";

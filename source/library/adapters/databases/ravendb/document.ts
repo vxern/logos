@@ -1,5 +1,5 @@
-import { Collection } from "logos:constants/database";
-import * as ravendb from "ravendb";
+import type { Collection } from "logos:constants/database";
+import type * as ravendb from "ravendb";
 
 interface RavenDBDocumentMetadataContainer {
 	"@metadata": RavenDBDocumentMetadata;

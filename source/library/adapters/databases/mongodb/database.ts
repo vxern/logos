@@ -1,12 +1,12 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
-import { DatabaseAdapter, DocumentConventions } from "logos/adapters/databases/adapter";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
+import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databases/adapter";
 import { MongoDBDocumentConventions } from "logos/adapters/databases/mongodb/conventions";
-import { MongoDBDocumentMetadata } from "logos/adapters/databases/mongodb/document";
+import type { MongoDBDocumentMetadata } from "logos/adapters/databases/mongodb/document";
 import { MongoDBDocumentSession } from "logos/adapters/databases/mongodb/session";
-import { IdentifierDataOrMetadata, Model } from "logos/database/model";
-import { Logger } from "logos/logger";
-import { DatabaseStore } from "logos/stores/database";
+import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { Logger } from "logos/logger";
+import type { DatabaseStore } from "logos/stores/database";
 import mongodb from "mongodb";
 
 class MongoDBAdapter extends DatabaseAdapter {
@@ -81,10 +81,10 @@ class MongoDBAdapter extends DatabaseAdapter {
 		return new MongoDBDocumentConventions({ document, data, collection });
 	}
 
-	async openSession({
+	openSession({
 		environment,
 		database,
-	}: { environment: Environment; database: DatabaseStore }): Promise<MongoDBDocumentSession> {
+	}: { environment: Environment; database: DatabaseStore }): MongoDBDocumentSession {
 		const mongoDatabase = this.#_mongoClient.db(this.#_database);
 		return new MongoDBDocumentSession({ environment, database, mongoDatabase });
 	}

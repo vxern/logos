@@ -1,5 +1,5 @@
 import * as Discord from "@discordeno/bot";
-import { OptionTemplate } from "logos/commands/commands";
+import type { OptionTemplate } from "logos/commands/commands";
 
 export default Object.freeze({
 	user: {

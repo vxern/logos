@@ -1,8 +1,8 @@
-import { DetectionLanguage, Detector } from "logos:constants/languages";
-import { DetectorAdapter, SingleDetectionResult } from "logos/adapters/detectors/adapter";
+import type { DetectionLanguage, Detector } from "logos:constants/languages";
+import type { DetectorAdapter, SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import { CLDAdapter } from "logos/adapters/detectors/cld";
 import { TinyLDAdapter } from "logos/adapters/detectors/tinyld";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 
 interface DetectionResult {
 	readonly likely: DetectionLanguage[];

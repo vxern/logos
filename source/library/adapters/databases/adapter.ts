@@ -1,8 +1,8 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
-import { IdentifierData, IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
+import { type IdentifierData, type IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { Logger } from "logos/logger";
-import { DatabaseStore } from "logos/stores/database";
+import type { DatabaseStore } from "logos/stores/database";
 
 abstract class DatabaseAdapter {
 	readonly log: Logger;
@@ -11,9 +11,9 @@ abstract class DatabaseAdapter {
 		this.log = Logger.create({ identifier: `DatabaseAdapter(${identifier})`, isDebug: environment.isDebug });
 	}
 
-	abstract setup(): Promise<void>;
+	abstract setup(): void | Promise<void>;
 
-	abstract teardown(): Promise<void>;
+	abstract teardown(): void | Promise<void>;
 
 	abstract conventionsFor({
 		document,
@@ -24,13 +24,13 @@ abstract class DatabaseAdapter {
 	abstract openSession({
 		environment,
 		database,
-	}: { environment: Environment; database: DatabaseStore }): Promise<DocumentSession>;
+	}: { environment: Environment; database: DatabaseStore }): DocumentSession;
 
 	async withSession<T>(
-		callback: (session: DocumentSession) => Promise<T>,
+		callback: (session: DocumentSession) => T | Promise<T>,
 		{ environment, database }: { environment: Environment; database: DatabaseStore },
 	): Promise<T> {
-		const session = await this.openSession({ environment, database });
+		const session = this.openSession({ environment, database });
 
 		const result = await callback(session);
 
@@ -65,7 +65,7 @@ abstract class DocumentSession {
 		return document;
 	}
 
-	abstract loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
+	abstract loadMany<M extends Model>(ids: string[]): (M | undefined)[] | Promise<(M | undefined)[]>;
 	async getMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
 		const results = await this.loadMany<M>(ids);
 
@@ -83,7 +83,7 @@ abstract class DocumentSession {
 		return documents;
 	}
 
-	abstract store<M extends Model>(document: M): Promise<void>;
+	abstract store<M extends Model>(document: M): void | Promise<void>;
 	async set<M extends Model>(document: M): Promise<M> {
 		await this.store(document);
 		this.database.cacheDocument(document);
@@ -91,7 +91,7 @@ abstract class DocumentSession {
 		return document;
 	}
 
-	async remove<M extends Model>(document: M): Promise<void> {
+	remove<M extends Model>(document: M): void {
 		// We don't call any methods to delete a document here because we don't actually delete anything from the
 		// database; we merely *mark* documents as deleted.
 
@@ -100,7 +100,7 @@ abstract class DocumentSession {
 
 	abstract query<M extends Model>({ collection }: { collection: Collection }): DocumentQuery<M>;
 
-	abstract dispose(): Promise<void>;
+	abstract dispose(): void | Promise<void>;
 
 	async loadManyTabulated<M extends Model, RawDocument>(
 		ids: string[],
@@ -155,7 +155,7 @@ abstract class DocumentQuery<M extends Model> {
 
 	abstract whereEquals(property: string, value: unknown): DocumentQuery<M>;
 
-	abstract execute(): Promise<M[]>;
+	abstract execute(): M[] | Promise<M[]>;
 	async run(): Promise<M[]> {
 		const documents = await this.execute();
 		return documents.filter((document) => !document.isDeleted);

@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { CorrectionComposer } from "logos/commands/components/modal-composers/correction-composer";
 
 type CorrectionMode = "partial" | "full";

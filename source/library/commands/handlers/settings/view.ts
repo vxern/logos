@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { User } from "logos/database/user";
 
 async function handleDisplaySettings(client: Client, interaction: Logos.Interaction): Promise<void> {

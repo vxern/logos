@@ -1,7 +1,7 @@
-import { Collection } from "logos:constants/database";
+import type { Collection } from "logos:constants/database";
 import { DocumentConventions } from "logos/adapters/databases/adapter";
-import { CouchDBDocument, CouchDBDocumentMetadata } from "logos/adapters/databases/couchdb/document";
-import { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { CouchDBDocument, CouchDBDocumentMetadata } from "logos/adapters/databases/couchdb/document";
+import { type IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 
 class CouchDBDocumentConventions extends DocumentConventions<CouchDBDocumentMetadata> {

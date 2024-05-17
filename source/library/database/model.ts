@@ -1,10 +1,10 @@
-import { Collection, isValidCollection } from "logos:constants/database";
+import { type Collection, isValidCollection } from "logos:constants/database";
 import { timeStructToMilliseconds } from "logos:constants/time";
 import { capitalise, decapitalise } from "logos:core/formatting";
-import { DocumentConventions } from "logos/adapters/databases/adapter";
-import { Client } from "logos/client";
-import { RateLimit } from "logos/database/guild";
-import { DatabaseStore } from "logos/stores/database";
+import type { DocumentConventions } from "logos/adapters/databases/adapter";
+import type { Client } from "logos/client";
+import type { RateLimit } from "logos/database/guild";
+import type { DatabaseStore } from "logos/stores/database";
 
 type ClientOrDatabaseStore = Client | DatabaseStore;
 
@@ -164,8 +164,8 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 			this.isDeleted = true;
 		});
 
-		await getDatabase(clientOrDatabase).withSession(async (session) => {
-			await session.remove(this);
+		await getDatabase(clientOrDatabase).withSession((session) => {
+			session.remove(this);
 		});
 	}
 }

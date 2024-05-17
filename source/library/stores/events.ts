@@ -1,5 +1,5 @@
-import { Environment } from "logos:core/loaders/environment";
-import { Collector } from "logos/collectors";
+import type { Environment } from "logos:core/loaders/environment";
+import type { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
 
 type Event = keyof Discord.EventHandlers;
@@ -54,11 +54,11 @@ class EventStore {
 		};
 	}
 
-	async collectEvent<Event extends keyof Discord.EventHandlers>(
+	collectEvent<Event extends keyof Discord.EventHandlers>(
 		guildId: bigint | undefined,
 		event: Event,
 		{ args }: { args: Parameters<Discord.EventHandlers[Event]> },
-	): Promise<void> {
+	): void {
 		const collectors = this.#collectors.get(event);
 		if (collectors !== undefined) {
 			for (const collector of collectors) {

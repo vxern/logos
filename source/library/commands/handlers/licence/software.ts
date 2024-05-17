@@ -1,5 +1,5 @@
 import { code } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { SoftwareLicenceView } from "logos/commands/components/paginated-views/software-licence-view";
 
 async function handleDisplaySoftwareLicenceAutocomplete(

@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { DynamicVoiceChannel, Guild } from "logos/database/guild";
+import type { DynamicVoiceChannel, Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 
 type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };

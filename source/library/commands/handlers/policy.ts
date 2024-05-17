@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 
 async function handleDisplayModerationPolicy(client: Client, interaction: Logos.Interaction): Promise<void> {

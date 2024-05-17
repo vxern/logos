@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
-import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
-import { SongListing } from "logos/services/music";
+import type { Client } from "logos/client";
+import { PaginatedView, type View } from "logos/commands/components/paginated-views/paginated-view";
+import type { SongListing } from "logos/services/music";
 
 class SongListingView extends PaginatedView<SongListing> {
 	readonly #title: string;

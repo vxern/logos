@@ -1,12 +1,12 @@
-import { Dictionary } from "logos:constants/dictionaries";
-import { LearningLanguage } from "logos:constants/languages";
+import type { Dictionary } from "logos:constants/dictionaries";
+import type { LearningLanguage } from "logos:constants/languages";
 import { isDefined } from "logos:core/utilities";
-import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
+import type { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
 import { DexonlineAdapter } from "logos/adapters/dictionaries/dexonline";
 import { DicolinkAdapter } from "logos/adapters/dictionaries/dicolink";
 import { WiktionaryAdapter } from "logos/adapters/dictionaries/wiktionary";
 import { WordsAPIAdapter } from "logos/adapters/dictionaries/words-api";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
 class DictionaryStore {

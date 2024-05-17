@@ -1,5 +1,5 @@
-import { DetectionLanguage } from "logos:constants/languages";
-import { Client } from "logos/client";
+import type { DetectionLanguage } from "logos:constants/languages";
+import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
 interface SingleDetectionResult {
@@ -15,7 +15,9 @@ abstract class DetectorAdapter {
 		this.client = client;
 	}
 
-	abstract detect({ text }: { text: string }): Promise<SingleDetectionResult | undefined>;
+	abstract detect({
+		text,
+	}: { text: string }): SingleDetectionResult | Promise<SingleDetectionResult | undefined> | undefined;
 }
 
 export { DetectorAdapter };

@@ -1,9 +1,9 @@
-import { Collection } from "logos:constants/database";
+import type { Collection } from "logos:constants/database";
 import { DocumentQuery } from "logos/adapters/databases/adapter";
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
-import { RethinkDBDocument } from "logos/adapters/databases/rethinkdb/document";
-import { Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { RethinkDBDocument } from "logos/adapters/databases/rethinkdb/document";
+import type { Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 
 class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {

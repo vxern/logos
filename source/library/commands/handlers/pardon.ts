@@ -1,6 +1,6 @@
 import { timeStructToMilliseconds } from "logos:constants/time";
 import { mention } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 import { Warning } from "logos/database/warning";
 

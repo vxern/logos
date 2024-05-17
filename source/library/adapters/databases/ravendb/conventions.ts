@@ -1,7 +1,7 @@
-import { Collection, isValidCollection } from "logos:constants/database";
+import { type Collection, isValidCollection } from "logos:constants/database";
 import { DocumentConventions } from "logos/adapters/databases/adapter";
-import { RavenDBDocument, RavenDBDocumentMetadataContainer } from "logos/adapters/databases/ravendb/document";
-import { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { RavenDBDocument, RavenDBDocumentMetadataContainer } from "logos/adapters/databases/ravendb/document";
+import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { DatabaseStore } from "logos/stores/database";
 
 class RavenDBDocumentConventions extends DocumentConventions<RavenDBDocumentMetadataContainer> {

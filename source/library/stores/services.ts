@@ -1,5 +1,5 @@
-import { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
+import type { Client } from "logos/client";
+import type { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
 import { AlertService } from "logos/services/alert";
 import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channels";
@@ -10,17 +10,17 @@ import { MusicService } from "logos/services/music";
 import { InformationNoticeService } from "logos/services/notices/information";
 import { ResourceNoticeService } from "logos/services/notices/resources";
 import { RoleNoticeService } from "logos/services/notices/roles";
-import { NoticeService } from "logos/services/notices/service";
+import type { NoticeService } from "logos/services/notices/service";
 import { WelcomeNoticeService } from "logos/services/notices/welcome";
 import { ReportPromptService } from "logos/services/prompts/reports";
 import { ResourcePromptService } from "logos/services/prompts/resources";
-import { PromptService } from "logos/services/prompts/service";
+import type { PromptService } from "logos/services/prompts/service";
 import { SuggestionPromptService } from "logos/services/prompts/suggestions";
 import { TicketPromptService } from "logos/services/prompts/tickets";
 import { VerificationPromptService } from "logos/services/prompts/verification";
 import { RealtimeUpdateService } from "logos/services/realtime-updates";
 import { RoleIndicatorService } from "logos/services/role-indicators";
-import { Service } from "logos/services/service";
+import type { Service } from "logos/services/service";
 import { StatusService } from "logos/services/status";
 
 class ServiceStore {
@@ -296,7 +296,7 @@ class ServiceStore {
 	async #stopServices(services: Service[]): Promise<void> {
 		const promises: Promise<void>[] = [];
 		for (const service of services) {
-			promises.push(service.stop());
+			promises.push(Promise.resolve(service.stop()));
 		}
 		await Promise.all(promises);
 	}

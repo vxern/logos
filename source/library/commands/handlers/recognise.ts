@@ -1,6 +1,6 @@
-import { DetectionLanguage } from "logos:constants/languages";
+import type { DetectionLanguage } from "logos:constants/languages";
 import { list } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,

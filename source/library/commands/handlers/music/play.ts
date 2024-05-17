@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import resolvers from "logos/commands/resolvers";
-import { SongListingResolver } from "logos/commands/resolvers/resolver";
+import type { SongListingResolver } from "logos/commands/resolvers/resolver";
 import { AudioStream, SongListing } from "logos/services/music";
 
 async function handleRequestStreamPlayback(
@@ -32,7 +32,7 @@ async function handleRequestQueryPlayback(
 		return;
 	}
 
-	if (!musicService.canManagePlayback(interaction) || !musicService.canRequestPlayback(interaction)) {
+	if (!(musicService.canManagePlayback(interaction) && musicService.canRequestPlayback(interaction))) {
 		return;
 	}
 
@@ -69,7 +69,7 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	if (!musicService.canManagePlayback(interaction) || !musicService.canRequestPlayback(interaction)) {
+	if (!(musicService.canManagePlayback(interaction) && musicService.canRequestPlayback(interaction))) {
 		return;
 	}
 

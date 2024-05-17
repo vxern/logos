@@ -1,5 +1,5 @@
-import { Languages, TranslationLanguage } from "logos:constants/languages";
-import { Client } from "logos/client";
+import type { Languages, TranslationLanguage } from "logos:constants/languages";
+import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
 interface TranslationResult {

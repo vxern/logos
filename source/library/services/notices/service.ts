@@ -1,8 +1,8 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Guild } from "logos/database/guild";
+import type { Guild } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
-import { ServiceStore } from "logos/stores/services";
+import type { ServiceStore } from "logos/stores/services";
 import Hash from "object-hash";
 
 type HashableProperties = "embeds" | "components";
@@ -67,7 +67,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 	async start(): Promise<void> {
 		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
-		this.#_messageDeletes.onCollect(async (payload) => {
+		this.#_messageDeletes.onCollect((payload) => {
 			const message = this.client.entities.messages.latest.get(payload.id);
 			if (message === undefined) {
 				return;
@@ -218,7 +218,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 		lastEmbed.footer = { text: guild.name, iconUrl: NoticeService.encodeHashInGuildIcon({ guild, hash }) };
 
-		return await this.client.bot.helpers.sendMessage(channelId, contents).catch(() => {
+		return this.client.bot.helpers.sendMessage(channelId, contents).catch(() => {
 			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 			return undefined;
 		});

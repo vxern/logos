@@ -1,12 +1,12 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { MongoDBDocumentConventions } from "logos/adapters/databases/mongodb/conventions";
-import { MongoDBDocument } from "logos/adapters/databases/mongodb/document";
+import type { MongoDBDocument } from "logos/adapters/databases/mongodb/document";
 import { MongoDBDocumentQuery } from "logos/adapters/databases/mongodb/query";
 import { Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
-import mongodb from "mongodb";
+import type { DatabaseStore } from "logos/stores/database";
+import type mongodb from "mongodb";
 
 class MongoDBDocumentSession extends DocumentSession {
 	readonly #_mongoDatabase: mongodb.Db;

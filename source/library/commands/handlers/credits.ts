@@ -1,6 +1,6 @@
-import { Translation } from "logos:constants/contributions";
-import { LocalisationLanguage } from "logos:constants/languages";
-import { Client } from "logos/client";
+import type { Translation } from "logos:constants/contributions";
+import type { LocalisationLanguage } from "logos:constants/languages";
+import type { Client } from "logos/client";
 
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
 	await client.notice(interaction, getTranslationView(client, interaction));

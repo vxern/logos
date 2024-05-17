@@ -1,5 +1,5 @@
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { parseTimeExpression } from "logos/commands/interactions";
 
 async function handleSkipToTimestampAutocomplete(

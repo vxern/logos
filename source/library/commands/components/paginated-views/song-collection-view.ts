@@ -1,7 +1,7 @@
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
-import { Song, SongCollection } from "logos/services/music";
+import type { Client } from "logos/client";
+import { PaginatedView, type View } from "logos/commands/components/paginated-views/paginated-view";
+import type { Song, SongCollection } from "logos/services/music";
 
 class SongCollectionView extends PaginatedView<Song> {
 	readonly #title: string;

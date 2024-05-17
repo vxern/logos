@@ -1,5 +1,5 @@
-import { RuleOrOther, isValidRule } from "logos:constants/rules";
-import { Client } from "logos/client";
+import { type RuleOrOther, isValidRule } from "logos:constants/rules";
+import type { Client } from "logos/client";
 
 type RuleTitleMode = "option" | "display";
 function getRuleTitleFormatted(

@@ -1,12 +1,12 @@
 import {
-	GoogleTranslateLanguage,
-	Languages,
-	TranslationLocale,
+	type GoogleTranslateLanguage,
+	type Languages,
+	type TranslationLocale,
 	getGoogleTranslateLocaleByTranslationLanguage,
 } from "logos:constants/languages";
 import { getGoogleTranslateLanguageByLocale, isGoogleTranslateLocale } from "logos:constants/languages/translation";
-import { TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
-import { Client } from "logos/client";
+import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
+import type { Client } from "logos/client";
 
 interface GoogleTranslationResult {
 	data: {

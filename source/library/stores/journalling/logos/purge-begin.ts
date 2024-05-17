@@ -1,7 +1,7 @@
 import { mention } from "logos:core/formatting";
-import { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"purgeBegin"> = async (client, [member, channel, messageCount, author], { guildLocale }) => {
+const logger: EventLogger<"purgeBegin"> = (client, [member, channel, messageCount, author], { guildLocale }) => {
 	const strings = constants.contexts.purgeBegin({ localise: client.localise.bind(client), locale: guildLocale });
 	return {
 		embeds: [

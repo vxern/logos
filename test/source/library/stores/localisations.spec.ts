@@ -2,7 +2,7 @@ import { describe, it } from "bun:test";
 import constants from "logos:constants/constants";
 import { mockEnvironment } from "logos:test/mocks";
 import { expect } from "chai";
-import { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
+import { type DescriptionLocalisations, LocalisationStore, type NameLocalisations } from "logos/stores/localisations";
 
 describe("LocalisationStore", () => {
 	describe("getOptionName()", () => {

@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { ReportComposer } from "logos/commands/components/modal-composers/report-composer";
 import { Guild } from "logos/database/guild";
 import { Report } from "logos/database/report";

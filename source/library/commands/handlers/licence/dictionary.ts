@@ -1,5 +1,5 @@
 import { getDictionaryLicenceByDictionary, isValidDictionary } from "logos:constants/licences";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 
 async function handleDisplayDictionaryLicenceAutocomplete(
 	client: Client,

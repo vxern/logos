@@ -1,6 +1,6 @@
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import type { Client } from "logos/client";
+import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
 
 interface AnswerFormData {
 	readonly question: string;
@@ -11,10 +11,7 @@ class AnswerComposer extends ModalComposer<AnswerFormData, never> {
 		super(client, { interaction, initialFormData: { question: trim(question, 4000), answer: "" } });
 	}
 
-	async buildModal(
-		submission: Logos.Interaction<any, any>,
-		{ formData }: { formData: AnswerFormData },
-	): Promise<Modal<AnswerFormData>> {
+	buildModal(submission: Logos.Interaction, { formData }: { formData: AnswerFormData }): Modal<AnswerFormData> {
 		const strings = constants.contexts.answerModal({
 			localise: this.client.localise.bind(this.client),
 			locale: submission.locale,

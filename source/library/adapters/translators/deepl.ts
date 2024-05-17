@@ -1,12 +1,12 @@
 import {
-	DeepLLanguage,
-	Languages,
+	type DeepLLanguage,
+	type Languages,
 	getDeepLLocaleByTranslationLanguage,
 	getDeepLTranslationLanguageByLocale,
 	isDeepLLocale,
 } from "logos:constants/languages";
-import { TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
-import { Client } from "logos/client";
+import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
+import type { Client } from "logos/client";
 
 class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 	constructor(client: Client) {
@@ -75,9 +75,9 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 			return undefined;
 		}
 
-		const detectedSourceLanguage = !isDeepLLocale(detectedSourceLocale)
-			? undefined
-			: getDeepLTranslationLanguageByLocale(detectedSourceLocale);
+		const detectedSourceLanguage = isDeepLLocale(detectedSourceLocale)
+			? getDeepLTranslationLanguageByLocale(detectedSourceLocale)
+			: undefined;
 
 		return { detectedSourceLanguage, text: translation.text };
 	}

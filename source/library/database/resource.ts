@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
-import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { Client } from "logos/client";
+import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 interface ResourceFormData {
 	readonly resource: string;
@@ -32,11 +32,11 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 		this.isResolved = isResolved ?? false;
 	}
 
-	static async getAll(
+	static getAll(
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Resource>> },
 	): Promise<Resource[]> {
-		return await Model.all<Resource>(clientOrDatabase, {
+		return Model.all<Resource>(clientOrDatabase, {
 			collection: "Resources",
 			where: Object.assign(
 				{ guildId: undefined, authorId: undefined, createdAt: undefined },

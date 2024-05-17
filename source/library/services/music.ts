@@ -1,8 +1,8 @@
 import { EventEmitter } from "node:events";
 import { mention } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Guild } from "logos/database/guild";
+import type { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
 import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
@@ -46,7 +46,7 @@ class MusicService extends LocalService {
 		this.#_voiceStateUpdates = new Collector({ guildId });
 	}
 
-	async start(): Promise<void> {
+	start(): void {
 		this.#_voiceStateUpdates.onCollect(this.#_handleVoiceStateUpdate.bind(this));
 
 		this.client.lavalinkService.manager.on(
@@ -110,7 +110,7 @@ class MusicService extends LocalService {
 			await this.createSession({ channelId });
 		}
 
-		this.session.receiveListing({ listing });
+		await this.session.receiveListing({ listing });
 	}
 
 	async #_handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {

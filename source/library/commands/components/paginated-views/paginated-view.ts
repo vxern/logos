@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
 interface View {
@@ -37,15 +37,15 @@ abstract class PaginatedView<T> {
 		const { embed, components } = this.build(this.#_anchor, this.#currentPage, this.#index);
 
 		let title: string | undefined;
-		if (!this.#hasSinglePage) {
+		if (this.#hasSinglePage) {
+			title = embed.title;
+		} else {
 			const strings = constants.contexts.page({
 				localise: this.client.localise.bind(this.client),
 				locale: this.#_anchor.locale,
 			});
 
 			title = `${embed.title} ~ ${strings.page} ${this.#index + 1}/${this.#pages.length}`;
-		} else {
-			title = embed.title;
 		}
 
 		if (!this.#isOnLastPage) {
@@ -177,7 +177,7 @@ abstract class PaginatedView<T> {
 		await this.#display();
 	}
 
-	async close(): Promise<void> {
+	close(): void | Promise<void> {
 		this.#_pageButtons.close();
 	}
 }

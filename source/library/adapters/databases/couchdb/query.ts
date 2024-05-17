@@ -1,7 +1,7 @@
 import { DocumentQuery } from "logos/adapters/databases/adapter";
-import { CouchDBDocumentSession } from "logos/adapters/databases/couchdb/session";
-import { Model } from "logos/database/model";
-import nano from "nano";
+import type { CouchDBDocumentSession } from "logos/adapters/databases/couchdb/session";
+import type { Model } from "logos/database/model";
+import type nano from "nano";
 
 class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	readonly #_documents: nano.DocumentScope<unknown>;

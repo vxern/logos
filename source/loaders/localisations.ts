@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
-import { Locale, LocalisationLanguage, getLocalisationLanguageByLocale } from "logos:constants/languages";
-import { Environment } from "logos:core/loaders/environment";
+import { type Locale, type LocalisationLanguage, getLocalisationLanguageByLocale } from "logos:constants/languages";
+import type { Environment } from "logos:core/loaders/environment";
 import { Logger } from "logos/logger";
 
 const decoder = new TextDecoder();

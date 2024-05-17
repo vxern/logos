@@ -1,6 +1,6 @@
 import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "logos:constants/slowmode";
 import { timestamp } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 
 const lastUseByGuildId = new Map<bigint, number>();

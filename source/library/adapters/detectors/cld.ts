@@ -1,7 +1,7 @@
 import { getCLDDetectionLanguageByLocale, isCLDLocale } from "logos:constants/languages";
 import cld from "cldpre";
-import { DetectorAdapter, SingleDetectionResult } from "logos/adapters/detectors/adapter";
-import { Client } from "logos/client";
+import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
+import type { Client } from "logos/client";
 
 class CLDAdapter extends DetectorAdapter {
 	constructor(client: Client) {

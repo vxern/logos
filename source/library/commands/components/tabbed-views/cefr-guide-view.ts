@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
-import { TabbedView, View } from "logos/commands/components/tabbed-views/tabbed-view";
-import { Guild } from "logos/database/guild";
+import type { Client } from "logos/client";
+import { TabbedView, type View } from "logos/commands/components/tabbed-views/tabbed-view";
+import type { Guild } from "logos/database/guild";
 
 type Bracket = "a" | "b" | "c";
 type Mode = "guide" | "examples";

@@ -1,12 +1,12 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBDocumentConventions } from "logos/adapters/databases/couchdb/conventions";
-import { CouchDBDocument } from "logos/adapters/databases/couchdb/document";
+import type { CouchDBDocument } from "logos/adapters/databases/couchdb/document";
 import { CouchDBDocumentQuery } from "logos/adapters/databases/couchdb/query";
-import { Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
-import nano from "nano";
+import type { Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
+import type nano from "nano";
 
 class CouchDBDocumentSession extends DocumentSession {
 	readonly #_documents: nano.DocumentScope<unknown>;

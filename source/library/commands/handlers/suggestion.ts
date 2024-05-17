@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { SuggestionComposer } from "logos/commands/components/modal-composers/suggestion-composer";
 import { Guild } from "logos/database/guild";
 import { Suggestion } from "logos/database/suggestion";

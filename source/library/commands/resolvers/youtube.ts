@@ -1,5 +1,5 @@
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { Song, SongCollection, SongListing } from "logos/services/music";
 import * as YouTubeSearch from "youtube-sr";

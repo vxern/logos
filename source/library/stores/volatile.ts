@@ -1,5 +1,5 @@
-import { Locale } from "logos:constants/languages";
-import { Environment } from "logos:core/loaders/environment";
+import type { Locale } from "logos:constants/languages";
+import type { Environment } from "logos:core/loaders/environment";
 import Redis from "ioredis";
 import { Logger } from "logos/logger";
 
@@ -82,7 +82,7 @@ class VolatileStore {
 		this.log.info("Disconnected from Redis instance...");
 	}
 
-	async getSentencePairCount({ learningLocale }: { learningLocale: Locale }): Promise<number> {
+	getSentencePairCount({ learningLocale }: { learningLocale: Locale }): Promise<number> {
 		return this.redis.scard(`${learningLocale}:index`);
 	}
 

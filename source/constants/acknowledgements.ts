@@ -1,4 +1,4 @@
-import { Contributor, contributors } from "logos:constants/contributions";
+import { type Contributor, contributors } from "logos:constants/contributions";
 
 interface Acknowledgement {
 	readonly users: Contributor[];

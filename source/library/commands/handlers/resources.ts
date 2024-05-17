@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 
 /** Displays a message with information on where to find the resources for a given language. */

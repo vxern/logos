@@ -1,5 +1,5 @@
-import { Rule, isValidRule } from "logos:constants/rules";
-import { Client } from "logos/client";
+import { type Rule, isValidRule } from "logos:constants/rules";
+import type { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
 import { Guild } from "logos/database/guild";
 

@@ -1,7 +1,7 @@
-import { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
-import { Definition, DictionaryAdapter, DictionaryEntry } from "logos/adapters/dictionaries/adapter";
-import { Client } from "logos/client";
+import { type Definition, DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import type { Client } from "logos/client";
 
 type SearchResult = {
 	results: Array<{

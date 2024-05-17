@@ -1,12 +1,12 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
-import { DatabaseAdapter, DocumentConventions } from "logos/adapters/databases/adapter";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
+import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databases/adapter";
 import { CouchDBDocumentConventions } from "logos/adapters/databases/couchdb/conventions";
-import { CouchDBDocumentMetadata } from "logos/adapters/databases/couchdb/document";
+import type { CouchDBDocumentMetadata } from "logos/adapters/databases/couchdb/document";
 import { CouchDBDocumentSession } from "logos/adapters/databases/couchdb/session";
-import { IdentifierDataOrMetadata, Model } from "logos/database/model";
-import { Logger } from "logos/logger";
-import { DatabaseStore } from "logos/stores/database";
+import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { Logger } from "logos/logger";
+import type { DatabaseStore } from "logos/stores/database";
 import nano from "nano";
 
 class CouchDBAdapter extends DatabaseAdapter {
@@ -91,10 +91,10 @@ class CouchDBAdapter extends DatabaseAdapter {
 		return new CouchDBDocumentConventions({ document, data, collection });
 	}
 
-	async openSession({
+	openSession({
 		environment,
 		database,
-	}: { environment: Environment; database: DatabaseStore }): Promise<CouchDBDocumentSession> {
+	}: { environment: Environment; database: DatabaseStore }): CouchDBDocumentSession {
 		return new CouchDBDocumentSession({ environment, database, documents: this.#_documents });
 	}
 }

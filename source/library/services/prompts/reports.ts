@@ -1,5 +1,5 @@
-import { Client } from "logos/client";
-import { Report } from "logos/database/report";
+import type { Client } from "logos/client";
+import type { Report } from "logos/database/report";
 import { User } from "logos/database/user";
 import { PromptService } from "logos/services/prompts/service";
 

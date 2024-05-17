@@ -1,6 +1,6 @@
 import { mention } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { HashableMessageContents, NoticeService } from "logos/services/notices/service";
+import type { Client } from "logos/client";
+import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
 
 class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {

@@ -1,9 +1,9 @@
 import { DocumentQuery } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
-import { RavenDBDocument } from "logos/adapters/databases/ravendb/document";
-import { Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
-import * as ravendb from "ravendb";
+import type { RavenDBDocument } from "logos/adapters/databases/ravendb/document";
+import type { Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
+import type * as ravendb from "ravendb";
 
 class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	readonly #_database: DatabaseStore;

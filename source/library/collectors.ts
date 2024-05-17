@@ -1,11 +1,11 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
 import {
-	LearningLanguage,
+	type LearningLanguage,
 	getDiscordLocalisationLanguageByLocale,
 	getLocaleByLearningLanguage,
 	getLocaleByLocalisationLanguage,
 } from "logos:constants/languages";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 import { User } from "logos/database/user";
 import { nanoid } from "nanoid";
@@ -157,7 +157,7 @@ class InteractionCollector<
 		super({
 			guildId,
 			isSingle,
-			removeAfter: !isPermanent ? constants.INTERACTION_TOKEN_EXPIRY : undefined,
+			removeAfter: isPermanent ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
 			dependsOn,
 		});
 
@@ -213,7 +213,7 @@ class InteractionCollector<
 			}
 		}
 
-		if (!this.only.has(interaction.user.id) && !this.#_acceptAnyUser) {
+		if (!(this.only.has(interaction.user.id) || this.#_acceptAnyUser)) {
 			return false;
 		}
 
@@ -238,13 +238,13 @@ class InteractionCollector<
 	/**
 	 * @deprecated
 	 * Do not use as this receives raw Discord interaction events, rather than Logos ones.
-	 * Use {@link InteractionCollector.onInteraction()} instead.
+	 * Use {@link onInteraction()} instead.
 	 */
 	onCollect(_: CollectEvent<"interactionCreate">) {
 		throw "UnimplementedError: Do not use `onCollect()` on interaction controllers. Use `onInteraction()` instead.";
 	}
 
-	onInteraction(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => Promise<void>): void {
+	onInteraction(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => void | Promise<void>): void {
 		super.onCollect(async (interactionRaw) => {
 			const locales = await this.#getLocaleData(interactionRaw);
 			const metadata = this.#getMetadata(interactionRaw);

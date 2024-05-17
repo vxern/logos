@@ -1,6 +1,6 @@
-import { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"guildBanRemove"> = async (client, [user, _], { guildLocale }) => {
+const logger: EventLogger<"guildBanRemove"> = (client, [user, _], { guildLocale }) => {
 	const strings = constants.contexts.guildBanRemove({ localise: client.localise.bind(client), locale: guildLocale });
 	return {
 		embeds: [

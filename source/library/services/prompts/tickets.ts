@@ -1,6 +1,6 @@
 import { mention, trim } from "logos:core/formatting";
-import { Client } from "logos/client";
-import { Ticket, TicketFormData, TicketType } from "logos/database/ticket";
+import type { Client } from "logos/client";
+import { Ticket, type TicketFormData, type TicketType } from "logos/database/ticket";
 import { User } from "logos/database/user";
 import { PromptService } from "logos/services/prompts/service";
 

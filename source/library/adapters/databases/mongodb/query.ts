@@ -1,10 +1,10 @@
-import { Collection } from "logos:constants/database";
+import type { Collection } from "logos:constants/database";
 import { DocumentQuery } from "logos/adapters/databases/adapter";
 import { MongoDBDocumentConventions } from "logos/adapters/databases/mongodb/conventions";
-import { MongoDBDocument } from "logos/adapters/databases/mongodb/document";
-import { MongoDBDocumentSession } from "logos/adapters/databases/mongodb/session";
-import { Model } from "logos/database/model";
-import mongodb from "mongodb";
+import type { MongoDBDocument } from "logos/adapters/databases/mongodb/document";
+import type { MongoDBDocumentSession } from "logos/adapters/databases/mongodb/session";
+import type { Model } from "logos/database/model";
+import type mongodb from "mongodb";
 
 class MongoDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	readonly #_mongoDatabase: mongodb.Db;

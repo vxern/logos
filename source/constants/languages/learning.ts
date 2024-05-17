@@ -1,6 +1,6 @@
 import {
-	Locale,
-	Language as LocalisationLanguage,
+	type Locale,
+	type Language as LocalisationLanguage,
 	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
 	isLogosLanguage as isLocalisationLanguage,
 	isLogosLocale as isLocalisationLocale,

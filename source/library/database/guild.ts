@@ -1,9 +1,9 @@
-import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
-import { TimeStruct } from "logos:constants/time";
-import { Client } from "logos/client";
+import type { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
+import type { TimeStruct } from "logos:constants/time";
+import type { Client } from "logos/client";
 import { GuildStats } from "logos/database/guild-stats";
-import { IdentifierData, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import { type IdentifierData, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 /** @since v3.5.0 */
 interface GuildLanguages {
@@ -685,19 +685,19 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		this.isNative = isNative ?? false;
 	}
 
-	static async get(client: Client, data: IdentifierData<Guild>): Promise<Guild | undefined> {
+	static get(client: Client, data: IdentifierData<Guild>): Guild | Promise<Guild | undefined> | undefined {
 		const partialId = Model.buildPartialId(data);
 		if (client.documents.guilds.has(partialId)) {
 			return client.documents.guilds.get(partialId)!;
 		}
 
-		return await client.database.withSession(async (session) => {
+		return client.database.withSession((session) => {
 			return session.get<Guild>(Model.buildId(data, { collection: "Guilds" }));
 		});
 	}
 
 	static async create(client: Client, data: CreateGuildOptions): Promise<Guild> {
-		const guildDocument = await client.database.withSession(async (session) => {
+		const guildDocument = await client.database.withSession((session) => {
 			return session.set(new Guild(client.database, data));
 		});
 
@@ -712,7 +712,7 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 			return guildDocument;
 		}
 
-		return await Guild.create(client, data);
+		return Guild.create(client, data);
 	}
 
 	hasEnabled(feature: keyof Guild) {

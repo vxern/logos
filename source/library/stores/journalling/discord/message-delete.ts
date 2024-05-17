@@ -1,7 +1,7 @@
 import { codeMultiline, mention } from "logos:core/formatting";
-import { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"messageDelete"> = async (client, [payload, _], { guildLocale }) => {
+const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocale }) => {
 	const message = client.entities.messages.latest.get(payload.id);
 	if (message === undefined) {
 		return undefined;

@@ -1,14 +1,14 @@
-import { CreateEntryRequestOptions, EntryRequest } from "logos/database/entry-request";
-import { CreateGuildOptions, Guild } from "logos/database/guild";
-import { CreateGuildStatsOptions, GuildStats } from "logos/database/guild-stats";
-import { CreatePraiseOptions, Praise } from "logos/database/praise";
-import { CreateReportOptions, Report } from "logos/database/report";
-import { CreateResourceOptions, Resource } from "logos/database/resource";
-import { CreateSuggestionOptions, Suggestion } from "logos/database/suggestion";
-import { CreateTicketOptions, Ticket } from "logos/database/ticket";
-import { CreateUserOptions, User } from "logos/database/user";
-import { CreateWarningOptions, Warning } from "logos/database/warning";
-import { DatabaseStore } from "logos/stores/database";
+import { type CreateEntryRequestOptions, EntryRequest } from "logos/database/entry-request";
+import { type CreateGuildOptions, Guild } from "logos/database/guild";
+import { type CreateGuildStatsOptions, GuildStats } from "logos/database/guild-stats";
+import { type CreatePraiseOptions, Praise } from "logos/database/praise";
+import { type CreateReportOptions, Report } from "logos/database/report";
+import { type CreateResourceOptions, Resource } from "logos/database/resource";
+import { type CreateSuggestionOptions, Suggestion } from "logos/database/suggestion";
+import { type CreateTicketOptions, Ticket } from "logos/database/ticket";
+import { type CreateUserOptions, User } from "logos/database/user";
+import { type CreateWarningOptions, Warning } from "logos/database/warning";
+import type { DatabaseStore } from "logos/stores/database";
 
 function entryRequest(database: DatabaseStore, options?: Partial<CreateEntryRequestOptions>): EntryRequest {
 	return new EntryRequest(

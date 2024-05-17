@@ -1,5 +1,5 @@
 import { mention } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Praise } from "logos/database/praise";
 import { Warning } from "logos/database/warning";
 
@@ -7,7 +7,7 @@ async function handleDisplayProfileAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string }>,
 ): Promise<void> {
-	client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
+	await client.autocompleteMembers(interaction, { identifier: interaction.parameters.user });
 }
 
 async function handleDisplayProfile(

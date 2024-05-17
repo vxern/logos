@@ -1,10 +1,10 @@
-import { Language } from "logos:constants/languages";
-import { Locale } from "logos:constants/languages/localisation";
-import { PartOfSpeech } from "logos:constants/parts-of-speech";
-import { RuleOrOther } from "logos:constants/rules";
-import { SlowmodeLevel } from "logos:constants/slowmode";
-import { TimeUnit } from "logos:constants/time";
-import { Client } from "logos/client";
+import type { Language } from "logos:constants/languages";
+import type { Locale } from "logos:constants/languages/localisation";
+import type { PartOfSpeech } from "logos:constants/parts-of-speech";
+import type { RuleOrOther } from "logos:constants/rules";
+import type { SlowmodeLevel } from "logos:constants/slowmode";
+import type { TimeUnit } from "logos:constants/time";
+import type { Client } from "logos/client";
 
 type ContextBuilder<T extends object> = ({
 	localise,

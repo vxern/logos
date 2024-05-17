@@ -1,6 +1,6 @@
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
@@ -203,7 +203,7 @@ class InteractionStore {
 		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
-				data: !visible ? { flags: Discord.MessageFlags.Ephemeral } : {},
+				data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
 			})
 			.catch((reason) => this.log.warn("Failed to postpone reply to interaction:", reason));
 	}

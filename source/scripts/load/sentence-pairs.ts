@@ -2,7 +2,7 @@ import * as fsSync from "node:fs";
 import * as fs from "node:fs/promises";
 import * as stream from "node:stream";
 import constants from "logos:constants/constants";
-import { Locale, getLocaleByLearningLanguage, isLearningLanguage } from "logos:constants/languages";
+import { type Locale, getLocaleByLearningLanguage, isLearningLanguage } from "logos:constants/languages";
 import { locales } from "logos:constants/languages/localisation";
 import { capitalise } from "logos:core/formatting";
 import eventStream from "event-stream";
@@ -94,7 +94,7 @@ interface EntryBuffer {
 	size: number;
 	add(record: RecordWithLanguage): void;
 	reset(): void;
-	flush(): Promise<void>;
+	flush(): void;
 }
 const entryBuffer: EntryBuffer = {
 	entries: {},
@@ -111,8 +111,9 @@ const entryBuffer: EntryBuffer = {
 		this.entries = {};
 		this.size = 0;
 	},
-	async flush() {
+	flush() {
 		console.info(`Flushing buffer (${this.size} entries)...`);
+		// unawaited
 		client.mset(this.entries);
 		this.reset();
 	},

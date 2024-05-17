@@ -1,9 +1,9 @@
 import defaults from "logos:constants/defaults";
 import { isLocalisationLanguage } from "logos:constants/languages";
-import { PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
+import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";
-import { Definition, DictionaryEntry, Expression } from "logos/adapters/dictionaries/adapter";
-import { Client } from "logos/client";
+import type { Definition, DictionaryEntry, Expression } from "logos/adapters/dictionaries/adapter";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
 async function handleFindWordAutocomplete(

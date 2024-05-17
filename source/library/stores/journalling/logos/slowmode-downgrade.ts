@@ -1,7 +1,7 @@
 import { mention } from "logos:core/formatting";
-import { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"slowmodeDowngrade"> = async (
+const logger: EventLogger<"slowmodeDowngrade"> = (
 	client,
 	[user, channel, previousLevel, currentLevel],
 	{ guildLocale },

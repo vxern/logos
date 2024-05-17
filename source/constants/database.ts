@@ -1,6 +1,3 @@
-const databaseProviders = Object.freeze(["none", "ravendb"]);
-type DatabaseProvider = (typeof databaseProviders)[number];
-
 const collections = Object.freeze([
 	"EntryRequests",
 	"GuildStats",
@@ -37,4 +34,4 @@ const identifierParts = Object.freeze([
 
 export default Object.freeze({ collections, identifierParts } as const);
 export { isValidCollection };
-export type { Collection, DatabaseProvider };
+export type { Collection };

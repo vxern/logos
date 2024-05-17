@@ -1,8 +1,8 @@
-import { LearningLanguage } from "logos:constants/languages";
-import { PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
+import type { LearningLanguage } from "logos:constants/languages";
+import { type PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
 import * as Dexonline from "dexonline-scraper";
-import { DictionaryAdapter, DictionaryEntry } from "logos/adapters/dictionaries/adapter";
-import { Client } from "logos/client";
+import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import type { Client } from "logos/client";
 
 type InflectionTable = NonNullable<DictionaryEntry["inflectionTable"]>;
 

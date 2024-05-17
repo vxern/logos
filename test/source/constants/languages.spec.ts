@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import { Language, getBaseLanguage, getTranslationLanguage } from "logos:constants/languages";
+import { type Language, getBaseLanguage, getTranslationLanguage } from "logos:constants/languages";
 import { expect } from "chai";
 
 describe("getBaseLanguage()", () => {

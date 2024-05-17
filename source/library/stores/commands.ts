@@ -2,8 +2,8 @@ import { isAutocomplete } from "logos:constants/interactions";
 import { getDiscordLanguageByLocale } from "logos:constants/languages/localisation";
 import { timeStructToMilliseconds } from "logos:constants/time";
 import { isDefined } from "logos:core/utilities";
-import { Client } from "logos/client";
-import {
+import type { Client } from "logos/client";
+import type {
 	BuiltCommand,
 	BuiltCommands,
 	Command,
@@ -16,10 +16,10 @@ import {
 	OptionMetadata,
 	OptionTemplate,
 } from "logos/commands/commands";
-import { InteractionHandler } from "logos/commands/handlers/handler";
-import { Guild } from "logos/database/guild";
+import type { InteractionHandler } from "logos/commands/handlers/handler";
+import type { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
-import { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
+import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
 
 interface RateLimit {
 	nextAllowedUsageTimestamp: number;

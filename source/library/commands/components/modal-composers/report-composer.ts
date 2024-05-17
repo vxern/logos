@@ -1,12 +1,9 @@
 import { trim } from "logos:core/formatting";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import { ReportFormData } from "logos/database/report";
+import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import type { ReportFormData } from "logos/database/report";
 
 class ReportComposer extends ModalComposer<ReportFormData, never> {
-	async buildModal(
-		submission: Logos.Interaction,
-		{ formData }: { formData: ReportFormData },
-	): Promise<Modal<ReportFormData>> {
+	buildModal(submission: Logos.Interaction, { formData }: { formData: ReportFormData }): Modal<ReportFormData> {
 		const strings = constants.contexts.reportModal({
 			localise: this.client.localise.bind(this.client),
 			locale: submission.locale,

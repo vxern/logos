@@ -1,21 +1,21 @@
-import constants_ from "logos:constants/constants";
-import { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
-import { Properties } from "logos:constants/properties";
-import { SlowmodeLevel } from "logos:constants/slowmode";
-import * as Discord from "@discordeno/bot";
-import { EntryRequest } from "logos/database/entry-request";
-import { Praise } from "logos/database/praise";
-import { Report } from "logos/database/report";
-import { Resource } from "logos/database/resource";
-import { Suggestion } from "logos/database/suggestion";
-import { Ticket } from "logos/database/ticket";
-import { Warning } from "logos/database/warning";
+import type constants_ from "logos:constants/constants";
+import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
+import type { Properties } from "logos:constants/properties";
+import type { SlowmodeLevel } from "logos:constants/slowmode";
+import type * as Discord from "@discordeno/bot";
+import type { EntryRequest } from "logos/database/entry-request";
+import type { Praise } from "logos/database/praise";
+import type { Report } from "logos/database/report";
+import type { Resource } from "logos/database/resource";
+import type { Suggestion } from "logos/database/suggestion";
+import type { Ticket } from "logos/database/ticket";
+import type { Warning } from "logos/database/warning";
 
 declare global {
 	interface PromiseConstructor {
 		createRace<T, R>(
 			elements: T[],
-			doAction: (element: T) => Promise<R | undefined>,
+			doAction: (element: T) => R | Promise<R | undefined> | undefined,
 		): AsyncGenerator<{ element: T; result?: R }, void, void>;
 	}
 
@@ -41,6 +41,7 @@ declare global {
 }
 
 declare global {
+	// biome-ignore lint/style/noNamespace: We use Logos types to make a distinction from Discordeno types.
 	namespace Logos {
 		type Guild = Pick<
 			Omit<Discord.Guild, "roles" | "members" | "channels" | "voiceStates"> & {
@@ -174,7 +175,7 @@ declare global {
 }
 
 declare global {
-	// @ts-ignore: This is fine.
+	// biome-ignore lint/nursery/noReExportAll: This is fine because we need these types under the `Discord` namespace.
 	export * as Discord from "@discordeno/bot";
 }
 

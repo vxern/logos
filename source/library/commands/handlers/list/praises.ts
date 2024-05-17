@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { getPraisePage } from "logos/commands/praises";
 import { Praise } from "logos/database/praise";
 

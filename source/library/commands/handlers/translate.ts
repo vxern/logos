@@ -1,12 +1,12 @@
 import languages, {
-	Languages,
-	TranslationLanguage,
+	type Languages,
+	type TranslationLanguage,
 	getTranslationLanguage,
 	isTranslationLanguage,
 } from "logos:constants/languages";
 import { trim } from "logos:core/formatting";
-import { TranslationResult } from "logos/adapters/translators/adapter";
-import { Client } from "logos/client";
+import type { TranslationResult } from "logos/adapters/translators/adapter";
+import type { Client } from "logos/client";
 
 async function handleTranslateChatInputAutocomplete(
 	client: Client,

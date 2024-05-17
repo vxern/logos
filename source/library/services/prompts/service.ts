@@ -1,10 +1,10 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Collector, InteractionCollector } from "logos/collectors";
-import { Guild } from "logos/database/guild";
-import { Model } from "logos/database/model";
-import { User } from "logos/database/user";
+import type { Guild } from "logos/database/guild";
+import type { Model } from "logos/database/model";
+import type { User } from "logos/database/user";
 import { LocalService } from "logos/services/service";
-import { ServiceStore } from "logos/stores/services";
+import type { ServiceStore } from "logos/stores/services";
 
 interface Configurations {
 	verification: Guild["verification"];
@@ -200,7 +200,7 @@ abstract class PromptService<
 		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
 		this.#_messageDeletes.onCollect(this.#handleMessageDelete.bind(this));
 
-		this.magicButton.onInteraction(async (buttonPress) => {
+		this.magicButton.onInteraction((buttonPress) => {
 			const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
 			if (handle === undefined) {
 				return;

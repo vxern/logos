@@ -1,5 +1,5 @@
-import { Language, LocalisationLanguage } from "logos:constants/languages";
-import { PartOfSpeech } from "logos:constants/parts-of-speech";
+import type { Language, LocalisationLanguage } from "logos:constants/languages";
+import type { PartOfSpeech } from "logos:constants/parts-of-speech";
 import armenian from "logos:constants/transformers/armenian";
 import danish from "logos:constants/transformers/danish";
 import dutch from "logos:constants/transformers/dutch";

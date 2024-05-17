@@ -1,4 +1,4 @@
-import { Environment } from "logos:core/loaders/environment";
+import type { Environment } from "logos:core/loaders/environment";
 import { Logger } from "logos/logger";
 
 class DiscordConnection {
@@ -38,7 +38,9 @@ class DiscordConnection {
 		// REMINDER(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
 		this.bot.handlers.MESSAGE_UPDATE = (bot, data) => {
 			const payload = data.d as Discord.DiscordMessage;
-			if (!payload.author) return;
+			if (!payload.author) {
+				return;
+			}
 
 			bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
 		};

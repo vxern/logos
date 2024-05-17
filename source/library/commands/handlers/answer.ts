@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { AnswerComposer } from "logos/commands/components/modal-composers/answer-composer";
 
 async function handleAnswer(client: Client, interaction: Logos.Interaction): Promise<void> {

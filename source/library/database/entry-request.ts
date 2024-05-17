@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
-import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { Client } from "logos/client";
+import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 interface EntryRequestFormData {
 	readonly reason: string;
@@ -87,7 +87,7 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 			return client.documents.entryRequests.get(partialId)!;
 		}
 
-		return await client.database.withSession(async (session) => {
+		return client.database.withSession((session) => {
 			return session.get<EntryRequest>(Model.buildId(data, { collection: "EntryRequests" }));
 		});
 	}

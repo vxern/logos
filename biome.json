@@ -4,18 +4,27 @@
 		"rules": {
 			"all": true,
 			"nursery": {
-				"useImportRestrictions": "off"
+				"all": true,
+				"noNamespaceImport": "off",
+				"noUndeclaredDependencies": "off",
+				"useImportRestrictions": "off",
+				"noConsole": "off",
+				"noNodejsModules": "off"
 			},
 			"style": {
-				"noNonNullAssertion": "off",
-				"useImportType": "off",
-				"useExportType": "off"
+				"all": true,
+				"noDefaultExport": "off",
+				"useNamingConvention": "off",
+				"noNonNullAssertion": "off"
 			},
 			"suspicious": {
+				"all": true,
 				"noExplicitAny": "off",
-				"noAssignInExpressions": "off"
+				"noAssignInExpressions": "off",
+				"noEmptyBlockStatements": "off"
 			},
 			"complexity": {
+				"all": true,
 				"noExcessiveCognitiveComplexity": "off"
 			}
 		}
@@ -33,8 +42,8 @@
 			"Logos",
 			"Events",
 			"WithRequired",
-			"constants",
-			"defaults"
+			"Timer",
+			"constants"
 		]
 	}
 }

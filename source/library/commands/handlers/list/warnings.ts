@@ -1,5 +1,5 @@
 import { timestamp } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
 import { Warning } from "logos/database/warning";
 

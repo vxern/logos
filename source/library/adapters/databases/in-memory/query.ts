@@ -1,5 +1,5 @@
 import { DocumentQuery } from "logos/adapters/databases/adapter";
-import { Model } from "logos/database/model";
+import type { Model } from "logos/database/model";
 
 class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	#_documents: Map<string, M>;
@@ -75,7 +75,7 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		return this;
 	}
 
-	async execute(): Promise<M[]> {
+	execute(): M[] {
 		return Array.from(this.#_documents.values());
 	}
 }

@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { GlobalService } from "logos/services/service";
 import { InteractionStore } from "logos/stores/interactions";
@@ -34,7 +34,7 @@ class InteractionRepetitionService extends GlobalService {
 		await this.#_showInChatButtons.close();
 	}
 
-	async #_handleCommandInteraction(interaction: Logos.Interaction): Promise<void> {
+	#_handleCommandInteraction(interaction: Logos.Interaction): void {
 		if (!this.client.isShowable(interaction)) {
 			return;
 		}

@@ -1,12 +1,12 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
-import { DatabaseAdapter, DocumentConventions } from "logos/adapters/databases/adapter";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
+import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databases/adapter";
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
-import { RethinkDBDocumentMetadata } from "logos/adapters/databases/rethinkdb/document";
+import type { RethinkDBDocumentMetadata } from "logos/adapters/databases/rethinkdb/document";
 import { RethinkDBDocumentSession } from "logos/adapters/databases/rethinkdb/session";
-import { IdentifierDataOrMetadata, Model } from "logos/database/model";
-import { Logger } from "logos/logger";
-import { DatabaseStore } from "logos/stores/database";
+import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { Logger } from "logos/logger";
+import type { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 
 class RethinkDBAdapter extends DatabaseAdapter {
@@ -76,10 +76,10 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		return new RethinkDBDocumentConventions({ document, data, collection });
 	}
 
-	async openSession({
+	openSession({
 		environment,
 		database,
-	}: { environment: Environment; database: DatabaseStore }): Promise<RethinkDBDocumentSession> {
+	}: { environment: Environment; database: DatabaseStore }): RethinkDBDocumentSession {
 		return new RethinkDBDocumentSession({ environment, database, connection: this.#_connection });
 	}
 

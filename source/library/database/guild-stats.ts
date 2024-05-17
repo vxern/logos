@@ -1,7 +1,7 @@
-import { Locale } from "logos:constants/languages";
-import { Client } from "logos/client";
-import { IdentifierData, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { Locale } from "logos:constants/languages";
+import type { Client } from "logos/client";
+import { type IdentifierData, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 type GameType =
 	/** @since v3.42.0 */
@@ -37,13 +37,13 @@ class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] 
 		this.stats = stats;
 	}
 
-	static async getOrCreate(client: Client, data: CreateGuildStatsOptions): Promise<GuildStats> {
+	static getOrCreate(client: Client, data: CreateGuildStatsOptions): GuildStats | Promise<GuildStats> {
 		const partialId = Model.buildPartialId<GuildStats>(data);
 		if (client.documents.guildStats.has(partialId)) {
 			return client.documents.guildStats.get(partialId)!;
 		}
 
-		return await client.database.withSession(async (session) => {
+		return client.database.withSession(async (session) => {
 			const guildStatsDocument = await session.get<GuildStats>(
 				Model.buildId<GuildStats>(data, { collection: "GuildStats" }),
 			);

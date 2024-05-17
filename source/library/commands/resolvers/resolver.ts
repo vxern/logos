@@ -1,5 +1,5 @@
-import { Client } from "logos/client";
-import { SongListing } from "logos/services/music";
+import type { Client } from "logos/client";
+import type { SongListing } from "logos/services/music";
 
 type SongListingResolver = (
 	client: Client,

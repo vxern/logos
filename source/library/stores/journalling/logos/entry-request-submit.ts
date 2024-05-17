@@ -1,11 +1,7 @@
 import { codeMultiline } from "logos:core/formatting";
-import { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"entryRequestSubmit"> = async (
-	client,
-	[user, entryRequest],
-	{ guildLocale, featureLanguage },
-) => {
+const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest], { guildLocale, featureLanguage }) => {
 	const strings = {
 		...constants.contexts.verificationModal({ localise: client.localise.bind(client), locale: guildLocale }),
 		...constants.contexts.entryRequestSubmit({ localise: client.localise.bind(client), locale: guildLocale }),

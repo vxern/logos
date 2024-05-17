@@ -1,7 +1,7 @@
-import { Rule } from "logos:constants/rules";
-import { Client } from "logos/client";
-import { ClientOrDatabaseStore, IdentifierData, Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { Rule } from "logos:constants/rules";
+import type { Client } from "logos/client";
+import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/database/model";
+import type { DatabaseStore } from "logos/stores/database";
 
 type CreateWarningOptions = { reason: string; rule?: Rule } & IdentifierData<Warning>;
 

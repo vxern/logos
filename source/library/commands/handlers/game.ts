@@ -1,11 +1,11 @@
-import { Locale } from "logos:constants/languages";
+import type { Locale } from "logos:constants/languages";
 import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { GuildStats } from "logos/database/guild-stats";
 import { User } from "logos/database/user";
-import { SentencePair } from "logos/stores/volatile";
+import type { SentencePair } from "logos/stores/volatile";
 
 function random(max: number): number {
 	return Math.floor(Math.random() * max);

@@ -5,7 +5,7 @@ import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
 import { handleMakeFullCorrection, handleMakePartialCorrection } from "logos/commands/handlers/correction";
 import { handleDisplayCredits } from "logos/commands/handlers/credits";
 import { handleStartGame } from "logos/commands/handlers/game";
-import { InteractionHandler } from "logos/commands/handlers/handler";
+import type { InteractionHandler } from "logos/commands/handlers/handler";
 import { handleDisplayBotInformation } from "logos/commands/handlers/information/bot";
 import { handleDisplayGuildInformation } from "logos/commands/handlers/information/guild";
 import {

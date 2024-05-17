@@ -1,8 +1,8 @@
 import { mention, timestamp } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { EntryRequest, VoteType } from "logos/database/entry-request";
-import { Guild } from "logos/database/guild";
+import type { EntryRequest, VoteType } from "logos/database/entry-request";
+import type { Guild } from "logos/database/guild";
 import { Model } from "logos/database/model";
 import { Ticket } from "logos/database/ticket";
 import { User } from "logos/database/user";

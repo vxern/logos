@@ -1,6 +1,6 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Guild, RoleWithIndicator } from "logos/database/guild";
+import type { Guild, RoleWithIndicator } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 
 class RoleIndicatorService extends LocalService {

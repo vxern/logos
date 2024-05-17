@@ -1,12 +1,9 @@
 import { trim } from "logos:core/formatting";
-import { Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import { TicketFormData } from "logos/database/ticket";
+import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import type { TicketFormData } from "logos/database/ticket";
 
 class TicketComposer extends ModalComposer<TicketFormData, never> {
-	async buildModal(
-		submission: Logos.Interaction<any, any>,
-		{ formData }: { formData: TicketFormData },
-	): Promise<Modal<TicketFormData>> {
+	buildModal(submission: Logos.Interaction, { formData }: { formData: TicketFormData }): Modal<TicketFormData> {
 		const strings = constants.contexts.ticketModal({
 			localise: this.client.localise.bind(this.client),
 			locale: submission.locale,

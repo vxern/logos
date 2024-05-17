@@ -1,5 +1,5 @@
-import { InputTextComponent } from "@discordeno/bot";
-import { Client } from "logos/client";
+import type { InputTextComponent } from "@discordeno/bot";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
 type TypedInputTextComponent<CustomID> = WithRequired<InputTextComponent, "value"> & { customId: CustomID };
@@ -74,9 +74,12 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		return content as FormData;
 	}
 
-	abstract buildModal(interaction: Logos.Interaction, { formData }: { formData: FormData }): Promise<Modal<FormData>>;
+	abstract buildModal(
+		interaction: Logos.Interaction,
+		{ formData }: { formData: FormData },
+	): Modal<FormData> | Promise<Modal<FormData>>;
 
-	async validate(_: { formData: FormData }): Promise<ValidationError | undefined> {
+	validate(_: { formData: FormData }): ValidationError | Promise<ValidationError | undefined> | undefined {
 		return undefined;
 	}
 
@@ -247,7 +250,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		await this.#display();
 	}
 
-	async close(): Promise<void> {
+	close(): void | Promise<void> {
 		this.#_submissions.close();
 	}
 }

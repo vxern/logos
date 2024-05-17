@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { CefrGuideView } from "logos/commands/components/tabbed-views/cefr-guide-view";
 import { Guild } from "logos/database/guild";
 

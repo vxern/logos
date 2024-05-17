@@ -1,5 +1,5 @@
-import { Client } from "logos/client";
-import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
+import type { Client } from "logos/client";
+import { PaginatedView, type View } from "logos/commands/components/paginated-views/paginated-view";
 
 class SoftwareLicenceView extends PaginatedView<string> {
 	readonly #title: string;

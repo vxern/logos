@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { GlobalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
@@ -134,10 +134,10 @@ class LavalinkService extends GlobalService {
 		});
 
 		this.manager.on("ready", (_, reconnected) => {
-			if (!reconnected) {
-				this.log.info("Connected to audio node.");
-			} else {
+			if (reconnected) {
 				this.log.info("Reconnected to audio node.");
+			} else {
+				this.log.info("Connected to audio node.");
 			}
 		});
 

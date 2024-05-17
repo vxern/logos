@@ -1,5 +1,5 @@
 // import { Collection } from "logos:constants/database";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 // import { Guild } from "logos/database/guild";
 // import { Model } from "logos/database/model";
 import { ActionLock } from "logos/helpers/action-lock";
@@ -21,7 +21,7 @@ class RealtimeUpdateService extends GlobalService {
 		*/
 	}
 
-	async start(): Promise<void> {
+	start(): void {
 		this.log.info("Streaming updates...");
 
 		/*

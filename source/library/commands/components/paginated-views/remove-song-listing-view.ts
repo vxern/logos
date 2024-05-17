@@ -1,8 +1,8 @@
 import { trim } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { PaginatedView, View } from "logos/commands/components/paginated-views/paginated-view";
-import { SongListing } from "logos/services/music";
+import { PaginatedView, type View } from "logos/commands/components/paginated-views/paginated-view";
+import type { SongListing } from "logos/services/music";
 
 class RemoveSongListingView extends PaginatedView<SongListing> {
 	readonly #_selectMenuSelection: InteractionCollector;

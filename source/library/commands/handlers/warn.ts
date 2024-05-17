@@ -1,7 +1,7 @@
 import { isValidRule } from "logos:constants/rules";
 import { timeStructToMilliseconds } from "logos:constants/time";
 import { mention } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
 import { Guild } from "logos/database/guild";
 import { Warning } from "logos/database/warning";

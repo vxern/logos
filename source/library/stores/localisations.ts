@@ -1,14 +1,14 @@
-import { ContextBuilder } from "logos:constants/contexts";
+import type { ContextBuilder } from "logos:constants/contexts";
 import {
-	Locale,
-	LocalisationLanguage,
+	type Locale,
+	type LocalisationLanguage,
 	getDiscordLocaleByLocalisationLanguage,
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 } from "logos:constants/languages";
-import { Environment } from "logos:core/loaders/environment";
+import type { Environment } from "logos:core/loaders/environment";
 import { Logger } from "logos/logger";
-import { ReplyVisibility } from "logos/stores/interactions";
+import type { ReplyVisibility } from "logos/stores/interactions";
 
 type RawLocalisationBuilder = (data?: Record<string, unknown>) => string | undefined;
 type LocalisationBuilder = (data?: Record<string, unknown>) => string;

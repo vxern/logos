@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { SongListingView } from "logos/commands/components/paginated-views/song-listing-view";
 
 async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.Interaction): Promise<void> {

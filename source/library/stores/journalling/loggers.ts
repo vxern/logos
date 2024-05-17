@@ -1,5 +1,5 @@
-import { FeatureLanguage, Locale } from "logos:constants/languages";
-import { Client } from "logos/client";
+import type { FeatureLanguage, Locale } from "logos:constants/languages";
+import type { Client } from "logos/client";
 import guildBanAdd from "logos/stores/journalling/discord/guild-ban-add";
 import guildBanRemove from "logos/stores/journalling/discord/guild-ban-remove";
 import guildMemberAdd from "logos/stores/journalling/discord/guild-member-add";
@@ -59,7 +59,7 @@ type EventLogger<Event extends keyof Events> = (
 	client: Client,
 	event: Events[Event],
 	{ guildLocale, featureLanguage }: { guildLocale: Locale; featureLanguage: FeatureLanguage },
-) => Promise<Discord.CreateMessageOptions | undefined>;
+) => Discord.CreateMessageOptions | Promise<Discord.CreateMessageOptions | undefined> | undefined;
 
 export default loggers;
 export type { EventLogger };

@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 
 async function handleDisplayAcknowledgements(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = constants.contexts.acknowledgements({

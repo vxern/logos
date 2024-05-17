@@ -1,4 +1,4 @@
 preload = ["./source/harness"]
 
 [test]
-preload = ["./source/harness", "./test/setup"]
+preload = ["./source/harness", "./test/harness"]

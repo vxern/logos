@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { TicketComposer } from "logos/commands/components/modal-composers/ticket-composer";
 import { Guild } from "logos/database/guild";
 import { Ticket } from "logos/database/ticket";

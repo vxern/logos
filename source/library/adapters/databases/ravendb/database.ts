@@ -1,13 +1,13 @@
 import fs from "node:fs/promises";
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
-import { DatabaseAdapter, DocumentConventions } from "logos/adapters/databases/adapter";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
+import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
-import { RavenDBDocumentMetadataContainer } from "logos/adapters/databases/ravendb/document";
+import type { RavenDBDocumentMetadataContainer } from "logos/adapters/databases/ravendb/document";
 import { RavenDBDocumentSession } from "logos/adapters/databases/ravendb/session";
-import { IdentifierDataOrMetadata, Model } from "logos/database/model";
-import { Logger } from "logos/logger";
-import { DatabaseStore } from "logos/stores/database";
+import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { Logger } from "logos/logger";
+import type { DatabaseStore } from "logos/stores/database";
 import * as ravendb from "ravendb";
 
 class RavenDBAdapter extends DatabaseAdapter {
@@ -57,11 +57,11 @@ class RavenDBAdapter extends DatabaseAdapter {
 		});
 	}
 
-	async setup(): Promise<void> {
+	setup(): void {
 		this.#_database.initialize();
 	}
 
-	async teardown(): Promise<void> {
+	teardown(): void {
 		this.#_database.dispose();
 	}
 
@@ -77,10 +77,10 @@ class RavenDBAdapter extends DatabaseAdapter {
 		return new RavenDBDocumentConventions({ document, data, collection });
 	}
 
-	async openSession({
+	openSession({
 		environment,
 		database,
-	}: { environment: Environment; database: DatabaseStore }): Promise<RavenDBDocumentSession> {
+	}: { environment: Environment; database: DatabaseStore }): RavenDBDocumentSession {
 		const rawSession = this.#_database.openSession();
 
 		return new RavenDBDocumentSession({ environment, database, session: rawSession });

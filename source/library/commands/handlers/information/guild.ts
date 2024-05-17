@@ -1,5 +1,5 @@
 import { mention, timestamp } from "logos:core/formatting";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { Guild } from "logos/database/guild";
 
 /** Displays information about the guild that this command was executed in. */

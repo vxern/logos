@@ -40,7 +40,7 @@ if (values.all) {
 	console.info(`Enabling all features for guild with ID ${id}...`);
 
 	const document = new Guild(database, { guildId: id });
-	await document.update(database, async () => {
+	await document.update(database, () => {
 		document.isNative = true;
 		document.languages = {
 			localisation: "English/American",
@@ -269,7 +269,7 @@ if (values.none) {
 	console.info(`Disabling all features for guild with ID ${id}...`);
 
 	const document = new Guild(database, { guildId: id });
-	await document.update(database, async () => {
+	await document.update(database, () => {
 		document.isNative = false;
 		document.languages = undefined;
 		document.features = undefined;

@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { GlobalService } from "logos/services/service";
 
 class StatusService extends GlobalService {
@@ -16,11 +16,11 @@ class StatusService extends GlobalService {
 		this.#currentIndex = 0;
 	}
 
-	async start(): Promise<void> {
+	start(): void {
 		this.#_timer = setInterval(this.#cycleStatus.bind(this), constants.STATUS_CYCLE_PERIOD);
 	}
 
-	async stop(): Promise<void> {
+	stop(): void {
 		clearInterval(this.#_timer);
 		this.#_timer = undefined;
 

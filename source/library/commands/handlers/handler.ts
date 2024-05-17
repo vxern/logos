@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 
 type InteractionHandler = (client: Client, interaction: Logos.Interaction) => Promise<void>;
 

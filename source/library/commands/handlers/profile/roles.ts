@@ -1,5 +1,5 @@
 import { getRoleCategories } from "logos:constants/roles";
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { createRoleSelectionMenu } from "logos/commands/components/role-selection";
 
 /**

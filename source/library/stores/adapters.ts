@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { DetectorStore } from "logos/stores/adapters/detectors";
 import { DictionaryStore } from "logos/stores/adapters/dictionaries";
 import { TranslatorStore } from "logos/stores/adapters/translators";

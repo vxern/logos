@@ -1,11 +1,11 @@
-import { Collection } from "logos:constants/database";
-import { Environment } from "logos:core/loaders/environment";
+import type { Collection } from "logos:constants/database";
+import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
-import { RethinkDBDocument } from "logos/adapters/databases/rethinkdb/document";
+import type { RethinkDBDocument } from "logos/adapters/databases/rethinkdb/document";
 import { RethinkDBDocumentQuery } from "logos/adapters/databases/rethinkdb/query";
 import { Model } from "logos/database/model";
-import { DatabaseStore } from "logos/stores/database";
+import type { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 
 class RethinkDBDocumentSession extends DocumentSession {
@@ -56,10 +56,10 @@ class RethinkDBDocumentSession extends DocumentSession {
 		const alreadyExists = await this.#_alreadyExists(document.id, { collection: document.collection });
 
 		let query: rethinkdb.RDatum;
-		if (!alreadyExists) {
-			query = rethinkdb.r.insert(rethinkdb.r.table(document.collection), document);
-		} else {
+		if (alreadyExists) {
 			query = rethinkdb.r.replace(rethinkdb.r.table(document.collection), document);
+		} else {
+			query = rethinkdb.r.insert(rethinkdb.r.table(document.collection), document);
 		}
 
 		await query.run(this.#_connection);

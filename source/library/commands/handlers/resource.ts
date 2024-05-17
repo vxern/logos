@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import type { Client } from "logos/client";
 import { ResourceComposer } from "logos/commands/components/modal-composers/resource-composer";
 import { Guild } from "logos/database/guild";
 import { Resource } from "logos/database/resource";
