@@ -1,6 +1,6 @@
 import type { Locale, LocalisationLanguage } from "logos:constants/languages";
 import type { Client } from "logos/client";
-import type { GameType } from "logos/database/guild-stats";
+import type { GameType } from "logos/database/guild-statistics";
 import { type IdentifierData, Model } from "logos/database/model";
 import type { DatabaseStore } from "logos/stores/database";
 
@@ -86,19 +86,19 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 			return;
 		}
 
-		const statsForLocale = this.scores[learningLocale];
-		if (statsForLocale === undefined) {
+		const statisticsForLocale = this.scores[learningLocale];
+		if (statisticsForLocale === undefined) {
 			this.scores[learningLocale] = { [game]: { ...User.#initialScores } };
 			return;
 		}
 
-		const statsForGame = statsForLocale[game];
-		if (statsForGame === undefined) {
-			statsForLocale[game] = { ...User.#initialScores };
+		const statisticsForGame = statisticsForLocale[game];
+		if (statisticsForGame === undefined) {
+			statisticsForLocale[game] = { ...User.#initialScores };
 			return;
 		}
 
-		statsForGame.sessionCount += 1;
+		statisticsForGame.sessionCount += 1;
 	}
 
 	incrementScore({ game, learningLocale }: { game: GameType; learningLocale: Locale }): void {

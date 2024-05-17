@@ -8,7 +8,7 @@ import { RavenDBAdapter } from "logos/adapters/databases/ravendb/database";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
 import { EntryRequest } from "logos/database/entry-request";
 import { Guild } from "logos/database/guild";
-import { GuildStats } from "logos/database/guild-stats";
+import { GuildStatistics } from "logos/database/guild-statistics";
 import type { Model, ModelConstructor } from "logos/database/model";
 import { Praise } from "logos/database/praise";
 import { Report } from "logos/database/report";
@@ -22,7 +22,7 @@ import { Logger } from "logos/logger";
 class DatabaseStore {
 	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({
 		EntryRequests: EntryRequest,
-		GuildStats: GuildStats,
+		GuildStatistics: GuildStatistics,
 		Guilds: Guild,
 		Praises: Praise,
 		Reports: Report,
@@ -36,7 +36,7 @@ class DatabaseStore {
 	readonly log: Logger;
 	readonly cache: {
 		readonly entryRequests: Map<string, EntryRequest>;
-		readonly guildStats: Map<string, GuildStats>;
+		readonly guildStatistics: Map<string, GuildStatistics>;
 		readonly guilds: Map<string, Guild>;
 		readonly praisesByAuthor: Map<string, Map<string, Praise>>;
 		readonly praisesByTarget: Map<string, Map<string, Praise>>;
@@ -59,15 +59,11 @@ class DatabaseStore {
 		return (callback) => this.#adapter.withSession(callback, { environment: this.#environment, database: this });
 	}
 
-	constructor({
-		environment,
-		log,
-		adapter,
-	}: { environment: Environment; log: Logger; adapter: DatabaseAdapter }) {
+	constructor({ environment, log, adapter }: { environment: Environment; log: Logger; adapter: DatabaseAdapter }) {
 		this.log = log;
 		this.cache = {
 			entryRequests: new Map(),
-			guildStats: new Map(),
+			guildStatistics: new Map(),
 			guilds: new Map(),
 			praisesByAuthor: new Map(),
 			praisesByTarget: new Map(),
@@ -190,8 +186,8 @@ class DatabaseStore {
 				this.cache.entryRequests.set(document.partialId, document);
 				break;
 			}
-			case document instanceof GuildStats: {
-				this.cache.guildStats.set(document.partialId, document);
+			case document instanceof GuildStatistics: {
+				this.cache.guildStatistics.set(document.partialId, document);
 				break;
 			}
 			case document instanceof Guild: {
@@ -250,8 +246,8 @@ class DatabaseStore {
 				this.cache.entryRequests.delete(document.partialId);
 				break;
 			}
-			case document instanceof GuildStats: {
-				this.cache.guildStats.delete(document.partialId);
+			case document instanceof GuildStatistics: {
+				this.cache.guildStatistics.delete(document.partialId);
 				break;
 			}
 			case document instanceof Guild: {

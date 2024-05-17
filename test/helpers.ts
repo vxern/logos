@@ -1,6 +1,6 @@
 import { type CreateEntryRequestOptions, EntryRequest } from "logos/database/entry-request";
 import { type CreateGuildOptions, Guild } from "logos/database/guild";
-import { type CreateGuildStatsOptions, GuildStats } from "logos/database/guild-stats";
+import { type CreateGuildStatisticsOptions, GuildStatistics } from "logos/database/guild-statistics";
 import { type CreatePraiseOptions, Praise } from "logos/database/praise";
 import { type CreateReportOptions, Report } from "logos/database/report";
 import { type CreateResourceOptions, Resource } from "logos/database/resource";
@@ -53,15 +53,15 @@ function guild(database: DatabaseStore, options?: Partial<CreateGuildOptions>): 
 	);
 }
 
-function guildStats(database: DatabaseStore, options?: Partial<CreateGuildStatsOptions>): GuildStats {
-	return new GuildStats(
+function guildStatistics(database: DatabaseStore, options?: Partial<CreateGuildStatisticsOptions>): GuildStatistics {
+	return new GuildStatistics(
 		database,
 		Object.assign(
 			{
 				guildId: `${123}`,
 				createdAt: Date.now(),
-				stats: {},
-			} satisfies Required<CreateGuildStatsOptions>,
+				statistics: {},
+			} satisfies Required<CreateGuildStatisticsOptions>,
 			options,
 		),
 	);
@@ -160,7 +160,7 @@ function user(database: DatabaseStore, options?: Partial<CreateUserOptions>): Us
 			{
 				createdAt: Date.now(),
 				userId: `${123}`,
-				account: { id: `${123}` },
+				account: { language: "Romanian" },
 				scores: {},
 			} satisfies CreateUserOptions,
 			options,
@@ -185,4 +185,4 @@ function warning(database: DatabaseStore, options?: Partial<CreateWarningOptions
 	);
 }
 
-export { entryRequest, guild, guildStats, praise, report, resource, suggestion, ticket, user, warning };
+export { entryRequest, guild, guildStatistics, praise, report, resource, suggestion, ticket, user, warning };

@@ -70,7 +70,7 @@ class LavalinkService extends GlobalService {
 	readonly #connector: ClientConnector;
 	readonly manager: shoukaku.Shoukaku;
 
-	constructor(client: Client, { host, port, password }: { host: string, port: string, password: string }) {
+	constructor(client: Client, { host, port, password }: { host: string; port: string; password: string }) {
 		super(client, { identifier: "LavalinkService" });
 
 		const nodes: shoukaku.NodeOption[] = [

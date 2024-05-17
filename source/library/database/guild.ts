@@ -1,7 +1,7 @@
 import type { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
 import type { TimeStruct } from "logos:constants/time";
 import type { Client } from "logos/client";
-import { GuildStats } from "logos/database/guild-stats";
+import { GuildStatistics } from "logos/database/guild-statistics";
 import { type IdentifierData, Model } from "logos/database/model";
 import type { DatabaseStore } from "logos/stores/database";
 
@@ -701,7 +701,7 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 			return session.set(new Guild(client.database, data));
 		});
 
-		await GuildStats.getOrCreate(client, { guildId: guildDocument.id.toString() });
+		await GuildStatistics.getOrCreate(client, { guildId: guildDocument.id.toString() });
 
 		return guildDocument;
 	}

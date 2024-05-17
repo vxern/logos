@@ -1,7 +1,7 @@
 const collections = Object.freeze([
 	"EntryRequests",
-	"GuildStats",
 	"Guilds",
+	"GuildStatistics",
 	"Praises",
 	"Reports",
 	"Resources",

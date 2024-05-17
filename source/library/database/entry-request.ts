@@ -8,7 +8,7 @@ interface EntryRequestFormData {
 	readonly whereFound: string;
 }
 
-interface VoteStats {
+interface VoteStatistics {
 	for?: string[];
 	against?: string[];
 }
@@ -28,7 +28,7 @@ type CreateEntryRequestOptions = {
 	isFinalised?: boolean;
 	forcedVerdict?: ForcedVerdict;
 	ticketChannelId?: string;
-	votes?: VoteStats;
+	votes?: VoteStatistics;
 } & IdentifierData<EntryRequest>;
 
 class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guildId", "authorId"] }> {
@@ -47,7 +47,7 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 	isFinalised: boolean;
 	forcedVerdict?: ForcedVerdict;
 	ticketChannelId?: string;
-	votes?: VoteStats;
+	votes?: VoteStatistics;
 
 	get votersFor(): string[] {
 		return this.votes?.for ?? [];

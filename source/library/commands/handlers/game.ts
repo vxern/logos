@@ -3,7 +3,7 @@ import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { GuildStats } from "logos/database/guild-stats";
+import { GuildStatistics } from "logos/database/guild-statistics";
 import { User } from "logos/database/user";
 import type { SentencePair } from "logos/stores/volatile";
 
@@ -47,11 +47,13 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		return;
 	}
 
-	const guildStatsDocument = await GuildStats.getOrCreate(client, { guildId: interaction.guildId.toString() });
+	const guildStatisticsDocument = await GuildStatistics.getOrCreate(client, {
+		guildId: interaction.guildId.toString(),
+	});
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
-	await guildStatsDocument.update(client, () => {
-		guildStatsDocument.registerSession({
+	await guildStatisticsDocument.update(client, () => {
+		guildStatisticsDocument.registerSession({
 			game: "pickMissingWord",
 			learningLocale: interaction.learningLocale,
 			isUnique:
@@ -77,8 +79,11 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
 		const isCorrect = pick === data.sentenceSelection.correctPick;
 
-		await guildStatsDocument.update(client, () => {
-			guildStatsDocument.incrementScore({ game: "pickMissingWord", learningLocale: interaction.learningLocale });
+		await guildStatisticsDocument.update(client, () => {
+			guildStatisticsDocument.incrementScore({
+				game: "pickMissingWord",
+				learningLocale: interaction.learningLocale,
+			});
 		});
 
 		await userDocument.update(client, () => {
