@@ -2,8 +2,9 @@ import { describe, it } from "bun:test";
 import { useDatabaseStore } from "logos:test/dependencies";
 import { praise, warning } from "logos:test/helpers";
 import { expect } from "chai";
-import { Model } from "logos/database/model";
+import { IdentifierData, Model } from "logos/database/model";
 import { Praise } from "logos/database/praise";
+import { Report } from "logos/database/report";
 import { Resource } from "logos/database/resource";
 import { Suggestion } from "logos/database/suggestion";
 import { Warning } from "logos/database/warning";
@@ -24,51 +25,27 @@ describe("Model", () => {
 		});
 
 		it("arranges the properties into a predetermined order, regardless of how they were passed.", () => {
-			const PARTIAL_ID = "0/123/456/789";
-
-			expect(
-				Model.buildPartialId<Warning>({
-					guildId: `${0}`,
-					authorId: `${123}`,
-					targetId: `${456}`,
-					createdAt: `${789}`,
-				}),
-			).to.equal(PARTIAL_ID);
-			expect(
-				Model.buildPartialId<Warning>({
-					createdAt: `${789}`,
-					guildId: `${0}`,
-					authorId: `${123}`,
-					targetId: `${456}`,
-				}),
-			).to.equal(PARTIAL_ID);
-			expect(
-				Model.buildPartialId<Warning>({
-					targetId: `${456}`,
-					createdAt: `${789}`,
-					guildId: `${0}`,
-					authorId: `${123}`,
-				}),
-			).to.equal(PARTIAL_ID);
-			expect(
-				Model.buildPartialId<Warning>({
-					authorId: `${123}`,
-					targetId: `${456}`,
-					createdAt: `${789}`,
-					guildId: `${0}`,
-				}),
-			).to.equal(PARTIAL_ID);
+			const PARTIAL_ID = "111/222/333";
+			const COMBINATIONS = [
+				{ guildId: `${111}`, authorId: `${222}`, createdAt: `${333}` },
+				{ guildId: `${111}`, createdAt: `${333}`, authorId: `${222}` },
+				{ authorId: `${222}`, guildId: `${111}`, createdAt: `${333}` },
+				{ authorId: `${222}`, createdAt: `${333}`, guildId: `${111}` },
+				{ createdAt: `${333}`, guildId: `${111}`, authorId: `${222}` },
+				{ createdAt: `${333}`, guildId: `${111}`, authorId: `${222}` },
+			] satisfies IdentifierData<Report>[];
+			for (const combination of COMBINATIONS) {
+				expect(Model.buildPartialId<Report>(combination)).to.equal(PARTIAL_ID);
+			}
 		});
 
 		it("does not include unrecognised ID parts in the result.", () => {
-			expect(Model.buildPartialId({ "this-is-an-invalid-id-part": "this-should-be-excluded" })).to.not.contain(
-				"this-should-be-excluded",
-			);
+			expect(Model.buildPartialId({ "this-is-an-invalid-id-part": "this-should-be-excluded" })).to.equal("");
 		});
 	});
 
 	describe("buildId()", () => {
-		it("returns a document ID composed of the camelCase collection name and a partial document ID.", () => {
+		it("returns a document ID composed of the collection name in camelCase and a partial document ID.", () => {
 			expect(
 				Model.buildId<Resource>(
 					{ guildId: `${123}`, authorId: `${456}`, createdAt: `${789}` },
@@ -90,6 +67,24 @@ describe("Model", () => {
 			expect(() => Model.getDataFromId("unknown/123/456/789")).to.throw(
 				`Collection "unknown" encoded in ID "unknown/123/456/789" is unknown.`,
 			);
+		});
+	});
+
+	describe("getDataFromPartialId()", () => {
+		it("decomposes the passed partial document ID into ID parts.", () => {
+			expect(Model.getDataFromPartialId<Suggestion>("123/456/789")).to.equal([`${123}`, `${456}`, `${789}`]);
+		});
+	});
+
+	describe("composeId()", () => {
+		it("composes the passed partial document ID and collection name into a document ID.", () => {
+			expect(Model.composeId("123/456/789", { collection: "Suggestions" })).to.equal("suggestions/123/456/789");
+		});
+	});
+
+	describe("decomposeId()", () => {
+		it("decomposes the passed document ID into a collection name and a partial document ID.", () => {
+			expect(Model.decomposeId("suggestions/123/456/789")).to.deep.equal(["Suggestions", "123/456/789"]);
 		});
 	});
 
