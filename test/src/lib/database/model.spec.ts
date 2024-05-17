@@ -72,7 +72,7 @@ describe("Model", () => {
 
 	describe("getDataFromPartialId()", () => {
 		it("decomposes the passed partial document ID into ID parts.", () => {
-			expect(Model.getDataFromPartialId<Suggestion>("123/456/789")).to.equal([`${123}`, `${456}`, `${789}`]);
+			expect(Model.getDataFromPartialId<Suggestion>("123/456/789")).to.deep.equal([`${123}`, `${456}`, `${789}`]);
 		});
 	});
 
