@@ -41,7 +41,7 @@ abstract class LocalService extends Service {
 	}
 
 	constructor(client: Client, { identifier, guildId }: { identifier: string; guildId: bigint }) {
-		super(client, { identifier: `${identifier}@${guildId}` });
+		super(client, { identifier });
 
 		this.guildId = guildId;
 		this.guildIdString = guildId.toString();
