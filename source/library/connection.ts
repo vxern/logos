@@ -115,7 +115,7 @@ class DiscordConnection {
 			this.cache.members.set(guildIdBigInt, new Map([[BigInt(userId), result]]));
 		}
 
-		this.cache.guilds.get(BigInt(guildId))?.members.set(BigInt(userId), result);
+		this.cache.guilds.get(BigInt(guildId))?.members?.set(BigInt(userId), result);
 
 		return result;
 	}
