@@ -3,6 +3,7 @@ import { loadEnvironment } from "logos:core/loaders/environment";
 import * as bun from "bun";
 import { Guild } from "logos/database/guild";
 import { DatabaseStore } from "logos/stores/database";
+import winston from "winston";
 
 const { values, positionals } = parseArgs({
 	args: bun.argv,
@@ -22,12 +23,12 @@ const { values, positionals } = parseArgs({
 
 const id = positionals.at(2);
 if (id === undefined) {
-	console.error("You must provide a guild ID.");
+	winston.error("You must provide a guild ID.");
 	process.exit(1);
 }
 
 if (!constants.patterns.discord.snowflake.test(id)) {
-	console.error("Guild ID invalid.");
+	winston.error("Guild ID invalid.");
 	process.exit(1);
 }
 
@@ -37,7 +38,7 @@ const database = await DatabaseStore.create({ environment });
 await database.setup({ prefetchDocuments: false });
 
 if (values.all) {
-	console.info(`Enabling all features for guild with ID ${id}...`);
+	winston.info(`Enabling all features for guild with ID ${id}...`);
 
 	const document = new Guild(database, { guildId: id });
 	await document.update(database, () => {
@@ -262,11 +263,11 @@ if (values.all) {
 		};
 	});
 
-	console.info("Features enabled!");
+	winston.info("Features enabled!");
 }
 
 if (values.none) {
-	console.info(`Disabling all features for guild with ID ${id}...`);
+	winston.info(`Disabling all features for guild with ID ${id}...`);
 
 	const document = new Guild(database, { guildId: id });
 	await document.update(database, () => {
@@ -275,7 +276,7 @@ if (values.none) {
 		document.features = undefined;
 	});
 
-	console.info("Features disabled!");
+	winston.info("Features disabled!");
 }
 
 await database.teardown();

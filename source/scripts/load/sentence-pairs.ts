@@ -7,6 +7,7 @@ import { locales } from "logos:constants/languages/localisation";
 import { capitalise } from "logos:core/formatting";
 import eventStream from "event-stream";
 import Redis from "ioredis";
+import winston from "winston";
 
 const RECORD_DELIMETER = "	";
 const MAX_BUFFER_SIZE = 1024 * 128;
@@ -18,25 +19,25 @@ interface SentencePairFile {
 	locale: Locale;
 }
 async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
-	console.info(`Looking for files in ${directoryPath}...`);
+	winston.info(`Looking for files in ${directoryPath}...`);
 
 	const files: SentencePairFile[] = [];
 	for (const entryPath of await fs.readdir(directoryPath)) {
 		const filePath = `${directoryPath}/${entryPath}`;
 		if ((await fs.stat(filePath)).isDirectory()) {
-			console.info(`Found directory ${filePath}. Discounting...`);
+			winston.info(`Found directory ${filePath}. Discounting...`);
 			continue;
 		}
 
 		const [_, fileName] = /^(.+)\.tsv$/.exec(entryPath) ?? [];
 		if (fileName === undefined) {
-			console.warn(`File '${entryPath}' has an invalid format. Discounting...`);
+			winston.warn(`File '${entryPath}' has an invalid format. Discounting...`);
 			continue;
 		}
 
 		const language = fileName.split("-").map(capitalise).join("/");
 		if (!isLearningLanguage(language)) {
-			console.warn(`Found file for language '${language}' not supported by the application. Discounting...`);
+			winston.warn(`Found file for language '${language}' not supported by the application. Discounting...`);
 			continue;
 		}
 
@@ -45,7 +46,7 @@ async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
 		files.push({ path: filePath, locale });
 	}
 
-	console.info(`Found ${files.length} sentence pair files in ${directoryPath}.`);
+	winston.info(`Found ${files.length} sentence pair files in ${directoryPath}.`);
 
 	return files;
 }
@@ -63,7 +64,7 @@ async function subscribeToReadStream(readStream: stream.Writable, file: Sentence
 	const stream = fsSync.createReadStream(file.path, { encoding: "utf-8", autoClose: true, emitClose: true });
 
 	stream.once("end", () => {
-		console.info(`Finished reading sentence pairs for ${file.locale}.`);
+		winston.info(`Finished reading sentence pairs for ${file.locale}.`);
 		stream.close();
 		resolve();
 	});
@@ -82,8 +83,6 @@ async function subscribeToReadStream(readStream: stream.Writable, file: Sentence
 
 	return promise;
 }
-
-console.time("load-sentence-pairs");
 
 const indexes: Record<Locale, number[]> = Object.fromEntries(
 	locales.map<[Locale, number[]]>((locale) => [locale, []]),
@@ -112,7 +111,7 @@ const entryBuffer: EntryBuffer = {
 		this.size = 0;
 	},
 	flush() {
-		console.info(`Flushing buffer (${this.size} entries)...`);
+		winston.info(`Flushing buffer (${this.size} entries)...`);
 		// unawaited
 		client.mset(this.entries);
 		this.reset();
@@ -155,8 +154,6 @@ readStream.end();
 	}
 	await pipeline.exec();
 }
-
-console.timeEnd("load-sentence-pairs");
 
 await client.quit();
 

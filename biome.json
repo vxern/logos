@@ -8,7 +8,6 @@
 				"noNamespaceImport": "off",
 				"noUndeclaredDependencies": "off",
 				"useImportRestrictions": "off",
-				"noConsole": "off",
 				"noNodejsModules": "off"
 			},
 			"style": {
