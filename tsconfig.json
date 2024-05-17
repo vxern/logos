@@ -5,7 +5,7 @@
 		"module": "ESNext",
 		"moduleDetection": "force",
 		"moduleResolution": "Bundler",
-		"outDir": "dist/",
+		"noEmit": true,
 		"skipLibCheck": true,
 		"allowJs": true,
 		"allowUnreachableCode": false,
@@ -31,19 +31,19 @@
 		"paths": {
 			"discordeno": ["@discordeno/bot"],
 			// The order here seems to matter given that the linter will pick up topmost entries first.
-			"logos/*": ["./src/lib/*"],
-			"logos:constants/*": ["./src/constants/*"],
-			"logos:core/*": ["./src/*"],
+			"logos/*": ["./source/library/*"],
+			"logos:constants/*": ["./source/constants/*"],
+			"logos:core/*": ["./source/*"],
 			"logos:test/*": ["./test/*"],
 			// The following should never be used, either because there is another import that covers them
 			// or they should never be imported from in the first place.
 			"logos:core/constants/*": ["./?"],
-			"logos:core/lib/*": ["./?"],
+			"logos:core/library/*": ["./?"],
 			"logos:core/index": ["./?"]
 		},
 		"types": [],
 	},
 	"compileOnSave": true,
-	"exclude": ["dist/", "node_modules/"],
-	"include": ["src/", "test/"]
+	"exclude": ["node_modules/"],
+	"include": ["source/", "test/"]
 }
