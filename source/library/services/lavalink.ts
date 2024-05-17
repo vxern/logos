@@ -7,17 +7,16 @@ class ClientConnector extends shoukaku.Connector {
 	declare readonly client: Client;
 
 	readonly #nodes: shoukaku.NodeOption[];
-
-	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
-	readonly #_voiceServerUpdates: Collector<"voiceServerUpdate">;
+	readonly #voiceStateUpdates: Collector<"voiceStateUpdate">;
+	readonly #voiceServerUpdates: Collector<"voiceServerUpdate">;
 
 	constructor(client: Client, { nodes }: { nodes: shoukaku.NodeOption[] }) {
 		super(client);
 
 		this.#nodes = nodes;
 
-		this.#_voiceStateUpdates = new Collector<"voiceStateUpdate">();
-		this.#_voiceServerUpdates = new Collector<"voiceServerUpdate">();
+		this.#voiceStateUpdates = new Collector<"voiceStateUpdate">();
+		this.#voiceServerUpdates = new Collector<"voiceServerUpdate">();
 	}
 
 	/**
@@ -41,7 +40,7 @@ class ClientConnector extends shoukaku.Connector {
 	}
 
 	async setup(): Promise<void> {
-		this.#_voiceStateUpdates.onCollect((voiceState) =>
+		this.#voiceStateUpdates.onCollect((voiceState) =>
 			this.manager?.connections.get(voiceState.guildId.toString())?.setStateUpdate({
 				session_id: voiceState.sessionId,
 				channel_id: voiceState.channelId?.toString(),
@@ -49,7 +48,7 @@ class ClientConnector extends shoukaku.Connector {
 				self_mute: voiceState.toggles.selfMute,
 			}),
 		);
-		this.#_voiceServerUpdates.onCollect((voiceServer) =>
+		this.#voiceServerUpdates.onCollect((voiceServer) =>
 			this.manager?.connections.get(voiceServer.guildId.toString())?.setServerUpdate({
 				token: voiceServer.token,
 				guild_id: voiceServer.guildId.toString(),
@@ -57,30 +56,30 @@ class ClientConnector extends shoukaku.Connector {
 			}),
 		);
 
-		await this.client.registerCollector("voiceStateUpdate", this.#_voiceStateUpdates);
-		await this.client.registerCollector("voiceServerUpdate", this.#_voiceServerUpdates);
+		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
+		await this.client.registerCollector("voiceServerUpdate", this.#voiceServerUpdates);
 
 		this.ready(this.#nodes);
 	}
 
 	async teardown(): Promise<void> {
-		await this.#_voiceStateUpdates.close();
-		await this.#_voiceServerUpdates.close();
+		await this.#voiceStateUpdates.close();
+		await this.#voiceServerUpdates.close();
 	}
 }
 
 class LavalinkService extends GlobalService {
 	readonly isBootstrapped: boolean;
 
-	readonly #_connector?: ClientConnector;
-	readonly #_manager?: shoukaku.Shoukaku;
+	readonly #connector?: ClientConnector;
+	readonly #manager?: shoukaku.Shoukaku;
 
 	get connector(): ClientConnector {
-		return this.#_connector!;
+		return this.#connector!;
 	}
 
 	get manager(): shoukaku.Shoukaku {
-		return this.#_manager!;
+		return this.#manager!;
 	}
 
 	constructor(client: Client) {
@@ -106,8 +105,8 @@ class LavalinkService extends GlobalService {
 			},
 		];
 
-		this.#_connector = new ClientConnector(client, { nodes });
-		this.#_manager = new shoukaku.Shoukaku(this.#_connector, nodes, {
+		this.#connector = new ClientConnector(client, { nodes });
+		this.#manager = new shoukaku.Shoukaku(this.#connector, nodes, {
 			resume: true,
 			resumeTimeout: constants.time.minute / 1000,
 			resumeByLibrary: true,
@@ -116,7 +115,7 @@ class LavalinkService extends GlobalService {
 			restTimeout: (5 * constants.time.second) / 1000,
 			userAgent: constants.USER_AGENT,
 		});
-		this.#_manager.setMaxListeners(0);
+		this.#manager.setMaxListeners(0);
 		this.isBootstrapped = true;
 	}
 

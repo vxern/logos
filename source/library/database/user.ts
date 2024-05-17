@@ -36,7 +36,7 @@ type CreateUserOptions = {
 } & IdentifierData<User>;
 
 class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
-	static readonly #_initialScores: GameScores = { totalScore: 0, sessionCount: 1 };
+	static readonly #initialScores: GameScores = { totalScore: 0, sessionCount: 1 };
 
 	get userId(): string {
 		return this.idParts[0];
@@ -44,7 +44,6 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 
 	readonly createdAt: number;
 	readonly account: Account;
-
 	scores?: Partial<Record<Locale, Partial<Record<GameType, GameScores>>>>;
 
 	get preferredLanguage(): LocalisationLanguage | undefined {
@@ -81,19 +80,19 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 
 	registerSession({ game, learningLocale }: { game: GameType; learningLocale: Locale }): void {
 		if (this.scores === undefined) {
-			this.scores = { [learningLocale]: { [game]: { ...User.#_initialScores } } };
+			this.scores = { [learningLocale]: { [game]: { ...User.#initialScores } } };
 			return;
 		}
 
 		const statsForLocale = this.scores[learningLocale];
 		if (statsForLocale === undefined) {
-			this.scores[learningLocale] = { [game]: { ...User.#_initialScores } };
+			this.scores[learningLocale] = { [game]: { ...User.#initialScores } };
 			return;
 		}
 
 		const statsForGame = statsForLocale[game];
 		if (statsForGame === undefined) {
-			statsForLocale[game] = { ...User.#_initialScores };
+			statsForLocale[game] = { ...User.#initialScores };
 			return;
 		}
 

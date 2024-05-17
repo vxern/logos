@@ -9,7 +9,7 @@ import type { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 
 class RethinkDBDocumentSession extends DocumentSession {
-	readonly #_connection: rethinkdb.Connection;
+	readonly #connection: rethinkdb.Connection;
 
 	constructor({
 		environment,
@@ -18,14 +18,14 @@ class RethinkDBDocumentSession extends DocumentSession {
 	}: { environment: Environment; database: DatabaseStore; connection: rethinkdb.Connection }) {
 		super({ identifier: "RethinkDB", environment, database });
 
-		this.#_connection = connection;
+		this.#connection = connection;
 	}
 
 	async load<M extends Model>(id: string): Promise<M | undefined> {
 		const [collection, _] = Model.decomposeId(id);
 		const rawDocument = await rethinkdb.r
 			.get<RethinkDBDocument | null>(rethinkdb.r.table(collection), id)
-			.run(this.#_connection);
+			.run(this.#connection);
 		if (rawDocument === null) {
 			return undefined;
 		}
@@ -42,18 +42,18 @@ class RethinkDBDocumentSession extends DocumentSession {
 					//
 					// https://github.com/rethinkdb/rethinkdb-ts/issues/126
 					.getAll<RethinkDBDocument>(rethinkdb.r.table(collection), ...ids)
-					.run(this.#_connection),
+					.run(this.#connection),
 			instantiateModel: (database, rawDocument) =>
 				RethinkDBDocumentConventions.instantiateModel<M>(database, rawDocument),
 		});
 	}
 
-	async #_alreadyExists(id: string, { collection }: { collection: Collection }): Promise<boolean> {
-		return await rethinkdb.r.table(collection).getAll(id).count().eq(1).run(this.#_connection);
+	async #alreadyExists(id: string, { collection }: { collection: Collection }): Promise<boolean> {
+		return await rethinkdb.r.table(collection).getAll(id).count().eq(1).run(this.#connection);
 	}
 
 	async store<M extends Model>(document: M): Promise<void> {
-		const alreadyExists = await this.#_alreadyExists(document.id, { collection: document.collection });
+		const alreadyExists = await this.#alreadyExists(document.id, { collection: document.collection });
 
 		let query: rethinkdb.RDatum;
 		if (alreadyExists) {
@@ -62,11 +62,11 @@ class RethinkDBDocumentSession extends DocumentSession {
 			query = rethinkdb.r.insert(rethinkdb.r.table(document.collection), document);
 		}
 
-		await query.run(this.#_connection);
+		await query.run(this.#connection);
 	}
 
 	query<M extends Model>({ collection }: { collection: Collection }): RethinkDBDocumentQuery<M> {
-		return new RethinkDBDocumentQuery<M>({ database: this.database, connection: this.#_connection, collection });
+		return new RethinkDBDocumentQuery<M>({ database: this.database, connection: this.#connection, collection });
 	}
 
 	async dispose(): Promise<void> {}

@@ -10,8 +10,8 @@ import type { DatabaseStore } from "logos/stores/database";
 import mongodb from "mongodb";
 
 class MongoDBAdapter extends DatabaseAdapter {
-	readonly #_mongoClient: mongodb.MongoClient;
-	readonly #_database: string;
+	readonly #mongoClient: mongodb.MongoClient;
+	readonly #database: string;
 
 	constructor({
 		environment,
@@ -30,13 +30,13 @@ class MongoDBAdapter extends DatabaseAdapter {
 	}) {
 		super({ environment, identifier: "MongoDB" });
 
-		this.#_mongoClient = new mongodb.MongoClient(`mongodb://${host}:${port}`, {
+		this.#mongoClient = new mongodb.MongoClient(`mongodb://${host}:${port}`, {
 			auth: {
 				username,
 				password,
 			},
 		});
-		this.#_database = database;
+		this.#database = database;
 	}
 
 	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): MongoDBAdapter | undefined {
@@ -62,11 +62,11 @@ class MongoDBAdapter extends DatabaseAdapter {
 	}
 
 	async setup(): Promise<void> {
-		await this.#_mongoClient.connect();
+		await this.#mongoClient.connect();
 	}
 
 	async teardown(): Promise<void> {
-		await this.#_mongoClient.close();
+		await this.#mongoClient.close();
 	}
 
 	conventionsFor({
@@ -85,7 +85,7 @@ class MongoDBAdapter extends DatabaseAdapter {
 		environment,
 		database,
 	}: { environment: Environment; database: DatabaseStore }): MongoDBDocumentSession {
-		const mongoDatabase = this.#_mongoClient.db(this.#_database);
+		const mongoDatabase = this.#mongoClient.db(this.#database);
 		return new MongoDBDocumentSession({ environment, database, mongoDatabase });
 	}
 }

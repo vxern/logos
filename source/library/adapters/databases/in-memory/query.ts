@@ -2,33 +2,33 @@ import { DocumentQuery } from "logos/adapters/databases/adapter";
 import type { Model } from "logos/database/model";
 
 class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
-	#_documents: Map<string, M>;
+	#documents: Map<string, M>;
 
 	constructor({ documents }: { documents: Map<string, M> }) {
 		super();
 
-		this.#_documents = documents;
+		this.#documents = documents;
 	}
 
-	#_whereIdRegex(pattern: RegExp): InMemoryDocumentQuery<M> {
+	#whereIdRegex(pattern: RegExp): InMemoryDocumentQuery<M> {
 		const newDocuments = new Map<string, M>();
-		for (const [partialId, document] of this.#_documents) {
+		for (const [partialId, document] of this.#documents) {
 			if (pattern.test(document.id)) {
 				newDocuments.set(partialId, document);
 			}
 		}
 
-		this.#_documents = newDocuments;
+		this.#documents = newDocuments;
 		return this;
 	}
 
 	whereRegex(property: string, pattern: RegExp): InMemoryDocumentQuery<M> {
 		if (property === "id") {
-			return this.#_whereIdRegex(pattern);
+			return this.#whereIdRegex(pattern);
 		}
 
 		const newDocuments = new Map<string, M>();
-		for (const [partialId, document] of this.#_documents) {
+		for (const [partialId, document] of this.#documents) {
 			if (property in document) {
 				continue;
 			}
@@ -39,29 +39,29 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 			}
 		}
 
-		this.#_documents = newDocuments;
+		this.#documents = newDocuments;
 		return this;
 	}
 
-	#_whereIdEquals(value: unknown): InMemoryDocumentQuery<M> {
+	#whereIdEquals(value: unknown): InMemoryDocumentQuery<M> {
 		const newDocuments = new Map<string, M>();
-		for (const [partialId, document] of this.#_documents) {
+		for (const [partialId, document] of this.#documents) {
 			if (value === document.id) {
 				newDocuments.set(partialId, document);
 			}
 		}
 
-		this.#_documents = newDocuments;
+		this.#documents = newDocuments;
 		return this;
 	}
 
 	whereEquals(property: string, value: unknown): InMemoryDocumentQuery<M> {
 		if (property === "id") {
-			return this.#_whereIdEquals(value);
+			return this.#whereIdEquals(value);
 		}
 
 		const newDocuments = new Map<string, M>();
-		for (const [partialId, document] of this.#_documents) {
+		for (const [partialId, document] of this.#documents) {
 			if (property in document) {
 				continue;
 			}
@@ -71,12 +71,12 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 			}
 		}
 
-		this.#_documents = newDocuments;
+		this.#documents = newDocuments;
 		return this;
 	}
 
 	execute(): M[] {
-		return Array.from(this.#_documents.values());
+		return Array.from(this.#documents.values());
 	}
 }
 

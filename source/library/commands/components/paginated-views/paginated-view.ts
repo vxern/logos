@@ -10,12 +10,11 @@ type PageAction = "previous" | "next";
 abstract class PaginatedView<T> {
 	readonly client: Client;
 
+	readonly #pageButtons: InteractionCollector<[action: PageAction]>;
+	readonly #anchor: Logos.Interaction;
 	readonly #pages: T[][];
 	readonly #showable: boolean;
 	#index: number;
-
-	readonly #_pageButtons: InteractionCollector<[action: PageAction]>;
-	readonly #_anchor: Logos.Interaction;
 
 	get #isOnFirstPage(): boolean {
 		return this.#index === 0;
@@ -34,7 +33,7 @@ abstract class PaginatedView<T> {
 	}
 
 	get #view(): View {
-		const { embed, components } = this.build(this.#_anchor, this.#currentPage, this.#index);
+		const { embed, components } = this.build(this.#anchor, this.#currentPage, this.#index);
 
 		let title: string | undefined;
 		if (this.#hasSinglePage) {
@@ -42,7 +41,7 @@ abstract class PaginatedView<T> {
 		} else {
 			const strings = constants.contexts.page({
 				localise: this.client.localise.bind(this.client),
-				locale: this.#_anchor.locale,
+				locale: this.#anchor.locale,
 			});
 
 			title = `${embed.title} ~ ${strings.page} ${this.#index + 1}/${this.#pages.length}`;
@@ -51,7 +50,7 @@ abstract class PaginatedView<T> {
 		if (!this.#isOnLastPage) {
 			const strings = constants.contexts.continuedOnNextPage({
 				localise: this.client.localise.bind(this.client),
-				locale: this.#_anchor.locale,
+				locale: this.#anchor.locale,
 			});
 
 			return { embed: { ...embed, title, footer: { text: strings.continuedOnNextPage } }, components };
@@ -64,22 +63,22 @@ abstract class PaginatedView<T> {
 		const buttons: Discord.ButtonComponent[] = [
 			{
 				type: Discord.MessageComponentTypes.Button,
-				customId: this.#_pageButtons.encodeId(["previous"]),
+				customId: this.#pageButtons.encodeId(["previous"]),
 				disabled: this.#isOnFirstPage,
 				style: Discord.ButtonStyles.Secondary,
 				label: constants.emojis.interactions.menu.controls.back,
 			},
 			{
 				type: Discord.MessageComponentTypes.Button,
-				customId: this.#_pageButtons.encodeId(["next"]),
+				customId: this.#pageButtons.encodeId(["next"]),
 				disabled: this.#isOnLastPage,
 				style: Discord.ButtonStyles.Secondary,
 				label: constants.emojis.interactions.menu.controls.forward,
 			},
 		];
 
-		if (this.#showable && !this.#_anchor.parameters.show) {
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor);
+		if (this.#showable && !this.#anchor.parameters.show) {
+			const showButton = this.client.interactionRepetitionService.getShowButton(this.#anchor);
 
 			return [
 				{
@@ -107,13 +106,13 @@ abstract class PaginatedView<T> {
 		}: { interaction: Logos.Interaction; elements: T[]; showable?: boolean; entriesPerPage?: number },
 	) {
 		this.client = client;
-		this.#_anchor = interaction;
+		this.#anchor = interaction;
 
 		this.#pages = elements.toChunked(entriesPerPage ?? constants.RESULTS_PER_PAGE);
 		this.#showable = showable ?? false;
 		this.#index = 0;
 
-		this.#_pageButtons = new InteractionCollector<[action: PageAction]>(client, {
+		this.#pageButtons = new InteractionCollector<[action: PageAction]>(client, {
 			only: interaction.parameters.show ? [interaction.user.id] : undefined,
 		});
 	}
@@ -121,7 +120,7 @@ abstract class PaginatedView<T> {
 	abstract build(interaction: Logos.Interaction, page: T[], index: number): View;
 
 	async #display(): Promise<void> {
-		await this.client.reply(this.#_anchor, {
+		await this.client.reply(this.#anchor, {
 			embeds: [this.#view.embed],
 			components: this.#paginationControls,
 		});
@@ -130,7 +129,7 @@ abstract class PaginatedView<T> {
 	async refresh(): Promise<void> {
 		const view = this.#view;
 
-		await this.client.editReply(this.#_anchor, {
+		await this.client.editReply(this.#anchor, {
 			embeds: [view.embed],
 			components: [...(view.components ?? []), ...this.#paginationControls],
 		});
@@ -153,7 +152,7 @@ abstract class PaginatedView<T> {
 	}
 
 	async open(): Promise<void> {
-		this.#_pageButtons.onInteraction(async (buttonPress) => {
+		this.#pageButtons.onInteraction(async (buttonPress) => {
 			await this.client.acknowledge(buttonPress);
 
 			switch (buttonPress.metadata[1]) {
@@ -170,15 +169,15 @@ abstract class PaginatedView<T> {
 			await this.refresh();
 		});
 
-		this.#_pageButtons.onDone(this.close.bind(this));
+		this.#pageButtons.onDone(this.close.bind(this));
 
-		await this.client.registerInteractionCollector(this.#_pageButtons);
+		await this.client.registerInteractionCollector(this.#pageButtons);
 
 		await this.#display();
 	}
 
 	close(): void | Promise<void> {
-		this.#_pageButtons.close();
+		this.#pageButtons.close();
 	}
 }
 

@@ -12,14 +12,13 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 
 	readonly #tabs: Generic["groups"];
 	readonly #showable: boolean;
-
-	readonly #_anchor: Logos.Interaction;
+	readonly #anchor: Logos.Interaction;
 
 	get #view(): View {
-		const view = this.build(this.#_anchor, { tabs: this.#tabs });
+		const view = this.build(this.#anchor, { tabs: this.#tabs });
 
-		if (this.#showable && !this.#_anchor.parameters.show) {
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.#_anchor);
+		if (this.#showable && !this.#anchor.parameters.show) {
+			const showButton = this.client.interactionRepetitionService.getShowButton(this.#anchor);
 
 			for (const { components } of view.components ?? []) {
 				if (components.length >= 5) {
@@ -50,7 +49,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 		this.#tabs = tabs;
 		this.#showable = showable ?? false;
 
-		this.#_anchor = interaction;
+		this.#anchor = interaction;
 	}
 
 	abstract build(interaction: Logos.Interaction, { tabs }: { tabs: Generic["groups"] }): View;
@@ -58,7 +57,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 	async #display(): Promise<void> {
 		const view = this.#view;
 
-		await this.client.reply(this.#_anchor, {
+		await this.client.reply(this.#anchor, {
 			embeds: [view.embed],
 			components: view.components,
 		});
@@ -67,7 +66,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 	async refresh(): Promise<void> {
 		const view = this.#view;
 
-		await this.client.editReply(this.#_anchor, {
+		await this.client.editReply(this.#anchor, {
 			embeds: [view.embed],
 			components: view.components,
 		});

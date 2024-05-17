@@ -10,8 +10,8 @@ import type { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 
 class RethinkDBAdapter extends DatabaseAdapter {
-	readonly #_connectionOptions: rethinkdb.RConnectionOptions;
-	#_connection!: rethinkdb.Connection;
+	readonly #connectionOptions: rethinkdb.RConnectionOptions;
+	#connection!: rethinkdb.Connection;
 
 	private constructor({
 		environment,
@@ -30,7 +30,7 @@ class RethinkDBAdapter extends DatabaseAdapter {
 	}) {
 		super({ environment, identifier: "RethinkDB" });
 
-		this.#_connectionOptions = { host, port: Number(port), db: database, user: username, password };
+		this.#connectionOptions = { host, port: Number(port), db: database, user: username, password };
 	}
 
 	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): RethinkDBAdapter | undefined {
@@ -56,12 +56,12 @@ class RethinkDBAdapter extends DatabaseAdapter {
 	}
 
 	async setup(): Promise<void> {
-		this.#_connection = await rethinkdb.r.connect(this.#_connectionOptions);
-		await this.#_createMissingTables();
+		this.#connection = await rethinkdb.r.connect(this.#connectionOptions);
+		await this.#createMissingTables();
 	}
 
 	async teardown(): Promise<void> {
-		await this.#_connection.close();
+		await this.#connection.close();
 	}
 
 	conventionsFor({
@@ -80,11 +80,11 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		environment,
 		database,
 	}: { environment: Environment; database: DatabaseStore }): RethinkDBDocumentSession {
-		return new RethinkDBDocumentSession({ environment, database, connection: this.#_connection });
+		return new RethinkDBDocumentSession({ environment, database, connection: this.#connection });
 	}
 
-	async #_createMissingTables(): Promise<void> {
-		const tableList = await rethinkdb.r.tableList().run(this.#_connection);
+	async #createMissingTables(): Promise<void> {
+		const tableList = await rethinkdb.r.tableList().run(this.#connection);
 
 		const queries: rethinkdb.RDatum<rethinkdb.TableChangeResult>[] = [];
 		for (const collection of constants.database.collections) {
@@ -101,7 +101,7 @@ class RethinkDBAdapter extends DatabaseAdapter {
 
 		this.log.info(`Creating missing tables (${queries.length} to create). This may take a moment...`);
 
-		await rethinkdb.r.expr(queries).run(this.#_connection);
+		await rethinkdb.r.expr(queries).run(this.#connection);
 	}
 }
 

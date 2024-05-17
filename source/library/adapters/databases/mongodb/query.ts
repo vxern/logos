@@ -7,10 +7,10 @@ import type { Model } from "logos/database/model";
 import type mongodb from "mongodb";
 
 class MongoDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
-	readonly #_mongoDatabase: mongodb.Db;
-	readonly #_session: MongoDBDocumentSession;
-	readonly #_collection: Collection;
-	readonly #_filter: mongodb.Filter<MongoDBDocument>;
+	readonly #mongoDatabase: mongodb.Db;
+	readonly #session: MongoDBDocumentSession;
+	readonly #collection: Collection;
+	readonly #filter: mongodb.Filter<MongoDBDocument>;
 
 	constructor({
 		mongoDatabase,
@@ -23,29 +23,29 @@ class MongoDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	}) {
 		super();
 
-		this.#_mongoDatabase = mongoDatabase;
-		this.#_session = session;
-		this.#_collection = collection;
-		this.#_filter = {};
+		this.#mongoDatabase = mongoDatabase;
+		this.#session = session;
+		this.#collection = collection;
+		this.#filter = {};
 	}
 
 	whereRegex(property: string, pattern: RegExp): MongoDBDocumentQuery<M> {
-		Object.assign(this.#_filter, { [property === "id" ? "_id" : property]: { $regex: pattern } });
+		Object.assign(this.#filter, { [property === "id" ? "_id" : property]: { $regex: pattern } });
 		return this;
 	}
 
 	whereEquals(property: string, value: unknown): MongoDBDocumentQuery<M> {
-		Object.assign(this.#_filter, { [property === "id" ? "_id" : property]: { $eq: value } });
+		Object.assign(this.#filter, { [property === "id" ? "_id" : property]: { $eq: value } });
 		return this;
 	}
 
 	async execute(): Promise<M[]> {
-		const rawDocuments = await this.#_mongoDatabase
-			.collection<MongoDBDocument>(this.#_collection)
-			.find(this.#_filter)
+		const rawDocuments = await this.#mongoDatabase
+			.collection<MongoDBDocument>(this.#collection)
+			.find(this.#filter)
 			.toArray();
 		return rawDocuments.map((rawDocument) =>
-			MongoDBDocumentConventions.instantiateModel(this.#_session.database, rawDocument),
+			MongoDBDocumentConventions.instantiateModel(this.#session.database, rawDocument),
 		);
 	}
 }

@@ -4,37 +4,37 @@ import { GlobalService } from "logos/services/service";
 import { InteractionStore } from "logos/stores/interactions";
 
 class InteractionRepetitionService extends GlobalService {
-	readonly #_commandInteractions: InteractionCollector;
-	readonly #_showInChatButtons: InteractionCollector<[interactionId: string]>;
+	readonly #commandInteractions: InteractionCollector;
+	readonly #showInChatButtons: InteractionCollector<[interactionId: string]>;
 
 	constructor(client: Client) {
 		super(client, { identifier: "InteractionRepetitionService" });
 
-		this.#_commandInteractions = new InteractionCollector(client, {
+		this.#commandInteractions = new InteractionCollector(client, {
 			type: Discord.InteractionTypes.ApplicationCommand,
 			anyCustomId: true,
 			isPermanent: true,
 		});
-		this.#_showInChatButtons = new InteractionCollector<[interactionId: string]>(client, {
+		this.#showInChatButtons = new InteractionCollector<[interactionId: string]>(client, {
 			customId: constants.components.showInChat,
 			isPermanent: true,
 		});
 	}
 
 	async start(): Promise<void> {
-		this.#_commandInteractions.onInteraction(this.#_handleCommandInteraction.bind(this));
-		this.#_showInChatButtons.onInteraction(this.#_handleShowInChat.bind(this));
+		this.#commandInteractions.onInteraction(this.#handleCommandInteraction.bind(this));
+		this.#showInChatButtons.onInteraction(this.#handleShowInChat.bind(this));
 
-		await this.client.registerInteractionCollector(this.#_commandInteractions);
-		await this.client.registerInteractionCollector(this.#_showInChatButtons);
+		await this.client.registerInteractionCollector(this.#commandInteractions);
+		await this.client.registerInteractionCollector(this.#showInChatButtons);
 	}
 
 	async stop(): Promise<void> {
-		await this.#_commandInteractions.close();
-		await this.#_showInChatButtons.close();
+		await this.#commandInteractions.close();
+		await this.#showInChatButtons.close();
 	}
 
-	#_handleCommandInteraction(interaction: Logos.Interaction): void {
+	#handleCommandInteraction(interaction: Logos.Interaction): void {
 		if (!this.client.isShowable(interaction)) {
 			return;
 		}
@@ -42,17 +42,17 @@ class InteractionRepetitionService extends GlobalService {
 		this.client.registerInteraction(interaction);
 	}
 
-	async #_handleShowInChat(buttonPress: Logos.Interaction<[interactionId: string]>): Promise<void> {
+	async #handleShowInChat(buttonPress: Logos.Interaction<[interactionId: string]>): Promise<void> {
 		await this.client.postponeReply(buttonPress);
 
 		const confirmButton = new InteractionCollector(this.client, {
 			only: [buttonPress.user.id],
-			dependsOn: this.#_showInChatButtons,
+			dependsOn: this.#showInChatButtons,
 			isSingle: true,
 		});
 		const cancelButton = new InteractionCollector(this.client, {
 			only: [buttonPress.user.id],
-			dependsOn: this.#_showInChatButtons,
+			dependsOn: this.#showInChatButtons,
 			isSingle: true,
 		});
 
@@ -122,7 +122,7 @@ class InteractionRepetitionService extends GlobalService {
 			style: Discord.ButtonStyles.Primary,
 			label: strings.show,
 			emoji: { name: constants.emojis.showInChat },
-			customId: this.#_showInChatButtons.encodeId([interaction.id.toString()]),
+			customId: this.#showInChatButtons.encodeId([interaction.id.toString()]),
 		};
 	}
 }

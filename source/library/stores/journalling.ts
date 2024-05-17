@@ -8,43 +8,41 @@ class JournallingStore {
 	readonly log: Logger;
 
 	readonly #client: Client;
-
-	readonly #_guildBanAddCollector: Collector<"guildBanAdd">;
-	readonly #_guildBanRemoveCollector: Collector<"guildBanRemove">;
-	readonly #_guildMemberAddCollector: Collector<"guildMemberAdd">;
-	readonly #_guildMemberRemoveCollector: Collector<"guildMemberRemove">;
-	readonly #_messageDeleteCollector: Collector<"messageDelete">;
-	readonly #_messageUpdateCollector: Collector<"messageUpdate">;
+	readonly #guildBanAddCollector: Collector<"guildBanAdd">;
+	readonly #guildBanRemoveCollector: Collector<"guildBanRemove">;
+	readonly #guildMemberAddCollector: Collector<"guildMemberAdd">;
+	readonly #guildMemberRemoveCollector: Collector<"guildMemberRemove">;
+	readonly #messageDeleteCollector: Collector<"messageDelete">;
+	readonly #messageUpdateCollector: Collector<"messageUpdate">;
 
 	constructor(client: Client) {
 		this.log = Logger.create({ identifier: "JournallingStore", isDebug: client.environment.isDebug });
 
 		this.#client = client;
-
-		this.#_guildBanAddCollector = new Collector();
-		this.#_guildBanRemoveCollector = new Collector();
-		this.#_guildMemberAddCollector = new Collector();
-		this.#_guildMemberRemoveCollector = new Collector();
-		this.#_messageDeleteCollector = new Collector();
-		this.#_messageUpdateCollector = new Collector();
+		this.#guildBanAddCollector = new Collector();
+		this.#guildBanRemoveCollector = new Collector();
+		this.#guildMemberAddCollector = new Collector();
+		this.#guildMemberRemoveCollector = new Collector();
+		this.#messageDeleteCollector = new Collector();
+		this.#messageUpdateCollector = new Collector();
 	}
 
 	async setup(): Promise<void> {
 		this.log.info("Setting up journalling store...");
 
-		this.#_guildBanAddCollector.onCollect((user, guildId) =>
+		this.#guildBanAddCollector.onCollect((user, guildId) =>
 			this.tryLog("guildBanAdd", { guildId, args: [user, guildId] }),
 		);
-		this.#_guildBanRemoveCollector.onCollect((user, guildId) =>
+		this.#guildBanRemoveCollector.onCollect((user, guildId) =>
 			this.tryLog("guildBanRemove", { guildId, args: [user, guildId] }),
 		);
-		this.#_guildMemberAddCollector.onCollect((member, user) =>
+		this.#guildMemberAddCollector.onCollect((member, user) =>
 			this.tryLog("guildMemberAdd", { guildId: member.guildId, args: [member, user] }),
 		);
-		this.#_guildMemberRemoveCollector.onCollect((user, guildId) =>
+		this.#guildMemberRemoveCollector.onCollect((user, guildId) =>
 			this.tryLog("guildMemberRemove", { guildId, args: [user, guildId] }),
 		);
-		this.#_messageDeleteCollector.onCollect((payload, message) => {
+		this.#messageDeleteCollector.onCollect((payload, message) => {
 			const guildId = payload.guildId;
 			if (guildId === undefined) {
 				return;
@@ -52,7 +50,7 @@ class JournallingStore {
 
 			this.tryLog("messageDelete", { guildId, args: [payload, message] });
 		});
-		this.#_messageUpdateCollector.onCollect((message, oldMessage) => {
+		this.#messageUpdateCollector.onCollect((message, oldMessage) => {
 			const guildId = message.guildId;
 			if (guildId === undefined) {
 				return;
@@ -61,12 +59,12 @@ class JournallingStore {
 			this.tryLog("messageUpdate", { guildId, args: [message, oldMessage] });
 		});
 
-		await this.#client.registerCollector("guildBanAdd", this.#_guildBanAddCollector);
-		await this.#client.registerCollector("guildBanRemove", this.#_guildBanRemoveCollector);
-		await this.#client.registerCollector("guildMemberAdd", this.#_guildMemberAddCollector);
-		await this.#client.registerCollector("guildMemberRemove", this.#_guildMemberRemoveCollector);
-		await this.#client.registerCollector("messageDelete", this.#_messageDeleteCollector);
-		await this.#client.registerCollector("messageUpdate", this.#_messageUpdateCollector);
+		await this.#client.registerCollector("guildBanAdd", this.#guildBanAddCollector);
+		await this.#client.registerCollector("guildBanRemove", this.#guildBanRemoveCollector);
+		await this.#client.registerCollector("guildMemberAdd", this.#guildMemberAddCollector);
+		await this.#client.registerCollector("guildMemberRemove", this.#guildMemberRemoveCollector);
+		await this.#client.registerCollector("messageDelete", this.#messageDeleteCollector);
+		await this.#client.registerCollector("messageUpdate", this.#messageUpdateCollector);
 
 		this.log.info("Journalling store set up.");
 	}
@@ -74,12 +72,12 @@ class JournallingStore {
 	teardown(): void {
 		this.log.info("Tearing down journalling store...");
 
-		this.#_guildBanAddCollector.close();
-		this.#_guildBanRemoveCollector.close();
-		this.#_guildMemberAddCollector.close();
-		this.#_guildMemberRemoveCollector.close();
-		this.#_messageDeleteCollector.close();
-		this.#_messageUpdateCollector.close();
+		this.#guildBanAddCollector.close();
+		this.#guildBanRemoveCollector.close();
+		this.#guildMemberAddCollector.close();
+		this.#guildMemberRemoveCollector.close();
+		this.#messageDeleteCollector.close();
+		this.#messageUpdateCollector.close();
 
 		this.log.info("Journalling store torn down.");
 	}

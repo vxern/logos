@@ -44,8 +44,7 @@ class CommandStore {
 		readonly execute: Map<string, InteractionHandler>;
 		readonly autocomplete: Map<string, InteractionHandler>;
 	};
-
-	readonly #_defaultCommands: BuiltCommand[];
+	readonly #defaultCommands: BuiltCommand[];
 
 	private constructor(
 		client: Client,
@@ -69,8 +68,7 @@ class CommandStore {
 		this.#collection = { showable, withRateLimit };
 		this.#lastCommandUseTimestamps = new Map();
 		this.#handlers = { execute: executeHandlers, autocomplete: autocompleteHandlers };
-
-		this.#_defaultCommands = [
+		this.#defaultCommands = [
 			this.commands.information,
 			this.commands.acknowledgements,
 			this.commands.credits,
@@ -479,7 +477,7 @@ class CommandStore {
 			}
 		}
 
-		return [...this.#_defaultCommands.map((command) => command.built), ...commands.map((command) => command.built)];
+		return [...this.#defaultCommands.map((command) => command.built), ...commands.map((command) => command.built)];
 	}
 
 	#getLastCommandUseTimestamps({

@@ -20,6 +20,19 @@ import { Warning } from "logos/database/warning";
 import { Logger } from "logos/logger";
 
 class DatabaseStore {
+	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({
+		EntryRequests: EntryRequest,
+		GuildStats: GuildStats,
+		Guilds: Guild,
+		Praises: Praise,
+		Reports: Report,
+		Resources: Resource,
+		Suggestions: Suggestion,
+		Tickets: Ticket,
+		Users: User,
+		Warnings: Warning,
+	} as const);
+
 	readonly log: Logger;
 	readonly cache: {
 		readonly entryRequests: Map<string, EntryRequest>;
@@ -35,28 +48,15 @@ class DatabaseStore {
 		readonly warningsByTarget: Map<string, Map<string, Warning>>;
 	};
 
-	static readonly #_classes: Record<Collection, ModelConstructor> = Object.freeze({
-		EntryRequests: EntryRequest,
-		GuildStats: GuildStats,
-		Guilds: Guild,
-		Praises: Praise,
-		Reports: Report,
-		Resources: Resource,
-		Suggestions: Suggestion,
-		Tickets: Ticket,
-		Users: User,
-		Warnings: Warning,
-	} as const);
-
-	readonly #_environment: Environment;
-	readonly #_adapter: DatabaseAdapter;
+	readonly #environment: Environment;
+	readonly #adapter: DatabaseAdapter;
 
 	get conventionsFor(): DatabaseAdapter["conventionsFor"] {
-		return this.#_adapter.conventionsFor.bind(this.#_adapter);
+		return this.#adapter.conventionsFor.bind(this.#adapter);
 	}
 
 	get withSession(): <T>(callback: (session: DocumentSession) => T | Promise<T>) => Promise<T> {
-		return (callback) => this.#_adapter.withSession(callback, { environment: this.#_environment, database: this });
+		return (callback) => this.#adapter.withSession(callback, { environment: this.#environment, database: this });
 	}
 
 	private constructor({
@@ -79,8 +79,8 @@ class DatabaseStore {
 			warningsByTarget: new Map(),
 		};
 
-		this.#_environment = environment;
-		this.#_adapter = adapter;
+		this.#environment = environment;
+		this.#adapter = adapter;
 	}
 
 	static async create({ environment }: { environment: Environment }): Promise<DatabaseStore> {
@@ -122,13 +122,13 @@ class DatabaseStore {
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {
-		return DatabaseStore.#_classes[collection];
+		return DatabaseStore.#classes[collection];
 	}
 
 	async setup({ prefetchDocuments }: { prefetchDocuments: boolean }): Promise<void> {
 		this.log.info("Setting up database store...");
 
-		await this.#_adapter.setup();
+		await this.#adapter.setup();
 
 		if (prefetchDocuments) {
 			await this.#prefetchDocuments();
@@ -138,7 +138,7 @@ class DatabaseStore {
 	}
 
 	async teardown(): Promise<void> {
-		await this.#_adapter.teardown();
+		await this.#adapter.teardown();
 	}
 
 	async #prefetchDocuments(): Promise<void> {

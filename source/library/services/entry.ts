@@ -9,7 +9,7 @@ import { User } from "logos/database/user";
 import { LocalService } from "logos/services/service";
 
 class EntryService extends LocalService {
-	readonly #_acceptedRulesButton: InteractionCollector;
+	readonly #acceptedRulesButton: InteractionCollector;
 
 	get configuration(): NonNullable<Guild["entry"]> {
 		return this.guildDocument.entry!;
@@ -22,7 +22,7 @@ class EntryService extends LocalService {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "EntryService", guildId });
 
-		this.#_acceptedRulesButton = new InteractionCollector(client, {
+		this.#acceptedRulesButton = new InteractionCollector(client, {
 			guildId,
 			customId: constants.components.acceptedRules,
 			isPermanent: true,
@@ -30,19 +30,19 @@ class EntryService extends LocalService {
 	}
 
 	async start(): Promise<void> {
-		this.#_acceptedRulesButton.onInteraction(this.#handleAcceptRules.bind(this));
+		this.#acceptedRulesButton.onInteraction(this.#handleAcceptRules.bind(this));
 
-		await this.client.registerInteractionCollector(this.#_acceptedRulesButton);
+		await this.client.registerInteractionCollector(this.#acceptedRulesButton);
 	}
 
 	async stop(): Promise<void> {
-		await this.#_acceptedRulesButton.close();
+		await this.#acceptedRulesButton.close();
 	}
 
 	async #handleAcceptRules(buttonPress: Logos.Interaction): Promise<void> {
 		const languageProficiencyButtons = new InteractionCollector<[index: string]>(this.client, {
 			only: [buttonPress.user.id],
-			dependsOn: this.#_acceptedRulesButton,
+			dependsOn: this.#acceptedRulesButton,
 		});
 
 		languageProficiencyButtons.onInteraction((buttonPress) =>

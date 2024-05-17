@@ -5,12 +5,12 @@ import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/rol
 import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
 
 class RoleNoticeService extends NoticeService<{ type: "roles" }> {
-	readonly #_selectRolesButton: InteractionCollector;
+	readonly #selectRolesButton: InteractionCollector;
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "InformationNoticeService", guildId }, { type: "roles" });
 
-		this.#_selectRolesButton = new InteractionCollector(client, {
+		this.#selectRolesButton = new InteractionCollector(client, {
 			guildId,
 			customId: constants.components.selectRoles,
 			isPermanent: true,
@@ -18,17 +18,17 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	}
 
 	async start(): Promise<void> {
-		this.#_selectRolesButton.onInteraction(async (buttonPress) => {
+		this.#selectRolesButton.onInteraction(async (buttonPress) => {
 			await handleOpenRoleSelectionMenu(this.client, buttonPress);
 		});
 
-		await this.client.registerInteractionCollector(this.#_selectRolesButton);
+		await this.client.registerInteractionCollector(this.#selectRolesButton);
 
 		await super.start();
 	}
 
 	async stop(): Promise<void> {
-		await this.#_selectRolesButton.close();
+		await this.#selectRolesButton.close();
 
 		await super.stop();
 	}
@@ -57,7 +57,7 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.description.clickHere,
 							style: Discord.ButtonStyles.Primary,
-							customId: this.#_selectRolesButton.customId,
+							customId: this.#selectRolesButton.customId,
 						},
 					],
 				},

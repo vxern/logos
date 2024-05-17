@@ -20,13 +20,11 @@ type SubmitEvent<FormData> = (interaction: Logos.Interaction, { formData }: { fo
  */
 abstract class ModalComposer<FormData, ValidationError extends string> {
 	readonly client: Client;
-
 	anchor: Logos.Interaction;
 
+	readonly #submissions: InteractionCollector;
 	#formData: FormData;
 	#onSubmit?: SubmitEvent<FormData>;
-
-	readonly #_submissions: InteractionCollector;
 
 	constructor(
 		client: Client,
@@ -38,7 +36,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 
 		this.#formData = initialFormData ?? ({} as FormData);
 
-		this.#_submissions = new InteractionCollector(client, {
+		this.#submissions = new InteractionCollector(client, {
 			type: Discord.InteractionTypes.ModalSubmit,
 			only: [interaction.user.id],
 		});
@@ -92,7 +90,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 
 		await this.client.displayModal(this.anchor, {
 			title: modal.title,
-			customId: this.#_submissions.customId,
+			customId: this.#submissions.customId,
 			components: modal.elements,
 		});
 	}
@@ -221,7 +219,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 	}
 
 	async open(): Promise<void> {
-		this.#_submissions.onInteraction(async (submission) => {
+		this.#submissions.onInteraction(async (submission) => {
 			const formData = ModalComposer.getFormData<FormData>(submission);
 			if (formData === undefined) {
 				this.client.log.warn("Could not get form data from modal composer.");
@@ -245,13 +243,13 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			await this.#dispatchSubmit(submission, { formData: this.#formData });
 		});
 
-		await this.client.registerInteractionCollector(this.#_submissions);
+		await this.client.registerInteractionCollector(this.#submissions);
 
 		await this.#display();
 	}
 
 	close(): void | Promise<void> {
-		this.#_submissions.close();
+		this.#submissions.close();
 	}
 }
 

@@ -15,42 +15,42 @@ type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: stri
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
 type IdentifierDataOrMetadata<M extends Model, Metadata = any> = IdentifierData<M> | Metadata;
 abstract class Model<Generic extends { collection: Collection; idParts: readonly string[] } = any> {
-	readonly #_conventions: DocumentConventions;
+	readonly #conventions: DocumentConventions;
 
 	abstract get createdAt(): number;
 
 	declare id: string;
 
 	get partialId(): string {
-		return this.#_conventions.partialId;
+		return this.#conventions.partialId;
 	}
 
 	get idParts(): Generic["idParts"] {
-		return this.#_conventions.idParts;
+		return this.#conventions.idParts;
 	}
 
 	get collection(): Collection {
-		return this.#_conventions.collection;
+		return this.#conventions.collection;
 	}
 
 	get revision(): string | undefined {
-		return this.#_conventions.revision;
+		return this.#conventions.revision;
 	}
 
 	set revision(value: string) {
-		this.#_conventions.revision = value;
+		this.#conventions.revision = value;
 	}
 
 	get isDeleted(): boolean | undefined {
-		return this.#_conventions.isDeleted;
+		return this.#conventions.isDeleted;
 	}
 
 	set isDeleted(value: boolean) {
-		this.#_conventions.isDeleted = value;
+		this.#conventions.isDeleted = value;
 	}
 
 	constructor(database: DatabaseStore, data: Record<string, unknown>, { collection }: { collection: Collection }) {
-		this.#_conventions = database.conventionsFor({ document: this, data, collection });
+		this.#conventions = database.conventionsFor({ document: this, data, collection });
 	}
 
 	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {

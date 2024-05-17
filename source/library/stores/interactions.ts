@@ -13,10 +13,9 @@ class InteractionStore {
 	readonly log: Logger;
 
 	readonly #client: Client;
-
-	readonly #_interactions: Map<bigint, Logos.Interaction>;
-	readonly #_replies: Map<string, ReplyData>;
-	readonly #_messages: Map<string, bigint>;
+	readonly #interactions: Map<bigint, Logos.Interaction>;
+	readonly #replies: Map<string, ReplyData>;
+	readonly #messages: Map<string, bigint>;
 
 	/** ⬜ The action should have succeeded if not for the bot's limitations. */
 	get unsupported(): InteractionStore["reply"] {
@@ -52,7 +51,7 @@ class InteractionStore {
 	/** @see {@link success()} */
 	get succeeded(): InteractionStore["editReply"] {
 		return async (interaction, embedOrData) => {
-			const replyData = this.#_replies.get(interaction.token)!;
+			const replyData = this.#replies.get(interaction.token)!;
 			if (!replyData.ephemeral) {
 				return await this.noticed(interaction, embedOrData);
 			}
@@ -116,9 +115,9 @@ class InteractionStore {
 
 		this.#client = client;
 
-		this.#_interactions = new Map();
-		this.#_replies = new Map();
-		this.#_messages = new Map();
+		this.#interactions = new Map();
+		this.#replies = new Map();
+		this.#messages = new Map();
 	}
 
 	static spoofInteraction<Interaction extends Logos.Interaction>(
@@ -135,26 +134,26 @@ class InteractionStore {
 	}
 
 	registerInteraction(interaction: Logos.Interaction): void {
-		this.#_interactions.set(interaction.id, interaction);
+		this.#interactions.set(interaction.id, interaction);
 	}
 
 	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
-		const interaction = this.#_interactions.get(interactionId);
+		const interaction = this.#interactions.get(interactionId);
 		if (interaction === undefined) {
 			return undefined;
 		}
 
-		this.#_interactions.delete(interactionId);
+		this.#interactions.delete(interactionId);
 
 		return interaction;
 	}
 
 	registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: bigint }): void {
-		this.#_messages.set(interaction.token, messageId);
+		this.#messages.set(interaction.token, messageId);
 	}
 
 	unregisterMessage(interaction: Logos.Interaction): void {
-		this.#_messages.delete(interaction.token);
+		this.#messages.delete(interaction.token);
 	}
 
 	async acknowledge(interaction: Logos.Interaction): Promise<void> {
@@ -172,7 +171,7 @@ class InteractionStore {
 	}
 
 	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
-		this.#_replies.set(interaction.token, { ephemeral: !visible });
+		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
 			const strings = constants.contexts.thinking({
@@ -219,7 +218,7 @@ class InteractionStore {
 			data.flags = Discord.MessageFlags.Ephemeral;
 		}
 
-		this.#_replies.set(interaction.token, { ephemeral: !visible });
+		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
 			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId!, data).catch((reason) => {
@@ -246,7 +245,7 @@ class InteractionStore {
 		const data = getInteractionCallbackData(embedOrData);
 
 		if (interaction.parameters["@repeat"]) {
-			const messageId = this.#_messages.get(interaction.token)!;
+			const messageId = this.#messages.get(interaction.token)!;
 
 			await this.#client.bot.helpers.editMessage(interaction.channelId!, messageId, data).catch((reason) => {
 				this.log.error("Failed to edit message reply made to repeated interaction:", reason);
@@ -263,9 +262,9 @@ class InteractionStore {
 
 	async deleteReply(interaction: Logos.Interaction): Promise<void> {
 		if (interaction.parameters["@repeat"]) {
-			const messageId = this.#_messages.get(interaction.token)!;
+			const messageId = this.#messages.get(interaction.token)!;
 
-			this.#_messages.delete(interaction.token);
+			this.#messages.delete(interaction.token);
 
 			await this.#client.bot.helpers.deleteMessage(interaction.channelId!, messageId).catch((reason) => {
 				this.log.error("Failed to delete message reply made to repeated interaction:", reason);
@@ -317,7 +316,7 @@ class InteractionStore {
 		};
 	}
 
-	#_resolveIdentifierToMembers({
+	#resolveIdentifierToMembers({
 		guildId,
 		seekerUserId,
 		identifier,
@@ -437,7 +436,7 @@ class InteractionStore {
 			options?: Partial<MemberNarrowingOptions>;
 		},
 	): Logos.Member | undefined {
-		const result = this.#_resolveIdentifierToMembers({
+		const result = this.#resolveIdentifierToMembers({
 			guildId: interaction.guildId,
 			seekerUserId: interaction.user.id,
 			identifier,
@@ -496,7 +495,7 @@ class InteractionStore {
 			return;
 		}
 
-		const result = this.#_resolveIdentifierToMembers({
+		const result = this.#resolveIdentifierToMembers({
 			guildId: interaction.guildId,
 			seekerUserId: interaction.user.id,
 			identifier: identifierTrimmed,

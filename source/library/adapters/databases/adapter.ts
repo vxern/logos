@@ -217,15 +217,15 @@ abstract class DocumentConventions<Metadata = any> {
 
 		this.assignAccessorsToModel();
 
-		this.#_populateModelData(data, { collection });
+		this.#populateModelData(data, { collection });
 
-		const partialId = this.#_getPartialIdFromData(data);
+		const partialId = this.#getPartialIdFromData(data);
 		this.collection = collection;
 		this.partialId = partialId;
 		this.idParts = partialId.split(constants.special.database.separator);
 	}
 
-	#_getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {
+	#getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {
 		let partialId: string;
 		if (this.hasMetadata(data)) {
 			partialId = Model.decomposeId(this.id)[1];
@@ -236,7 +236,7 @@ abstract class DocumentConventions<Metadata = any> {
 		return partialId;
 	}
 
-	#_populateModelData(
+	#populateModelData(
 		data: IdentifierDataOrMetadata<Model, Metadata>,
 		{ collection }: { collection: Collection },
 	): void {

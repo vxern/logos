@@ -3,8 +3,7 @@ import { GlobalService } from "logos/services/service";
 
 class StatusService extends GlobalService {
 	#currentIndex: number;
-
-	#_timer?: Timer;
+	#timer?: Timer;
 
 	get status(): string {
 		return constants.statuses[this.#currentIndex]!;
@@ -17,12 +16,12 @@ class StatusService extends GlobalService {
 	}
 
 	start(): void {
-		this.#_timer = setInterval(this.#cycleStatus.bind(this), constants.STATUS_CYCLE_PERIOD);
+		this.#timer = setInterval(this.#cycleStatus.bind(this), constants.STATUS_CYCLE_PERIOD);
 	}
 
 	stop(): void {
-		clearInterval(this.#_timer);
-		this.#_timer = undefined;
+		clearInterval(this.#timer);
+		this.#timer = undefined;
 
 		this.#currentIndex = 0;
 	}

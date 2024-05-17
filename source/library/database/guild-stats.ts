@@ -20,7 +20,7 @@ type CreateGuildStatsOptions = {
 
 // TODO(vxern): This needs renaming to "GuildStatistics" at some point.
 class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] }> {
-	static readonly #_initialStats: GameStats = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
+	static readonly #initialStats: GameStats = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
 
 	get guildId(): string {
 		return this.idParts[0];
@@ -61,19 +61,19 @@ class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] 
 		isUnique,
 	}: { game: GameType; learningLocale: Locale; isUnique: boolean }): void {
 		if (this.stats === undefined) {
-			this.stats = { [learningLocale]: { [game]: { ...GuildStats.#_initialStats } } };
+			this.stats = { [learningLocale]: { [game]: { ...GuildStats.#initialStats } } };
 			return;
 		}
 
 		const statsForLocale = this.stats[learningLocale];
 		if (statsForLocale === undefined) {
-			this.stats[learningLocale] = { [game]: { ...GuildStats.#_initialStats } };
+			this.stats[learningLocale] = { [game]: { ...GuildStats.#initialStats } };
 			return;
 		}
 
 		const statsForGame = statsForLocale[game];
 		if (statsForGame === undefined) {
-			statsForLocale[game] = { ...GuildStats.#_initialStats };
+			statsForLocale[game] = { ...GuildStats.#initialStats };
 			return;
 		}
 

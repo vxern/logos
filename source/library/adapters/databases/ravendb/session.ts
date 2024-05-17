@@ -9,7 +9,7 @@ import type { DatabaseStore } from "logos/stores/database";
 import type * as ravendb from "ravendb";
 
 class RavenDBDocumentSession extends DocumentSession {
-	readonly #_session: ravendb.IDocumentSession;
+	readonly #session: ravendb.IDocumentSession;
 
 	constructor({
 		environment,
@@ -18,14 +18,14 @@ class RavenDBDocumentSession extends DocumentSession {
 	}: { environment: Environment; database: DatabaseStore; session: ravendb.IDocumentSession }) {
 		super({ identifier: "RavenDB", environment, database });
 
-		this.#_session = session;
+		this.#session = session;
 
 		// ! The following line prevents the RavenDB client from trying to convert raw documents to an entity by itself.
-		this.#_session.advanced.entityToJson.convertToEntity = (_, __, document, ___) => document;
+		this.#session.advanced.entityToJson.convertToEntity = (_, __, document, ___) => document;
 	}
 
 	async load<M extends Model>(id: string): Promise<M | undefined> {
-		const rawDocument = await this.#_session.load(id);
+		const rawDocument = await this.#session.load(id);
 		if (rawDocument === null) {
 			return undefined;
 		}
@@ -35,7 +35,7 @@ class RavenDBDocumentSession extends DocumentSession {
 
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
 		const documents: (M | undefined)[] = [];
-		const rawDocuments = await this.#_session.load(ids);
+		const rawDocuments = await this.#session.load(ids);
 		for (const rawDocument of Object.values(rawDocuments)) {
 			if (rawDocument === null) {
 				documents.push(undefined);
@@ -51,16 +51,16 @@ class RavenDBDocumentSession extends DocumentSession {
 	}
 
 	async store<M extends Model>(document: M): Promise<void> {
-		await this.#_session.store(document);
-		await this.#_session.saveChanges();
+		await this.#session.store(document);
+		await this.#session.saveChanges();
 	}
 
 	query<M extends Model>(_: { collection: Collection }): RavenDBDocumentQuery<M> {
-		return new RavenDBDocumentQuery<M>({ database: this.database, session: this.#_session });
+		return new RavenDBDocumentQuery<M>({ database: this.database, session: this.#session });
 	}
 
 	dispose(): void {
-		this.#_session.dispose();
+		this.#session.dispose();
 	}
 }
 

@@ -1,7 +1,7 @@
 import winston from "winston";
 
 class Logger {
-	static readonly #_instances = new Map<string, Logger>();
+	static readonly #instances = new Map<string, Logger>();
 
 	readonly #identifierDisplayed: string;
 	readonly #isDebug: boolean;
@@ -12,18 +12,18 @@ class Logger {
 	}
 
 	static create({ identifier, isDebug = false }: { identifier: string; isDebug: boolean | undefined }): Logger {
-		if (Logger.#_instances.has(identifier)) {
-			return Logger.#_instances.get(identifier)!;
+		if (Logger.#instances.has(identifier)) {
+			return Logger.#instances.get(identifier)!;
 		}
 
 		const instance = new Logger({ identifier, isDebug });
 
-		Logger.#_instances.set(identifier, instance);
+		Logger.#instances.set(identifier, instance);
 
 		return instance;
 	}
 
-	#_formatMessage(pieces: unknown[]): string {
+	#formatMessage(pieces: unknown[]): string {
 		const piecesFormatted = pieces
 			.map((piece) => {
 				if (typeof piece === "object") {
@@ -46,19 +46,19 @@ class Logger {
 			return;
 		}
 
-		winston.debug(this.#_formatMessage(pieces));
+		winston.debug(this.#formatMessage(pieces));
 	}
 
 	info(...pieces: unknown[]): void {
-		winston.info(this.#_formatMessage(pieces));
+		winston.info(this.#formatMessage(pieces));
 	}
 
 	warn(...pieces: unknown[]): void {
-		winston.warn(this.#_formatMessage(pieces));
+		winston.warn(this.#formatMessage(pieces));
 	}
 
 	error(...pieces: unknown[]): void {
-		winston.error(this.#_formatMessage(pieces));
+		winston.error(this.#formatMessage(pieces));
 	}
 }
 

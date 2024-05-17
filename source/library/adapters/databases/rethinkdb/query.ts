@@ -8,10 +8,9 @@ import rethinkdb from "rethinkdb-ts";
 
 class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	readonly #collection: Collection;
-
-	readonly #_database: DatabaseStore;
-	readonly #_connection: rethinkdb.Connection;
-	#_query: rethinkdb.RTable<RethinkDBDocument>;
+	readonly #database: DatabaseStore;
+	readonly #connection: rethinkdb.Connection;
+	#query: rethinkdb.RTable<RethinkDBDocument>;
 
 	constructor({
 		database,
@@ -21,25 +20,25 @@ class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		super();
 
 		this.#collection = collection;
-		this.#_database = database;
-		this.#_connection = connection;
-		this.#_query = rethinkdb.r.table(this.#collection);
+		this.#database = database;
+		this.#connection = connection;
+		this.#query = rethinkdb.r.table(this.#collection);
 	}
 
 	whereRegex(property: string, pattern: RegExp): RethinkDBDocumentQuery<M> {
-		this.#_query = this.#_query.filter((document) => document(property).match(pattern.source));
+		this.#query = this.#query.filter((document) => document(property).match(pattern.source));
 		return this;
 	}
 
 	whereEquals(property: string, value: unknown): RethinkDBDocumentQuery<M> {
-		this.#_query = this.#_query.filter({ [property]: value });
+		this.#query = this.#query.filter({ [property]: value });
 		return this;
 	}
 
 	async execute(): Promise<M[]> {
-		const rawDocuments = await this.#_query.run(this.#_connection);
+		const rawDocuments = await this.#query.run(this.#connection);
 		return rawDocuments.map((rawDocument) =>
-			RethinkDBDocumentConventions.instantiateModel<M>(this.#_database, rawDocument),
+			RethinkDBDocumentConventions.instantiateModel<M>(this.#database, rawDocument),
 		);
 	}
 }

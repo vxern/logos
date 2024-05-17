@@ -35,6 +35,21 @@ abstract class PromptService<
 		metadata: [partialId: string, isResolve: string];
 	},
 > extends LocalService {
+	static readonly #configurationLocators = Object.freeze({
+		verification: (guildDocument) => guildDocument.verification,
+		reports: (guildDocument) => guildDocument.reports,
+		resources: (guildDocument) => guildDocument.resourceSubmissions,
+		suggestions: (guildDocument) => guildDocument.suggestions,
+		tickets: (guildDocument) => guildDocument.tickets,
+	} as const satisfies ConfigurationLocators);
+	static readonly #customIds = Object.freeze({
+		verification: constants.components.verification,
+		reports: constants.components.reports,
+		resources: constants.components.resources,
+		suggestions: constants.components.suggestions,
+		tickets: constants.components.tickets,
+	} as const satisfies CustomIDs);
+
 	readonly documents: Map<string, Generic["model"]>;
 	readonly promptByPartialId: Map</*partialId: */ string, Discord.Message>;
 	readonly magicButton: InteractionCollector<Generic["metadata"]>;
@@ -48,28 +63,12 @@ abstract class PromptService<
 	>;
 	readonly #documentByPromptId: Map</*promptId: */ bigint, Generic["model"]>;
 	readonly #userIdByPromptId: Map</*promptId: */ bigint, bigint>;
-
-	static readonly #_configurationLocators = Object.freeze({
-		verification: (guildDocument) => guildDocument.verification,
-		reports: (guildDocument) => guildDocument.reports,
-		resources: (guildDocument) => guildDocument.resourceSubmissions,
-		suggestions: (guildDocument) => guildDocument.suggestions,
-		tickets: (guildDocument) => guildDocument.tickets,
-	} as const satisfies ConfigurationLocators);
-	static readonly #_customIds = Object.freeze({
-		verification: constants.components.verification,
-		reports: constants.components.reports,
-		resources: constants.components.resources,
-		suggestions: constants.components.suggestions,
-		tickets: constants.components.tickets,
-	} as const satisfies CustomIDs);
-
-	readonly #_configuration: ConfigurationLocators[Generic["type"]];
-	readonly #_messageUpdates: Collector<"messageUpdate">;
-	readonly #_messageDeletes: Collector<"messageDelete">;
+	readonly #configuration: ConfigurationLocators[Generic["type"]];
+	readonly #messageUpdates: Collector<"messageUpdate">;
+	readonly #messageDeletes: Collector<"messageDelete">;
 
 	get configuration(): NonNullable<Configurations[Generic["type"]]> {
-		return this.#_configuration(this.guildDocument)!;
+		return this.#configuration(this.guildDocument)!;
 	}
 
 	get channelId(): bigint | undefined {
@@ -83,7 +82,7 @@ abstract class PromptService<
 	) {
 		super(client, { identifier, guildId });
 
-		const customId = PromptService.#_customIds[type];
+		const customId = PromptService.#customIds[type];
 		this.magicButton = new InteractionCollector(client, { customId, isPermanent: true });
 		this.removeButton = new InteractionCollector(client, {
 			guildId,
@@ -91,19 +90,17 @@ abstract class PromptService<
 			isPermanent: true,
 		});
 
-		this.#type = type;
-		this.#deleteMode = deleteMode;
-
 		this.documents = new Map();
 		this.promptByPartialId = new Map();
 
+		this.#type = type;
+		this.#deleteMode = deleteMode;
 		this.#handlerByPartialId = new Map();
 		this.#documentByPromptId = new Map();
 		this.#userIdByPromptId = new Map();
-
-		this.#_configuration = PromptService.#_configurationLocators[type];
-		this.#_messageUpdates = new Collector<"messageUpdate">({ guildId });
-		this.#_messageDeletes = new Collector<"messageDelete">({ guildId });
+		this.#configuration = PromptService.#configurationLocators[type];
+		this.#messageUpdates = new Collector<"messageUpdate">({ guildId });
+		this.#messageDeletes = new Collector<"messageDelete">({ guildId });
 	}
 
 	static encodePartialIdInUserAvatar({ user, partialId }: { user: Logos.User; partialId: string }): string {
@@ -197,8 +194,8 @@ abstract class PromptService<
 			});
 		}
 
-		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
-		this.#_messageDeletes.onCollect(this.#handleMessageDelete.bind(this));
+		this.#messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
+		this.#messageDeletes.onCollect(this.#handleMessageDelete.bind(this));
 
 		this.magicButton.onInteraction((buttonPress) => {
 			const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
@@ -302,15 +299,15 @@ abstract class PromptService<
 			await this.handleDelete(promptDocument);
 		});
 
-		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
-		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
+		await this.client.registerCollector("messageUpdate", this.#messageUpdates);
+		await this.client.registerCollector("messageDelete", this.#messageDeletes);
 		await this.client.registerInteractionCollector(this.magicButton);
 		await this.client.registerInteractionCollector(this.removeButton);
 	}
 
 	async stop(): Promise<void> {
-		await this.#_messageUpdates.close();
-		await this.#_messageDeletes.close();
+		await this.#messageUpdates.close();
+		await this.#messageDeletes.close();
 		await this.magicButton.close();
 		await this.removeButton.close();
 

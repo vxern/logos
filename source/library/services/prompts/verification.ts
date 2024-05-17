@@ -21,7 +21,7 @@ class VerificationPromptService extends PromptService<{
 	model: EntryRequest;
 	metadata: [partialId: string, isAccept: string];
 }> {
-	readonly #_openInquiry: InteractionCollector<[partialId: string]>;
+	readonly #openInquiry: InteractionCollector<[partialId: string]>;
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(
@@ -30,7 +30,7 @@ class VerificationPromptService extends PromptService<{
 			{ type: "verification", deleteMode: "none" },
 		);
 
-		this.#_openInquiry = new InteractionCollector(client, {
+		this.#openInquiry = new InteractionCollector(client, {
 			guildId,
 			customId: InteractionCollector.encodeCustomId([constants.components.createInquiry]),
 			isPermanent: true,
@@ -38,17 +38,17 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async start(): Promise<void> {
-		this.#_openInquiry.onInteraction(async (selection) => {
+		this.#openInquiry.onInteraction(async (selection) => {
 			await this.#handleOpenInquiry(selection, selection.metadata[1]);
 		});
 
-		await this.client.registerInteractionCollector(this.#_openInquiry);
+		await this.client.registerInteractionCollector(this.#openInquiry);
 
 		await super.start();
 	}
 
 	async stop(): Promise<void> {
-		this.#_openInquiry.close();
+		this.#openInquiry.close();
 
 		await super.stop();
 	}
@@ -60,7 +60,6 @@ class VerificationPromptService extends PromptService<{
 		}
 
 		const entryRequests: Map<string, EntryRequest> = new Map();
-
 		for (const [partialId, entryRequestDocument] of this.client.documents.entryRequests) {
 			if (entryRequestDocument.guildId !== this.guildIdString) {
 				continue;
@@ -233,7 +232,7 @@ class VerificationPromptService extends PromptService<{
 										type: Discord.MessageComponentTypes.Button,
 										style: Discord.ButtonStyles.Primary,
 										label: strings.open,
-										customId: this.#_openInquiry.encodeId([entryRequestDocument.partialId]),
+										customId: this.#openInquiry.encodeId([entryRequestDocument.partialId]),
 									},
 							  ]
 							: []) as Discord.ButtonComponent[]),

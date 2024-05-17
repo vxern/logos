@@ -6,31 +6,31 @@ import type { DatabaseStore } from "logos/stores/database";
 import type * as ravendb from "ravendb";
 
 class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
-	readonly #_database: DatabaseStore;
-	readonly #_session: ravendb.IDocumentSession;
-	#_query: ravendb.IDocumentQuery<RavenDBDocument>;
+	readonly #database: DatabaseStore;
+	readonly #session: ravendb.IDocumentSession;
+	#query: ravendb.IDocumentQuery<RavenDBDocument>;
 
 	constructor({ database, session }: { database: DatabaseStore; session: ravendb.IDocumentSession }) {
 		super();
 
-		this.#_database = database;
-		this.#_session = session;
-		this.#_query = this.#_session.query({});
+		this.#database = database;
+		this.#session = session;
+		this.#query = this.#session.query({});
 	}
 
 	whereRegex(property: string, pattern: RegExp): RavenDBDocumentQuery<M> {
-		this.#_query = this.#_query.whereRegex(property, pattern.source);
+		this.#query = this.#query.whereRegex(property, pattern.source);
 		return this;
 	}
 
 	whereEquals(property: string, value: unknown): RavenDBDocumentQuery<M> {
-		this.#_query = this.#_query.whereEquals(property, value);
+		this.#query = this.#query.whereEquals(property, value);
 		return this;
 	}
 
 	async execute(): Promise<M[]> {
-		const rawDocuments = await this.#_query.all();
-		return rawDocuments.map((document) => RavenDBDocumentConventions.instantiateModel(this.#_database, document));
+		const rawDocuments = await this.#query.all();
+		return rawDocuments.map((document) => RavenDBDocumentConventions.instantiateModel(this.#database, document));
 	}
 }
 

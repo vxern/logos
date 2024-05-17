@@ -39,12 +39,11 @@ class Client {
 	readonly #journalling: JournallingStore;
 	readonly #adapters: AdapterStore;
 	readonly #connection: DiscordConnection;
-
-	readonly #_guildReloadLock: ActionLock;
-	readonly #_guildCreateCollector: Collector<"guildCreate">;
-	readonly #_guildDeleteCollector: Collector<"guildDelete">;
-	readonly #_interactionCollector: InteractionCollector;
-	readonly #_channelDeleteCollector: Collector<"channelDelete">;
+	readonly #guildReloadLock: ActionLock;
+	readonly #guildCreateCollector: Collector<"guildCreate">;
+	readonly #guildDeleteCollector: Collector<"guildDelete">;
+	readonly #interactionCollector: InteractionCollector;
+	readonly #channelDeleteCollector: Collector<"channelDelete">;
 
 	get documents(): DatabaseStore["cache"] {
 		return this.database.cache;
@@ -283,15 +282,15 @@ class Client {
 		this.#adapters = new AdapterStore(this);
 		this.#connection = new DiscordConnection({ environment, bot, events: this.#events.buildEventHandlers() });
 
-		this.#_guildReloadLock = new ActionLock();
-		this.#_guildCreateCollector = new Collector<"guildCreate">();
-		this.#_guildDeleteCollector = new Collector<"guildDelete">();
-		this.#_interactionCollector = new InteractionCollector(this, {
+		this.#guildReloadLock = new ActionLock();
+		this.#guildCreateCollector = new Collector<"guildCreate">();
+		this.#guildDeleteCollector = new Collector<"guildDelete">();
+		this.#interactionCollector = new InteractionCollector(this, {
 			anyType: true,
 			anyCustomId: true,
 			isPermanent: true,
 		});
-		this.#_channelDeleteCollector = new Collector<"channelDelete">();
+		this.#channelDeleteCollector = new Collector<"channelDelete">();
 	}
 
 	static async create({
@@ -338,10 +337,10 @@ class Client {
 	async #setupCollectors(): Promise<void> {
 		this.log.info("Setting up event collectors...");
 
-		this.#_guildCreateCollector.onCollect((guild) => this.#setupGuild(guild));
-		this.#_guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild({ guildId }));
-		this.#_interactionCollector.onInteraction(this.receiveInteraction.bind(this));
-		this.#_channelDeleteCollector.onCollect((channel) => {
+		this.#guildCreateCollector.onCollect((guild) => this.#setupGuild(guild));
+		this.#guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild({ guildId }));
+		this.#interactionCollector.onInteraction(this.receiveInteraction.bind(this));
+		this.#channelDeleteCollector.onCollect((channel) => {
 			this.entities.channels.delete(channel.id);
 
 			if (channel.guildId !== undefined) {
@@ -349,10 +348,10 @@ class Client {
 			}
 		});
 
-		await this.registerCollector("guildCreate", this.#_guildCreateCollector);
-		await this.registerCollector("guildDelete", this.#_guildDeleteCollector);
-		await this.registerInteractionCollector(this.#_interactionCollector);
-		await this.registerCollector("channelDelete", this.#_channelDeleteCollector);
+		await this.registerCollector("guildCreate", this.#guildCreateCollector);
+		await this.registerCollector("guildDelete", this.#guildDeleteCollector);
+		await this.registerInteractionCollector(this.#interactionCollector);
+		await this.registerCollector("channelDelete", this.#channelDeleteCollector);
 
 		this.log.info("Event collectors set up.");
 	}
@@ -360,10 +359,10 @@ class Client {
 	#teardownCollectors(): void {
 		this.log.info("Tearing down event collectors...");
 
-		this.#_guildCreateCollector.close();
-		this.#_guildDeleteCollector.close();
-		this.#_channelDeleteCollector.close();
-		this.#_interactionCollector.close();
+		this.#guildCreateCollector.close();
+		this.#guildDeleteCollector.close();
+		this.#channelDeleteCollector.close();
+		this.#interactionCollector.close();
 
 		this.log.info("Event collectors torn down.");
 	}
@@ -427,7 +426,7 @@ class Client {
 	}
 
 	async stop(): Promise<void> {
-		await this.#_guildReloadLock.dispose();
+		await this.#guildReloadLock.dispose();
 
 		this.volatile?.teardown();
 		await this.database.teardown();
@@ -438,10 +437,10 @@ class Client {
 	}
 
 	async reloadGuild(guildId: bigint): Promise<void> {
-		await this.#_guildReloadLock.doAction(() => this.#_handleGuildReload(guildId));
+		await this.#guildReloadLock.doAction(() => this.#handleGuildReload(guildId));
 	}
 
-	async #_handleGuildReload(guildId: bigint): Promise<void> {
+	async #handleGuildReload(guildId: bigint): Promise<void> {
 		const guild = this.entities.guilds.get(guildId);
 		if (guild === undefined) {
 			this.log.warn(`Tried to reload ${this.diagnostics.guild(guildId)}, but it wasn't cached.`);

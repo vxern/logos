@@ -25,8 +25,8 @@ class RealtimeUpdateService extends GlobalService {
 		this.log.info("Streaming updates...");
 
 		/*
-			this.streamSubscription.on("data", this.#_receiveGuildConfigurationUpdate);
-			this.streamSubscription.on("error", this.#_handleError);
+			this.streamSubscription.on("data", this.#receiveGuildConfigurationUpdate);
+			this.streamSubscription.on("error", this.#handleError);
 		*/
 	}
 
@@ -36,21 +36,21 @@ class RealtimeUpdateService extends GlobalService {
 		/*
 			this.changes.dispose();
 
-			this.streamSubscription.off("data", this.#_receiveGuildConfigurationUpdate);
-			this.streamSubscription.off("error", this.#_handleError);
+			this.streamSubscription.off("data", this.#receiveGuildConfigurationUpdate);
+			this.streamSubscription.off("error", this.#handleError);
 		*/
 	}
 
 	/*
-	#_receiveGuildConfigurationUpdate = async (data: ravendb.DocumentChange): Promise<void> => {
+	#receiveGuildConfigurationUpdate = async (data: ravendb.DocumentChange): Promise<void> => {
 		const [_, [guildId]] = Model.getDataFromId<Guild>(data.id);
 
 		this.log.info(`Detected update to configuration for ${this.client.diagnostics.guild(guildId)}. Queueing update...`);
 
-		await this.lock.doAction(() => this.#_handleUpdateGuildConfiguration(data));
+		await this.lock.doAction(() => this.#handleUpdateGuildConfiguration(data));
 	};
 
-	async #_handleUpdateGuildConfiguration(data: ravendb.DocumentChange): Promise<void> {
+	async #handleUpdateGuildConfiguration(data: ravendb.DocumentChange): Promise<void> {
 		const newGuildDocument = await this.client.database.withSession<Guild>(async (session) => {
 			const query = session
 				.query({ collection: "Guilds" satisfies Collection })
@@ -67,7 +67,7 @@ class RealtimeUpdateService extends GlobalService {
 		await this.client.reloadGuild(BigInt(newGuildDocument.guildId));
 	}
 
-	#_handleError = (error: Error): void => {
+	#handleError = (error: Error): void => {
 		this.log.info(`Guild document stream closed: ${error}`);
 	};
 	*/

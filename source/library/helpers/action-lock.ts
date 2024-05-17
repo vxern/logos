@@ -1,72 +1,72 @@
 type Action = () => Promise<void>;
 type ActionReceiver = (action: Action) => Promise<void>;
 class ActionLock {
-	readonly #_handlerQueue: Action[];
-	#_isLocked = false;
-	#_onDone?: () => void;
+	readonly #handlerQueue: Action[];
+	#isLocked = false;
+	#onDone?: () => void;
 
-	get #_nextAction(): Action | undefined {
-		return this.#_handlerQueue.shift();
+	get #nextAction(): Action | undefined {
+		return this.#handlerQueue.shift();
 	}
 
 	get doAction(): ActionReceiver {
-		return this.#_receiveAction.bind(this);
+		return this.#receiveAction.bind(this);
 	}
 
 	constructor() {
-		this.#_handlerQueue = [];
+		this.#handlerQueue = [];
 	}
 
-	#_lock(): void {
-		this.#_isLocked = true;
+	#lock(): void {
+		this.#isLocked = true;
 	}
 
-	#_unlock(): void {
-		this.#_isLocked = false;
+	#unlock(): void {
+		this.#isLocked = false;
 
-		this.#_onDone?.();
-		this.#_onDone = undefined;
+		this.#onDone?.();
+		this.#onDone = undefined;
 	}
 
-	async #_receiveAction(action: Action): Promise<void> {
-		if (this.#_isLocked) {
+	async #receiveAction(action: Action): Promise<void> {
+		if (this.#isLocked) {
 			const { promise, resolve } = Promise.withResolvers<void>();
 
-			this.#_handlerQueue.push(() => action().then(resolve));
+			this.#handlerQueue.push(() => action().then(resolve));
 
 			return promise;
 		}
 
-		await this.#_doAction(action);
+		await this.#doAction(action);
 	}
 
-	async #_doAction(action: Action): Promise<void> {
-		this.#_lock();
+	async #doAction(action: Action): Promise<void> {
+		this.#lock();
 
 		await action.call(undefined);
 
 		// If there is no other action ready to be performed, shut the loop down.
-		const nextAction = this.#_nextAction;
+		const nextAction = this.#nextAction;
 		if (nextAction === undefined) {
-			this.#_unlock();
+			this.#unlock();
 			return;
 		}
 
 		// Otherwise, jump straight onto the next action, marking the next run of the loop.
 		// unawaited
-		this.#_doAction(nextAction);
+		this.#doAction(nextAction);
 	}
 
 	async dispose(): Promise<void> {
-		if (!this.#_isLocked) {
+		if (!this.#isLocked) {
 			return;
 		}
 
-		this.#_handlerQueue.length = 0;
+		this.#handlerQueue.length = 0;
 
 		const { promise, resolve } = Promise.withResolvers<void>();
 
-		this.#_onDone = () => resolve();
+		this.#onDone = () => resolve();
 
 		return promise;
 	}

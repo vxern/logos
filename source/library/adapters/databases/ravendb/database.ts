@@ -11,7 +11,7 @@ import type { DatabaseStore } from "logos/stores/database";
 import * as ravendb from "ravendb";
 
 class RavenDBAdapter extends DatabaseAdapter {
-	readonly #_database: ravendb.DocumentStore;
+	readonly #database: ravendb.DocumentStore;
 
 	private constructor({
 		environment,
@@ -24,9 +24,9 @@ class RavenDBAdapter extends DatabaseAdapter {
 
 		const url = `${host}:${port}`;
 		if (certificate !== undefined) {
-			this.#_database = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
+			this.#database = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
 		} else {
-			this.#_database = new ravendb.DocumentStore(url, database);
+			this.#database = new ravendb.DocumentStore(url, database);
 		}
 	}
 
@@ -58,11 +58,11 @@ class RavenDBAdapter extends DatabaseAdapter {
 	}
 
 	setup(): void {
-		this.#_database.initialize();
+		this.#database.initialize();
 	}
 
 	teardown(): void {
-		this.#_database.dispose();
+		this.#database.dispose();
 	}
 
 	conventionsFor({
@@ -81,7 +81,7 @@ class RavenDBAdapter extends DatabaseAdapter {
 		environment,
 		database,
 	}: { environment: Environment; database: DatabaseStore }): RavenDBDocumentSession {
-		const rawSession = this.#_database.openSession();
+		const rawSession = this.#database.openSession();
 
 		return new RavenDBDocumentSession({ environment, database, session: rawSession });
 	}

@@ -10,7 +10,7 @@ import type { DatabaseStore } from "logos/stores/database";
 import nano from "nano";
 
 class CouchDBAdapter extends DatabaseAdapter {
-	readonly #_documents: nano.DocumentScope<unknown>;
+	readonly #documents: nano.DocumentScope<unknown>;
 
 	private constructor({
 		environment,
@@ -48,7 +48,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 			url,
 			requestDefaults: { agent: constants.USER_AGENT, headers: { "User-Agent": constants.USER_AGENT } },
 		});
-		this.#_documents = server.db.use(database);
+		this.#documents = server.db.use(database);
 	}
 
 	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): CouchDBAdapter | undefined {
@@ -95,7 +95,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		environment,
 		database,
 	}: { environment: Environment; database: DatabaseStore }): CouchDBDocumentSession {
-		return new CouchDBDocumentSession({ environment, database, documents: this.#_documents });
+		return new CouchDBDocumentSession({ environment, database, documents: this.#documents });
 	}
 }
 

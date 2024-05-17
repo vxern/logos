@@ -19,7 +19,7 @@ type DynamicVoiceChannelData = {
 class DynamicVoiceChannelService extends LocalService {
 	readonly oldVoiceStates: Map</*userId:*/ bigint, Logos.VoiceState>;
 
-	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
+	readonly #voiceStateUpdates: Collector<"voiceStateUpdate">;
 
 	get configuration(): NonNullable<Guild["dynamicVoiceChannels"]> {
 		return this.guildDocument.dynamicVoiceChannels!;
@@ -104,20 +104,20 @@ class DynamicVoiceChannelService extends LocalService {
 
 		this.oldVoiceStates = new Map();
 
-		this.#_voiceStateUpdates = new Collector({ guildId });
+		this.#voiceStateUpdates = new Collector({ guildId });
 	}
 
 	async start(): Promise<void> {
-		this.#_voiceStateUpdates.onCollect(this.#_handleVoiceStateUpdate.bind(this));
+		this.#voiceStateUpdates.onCollect(this.#handleVoiceStateUpdate.bind(this));
 
-		await this.client.registerCollector("voiceStateUpdate", this.#_voiceStateUpdates);
+		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
 		const voiceStatesAll = this.channels.flatMap((channel) => [
 			...channel.parent.voiceStates,
 			...channel.children.flatMap((channel) => channel.voiceStates),
 		]);
 		for (const voiceState of voiceStatesAll) {
-			await this.#_handleVoiceStateUpdate(voiceState);
+			await this.#handleVoiceStateUpdate(voiceState);
 		}
 
 		for (const { parent, children, configuration } of this.channels) {
@@ -147,27 +147,27 @@ class DynamicVoiceChannelService extends LocalService {
 	}
 
 	async stop(): Promise<void> {
-		await this.#_voiceStateUpdates.close();
+		await this.#voiceStateUpdates.close();
 
 		this.oldVoiceStates.clear();
 	}
 
-	async #_handleVoiceStateUpdate(newVoiceState: Logos.VoiceState): Promise<void> {
+	async #handleVoiceStateUpdate(newVoiceState: Logos.VoiceState): Promise<void> {
 		const oldVoiceState = this.oldVoiceStates.get(newVoiceState.userId);
 
 		if (oldVoiceState === undefined || oldVoiceState.channelId === undefined) {
-			await this.#_handleConnect(newVoiceState);
+			await this.#handleConnect(newVoiceState);
 		} else if (newVoiceState.channelId === undefined) {
-			await this.#_handleDisconnect(oldVoiceState);
+			await this.#handleDisconnect(oldVoiceState);
 		} else {
-			await this.#_handleConnect(newVoiceState);
-			await this.#_handleDisconnect(oldVoiceState);
+			await this.#handleConnect(newVoiceState);
+			await this.#handleDisconnect(oldVoiceState);
 		}
 
 		this.oldVoiceStates.set(newVoiceState.userId, newVoiceState);
 	}
 
-	async #_handleConnect(newVoiceState: Logos.VoiceState): Promise<void> {
+	async #handleConnect(newVoiceState: Logos.VoiceState): Promise<void> {
 		const channels = this.channels;
 		if (channels === undefined) {
 			return;
@@ -222,7 +222,7 @@ class DynamicVoiceChannelService extends LocalService {
 			);
 	}
 
-	async #_handleDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
+	async #handleDisconnect(oldVoiceState: Logos.VoiceState): Promise<void> {
 		const channels = this.channels;
 		if (channels === undefined) {
 			return;

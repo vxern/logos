@@ -4,7 +4,7 @@ import type { Guild, RoleWithIndicator } from "logos/database/guild";
 import { LocalService } from "logos/services/service";
 
 class RoleIndicatorService extends LocalService {
-	readonly #_guildMemberUpdates: Collector<"guildMemberUpdate">;
+	readonly #guildMemberUpdates: Collector<"guildMemberUpdate">;
 
 	get configuration(): NonNullable<Guild["roleIndicators"]> {
 		return this.guildDocument.roleIndicators!;
@@ -13,7 +13,7 @@ class RoleIndicatorService extends LocalService {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "RoleIndicatorService", guildId });
 
-		this.#_guildMemberUpdates = new Collector({ guildId });
+		this.#guildMemberUpdates = new Collector({ guildId });
 	}
 
 	async start(): Promise<void> {
@@ -25,13 +25,13 @@ class RoleIndicatorService extends LocalService {
 			await this.guildMemberUpdate(member, member.user);
 		}
 
-		this.#_guildMemberUpdates.onCollect(this.guildMemberUpdate.bind(this));
+		this.#guildMemberUpdates.onCollect(this.guildMemberUpdate.bind(this));
 
-		await this.client.registerCollector("guildMemberUpdate", this.#_guildMemberUpdates);
+		await this.client.registerCollector("guildMemberUpdate", this.#guildMemberUpdates);
 	}
 
 	async stop(): Promise<void> {
-		await this.#_guildMemberUpdates.close();
+		await this.#guildMemberUpdates.close();
 	}
 
 	async guildMemberUpdate(member: Discord.Member | Logos.Member, user: Discord.User | Logos.User): Promise<void> {

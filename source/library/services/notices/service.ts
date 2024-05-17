@@ -27,20 +27,20 @@ type ConfigurationLocators = {
 type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
 abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
-	#noticeData: NoticeData | undefined;
-
-	static readonly #_configurationLocators = Object.freeze({
+	static readonly #configurationLocators = Object.freeze({
 		information: (guildDocument) => guildDocument.informationNotice,
 		resources: (guildDocument) => guildDocument.resourceNotice,
 		roles: (guildDocument) => guildDocument.roleNotice,
 		welcome: (guildDocument) => guildDocument.welcomeNotice,
 	} as const satisfies ConfigurationLocators);
-	readonly #_configuration: ConfigurationLocators[Generic["type"]];
-	readonly #_messageUpdates: Collector<"messageUpdate">;
-	readonly #_messageDeletes: Collector<"messageDelete">;
+
+	readonly #configuration: ConfigurationLocators[Generic["type"]];
+	readonly #messageUpdates: Collector<"messageUpdate">;
+	readonly #messageDeletes: Collector<"messageDelete">;
+	#noticeData: NoticeData | undefined;
 
 	get configuration(): NonNullable<Configurations[Generic["type"]]> {
-		return this.#_configuration(this.guildDocument)!;
+		return this.#configuration(this.guildDocument)!;
 	}
 
 	get channelId(): bigint | undefined {
@@ -54,9 +54,9 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 	) {
 		super(client, { identifier, guildId });
 
-		this.#_configuration = NoticeService.#_configurationLocators[type];
-		this.#_messageUpdates = new Collector<"messageUpdate">({ guildId });
-		this.#_messageDeletes = new Collector<"messageDelete">({ guildId });
+		this.#configuration = NoticeService.#configurationLocators[type];
+		this.#messageUpdates = new Collector<"messageUpdate">({ guildId });
+		this.#messageDeletes = new Collector<"messageDelete">({ guildId });
 	}
 
 	static encodeHashInGuildIcon({ guild, hash }: { guild: Logos.Guild; hash: string }): string {
@@ -66,8 +66,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 	}
 
 	async start(): Promise<void> {
-		this.#_messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
-		this.#_messageDeletes.onCollect((payload) => {
+		this.#messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
+		this.#messageDeletes.onCollect((payload) => {
 			const message = this.client.entities.messages.latest.get(payload.id);
 			if (message === undefined) {
 				return;
@@ -76,8 +76,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			this.#handleMessageDelete(message);
 		});
 
-		await this.client.registerCollector("messageUpdate", this.#_messageUpdates);
-		await this.client.registerCollector("messageDelete", this.#_messageDeletes);
+		await this.client.registerCollector("messageUpdate", this.#messageUpdates);
+		await this.client.registerCollector("messageDelete", this.#messageDeletes);
 
 		const channelId = this.channelId;
 		if (channelId === undefined) {
@@ -145,8 +145,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 	}
 
 	async stop(): Promise<void> {
-		await this.#_messageUpdates.close();
-		await this.#_messageDeletes.close();
+		await this.#messageUpdates.close();
+		await this.#messageDeletes.close();
 
 		this.#noticeData = undefined;
 	}

@@ -9,7 +9,7 @@ import type { DatabaseStore } from "logos/stores/database";
 import type nano from "nano";
 
 class CouchDBDocumentSession extends DocumentSession {
-	readonly #_documents: nano.DocumentScope<unknown>;
+	readonly #documents: nano.DocumentScope<unknown>;
 
 	constructor({
 		environment,
@@ -18,11 +18,11 @@ class CouchDBDocumentSession extends DocumentSession {
 	}: { environment: Environment; database: DatabaseStore; documents: nano.DocumentScope<unknown> }) {
 		super({ identifier: "CouchDB", environment, database });
 
-		this.#_documents = documents;
+		this.#documents = documents;
 	}
 
 	async load<M extends Model>(id: string): Promise<M | undefined> {
-		const rawDocument = await this.#_documents.get(id).catch((error) => {
+		const rawDocument = await this.#documents.get(id).catch((error) => {
 			if (error.statusCode !== 404) {
 				this.log.error(`Failed to get document ${id}: ${error}`);
 			}
@@ -41,7 +41,7 @@ class CouchDBDocumentSession extends DocumentSession {
 			return [];
 		}
 
-		const response = await this.#_documents
+		const response = await this.#documents
 			.fetch({ keys: ids }, { conflicts: false, include_docs: true })
 			.catch((error) => {
 				this.log.error(`Failed to get ${ids.length} documents: ${error}`);
@@ -73,7 +73,7 @@ class CouchDBDocumentSession extends DocumentSession {
 			document.revision = existingDocument.revision!;
 		}
 
-		const result = await this.#_documents
+		const result = await this.#documents
 			.insert(document as unknown as nano.IdentifiedDocument, { rev: document.revision })
 			.catch((error) => {
 				// Conflict during insertion. This happens when a document is attempted to be saved twice at the same
@@ -96,7 +96,7 @@ class CouchDBDocumentSession extends DocumentSession {
 	}
 
 	query<M extends Model>(_: { collection: Collection }): CouchDBDocumentQuery<M> {
-		return new CouchDBDocumentQuery<M>({ documents: this.#_documents, session: this });
+		return new CouchDBDocumentQuery<M>({ documents: this.#documents, session: this });
 	}
 
 	async dispose(): Promise<void> {}

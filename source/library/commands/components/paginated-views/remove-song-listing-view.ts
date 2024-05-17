@@ -5,10 +5,10 @@ import { PaginatedView, type View } from "logos/commands/components/paginated-vi
 import type { SongListing } from "logos/services/music";
 
 class RemoveSongListingView extends PaginatedView<SongListing> {
-	readonly #_selectMenuSelection: InteractionCollector;
+	readonly #selectMenuSelection: InteractionCollector;
 
 	get onInteraction(): InteractionCollector["onInteraction"] {
-		return this.#_selectMenuSelection.onInteraction.bind(this);
+		return this.#selectMenuSelection.onInteraction.bind(this);
 	}
 
 	constructor(
@@ -17,7 +17,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 	) {
 		super(client, { interaction, elements: listings, showable: true });
 
-		this.#_selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
+		this.#selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
 	}
 
 	#buildSelectMenu(page: SongListing[], pageIndex: number): Discord.ActionRow {
@@ -32,7 +32,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 			components: [
 				{
 					type: Discord.MessageComponentTypes.SelectMenu,
-					customId: this.#_selectMenuSelection.customId,
+					customId: this.#selectMenuSelection.customId,
 					minValues: 1,
 					maxValues: 1,
 					options,
@@ -69,13 +69,13 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 	async open(): Promise<void> {
 		await super.open();
 
-		await this.client.registerInteractionCollector(this.#_selectMenuSelection);
+		await this.client.registerInteractionCollector(this.#selectMenuSelection);
 	}
 
 	async close(): Promise<void> {
 		await super.close();
 
-		this.#_selectMenuSelection.close();
+		this.#selectMenuSelection.close();
 	}
 }
 

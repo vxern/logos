@@ -9,11 +9,10 @@ import * as shoukaku from "shoukaku";
 
 type PlaybackActionType = "manage" | "check";
 class MusicService extends LocalService {
+	readonly #voiceStateUpdates: Collector<"voiceStateUpdate">;
+	#managerDisconnects!: (name: string, count: number) => void;
+	#managerConnectionRestores!: (name: string, reconnected: boolean) => void;
 	#session?: MusicSession;
-
-	readonly #_voiceStateUpdates: Collector<"voiceStateUpdate">;
-	#_managerDisconnects!: (name: string, count: number) => void;
-	#_managerConnectionRestores!: (name: string, reconnected: boolean) => void;
 
 	get configuration(): NonNullable<Guild["music"]> {
 		return this.guildDocument.music!;
@@ -27,7 +26,7 @@ class MusicService extends LocalService {
 		return this.#session!;
 	}
 
-	get #_isLogosAlone(): boolean | undefined {
+	get #isLogosAlone(): boolean | undefined {
 		const botVoiceState = this.guild.voiceStates.get(this.client.bot.id);
 		if (botVoiceState?.channelId === undefined) {
 			return undefined;
@@ -43,27 +42,27 @@ class MusicService extends LocalService {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "MusicService", guildId });
 
-		this.#_voiceStateUpdates = new Collector({ guildId });
+		this.#voiceStateUpdates = new Collector({ guildId });
 	}
 
 	start(): void {
-		this.#_voiceStateUpdates.onCollect(this.#_handleVoiceStateUpdate.bind(this));
+		this.#voiceStateUpdates.onCollect(this.#handleVoiceStateUpdate.bind(this));
 
 		this.client.lavalinkService.manager.on(
 			"disconnect",
-			(this.#_managerDisconnects = this.#_handleConnectionLost.bind(this)),
+			(this.#managerDisconnects = this.#handleConnectionLost.bind(this)),
 		);
 		this.client.lavalinkService.manager.on(
 			"ready",
-			(this.#_managerConnectionRestores = this.#_handleConnectionRestored.bind(this)),
+			(this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this)),
 		);
 	}
 
 	async stop(): Promise<void> {
-		await this.#_voiceStateUpdates.close();
+		await this.#voiceStateUpdates.close();
 
-		this.client.lavalinkService.manager.off("disconnect", this.#_managerDisconnects);
-		this.client.lavalinkService.manager.off("ready", this.#_managerConnectionRestores);
+		this.client.lavalinkService.manager.off("disconnect", this.#managerDisconnects);
+		this.client.lavalinkService.manager.off("ready", this.#managerConnectionRestores);
 
 		await this.destroySession();
 	}
@@ -113,13 +112,13 @@ class MusicService extends LocalService {
 		await this.session.receiveListing({ listing });
 	}
 
-	async #_handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
-		if (this.#_isLogosAlone === true) {
-			await this.#_handleSessionAbandoned();
+	async #handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
+		if (this.#isLogosAlone === true) {
+			await this.#handleSessionAbandoned();
 		}
 	}
 
-	async #_handleSessionAbandoned(): Promise<void> {
+	async #handleSessionAbandoned(): Promise<void> {
 		const strings = constants.contexts.stopped({
 			localise: this.client.localise.bind(this.client),
 			locale: this.guildLocale,
@@ -139,7 +138,7 @@ class MusicService extends LocalService {
 		await this.destroySession();
 	}
 
-	#_handleConnectionLost(_: string, __: number): void {
+	#handleConnectionLost(_: string, __: number): void {
 		this.client.bot.gateway
 			.leaveVoiceChannel(this.guildId)
 			.catch(() => this.log.warn("Failed to leave voice channel."));
@@ -172,7 +171,7 @@ class MusicService extends LocalService {
 		this.session.isDisconnected = true;
 	}
 
-	async #_handleConnectionRestored(_: string, __: boolean): Promise<void> {
+	async #handleConnectionRestored(_: string, __: boolean): Promise<void> {
 		if (!this.hasSession) {
 			return;
 		}
@@ -196,7 +195,7 @@ class MusicService extends LocalService {
 			.catch(() => this.log.warn("Failed to send audio restored message."));
 	}
 
-	#_canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
+	#canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
 		if (this.session.isDisconnected) {
 			const strings = constants.contexts.cannotManageDuringOutage({
 				localise: this.client.localise.bind(this.client),
@@ -241,11 +240,11 @@ class MusicService extends LocalService {
 	}
 
 	canCheckPlayback(interaction: Logos.Interaction) {
-		return this.#_canPerformAction(interaction, { action: "check" });
+		return this.#canPerformAction(interaction, { action: "check" });
 	}
 
 	canManagePlayback(interaction: Logos.Interaction) {
-		return this.#_canPerformAction(interaction, { action: "manage" });
+		return this.#canPerformAction(interaction, { action: "manage" });
 	}
 
 	canRequestPlayback(interaction: Logos.Interaction): boolean {
@@ -271,67 +270,67 @@ class MusicService extends LocalService {
 }
 
 class ListingQueue extends EventEmitter {
-	readonly #_listings: SongListing[];
-	readonly #_limit: number;
-	readonly #_discardOnPassedLimit: boolean;
+	readonly #listings: SongListing[];
+	readonly #limit: number;
+	readonly #discardOnPassedLimit: boolean;
 
 	get listings(): SongListing[] {
-		return structuredClone(this.#_listings);
+		return structuredClone(this.#listings);
 	}
 
 	get count(): number {
-		return this.#_listings.length;
+		return this.#listings.length;
 	}
 
 	get isFull(): boolean {
-		return this.#_listings.length >= this.#_limit;
+		return this.#listings.length >= this.#limit;
 	}
 
 	get isEmpty(): boolean {
-		return this.#_listings.length === 0;
+		return this.#listings.length === 0;
 	}
 
 	constructor({ limit, discardOnPassedLimit }: { limit: number; discardOnPassedLimit: boolean }) {
 		super();
-		this.#_listings = [];
-		this.#_limit = limit;
-		this.#_discardOnPassedLimit = discardOnPassedLimit;
+		this.#listings = [];
+		this.#limit = limit;
+		this.#discardOnPassedLimit = discardOnPassedLimit;
 	}
 
 	addOld(listing: SongListing): void {
 		if (this.isFull) {
-			if (!this.#_discardOnPassedLimit) {
+			if (!this.#discardOnPassedLimit) {
 				return;
 			}
 
-			this.#_listings.pop();
+			this.#listings.pop();
 		}
 
-		this.#_listings.unshift(listing);
+		this.#listings.unshift(listing);
 	}
 
 	addNew(listing: SongListing): void {
 		if (this.isFull) {
-			if (!this.#_discardOnPassedLimit) {
+			if (!this.#discardOnPassedLimit) {
 				return;
 			}
 
-			this.#_listings.shift();
+			this.#listings.shift();
 		}
 
-		this.#_listings.push(listing);
+		this.#listings.push(listing);
 	}
 
 	removeOldest(): SongListing {
-		return this.#_listings.shift()!;
+		return this.#listings.shift()!;
 	}
 
 	removeNewest(): SongListing {
-		return this.#_listings.pop()!;
+		return this.#listings.pop()!;
 	}
 
 	removeAt(index: number): SongListing | undefined {
-		return this.#_listings.splice(index, 1)?.at(0);
+		return this.#listings.splice(index, 1)?.at(0);
 	}
 }
 
@@ -437,8 +436,8 @@ class MusicSession extends EventEmitter {
 	readonly listings: ListingManager;
 	isDisconnected: boolean;
 
-	#_trackEnds!: (data: shoukaku.TrackEndEvent) => void;
-	#_trackExceptions!: (data: shoukaku.TrackExceptionEvent) => void;
+	#trackEnds!: (data: shoukaku.TrackEndEvent) => void;
+	#trackExceptions!: (data: shoukaku.TrackExceptionEvent) => void;
 
 	get hasCurrent(): boolean {
 		return this.listings.hasCurrent;
@@ -480,13 +479,13 @@ class MusicSession extends EventEmitter {
 	}
 
 	start(): void {
-		this.player.on("end", (this.#_trackEnds = this.#_handleTrackEnd.bind(this)));
-		this.player.on("exception", (this.#_trackExceptions = this.#_handleTrackException.bind(this)));
+		this.player.on("end", (this.#trackEnds = this.#handleTrackEnd.bind(this)));
+		this.player.on("exception", (this.#trackExceptions = this.#handleTrackException.bind(this)));
 	}
 
 	async stop(): Promise<void> {
-		this.player.off("end", this.#_trackEnds);
-		this.player.off("exception", this.#_trackExceptions);
+		this.player.off("end", this.#trackEnds);
+		this.player.off("exception", this.#trackExceptions);
 
 		this.listings.dispose();
 		await this.player.destroy();
@@ -494,11 +493,11 @@ class MusicSession extends EventEmitter {
 		this.removeAllListeners();
 	}
 
-	async #_handleTrackEnd(_: shoukaku.TrackEndEvent): Promise<void> {
+	async #handleTrackEnd(_: shoukaku.TrackEndEvent): Promise<void> {
 		await this.advanceQueue();
 	}
 
-	async #_handleTrackException(event: shoukaku.TrackExceptionEvent): Promise<void> {
+	async #handleTrackException(event: shoukaku.TrackExceptionEvent): Promise<void> {
 		this.playable.isLooping = false;
 
 		this.log.warn(`Failed to play track: ${event.exception}`);
@@ -563,7 +562,7 @@ class MusicSession extends EventEmitter {
 		await this.advanceQueue({ replay: true });
 	}
 
-	#_advanceSongCollection({ queueable }: { queueable: SongCollection }): void {
+	#advanceSongCollection({ queueable }: { queueable: SongCollection }): void {
 		if (queueable.playable.isLooping) {
 			return;
 		}
@@ -581,7 +580,7 @@ class MusicSession extends EventEmitter {
 		this.listings.moveCurrentToHistory();
 	}
 
-	#_advancePlayable(): void {
+	#advancePlayable(): void {
 		this.listings.moveCurrentToHistory();
 	}
 
@@ -602,12 +601,12 @@ class MusicSession extends EventEmitter {
 		}
 
 		if (this.queueable instanceof SongCollection) {
-			this.#_advanceSongCollection({ queueable: this.queueable });
+			this.#advanceSongCollection({ queueable: this.queueable });
 			await this.play({ playable: this.playable });
 			return;
 		}
 
-		this.#_advancePlayable();
+		this.#advancePlayable();
 		await this.playNext();
 	}
 
@@ -622,7 +621,7 @@ class MusicSession extends EventEmitter {
 	}
 
 	async play({ playable }: { playable: Playable }): Promise<boolean> {
-		const track = await this.#_getTrack({ playable });
+		const track = await this.#getTrack({ playable });
 		if (track === undefined) {
 			return false;
 		}
@@ -687,7 +686,7 @@ class MusicSession extends EventEmitter {
 		return true;
 	}
 
-	async #_getTrack({ playable }: { playable: Playable }): Promise<shoukaku.Track | undefined> {
+	async #getTrack({ playable }: { playable: Playable }): Promise<shoukaku.Track | undefined> {
 		const result = await this.player.node.rest.resolve(`ytsearch:${playable.url}`);
 		if (result === undefined) {
 			return undefined;
@@ -755,7 +754,7 @@ class MusicSession extends EventEmitter {
 		}
 	}
 
-	#_skipSongInSongCollection({
+	#skipSongInSongCollection({
 		queueable,
 		controls,
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
@@ -768,11 +767,11 @@ class MusicSession extends EventEmitter {
 		}
 	}
 
-	#_skipSongCollection(): void {
+	#skipSongCollection(): void {
 		this.listings.moveCurrentToHistory();
 	}
 
-	#_skipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
+	#skipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
 		this.listings.moveCurrentToHistory();
 
 		const count = controls.by ?? controls.to ?? 0;
@@ -783,25 +782,25 @@ class MusicSession extends EventEmitter {
 	async skip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
 		if (this.queueable instanceof SongCollection) {
 			if (mode === "song-collection" || this.queueable.isLastInCollection) {
-				this.#_skipSongCollection();
+				this.#skipSongCollection();
 			} else {
-				this.#_skipSongInSongCollection({ queueable: this.queueable, controls });
+				this.#skipSongInSongCollection({ queueable: this.queueable, controls });
 			}
 		} else {
-			this.#_skipPlayable({ controls });
+			this.#skipPlayable({ controls });
 		}
 
 		await this.player.stopTrack();
 	}
 
-	#_unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
+	#unskipSongCollection({ queueable }: { queueable: SongCollection }): void {
 		queueable.index -= 1;
 
 		this.listings.moveCurrentToQueue();
 		this.listings.moveFromHistoryToQueue({ count: 1 });
 	}
 
-	#_unskipSongInSongCollection({
+	#unskipSongInSongCollection({
 		queueable,
 		controls,
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
@@ -814,7 +813,7 @@ class MusicSession extends EventEmitter {
 		}
 	}
 
-	#_unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
+	#unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
 		if (this.hasCurrent) {
 			this.listings.moveCurrentToQueue();
 		}
@@ -827,12 +826,12 @@ class MusicSession extends EventEmitter {
 	async unskip({ mode, controls }: { mode: QueueableMode; controls: Partial<PositionControls> }): Promise<void> {
 		if (this.hasCurrent && this.queueable instanceof SongCollection) {
 			if (mode === "song-collection" || this.queueable.isFirstInCollection) {
-				this.#_unskipSongCollection({ queueable: this.queueable });
+				this.#unskipSongCollection({ queueable: this.queueable });
 			} else {
-				this.#_unskipSongInSongCollection({ queueable: this.queueable, controls });
+				this.#unskipSongInSongCollection({ queueable: this.queueable, controls });
 			}
 		} else {
-			this.#_unskipPlayable({ controls });
+			this.#unskipPlayable({ controls });
 		}
 
 		if (this.player.track !== null) {
@@ -843,7 +842,7 @@ class MusicSession extends EventEmitter {
 		await this.advanceQueue();
 	}
 
-	#_replaySongCollection(): void {
+	#replaySongCollection(): void {
 		const queueable = this.queueable;
 		if (!(queueable instanceof SongCollection)) {
 			return;
@@ -854,7 +853,7 @@ class MusicSession extends EventEmitter {
 
 	async replay({ mode }: { mode: QueueableMode }): Promise<void> {
 		if (mode === "song-collection") {
-			this.#_replaySongCollection();
+			this.#replaySongCollection();
 		}
 
 		await this.advanceQueue({ replay: true });

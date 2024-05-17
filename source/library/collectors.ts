@@ -21,11 +21,10 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	readonly #isSingle: boolean;
 	readonly #removeAfter?: number;
 	readonly #dependsOn?: Collector;
-
-	readonly #_resolveDone: () => void;
-	#_onCollect?: CollectEvent<Event>;
-	#_onDone?: DoneEvent;
-	#_isClosed = false;
+	readonly #resolveDone: () => void;
+	#onCollect?: CollectEvent<Event>;
+	#onDone?: DoneEvent;
+	#isClosed = false;
 
 	get close(): DoneEvent {
 		return this.dispatchDone.bind(this);
@@ -44,7 +43,7 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	} = {}) {
 		const done = Promise.withResolvers<void>();
 		this.done = done.promise;
-		this.#_resolveDone = done.resolve;
+		this.#resolveDone = done.resolve;
 
 		this.guildId = guildId;
 
@@ -68,11 +67,11 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	}
 
 	async dispatchCollect(...args: Parameters<Discord.EventHandlers[Event]>): Promise<void> {
-		if (this.#_isClosed) {
+		if (this.#isClosed) {
 			return;
 		}
 
-		await this.#_onCollect?.(...args);
+		await this.#onCollect?.(...args);
 
 		if (this.#isSingle) {
 			this.close();
@@ -81,30 +80,30 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	}
 
 	async dispatchDone(): Promise<void> {
-		if (this.#_isClosed) {
+		if (this.#isClosed) {
 			return;
 		}
 
-		const dispatchDone = this.#_onDone;
+		const dispatchDone = this.#onDone;
 
-		this.#_isClosed = true;
-		this.#_onCollect = undefined;
-		this.#_onDone = undefined;
+		this.#isClosed = true;
+		this.#onCollect = undefined;
+		this.#onDone = undefined;
 
 		await dispatchDone?.();
-		this.#_resolveDone();
+		this.#resolveDone();
 	}
 
 	onCollect(callback: CollectEvent<Event>): void {
-		this.#_onCollect = callback;
+		this.#onCollect = callback;
 	}
 
 	onDone(callback: DoneEvent): void {
-		if (this.#_onDone !== undefined) {
+		if (this.#onDone !== undefined) {
 			return;
 		}
 
-		this.#_onDone = callback;
+		this.#onDone = callback;
 	}
 }
 
@@ -114,7 +113,7 @@ class InteractionCollector<
 > extends Collector<"interactionCreate"> {
 	static readonly noneId = constants.components.none;
 
-	static readonly #_defaultParameters: Logos.InteractionParameters<Record<string, unknown>> = Object.freeze({
+	static readonly #defaultParameters: Logos.InteractionParameters<Record<string, unknown>> = Object.freeze({
 		"@repeat": false,
 		show: false,
 	});
@@ -127,8 +126,8 @@ class InteractionCollector<
 
 	readonly #client: Client;
 
-	readonly #_baseId: string;
-	readonly #_acceptAnyUser: boolean;
+	readonly #baseId: string;
+	readonly #acceptAnyUser: boolean;
 
 	constructor(
 		client: Client,
@@ -169,8 +168,8 @@ class InteractionCollector<
 
 		this.#client = client;
 
-		this.#_baseId = InteractionCollector.decodeId(this.customId)[0];
-		this.#_acceptAnyUser = this.only.values.length === 0;
+		this.#baseId = InteractionCollector.decodeId(this.customId)[0];
+		this.#acceptAnyUser = this.only.values.length === 0;
 	}
 
 	static getCommandName(interaction: Discord.Interaction): string {
@@ -213,7 +212,7 @@ class InteractionCollector<
 			}
 		}
 
-		if (!(this.only.has(interaction.user.id) || this.#_acceptAnyUser)) {
+		if (!(this.only.has(interaction.user.id) || this.#acceptAnyUser)) {
 			return false;
 		}
 
@@ -227,7 +226,7 @@ class InteractionCollector<
 			}
 
 			const data = InteractionCollector.decodeId(interaction.data.customId);
-			if (data[0] !== this.#_baseId) {
+			if (data[0] !== this.#baseId) {
 				return false;
 			}
 		}
@@ -345,11 +344,11 @@ class InteractionCollector<
 	): Logos.InteractionParameters<Parameters> {
 		const options = interaction.data?.options;
 		if (options === undefined) {
-			return InteractionCollector.#_defaultParameters as Logos.InteractionParameters<Parameters>;
+			return InteractionCollector.#defaultParameters as Logos.InteractionParameters<Parameters>;
 		}
 
 		return Object.assign(
-			{ ...InteractionCollector.#_defaultParameters },
+			{ ...InteractionCollector.#defaultParameters },
 			InteractionCollector.#parseParameters(options),
 		) as Logos.InteractionParameters<Parameters>;
 	}

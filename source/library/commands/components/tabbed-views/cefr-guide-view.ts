@@ -11,10 +11,10 @@ interface TabGroups {
 }
 
 class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
-	readonly #_guildDocument: Guild;
+	readonly #guildDocument: Guild;
 
 	get #configuration(): NonNullable<Guild["cefr"]> {
-		return this.#_guildDocument.cefr!;
+		return this.#guildDocument.cefr!;
 	}
 
 	constructor(
@@ -23,7 +23,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	) {
 		super(client, { interaction, tabs: { bracket: "a", mode: "guide" }, showable: true });
 
-		this.#_guildDocument = guildDocument;
+		this.#guildDocument = guildDocument;
 	}
 
 	build(interaction: Logos.Interaction, { tabs }: { tabs: TabGroups }): View {
