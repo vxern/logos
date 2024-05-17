@@ -25,7 +25,17 @@ class Logger {
 
 	#_formatMessage(pieces: unknown[]): string {
 		const piecesFormatted = pieces
-			.map((piece) => (typeof piece === "object" ? JSON.stringify(piece) : piece))
+			.map((piece) => {
+				if (typeof piece === "object") {
+					if (piece !== null && "stack" in piece) {
+						return piece.stack;
+					}
+
+					return JSON.stringify(piece);
+				}
+
+				return piece;
+			})
 			.join(" ");
 
 		return `${this.#identifierDisplayed} ${piecesFormatted}`;

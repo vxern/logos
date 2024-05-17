@@ -43,6 +43,7 @@ Promise.createRace = async function* <T, R>(
 
 winston.configure({
 	format: winston.format.combine(
+		winston.format.errors({ stack: true }),
 		winston.format.cli(),
 		winston.format.colorize({ all: true }),
 		winston.format.timestamp(),
