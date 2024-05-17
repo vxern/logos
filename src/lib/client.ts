@@ -322,12 +322,7 @@ class Client {
 			gateway: {
 				token: environment.discordSecret,
 				events: {},
-				cache: {
-					requestMembers: {
-						enabled: true,
-						pending: new Discord.Collection(),
-					},
-				},
+				cache: { requestMembers: { enabled: true } },
 			},
 		});
 

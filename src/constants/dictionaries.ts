@@ -24,5 +24,5 @@ const languages = Object.freeze({
 	Turkish: ["wiktionary"],
 } satisfies Record<LearningLanguage, Dictionary[]> as Record<LearningLanguage, Dictionary[]>);
 
-export default { languages };
+export default Object.freeze({ languages });
 export type { Dictionary };

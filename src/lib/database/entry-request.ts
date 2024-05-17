@@ -57,7 +57,18 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 		return this.votes?.against ?? [];
 	}
 
-	constructor(database: DatabaseStore, {createdAt, requestedRoleId, formData, isFinalised, forcedVerdict, ticketChannelId, votes, ...data}: CreateEntryRequestOptions,
+	constructor(
+		database: DatabaseStore,
+		{
+			createdAt,
+			requestedRoleId,
+			formData,
+			isFinalised,
+			forcedVerdict,
+			ticketChannelId,
+			votes,
+			...data
+		}: CreateEntryRequestOptions,
 	) {
 		super(database, data, { collection: "EntryRequests" });
 

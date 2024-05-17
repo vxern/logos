@@ -25,7 +25,7 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 
 	isResolved: boolean;
 
-	constructor(database: DatabaseStore, {formData, isResolved, ...data}: CreateSuggestionOptions) {
+	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateSuggestionOptions) {
 		super(database, data, { collection: "Suggestions" });
 
 		this.formData = formData;

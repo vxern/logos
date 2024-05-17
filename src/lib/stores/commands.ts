@@ -1,5 +1,6 @@
 import { isAutocomplete } from "logos:constants/interactions";
 import { getDiscordLanguageByLocale } from "logos:constants/languages/localisation";
+import { timeStructToMilliseconds } from "logos:constants/time";
 import { isDefined } from "logos:core/utilities";
 import { Client } from "logos/client";
 import {
@@ -16,7 +17,7 @@ import {
 	OptionTemplate,
 } from "logos/commands/commands";
 import { InteractionHandler } from "logos/commands/handlers/handler";
-import { Guild, timeStructToMilliseconds } from "logos/database/guild";
+import { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
 import { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
 

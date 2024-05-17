@@ -1,4 +1,4 @@
-const emojis = Object.freeze({
+export default Object.freeze({
 	ruleBullet: "💠",
 	understood: "✅",
 	information: {
@@ -221,5 +221,3 @@ const emojis = Object.freeze({
 		},
 	},
 } as const);
-
-export default emojis;

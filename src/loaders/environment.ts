@@ -17,7 +17,7 @@ interface Environment {
 	readonly ravendbSecure?: boolean;
 	readonly couchdbUsername?: string;
 	readonly couchdbPassword?: string;
-	readonly couchdbProtocol: string;
+	readonly couchdbProtocol?: string;
 	readonly couchdbHost?: string;
 	readonly couchdbPort?: string;
 	readonly couchdbDatabase?: string;
@@ -62,7 +62,7 @@ function loadEnvironment(): Environment {
 		ravendbSecure: process.env.RAVENDB_SECURE === "true",
 		couchdbUsername: process.env.COUCHDB_USERNAME,
 		couchdbPassword: process.env.COUCHDB_PASSWORD,
-		couchdbProtocol: process.env.COUCHDB_PROTOCOL ?? "http",
+		couchdbProtocol: process.env.COUCHDB_PROTOCOL,
 		couchdbHost: process.env.COUCHDB_HOST,
 		couchdbPort: process.env.COUCHDB_PORT,
 		couchdbDatabase: process.env.COUCHDB_DATABASE,

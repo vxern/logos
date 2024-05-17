@@ -1,9 +1,10 @@
+import { timeStructToMilliseconds } from "logos:constants/time";
 import { code } from "logos:core/formatting";
 import { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { EntryRequestComposer } from "logos/commands/components/modal-composers/entry-request-composer";
 import { EntryRequest } from "logos/database/entry-request";
-import { Guild, timeStructToMilliseconds } from "logos/database/guild";
+import { Guild } from "logos/database/guild";
 import { User } from "logos/database/user";
 import { LocalService } from "logos/services/service";
 

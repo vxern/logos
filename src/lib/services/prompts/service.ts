@@ -130,16 +130,22 @@ abstract class PromptService<
 
 		const documents = this.getAllDocuments();
 
-		this.log.info(`Found ${documents.size} ${this.#type} documents on ${this.client.diagnostics.guild(this.guild)}.`);
+		this.log.info(
+			`Found ${documents.size} ${this.#type} documents on ${this.client.diagnostics.guild(this.guild)}.`,
+		);
 
 		for (const [partialId, document] of documents.entries()) {
 			this.documents.set(partialId, document);
 		}
 
-		const messages = await this.getAllMessages({ channelId }) ?? [];
+		const messages = (await this.getAllMessages({ channelId })) ?? [];
 		const [validPrompts, invalidPrompts] = this.filterPrompts(messages);
 
-		this.log.info(`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}, of which ${invalidPrompts.length} aren't prompts or are invalid.`);
+		this.log.info(
+			`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}, of which ${
+				invalidPrompts.length
+			} aren't prompts or are invalid.`,
+		);
 
 		if (validPrompts.length !== 0) {
 			this.log.info(`Restoring state for ${documents.size} ${this.#type} documents...`);
@@ -154,7 +160,9 @@ abstract class PromptService<
 			if (prompt !== undefined) {
 				prompts.delete(document.partialId);
 			} else {
-				this.log.warn(`Could not find existing prompt for ${document.id}. Has it been manually deleted? Recreating...`);
+				this.log.warn(
+					`Could not find existing prompt for ${document.id}. Has it been manually deleted? Recreating...`,
+				);
 
 				const user = this.client.entities.users.get(userId);
 				if (user === undefined) {
@@ -178,7 +186,9 @@ abstract class PromptService<
 
 		const expiredPrompts = Array.from(prompts.values());
 		if (prompts.size !== 0) {
-			this.log.warn(`Could not restore the prompt-to-document link between ${prompts.size} prompts. Considering these prompts expired and deleting...`);
+			this.log.warn(
+				`Could not restore the prompt-to-document link between ${prompts.size} prompts. Considering these prompts expired and deleting...`,
+			);
 		}
 
 		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
@@ -395,10 +405,7 @@ abstract class PromptService<
 
 	filterPrompts(
 		prompts: Discord.Message[],
-	): [
-		valid: [partialId: string, prompt: Discord.Message][],
-		invalid: Discord.Message[],
-	] {
+	): [valid: [partialId: string, prompt: Discord.Message][], invalid: Discord.Message[]] {
 		const valid: [partialId: string, prompt: Discord.Message][] = [];
 		const invalid: Discord.Message[] = [];
 
@@ -415,10 +422,7 @@ abstract class PromptService<
 		return [valid, invalid];
 	}
 
-	async savePrompt(
-		user: Logos.User,
-		promptDocument: Generic["model"],
-	): Promise<Discord.Message | undefined> {
+	async savePrompt(user: Logos.User, promptDocument: Generic["model"]): Promise<Discord.Message | undefined> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
 			return undefined;

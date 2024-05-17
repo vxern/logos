@@ -41,7 +41,7 @@
 			"logos:core/lib/*": ["./?"],
 			"logos:core/index": ["./?"]
 		},
-		"types": ["bun", "mocha"]
+		"types": [],
 	},
 	"compileOnSave": true,
 	"exclude": ["dist/", "node_modules/"],

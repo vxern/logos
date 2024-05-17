@@ -30,7 +30,7 @@ class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] 
 
 	stats?: Partial<Record<Locale, Partial<Record<GameType, GameStats>>>>;
 
-	constructor(database: DatabaseStore, {createdAt, stats, ...data}: CreateGuildStatsOptions) {
+	constructor(database: DatabaseStore, { createdAt, stats, ...data }: CreateGuildStatsOptions) {
 		super(database, data, { collection: "GuildStats" });
 
 		this.createdAt = createdAt ?? Date.now();
@@ -44,7 +44,9 @@ class GuildStats extends Model<{ collection: "GuildStats"; idParts: ["guildId"] 
 		}
 
 		return await client.database.withSession(async (session) => {
-			const guildStatsDocument = await session.get<GuildStats>(Model.buildId<GuildStats>(data, { collection: "GuildStats" }));
+			const guildStatsDocument = await session.get<GuildStats>(
+				Model.buildId<GuildStats>(data, { collection: "GuildStats" }),
+			);
 			if (guildStatsDocument !== undefined) {
 				return guildStatsDocument;
 			}

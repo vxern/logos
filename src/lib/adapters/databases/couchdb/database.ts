@@ -24,12 +24,14 @@ class CouchDBAdapter extends DatabaseAdapter {
 		environment: Environment;
 		username: string;
 		password: string;
-		protocol: string;
+		protocol?: string;
 		host: string;
 		port: string;
 		database: string;
 	}) {
 		super({ identifier: "CouchDB", environment });
+
+		protocol = "http";
 
 		let url: string;
 		if (username !== undefined) {
@@ -67,7 +69,6 @@ class CouchDBAdapter extends DatabaseAdapter {
 			environment,
 			username: environment.couchdbUsername,
 			password: environment.couchdbPassword,
-			protocol: environment.couchdbProtocol,
 			host: environment.couchdbHost,
 			port: environment.couchdbPort,
 			database: environment.couchdbDatabase,

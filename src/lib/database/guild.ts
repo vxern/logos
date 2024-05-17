@@ -1,5 +1,5 @@
 import { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
-import { TimeUnit } from "logos:constants/time";
+import { TimeStruct } from "logos:constants/time";
 import { Client } from "logos/client";
 import { GuildStats } from "logos/database/guild-stats";
 import { IdentifierData, Model } from "logos/database/model";
@@ -250,17 +250,10 @@ interface GuildFeatures {
 	}>;
 }
 
-type TimeStruct = [quantity: number, unit: TimeUnit];
-
-function timeStructToMilliseconds([quantity, unit]: TimeStruct): number {
-	const duration = constants.time[unit];
-	return duration * quantity;
-}
-
 type Activatable<T extends Record<string, unknown> = Record<string, unknown>> = { enabled: boolean } & (
 	| ({ enabled: false } & Partial<T>)
 	| ({ enabled: true } & T)
-	);
+);
 type Enabled<T> = T & { enabled: true };
 
 type RateLimit = {
@@ -687,7 +680,7 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		return this.isEnabled.bind(this);
 	}
 
-	constructor(database: DatabaseStore, {createdAt, languages, features, isNative, ...data}: CreateGuildOptions) {
+	constructor(database: DatabaseStore, { createdAt, languages, features, isNative, ...data }: CreateGuildOptions) {
 		super(database, data, { collection: "Guilds" });
 
 		this.createdAt = createdAt ?? Date.now();
@@ -735,5 +728,5 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 	}
 }
 
-export { timeStructToMilliseconds, Guild };
+export { Guild };
 export type { CreateGuildOptions, DynamicVoiceChannel, TimeStruct, RoleWithIndicator, RateLimit };

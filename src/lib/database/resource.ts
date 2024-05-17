@@ -25,7 +25,7 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 
 	isResolved: boolean;
 
-	constructor(database: DatabaseStore, {formData, isResolved, ...data}: CreateResourceOptions) {
+	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateResourceOptions) {
 		super(database, data, { collection: "Resources" });
 
 		this.formData = formData;

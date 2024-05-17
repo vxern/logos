@@ -9,5 +9,13 @@ const time = Object.freeze({
 } as const);
 type TimeUnit = keyof typeof time;
 
+type TimeStruct = [quantity: number, unit: TimeUnit];
+
+function timeStructToMilliseconds([quantity, unit]: TimeStruct): number {
+	const duration = constants.time[unit];
+	return duration * quantity;
+}
+
 export default time;
-export type { TimeUnit };
+export { timeStructToMilliseconds };
+export type { TimeUnit, TimeStruct };

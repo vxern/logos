@@ -1,8 +1,9 @@
 import { Collection, isValidCollection } from "logos:constants/database";
+import { timeStructToMilliseconds } from "logos:constants/time";
 import { capitalise, decapitalise } from "logos:core/formatting";
 import { DocumentConventions } from "logos/adapters/databases/adapter";
 import { Client } from "logos/client";
-import { RateLimit, timeStructToMilliseconds } from "logos/database/guild";
+import { RateLimit } from "logos/database/guild";
 import { DatabaseStore } from "logos/stores/database";
 
 type ClientOrDatabaseStore = Client | DatabaseStore;

@@ -205,10 +205,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 	abstract generateNotice(): HashableMessageContents | undefined;
 
-	async saveNotice(
-		contents: HashableMessageContents,
-		hash: string,
-	): Promise<Discord.Message | undefined> {
+	async saveNotice(contents: HashableMessageContents, hash: string): Promise<Discord.Message | undefined> {
 		const [channelId, guild] = [this.channelId, this.guild];
 		if (channelId === undefined || guild === undefined) {
 			return undefined;

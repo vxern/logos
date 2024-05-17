@@ -1,4 +1,4 @@
-// * When editing this file, make sure to also update `CONTRIBUTING.md`.
+// * When editing this file, make sure to also update `SETUP.md`.
 export default Object.freeze({
 	deepl: {
 		translate: "https://api-free.deepl.com/v2/translate",

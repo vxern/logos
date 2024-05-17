@@ -1,4 +1,4 @@
-import { Client } from "logos/client";
+import { Environment } from "logos:core/loaders/environment";
 import { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
 
@@ -8,8 +8,8 @@ class EventStore {
 
 	readonly #collectors: Map<Event, Set<Collector<Event>>>;
 
-	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "Client/EventStore", isDebug: client.environment.isDebug });
+	constructor({ environment }: { environment: Environment }) {
+		this.log = Logger.create({ identifier: "Client/EventStore", isDebug: environment.isDebug });
 
 		this.#collectors = new Map();
 	}
