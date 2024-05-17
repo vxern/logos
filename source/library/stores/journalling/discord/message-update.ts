@@ -1,4 +1,4 @@
-import { codeMultiline, mention } from "logos:core/formatting";
+import {codeMultiline, mention, trim} from "logos:core/formatting";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"messageUpdate"> = (client, [message, _], { guildLocale }) => {
@@ -24,11 +24,11 @@ const logger: EventLogger<"messageUpdate"> = (client, [message, _], { guildLocal
 				fields: [
 					{
 						name: strings.fields.before,
-						value: codeMultiline(oldMessage.content),
+						value: codeMultiline(trim(oldMessage.content, constants.MAXIMUM_EMBED_FIELD_LENGTH - 6)),
 					},
 					{
 						name: strings.fields.after,
-						value: codeMultiline(message.content),
+						value: codeMultiline(trim(message.content, constants.MAXIMUM_EMBED_FIELD_LENGTH - 6)),
 					},
 				],
 			},

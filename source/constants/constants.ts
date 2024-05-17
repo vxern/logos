@@ -33,6 +33,7 @@ const constants = Object.freeze({
 	MAXIMUM_VOLUME: 100,
 	MAXIMUM_HISTORY_ENTRIES: 100,
 	MAXIMUM_QUEUE_ENTRIES: 100,
+	MAXIMUM_EMBED_FIELD_LENGTH: 1024,
 	RESULTS_PER_PAGE: 10,
 	STATUS_CYCLE_PERIOD: 1000 * 10, // 10 seconds in milliseconds.
 	INTERACTION_TOKEN_EXPIRY: 1000 * 60 * 15 - 1000 * 10, // 14 minutes, 50 seconds in milliseconds.
