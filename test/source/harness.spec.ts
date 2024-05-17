@@ -2,7 +2,6 @@ import { describe, it } from "bun:test";
 import { expect } from "chai";
 
 describe("Array.prototype.toChunked()", () => {
-	// TODO(vxern): Verify that it delegates the call to `chunk()`.
 	it("gets the chunked result.", () => {
 		expect(["a", "b", "c"].toChunked(1)).to.deep.equal([["a"], ["b"], ["c"]]);
 	});

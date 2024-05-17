@@ -5,9 +5,6 @@ import { type IdentifierData, Model } from "logos/database/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 interface Account {
-	/** User's Discord ID. */
-	readonly id: string;
-
 	/**
 	 * User's preferred localisation language.
 	 *
@@ -43,14 +40,19 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 	}
 
 	readonly createdAt: number;
-	readonly account: Account;
+	account?: Account;
 	scores?: Partial<Record<Locale, Partial<Record<GameType, GameScores>>>>;
 
 	get preferredLanguage(): LocalisationLanguage | undefined {
-		return this.account.language;
+		return this.account?.language;
 	}
 
 	set preferredLanguage(language: LocalisationLanguage | undefined) {
+		if (this.account === undefined) {
+			this.account = { language };
+			return;
+		}
+
 		this.account.language = language;
 	}
 
@@ -58,7 +60,7 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 		super(database, data, { collection: "Users" });
 
 		this.createdAt = createdAt ?? Date.now();
-		this.account = account ?? { id: this.userId };
+		this.account = account;
 		this.scores = scores;
 	}
 
@@ -115,7 +117,7 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 	}
 
 	isAuthorisedOn({ guildId }: { guildId: string }): boolean {
-		if (this.account.authorisedOn === undefined) {
+		if (this.account?.authorisedOn === undefined) {
 			return false;
 		}
 
@@ -123,7 +125,7 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 	}
 
 	isRejectedOn({ guildId }: { guildId: string }): boolean {
-		if (this.account.rejectedOn === undefined) {
+		if (this.account?.rejectedOn === undefined) {
 			return false;
 		}
 
@@ -154,15 +156,24 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 
 		switch (status) {
 			case "authorised": {
+				if (this.account === undefined) {
+					this.account = { authorisedOn: [guildId] };
+					return;
+				}
+
 				if (this.account.authorisedOn === undefined) {
 					this.account.authorisedOn = [guildId];
-					return;
 				}
 
 				this.account.authorisedOn.push(guildId);
 				break;
 			}
 			case "rejected": {
+				if (this.account === undefined) {
+					this.account = { rejectedOn: [guildId] };
+					return;
+				}
+
 				if (this.account.rejectedOn === undefined) {
 					this.account.rejectedOn = [guildId];
 					return;
@@ -177,11 +188,11 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 	clearAuthorisationStatus({ guildId, status }: { guildId: string; status: AuthorisationStatus }): void {
 		switch (status) {
 			case "authorised": {
-				this.account.authorisedOn!.splice(this.account.authorisedOn!.indexOf(guildId), 1);
+				this.account!.authorisedOn!.splice(this.account!.authorisedOn!.indexOf(guildId), 1);
 				break;
 			}
 			case "rejected": {
-				this.account.rejectedOn!.splice(this.account.rejectedOn!.indexOf(guildId), 1);
+				this.account!.rejectedOn!.splice(this.account!.rejectedOn!.indexOf(guildId), 1);
 				break;
 			}
 		}

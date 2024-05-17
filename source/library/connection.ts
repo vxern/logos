@@ -35,7 +35,7 @@ class DiscordConnection {
 			roles: new Map(),
 		};
 
-		// REMINDER(vxern): This is a fix for the Discordeno MESSAGE_UPDATE handler filtering out cases where an embed was removed from a message.
+		// REMINDER(vxern): This is a monkey-patch for the Discordeno MESSAGE_UPDATE handler filtering out `MESSAGE_UPDATE`s caused by an embed being removed from a message.
 		this.bot.handlers.MESSAGE_UPDATE = (bot, data) => {
 			const payload = data.d as Discord.DiscordMessage;
 			if (!payload.author) {
@@ -59,7 +59,6 @@ class DiscordConnection {
 			voiceState: this.#transformVoiceState.bind(this),
 		});
 
-		// REMINDER(vxern): Move this to `createBot()` once it's supported.
 		transformers.desiredProperties = constants.properties as unknown as Discord.Transformers["desiredProperties"];
 
 		return transformers;
@@ -68,7 +67,7 @@ class DiscordConnection {
 	#transformGuild(_: Discord.Bot, payload: Parameters<Discord.Transformers["guild"]>[1]): Discord.Guild {
 		const result = Discord.transformGuild(this.bot, payload);
 
-		// REMINDER(vxern): Monkey-patch for Discordeno filtering out shard IDs equal to 0.
+		// REMINDER(vxern): This is a monkey-patch for Discordeno filtering out shard IDs equal to 0.
 		result.shardId = payload.shardId;
 
 		for (const channel of payload.guild.channels ?? []) {
