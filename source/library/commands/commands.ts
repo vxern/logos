@@ -157,7 +157,7 @@ const commands = Object.freeze({
 		handle: handleStartGame,
 	},
 	recognise: {
-		identifier: "recognize",
+		identifier: "recognise",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleRecogniseLanguageChatInput,
@@ -170,7 +170,7 @@ const commands = Object.freeze({
 		},
 	},
 	recogniseMessage: {
-		identifier: "recognize.message",
+		identifier: "recognise.message",
 		type: Discord.ApplicationCommandTypes.Message,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		handle: handleRecogniseLanguageMessage,
@@ -254,7 +254,7 @@ const commands = Object.freeze({
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 	},
 	licence: {
-		identifier: "license",
+		identifier: "licence",
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: {

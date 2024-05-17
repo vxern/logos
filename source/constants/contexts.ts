@@ -74,18 +74,18 @@ export default Object.freeze({
 		target: localise("information.options.server.strings.languageTypes.target", locale)(),
 	}),
 	dictionaryLicence: ({ localise, locale }) => ({
-		title: localise("license.strings.license", locale),
+		title: localise("licence.strings.license", locale),
 		fields: {
-			source: localise("license.strings.source", locale)(),
-			copyright: localise("license.strings.copyright", locale)(),
+			source: localise("licence.strings.source", locale)(),
+			copyright: localise("licence.strings.copyright", locale)(),
 		},
 	}),
 	softwareLicence: ({ localise, locale }) => ({
-		license: localise("license.strings.license", locale),
+		license: localise("licence.strings.license", locale),
 	}),
 	invalidLicence: ({ localise, locale }) => ({
-		title: localise("license.strings.invalid.title", locale)(),
-		description: localise("license.strings.invalid.description", locale)(),
+		title: localise("licence.strings.invalid.title", locale)(),
+		description: localise("licence.strings.invalid.description", locale)(),
 	}),
 	noWarningsForSelf: ({ localise, locale }) => ({
 		title: localise("list.options.warnings.strings.noActiveWarnings.title", locale)(),
@@ -1117,18 +1117,18 @@ export default Object.freeze({
 		noContent: localise("purge.strings.noContent", locale)(),
 	}),
 	cannotUseForRecognition: ({ localise, locale }) => ({
-		title: localise("recognize.strings.cannotUse.title", locale)(),
-		description: localise("recognize.strings.cannotUse.description", locale)(),
+		title: localise("recognise.strings.cannotUse.title", locale)(),
+		description: localise("recognise.strings.cannotUse.description", locale)(),
 	}),
 	textEmpty: ({ localise, locale }) => ({
-		title: localise("recognize.strings.textEmpty.title", locale)(),
-		description: localise("recognize.strings.textEmpty.description", locale)(),
+		title: localise("recognise.strings.textEmpty.title", locale)(),
+		description: localise("recognise.strings.textEmpty.description", locale)(),
 	}),
 	unknownLanguage: ({ localise, locale }) => ({
-		title: localise("recognize.strings.unknown.title", locale)(),
+		title: localise("recognise.strings.unknown.title", locale)(),
 		description: {
-			text: localise("recognize.strings.unknown.description.text", locale)(),
-			message: localise("recognize.strings.unknown.description.message", locale)(),
+			text: localise("recognise.strings.unknown.description.text", locale)(),
+			message: localise("recognise.strings.unknown.description.message", locale)(),
 		},
 	}),
 	musicHalted: ({ localise, locale }) => ({
@@ -1335,12 +1335,12 @@ export default Object.freeze({
 		description: localise("settings.strings.invalid.description", locale)(),
 	}),
 	likelyMatch: ({ localise, locale }) => ({
-		title: localise("recognize.strings.fields.likelyMatches.title", locale)(),
-		description: localise("recognize.strings.fields.likelyMatches.description.single", locale),
+		title: localise("recognise.strings.fields.likelyMatches.title", locale)(),
+		description: localise("recognise.strings.fields.likelyMatches.description.single", locale),
 	}),
 	likelyMatches: ({ localise, locale }) => ({
-		title: localise("recognize.strings.fields.likelyMatches.title", locale)(),
-		description: localise("recognize.strings.fields.likelyMatches.description.multiple", locale)(),
+		title: localise("recognise.strings.fields.likelyMatches.title", locale)(),
+		description: localise("recognise.strings.fields.likelyMatches.description.multiple", locale)(),
 	}),
 	otherRuleOption: ({ localise, locale }) => ({
 		option: localise("warn.options.rule.strings.other", locale)(),
@@ -1376,12 +1376,12 @@ export default Object.freeze({
 		language: (language: Language) => localise(constants.localisations.languages[language], locale)(),
 	}),
 	possibleMatch: ({ localise, locale }) => ({
-		title: localise("recognize.strings.fields.possibleMatches.title", locale)(),
-		description: localise("recognize.strings.fields.possibleMatches.description.single", locale),
+		title: localise("recognise.strings.fields.possibleMatches.title", locale)(),
+		description: localise("recognise.strings.fields.possibleMatches.description.single", locale),
 	}),
 	possibleMatches: ({ localise, locale }) => ({
-		title: localise("recognize.strings.fields.possibleMatches.title", locale)(),
-		description: localise("recognize.strings.fields.possibleMatches.description.multiple", locale)(),
+		title: localise("recognise.strings.fields.possibleMatches.title", locale)(),
+		description: localise("recognise.strings.fields.possibleMatches.description.multiple", locale)(),
 	}),
 	redirect: ({ localise, locale }) => ({
 		redirect: localise("resources.strings.redirect", locale),
