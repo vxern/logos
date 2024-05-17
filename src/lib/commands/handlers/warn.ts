@@ -145,7 +145,7 @@ async function handleWarnUser(
 
 	const surpassedLimit = warningDocumentsActive.length > configuration.limit;
 	if (surpassedLimit) {
-		if (guildDocument.areEnabled("alerts")) {
+		if (guildDocument.hasEnabled("alerts")) {
 			const alertService = client.getAlertService(guild.id);
 			if (configuration.autoTimeout?.enabled) {
 				const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
@@ -209,7 +209,7 @@ async function handleWarnUser(
 			localise: client.localise.bind(client),
 			locale: interaction.guildLocale,
 		});
-		if (guildDocument.areEnabled("alerts")) {
+		if (guildDocument.hasEnabled("alerts")) {
 			const alertService = client.getAlertService(guild.id);
 			alertService?.alert({
 				embeds: [

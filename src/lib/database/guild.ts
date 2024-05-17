@@ -676,10 +676,6 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		return socialFeatures.profile;
 	}
 
-	get areEnabled(): Guild["isEnabled"] {
-		return this.isEnabled.bind(this);
-	}
-
 	constructor(database: DatabaseStore, { createdAt, languages, features, isNative, ...data }: CreateGuildOptions) {
 		super(database, data, { collection: "Guilds" });
 
@@ -719,7 +715,7 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		return await Guild.create(client, data);
 	}
 
-	isEnabled(feature: keyof Guild) {
+	hasEnabled(feature: keyof Guild) {
 		return this[feature] !== undefined;
 	}
 

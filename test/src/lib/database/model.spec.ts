@@ -121,18 +121,6 @@ describe("Model", () => {
 			).to.be.false;
 		});
 	});
-
-	describe("create()", () => {
-		// TODO(vxern): Add tests.
-	});
-
-	describe("update()", () => {
-		// TODO(vxern): Add tests.
-	});
-
-	describe("delete()", () => {
-		// TODO(vxern): Add tests.
-	});
 });
 
 describe("getDatabase()", () => {

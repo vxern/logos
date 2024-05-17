@@ -7,6 +7,13 @@ import { Guild } from "logos/database/guild";
 describe("Guild", () => {
 	const database = useDatabaseStore();
 
+	describe("partialId()", () => {
+		it("returns the expected partial ID.", () => {
+			const model = new Guild(database(), { guildId: `${123}` });
+			expect(model.partialId).to.equal("123");
+		});
+	});
+
 	describe("idParts()", () => {
 		it("returns the expected decoded ID parts.", () => {
 			const model = new Guild(database(), { guildId: `${123}` });
@@ -14,12 +21,7 @@ describe("Guild", () => {
 		});
 	});
 
-	describe("partialId()", () => {
-		it("returns the expected partial ID.", () => {
-			const model = new Guild(database(), { guildId: `${123}` });
-			expect(model.partialId).to.equal("123");
-		});
-	});
+	// TODO(vxern): Test `collection`, `revision`, `isDeleted`.
 
 	describe("guildId()", () => {
 		it("returns the ID of the guild the document is for.", () => {
@@ -216,11 +218,11 @@ describe("Guild", () => {
 		// TODO(vxern): Add tests.
 	});
 
-	describe("areEnabled()", () => {
+	describe("get()", () => {
 		// TODO(vxern): Add tests.
 	});
 
-	describe("get()", () => {
+	describe("create()", () => {
 		// TODO(vxern): Add tests.
 	});
 
@@ -228,7 +230,15 @@ describe("Guild", () => {
 		// TODO(vxern): Add tests.
 	});
 
-	describe("isEnabled()", () => {
+	describe("update()", () => {
+		// TODO(vxern): Add tests.
+	});
+
+	describe("delete()", () => {
+		// TODO(vxern): Add tests.
+	});
+
+	describe("hasEnabled()", () => {
 		it("returns true when the specified feature is enabled.", () => {
 			const model = new Guild(database(), {
 				guildId: `${123}`,
@@ -236,12 +246,12 @@ describe("Guild", () => {
 					information: { enabled: true, features: { journaling: { enabled: true, channelId: `${123}` } } },
 				},
 			});
-			expect(model.isEnabled("journalling")).to.be.true;
+			expect(model.hasEnabled("journalling")).to.be.true;
 		});
 
 		it("returns false when the specified feature is not configured.", () => {
 			const model = new Guild(database(), { guildId: `${123}` });
-			expect(model.isEnabled("journalling")).to.be.false;
+			expect(model.hasEnabled("journalling")).to.be.false;
 		});
 
 		it("returns false when the specified feature is disabled.", () => {
@@ -249,7 +259,7 @@ describe("Guild", () => {
 				guildId: `${123}`,
 				features: { information: { enabled: true, features: { journaling: { enabled: false } } } },
 			});
-			expect(model.isEnabled("journalling")).to.be.false;
+			expect(model.hasEnabled("journalling")).to.be.false;
 		});
 	});
 

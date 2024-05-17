@@ -142,30 +142,30 @@ class ServiceStore {
 	): Promise<void> {
 		const services: Service[] = [];
 
-		if (guildDocument.areEnabled("informationFeatures")) {
-			if (guildDocument.areEnabled("noticeFeatures")) {
-				if (guildDocument.isEnabled("informationNotice")) {
+		if (guildDocument.hasEnabled("informationFeatures")) {
+			if (guildDocument.hasEnabled("noticeFeatures")) {
+				if (guildDocument.hasEnabled("informationNotice")) {
 					const service = new InformationNoticeService(client, { guildId });
 					services.push(service);
 
 					this.local.notices.information.set(guildId, service);
 				}
 
-				if (guildDocument.isEnabled("resourceNotice")) {
+				if (guildDocument.hasEnabled("resourceNotice")) {
 					const service = new ResourceNoticeService(client, { guildId });
 					services.push(service);
 
 					this.local.notices.resources.set(guildId, service);
 				}
 
-				if (guildDocument.isEnabled("roleNotice")) {
+				if (guildDocument.hasEnabled("roleNotice")) {
 					const service = new RoleNoticeService(client, { guildId });
 					services.push(service);
 
 					this.local.notices.roles.set(guildId, service);
 				}
 
-				if (guildDocument.isEnabled("welcomeNotice")) {
+				if (guildDocument.hasEnabled("welcomeNotice")) {
 					const service = new WelcomeNoticeService(client, { guildId });
 					services.push(service);
 
@@ -174,22 +174,22 @@ class ServiceStore {
 			}
 		}
 
-		if (guildDocument.areEnabled("moderationFeatures")) {
-			if (guildDocument.areEnabled("alerts")) {
+		if (guildDocument.hasEnabled("moderationFeatures")) {
+			if (guildDocument.hasEnabled("alerts")) {
 				const service = new AlertService(client, { guildId });
 				services.push(service);
 
 				this.local.alerts.set(guildId, service);
 			}
 
-			if (guildDocument.areEnabled("reports")) {
+			if (guildDocument.hasEnabled("reports")) {
 				const service = new ReportPromptService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.reports.set(guildId, service);
 			}
 
-			if (guildDocument.isEnabled("verification")) {
+			if (guildDocument.hasEnabled("verification")) {
 				const service = new VerificationPromptService(client, { guildId });
 				services.push(service);
 
@@ -197,43 +197,43 @@ class ServiceStore {
 			}
 		}
 
-		if (guildDocument.areEnabled("serverFeatures")) {
-			if (guildDocument.areEnabled("dynamicVoiceChannels")) {
+		if (guildDocument.hasEnabled("serverFeatures")) {
+			if (guildDocument.hasEnabled("dynamicVoiceChannels")) {
 				const service = new DynamicVoiceChannelService(client, { guildId });
 				services.push(service);
 
 				this.local.dynamicVoiceChannels.set(guildId, service);
 			}
 
-			if (guildDocument.isEnabled("entry")) {
+			if (guildDocument.hasEnabled("entry")) {
 				const service = new EntryService(client, { guildId });
 				services.push(service);
 
 				this.local.entry.set(guildId, service);
 			}
 
-			if (guildDocument.areEnabled("roleIndicators")) {
+			if (guildDocument.hasEnabled("roleIndicators")) {
 				const service = new RoleIndicatorService(client, { guildId });
 				services.push(service);
 
 				this.local.roleIndicators.set(guildId, service);
 			}
 
-			if (guildDocument.areEnabled("suggestions")) {
+			if (guildDocument.hasEnabled("suggestions")) {
 				const service = new SuggestionPromptService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.suggestions.set(guildId, service);
 			}
 
-			if (guildDocument.areEnabled("tickets")) {
+			if (guildDocument.hasEnabled("tickets")) {
 				const service = new TicketPromptService(client, { guildId });
 				services.push(service);
 
 				this.local.prompts.tickets.set(guildId, service);
 			}
 
-			if (guildDocument.areEnabled("resourceSubmissions")) {
+			if (guildDocument.hasEnabled("resourceSubmissions")) {
 				const service = new ResourcePromptService(client, { guildId });
 				services.push(service);
 
@@ -241,8 +241,8 @@ class ServiceStore {
 			}
 		}
 
-		if (guildDocument.areEnabled("socialFeatures")) {
-			if (guildDocument.isEnabled("music") && client.lavalinkService.isBootstrapped) {
+		if (guildDocument.hasEnabled("socialFeatures")) {
+			if (guildDocument.hasEnabled("music") && client.lavalinkService.isBootstrapped) {
 				const service = new MusicService(client, { guildId });
 				services.push(service);
 
