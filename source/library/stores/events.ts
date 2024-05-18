@@ -16,7 +16,8 @@ class EventStore {
 
 	buildEventHandlers(): Partial<Discord.EventHandlers> {
 		return {
-			// * Raw events are not collected - Plug into specific events instead.
+			// We do not collect events from Discordeno's `raw()` sink; Use the sink for the specific event you want to
+			// handle.
 			ready: (payload, rawPayload) => this.collectEvent(undefined, "ready", { args: [payload, rawPayload] }),
 			interactionCreate: (interactionRaw) =>
 				this.collectEvent(interactionRaw.guildId, "interactionCreate", { args: [interactionRaw] }),

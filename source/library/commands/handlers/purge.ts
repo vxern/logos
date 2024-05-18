@@ -481,7 +481,7 @@ async function handlePurgeMessages(
 					})} ${strings.description.mayTakeTime}\n\n${strings.description.onceComplete}`,
 				},
 			],
-			// * This is intended: Components are to be removed off of the message here.
+			// Passing an empty array here removes the components.
 			components: [],
 		});
 	}

@@ -281,7 +281,7 @@ function getWords(...sentences: string[]): string[] {
 	return wordsAll;
 }
 
-// ! Mutates the original array.
+// Mutates the original array.
 function extractRandomWord(words: string[]): string {
 	const word = words.splice(random(words.length), 1).at(0);
 	if (word === undefined) {

@@ -54,7 +54,6 @@ class WiktionaryAdapter extends DictionaryAdapter<WordData[]> {
 	async fetch(lemma: string, learningLanguage: LearningLanguage): Promise<WordData[] | undefined> {
 		const data = await wiktionary.parse(lemma, getReduced(learningLanguage));
 		if (data.length === 0) {
-			// @ts-ignore: Accessing private member.
 			const suggestion = wiktionary.document.getElementById("did-you-mean")?.innerText ?? undefined;
 			if (suggestion === undefined) {
 				return undefined;

@@ -102,8 +102,8 @@ class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
 	}
 
 	incrementScore({ game, learningLocale }: { game: GameType; learningLocale: Locale }): void {
-		// * We don't care about incrementing the score if the scores could not be found.
-		// * At that point, we have a bigger problem to think about - the scores being gone.
+		// We don't care about incrementing the score if the scores could not be found since at that point, we'd have a
+		// bigger problem to think about: The scores being gone.
 		const scoresForGame = this.scores?.[learningLocale]?.[game];
 		if (scoresForGame === undefined) {
 			return;

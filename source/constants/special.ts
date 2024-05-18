@@ -1,14 +1,11 @@
 export default Object.freeze({
 	meta: {
-		// ! Responsible for inserting whitespace where a standard space would get filtered out.
-		// ! Changing this would break:
-		// ! - Empty translations.
-		// ! - Indentation on the /word command.
+		// Used to insert a blank character where a standard whitespace character would otherwise get filtered out by
+		// Discord.
 		whitespace: "⠀",
 	},
 	interaction: {
-		// ! Responsible for separating pieces of data in component custom IDs.
-		// ! Changing this would break button interactions on all existing prompts/notices.
+		// Acts as a delimeter for pieces of metadata encoded into an interaction custom ID.
 		separator: "|",
 		divider: "/",
 	},

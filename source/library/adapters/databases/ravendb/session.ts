@@ -20,7 +20,8 @@ class RavenDBDocumentSession extends DocumentSession {
 
 		this.#session = session;
 
-		// ! The following line prevents the RavenDB client from trying to convert raw documents to an entity by itself.
+		// The following line is vital to the valid functioning of the RavenDB session: it prevents the RavenDB client
+		// from trying to convert raw documents into an entity (i.e. a class) by itself.
 		this.#session.advanced.entityToJson.convertToEntity = (_, __, document, ___) => document;
 	}
 
