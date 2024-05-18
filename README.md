@@ -1,5 +1,7 @@
 ## «λόγος», Logos, “word”
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d1aba2d52cda40abba4d0de788d1a531)](https://app.codacy.com/gh/vxern/logos?utm_source=github.com&utm_medium=referral&utm_content=vxern/logos&utm_campaign=Badge_Grade)
+
 ### Application for language & linguistics communities on Discord
 
 #### Find definitions, translate text, detect languages, read guides, play games, submit resources, answer questions
