@@ -24,4 +24,13 @@
 - 💢 Moderation tools, including user verification, user reports, a warning + pardoning system, fine-tunable slowmode, message purging, rule citation, policy viewing, and more.
 - 💐 Social features including viewing user profiles and thanking users for their contributions.
 
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
 ### Ready to [set up](SETUP.md) or [contribute](CONTRIBUTING)?

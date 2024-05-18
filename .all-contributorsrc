@@ -1,0 +1,147 @@
+{
+  "projectName": "logos",
+  "projectOwner": "vxern",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": ["README.md"],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "angular",
+  "contributorsPerLine": 4,
+  "contributorsSortAlphabetically": false,
+  "linkToUsage": false,
+  "skipCi": true,
+  "contributors": [
+    {
+      "login": "vxern",
+      "name": "Dorian Oszczęda",
+      "avatar_url": "https://avatars.githubusercontent.com/u/56321034?v=4",
+      "profile": "https://github.com/vxern",
+      "contributions": ["maintenance", "code"]
+    },
+    {
+      "login": "16wardm",
+      "name": "Mattheos",
+      "profile": "https://github.com/16wardm",
+      "contributions": ["translation", "userTesting", "ideas"]
+    },
+    {
+      "login": "at.peace",
+      "name": "Alaska",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "asterfields_",
+      "name": "Asterfields",
+      "profile": "https://x.com/_stechi_",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "adeniial",
+      "name": "aura",
+      "profile": "https://x.com/_stechi_",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "eagely",
+      "name": "eagely",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "estheroide",
+      "name": "Esther",
+      "profile": "https://instagram.com/yosgatian",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "kamelNeoN",
+      "name": "Kamel",
+      "contributions": ["translation", "ideas"]
+    },
+    {
+      "login": "megaglaceon",
+      "name": "Mega Glaceon",
+      "profile": "https://github.com/a-mcego",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "nemokosch",
+      "name": "Nemokosch",
+      "profile": "https://github.com/2colours",
+      "contributions": ["infra", "userTesting", "translation", "ideas"]
+    },
+    {
+      "login": "noxys",
+      "name": "Noxys",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "okruchchleba",
+      "name": "Okruch Chleba",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "rodutnotira",
+      "name": "Rodut Notira",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "hani_men12",
+      "name": "Haniel",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "ferb02",
+      "name": "Victor",
+      "profile": "https://youtube.com/channel/UC4aqpjKwQfkqxmQO0Owy2QQ",
+      "contributions": ["userTesting", "translation"]
+    },
+    {
+      "login": "rottingrat666",
+      "name": "Mike",
+      "profile": "https://instagram.com/mike_dishakjian",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "moorddroom",
+      "name": "Moorddroom",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "iiv",
+      "name": "iiv",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "telemaniak",
+      "name": "Telemaniak",
+      "profile": "mailto:macmillantrenton@gmail.com",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "theodeninmuhafizi",
+      "name": "Theodenin Muhafizi",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "yeetfe",
+      "name": "Yeetfe",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "vittorio3099",
+      "name": "Paul",
+      "contributions": ["ideas"]
+    },
+    {
+      "login": "pascu",
+      "name": "Pascu",
+      "contributions": ["ideas"]
+    },
+    {
+      "login": "bean__queen",
+      "name": "Annie",
+      "contributions": ["userTesting", "ideas"]
+    }
+  ],
+}
