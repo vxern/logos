@@ -25,7 +25,7 @@ const contributors = Object.freeze({
 	asterfields: {
 		username: "@asterfields_",
 		id: "839862207025119252",
-		link: "https://instagram.com/asternight1",
+		link: "https://x.com/_stechi_",
 	},
 	aura: {
 		username: "@adeniial",
