@@ -47,6 +47,7 @@ const contributors = Object.freeze({
 	megaGlaceon: {
 		username: "@megaglaceon",
 		id: "186212508141355008",
+		link: "https://github.com/a-mcego",
 	},
 	nemokosch: {
 		username: "@nemokosch",
