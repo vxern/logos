@@ -23,12 +23,12 @@ class DictionaryStore {
 
 		const dicolinkAdapter = DicolinkAdapter.tryCreate(client);
 		if (dicolinkAdapter === undefined) {
-			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a Dicolink integration.")
+			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a Dicolink integration.");
 		}
 
 		const wordsApiAdapter = WordsAPIAdapter.tryCreate(client);
 		if (wordsApiAdapter === undefined) {
-			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a WordsAPI integration.")
+			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a WordsAPI integration.");
 		}
 
 		this.adapters = {

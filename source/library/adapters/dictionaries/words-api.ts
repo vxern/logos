@@ -43,11 +43,11 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 	}
 
 	async fetch(lemma: string, _: LearningLanguage): Promise<SearchResult | undefined> {
-		const response = await fetch(constants.endpoints.words.word(lemma), {
+		const response = await fetch(constants.endpoints.wordsApi.word(lemma), {
 			headers: {
 				"User-Agent": constants.USER_AGENT,
 				"X-RapidAPI-Key": this.token,
-				"X-RapidAPI-Host": constants.endpoints.words.host,
+				"X-RapidAPI-Host": constants.endpoints.wordsApi.host,
 			},
 		});
 		if (!response.ok) {

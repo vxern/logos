@@ -42,6 +42,10 @@ describe("isGoogleTranslateLocale()", () => {
 	});
 });
 
+describe("isLingvanexLocale()", () => {
+	// TODO(vxern): Implement.
+});
+
 describe("getDeepLLocaleByLanguage()", () => {
 	it("returns the locale corresponding to the passed DeepL language.", () => {
 		expect(getDeepLLocaleByLanguage("Hungarian")).to.equal("HU");
@@ -56,6 +60,10 @@ describe("getGoogleTranslateLocaleByLanguage()", () => {
 	});
 });
 
+describe("getLingvanexLocaleByLanguage()", () => {
+	// TODO(vxern): Implement.
+});
+
 describe("getDeepLLanguageByLocale()", () => {
 	it("returns the language corresponding to the passed DeepL locale.", () => {
 		expect(getDeepLLanguageByLocale("ET")).to.equal("Estonian");
@@ -63,9 +71,13 @@ describe("getDeepLLanguageByLocale()", () => {
 	});
 });
 
-describe("getGoogleTranslateLocaleByLanguage()", () => {
+describe("getGoogleTranslateLanguageByLocale()", () => {
 	it("returns the locale corresponding to the passed DeepL language.", () => {
 		expect(getGoogleTranslateLocaleByLanguage("Danish")).to.equal("da");
 		expect(getGoogleTranslateLocaleByLanguage("Indonesian")).to.equal("id");
 	});
+});
+
+describe("getLingvanexLanguageByLocale()", () => {
+	// TODO(vxern): Implement.
 });

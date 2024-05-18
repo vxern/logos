@@ -36,6 +36,8 @@ import {
 	type DeepLLocale,
 	type GoogleTranslateLanguage,
 	type GoogleTranslateLocale,
+	type LingvanexLanguage,
+	type LingvanexLocale,
 	type Language as TranslationLanguage,
 	type Locale as TranslationLocale,
 	type Translator,
@@ -43,8 +45,11 @@ import {
 	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
 	getGoogleTranslateLocaleByLanguage as getGoogleTranslateLocaleByTranslationLanguage,
 	getGoogleTranslateLanguageByLocale as getGoogleTranslateTranslationLanguageByLocale,
+	getLingvanexLocaleByLanguage as getLingvanexLocaleByTranslationLanguage,
+	getLingvanexLanguageByLocale as getLingvanexTranslationLanguageByLocale,
 	isDeepLLocale,
 	isGoogleTranslateLocale,
+	isLingvanexLocale,
 	isLanguage as isTranslationLanguage,
 	languages as translationLanguages,
 } from "logos:constants/languages/translation";
@@ -150,6 +155,9 @@ export {
 	getTranslationLanguage,
 	getFeatureLanguage,
 	getBaseLanguage,
+	getLingvanexTranslationLanguageByLocale,
+	getLingvanexLocaleByTranslationLanguage,
+	isLingvanexLocale,
 };
 export type {
 	Detector,
@@ -173,4 +181,6 @@ export type {
 	DetectionLanguage,
 	DetectionLocale,
 	WithBaseLanguage,
+	LingvanexLanguage,
+	LingvanexLocale,
 };

@@ -4,15 +4,17 @@ import { isDefined } from "logos:core/utilities";
 import type { TranslatorAdapter } from "logos/adapters/translators/adapter";
 import { DeepLAdapter } from "logos/adapters/translators/deepl";
 import { GoogleTranslateAdapter } from "logos/adapters/translators/google-translate";
+import { LingvanexAdapter } from "logos/adapters/translators/lingvanex";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
 class TranslatorStore {
-	static readonly priority: Translator[] = ["deepl", "google"];
+	static readonly priority: Translator[] = ["deepl", "google", "lingvanex"];
 
 	readonly adapters: {
 		readonly deepl?: DeepLAdapter;
 		readonly google?: GoogleTranslateAdapter;
+		readonly lingvanex?: LingvanexAdapter;
 	} & Partial<Record<Translator, TranslatorAdapter>>;
 
 	constructor(client: Client) {
@@ -20,17 +22,25 @@ class TranslatorStore {
 
 		const deeplAdapter = DeepLAdapter.tryCreate(client);
 		if (deeplAdapter === undefined) {
-			log.warn("`SECRET_DEEPL` was not provided. Logos will run without a DeepL integration.");
+			log.warn("`SECRET_DEEPL` has not been provided. Logos will run without a DeepL integration.");
 		}
 
 		const googleTranslateAdapter = GoogleTranslateAdapter.tryCreate(client);
 		if (googleTranslateAdapter === undefined) {
-			log.warn("`SECRET_RAPID_API` was not provided. Logos will run without a Google Translate integration.");
+			log.warn(
+				"`SECRET_RAPID_API` has not been provided. Logos will run without a Google Translate integration.",
+			);
+		}
+
+		const lingvanexAdapter = LingvanexAdapter.tryCreate(client);
+		if (lingvanexAdapter === undefined) {
+			log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a Lingvanex integration.");
 		}
 
 		this.adapters = {
 			deepl: deeplAdapter,
 			google: googleTranslateAdapter,
+			lingvanex: lingvanexAdapter,
 		};
 	}
 
