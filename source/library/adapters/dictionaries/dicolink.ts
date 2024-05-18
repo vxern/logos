@@ -1,6 +1,5 @@
 import type { LearningLanguage } from "logos:constants/languages";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
-import { isDefined } from "logos:core/utilities";
 import { type Definition, DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
 import type { Client } from "logos/client";
 
@@ -13,7 +12,7 @@ interface DicolinkResult {
 	readonly word?: string;
 	readonly definition: string;
 	readonly dicolinkUrl: string;
-};
+}
 
 class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 	static readonly #excludedSources = ["wiktionnaire"];
@@ -42,13 +41,15 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 		const response = await fetch(
 			// 'limite=200' maxes out the number of returned results.
 			// 'source=tous' tells Dicolink to fetch entries from all of its available dictionaries.
-			`${constants.endpoints.dicolink.definitions(lemma)}?limite=200&source=tous`, {
-			headers: {
-				"User-Agent": constants.USER_AGENT,
-				"X-RapidAPI-Key": this.token,
-				"X-RapidAPI-Host": constants.endpoints.dicolink.host,
+			`${constants.endpoints.dicolink.definitions(lemma)}?limite=200&source=tous`,
+			{
+				headers: {
+					"User-Agent": constants.USER_AGENT,
+					"X-RapidAPI-Key": this.token,
+					"X-RapidAPI-Host": constants.endpoints.dicolink.host,
+				},
 			},
-		});
+		);
 		if (!response.ok) {
 			return undefined;
 		}
@@ -65,7 +66,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 			dicolinkUrl: result.dicolinkUrl,
 		}));
 
-		return resultsAll.filter((result) => isDefined(result.partOfSpeech)) as DicolinkResult[];
+		return this.#pickResultsFromBestSource(resultsAll);
 	}
 
 	parse(
@@ -82,7 +83,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 				distribution[result.source]?.push(result);
 				return distribution;
 			},
-			Object.fromEntries(sources.map((source) => [source, []])) as Record<string, Result[]>,
+			Object.fromEntries(sources.map((source) => [source, []])) as Record<string, DicolinkResult[]>,
 		);
 		const results = Object.values(resultsDistributed).reduce((a, b) => {
 			return a.length > b.length ? a : b;
@@ -120,11 +121,14 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 		const sourcesAll = Array.from(new Set(resultsAll.map((result) => result.source)).values());
 		const sources = sourcesAll.filter((source) => !DicolinkAdapter.#excludedSources.includes(source));
 
-		const resultsDistributed = resultsAll.reduce((distribution, result) => {
-			distribution[result.source]?.push(result);
-			return distribution;
-		}, Object.fromEntries(sources.map((source) => [source, []])) as Record<string, DicolinkResult[]>);
-		return Object.values(resultsDistributed).reduce((a, b) => a.length > b.length ? a : b);
+		const resultsDistributed = resultsAll.reduce(
+			(distribution, result) => {
+				distribution[result.source]?.push(result);
+				return distribution;
+			},
+			Object.fromEntries(sources.map((source) => [source, []])) as Record<string, DicolinkResult[]>,
+		);
+		return Object.values(resultsDistributed).reduce((a, b) => (a.length > b.length ? a : b));
 	}
 }
 
