@@ -22,7 +22,9 @@ class RavenDBAdapter extends DatabaseAdapter {
 	}: { environment: Environment; host: string; port: string; database: string; certificate?: Buffer }) {
 		super({ identifier: "RavenDB", environment });
 
-		const url = `${host}:${port}`;
+		const protocol = certificate !== undefined ? "https" : "http";
+
+		const url = `${protocol}://${host}:${port}`;
 		if (certificate !== undefined) {
 			this.#database = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
 		} else {
