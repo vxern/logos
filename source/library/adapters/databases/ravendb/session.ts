@@ -52,7 +52,7 @@ class RavenDBDocumentSession extends DocumentSession {
 	}
 
 	async store<M extends Model>(document: M): Promise<void> {
-		await this.#session.store(document);
+		await this.#session.store(document, document.id);
 		await this.#session.saveChanges();
 	}
 
