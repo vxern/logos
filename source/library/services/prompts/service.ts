@@ -151,7 +151,7 @@ abstract class PromptService<
 		const prompts = new Map(validPrompts);
 		for (const [_, document] of this.documents) {
 			const userDocument = await this.getUserDocument(document);
-			const userId = BigInt(userDocument.account.id);
+			const userId = BigInt(userDocument.id);
 
 			let prompt = prompts.get(document.partialId);
 			if (prompt !== undefined) {

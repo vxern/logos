@@ -43,7 +43,6 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 	readonly createdAt: number;
 	readonly requestedRoleId: string;
 	readonly formData: EntryRequestFormData;
-
 	isFinalised: boolean;
 	forcedVerdict?: ForcedVerdict;
 	ticketChannelId?: string;
