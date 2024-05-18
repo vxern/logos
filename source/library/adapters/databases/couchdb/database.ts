@@ -4,8 +4,8 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { CouchDBDocumentConventions } from "logos/adapters/databases/couchdb/conventions";
 import type { CouchDBDocumentMetadata } from "logos/adapters/databases/couchdb/document";
 import { CouchDBDocumentSession } from "logos/adapters/databases/couchdb/session";
-import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import type { Logger } from "logos/logger";
+import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import nano from "nano";
 

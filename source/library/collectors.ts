@@ -6,8 +6,8 @@ import {
 	getLocaleByLocalisationLanguage,
 } from "logos:constants/languages";
 import type { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
-import { User } from "logos/database/user";
+import { Guild } from "logos/models/guild";
+import { User } from "logos/models/user";
 import { nanoid } from "nanoid";
 
 type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.EventHandlers> = (

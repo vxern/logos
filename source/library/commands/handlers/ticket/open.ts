@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
 import { TicketComposer } from "logos/commands/components/modal-composers/ticket-composer";
-import { Guild } from "logos/database/guild";
-import { Ticket } from "logos/database/ticket";
+import { Guild } from "logos/models/guild";
+import { Ticket } from "logos/models/ticket";
 
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });

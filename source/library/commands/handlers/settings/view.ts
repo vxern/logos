@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import { User } from "logos/database/user";
+import { User } from "logos/models/user";
 
 async function handleDisplaySettings(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });

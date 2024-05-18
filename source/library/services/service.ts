@@ -1,7 +1,7 @@
 import { type Locale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
 import type { Client } from "logos/client";
-import type { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
+import type { Guild } from "logos/models/guild";
 
 abstract class Service {
 	readonly log: Logger;

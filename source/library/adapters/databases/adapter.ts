@@ -1,7 +1,7 @@
 import type { Collection } from "logos:constants/database";
 import type { Environment } from "logos:core/loaders/environment";
-import { type IdentifierData, type IdentifierDataOrMetadata, Model } from "logos/database/model";
 import { Logger } from "logos/logger";
+import { type IdentifierData, type IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 abstract class DatabaseAdapter {

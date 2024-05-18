@@ -1,7 +1,7 @@
 import { mention, trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { Ticket, type TicketFormData, type TicketType } from "logos/database/ticket";
-import { User } from "logos/database/user";
+import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
+import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
 class TicketPromptService extends PromptService<{

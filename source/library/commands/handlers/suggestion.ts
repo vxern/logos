@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
 import { SuggestionComposer } from "logos/commands/components/modal-composers/suggestion-composer";
-import { Guild } from "logos/database/guild";
-import { Suggestion } from "logos/database/suggestion";
+import { Guild } from "logos/models/guild";
+import { Suggestion } from "logos/models/suggestion";
 
 async function handleMakeSuggestion(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });

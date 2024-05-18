@@ -4,7 +4,7 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { InMemoryDocumentConventions } from "logos/adapters/databases/in-memory/conventions";
 import type { InMemoryDocumentMetadata } from "logos/adapters/databases/in-memory/document";
 import { InMemoryDocumentSession } from "logos/adapters/databases/in-memory/session";
-import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 class InMemoryAdapter extends DatabaseAdapter {

@@ -1,6 +1,6 @@
 import type { Client } from "logos/client";
-import type { Report } from "logos/database/report";
-import { User } from "logos/database/user";
+import type { Report } from "logos/models/report";
+import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
 class ReportPromptService extends PromptService<{

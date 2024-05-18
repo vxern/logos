@@ -1,7 +1,7 @@
 import type { Collection } from "logos:constants/database";
 import { DocumentConventions } from "logos/adapters/databases/adapter";
 import type { RethinkDBDocument, RethinkDBDocumentMetadata } from "logos/adapters/databases/rethinkdb/document";
-import { type IdentifierDataOrMetadata, Model } from "logos/database/model";
+import { type IdentifierDataOrMetadata, Model } from "logos/models/model";
 import { DatabaseStore } from "logos/stores/database";
 
 class RethinkDBDocumentConventions extends DocumentConventions<RethinkDBDocumentMetadata> {

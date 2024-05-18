@@ -1,6 +1,6 @@
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import type { Guild } from "logos/database/guild";
+import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
 import type { ServiceStore } from "logos/stores/services";
 import Hash from "object-hash";

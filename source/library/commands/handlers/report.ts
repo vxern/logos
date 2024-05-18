@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
 import { ReportComposer } from "logos/commands/components/modal-composers/report-composer";
-import { Guild } from "logos/database/guild";
-import { Report } from "logos/database/report";
+import { Guild } from "logos/models/guild";
+import { Report } from "logos/models/report";
 
 async function handleMakeReport(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });

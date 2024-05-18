@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
+import { Guild } from "logos/models/guild";
 
 async function handleDisplayModerationPolicy(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });

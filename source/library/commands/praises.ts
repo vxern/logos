@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { Praise } from "logos/database/praise";
+import type { Praise } from "logos/models/praise";
 
 function getPraisePage(
 	client: Client,

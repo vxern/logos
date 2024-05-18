@@ -1,7 +1,7 @@
 import { mention } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
-import { Praise } from "logos/database/praise";
+import { Guild } from "logos/models/guild";
+import { Praise } from "logos/models/praise";
 
 async function handlePraiseUserAutocomplete(
 	client: Client,

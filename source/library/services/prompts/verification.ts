@@ -1,11 +1,11 @@
 import { mention, timestamp } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import type { EntryRequest, VoteType } from "logos/database/entry-request";
-import type { Guild } from "logos/database/guild";
-import { Model } from "logos/database/model";
-import { Ticket } from "logos/database/ticket";
-import { User } from "logos/database/user";
+import type { EntryRequest, VoteType } from "logos/models/entry-request";
+import type { Guild } from "logos/models/guild";
+import { Model } from "logos/models/model";
+import { Ticket } from "logos/models/ticket";
+import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
 type Configuration = NonNullable<Guild["verification"]>;

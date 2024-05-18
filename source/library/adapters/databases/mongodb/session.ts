@@ -4,7 +4,7 @@ import { DocumentSession } from "logos/adapters/databases/adapter";
 import { MongoDBDocumentConventions } from "logos/adapters/databases/mongodb/conventions";
 import type { MongoDBDocument } from "logos/adapters/databases/mongodb/document";
 import { MongoDBDocumentQuery } from "logos/adapters/databases/mongodb/query";
-import { Model } from "logos/database/model";
+import { Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import type mongodb from "mongodb";
 

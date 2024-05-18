@@ -4,7 +4,7 @@ import { DocumentSession } from "logos/adapters/databases/adapter";
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
 import type { RethinkDBDocument } from "logos/adapters/databases/rethinkdb/document";
 import { RethinkDBDocumentQuery } from "logos/adapters/databases/rethinkdb/query";
-import { Model } from "logos/database/model";
+import { Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 

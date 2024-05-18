@@ -1,7 +1,7 @@
 import { mention } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { Praise } from "logos/database/praise";
-import { Warning } from "logos/database/warning";
+import { Praise } from "logos/models/praise";
+import { Warning } from "logos/models/warning";
 
 async function handleDisplayProfileAutocomplete(
 	client: Client,

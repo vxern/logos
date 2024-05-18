@@ -1,6 +1,6 @@
 import { DocumentQuery } from "logos/adapters/databases/adapter";
 import type { CouchDBDocumentSession } from "logos/adapters/databases/couchdb/session";
-import type { Model } from "logos/database/model";
+import type { Model } from "logos/models/model";
 import type nano from "nano";
 
 class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {

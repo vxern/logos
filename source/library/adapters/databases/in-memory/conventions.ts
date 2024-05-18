@@ -1,7 +1,7 @@
 import type { Collection } from "logos:constants/database";
 import { DocumentConventions } from "logos/adapters/databases/adapter";
 import type { InMemoryDocumentMetadata } from "logos/adapters/databases/in-memory/document";
-import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
+import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 
 class InMemoryDocumentConventions extends DocumentConventions<InMemoryDocumentMetadata> {
 	get id(): string {

@@ -1,7 +1,7 @@
 import { timestamp } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
-import { Warning } from "logos/database/warning";
+import { Warning } from "logos/models/warning";
 
 async function handleDisplayWarningsAutocomplete(
 	client: Client,

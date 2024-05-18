@@ -3,8 +3,8 @@ import { timeStructToMilliseconds } from "logos:constants/time";
 import { mention } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
-import { Guild } from "logos/database/guild";
-import { Warning } from "logos/database/warning";
+import { Guild } from "logos/models/guild";
+import { Warning } from "logos/models/warning";
 
 async function handleWarnUserAutocomplete(
 	client: Client,

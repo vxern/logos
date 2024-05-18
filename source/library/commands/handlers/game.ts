@@ -3,8 +3,8 @@ import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { GuildStatistics } from "logos/database/guild-statistics";
-import { User } from "logos/database/user";
+import { GuildStatistics } from "logos/models/guild-statistics";
+import { User } from "logos/models/user";
 import type { SentencePair } from "logos/stores/volatile";
 
 function random(max: number): number {

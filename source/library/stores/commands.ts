@@ -17,8 +17,8 @@ import type {
 	OptionTemplate,
 } from "logos/commands/commands";
 import type { InteractionHandler } from "logos/commands/handlers/handler";
-import type { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
+import type { Guild } from "logos/models/guild";
 import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
 
 interface RateLimit {

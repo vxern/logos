@@ -2,8 +2,8 @@ import { EventEmitter } from "node:events";
 import { mention } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import type { Guild } from "logos/database/guild";
 import { Logger } from "logos/logger";
+import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
 

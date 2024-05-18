@@ -1,6 +1,6 @@
 import type { Locale } from "logos:constants/languages";
 import type { Client } from "logos/client";
-import { type IdentifierData, Model } from "logos/database/model";
+import { type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 type GameType =

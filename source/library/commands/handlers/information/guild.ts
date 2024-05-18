@@ -1,6 +1,6 @@
 import { mention, timestamp } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { Guild } from "logos/database/guild";
+import { Guild } from "logos/models/guild";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(client: Client, interaction: Logos.Interaction): Promise<void> {

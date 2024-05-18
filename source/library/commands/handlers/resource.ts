@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
 import { ResourceComposer } from "logos/commands/components/modal-composers/resource-composer";
-import { Guild } from "logos/database/guild";
-import { Resource } from "logos/database/resource";
+import { Guild } from "logos/models/guild";
+import { Resource } from "logos/models/resource";
 
 async function handleSubmitResource(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });

@@ -1,7 +1,7 @@
 import { parseArgs } from "node:util";
 import { loadEnvironment } from "logos:core/loaders/environment";
 import * as bun from "bun";
-import { Guild } from "logos/database/guild";
+import { Guild } from "logos/models/guild";
 import { DatabaseStore } from "logos/stores/database";
 import winston from "winston";
 

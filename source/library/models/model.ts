@@ -3,7 +3,7 @@ import { timeStructToMilliseconds } from "logos:constants/time";
 import { capitalise, decapitalise } from "logos:core/formatting";
 import type { DocumentConventions } from "logos/adapters/databases/adapter";
 import type { Client } from "logos/client";
-import type { RateLimit } from "logos/database/guild";
+import type { RateLimit } from "logos/models/guild";
 import type { DatabaseStore } from "logos/stores/database";
 
 type ClientOrDatabaseStore = Client | DatabaseStore;

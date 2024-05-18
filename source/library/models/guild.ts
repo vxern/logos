@@ -1,8 +1,8 @@
 import type { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
 import type { TimeStruct } from "logos:constants/time";
 import type { Client } from "logos/client";
-import { GuildStatistics } from "logos/database/guild-statistics";
-import { type IdentifierData, Model } from "logos/database/model";
+import { GuildStatistics } from "logos/models/guild-statistics";
+import { type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 /** @since v3.5.0 */

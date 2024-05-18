@@ -1,7 +1,7 @@
 import { trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { SuggestionFormData } from "logos/database/suggestion";
+import type { SuggestionFormData } from "logos/models/suggestion";
 
 class SuggestionComposer extends ModalComposer<SuggestionFormData, never> {
 	constructor(client: Client, { interaction }: { interaction: Logos.Interaction }) {

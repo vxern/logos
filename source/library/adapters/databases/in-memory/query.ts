@@ -1,5 +1,5 @@
 import { DocumentQuery } from "logos/adapters/databases/adapter";
-import type { Model } from "logos/database/model";
+import type { Model } from "logos/models/model";
 
 class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	#documents: Map<string, M>;

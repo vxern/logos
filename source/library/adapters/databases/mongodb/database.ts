@@ -4,8 +4,8 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { MongoDBDocumentConventions } from "logos/adapters/databases/mongodb/conventions";
 import type { MongoDBDocumentMetadata } from "logos/adapters/databases/mongodb/document";
 import { MongoDBDocumentSession } from "logos/adapters/databases/mongodb/session";
-import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import type { Logger } from "logos/logger";
+import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import mongodb from "mongodb";
 

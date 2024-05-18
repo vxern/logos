@@ -4,7 +4,7 @@ import { DocumentSession } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
 import type { RavenDBDocument } from "logos/adapters/databases/ravendb/document";
 import { RavenDBDocumentQuery } from "logos/adapters/databases/ravendb/query";
-import type { Model } from "logos/database/model";
+import type { Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import type * as ravendb from "ravendb";
 

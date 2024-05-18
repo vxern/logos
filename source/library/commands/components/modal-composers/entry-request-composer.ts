@@ -1,6 +1,6 @@
 import { trim } from "logos:core/formatting";
 import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { EntryRequestFormData } from "logos/database/entry-request";
+import type { EntryRequestFormData } from "logos/models/entry-request";
 
 class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 	buildModal(

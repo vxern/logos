@@ -3,13 +3,13 @@ import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } 
 import type { Properties } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
 import type * as Discord from "@discordeno/bot";
-import type { EntryRequest } from "logos/database/entry-request";
-import type { Praise } from "logos/database/praise";
-import type { Report } from "logos/database/report";
-import type { Resource } from "logos/database/resource";
-import type { Suggestion } from "logos/database/suggestion";
-import type { Ticket } from "logos/database/ticket";
-import type { Warning } from "logos/database/warning";
+import type { EntryRequest } from "logos/models/entry-request";
+import type { Praise } from "logos/models/praise";
+import type { Report } from "logos/models/report";
+import type { Resource } from "logos/models/resource";
+import type { Suggestion } from "logos/models/suggestion";
+import type { Ticket } from "logos/models/ticket";
+import type { Warning } from "logos/models/warning";
 
 declare global {
 	interface PromiseConstructor {

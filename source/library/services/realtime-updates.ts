@@ -1,7 +1,7 @@
 // import { Collection } from "logos:constants/database";
 import type { Client } from "logos/client";
-// import { Guild } from "logos/database/guild";
-// import { Model } from "logos/database/model";
+// import { Guild } from "logos/models/guild";
+// import { Model } from "logos/models/model";
 import { ActionLock } from "logos/helpers/action-lock";
 import { GlobalService } from "logos/services/service";
 // import * as ravendb from "ravendb";

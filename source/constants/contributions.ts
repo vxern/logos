@@ -90,7 +90,7 @@ const contributors = Object.freeze({
 	telemaniak: {
 		username: "@telemaniak",
 		id: "410812091071725598",
-		link: "mailto:macmillantrenton@gmail.com"
+		link: "mailto:macmillantrenton@gmail.com",
 	},
 	vxern: {
 		username: "@vxern",

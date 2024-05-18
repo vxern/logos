@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { Guild } from "logos/database/guild";
+import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
 
 class AlertService extends LocalService {

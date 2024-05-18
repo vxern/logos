@@ -2,7 +2,7 @@ import type { Collection } from "logos:constants/database";
 import { DocumentQuery } from "logos/adapters/databases/adapter";
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
 import type { RethinkDBDocument } from "logos/adapters/databases/rethinkdb/document";
-import type { Model } from "logos/database/model";
+import type { Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 

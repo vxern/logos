@@ -5,8 +5,8 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
 import type { RavenDBDocumentMetadataContainer } from "logos/adapters/databases/ravendb/document";
 import { RavenDBDocumentSession } from "logos/adapters/databases/ravendb/session";
-import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import type { Logger } from "logos/logger";
+import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import * as ravendb from "ravendb";
 

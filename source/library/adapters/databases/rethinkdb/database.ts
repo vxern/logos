@@ -4,8 +4,8 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
 import type { RethinkDBDocumentMetadata } from "logos/adapters/databases/rethinkdb/document";
 import { RethinkDBDocumentSession } from "logos/adapters/databases/rethinkdb/session";
-import type { IdentifierDataOrMetadata, Model } from "logos/database/model";
 import type { Logger } from "logos/logger";
+import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import rethinkdb from "rethinkdb-ts";
 

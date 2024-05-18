@@ -1,6 +1,6 @@
 import type { Client } from "logos/client";
-import type { Resource } from "logos/database/resource";
-import { User } from "logos/database/user";
+import type { Resource } from "logos/models/resource";
+import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
 class ResourcePromptService extends PromptService<{

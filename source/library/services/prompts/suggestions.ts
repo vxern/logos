@@ -1,6 +1,6 @@
 import type { Client } from "logos/client";
-import type { Suggestion } from "logos/database/suggestion";
-import { User } from "logos/database/user";
+import type { Suggestion } from "logos/models/suggestion";
+import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
 class SuggestionPromptService extends PromptService<{

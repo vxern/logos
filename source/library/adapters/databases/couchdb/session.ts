@@ -4,7 +4,7 @@ import { DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBDocumentConventions } from "logos/adapters/databases/couchdb/conventions";
 import type { CouchDBDocument } from "logos/adapters/databases/couchdb/document";
 import { CouchDBDocumentQuery } from "logos/adapters/databases/couchdb/query";
-import type { Model } from "logos/database/model";
+import type { Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import type nano from "nano";
 

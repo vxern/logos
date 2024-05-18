@@ -2,7 +2,7 @@ import type { Collection } from "logos:constants/database";
 import type { Environment } from "logos:core/loaders/environment";
 import { type DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
 import { InMemoryDocumentQuery } from "logos/adapters/databases/in-memory/query";
-import { Model } from "logos/database/model";
+import { Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 class InMemoryDocumentSession extends DocumentSession {

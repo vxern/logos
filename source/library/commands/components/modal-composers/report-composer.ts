@@ -1,6 +1,6 @@
 import { trim } from "logos:core/formatting";
 import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { ReportFormData } from "logos/database/report";
+import type { ReportFormData } from "logos/models/report";
 
 class ReportComposer extends ModalComposer<ReportFormData, never> {
 	buildModal(submission: Logos.Interaction, { formData }: { formData: ReportFormData }): Modal<ReportFormData> {

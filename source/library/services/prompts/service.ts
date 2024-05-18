@@ -1,8 +1,8 @@
 import type { Client } from "logos/client";
 import { Collector, InteractionCollector } from "logos/collectors";
-import type { Guild } from "logos/database/guild";
-import type { Model } from "logos/database/model";
-import type { User } from "logos/database/user";
+import type { Guild } from "logos/models/guild";
+import type { Model } from "logos/models/model";
+import type { User } from "logos/models/user";
 import { LocalService } from "logos/services/service";
 import type { ServiceStore } from "logos/stores/services";
 

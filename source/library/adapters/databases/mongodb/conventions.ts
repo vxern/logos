@@ -1,7 +1,7 @@
 import type { Collection } from "logos:constants/database";
 import { DocumentConventions } from "logos/adapters/databases/adapter";
 import type { MongoDBDocument, MongoDBDocumentMetadata } from "logos/adapters/databases/mongodb/document";
-import { type IdentifierDataOrMetadata, Model } from "logos/database/model";
+import { type IdentifierDataOrMetadata, Model } from "logos/models/model";
 import { DatabaseStore } from "logos/stores/database";
 
 class MongoDBDocumentConventions extends DocumentConventions<MongoDBDocumentMetadata> {

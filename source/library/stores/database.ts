@@ -6,18 +6,18 @@ import { InMemoryAdapter } from "logos/adapters/databases/in-memory/database";
 import { MongoDBAdapter } from "logos/adapters/databases/mongodb/database";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb/database";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
-import { EntryRequest } from "logos/database/entry-request";
-import { Guild } from "logos/database/guild";
-import { GuildStatistics } from "logos/database/guild-statistics";
-import type { Model, ModelConstructor } from "logos/database/model";
-import { Praise } from "logos/database/praise";
-import { Report } from "logos/database/report";
-import { Resource } from "logos/database/resource";
-import { Suggestion } from "logos/database/suggestion";
-import { Ticket } from "logos/database/ticket";
-import { User } from "logos/database/user";
-import { Warning } from "logos/database/warning";
 import { Logger } from "logos/logger";
+import { EntryRequest } from "logos/models/entry-request";
+import { Guild } from "logos/models/guild";
+import { GuildStatistics } from "logos/models/guild-statistics";
+import type { Model, ModelConstructor } from "logos/models/model";
+import { Praise } from "logos/models/praise";
+import { Report } from "logos/models/report";
+import { Resource } from "logos/models/resource";
+import { Suggestion } from "logos/models/suggestion";
+import { Ticket } from "logos/models/ticket";
+import { User } from "logos/models/user";
+import { Warning } from "logos/models/warning";
 
 class DatabaseStore {
 	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({

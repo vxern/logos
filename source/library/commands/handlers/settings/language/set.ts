@@ -1,7 +1,7 @@
 import languages, { getLocaleByLocalisationLanguage, isLocalisationLanguage } from "logos:constants/languages";
 import { trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { User } from "logos/database/user";
+import { User } from "logos/models/user";
 
 async function handleSetLanguageAutocomplete(
 	client: Client,

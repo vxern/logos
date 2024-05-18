@@ -2,7 +2,7 @@ import { describe, it } from "bun:test";
 import { type TimeUnit, timeStructToMilliseconds } from "logos:constants/time";
 import { useDatabaseStore } from "logos:test/dependencies";
 import { expect } from "chai";
-import { Guild } from "logos/database/guild";
+import { Guild } from "logos/models/guild";
 
 describe("Guild", () => {
 	const database = useDatabaseStore();

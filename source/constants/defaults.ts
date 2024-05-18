@@ -5,7 +5,7 @@ import type {
 	LocalisationLanguage,
 	TranslationLanguage,
 } from "logos:constants/languages";
-import type { RateLimit, TimeStruct } from "logos/database/guild";
+import type { RateLimit, TimeStruct } from "logos/models/guild";
 
 const FEATURE_LOCALE: Locale = "eng-US";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";

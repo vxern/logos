@@ -3,9 +3,9 @@ import { code } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { EntryRequestComposer } from "logos/commands/components/modal-composers/entry-request-composer";
-import { EntryRequest } from "logos/database/entry-request";
-import type { Guild } from "logos/database/guild";
-import { User } from "logos/database/user";
+import { EntryRequest } from "logos/models/entry-request";
+import type { Guild } from "logos/models/guild";
+import { User } from "logos/models/user";
 import { LocalService } from "logos/services/service";
 
 class EntryService extends LocalService {

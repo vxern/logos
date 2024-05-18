@@ -3,11 +3,11 @@ import type { Environment } from "logos:core/loaders/environment";
 import { Collector, InteractionCollector } from "logos/collectors";
 import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
-import { Guild } from "logos/database/guild";
-import { Model } from "logos/database/model";
 import { Diagnostics } from "logos/diagnostics";
 import { ActionLock } from "logos/helpers/action-lock";
 import { Logger } from "logos/logger";
+import { Guild } from "logos/models/guild";
+import { Model } from "logos/models/model";
 import type { InteractionRepetitionService } from "logos/services/interaction-repetition";
 import type { LavalinkService } from "logos/services/lavalink";
 import type { RealtimeUpdateService } from "logos/services/realtime-updates";
@@ -521,8 +521,8 @@ class Client {
 
 		this.log.info(`Handling ${this.diagnostics.interaction(interaction)}...`);
 
-		await handle(this, interaction).catch(
-			(error) => this.log.error(`Failed to handle ${this.diagnostics.interaction(interaction)}: `, error)
+		await handle(this, interaction).catch((error) =>
+			this.log.error(`Failed to handle ${this.diagnostics.interaction(interaction)}: `, error),
 		);
 	}
 }
