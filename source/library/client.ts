@@ -519,12 +519,9 @@ class Client {
 			}
 		}
 
-		try {
-			this.log.info(`Handling ${this.diagnostics.interaction(interaction)}...`);
-			await handle(this, interaction);
-		} catch (exception) {
-			this.log.error(exception);
-		}
+		this.log.info(`Handling ${this.diagnostics.interaction(interaction)}...`);
+
+		await handle(this, interaction).catch((error) => this.log.error(error));
 	}
 }
 
