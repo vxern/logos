@@ -8,7 +8,7 @@ import { getGoogleTranslateLanguageByLocale, isGoogleTranslateLocale } from "log
 import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 
-interface GoogleTranslationResult {
+interface GoogleTranslateResult {
 	readonly data: {
 		readonly translations: {
 			readonly detectedSourceLanguage?: string;
@@ -68,9 +68,9 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 			return undefined;
 		}
 
-		let result: GoogleTranslationResult;
+		let result: GoogleTranslateResult;
 		try {
-			result = (await response.json()) as GoogleTranslationResult;
+			result = (await response.json()) as GoogleTranslateResult;
 		} catch (exception) {
 			this.client.log.error("Reading response data for text translation failed:", exception);
 			return undefined;
