@@ -6,6 +6,8 @@
 
 ##### examples - pronunciation - inflection - etymologies - relations - expressions - usage notes - and more
 
+![Licence](https://img.shields.io/github/license/vxern/logos.svg?style=for-the-badge) ![Release](https://img.shields.io/github/release/vxern/logos.svg?style=for-the-badge) ![Pull Requests](https://img.shields.io/github/issues-pr/vxern/logos.svg?style=for-the-badge) ![Issues](https://img.shields.io/github/issues/vxern/logos.svg?style=for-the-badge) ![Wakatime](https://wakatime.com/badge/github/vxern/logos.svg?style=for-the-badge)
+
 ### Language Support
 
 - 📖 Definitions available for words in the above listed languages, sourced variously from **Wiktionary**, **Dexonline**, **Dicolink**, and **WordsAPI**, with **PONS** and **Wordnik** integrations on the way.
