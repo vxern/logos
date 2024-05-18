@@ -9,12 +9,20 @@ import { type TranslationResult, TranslatorAdapter } from "logos/adapters/transl
 import type { Client } from "logos/client";
 
 class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
-	constructor(client: Client) {
+	readonly token: string;
+
+	constructor(client: Client, { token }: { token: string }) {
 		super(client, { identifier: "DeepL" });
 
+		this.token = token;
+	}
+
+	static tryCreate(client: Client): DeepLAdapter | undefined {
 		if (client.environment.deeplSecret === undefined) {
-			this.log.warn("`SECRET_DEEPL` was not provided. Logos will run without a DeepL integration.");
+			return undefined;
 		}
+
+		return new DeepLAdapter(client, { token: client.environment.deeplSecret });
 	}
 
 	async translate({
@@ -40,7 +48,7 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 				headers: {
 					"User-Agent": constants.USER_AGENT,
 					"Content-Type": "application/json",
-					Authorization: `DeepL-Auth-Key ${this.client.environment.deeplSecret}`,
+					Authorization: `DeepL-Auth-Key ${this.token}`,
 				},
 				body: JSON.stringify({
 					text: [text],

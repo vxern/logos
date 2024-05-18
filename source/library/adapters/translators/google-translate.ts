@@ -9,23 +9,29 @@ import { type TranslationResult, TranslatorAdapter } from "logos/adapters/transl
 import type { Client } from "logos/client";
 
 interface GoogleTranslationResult {
-	data: {
-		translations: {
-			detectedSourceLanguage?: string;
-			translatedText: string;
+	readonly data: {
+		readonly translations: {
+			readonly detectedSourceLanguage?: string;
+			readonly translatedText: string;
 		}[];
 	};
 }
 
 class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> {
-	constructor(client: Client) {
+	readonly token: string;
+
+	constructor(client: Client, { token }: { token: string }) {
 		super(client, { identifier: "GoogleTranslate" });
 
+		this.token = token;
+	}
+
+	static tryCreate(client: Client): GoogleTranslateAdapter | undefined {
 		if (client.environment.rapidApiSecret === undefined) {
-			this.log.warn(
-				"`SECRET_RAPID_API` was not provided. Logos will run without a Google Translate integration.",
-			);
+			return undefined;
 		}
+
+		return new GoogleTranslateAdapter(client, { token: client.environment.rapidApiSecret });
 	}
 
 	async translate({
@@ -48,7 +54,7 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 				headers: {
 					"User-Agent": constants.USER_AGENT,
 					"Content-Type": "application/x-www-form-urlencoded",
-					"X-RapidAPI-Key": this.client.environment.rapidApiSecret,
+					"X-RapidAPI-Key": this.token,
 					"X-RapidAPI-Host": constants.endpoints.googleTranslate.host,
 				},
 				body: new URLSearchParams({ source: locales.source, target: locales.target, q: text, format: "text" }),
