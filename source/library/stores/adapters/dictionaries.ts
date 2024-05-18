@@ -13,27 +13,30 @@ class DictionaryStore {
 	readonly log: Logger;
 	readonly adapters: {
 		readonly dexonline: DexonlineAdapter;
+		readonly dicolink?: DicolinkAdapter;
 		readonly wiktionary: WiktionaryAdapter;
-		dicolink?: DicolinkAdapter;
-		"words-api"?: WordsAPIAdapter;
+		readonly "words-api"?: WordsAPIAdapter;
 	} & Partial<Record<Dictionary, DictionaryAdapter>>;
 
 	constructor(client: Client) {
 		this.log = Logger.create({ identifier: "Client/DictionaryStore", isDebug: client.environment.isDebug });
+
+		const dicolinkAdapter = DicolinkAdapter.tryCreate(client);
+		if (dicolinkAdapter === undefined) {
+			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a Dicolink integration.")
+		}
+
+		const wordsApiAdapter = WordsAPIAdapter.tryCreate(client);
+		if (wordsApiAdapter === undefined) {
+			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a WordsAPI integration.")
+		}
+
 		this.adapters = {
 			dexonline: new DexonlineAdapter(client),
+			dicolink: dicolinkAdapter,
 			wiktionary: new WiktionaryAdapter(client),
+			"words-api": wordsApiAdapter,
 		};
-
-		if (client.environment.rapidApiSecret !== undefined) {
-			this.adapters.dicolink = new DicolinkAdapter(client);
-			this.adapters["words-api"] = new WordsAPIAdapter(client);
-		} else {
-			this.log.warn(
-				"`SECRET_RAPIDAPI` has not been provided. Logos will run without its Dicolink and WordsAPI" +
-					" integrations.",
-			);
-		}
 	}
 
 	getAdapters({ learningLanguage }: { learningLanguage: LearningLanguage }): DictionaryAdapter[] {

@@ -4,36 +4,49 @@ import { type Definition, DictionaryAdapter, type DictionaryEntry } from "logos/
 import type { Client } from "logos/client";
 
 type SearchResult = {
-	results: Array<{
-		definition: string;
-		partOfSpeech: string;
-		synonyms?: string[];
-		typeof?: string[];
-		derivation?: string[];
-	}>;
-	syllables: {
-		count: number;
-		list: string[];
+	readonly results: {
+		readonly definition: string;
+		readonly partOfSpeech: string;
+		readonly synonyms?: string[];
+		readonly typeof?: string[];
+		readonly derivation?: string[];
+	}[];
+	readonly syllables: {
+		readonly count: number;
+		readonly list: string[];
 	};
-	pronunciation: {
-		all: string;
+	readonly pronunciation: {
+		readonly all: string;
 	};
 };
 
 class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
-	constructor(client: Client) {
+	readonly token: string;
+
+	constructor(client: Client, { token }: { token: string }) {
 		super(client, {
 			identifier: "WordsAPI",
 			provides: ["definitions"],
 			supports: ["English/American", "English/British"],
 			isFallback: true,
 		});
+
+		this.token = token;
+	}
+
+	static tryCreate(client: Client): WordsAPIAdapter | undefined {
+		if (client.environment.rapidApiSecret === undefined) {
+			return undefined;
+		}
+
+		return new WordsAPIAdapter(client, { token: client.environment.rapidApiSecret });
 	}
 
 	async fetch(lemma: string, _: LearningLanguage): Promise<SearchResult | undefined> {
 		const response = await fetch(constants.endpoints.words.word(lemma), {
 			headers: {
-				"X-RapidAPI-Key": this.client.environment.rapidApiSecret!,
+				"User-Agent": constants.USER_AGENT,
+				"X-RapidAPI-Key": this.token,
 				"X-RapidAPI-Host": constants.endpoints.words.host,
 			},
 		});
