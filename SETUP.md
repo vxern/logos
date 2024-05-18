@@ -177,6 +177,11 @@ To get a DeepL token, you will need to have a DeepL account.
 SECRET_DEEPL=<token goes here>
 ```
 
+<!-- 
+The following dictionaries have integrations that were implemented on the word overhaul branch, but which aren't present
+in the main branch yet. I'll be leaving their setup entries out here for when they're added.
+--->
+<!--
 ### Step 5.3: Wordnik
 
 > Logos uses Wordnik to provide information about words in English. The free plan comes with a limit of 100 calls per hour.
@@ -202,6 +207,7 @@ To get a PONS token, you will need to have a PONS account, and then submit an AP
 ```
 SECRET_PONS=<token goes here>
 ```
+--->
 
 ### That's all!
 
