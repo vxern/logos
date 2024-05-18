@@ -38,7 +38,6 @@ const contributors = Object.freeze({
 	estheroide: {
 		username: "@estheroide",
 		id: "747900197358665758",
-		link: "https://instagram.com/yosgatian",
 	},
 	kamelNeon: {
 		username: "KamelNeoN#8068",
