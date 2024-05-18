@@ -30,6 +30,10 @@ class RavenDBAdapter extends DatabaseAdapter {
 		} else {
 			this.#database = new ravendb.DocumentStore(url, database);
 		}
+
+		// @ts-expect-error: We don't want RavenDB to be setting the `id` property on documents since we handle that
+		// ourselves.
+		this.#database.conventions.getIdentityProperty = () => undefined;
 	}
 
 	static async tryCreate({
