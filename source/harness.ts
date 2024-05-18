@@ -15,13 +15,13 @@ Object.mirror = <T extends Record<string, string>>(object: T) => {
 Promise.createRace = async function* <T, R>(
 	this,
 	elements: T[],
-	doAction: (element: T) => Promise<R | undefined>,
+	doAction: (element: T) => R | Promise<R | undefined> | undefined,
 ): AsyncGenerator<{ element: T; result?: R }, void, void> {
 	const promisesWithResolver = elements.map(() => Promise.withResolvers<{ element: T; result?: R }>());
 
 	const resolvers = [...promisesWithResolver];
 	for (const element of elements) {
-		doAction(element).then((result) => {
+		Promise.resolve(doAction(element)).then((result) => {
 			const { resolve } = resolvers.shift()!;
 
 			if (result === undefined) {
