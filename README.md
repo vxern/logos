@@ -26,7 +26,7 @@
 - 💢 Moderation tools, including user verification, user reports, a warning + pardoning system, fine-tunable slowmode, message purging, rule citation, policy viewing, and more.
 - 💐 Social features including viewing user profiles and thanking users for their contributions.
 
-### Ready to [set up](SETUP.md), [contribute](CONTRIBUTING.md) or [join the community](https://discord.gg/TWdAjkTfah)?
+### Ready to [join the community](https://discord.gg/TWdAjkTfah), [set up](SETUP.md) or [contribute](CONTRIBUTING.md)?
 
 ### Contributors
 
