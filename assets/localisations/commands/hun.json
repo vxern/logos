@@ -371,7 +371,6 @@
     "music.options.pause.strings.paused.description": "Paused the playback of music.",
     "music.options.play.name": "lejátszás",
     "music.options.play.description": "Zenelejátszást tesz lehetővé egy hangcsatornában.",
-    "music.options.play.options.file.options.url.description": "A hangfájl linkje.",
     "music.options.play.options.youtube.name": "youtube",
     "music.options.play.options.youtube.description": "Plays a song from YouTube.",
     "music.options.play.strings.selectSong.title": "Select an entry",

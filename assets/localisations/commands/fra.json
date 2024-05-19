@@ -371,7 +371,6 @@
     "music.options.pause.strings.paused.description": "La lecture de musique est mise en pause.",
     "music.options.play.name": "passe",
     "music.options.play.description": "Permet à l'utilisateur de lire de la musique dans un salon vocal.",
-    "music.options.play.options.file.options.url.description": "Lien vers le fichier audio.",
     "music.options.play.options.youtube.name": "youtube",
     "music.options.play.options.youtube.description": "Lit une chanson de YouTube.",
     "music.options.play.strings.selectSong.title": "Choisissez une entrée",

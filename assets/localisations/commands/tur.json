@@ -371,7 +371,6 @@
     "music.options.pause.strings.paused.description": "Müzik çalma duraklatıldı.",
     "music.options.play.name": "çal",
     "music.options.play.description": "Kullanıcının bir ses kanalında müzik çalmasına izin verir.",
-    "music.options.play.options.file.options.url.description": "Ses dosyasının bağlantısı.",
     "music.options.play.options.youtube.name": "youtube",
     "music.options.play.options.youtube.description": "YouTube'dan bir şarkı çalar.",
     "music.options.play.strings.selectSong.title": "Bir girdi seçin",

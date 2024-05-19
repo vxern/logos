@@ -370,7 +370,6 @@
     "music.options.pause.strings.paused.description": "Wstrzymano odtwarzanie muzyki.",
     "music.options.play.name": "odtwórz",
     "music.options.play.description": "Pozwala użytkownikowi na odtwarzanie muzyki w kanale głosowym.",
-    "music.options.play.options.file.options.url.description": "Link do pliku audio.",
     "music.options.play.options.youtube.name": "youtube",
     "music.options.play.options.youtube.description": "Odtwarza muzykę z platformy YouTube.",
     "music.options.play.strings.selectSong.title": "Wybierz rezultat",

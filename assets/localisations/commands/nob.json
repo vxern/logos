@@ -371,7 +371,6 @@
     "music.options.pause.strings.paused.description": "Satt avspillingen av musikk på pause.",
     "music.options.play.name": "spill",
     "music.options.play.description": "Tillater brukeren å spille musikk i en stemmekanal.",
-    "music.options.play.options.file.options.url.description": "Lenke til lydfilen.",
     "music.options.play.options.youtube.name": "youtube",
     "music.options.play.options.youtube.description": "Spiller en sang fra YouTube.",
     "music.options.play.strings.selectSong.title": "Velg en oppføring",

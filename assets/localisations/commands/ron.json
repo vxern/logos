@@ -371,7 +371,6 @@
     "music.options.pause.strings.paused.description": "Redarea muzicii a fost întreruptă.",
     "music.options.play.name": "redare",
     "music.options.play.description": "Permite utilizatorului să redea muzică într-un canal de voce.",
-    "music.options.play.options.file.options.url.description": "Linkul către un fișier audio.",
     "music.options.play.options.youtube.name": "youtube",
     "music.options.play.options.youtube.description": "Redă muzică din YouTube.",
     "music.options.play.strings.selectSong.title": "Selectează o intrare",
