@@ -103,7 +103,7 @@ class DatabaseStore {
 		}
 
 		if (adapter === undefined) {
-			if (environment.databaseSolution !== undefined) {
+			if (environment.databaseSolution === undefined) {
 				log.error(
 					"`DATABASE_SOLUTION` was not provided. If this was intentional, explicitly define `DATABASE_SOLUTION` as 'none'.",
 				);
