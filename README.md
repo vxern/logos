@@ -4,7 +4,7 @@
 
 #### Find definitions, translate text, detect languages, read guides, play games, submit resources, answer questions
 
-##### examples - pronunciation - inflection - etymologies - relations - expressions - usage notes - and more
+##### Examples - Pronunciation - Inflection - Etymologies - Relations - Expressions - Usage Notes
 
 ![Licence](https://img.shields.io/github/license/vxern/logos.svg?style=for-the-badge) ![Release](https://img.shields.io/github/release/vxern/logos.svg?style=for-the-badge) ![Pull Requests](https://img.shields.io/github/issues-pr/vxern/logos.svg?style=for-the-badge) ![Issues](https://img.shields.io/github/issues/vxern/logos.svg?style=for-the-badge) ![Wakatime](https://wakatime.com/badge/github/vxern/logos.svg?style=for-the-badge)
 
@@ -24,9 +24,9 @@
 - 🎶 Audio playback with advanced track manipulation, queue + history management, first-class playlist support, and more.
 - 🧳 Intuitive, unique role management using a folder-like role selection menu.
 - 💢 Moderation tools, including user verification, user reports, a warning + pardoning system, fine-tunable slowmode, message purging, rule citation, policy viewing, and more.
-- 💐 Social features including viewing user profiles and thanking users for their contributions.
+- 💐 Social features including viewing user profiles and thanking users for their contributions. 
 
-### Ready to [join the community](https://discord.gg/TWdAjkTfah), [set up](SETUP.md) or [contribute](CONTRIBUTING.md)?
+#### [Message @vxern for a demo](https://discord.com/users/217319536485990400) · [Join the Logos community](https://discord.gg/TWdAjkTfah) · [Contribute to the project](CONTRIBUTING.md) · [Set the bot up for yourself](CONTRIBUTING.md)
 
 ### Contributors
 
