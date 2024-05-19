@@ -531,7 +531,7 @@ class VerificationPromptService extends PromptService<{
 			});
 
 			this.log.info(
-				`Accepted ${this.client.diagnostics.user(authorDocument.id)} onto ${this.client.diagnostics.guild(
+				`Accepted ${this.client.diagnostics.user(authorDocument.userId)} onto ${this.client.diagnostics.guild(
 					guild,
 				)}.`,
 			);
@@ -547,7 +547,7 @@ class VerificationPromptService extends PromptService<{
 					this.log.warn(
 						`Failed to add ${this.client.diagnostics.role(
 							entryRequestDocument.requestedRoleId,
-						)} to ${this.client.diagnostics.user(authorDocument.id)} on ${this.client.diagnostics.guild(
+						)} to ${this.client.diagnostics.user(authorDocument.userId)} on ${this.client.diagnostics.guild(
 							guild,
 						)}.`,
 					),
@@ -560,7 +560,7 @@ class VerificationPromptService extends PromptService<{
 			});
 
 			this.log.info(
-				`Rejected ${this.client.diagnostics.user(authorDocument.id)} from ${this.client.diagnostics.guild(
+				`Rejected ${this.client.diagnostics.user(authorDocument.userId)} from ${this.client.diagnostics.guild(
 					guild,
 				)}.`,
 			);
@@ -570,7 +570,7 @@ class VerificationPromptService extends PromptService<{
 				.catch(() =>
 					this.log.warn(
 						`Failed to ban ${this.client.diagnostics.user(
-							authorDocument.id,
+							authorDocument.userId,
 						)} on ${this.client.diagnostics.guild(guild)}.`,
 					),
 				);
