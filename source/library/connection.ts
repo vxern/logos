@@ -85,7 +85,7 @@ class DiscordConnection {
 		this.cache.channels.set(result.id, result);
 
 		if (result.guildId !== undefined) {
-			this.cache.guilds.get(result.guildId)?.channels.set(result.id, result);
+			this.cache.guilds.get(result.guildId)?.channels?.set(result.id, result);
 		}
 
 		return result;
@@ -158,7 +158,7 @@ class DiscordConnection {
 		const result = Discord.transformRole(this.bot, payload);
 
 		this.cache.roles.set(result.id, result);
-		this.cache.guilds.get(result.guildId)?.roles.set(result.id, result);
+		this.cache.guilds.get(result.guildId)?.roles?.set(result.id, result);
 
 		return result;
 	}
@@ -170,9 +170,9 @@ class DiscordConnection {
 		const result = Discord.transformVoiceState(this.bot, payload);
 
 		if (result.channelId !== undefined) {
-			this.cache.guilds.get(result.guildId)?.voiceStates.set(result.userId, result);
+			this.cache.guilds.get(result.guildId)?.voiceStates?.set(result.userId, result);
 		} else {
-			this.cache.guilds.get(result.guildId)?.voiceStates.delete(result.userId);
+			this.cache.guilds.get(result.guildId)?.voiceStates?.delete(result.userId);
 		}
 
 		return result;
