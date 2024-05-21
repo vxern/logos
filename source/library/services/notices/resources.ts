@@ -26,7 +26,7 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 		return {
 			embeds: [
 				{
-					title: strings.title,
+					title: strings.title({ language: strings.language(this.guildDocument.featureLanguage) }),
 					description:
 						`${strings.description.storedInRepository({ link: resourceConfiguration.url })}\n\n` +
 						`${strings.description.easierToManage}\n\n` +

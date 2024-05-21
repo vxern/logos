@@ -963,7 +963,7 @@ export default Object.freeze({
 		translation: localise("translate.strings.translation", locale)(),
 	}),
 	resourceNotice: ({ localise, locale }) => ({
-		title: localise("notices.resources.title", locale)(),
+		title: localise("notices.resources.title", locale),
 		description: {
 			storedInRepository: localise("notices.resources.description.storedInRepository", locale),
 			easierToManage: localise("notices.resources.description.easierToManage", locale)(),
