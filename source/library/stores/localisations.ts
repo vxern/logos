@@ -169,7 +169,6 @@ class LocalisationStore {
 		return (data) => {
 			const localisation = this.#localisations.get(key);
 			if (localisation === undefined) {
-				this.log.error(`Attempted to localise string with unregistered key '${key}'.`);
 				return undefined;
 			}
 
@@ -192,7 +191,15 @@ class LocalisationStore {
 	}
 
 	localise(key: string, locale?: Locale): LocalisationBuilder {
-		return (data) => this.localiseRaw(key, locale)(data) ?? constants.special.missingString;
+		return (data) => {
+			const localisation = this.localiseRaw(key, locale)(data);
+			if (localisation === undefined) {
+				this.log.error(`Attempted to localise string with unregistered key '${key}'.`);
+				return constants.special.missingString;
+			}
+
+			return localisation;
+		}
 	}
 
 	localiseCommand(key: string, locale?: Locale): string {
