@@ -3,7 +3,7 @@ import { Collector } from "logos/collectors";
 import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
 import type { ServiceStore } from "logos/stores/services";
-import Hash from "object-hash";
+import { default as hashObject } from "object-hash";
 
 type HashableProperties = "embeds" | "components";
 type HashableMessageContents = Pick<Discord.CreateMessageOptions, HashableProperties>;
@@ -59,11 +59,22 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		this.#messageDeletes = new Collector<"messageDelete">({ guildId });
 	}
 
+	static #hashMessageContents(contents: HashableMessageContents): string {
+		return hashObject(contents, {
+			algorithm: "md5",
+			unorderedArrays: true,
+			unorderedObjects: true,
+			unorderedSets: true,
+		});
+	}
+
 	static encodeHashInGuildIcon({ guild, hash }: { guild: Logos.Guild; hash: string }): string {
 		const iconUrl = Discord.guildIconUrl(guild.id, guild.icon);
 
 		return `${iconUrl}&hash=${hash}`;
 	}
+
+	abstract generateNotice(): HashableMessageContents | undefined;
 
 	async start(): Promise<void> {
 		this.#messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
@@ -89,16 +100,16 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			return;
 		}
 
-		const expectedHash = NoticeService.hash(expectedContents);
+		const expectedHash = NoticeService.#hashMessageContents(expectedContents);
 
 		const noticesAll = await this.getAllMessages({ channelId });
 		if (noticesAll === undefined || noticesAll.length === 0) {
-			const notice = await this.saveNotice(expectedContents, expectedHash);
+			const notice = await this.#sendNotice({ contents: expectedContents, hash: expectedHash });
 			if (notice === undefined) {
 				return;
 			}
 
-			this.registerNotice(BigInt(notice.id), expectedHash);
+			this.#registerNotice({ noticeId: notice.id, hash: expectedHash });
 			return;
 		}
 
@@ -130,16 +141,16 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 					this.log.warn("Failed to delete notice.");
 				});
 
-				const newNotice = await this.saveNotice(expectedContents, expectedHash);
+				const newNotice = await this.#sendNotice({ contents: expectedContents, hash: expectedHash });
 				if (newNotice === undefined) {
 					return;
 				}
 
-				this.registerNotice(BigInt(newNotice.id), expectedHash);
+				this.#registerNotice({ noticeId: newNotice.id, hash: expectedHash });
 				return;
 			}
 
-			this.registerNotice(BigInt(notice.id), hash);
+			this.#registerNotice({ noticeId: notice.id, hash });
 			return;
 		}
 	}
@@ -193,19 +204,17 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			return;
 		}
 
-		const hash = NoticeService.hash(contents);
+		const hash = NoticeService.#hashMessageContents(contents);
 
-		const notice = await this.saveNotice(contents, hash);
+		const notice = await this.#sendNotice({ contents, hash });
 		if (notice === undefined) {
 			return;
 		}
 
-		this.registerNotice(BigInt(notice.id), hash);
+		this.#registerNotice({ noticeId: notice.id, hash });
 	}
 
-	abstract generateNotice(): HashableMessageContents | undefined;
-
-	async saveNotice(contents: HashableMessageContents, hash: string): Promise<Discord.Message | undefined> {
+	async #sendNotice({ contents, hash }: { contents: HashableMessageContents, hash: string }): Promise<Discord.Message | undefined> {
 		const [channelId, guild] = [this.channelId, this.guild];
 		if (channelId === undefined || guild === undefined) {
 			return undefined;
@@ -224,17 +233,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		});
 	}
 
-	registerNotice(noticeId: bigint, hash: string): void {
+	#registerNotice({ noticeId, hash }: { noticeId: bigint, hash: string }): void {
 		this.#noticeData = { id: noticeId, hash };
-	}
-
-	static hash(contents: HashableMessageContents): string {
-		return Hash(contents, {
-			algorithm: "md5",
-			unorderedArrays: true,
-			unorderedObjects: true,
-			unorderedSets: true,
-		});
 	}
 }
 
