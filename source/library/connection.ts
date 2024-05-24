@@ -70,11 +70,11 @@ class DiscordConnection {
 		// REMINDER(vxern): This is a monkey-patch for Discordeno filtering out shard IDs equal to 0.
 		result.shardId = payload.shardId;
 
+		this.cache.guilds.set(result.id, result as unknown as Logos.Guild);
+
 		for (const channel of payload.guild.channels ?? []) {
 			this.bot.transformers.channel(this.bot, { channel, guildId: result.id });
 		}
-
-		this.cache.guilds.set(result.id, result as unknown as Logos.Guild);
 
 		return result;
 	}

@@ -321,7 +321,7 @@ class Client {
 			gateway: {
 				token: environment.discordSecret,
 				events: {},
-				cache: { requestMembers: { enabled: true } },
+				cache: { requestMembers: { enabled: true, pending: new Discord.Collection() } },
 			},
 		});
 
@@ -344,7 +344,7 @@ class Client {
 			this.entities.channels.delete(channel.id);
 
 			if (channel.guildId !== undefined) {
-				this.entities.guilds.get(channel.guildId)?.channels.delete(channel.id);
+				this.entities.guilds.get(channel.guildId)?.channels?.delete(channel.id);
 			}
 		});
 

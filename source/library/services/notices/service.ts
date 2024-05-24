@@ -214,7 +214,10 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		this.#registerNotice({ noticeId: notice.id, hash });
 	}
 
-	async #sendNotice({ contents, hash }: { contents: HashableMessageContents, hash: string }): Promise<Discord.Message | undefined> {
+	async #sendNotice({
+		contents,
+		hash,
+	}: { contents: HashableMessageContents; hash: string }): Promise<Discord.Message | undefined> {
 		const [channelId, guild] = [this.channelId, this.guild];
 		if (channelId === undefined || guild === undefined) {
 			return undefined;
@@ -233,7 +236,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		});
 	}
 
-	#registerNotice({ noticeId, hash }: { noticeId: bigint, hash: string }): void {
+	#registerNotice({ noticeId, hash }: { noticeId: bigint; hash: string }): void {
 		this.#noticeData = { id: noticeId, hash };
 	}
 }

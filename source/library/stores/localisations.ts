@@ -199,7 +199,7 @@ class LocalisationStore {
 			}
 
 			return localisation;
-		}
+		};
 	}
 
 	localiseCommand(key: string, locale?: Locale): string {

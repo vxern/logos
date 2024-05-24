@@ -50,7 +50,6 @@ const properties = {
 		content: true,
 		embeds: true,
 		author: true,
-		interactionMetadata: {},
 		interaction: {},
 		messageReference: {},
 	},
@@ -95,6 +94,8 @@ const properties = {
 	},
 	entitlement: {},
 	sku: {},
+	// REMINDER(vxern): Remove once added in Discordeno.
+	// @ts-ignore: This is fine.
 	voiceState: {
 		guildId: true,
 		channelId: true,
