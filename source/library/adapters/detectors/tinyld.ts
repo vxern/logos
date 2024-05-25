@@ -9,6 +9,9 @@ class TinyLDAdapter extends DetectorAdapter {
 	}
 
 	detect({ text: _ }: { text: string }): SingleDetectionResult | undefined {
+		// REMINDER(vxern): This will be removed once TinyLD works once again.
+		return undefined;
+
 		let detectedLocale: string;
 		try {
 			// detectedLocale = tinyld.toISO3(tinyld.detect(text));
