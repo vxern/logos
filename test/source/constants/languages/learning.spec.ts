@@ -1,6 +1,7 @@
 import { describe, it } from "bun:test";
-import { isLanguage, isLocale } from "logos:constants/languages/learning";
+import {getWiktionaryLanguageName, isLanguage, isLocale} from "logos:constants/languages/learning";
 import { expect } from "chai";
+import {getLogosLocaleByLanguage} from "logos:constants/languages/localisation";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported learning language.", () => {
@@ -25,9 +26,15 @@ describe("isLocale()", () => {
 });
 
 describe("getLocaleByLanguage()", () => {
-	// TODO(vxern): Implement.
+	it("returns the language corresponding to the passed learning locale.", () => {
+		expect(getLogosLocaleByLanguage("English/American")).to.equal("eng-US");
+		expect(getLogosLocaleByLanguage("German")).to.equal("deu");
+	});
 });
 
 describe("getWiktionaryLanguageName()", () => {
-	// TODO(vxern): Implement.
+	it("returns the Wiktionary name for the learning language if available.", () => {
+		expect(getWiktionaryLanguageName("English/American")).to.equal("English");
+		expect(getWiktionaryLanguageName("Norwegian/Bokmål")).to.equal("Norwegian Bokmål");
+	});
 });
