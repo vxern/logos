@@ -2,7 +2,7 @@ import type { LearningLanguage } from "logos:constants/languages";
 
 type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "words-api";
 
-const languages = Object.freeze({
+const dictionariesByLanguage = Object.freeze({
 	"Armenian/Eastern": ["wiktionary"],
 	"Armenian/Western": ["wiktionary"],
 	Danish: ["wiktionary"],
@@ -24,5 +24,5 @@ const languages = Object.freeze({
 	Turkish: ["wiktionary"],
 } satisfies Record<LearningLanguage, Dictionary[]> as Record<LearningLanguage, Dictionary[]>);
 
-export default Object.freeze({ languages });
+export default Object.freeze({ languages: dictionariesByLanguage });
 export type { Dictionary };
