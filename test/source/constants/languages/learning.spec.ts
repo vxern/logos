@@ -23,3 +23,11 @@ describe("isLocale()", () => {
 		expect(isLocale("this-is-not-a-supported-learning-locale")).to.be.false;
 	});
 });
+
+describe("getLocaleByLanguage()", () => {
+	// TODO(vxern): Implement.
+});
+
+describe("getWiktionaryLanguageName()", () => {
+	// TODO(vxern): Implement.
+});

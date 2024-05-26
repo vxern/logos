@@ -3,32 +3,38 @@ import english from "logos:constants/parts-of-speech/english";
 import french from "logos:constants/parts-of-speech/french";
 import romanian from "logos:constants/parts-of-speech/romanian";
 
-type PartOfSpeech =
-	| "noun"
-	| "verb"
-	| "adjective"
-	| "adverb"
-	| "adposition"
-	| "article"
-	| "proper-noun"
-	| "letter"
-	| "character"
-	| "phrase"
-	| "idiom"
-	| "symbol"
-	| "syllable"
-	| "numeral"
-	| "initialism"
-	| "particle"
-	| "punctuation"
-	| "affix"
-	| "pronoun"
-	| "determiner"
-	| "conjunction"
-	| "interjection"
-	| "unknown";
+const partsOfSpeech = [
+	"noun"
+,	"verb"
+,	"adjective"
+,	"adverb"
+,	"adposition"
+,	"article"
+,	"proper-noun"
+,	"letter"
+,	"character"
+,	"phrase"
+,	"idiom"
+,	"symbol"
+,	"syllable"
+,	"numeral"
+,	"initialism"
+,	"particle"
+,	"punctuation"
+,	"affix"
+,	"pronoun"
+,	"determiner"
+,	"conjunction"
+,	"interjection"
+,	"unknown"
+,] as const;
+type PartOfSpeech = typeof partsOfSpeech[number];
 
-const partsOfSpeech = Object.freeze({
+function isPartOfSpeech(partOfSpeech: string): partOfSpeech is PartOfSpeech {
+	return (partsOfSpeech as readonly string[]).includes(partOfSpeech);
+}
+
+const partsOfSpeechByLanguage = Object.freeze({
 	"English/American": english,
 	"English/British": english,
 	French: french,
@@ -46,11 +52,15 @@ function getPartOfSpeech({
 	detected: PartOfSpeech,
 	original: string,
 ] {
-	if (!(learningLanguage in partsOfSpeech)) {
+	if (isPartOfSpeech(terms.exact)) {
+		return [terms.exact, terms.exact];
+	}
+
+	if (!(learningLanguage in partsOfSpeechByLanguage)) {
 		return ["unknown", terms.exact];
 	}
 
-	const partsOfSpeechLocalised = partsOfSpeech[learningLanguage as keyof typeof partsOfSpeech] as Record<
+	const partsOfSpeechLocalised = partsOfSpeechByLanguage[learningLanguage as keyof typeof partsOfSpeechByLanguage] as Record<
 		string,
 		PartOfSpeech
 	>;

@@ -1,3 +1,4 @@
+import type { LearningLanguage, WithBaseLanguage } from "logos:constants/languages";
 import {
 	type Locale,
 	type Language as LocalisationLanguage,
@@ -20,5 +21,17 @@ function getLocaleByLanguage(language: Language): Locale {
 	return getLocaleByLocalisationLanguage(language);
 }
 
-export { getLocaleByLanguage, isLanguage, isLocale };
+const wiktionaryLanguageNames = Object.freeze({
+	"English/American": "English",
+	"English/British": "English",
+	"Norwegian/Bokmål": "Norwegian Bokmål",
+	"Armenian/Western": "Armenian",
+	"Armenian/Eastern": "Armenian",
+} satisfies Record<WithBaseLanguage<LearningLanguage>, string>);
+
+function getWiktionaryLanguageName(language: LearningLanguage): string {
+	return (wiktionaryLanguageNames as Record<string, string>)[language] ?? language;
+}
+
+export { getLocaleByLanguage, isLanguage, isLocale, getWiktionaryLanguageName };
 export type { Language };

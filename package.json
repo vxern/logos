@@ -55,11 +55,11 @@
     "nano": "^10.1.3",
     "nanoid": "^5.0.5",
     "object-hash": "^3.0.0",
-    "parse-wiktionary": "^1.0.0",
     "ravendb": "^5.4.2",
     "rethinkdb-ts": "^2.6.0",
     "shoukaku": "^4.0.1",
     "tinyld": "^1.3.4",
+    "wiktionary-scraper": "^0.0.1-patch.3",
     "winston": "^3.13.0",
     "youtube-sr": "^4.3.10"
   },
