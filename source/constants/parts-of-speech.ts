@@ -69,7 +69,7 @@ function getPartOfSpeech({
 	}
 
 	if (terms.approximate !== undefined && terms.approximate in partsOfSpeechLocalised) {
-		return [partsOfSpeechLocalised[terms.approximate]!, terms.exact];
+		return [partsOfSpeechLocalised[terms.approximate]!, terms.approximate];
 	}
 
 	return ["unknown", terms.exact];

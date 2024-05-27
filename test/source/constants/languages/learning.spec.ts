@@ -1,7 +1,7 @@
 import { describe, it } from "bun:test";
-import {getWiktionaryLanguageName, isLanguage, isLocale} from "logos:constants/languages/learning";
+import { getWiktionaryLanguageName, isLanguage, isLocale } from "logos:constants/languages/learning";
+import { getLogosLocaleByLanguage } from "logos:constants/languages/localisation";
 import { expect } from "chai";
-import {getLogosLocaleByLanguage} from "logos:constants/languages/localisation";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported learning language.", () => {
