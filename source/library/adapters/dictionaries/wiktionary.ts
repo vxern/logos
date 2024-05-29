@@ -73,7 +73,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 			}
 
 			const partOfSpeech = getPartOfSpeech({
-				terms: { exact: result.partOfSpeech, approximate: result.partOfSpeech.split(" ").reverse().join(" ") },
+				terms: { exact: result.partOfSpeech },
 				learningLanguage: "English/American",
 			});
 
