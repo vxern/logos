@@ -1,0 +1,15 @@
+{
+    "interactions.continuedOnNextPage": "",
+    "interactions.page": "",
+    "interactions.invalidUser.title": "",
+    "interactions.invalidUser.description": "",
+    "interactions.rateLimited.title": "",
+    "interactions.rateLimited.description.tooManyUses": "",
+    "interactions.rateLimited.description.cannotUseAgainUntil": "",
+    "interactions.show": "",
+    "interactions.show.sureToShow.title": "",
+    "interactions.show.sureToShow.description": "",
+    "interactions.show.sureToShow.yes": "",
+    "interactions.show.sureToShow.no": "",
+    "interactions.thinking": ""
+}
