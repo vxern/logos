@@ -1,0 +1,20 @@
+{
+    "parameters.user.name": "",
+    "parameters.user.description": "",
+    "parameters.show.name": "",
+    "parameters.show.description": "",
+    "parameters.duration.name": "",
+    "parameters.duration.description": "",
+    "parameters.reason.name": "",
+    "parameters.reason.description": "",
+    "parameters.query.name": "",
+    "parameters.query.description": "",
+    "parameters.timestamp.name": "",
+    "parameters.timestamp.description": "",
+    "parameters.collection.name": "",
+    "parameters.collection.description": "",
+    "parameters.by.name": "",
+    "parameters.by.description": "",
+    "parameters.to.name": "",
+    "parameters.to.description": ""
+}
