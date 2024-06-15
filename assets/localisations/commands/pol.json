@@ -707,5 +707,6 @@
     "game.strings.skip": "Pomiń",
     "game.strings.correctGuesses": "Poprawne odpowiedzi: {number}",
     "game.strings.allTime": "Cały czas: {number}",
-    "game.strings.next": "Dalej"
+    "game.strings.next": "Dalej",
+    "answer.message.description": "Pozwala użytkownikowi na wysłanie odpowiedzi na pytanie."
 }
