@@ -191,5 +191,10 @@
     "languages.inupiak": "Inupiak",
     "languages.khasi": "Khasi",
     "languages.klingon": "Klingoniană",
-    "languages.lubaLulua": "Luba-Lulua"
+    "languages.lubaLulua": "Luba-Lulua",
+    "languages.arabic.egyptian": "Arabă (Egipt)",
+    "languages.arabic.emirati": "Arabă (Emiratele Arabe Unite)",
+    "languages.arabic.saudiArabian": "Arabă (Arabia Saudită)",
+    "languages.catalan.valencian": "Catalană (Valencia)",
+    "languages.english.australian": "Engleză (Australia)"
 }
