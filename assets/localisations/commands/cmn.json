@@ -1,13 +1,7 @@
 {
-    "cefr.strings.levels.c2.description": "",
     "translate.message.name": "",
-    "word.strings.verbs.moods.indicative": "",
     "pardon.options.warning.description": "",
-    "purge.strings.purged.title": "",
     "timeout.description": "",
-    "music.options.now.strings.collection": "",
     "music.options.replay.strings.replaying.description": "",
-    "music.options.volume.options.display.strings.volume.description": "",
-    "praise.options.comment.description": "",
-    "licence.options.dictionary.options.dictionary.name": ""
+    "praise.options.comment.description": ""
 }
