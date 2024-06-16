@@ -1,7 +1,7 @@
 {
-    "entry.welcome.title": "",
+    "entry.welcome.title": "歡迎進入",
     "entry.welcome.description.toEnter": "",
-    "entry.welcome.description.acceptedRules": "",
+    "entry.welcome.description.acceptedRules": "我已閱讀規矩並同意遵守",
     "entry.proficiency.title": "",
     "entry.proficiency.description.chooseProficiency": "",
     "entry.proficiency.description.canChangeLater": "",
