@@ -13,5 +13,20 @@
     "events.messageUpdate.fields.before": "Vorher",
     "events.messageUpdate.fields.after": "Nachher",
     "events.entryRequestAccept.title": "Zugangsantrag akzeptiert",
-    "events.entryRequestReject.title": "Zugangsantrag abegelehnt"
+    "events.entryRequestReject.title": "Zugangsantrag abegelehnt",
+    "events.entryRequestAccept.description": "{user}s Zugangsantrag wurde von {moderator} akzeptiert.",
+    "events.entryRequestReject.description": "{user}s Zugangsantrag wurde von {moderator} abgelehnt.",
+    "events.entryRequestSubmit.title": "Zugangsantrag eingereicht",
+    "events.entryRequestSubmit.description": "{user} hat einen Antrag zur Beitretung dem Server eingereicht.",
+    "events.inquiryOpen.fields.topic": "Thema",
+    "events.memberTimeoutAdd.fields.reason": "Grund",
+    "events.memberTimeoutAdd.fields.lastsUntil": "Dauert bis",
+    "events.memberWarnAdd.title": "Benutzer gewarnt",
+    "events.memberWarnAdd.description": "{user} wurde von {moderator} gewarnt.",
+    "events.memberWarnAdd.fields.reason": "Grund",
+    "events.memberWarnRemove.fields.warning": "Warnung",
+    "events.praiseAdd.title": "Benutzer gelobt",
+    "events.praiseAdd.description": "{user} wurde von {author} gelobt.",
+    "events.purgeBegin.description.messages.one": "{one} Nachricht",
+    "events.purgeBegin.description.messages.two": "{two} Nachrichten"
 }
