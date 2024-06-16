@@ -1,6 +1,7 @@
 import type { DetectionLanguage, Detector } from "logos:constants/languages";
 import type { DetectorAdapter, SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import { CLDAdapter } from "logos/adapters/detectors/cld";
+import { FastTextAdapter } from "logos/adapters/detectors/fasttext";
 import { TinyLDAdapter } from "logos/adapters/detectors/tinyld";
 import type { Client } from "logos/client";
 
@@ -14,12 +15,14 @@ class DetectorStore {
 	readonly adapters: {
 		readonly cld: CLDAdapter;
 		readonly tinyld: TinyLDAdapter;
+		readonly fasttext: FastTextAdapter;
 	} & Record<Detector, DetectorAdapter>;
 
 	constructor(client: Client) {
 		this.adapters = {
 			cld: new CLDAdapter(client),
 			tinyld: new TinyLDAdapter(client),
+			fasttext: new FastTextAdapter(client),
 		};
 	}
 
