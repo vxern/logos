@@ -1,8 +1,13 @@
 {
     "policies.moderation.title": "管制政策",
-    "policies.moderation.points.introduction.description": "",
-    "policies.moderation.points.breach.description": "",
-    "policies.moderation.points.warnings.description": "",
-    "policies.moderation.points.furtherAction.description": "",
-    "policies.moderation.points.ban.description": ""
+    "policies.moderation.points.introduction.description": "根據伺服器的規矩，實施三次性的警告制度。",
+    "policies.moderation.points.breach.description": "在整個伺服器內，若有違反則會發出一次警告。",
+    "policies.moderation.points.warnings.description": "若用戶已被發出三次警告，第四次警告會讓用戶被禁言。每個警告會在發出後兩個月消除。",
+    "policies.moderation.points.furtherAction.description": "管理員會接收到該用戶被禁言的通知，然後按照情況決定合適的行動。",
+    "policies.moderation.points.ban.description": "不尊重規矩的用戶會被永久禁止。",
+    "policies.moderation.points.introduction.title": "管理員怎麼管理伺服器呢？",
+    "policies.moderation.points.breach.title": "規矩在哪裡應用呢？",
+    "policies.moderation.points.warnings.title": "被警告多次會有什麼後果？",
+    "policies.moderation.points.furtherAction.title": "之後會有什麼後果？",
+    "policies.moderation.points.ban.title": "如果我不在乎呢？"
 }
