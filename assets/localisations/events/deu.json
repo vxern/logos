@@ -1,1 +1,17 @@
-{}
+{
+    "events.banAdd.title": "Benutzer verbannt",
+    "events.banAdd.description": "{user} ist verbannt worden.",
+    "events.banRemove.title": "Der Bann des Benutzers wurde aufgehoben",
+    "events.banRemove.description": "{user}s Bann ist aufgehoben worden.",
+    "events.memberAdd.title": "Benutzer beigetreten",
+    "events.memberAdd.description": "{user} ist dem Server beigetreten.",
+    "events.memberRemove.title": "Benutzer verlassen",
+    "events.memberRemove.description": "{user} hat den Server verlassen.",
+    "events.messageDelete.title": "Nachricht gelöscht",
+    "events.messageDelete.description": "{user} hat seine:ihre Nachricht in {channel} gelöscht.",
+    "events.messageDelete.fields.content": "Inhalt",
+    "events.messageUpdate.fields.before": "Vorher",
+    "events.messageUpdate.fields.after": "Nachher",
+    "events.entryRequestAccept.title": "Zugangsantrag akzeptiert",
+    "events.entryRequestReject.title": "Zugangsantrag abegelehnt"
+}
