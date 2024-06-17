@@ -7,7 +7,7 @@
     "languages.dutch": "Olandeză (Neerlandeză)",
     "languages.english": "Engleză",
     "languages.english.american": "Engleză (Americană)",
-    "languages.english.british": "Engleză (Britanică)",
+    "languages.english.british": "Engleză (Marea Britanie)",
     "languages.estonian": "Estonă",
     "languages.finnish": "Finlandeză",
     "languages.french": "Franceză",
@@ -23,8 +23,8 @@
     "languages.norwegian": "Norvegiană",
     "languages.norwegian.bokmal": "Norvegiană (Bokmål)",
     "languages.polish": "Poloneză",
-    "languages.portuguese.brazilian": "Portugheză (Braziliană)",
-    "languages.portuguese.european": "Portugheză (Europeană)",
+    "languages.portuguese.brazilian": "Portugheză (Brazilia)",
+    "languages.portuguese.european": "Portugheză (Europa)",
     "languages.romanian": "Română",
     "languages.russian": "Rusă",
     "languages.slovenian": "Slovenă",
@@ -196,5 +196,11 @@
     "languages.arabic.emirati": "Arabă (Emiratele Arabe Unite)",
     "languages.arabic.saudiArabian": "Arabă (Arabia Saudită)",
     "languages.catalan.valencian": "Catalană (Valencia)",
-    "languages.english.australian": "Engleză (Australia)"
+    "languages.english.australian": "Engleză (Australia)",
+    "languages.french.canadian": "Franceză (Canada)",
+    "languages.french.french": "Franceză (Franța)",
+    "languages.portuguese.portuguese": "Portugheză (Portugalia)",
+    "languages.spanish.american": "Spaniolă (Statele Unite)",
+    "languages.spanish.mexican": "Spaniolă (Mexic)",
+    "languages.spanish.spanish": "Spaniolă (Spania)"
 }
