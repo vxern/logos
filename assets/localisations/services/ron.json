@@ -15,7 +15,7 @@
     "alreadyMarkedResolved.description": "Acest caz a fost deja marcat ca rezolvat.",
     "alreadyMarkedUnresolved.title": "Deja este marcat ca nerezolvat",
     "alreadyMarkedUnresolved.description": "Acest caz a fost deja marcat ca nerezolvat.",
-    "notices.resources.title": "Unde se pot găsi resursele",
+    "notices.resources.title": "Unde se pot găsi resursele pentru a învăța limba {language}",
     "notices.resources.description.storedInRepository": "Resursele noastre sunt stocate într-un [repozitoriu GitHub]({link}). Butonul de mai jos te va și duce acolo.",
     "notices.resources.description.contributable": "Poți trimite noi resurse într-unul din cele trei moduri, aranjate după bătaia de cap implicată:",
     "notices.resources.description.contributable.usingCommand": "Folosind comanda {command}.",
