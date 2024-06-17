@@ -1,15 +1,9 @@
 {
     "form.failedToSubmit.title": "出現問題",
-    "prompts.continue": "",
     "prompts.stay": "",
-    "verification.title": "",
     "verification.fields.aim": "",
-    "answer.title": "",
     "answer.fields.answer": "",
-    "correction.fields.original": "",
     "report.title": "",
-    "report.fields.users": "",
     "suggestion.title": "",
-    "resource.title": "",
     "ticket.title": ""
 }
