@@ -1,17 +1,10 @@
 {
     "notices.lastUpdate": "上一次更新",
-    "notices.resources.title": "",
     "notices.resources.description.easierToManage": "",
-    "notices.resources.description.contributable.usingCommand": "",
     "notices.resources.description.contributable.makingPullRequest": "",
-    "reports.reason": "",
     "reports.noLinkProvided": "",
-    "suggestion.suggestion": "",
     "submittedAt": "",
-    "markUnresolved": "",
     "alreadyMarkedResolved.description": "",
-    "alreadyMarkedUnresolved.description": "",
     "cannotRemovePrompt.title": "",
-    "close": "",
     "cannotCloseIssue.description": ""
 }
