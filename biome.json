@@ -1,48 +1,46 @@
 {
-	"linter": {
-		"enabled": true,
-		"rules": {
-			"all": true,
-			"nursery": {
-				"all": true,
-				"noNamespaceImport": "off",
-				"noUndeclaredDependencies": "off",
-				"useImportRestrictions": "off",
-				"noNodejsModules": "off"
-			},
-			"style": {
-				"all": true,
-				"noDefaultExport": "off",
-				"useNamingConvention": "off",
-				"noNonNullAssertion": "off"
-			},
-			"suspicious": {
-				"all": true,
-				"noExplicitAny": "off",
-				"noAssignInExpressions": "off",
-				"noEmptyBlockStatements": "off"
-			},
-			"complexity": {
-				"all": true,
-				"noExcessiveCognitiveComplexity": "off"
-			}
-		}
-	},
-	"formatter": {
-		"enabled": true,
-		"formatWithErrors": true,
-		"indentWidth": 4,
-		"indentStyle": "tab",
-		"lineWidth": 120
-	},
-	"javascript": {
-		"globals": [
-			"Discord",
-			"Logos",
-			"Events",
-			"WithRequired",
-			"Timer",
-			"constants"
-		]
-	}
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "all": true,
+      "nursery": {
+        "all": true,
+        "noUndeclaredDependencies": "off",
+        "useImportRestrictions": "off"
+      },
+      "style": {
+        "all": true,
+        "noDefaultExport": "off",
+        "useNamingConvention": "off",
+        "noNonNullAssertion": "off"
+      },
+      "suspicious": {
+        "all": true,
+        "noExplicitAny": "off",
+        "noAssignInExpressions": "off",
+        "noEmptyBlockStatements": "off"
+      },
+      "complexity": {
+        "all": true,
+        "noExcessiveCognitiveComplexity": "off"
+      }
+    }
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": true,
+    "indentWidth": 4,
+    "indentStyle": "tab",
+    "lineWidth": 120
+  },
+  "javascript": {
+    "globals": [
+      "Discord",
+      "Logos",
+      "Events",
+      "WithRequired",
+      "Timer",
+      "constants"
+    ]
+  }
 }

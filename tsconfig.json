@@ -1,49 +1,69 @@
 {
-	"compilerOptions": {
-		"lib": ["ESNext"],
-		"target": "ESNext",
-		"module": "ESNext",
-		"moduleDetection": "force",
-		"moduleResolution": "Bundler",
-		"noEmit": true,
-		"skipLibCheck": true,
-		"allowJs": true,
-		"allowUnreachableCode": false,
-		"allowUnusedLabels": false,
-		"esModuleInterop": true,
-		"checkJs": false,
-		"noFallthroughCasesInSwitch": true,
-		"noImplicitAny": true,
-		"noImplicitReturns": true,
-		"noImplicitThis": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noUncheckedIndexedAccess": true,
-		"strict": true,
-		"strictBindCallApply": true,
-		"strictFunctionTypes": true,
-		"strictPropertyInitialization": true,
-		"strictNullChecks": true,
-		"suppressExcessPropertyErrors": false,
-		"suppressImplicitAnyIndexErrors": false,
-		"isolatedModules": true,
-		"baseUrl": "",
-		"paths": {
-			"discordeno": ["@discordeno/bot"],
-			// The order here seems to matter given that the linter will pick up topmost entries first.
-			"logos/*": ["./source/library/*"],
-			"logos:constants/*": ["./source/constants/*"],
-			"logos:core/*": ["./source/*"],
-			"logos:test/*": ["./test/*"],
-			// The following should never be used, either because there is another import that covers them
-			// or they should never be imported from in the first place.
-			"logos:core/constants/*": ["./?"],
-			"logos:core/library/*": ["./?"],
-			"logos:core/index": ["./?"]
-		},
-		"types": [],
-	},
-	"compileOnSave": true,
-	"exclude": ["node_modules/"],
-	"include": ["source/", "test/"]
+  "compilerOptions": {
+    "lib": [
+      "ESNext"
+    ],
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "esModuleInterop": true,
+    "checkJs": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noUncheckedIndexedAccess": true,
+    "strict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "strictNullChecks": true,
+    "suppressExcessPropertyErrors": false,
+    "suppressImplicitAnyIndexErrors": false,
+    "isolatedModules": true,
+    "baseUrl": "",
+    "paths": {
+      "discordeno": [
+        "@discordeno/bot"
+      ],
+      "logos/*": [
+        "./source/library/*"
+      ],
+      "logos:constants/*": [
+        "./source/constants/*"
+      ],
+      "logos:core/*": [
+        "./source/*"
+      ],
+      "logos:test/*": [
+        "./test/*"
+      ],
+      "logos:core/constants/*": [
+        "./?"
+      ],
+      "logos:core/library/*": [
+        "./?"
+      ],
+      "logos:core/index": [
+        "./?"
+      ]
+    },
+    "types": []
+  },
+  "compileOnSave": true,
+  "exclude": [
+    "node_modules/"
+  ],
+  "include": [
+    "source/",
+    "test/"
+  ]
 }
