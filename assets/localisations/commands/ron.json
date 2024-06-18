@@ -249,7 +249,7 @@
     "purge.strings.end": "Mesaj de sfârșit",
     "purge.strings.noContent": "Fără conținut",
     "purge.strings.embedPosted": "Postare incorporată {relative_timestamp} de {user_mention}",
-    "purge.strings.posted": "Posta de către {user_mention} {relative_timestamp}",
+    "purge.strings.posted": "Postat de către {user_mention} {relative_timestamp}",
     "purge.strings.messagesFound": "Mesaje găsite",
     "purge.strings.yes": "Da",
     "purge.strings.no": "Nu",
