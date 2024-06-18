@@ -415,6 +415,68 @@ const languages = Object.freeze({
 		"Yoruba",
 		"Zaza",
 	],
+	eld: [
+		"Albanian",
+		"Amharic",
+		"Arabic",
+		"Armenian",
+		"Azerbaijani",
+		"Basque",
+		"Belarusian",
+		"Bengali",
+		"Bulgarian",
+		"Catalan",
+		"Chinese",
+		"CzechoSlovak/Czech",
+		"CzechoSlovak/Slovak",
+		"Danish",
+		"Dutch",
+		"English",
+		"Estonian",
+		"Filipino/Tagalog",
+		"Finnish",
+		"French",
+		"Georgian",
+		"German",
+		"Greek",
+		"Gujarati",
+		"Hebrew",
+		"Hindi",
+		"Hungarian",
+		"Icelandic",
+		"Italian",
+		"Japanese",
+		"Kannada",
+		"Korean",
+		"Kurdish",
+		"Lao",
+		"Latvian",
+		"Lithuanian",
+		"Malay",
+		"Malayalam",
+		"Marathi",
+		"Norwegian",
+		"Oriya",
+		"Persian",
+		"Polish",
+		"Portuguese",
+		"Punjabi",
+		"Romanian",
+		"Russian",
+		"SerboCroatian/Croatian",
+		"SerboCroatian/Serbian",
+		"Slovene",
+		"Spanish",
+		"Swedish",
+		"Tamil",
+		"Telugu",
+		"Thai",
+		"Turkish",
+		"Ukrainian",
+		"Urdu",
+		"Vietnamese",
+		"Yoruba",
+	],
 } as const);
 type Detector = keyof typeof languages;
 
@@ -485,8 +547,8 @@ const languageToLocale = Object.freeze({
 		Hungarian: "hu",
 		Icelandic: "is",
 		Igbo: "ig",
-		Indonesian: "id",
 		Interlingua: "ia",
+		Indonesian: "id",
 		Interlingue: "ie",
 		Inuktitut: "iu",
 		Inupiak: "ik",
@@ -835,22 +897,87 @@ const languageToLocale = Object.freeze({
 		Yoruba: "yor",
 		Zaza: "zza",
 	},
+	eld: {
+		Albanian: "sq",
+		Amharic: "am",
+		Arabic: "ar",
+		Armenian: "hy",
+		Azerbaijani: "az",
+		Basque: "eu",
+		Belarusian: "be",
+		Bengali: "bn",
+		Bulgarian: "bg",
+		Catalan: "ca",
+		Chinese: "zh",
+		"CzechoSlovak/Czech": "cs",
+		"CzechoSlovak/Slovak": "sk",
+		Danish: "da",
+		Dutch: "nl",
+		English: "en",
+		Estonian: "et",
+		"Filipino/Tagalog": "tl",
+		Finnish: "fi",
+		French: "fr",
+		Georgian: "ka",
+		German: "de",
+		Greek: "el",
+		Gujarati: "gu",
+		Hebrew: "he",
+		Hindi: "hi",
+		Hungarian: "hu",
+		Icelandic: "is",
+		Italian: "it",
+		Japanese: "ja",
+		Kannada: "kn",
+		Korean: "ko",
+		Kurdish: "ku",
+		Lao: "lo",
+		Latvian: "lv",
+		Lithuanian: "lt",
+		Malay: "ms",
+		Malayalam: "ml",
+		Marathi: "mr",
+		Norwegian: "no",
+		Oriya: "or",
+		Persian: "fa",
+		Polish: "pl",
+		Portuguese: "pt",
+		Punjabi: "pa",
+		Romanian: "ro",
+		Russian: "ru",
+		"SerboCroatian/Croatian": "hr",
+		"SerboCroatian/Serbian": "sr",
+		Slovene: "sl",
+		Spanish: "es",
+		Swedish: "sv",
+		Tamil: "ta",
+		Telugu: "te",
+		Thai: "th",
+		Turkish: "tr",
+		Ukrainian: "uk",
+		Urdu: "ur",
+		Vietnamese: "vi",
+		Yoruba: "yo",
+	},
 } as const);
 
 type CLDLanguage = (typeof languages.cld)[number];
 type TinyLDLanguage = (typeof languages.tinyld)[number];
 type FastTextLanguage = (typeof languages.fasttext)[number];
-type Language = CLDLanguage | TinyLDLanguage | FastTextLanguage;
+type ELDLanguage = (typeof languages.eld)[number];
+type Language = CLDLanguage | TinyLDLanguage | FastTextLanguage | ELDLanguage;
 
 type CLDLocale = (typeof languageToLocale.cld)[keyof typeof languageToLocale.cld];
 type TinyLDLocale = (typeof languageToLocale.tinyld)[keyof typeof languageToLocale.tinyld];
 type FastTextLocale = (typeof languageToLocale.fasttext)[keyof typeof languageToLocale.fasttext];
-type Locale = CLDLocale | TinyLDLocale | FastTextLocale;
+type ELDLocale = (typeof languageToLocale.eld)[keyof typeof languageToLocale.eld];
+type Locale = CLDLocale | TinyLDLocale | FastTextLocale | ELDLocale;
 
 const localeToLanguage = {
 	cld: Object.mirror(languageToLocale.cld),
 	tinyld: Object.mirror(languageToLocale.tinyld),
 	fasttext: Object.mirror(languageToLocale.fasttext),
+	eld: Object.mirror(languageToLocale.eld),
 };
 
 function isCLDLocale(locale: string): locale is CLDLocale {
@@ -865,6 +992,10 @@ function isFastTextLocale(locale: string): locale is FastTextLocale {
 	return locale in localeToLanguage.fasttext;
 }
 
+function isELDLocale(locale: string): locale is ELDLocale {
+	return locale in localeToLanguage.eld;
+}
+
 function getCLDLanguageByLocale(locale: CLDLocale): CLDLanguage {
 	return localeToLanguage.cld[locale];
 }
@@ -877,6 +1008,10 @@ function getFastTextLanguageByLocale(locale: FastTextLocale): FastTextLanguage {
 	return localeToLanguage.fasttext[locale];
 }
 
+function getELDLanguageByLocale(locale: ELDLocale): ELDLanguage {
+	return localeToLanguage.eld[locale];
+}
+
 export {
 	getTinyLDLanguageByLocale,
 	isTinyLDLocale,
@@ -884,6 +1019,8 @@ export {
 	getCLDLanguageByLocale,
 	isFastTextLocale,
 	getFastTextLanguageByLocale,
+	isELDLocale,
+	getELDLanguageByLocale,
 };
 export type {
 	Detector,
@@ -895,4 +1032,6 @@ export type {
 	CLDLocale,
 	FastTextLanguage,
 	FastTextLocale,
+	ELDLanguage,
+	ELDLocale,
 };
