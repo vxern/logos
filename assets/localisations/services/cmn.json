@@ -1,10 +1,6 @@
 {
     "notices.lastUpdate": "上一次更新",
-    "notices.resources.description.easierToManage": "",
     "notices.resources.description.contributable.makingPullRequest": "",
-    "reports.noLinkProvided": "",
     "submittedAt": "",
-    "alreadyMarkedResolved.description": "",
-    "cannotRemovePrompt.title": "",
-    "cannotCloseIssue.description": ""
+    "cannotRemovePrompt.title": ""
 }
