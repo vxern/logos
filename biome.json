@@ -10,6 +10,7 @@
       },
       "style": {
         "all": true,
+        "noNamespaceImport": "off",
         "noDefaultExport": "off",
         "useNamingConvention": "off",
         "noNonNullAssertion": "off"
