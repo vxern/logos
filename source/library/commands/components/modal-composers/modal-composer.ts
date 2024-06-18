@@ -62,7 +62,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			const key = field.customId;
 			const value = field.value ?? "";
 
-			if (value.length !== 0) {
+			if (value.length > 0) {
 				content[key] = value;
 			} else {
 				content[key] = undefined;

@@ -62,7 +62,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 										name: strings.levels.a0.title,
 										value: strings.levels.a0.description,
 									},
-							  ]
+								]
 							: []),
 						{
 							name: strings.levels.a1.title,
@@ -120,7 +120,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 										name: strings.levels.c3.title,
 										value: strings.levels.c3.description,
 									},
-							  ]
+								]
 							: []),
 					],
 				};
@@ -151,7 +151,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 										name: strings.levels.a0.title,
 										value: examples.a0,
 									},
-							  ]
+								]
 							: []),
 						{
 							name: strings.levels.a1.title,
@@ -209,7 +209,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 										name: strings.levels.c3.title,
 										value: examples.c3,
 									},
-							  ]
+								]
 							: []),
 					],
 				};

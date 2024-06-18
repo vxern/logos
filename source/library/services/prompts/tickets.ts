@@ -77,7 +77,7 @@ class TicketPromptService extends PromptService<{
 									label: strings.close,
 									customId: this.removeButton.encodeId([ticketDocument.partialId]),
 								},
-						  ]
+							]
 						: [
 								{
 									type: Discord.MessageComponentTypes.Button,
@@ -85,7 +85,7 @@ class TicketPromptService extends PromptService<{
 									label: strings.markResolved,
 									customId: this.magicButton.encodeId([ticketDocument.partialId, `${true}`]),
 								},
-						  ],
+							],
 				},
 			],
 		};

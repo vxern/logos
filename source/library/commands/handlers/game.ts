@@ -159,7 +159,7 @@ async function getGameView(
 						? data.sentenceSelection.sentencePair.sentence.replaceAll(
 								wholeWordPattern,
 								`__${data.sentenceSelection.correctPick[1]}__`,
-						  )
+							)
 						: data.sentenceSelection.sentencePair.sentence.replaceAll(wholeWordPattern, mask),
 				description: data.sentenceSelection.sentencePair.translation,
 				color: data.embedColour,
@@ -214,13 +214,13 @@ async function getGameView(
 								style: Discord.ButtonStyles.Primary,
 								label: `${constants.emojis.interactions.menu.controls.forward} ${strings.next}`,
 								customId: data.skipButton.encodeId([]),
-						  }
+							}
 						: {
 								type: Discord.MessageComponentTypes.Button,
 								style: Discord.ButtonStyles.Secondary,
 								label: `${constants.emojis.interactions.menu.controls.forward} ${strings.skip}`,
 								customId: data.skipButton.encodeId([]),
-						  },
+							},
 				] as [Discord.ButtonComponent],
 			},
 		],
@@ -343,7 +343,7 @@ async function getSentenceSelection(
 		.sort((a, b) => a.sort - b.sort)
 		.map(({ word }) => word);
 	if (wordsUnordered.length < constants.PICK_MISSING_WORD_CHOICES - 1) {
-		for (const _ of Array(constants.PICK_MISSING_WORD_CHOICES - 1 - wordsUnordered.length).keys()) {
+		for (const _ of new Array(constants.PICK_MISSING_WORD_CHOICES - 1 - wordsUnordered.length).keys()) {
 			wordsUnordered.push(constants.special.missingString);
 		}
 	}
@@ -367,7 +367,7 @@ async function getSentenceSelection(
 
 	const correctPick: Selection = [mainSentencePair.sentenceId, mainWord];
 	const allPicksRaw: Selection[] = [correctPick];
-	for (const index of Array(sentencePairs.length).keys()) {
+	for (const index of new Array(sentencePairs.length).keys()) {
 		const [sentencePair, word] = [sentencePairs[index], decoys[index]];
 		if (sentencePair === undefined || word === undefined) {
 			throw "StateError: Failed to create pick.";

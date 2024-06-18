@@ -77,7 +77,7 @@ async function subscribeToReadStream(readStream: stream.Writable, file: Sentence
 			record[0] = Number.parseInt(record[0] as string);
 			record[2] = Number.parseInt(record[2] as string);
 
-			line.length !== 0 && readStream.write([file.locale, record] satisfies RecordWithLanguage);
+			line.length > 0 && readStream.write([file.locale, record] satisfies RecordWithLanguage);
 		}),
 	);
 

@@ -52,7 +52,7 @@ class RoleIndicatorService extends LocalService {
 		const applicableRoles = applicableRolesAll.slice(0, this.configuration.limit ?? applicableRolesAll.length);
 		const applicableIndicators = applicableRoles.map((role) => role.indicator);
 
-		const hasApplicableIndicators = applicableIndicators.length !== 0;
+		const hasApplicableIndicators = applicableIndicators.length > 0;
 
 		if (member.nick === undefined) {
 			if (!hasApplicableIndicators) {

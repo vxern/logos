@@ -246,7 +246,7 @@ class DynamicVoiceChannelService extends LocalService {
 		}
 
 		// If somebody is still connected to the channel, do not process.
-		if (channel.voiceStates.length !== 0) {
+		if (channel.voiceStates.length > 0) {
 			return;
 		}
 

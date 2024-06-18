@@ -131,7 +131,7 @@ async function handleFindWord(
 
 			const existingEntries = entriesByPartOfSpeech.get(partOfSpeech) ?? entries;
 
-			for (const index of Array(entries).keys()) {
+			for (const index of new Array(entries).keys()) {
 				const existingEntry = existingEntries[index];
 				const entry = entries[index];
 				if (entry === undefined) {
@@ -495,7 +495,7 @@ function entryToEmbeds(
 	const embeds: Discord.CamelizedDiscordEmbed[] = [];
 	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
-	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length !== 0) {
+	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length > 0) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.nativeDefinitions, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, verbose);
 
@@ -521,7 +521,7 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.definitions !== undefined && entry.definitions.length !== 0) {
+	if (entry.definitions !== undefined && entry.definitions.length > 0) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.definitions, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, verbose);
 
@@ -547,7 +547,7 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.expressions !== undefined && entry.expressions.length !== 0) {
+	if (entry.expressions !== undefined && entry.expressions.length > 0) {
 		const expressionsStringified = stringifyEntries(client, interaction, entry.expressions, "expressions");
 		const expressionsFitted = fitTextToFieldSize(client, interaction, expressionsStringified, verbose);
 
@@ -569,7 +569,7 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.etymologies !== undefined && entry.etymologies.length !== 0) {
+	if (entry.etymologies !== undefined && entry.etymologies.length > 0) {
 		const etymology = entry.etymologies
 			.map((etymology) => {
 				if (etymology.tags === undefined) {
@@ -690,30 +690,30 @@ function stringifyEntries<
 				const diminutives = entry.relations.diminutives ?? [];
 				const augmentatives = entry.relations.augmentatives ?? [];
 
-				if (synonyms.length !== 0 || antonyms.length !== 0) {
+				if (synonyms.length > 0 || antonyms.length > 0) {
 					anchor += "\n  - ";
 					const columns: string[] = [];
 
-					if (synonyms.length !== 0) {
+					if (synonyms.length > 0) {
 						columns.push(`**${strings.synonyms}**: ${synonyms.join(", ")}`);
 					}
 
-					if (antonyms.length !== 0) {
+					if (antonyms.length > 0) {
 						columns.push(`**${strings.antonyms}**: ${antonyms.join(", ")}`);
 					}
 
 					anchor += columns.join(` ${constants.special.divider} `);
 				}
 
-				if (diminutives.length !== 0 || augmentatives.length !== 0) {
+				if (diminutives.length > 0 || augmentatives.length > 0) {
 					anchor += "\n  - ";
 					const columns: string[] = [];
 
-					if (diminutives.length !== 0) {
+					if (diminutives.length > 0) {
 						columns.push(`**${strings.diminutives}**: ${diminutives.join(", ")}`);
 					}
 
-					if (augmentatives.length !== 0) {
+					if (augmentatives.length > 0) {
 						columns.push(`**${strings.augmentatives}**: ${augmentatives.join(", ")}`);
 					}
 

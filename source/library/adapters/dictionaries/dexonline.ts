@@ -226,7 +226,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 									value: vocative.map((terms) => terms.join(", ")).join("\n"),
 									inline: true,
 								},
-						  ]
+							]
 						: []),
 				],
 			},

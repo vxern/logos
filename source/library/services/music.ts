@@ -384,7 +384,7 @@ class ListingManager extends EventEmitter {
 	moveFromQueueToHistory({ count }: { count: number }): void {
 		count = Math.min(Math.max(count, 0), this.queue.count);
 
-		for (const _ of Array(count).keys()) {
+		for (const _ of new Array(count).keys()) {
 			this.history.addNew(this.queue.removeOldest());
 		}
 
@@ -397,7 +397,7 @@ class ListingManager extends EventEmitter {
 	moveFromHistoryToQueue({ count }: { count: number }): void {
 		count = Math.min(Math.max(count, 0), this.history.count);
 
-		for (const _ of Array().keys()) {
+		for (const _ of new Array().keys()) {
 			this.queue.addOld(this.history.removeNewest());
 		}
 
@@ -665,7 +665,7 @@ class MusicSession extends EventEmitter {
 											index: this.queueable.index + 1,
 											number: this.queueable.songs.length,
 											title: this.queueable.title,
-									  })
+										})
 									: "",
 							title: playable.title,
 							url: playable.url,

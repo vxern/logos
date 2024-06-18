@@ -36,7 +36,7 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [client.interactionRepetitionService.getShowButton(interaction)],
 				},
-		  ];
+			];
 
 	await client.notice(
 		interaction,

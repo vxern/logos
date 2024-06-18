@@ -91,7 +91,7 @@ class VolatileStore {
 		count,
 	}: { learningLocale: Locale; count: number }): Promise<SentencePair[]> {
 		const pipeline = this.redis.pipeline();
-		for (const _ of Array(count).keys()) {
+		for (const _ of new Array(count).keys()) {
 			pipeline.srandmember(`${learningLocale}:index`);
 		}
 

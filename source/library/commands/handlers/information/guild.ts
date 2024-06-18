@@ -68,14 +68,14 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 							),
 							inline: false,
 						},
-				  ]
+					]
 				: [
 						{
 							name: `${constants.emojis.guild.owner} ${strings.description.owner}`,
 							value: mention(owner.id, { type: "user" }),
 							inline: true,
 						},
-				  ]),
+					]),
 		],
 	});
 }

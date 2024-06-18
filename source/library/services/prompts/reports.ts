@@ -98,7 +98,7 @@ class ReportPromptService extends PromptService<{
 									label: strings.close,
 									customId: this.removeButton.encodeId([reportDocument.partialId]),
 								},
-						  ]
+							]
 						: [
 								{
 									type: Discord.MessageComponentTypes.Button,
@@ -106,7 +106,7 @@ class ReportPromptService extends PromptService<{
 									label: strings.markResolved,
 									customId: this.magicButton.encodeId([reportDocument.partialId, `${true}`]),
 								},
-						  ],
+							],
 				},
 			],
 		};

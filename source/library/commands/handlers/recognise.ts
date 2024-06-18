@@ -15,7 +15,7 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 		return;
 	}
 
-	const hasEmbeds = message.embeds !== undefined && message.embeds.length !== 0;
+	const hasEmbeds = message.embeds !== undefined && message.embeds.length > 0;
 	if (hasEmbeds) {
 		const strings = constants.contexts.cannotUseForRecognition({
 			localise: client.localise.bind(client),
@@ -106,7 +106,7 @@ async function handleRecogniseLanguage(
 				value: strings.description({ language: `**${strings.language(language)}` }),
 				inline: false,
 			});
-		} else if (detectedLanguages.likely.length !== 0) {
+		} else if (detectedLanguages.likely.length > 0) {
 			const strings = {
 				...constants.contexts.likelyMatches({
 					localise: client.localise.bind(client),
@@ -142,7 +142,7 @@ async function handleRecogniseLanguage(
 				value: strings.description({ language: `**${strings.language(language)}**` }),
 				inline: false,
 			});
-		} else if (detectedLanguages.possible.length !== 0) {
+		} else if (detectedLanguages.possible.length > 0) {
 			const strings = {
 				...constants.contexts.possibleMatches({
 					localise: client.localise.bind(client),
