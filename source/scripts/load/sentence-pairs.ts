@@ -9,6 +9,7 @@ import eventStream from "event-stream";
 import Redis from "ioredis";
 import winston from "winston";
 
+const FILE_EXPRESSION = /^(.+)\.tsv$/;
 const RECORD_DELIMETER = "	";
 const MAX_BUFFER_SIZE = 1024 * 128;
 
@@ -29,7 +30,7 @@ async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
 			continue;
 		}
 
-		const [_, fileName] = /^(.+)\.tsv$/.exec(entryPath) ?? [];
+		const [_, fileName] = FILE_EXPRESSION.exec(entryPath) ?? [];
 		if (fileName === undefined) {
 			winston.warn(`File '${entryPath}' has an invalid format. Discounting...`);
 			continue;
@@ -128,7 +129,7 @@ const readStream = new stream.Writable({
 	},
 });
 
-const promises = [];
+const promises: Promise<void>[] = [];
 for (const file of await getFiles(constants.SENTENCE_PAIRS_DIRECTORY)) {
 	promises.push(subscribeToReadStream(readStream, file));
 }

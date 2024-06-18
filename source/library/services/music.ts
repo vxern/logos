@@ -698,7 +698,9 @@ class MusicSession extends EventEmitter {
 			}
 			case shoukaku.LoadType.PLAYLIST:
 			case shoukaku.LoadType.TRACK: {
-				throw `UnhandledError: Received an unknown track load type '${result}' when searching for track.`;
+				throw new Error(
+					`UnhandledError: Received an unknown track load type '${result}' when searching for track.`,
+				);
 			}
 			case shoukaku.LoadType.ERROR:
 			case shoukaku.LoadType.EMPTY: {

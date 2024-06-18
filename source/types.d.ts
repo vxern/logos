@@ -175,7 +175,7 @@ declare global {
 }
 
 declare global {
-	// biome-ignore lint/nursery/noReExportAll: This is fine because we need these types under the `Discord` namespace.
+	// biome-ignore lint/performance/noReExportAll: This is fine because we need these types under the `Discord` namespace.
 	export * as Discord from "@discordeno/bot";
 }
 

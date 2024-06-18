@@ -43,7 +43,7 @@ function decapitalise(string: string): string {
  */
 function code(string: string): string {
 	if (string.length === 0) {
-		throw "ArgumentError: The string cannot be empty.";
+		throw new Error("The string cannot be empty.");
 	}
 
 	return `\`${string}\``;
@@ -57,7 +57,7 @@ function code(string: string): string {
  */
 function codeMultiline(string: string): string {
 	if (string.length === 0) {
-		throw "ArgumentError: The string cannot be empty.";
+		throw new Error("The string cannot be empty.");
 	}
 
 	return `\`\`\`${string}\`\`\``;
@@ -71,7 +71,7 @@ function codeMultiline(string: string): string {
  */
 function list(items: string[]): string {
 	if (items.length === 0) {
-		throw "ArgumentError: The array cannot be empty.";
+		throw new Error("The array cannot be empty.");
 	}
 
 	return items.map((item) => `${constants.special.bullet} ${item}`).join("\n");

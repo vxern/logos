@@ -27,7 +27,9 @@ class RavenDBDocumentConventions extends DocumentConventions<RavenDBDocumentMeta
 
 	static instantiateModel<M extends Model>(database: DatabaseStore, payload: RavenDBDocument): M {
 		if (!isValidCollection(payload["@metadata"]["@collection"])) {
-			throw `Document ${payload.id} is part of an unknown collection: "${payload["@metadata"]["@collection"]}"`;
+			throw new Error(
+				`Document ${payload.id} is part of an unknown collection: "${payload["@metadata"]["@collection"]}"`,
+			);
 		}
 
 		const ModelClass = DatabaseStore.getModelClassByCollection({

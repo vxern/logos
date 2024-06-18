@@ -97,13 +97,13 @@ class VolatileStore {
 
 		const results = await pipeline.exec();
 		if (results === null) {
-			throw "StateError: Failed to get random indexes for sentence pairs.";
+			throw new Error("Failed to get random indexes for sentence pairs.");
 		}
 
 		const ids: string[] = [];
 		for (const [error, id] of results) {
 			if (error !== null || id === null) {
-				throw `StateError: Failed to get random index for sentence pair: ${id}`;
+				throw new Error(`Failed to get random index for sentence pair: ${id}`);
 			}
 
 			ids.push(id as string);
@@ -113,7 +113,7 @@ class VolatileStore {
 		for (const id of ids) {
 			const pairEncoded = await this.redis.get(`${learningLocale}:${id}`);
 			if (pairEncoded === null) {
-				throw `StateError: Failed to get sentence pair for locale ${learningLocale} and index ${id}.`;
+				throw new Error(`Failed to get sentence pair for locale ${learningLocale} and index ${id}.`);
 			}
 
 			encodedPairs.push(JSON.parse(pairEncoded) as SentencePairEncoded);

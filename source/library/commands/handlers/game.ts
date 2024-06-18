@@ -237,7 +237,7 @@ function getWords(...sentences: string[]): string[] {
 		let isCompound = false;
 
 		for (const segment of segmentsRaw) {
-			if (/[’'-]/.test(segment.segment)) {
+			if (constants.patterns.wordSeparator.test(segment.segment)) {
 				isCompound = true;
 				segmentsProcessedSeparate.at(-1)?.push(segment);
 				continue;
@@ -270,7 +270,7 @@ function getWords(...sentences: string[]): string[] {
 				continue;
 			}
 
-			if (/[0-9]/.test(segment.segment)) {
+			if (constants.patterns.digit.test(segment.segment)) {
 				continue;
 			}
 
@@ -285,7 +285,7 @@ function getWords(...sentences: string[]): string[] {
 function extractRandomWord(words: string[]): string {
 	const word = words.splice(random(words.length), 1).at(0);
 	if (word === undefined) {
-		throw "StateError: Failed to extract random word.";
+		throw new Error("Failed to extract random word.");
 	}
 
 	return word;
@@ -330,7 +330,7 @@ async function getSentenceSelection(
 
 	const mainSentencePair = sentencePairs.splice(random(sentencePairs.length), 1).at(0);
 	if (mainSentencePair === undefined) {
-		throw "StateError: Failed to select main sentence pair.";
+		throw new Error("Failed to select main sentence pair.");
 	}
 
 	const mainSentenceWords = Array.from(new Set(getWords(mainSentencePair.sentence)));
@@ -370,7 +370,7 @@ async function getSentenceSelection(
 	for (const index of new Array(sentencePairs.length).keys()) {
 		const [sentencePair, word] = [sentencePairs[index], decoys[index]];
 		if (sentencePair === undefined || word === undefined) {
-			throw "StateError: Failed to create pick.";
+			throw new Error("Failed to create pick.");
 		}
 
 		allPicksRaw.push([sentencePair.sentenceId, word]);

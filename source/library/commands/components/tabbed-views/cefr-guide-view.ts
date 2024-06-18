@@ -131,7 +131,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	getExampleEmbed(interaction: Logos.Interaction, { bracket }: { bracket: Bracket }): Discord.CamelizedDiscordEmbed {
 		const examples = this.#configuration.examples?.levels;
 		if (examples === undefined) {
-			throw "StateError: Attempted to get example embed when the CEFR configuration was missing examples.";
+			throw new Error("Attempted to get example embed when the CEFR configuration was missing examples.");
 		}
 
 		switch (bracket) {

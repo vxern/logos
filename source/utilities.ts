@@ -5,7 +5,7 @@ function* chunk<T>(array: T[], size: number): Generator<T[], void, void> {
 	}
 
 	if (size === 0) {
-		throw "ArgumentError: The size of a chunk cannot be zero.";
+		throw new Error("The size of a chunk cannot be zero.");
 	}
 
 	const chunks = array.length <= size ? 1 : Math.ceil(array.length / size);

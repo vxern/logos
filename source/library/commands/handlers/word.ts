@@ -135,7 +135,9 @@ async function handleFindWord(
 				const existingEntry = existingEntries[index];
 				const entry = entries[index];
 				if (entry === undefined) {
-					throw `StateError: Entry at index ${index} for part of speech ${partOfSpeech} unexpectedly undefined.`;
+					throw new Error(
+						`Entry at index ${index} for part of speech ${partOfSpeech} unexpectedly undefined.`,
+					);
 				}
 
 				if (existingEntry === undefined) {
@@ -662,7 +664,9 @@ function stringifyEntries<
 		const parenthesesContents: string[] = [];
 		for (const [match, contents] of entry.value.matchAll(parenthesesExpression)) {
 			if (contents === undefined) {
-				throw `StateError: '${match}' was matched to the parentheses regular expression, but the contents were \`undefined\`.`;
+				throw new Error(
+					`'${match}' was matched to the parentheses regular expression, but the contents were \`undefined\`.`,
+				);
 			}
 
 			if (parenthesesContents.includes(contents)) {

@@ -40,7 +40,7 @@
 		"configure:guild": "bun run ./source/scripts/configure/guild.ts",
 		"load:sentence-pairs": "bun run ./source/scripts/load/sentence-pairs.ts",
 		"setup": "bun load:sentence-pairs",
-		"lint": "biome check --apply-unsafe --organize-imports-enabled true ./source/ && biome check --apply-unsafe --organize-imports-enabled true ./test/",
+		"lint": "biome check --write --unsafe ./source/ ./test/",
 		"start": "bun run ./source/index.ts"
 	},
 	"dependencies": {

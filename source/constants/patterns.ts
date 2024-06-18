@@ -29,6 +29,9 @@ const patterns = Object.freeze({
 	wholeWord: (word: string) => new RegExp(`(?<=^|\\p{Z}|\\p{P})${word}(?=\\p{Z}|\\p{P}|$)`, "giu"),
 	/** Used for matching emojis, e.g. ✨ */
 	emojiExpression: /\p{Extended_Pictographic}/u,
+	wordSeparator: /[’'-]/,
+	digit: /[0-9]/,
+	localisationDescription: /\.description$/,
 } as const);
 
 function isValidSnowflake(snowflake: string): boolean {

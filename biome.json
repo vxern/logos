@@ -5,6 +5,7 @@
       "all": true,
       "nursery": {
         "all": true,
+        "useDefaultSwitchClause": "off",
         "noUndeclaredDependencies": "off",
         "useImportRestrictions": "off"
       },
@@ -24,8 +25,14 @@
       "complexity": {
         "all": true,
         "noExcessiveCognitiveComplexity": "off"
+      },
+      "correctness": {
+        "noNodejsModules": "off"
       }
     }
+  },
+  "organizeImports": {
+    "enabled": true
   },
   "formatter": {
     "enabled": true,

@@ -56,7 +56,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			}
 
 			if (field.customId === undefined) {
-				throw "StateError: The custom ID of a submitted modal field was missing.";
+				throw new Error("The custom ID of a submitted modal field was missing.");
 			}
 
 			const key = field.customId;

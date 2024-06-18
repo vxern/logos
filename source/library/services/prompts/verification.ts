@@ -585,7 +585,7 @@ class VerificationPromptService extends PromptService<{
 					where: { guildId: this.guildIdString, channelId: entryRequestDocument.ticketChannelId },
 				});
 				if (ticketDocument === undefined) {
-					throw "StateError: Unable to find ticket document.";
+					throw new Error("Unable to find ticket document.");
 				}
 
 				await ticketService.handleDelete(ticketDocument);
