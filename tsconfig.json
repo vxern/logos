@@ -29,6 +29,7 @@
     "suppressExcessPropertyErrors": false,
     "suppressImplicitAnyIndexErrors": false,
     "isolatedModules": true,
+    "allowImportingTsExtensions": true,
     "baseUrl": "",
     "paths": {
       "discordeno": [
