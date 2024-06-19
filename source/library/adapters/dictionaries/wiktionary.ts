@@ -27,7 +27,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 				"German",
 				"Greek",
 				"Hungarian",
-				"Norwegian/Bokmål",
+				"Norwegian/Bokmal",
 				"Polish",
 				"Romanian",
 				"Russian",

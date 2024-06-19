@@ -14,7 +14,7 @@ const dictionariesByLanguage = Object.freeze({
 	German: ["wiktionary"],
 	Greek: ["wiktionary"],
 	Hungarian: ["wiktionary"],
-	"Norwegian/Bokmål": ["wiktionary"],
+	"Norwegian/Bokmal": ["wiktionary"],
 	Polish: ["wiktionary"],
 	Romanian: ["dexonline", "wiktionary"],
 	Russian: ["wiktionary"],

@@ -35,6 +35,6 @@ describe("getLocaleByLanguage()", () => {
 describe("getWiktionaryLanguageName()", () => {
 	it("returns the Wiktionary name for the learning language if available.", () => {
 		expect(getWiktionaryLanguageName("English/American")).to.equal("English");
-		expect(getWiktionaryLanguageName("Norwegian/Bokmål")).to.equal("Norwegian Bokmål");
+		expect(getWiktionaryLanguageName("Norwegian/Bokmal")).to.equal("Norwegian Bokmål");
 	});
 });
