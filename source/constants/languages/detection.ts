@@ -285,6 +285,7 @@ const languages = Object.freeze({
 		"Estonian",
 		"Filipino/Cebuano",
 		"Filipino/Ilocano",
+		"Filipino/Kapampangan",
 		"Filipino/Tagalog",
 		"Filipino/Waray",
 		"Finnish",
@@ -358,7 +359,6 @@ const languages = Object.freeze({
 		"Occitan",
 		"Odia",
 		"Ossetian",
-		"Pampanga",
 		"Pashto",
 		"Persian",
 		"Pfaelzisch",
@@ -705,6 +705,7 @@ const languageToLocale = Object.freeze({
 		Estonian: "est",
 		"Filipino/Cebuano": "ceb",
 		"Filipino/Ilocano": "ilo",
+		"Filipino/Kapampangan": "pam",
 		"Filipino/Tagalog": "tgl",
 		"Filipino/Waray": "war",
 		Finnish: "fin",
@@ -778,7 +779,6 @@ const languageToLocale = Object.freeze({
 		Occitan: "oci",
 		Odia: "ory",
 		Ossetian: "oss",
-		Pampanga: "pam",
 		Pashto: "pus",
 		Persian: "fas",
 		Pfaelzisch: "pfl",
@@ -842,9 +842,12 @@ type TinyLDLanguage = (typeof languages.tinyld)[number];
 type FastTextLanguage = (typeof languages.fasttext)[number];
 type Language = CLDLanguage | TinyLDLanguage | FastTextLanguage;
 
-type CLDLocale = (typeof languageToLocale.cld)[keyof typeof languageToLocale.cld];
-type TinyLDLocale = (typeof languageToLocale.tinyld)[keyof typeof languageToLocale.tinyld];
-type FastTextLocale = (typeof languageToLocale.fasttext)[keyof typeof languageToLocale.fasttext];
+type CLDLocale =
+	(typeof languageToLocale.cld)[keyof typeof languageToLocale.cld];
+type TinyLDLocale =
+	(typeof languageToLocale.tinyld)[keyof typeof languageToLocale.tinyld];
+type FastTextLocale =
+	(typeof languageToLocale.fasttext)[keyof typeof languageToLocale.fasttext];
 type Locale = CLDLocale | TinyLDLocale | FastTextLocale;
 
 const localeToLanguage = {
