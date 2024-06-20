@@ -48,6 +48,7 @@
 		"cldpre": "^2.9.0",
 		"dexonline-scraper": "^0.2.1",
 		"dotenv": "^16.4.5",
+		"eld": "github:vxern/efficient-language-detector-js#b8f7a21413bef94fc71207241748f4a1d0089cd3",
 		"event-stream": "^4.0.1",
 		"fastest-levenshtein": "^1.0.16",
 		"fasttext.wasm.js": "^1.0.0",

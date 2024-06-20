@@ -4,14 +4,18 @@ import {
 	type Language as DetectionLanguage,
 	type Locale as DetectionLocale,
 	type Detector,
+	type ELDLanguage,
+	type ELDLocale,
 	type FastTextLanguage,
 	type FastTextLocale,
 	type TinyLDLanguage,
 	type TinyLDLocale,
 	getCLDLanguageByLocale as getCLDDetectionLanguageByLocale,
+	getELDLanguageByLocale as getELDDetectionLanguageByLocale,
 	getFastTextLanguageByLocale as getFastTextDetectionLanguageByLocale,
 	getTinyLDLanguageByLocale as getTinyLDDetectionLanguageByLocale,
 	isCLDLocale,
+	isELDLocale,
 	isFastTextLocale,
 	isTinyLDLocale,
 } from "logos:constants/languages/detection";
@@ -164,6 +168,8 @@ export {
 	isLingvanexLocale,
 	getFastTextDetectionLanguageByLocale,
 	isFastTextLocale,
+	getELDDetectionLanguageByLocale,
+	isELDLocale,
 };
 export type {
 	Detector,
@@ -191,4 +197,6 @@ export type {
 	LingvanexLocale,
 	FastTextLanguage,
 	FastTextLocale,
+	ELDLanguage,
+	ELDLocale,
 };
