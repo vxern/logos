@@ -77,7 +77,7 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 		const [collectionCamelcase, ...data] = id.split(constants.special.database.separator) as [string, string[]];
 		const collection = capitalise(collectionCamelcase);
 		if (!isValidCollection(collection)) {
-			throw `Collection "${collectionCamelcase}" encoded in ID "${id}" is unknown.`;
+			throw new Error(`Collection "${collectionCamelcase}" encoded in ID "${id}" is unknown.`);
 		}
 
 		return [collection as Collection, data as IdentifierParts<M>];

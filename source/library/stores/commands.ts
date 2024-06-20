@@ -520,7 +520,7 @@ class CommandStore {
 		if (timestamps.length + 1 > constants.defaults.COMMAND_RATE_LIMIT.uses) {
 			const lastTimestamp = timestamps.at(0);
 			if (lastTimestamp === undefined) {
-				throw "StateError: Unexpectedly undefined initial timestamp.";
+				throw new Error("Unexpectedly undefined initial timestamp.");
 			}
 
 			const nextAllowedUsageTimestamp = intervalMilliseconds - executedAt - lastTimestamp;

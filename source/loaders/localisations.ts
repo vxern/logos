@@ -85,7 +85,7 @@ async function loadLocalisations({
 
 				if (
 					key.endsWith(".description") &&
-					`${key.replace(/\.description$/, ".name")}` in strings &&
+					`${key.replace(constants.patterns.localisationDescription, ".name")}` in strings &&
 					value.length > 100
 				) {
 					log.warn(`${language}: '${key}' is too long (>100 characters). Normalising...`);

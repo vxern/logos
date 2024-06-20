@@ -114,7 +114,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		}
 
 		if (noticesAll.length > 1) {
-			while (noticesAll.length !== 0) {
+			while (noticesAll.length > 0) {
 				const notice = noticesAll.pop();
 				if (notice === undefined) {
 					return;

@@ -32,7 +32,7 @@ describe("Promise.createRace()", () => {
 		);
 
 		// Then we verify that the numbers do indeed come in the order of earliest completion.
-		for (const number of Array(10).keys()) {
+		for (const number of new Array(10).keys()) {
 			expect((await iterator.next()).value).to.deep.equal({ element: number + 1, result: number + 1 });
 		}
 

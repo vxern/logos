@@ -19,7 +19,10 @@ import swedish from "logos:constants/transformers/swedish";
 import turkish from "logos:constants/transformers/turkish";
 
 type TransformerType = "pluralise";
-type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;
+type Transformer = (
+	matchTerm: string,
+	matches: Record<string, string>,
+) => string | undefined;
 
 const localisations = Object.freeze({
 	transformers: {
@@ -34,7 +37,7 @@ const localisations = Object.freeze({
 		German: german,
 		Greek: greek,
 		Hungarian: hungarian,
-		"Norwegian/Bokmål": norwegian,
+		"Norwegian/Bokmal": norwegian,
 		Polish: polish,
 		Romanian: romanian,
 		Russian: russian,
@@ -42,7 +45,10 @@ const localisations = Object.freeze({
 		Spanish: spanish,
 		Swedish: swedish,
 		Turkish: turkish,
-	} satisfies Record<LocalisationLanguage, Record<TransformerType, Transformer>>,
+	} satisfies Record<
+		LocalisationLanguage,
+		Record<TransformerType, Transformer>
+	>,
 	languages: {
 		Abkhazian: "languages.abkhazian",
 		Afar: "languages.afar",
@@ -215,13 +221,12 @@ const localisations = Object.freeze({
 		Nepali: "languages.nepali",
 		Newar: "languages.newar",
 		Norwegian: "languages.norwegian",
-		"Norwegian/Bokmål": "languages.norwegian.bokmal",
+		"Norwegian/Bokmal": "languages.norwegian.bokmal",
 		"Norwegian/Nynorsk": "languages.norwegian.nynorsk",
 		Occitan: "languages.occitan",
 		Odia: "languages.odia",
 		Oromo: "languages.oromo",
 		Ossetian: "languages.ossetian",
-		Pampanga: "languages.pampanga",
 		Pashto: "languages.pashto",
 		Pedi: "languages.pedi",
 		Persian: "languages.persian",

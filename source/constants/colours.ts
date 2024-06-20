@@ -9,7 +9,7 @@ import patterns from "logos:constants/patterns";
  */
 function fromHex(colour: string): number {
 	if (!patterns.rgbHex.test(colour)) {
-		throw "The passed colour was not in the correct format (#ffffff).";
+		throw new Error("The passed colour was not in the correct format (#ffffff).");
 	}
 
 	return Number.parseInt(colour.replace("#", "0x"));

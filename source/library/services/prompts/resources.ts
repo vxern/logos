@@ -66,7 +66,7 @@ class ResourcePromptService extends PromptService<{
 									label: strings.remove,
 									customId: this.removeButton.encodeId([resourceDocument.partialId]),
 								},
-						  ]
+							]
 						: [
 								{
 									type: Discord.MessageComponentTypes.Button,
@@ -74,7 +74,7 @@ class ResourcePromptService extends PromptService<{
 									label: strings.markResolved,
 									customId: this.magicButton.encodeId([resourceDocument.partialId, `${true}`]),
 								},
-						  ],
+							],
 				},
 			],
 		};

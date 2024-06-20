@@ -52,7 +52,7 @@ async function handleDisplayDictionaryLicence(
 							name: strings.fields.copyright,
 							value: licence.notices.copyright,
 						},
-				  ]
+					]
 				: []),
 		],
 	});

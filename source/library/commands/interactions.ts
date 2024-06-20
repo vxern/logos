@@ -10,7 +10,9 @@ function parseTimeExpression(
 	if (conciseMatch !== undefined) {
 		const [_, hours, minutes, seconds] = conciseMatch;
 		if (seconds === undefined) {
-			throw `StateError: The expression '${expression}' was matched to the concise timestamp regular expression, but the seconds part was \`undefined\`.`;
+			throw new Error(
+				`The expression '${expression}' was matched to the concise timestamp regular expression, but the seconds part was \`undefined\`.`,
+			);
 		}
 
 		return parseConciseTimeExpression(client, interaction, [hours, minutes, seconds]);
@@ -28,7 +30,7 @@ function parseConciseTimeExpression(
 		.map((part) => (part !== undefined ? Number(part) : undefined))
 		.reverse() as [number, ...number[]];
 
-	const verboseExpressionParts = [];
+	const verboseExpressionParts: string[] = [];
 
 	if (seconds !== 0) {
 		const strings = {
@@ -106,7 +108,7 @@ function parseVerboseTimeExpressionPhrase(
 
 	const timeUnitsWithAliases = timeUnitsWithAliasesLocalised.get(interaction.locale);
 	if (timeUnitsWithAliases === undefined) {
-		throw `Failed to get time unit aliases for locale '${interaction.locale}'.`;
+		throw new Error(`Failed to get time unit aliases for locale '${interaction.locale}'.`);
 	}
 
 	function extractNumbers(expression: string): number[] {
@@ -163,14 +165,14 @@ function parseVerboseTimeExpressionPhrase(
 		quantifiers[index],
 	])) {
 		if (quantifier === undefined) {
-			throw `Failed to get quantifier for time unit '${timeUnit}' and locale '${interaction.locale}'.`;
+			throw new Error(`Failed to get quantifier for time unit '${timeUnit}' and locale '${interaction.locale}'.`);
 		}
 
 		timeUnitQuantifierTuples.push([timeUnit, quantifier]);
 	}
 	timeUnitQuantifierTuples.sort(([previous], [next]) => constants.time[next] - constants.time[previous]);
 
-	const timeExpressions = [];
+	const timeExpressions: string[] = [];
 	let total = 0;
 	for (const [timeUnit, quantifier] of timeUnitQuantifierTuples) {
 		const strings = {

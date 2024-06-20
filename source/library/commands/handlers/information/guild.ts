@@ -68,14 +68,14 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 							),
 							inline: false,
 						},
-				  ]
+					]
 				: [
 						{
 							name: `${constants.emojis.guild.owner} ${strings.description.owner}`,
 							value: mention(owner.id, { type: "user" }),
 							inline: true,
 						},
-				  ]),
+					]),
 		],
 	});
 }
@@ -121,7 +121,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 	).map((role) => {
 		const snowflake = (role.snowflakes as Record<string, string>)[guildIdString];
 		if (snowflake === undefined) {
-			throw `StateError: Could not get the snowflake of ${client.diagnostics.role(role.id)}.`;
+			throw new Error(`Could not get the snowflake of ${client.diagnostics.role(role.id)}.`);
 		}
 
 		return BigInt(snowflake);
@@ -130,7 +130,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		.map((roleId) => {
 			const role = guild.roles.get(roleId);
 			if (role === undefined) {
-				throw `StateError: The ${client.diagnostics.role(roleId)} no longer exists.`;
+				throw new Error(`The ${client.diagnostics.role(roleId)} no longer exists.`);
 			}
 
 			return role;

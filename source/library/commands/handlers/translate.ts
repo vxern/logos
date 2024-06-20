@@ -66,7 +66,7 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 		return;
 	}
 
-	const hasEmbeds = message.embeds !== undefined && message.embeds.length !== 0;
+	const hasEmbeds = message.embeds !== undefined && message.embeds.length > 0;
 	if (hasEmbeds) {
 		const strings = constants.contexts.cannotUseMessageForTranslation({
 			localise: client.localise.bind(client),
@@ -287,7 +287,7 @@ async function translateText(
 	}
 
 	// Ensures that an empty translation string does not result in embed failure.
-	const translatedText = translation.text.trim().length !== 0 ? translation.text : constants.special.meta.whitespace;
+	const translatedText = translation.text.trim().length > 0 ? translation.text : constants.special.meta.whitespace;
 
 	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
 
@@ -343,7 +343,7 @@ async function translateText(
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [client.interactionRepetitionService.getShowButton(interaction)],
 				},
-		  ];
+			];
 
 	await client.noticed(interaction, { embeds, components });
 }

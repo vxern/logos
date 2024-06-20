@@ -38,7 +38,7 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 
 		const [sourceLocale, _] = sourceLocaleComplete.split("-");
 		if (sourceLocale === undefined) {
-			throw "StateError: Locale part unexpectedly undefined.";
+			throw new Error("Locale part unexpectedly undefined.");
 		}
 
 		let response: Response;

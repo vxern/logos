@@ -1,6 +1,7 @@
 .idea/
 !.idea/modules.xml
 !.idea/vcs.xml
+logs/
 node_modules/
 dist/
 .cert.pfx
