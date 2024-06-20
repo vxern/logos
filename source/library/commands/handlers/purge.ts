@@ -651,7 +651,7 @@ function getMessageContent(
 	interaction: Logos.Interaction,
 	message: Discord.Message,
 ): string | undefined {
-	if (message.content?.trim().length === 0 && message.embeds?.length > 0) {
+	if (message.content?.trim().length === 0 && (message.embeds?.length ?? 0) > 0) {
 		return undefined;
 	}
 
