@@ -48,5 +48,5 @@ winston.configure({
 		winston.format.colorize({ all: true }),
 		winston.format.timestamp(),
 	),
-	transports: new winston.transports.Console(),
+	transports: [new winston.transports.Console(), new winston.transports.File({ filename: "logs/standard.txt" })],
 });
