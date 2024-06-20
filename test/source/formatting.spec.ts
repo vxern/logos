@@ -24,7 +24,7 @@ describe("decapitalise()", () => {
 
 describe("code()", () => {
 	it("throws when an empty string is passed.", () => {
-		expect(() => code("")).to.throw("ArgumentError: The string cannot be empty.");
+		expect(() => code("")).to.throw("The string cannot be empty.");
 	});
 
 	it("wraps the passed string in a markdown code block.", () => {
@@ -40,13 +40,13 @@ describe("codeMultiline()", () => {
 	});
 
 	it("returns a formatted placeholder when an empty string is inputted.", () => {
-		expect(() => code("")).to.throw("ArgumentError: The string cannot be empty.");
+		expect(() => code("")).to.throw("The string cannot be empty.");
 	});
 });
 
 describe("list()", () => {
 	it("throws when an empty array is inputted.", () => {
-		expect(() => list([])).to.throw("ArgumentError: The array cannot be empty.");
+		expect(() => list([])).to.throw("The array cannot be empty.");
 	});
 
 	it("formats the passed array of strings as a markdown list.", () => {

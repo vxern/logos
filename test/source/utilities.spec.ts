@@ -10,7 +10,7 @@ describe("chunk()", () => {
 	});
 
 	it("throws when the chunk size is specified as zero.", () => {
-		expect(() => chunk(["a", "b"], 0).next()).to.throw("ArgumentError: The size of a chunk cannot be zero.");
+		expect(() => chunk(["a", "b"], 0).next()).to.throw("The size of a chunk cannot be zero.");
 	});
 
 	it("chunks the array when the number of items is less than the chunk size, returning.", () => {

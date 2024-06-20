@@ -22,7 +22,7 @@ const logger: EventLogger<"purgeEnd"> = (client, [member, channel, messageCount,
 									name: strings.fields.author,
 									value: client.diagnostics.user(author),
 								},
-						  ]
+							]
 						: undefined,
 			},
 		],

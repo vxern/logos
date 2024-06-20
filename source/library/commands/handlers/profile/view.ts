@@ -40,7 +40,7 @@ async function handleDisplayProfile(
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [client.interactionRepetitionService.getShowButton(interaction)],
 				},
-		  ];
+			];
 
 	await client.notice(
 		interaction,

@@ -21,7 +21,7 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [client.interactionRepetitionService.getShowButton(interaction)],
 				},
-		  ];
+			];
 
 	const strings = constants.contexts.moderationPolicy({
 		localise: client.localise.bind(client),

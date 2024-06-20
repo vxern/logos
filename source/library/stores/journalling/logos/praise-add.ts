@@ -18,7 +18,7 @@ const logger: EventLogger<"praiseAdd"> = (client, [member, praise, author], { gu
 									name: strings.fields.comment,
 									value: praise.comment,
 								},
-						  ]
+							]
 						: undefined,
 			},
 		],

@@ -175,7 +175,7 @@ class InteractionCollector<
 	static getCommandName(interaction: Discord.Interaction): string {
 		const commandName = interaction.data?.name;
 		if (commandName === undefined) {
-			throw "Command did not have a name.";
+			throw new Error("Command did not have a name.");
 		}
 
 		const subCommandGroupOption = interaction.data?.options?.find((option) => isSubcommandGroup(option));
@@ -185,7 +185,7 @@ class InteractionCollector<
 			const subCommandGroupName = subCommandGroupOption.name;
 			const subCommandName = subCommandGroupOption.options?.find((option) => isSubcommand(option))?.name;
 			if (subCommandName === undefined) {
-				throw "Sub-command did not have a name.";
+				throw new Error("Sub-command did not have a name.");
 			}
 
 			commandNameFull = `${commandName} ${subCommandGroupName} ${subCommandName}`;
@@ -240,7 +240,7 @@ class InteractionCollector<
 	 * Use {@link onInteraction()} instead.
 	 */
 	onCollect(_: CollectEvent<"interactionCreate">) {
-		throw "UnimplementedError: Do not use `onCollect()` on interaction controllers. Use `onInteraction()` instead.";
+		throw new Error("Do not use `onCollect()` on interaction controllers. Use `onInteraction()` instead.");
 	}
 
 	onInteraction(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => void | Promise<void>): void {

@@ -165,7 +165,7 @@ class VerificationPromptService extends PromptService<{
 						{
 							name: `${constants.emojis.verification.for} ${strings.votesFor}`,
 							value:
-								votedForFormatted !== undefined && votedForFormatted.length !== 0
+								votedForFormatted !== undefined && votedForFormatted.length > 0
 									? votedForFormatted.join("\n")
 									: `*${strings.noneYet}*`,
 							inline: true,
@@ -173,7 +173,7 @@ class VerificationPromptService extends PromptService<{
 						{
 							name: `${constants.emojis.verification.against} ${strings.votesAgainst}`,
 							value:
-								votedAgainstFormatted !== undefined && votedAgainstFormatted.length !== 0
+								votedAgainstFormatted !== undefined && votedAgainstFormatted.length > 0
 									? votedAgainstFormatted.join("\n")
 									: `*${strings.noneYet}*`,
 							inline: true,
@@ -206,7 +206,7 @@ class VerificationPromptService extends PromptService<{
 													quantity: voteInformation.acceptance.remaining,
 												},
 											),
-									  }),
+										}),
 							customId: this.magicButton.encodeId([entryRequestDocument.partialId, `${true}`]),
 						},
 						{
@@ -223,7 +223,7 @@ class VerificationPromptService extends PromptService<{
 													quantity: voteInformation.rejection.remaining,
 												},
 											),
-									  }),
+										}),
 							customId: this.magicButton.encodeId([entryRequestDocument.partialId, `${false}`]),
 						},
 						...((entryRequestDocument.ticketChannelId === undefined
@@ -234,7 +234,7 @@ class VerificationPromptService extends PromptService<{
 										label: strings.open,
 										customId: this.#openInquiry.encodeId([entryRequestDocument.partialId]),
 									},
-							  ]
+								]
 							: []) as Discord.ButtonComponent[]),
 					] as [Discord.ButtonComponent, Discord.ButtonComponent],
 				},
@@ -585,7 +585,7 @@ class VerificationPromptService extends PromptService<{
 					where: { guildId: this.guildIdString, channelId: entryRequestDocument.ticketChannelId },
 				});
 				if (ticketDocument === undefined) {
-					throw "StateError: Unable to find ticket document.";
+					throw new Error("Unable to find ticket document.");
 				}
 
 				await ticketService.handleDelete(ticketDocument);

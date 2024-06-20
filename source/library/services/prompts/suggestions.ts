@@ -70,7 +70,7 @@ class SuggestionPromptService extends PromptService<{
 									label: strings.remove,
 									customId: this.removeButton.encodeId([suggestionDocument.partialId]),
 								},
-						  ]
+							]
 						: [
 								{
 									type: Discord.MessageComponentTypes.Button,
@@ -78,7 +78,7 @@ class SuggestionPromptService extends PromptService<{
 									label: strings.markResolved,
 									customId: this.magicButton.encodeId([suggestionDocument.partialId, `${true}`]),
 								},
-						  ],
+							],
 				},
 			],
 		};
