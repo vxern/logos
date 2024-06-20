@@ -19,10 +19,7 @@ import swedish from "logos:constants/transformers/swedish";
 import turkish from "logos:constants/transformers/turkish";
 
 type TransformerType = "pluralise";
-type Transformer = (
-	matchTerm: string,
-	matches: Record<string, string>,
-) => string | undefined;
+type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;
 
 const localisations = Object.freeze({
 	transformers: {
@@ -45,10 +42,7 @@ const localisations = Object.freeze({
 		Spanish: spanish,
 		Swedish: swedish,
 		Turkish: turkish,
-	} satisfies Record<
-		LocalisationLanguage,
-		Record<TransformerType, Transformer>
-	>,
+	} satisfies Record<LocalisationLanguage, Record<TransformerType, Transformer>>,
 	languages: {
 		Abkhazian: "languages.abkhazian",
 		Afar: "languages.afar",
