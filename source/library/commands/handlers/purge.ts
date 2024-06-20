@@ -137,13 +137,13 @@ async function handlePurgeMessages(
 									format: "relative",
 								}),
 								user_mention: mention(BigInt(startMessage.author.id), { type: "user" }),
-						  })}`
+							})}`
 						: strings.embedPosted({
 								relative_timestamp: timestamp(startMessage.timestamp, {
 									format: "relative",
 								}),
 								user_mention: mention(BigInt(startMessage.author.id), { type: "user" }),
-						  }),
+							}),
 			},
 			{
 				name: strings.end,
@@ -152,11 +152,11 @@ async function handlePurgeMessages(
 						? `${endMessageContent}\n${strings.posted({
 								relative_timestamp: timestamp(endMessage.timestamp, { format: "relative" }),
 								user_mention: mention(BigInt(endMessage.author.id), { type: "user" }),
-						  })}`
+							})}`
 						: strings.embedPosted({
 								relative_timestamp: timestamp(endMessage.timestamp, { format: "relative" }),
 								user_mention: mention(BigInt(endMessage.author.id), { type: "user" }),
-						  }),
+							}),
 			},
 			{
 				name: strings.messagesFound,
@@ -611,16 +611,16 @@ async function displaySnowflakesInvalidError(
 			? {
 					title: strings.both.title,
 					description: strings.both.description,
-			  }
+				}
 			: isStartInvalid
-			  ? {
+				? {
 						title: strings.start.title,
 						description: strings.start.description,
-				  }
-			  : {
+					}
+				: {
 						title: strings.end.title,
 						description: strings.end.description,
-				  },
+					},
 	);
 }
 
@@ -651,7 +651,7 @@ function getMessageContent(
 	interaction: Logos.Interaction,
 	message: Discord.Message,
 ): string | undefined {
-	if (message.content?.trim().length === 0 && message.embeds?.length !== 0) {
+	if (message.content?.trim().length === 0 && message.embeds?.length > 0) {
 		return undefined;
 	}
 

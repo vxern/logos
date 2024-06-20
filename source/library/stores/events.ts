@@ -76,6 +76,19 @@ class EventStore {
 		}
 	}
 
+	async registerCollector<Event extends keyof Discord.EventHandlers>(
+		event: Event,
+		collector: Collector<Event>,
+	): Promise<void> {
+		this.#registerCollector(event, collector);
+
+		collector.initialise();
+
+		collector.done.then(() => {
+			this.#unregisterCollector(event, collector);
+		});
+	}
+
 	#registerCollector(event: Event, collector: Collector<Event>): void {
 		this.log.debug(`Registering collector for '${event}'...`);
 
@@ -91,23 +104,10 @@ class EventStore {
 	#unregisterCollector(event: Event, collector: Collector<Event>): void {
 		const collectors = this.#collectors.get(event);
 		if (collectors === undefined) {
-			throw `StateError: Collectors for event "${event}" unexpectedly missing.`;
+			throw new Error(`Collectors for event "${event}" unexpectedly missing.`);
 		}
 
 		collectors.delete(collector);
-	}
-
-	async registerCollector<Event extends keyof Discord.EventHandlers>(
-		event: Event,
-		collector: Collector<Event>,
-	): Promise<void> {
-		this.#registerCollector(event, collector);
-
-		collector.initialise();
-
-		collector.done.then(() => {
-			this.#unregisterCollector(event, collector);
-		});
 	}
 }
 

@@ -23,7 +23,7 @@ const logger: EventLogger<"reportSubmit"> = (client, [author, report], { guildLo
 									name: strings.fields.messageLink,
 									value: report.formData.messageLink,
 								},
-						  ]
+							]
 						: []),
 				],
 			},

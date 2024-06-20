@@ -72,7 +72,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 
 	await client.registerInteractionCollector(selectMenuSelection);
 
-	const options = [];
+	const options: Discord.SelectOption[] = [];
 	for (const [result, index] of results.map<[YouTubeSearch.Playlist | YouTubeSearch.Video, number]>(
 		(result, index) => [result, index],
 	)) {

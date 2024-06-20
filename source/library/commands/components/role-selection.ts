@@ -60,12 +60,12 @@ function traverseRoleSelectionTree(data: NavigationData): [RoleCategory, ...Role
 		(categories, next) => {
 			const lastCategoryGroup = categories.at(-1) as RoleCategoryGroup | undefined;
 			if (lastCategoryGroup === undefined) {
-				throw "StateError: Could not get the last role category group when traversing the role selection tree.";
+				throw new Error("Could not get the last role category group when traversing the role selection tree.");
 			}
 
 			const lastCategory = lastCategoryGroup.categories[next];
 			if (lastCategory === undefined) {
-				throw "StateError: Could not get the last role category when traversing the role selection tree.";
+				throw new Error("Could not get the last role category when traversing the role selection tree.");
 			}
 
 			categories.push(lastCategory);
@@ -269,7 +269,7 @@ async function traverseRoleTreeAndDisplay(
 	const categories = traverseRoleSelectionTree(data.browsingData.navigationData);
 	const category = categories.at(-1);
 	if (category === undefined) {
-		throw "StateError: Could not get the last role category.";
+		throw new Error("Could not get the last role category.");
 	}
 
 	let selectOptions: Discord.SelectOption[];
@@ -287,9 +287,9 @@ async function traverseRoleTreeAndDisplay(
 			return (Object.entries(menuRoles) as [string, RoleImplicit][]).map(([name, role]) => {
 				const snowflake = role.snowflakes[interaction.guildId.toString()];
 				if (snowflake === undefined) {
-					throw `StateError: Could not get the snowflake for a role on ${client.diagnostics.guild(
-						interaction.guildId,
-					)}.`;
+					throw new Error(
+						`Could not get the snowflake for a role on ${client.diagnostics.guild(interaction.guildId)}.`,
+					);
 				}
 
 				return [name, BigInt(snowflake)];
@@ -356,7 +356,7 @@ async function displaySelectMenu(
 
 	const category = categories.at(-1);
 	if (category === undefined) {
-		throw "StateError: Could not get the last role category.";
+		throw new Error("Could not get the last role category.");
 	}
 
 	const strings = {

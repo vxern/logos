@@ -38,8 +38,8 @@ Promise.createRace = async function* <T, R>(
 };
 
 (globalThis as any).Discord = Discord;
-(globalThis as any).constants = await import("./constants/constants").then((module) => module.default);
-(globalThis as any).defaults = await import("./constants/defaults").then((module) => module.default);
+(globalThis as any).constants = await import("./constants/constants.ts").then((module) => module.default);
+(globalThis as any).defaults = await import("./constants/defaults.ts").then((module) => module.default);
 
 winston.configure({
 	format: winston.format.combine(

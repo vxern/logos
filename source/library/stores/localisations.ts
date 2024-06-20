@@ -209,7 +209,7 @@ class LocalisationStore {
 		}
 
 		const parts: string[] = [];
-		for (const index of Array(keyParts.length).keys()) {
+		for (const index of new Array(keyParts.length).keys()) {
 			const part = keyParts.slice(0, index + 1).join(".options.");
 			parts.push(this.localise(`${part}.name`, locale)());
 		}

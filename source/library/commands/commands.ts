@@ -687,7 +687,7 @@ type CommandBuilder<Generic extends { built: boolean } = { built: boolean }> = t
 	? CommandBuilderBase<Generic> & {
 			key: string;
 			built: Discord.CreateApplicationCommand;
-	  }
+		}
 	: CommandBuilderBase<Generic>;
 
 interface OptionBuilderBase<Generic extends { built: boolean }> extends OptionMetadata {
@@ -706,7 +706,7 @@ type OptionBuilder<Generic extends { built: boolean } = { built: boolean }> = tr
 	? OptionBuilderBase<Generic> & {
 			key: string;
 			built: Discord.ApplicationCommandOption;
-	  }
+		}
 	: OptionBuilderBase<Generic>;
 
 type CommandTemplate = CommandBuilder<{ built: false }>;

@@ -15,7 +15,7 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 		return;
 	}
 
-	const hasEmbeds = message.embeds !== undefined && message.embeds.length !== 0;
+	const hasEmbeds = message.embeds !== undefined && message.embeds.length > 0;
 	if (hasEmbeds) {
 		const strings = constants.contexts.cannotUseForRecognition({
 			localise: client.localise.bind(client),
@@ -72,7 +72,7 @@ async function handleRecogniseLanguage(
 	if (detectedLanguages.likely.length === 1 && detectedLanguages.possible.length === 0) {
 		const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
 		if (language === undefined) {
-			throw "StateError: Detected language unexpectedly undefined.";
+			throw new Error("Detected language unexpectedly undefined.");
 		}
 
 		const strings = {
@@ -91,7 +91,7 @@ async function handleRecogniseLanguage(
 		if (detectedLanguages.likely.length === 1) {
 			const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
 			if (language === undefined) {
-				throw "StateError: Likely detected language unexpectedly undefined.";
+				throw new Error("Likely detected language unexpectedly undefined.");
 			}
 
 			const strings = {
@@ -106,7 +106,7 @@ async function handleRecogniseLanguage(
 				value: strings.description({ language: `**${strings.language(language)}` }),
 				inline: false,
 			});
-		} else if (detectedLanguages.likely.length !== 0) {
+		} else if (detectedLanguages.likely.length > 0) {
 			const strings = {
 				...constants.contexts.likelyMatches({
 					localise: client.localise.bind(client),
@@ -127,7 +127,7 @@ async function handleRecogniseLanguage(
 		if (detectedLanguages.possible.length === 1) {
 			const language = detectedLanguages.possible.at(0) as DetectionLanguage | undefined;
 			if (language === undefined) {
-				throw "StateError: Possible detected language unexpectedly undefined.";
+				throw new Error("Possible detected language unexpectedly undefined.");
 			}
 
 			const strings = {
@@ -142,7 +142,7 @@ async function handleRecogniseLanguage(
 				value: strings.description({ language: `**${strings.language(language)}**` }),
 				inline: false,
 			});
-		} else if (detectedLanguages.possible.length !== 0) {
+		} else if (detectedLanguages.possible.length > 0) {
 			const strings = {
 				...constants.contexts.possibleMatches({
 					localise: client.localise.bind(client),

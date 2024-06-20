@@ -71,7 +71,7 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 			});
 
 			const definition: Definition = { value: result.definition };
-			if (result.synonyms !== undefined && result.synonyms.length !== 0) {
+			if (result.synonyms !== undefined && result.synonyms.length > 0) {
 				definition.relations = { synonyms: result.synonyms };
 			}
 

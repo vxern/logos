@@ -120,7 +120,7 @@ class ServiceStore {
 		const services = Object.values(this.global);
 		this.log.info(`Starting global services... (${services.length} services to start)`);
 
-		const promises = [];
+		const promises: (void | Promise<void>)[] = [];
 		for (const service of services) {
 			promises.push(service.start());
 		}
@@ -273,7 +273,7 @@ class ServiceStore {
 
 		this.#collection.local.set(guildId, services);
 
-		const promises = [];
+		const promises: (void | Promise<void>)[] = [];
 		for (const service of services) {
 			promises.push(service.start());
 		}
