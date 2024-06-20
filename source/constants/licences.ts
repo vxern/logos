@@ -68,6 +68,7 @@ const licences = Object.freeze({
 		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
 		"event-stream": mit("Copyright (c) 2011 Dominic Tarr"),
 		"fastest-levenshtein": mit("Copyright (c) 2020 Kasper Unn Weihe"),
+		"fasttext.wasm.js": mit("Copyright (c) 2023 Yuns <https://github.com/yunsii>"),
 		ioredis: mit("Copyright (c) 2015-2022 Zihua Li"),
 		nano: apache("Copyright [2016-2018] The Apache Software Foundation"),
 		nanoid: mit("Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>"),
