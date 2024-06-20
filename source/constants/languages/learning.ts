@@ -24,7 +24,7 @@ function getLocaleByLanguage(language: Language): Locale {
 const wiktionaryLanguageNames = Object.freeze({
 	"English/American": "English",
 	"English/British": "English",
-	"Norwegian/Bokmål": "Norwegian Bokmål",
+	"Norwegian/Bokmal": "Norwegian Bokmål",
 	"Armenian/Western": "Armenian",
 	"Armenian/Eastern": "Armenian",
 } satisfies Record<WithBaseLanguage<LearningLanguage>, string>);

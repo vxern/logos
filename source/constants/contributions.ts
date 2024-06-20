@@ -159,7 +159,7 @@ export default Object.freeze({
 			completion: 4,
 			contributors: [contributors.nemokosch],
 		},
-		"Norwegian/Bokmål": {
+		"Norwegian/Bokmal": {
 			flag: "🇳🇴",
 			completion: 8,
 			contributors: [contributors.telemaniak],
