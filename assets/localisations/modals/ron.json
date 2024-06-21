@@ -22,5 +22,7 @@
     "resource.title": "Resursă",
     "resource.fields.resource": "Ce resursă ai vrea să trimiți?",
     "ticket.title": "Tichet de asistență",
-    "ticket.fields.topic": "Care este subiectul tichetului tău?"
+    "ticket.fields.topic": "Care este subiectul tichetului tău?",
+    "form.failedToSubmit.title": "Ceva a mers prost",
+    "form.failedToSubmit.description": "Depunerea ta nu a putut fi procesată."
 }

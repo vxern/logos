@@ -14,5 +14,10 @@
     "alreadyMarkedResolved.title": "Bereits als gelöst markiert",
     "alreadyMarkedResolved.description": "Der Problem wurde schon als gelöst markiert.",
     "alreadyMarkedUnresolved.title": "Bereits als ungelöst markiert",
-    "alreadyMarkedUnresolved.description": "Der Problem wurde schon als ungelöst markiert."
+    "alreadyMarkedUnresolved.description": "Der Problem wurde schon als ungelöst markiert.",
+    "notices.resources.description.storedInRepository": "Unsere Ressourcen sind in einem [GitHub Repository]({link}) gespeichert. Die Schaltfläche unten führt auch dorthin.",
+    "notices.resources.description.contributable.usingCommand": "Den Befehl {command} benutzen.",
+    "remove": "Löschen",
+    "cannotRemovePrompt.title": "Die Nachricht kann nicht gelöscht werden",
+    "cannotRemovePrompt.description": "Du kannst diese Nachricht nicht löschen."
 }
