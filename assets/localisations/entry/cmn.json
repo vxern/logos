@@ -1,20 +1,12 @@
 {
     "entry.welcome.title": "歡迎進入",
     "entry.welcome.description.acceptedRules": "我已閱讀規矩並同意遵守",
-    "entry.proficiency.receivedAccess.title": "",
     "entry.verification.getVerified.description.verificationRequired": "",
-    "entry.verification.verifyingAccount.verifyingAccount.description": "",
     "entry.verification.verifyingAccount.tooNew.description": "",
-    "entry.verification.answers.alreadyAnswered.description": "",
     "entry.verification.answers.failed.title": "",
-    "entry.verification.accountCreated": "",
     "entry.verification.noneYet": "",
-    "entry.verification.vote.acceptMultiple.votes.two": "",
     "entry.verification.vote.rejectMultiple.votes.one": "",
-    "entry.verification.vote.failed.description": "",
     "entry.verification.vote.alreadyVoted.inFavour.description": "",
-    "entry.verification.vote.stanceChanged.description": "",
     "entry.verification.vote.sureToForce.reject.description": "",
-    "entry.verification.inquiry.open": "",
     "entry.verification.inquiry.opened.title": ""
 }
