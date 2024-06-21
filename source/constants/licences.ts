@@ -9,6 +9,7 @@ interface DictionaryLicence {
 	readonly notices: {
 		readonly licence: string;
 		readonly copyright?: string;
+		readonly badgeLink?: string;
 	};
 }
 
@@ -21,6 +22,7 @@ const licences = Object.freeze({
 				licence:
 					"Baza de definiții a dexonline este liberă; o puteți redistribui și/sau modifica în conformitate cu termenii Licenței Publice Generale GNU așa cum este ea publicată de Free Software Foundation; fie versiunea 2 a Licenței, fie (la latitudinea dumneavoastră) orice versiune ulterioară. Baza de definiții este distribuită cu speranța că vă va fi utilă, dar FĂRĂ NICIO GARANȚIE, chiar fără garanția implicită de vandabilitate sau conformitate unui anumit scop. Citiți Licența Publică Generală GNU pentru detalii. Puteți găsi o copie a Licenței Publice Generale GNU [aici](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) și o traducere a ei în limba română [aici](https://ro.wikipedia.org/wiki/GPL_%28licen%C8%9B%C4%83,_versiunea_2%29).",
 				copyright: "Copyright © 2004-2023 dexonline (https://dexonline.ro)",
+				badgeLink: "https://www.dicolink.com/imgs/dicolink_badge_a1.png",
 			},
 		},
 		dicolink: {
