@@ -54,6 +54,16 @@ const licences = Object.freeze({
 					"The original texts of Wiktionary entries are dual-licensed to the public under both the [Creative Commons Attribution-ShareAlike 3.0 Unported License (CC-BY-SA)](https://en.wiktionary.org/wiki/Wiktionary:CC-BY-SA) and the [GNU Free Documentation License (GFDL)](https://en.wiktionary.org/wiki/Wiktionary:Text_of_the_GNU_Free_Documentation_License). The full text of both licenses can be found at [Wiktionary:Text of Creative Commons Attribution-ShareAlike 3.0 Unported License](https://en.wiktionary.org/wiki/Wiktionary:Text_of_Creative_Commons_Attribution-ShareAlike_3.0_Unported_License), as well as [Wiktionary:Text of the GNU Free Documentation License](https://en.wiktionary.org/wiki/Wiktionary:Text_of_the_GNU_Free_Documentation_License). Permission is granted to copy, distribute and/or modify the text of all Wiktionary entries under the terms of the Creative Commons Attribution-ShareAlike 3.0 Unported License, and the GNU Free Documentation License, Version 1.1 or any later version published by the [Free Software Foundation](https://en.wikipedia.org/wiki/Free_Software_Foundation); with no Invariant Sections, with no Front-Cover Texts, and with no Back-Cover Texts.",
 			},
 		},
+		wordnik: {
+			name: "wordnik.com",
+			link: "https://developer.wordnik.com/terms",
+			faviconLink: "https://wordnik.com/img/favicon.png",
+			notices: {
+				licence: `If Wordnik Data is served from Your Site pursuant to this Agreement, You shall accompany all Wordnik Data with a link directly to https://www.wordnik.com/words/\\[specific word\\].
+You must also include, in your app or site, wherever you provide attributions or acknowledgments, a "Powered by Wordnik" logo that links to Wordnik.com. Any of the "Powered by Wordnik" logos found at this link: https://www.wordnik.com/media-kit are acceptable. The logo may be used as the anchor for the link. Logos cannot be resized or edited in any fashion without permission. If Wordnik Data is used in alternative media formats, equivalent attribution must be given to Wordnik. Prior written consent from Wordnik is required to use Wordnik Data without attribution.`,
+				badgeLink: "https://www.wordnik.com/img/wordnik_badge_a1.png",
+			},
+		},
 		wordsApi: {
 			name: "wordsapi.com",
 			link: "https://wordsapi.com",
