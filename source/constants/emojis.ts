@@ -109,6 +109,7 @@ export default Object.freeze({
 			},
 		},
 	},
+	source: "©️",
 	guild: {
 		description: "🖋️",
 		members: "🧑",
