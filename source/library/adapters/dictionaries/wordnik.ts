@@ -101,9 +101,7 @@ class WordnikAdapter extends DictionaryAdapter<Result[]> {
 				partOfSpeech: ["unknown", "unknown"],
 				relations: relationField,
 				rhymes: rhymeField,
-				sources: [
-					[constants.links.generateWordnikDefinitionLink(lemma), constants.licences.dictionaries.wordnik],
-				],
+				sources: [[constants.links.wordnikDefinitionLink(lemma), constants.licences.dictionaries.wordnik]],
 			},
 		];
 	}
