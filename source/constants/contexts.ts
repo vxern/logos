@@ -855,13 +855,15 @@ export default Object.freeze({
 		description: localise("game.strings.noSentencesAvailable.description", locale)(),
 	}),
 	game: ({ localise, locale }) => ({
-		sentence: localise("game.strings.sentence", locale)(),
-		translation: localise("game.strings.translation", locale)(),
 		skip: localise("game.strings.skip", locale)(),
-		sourcedFrom: localise("game.strings.sourcedFrom", locale),
 		correctGuesses: localise("game.strings.correctGuesses", locale),
 		allTime: localise("game.strings.allTime", locale),
 		next: localise("game.strings.next", locale)(),
+	}),
+	sentencesSourcedFrom: ({ localise, locale }) => ({
+		sentence: localise("game.strings.sentence", locale)(),
+		translation: localise("game.strings.translation", locale)(),
+		sourcedFrom: localise("game.strings.sourcedFrom", locale),
 	}),
 	pardoned: ({ localise, locale }) => ({
 		title: localise("pardon.strings.pardoned.title", locale)(),
@@ -1024,6 +1026,9 @@ export default Object.freeze({
 	}),
 	show: ({ localise, locale }) => ({
 		show: localise("interactions.show", locale)(),
+	}),
+	source: ({ localise, locale }) => ({
+		source: localise("interactions.source", locale)(),
 	}),
 	purge: ({ localise, locale }) => ({
 		start: localise("purge.strings.start", locale)(),

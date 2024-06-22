@@ -6,6 +6,7 @@ import { InteractionCollector } from "logos/collectors";
 import { GuildStatistics } from "logos/models/guild-statistics";
 import { User } from "logos/models/user";
 import type { SentencePair } from "logos/stores/volatile";
+import { TatoebaSourceNotice } from "logos/commands/components/source-notices/tatoeba-source-notice.ts";
 
 function random(max: number): number {
 	return Math.floor(Math.random() * max);
@@ -137,10 +138,13 @@ async function getGameView(
 		userDocument.getGameScores({ game: "pickMissingWord", learningLocale: interaction.learningLocale })
 			?.totalScore ?? 0;
 
-	const sentenceSource = constants.links.tatoebaSentence(data.sentenceSelection.sentencePair.sentenceId.toString());
-	const translationSource = constants.links.tatoebaSentence(
-		data.sentenceSelection.sentencePair.translationId.toString(),
-	);
+	const sourceNotice = new TatoebaSourceNotice(client, {
+		interaction,
+		sentenceId: data.sentenceSelection.sentencePair.sentenceId,
+		translationId: data.sentenceSelection.sentencePair.translationId,
+	});
+
+	await sourceNotice.register();
 
 	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]);
 	const mask = constants.special.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
@@ -148,11 +152,6 @@ async function getGameView(
 	const strings = constants.contexts.game({ localise: client.localise.bind(client), locale: interaction.locale });
 	return {
 		embeds: [
-			{
-				description: `${constants.emojis.link} [${strings.sentence}](${sentenceSource}) · [${strings.translation}](${translationSource})`,
-				color: constants.colours.peach,
-				footer: { text: strings.sourcedFrom({ source: constants.licences.dictionaries.tatoeba.name }) },
-			},
 			{
 				title:
 					mode === "reveal"
@@ -221,7 +220,8 @@ async function getGameView(
 								label: `${constants.emojis.interactions.menu.controls.forward} ${strings.skip}`,
 								customId: data.skipButton.encodeId([]),
 							},
-				] as [Discord.ButtonComponent],
+					sourceNotice.button,
+				] as [Discord.ButtonComponent, Discord.ButtonComponent],
 			},
 		],
 	};
