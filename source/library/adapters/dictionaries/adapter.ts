@@ -1,5 +1,5 @@
 import type { LearningLanguage } from "logos:constants/languages";
-import type { DictionaryLicence } from "logos:constants/licences";
+import type { Licence } from "logos:constants/licences";
 import type { PartOfSpeech } from "logos:constants/parts-of-speech";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
@@ -68,7 +68,7 @@ interface DictionaryEntry {
 	/** The inflection of the lemma. */
 	inflectionTable?: InflectionTable;
 
-	sources: [link: string, licence: DictionaryLicence][];
+	sources: [link: string, licence: Licence][];
 }
 
 abstract class DictionaryAdapter<DataType = unknown> {

@@ -87,7 +87,7 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 			? getDeepLTranslationLanguageByLocale(detectedSourceLocale)
 			: undefined;
 
-		return { detectedSourceLanguage, text: translation.text };
+		return { detectedSourceLanguage, text: translation.text, source: constants.licences.translators.deepl };
 	}
 }
 

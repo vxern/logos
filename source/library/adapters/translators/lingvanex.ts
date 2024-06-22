@@ -74,7 +74,7 @@ class LingvanexAdapter extends TranslatorAdapter<LingvanexLanguage> {
 				? undefined
 				: getLingvanexTranslationLanguageByLocale(detectedSourceLocale);
 
-		return { detectedSourceLanguage, text: translatedText };
+		return { detectedSourceLanguage, text: translatedText, source: constants.licences.translators.lingvanex };
 	}
 }
 

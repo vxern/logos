@@ -40,14 +40,14 @@ async function handleDisplayDictionaryLicence(
 			iconUrl: licence.faviconLink,
 			url: licence.link,
 		},
-		description: `*${licence.notices.licence}*`,
-		image: licence.notices.badgeLink !== undefined ? { url: licence.notices.badgeLink } : undefined,
+		description: licence.notices !== undefined ? `*${licence.notices.licence}*` : undefined,
+		image: licence.notices?.badgeLink !== undefined ? { url: licence.notices.badgeLink } : undefined,
 		fields: [
 			{
 				name: strings.fields.source,
 				value: licence.link,
 			},
-			...(licence.notices.copyright !== undefined
+			...(licence.notices?.copyright !== undefined
 				? [
 						{
 							name: strings.fields.copyright,

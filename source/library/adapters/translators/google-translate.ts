@@ -91,7 +91,7 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 				? undefined
 				: getGoogleTranslateLanguageByLocale(detectedSourceLocale);
 
-		return { detectedSourceLanguage, text: translatedText };
+		return { detectedSourceLanguage, text: translatedText, source: constants.licences.translators.googleTranslate };
 	}
 }
 
