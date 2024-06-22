@@ -1,14 +1,14 @@
 import type { LearningLanguage } from "logos:constants/languages";
 
-type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "words-api";
+type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "wordnik" | "words-api";
 
 const dictionariesByLanguage = Object.freeze({
 	"Armenian/Eastern": ["wiktionary"],
 	"Armenian/Western": ["wiktionary"],
 	Danish: ["wiktionary"],
 	Dutch: ["wiktionary"],
-	"English/American": ["wiktionary", "words-api"],
-	"English/British": ["wiktionary", "words-api"],
+	"English/American": ["wiktionary", "wordnik", "words-api"],
+	"English/British": ["wiktionary", "wordnik", "words-api"],
 	Finnish: ["wiktionary"],
 	French: ["dicolink", "wiktionary"],
 	German: ["wiktionary"],

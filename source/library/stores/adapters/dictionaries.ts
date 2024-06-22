@@ -5,6 +5,7 @@ import type { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
 import { DexonlineAdapter } from "logos/adapters/dictionaries/dexonline";
 import { DicolinkAdapter } from "logos/adapters/dictionaries/dicolink";
 import { WiktionaryAdapter } from "logos/adapters/dictionaries/wiktionary";
+import { WordnikAdapter } from "logos/adapters/dictionaries/wordnik.ts";
 import { WordsAPIAdapter } from "logos/adapters/dictionaries/words-api";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
@@ -15,6 +16,7 @@ class DictionaryStore {
 		readonly dexonline: DexonlineAdapter;
 		readonly dicolink?: DicolinkAdapter;
 		readonly wiktionary: WiktionaryAdapter;
+		readonly wordnik?: WordsAPIAdapter;
 		readonly "words-api"?: WordsAPIAdapter;
 	} & Partial<Record<Dictionary, DictionaryAdapter>>;
 
@@ -24,6 +26,11 @@ class DictionaryStore {
 		const dicolinkAdapter = DicolinkAdapter.tryCreate(client);
 		if (dicolinkAdapter === undefined) {
 			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a Dicolink integration.");
+		}
+
+		const wordnikAdapter = WordnikAdapter.tryCreate(client);
+		if (wordnikAdapter === undefined) {
+			this.log.warn("`SECRET_WORDNIK` has not been provided. Logos will run without a Wordnik integration.");
 		}
 
 		const wordsApiAdapter = WordsAPIAdapter.tryCreate(client);
