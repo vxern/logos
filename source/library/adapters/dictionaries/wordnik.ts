@@ -34,7 +34,7 @@ class WordnikAdapter extends DictionaryAdapter<Result[]> {
 		return new WordnikAdapter(client, { token: client.environment.wordnikSecret });
 	}
 
-	async fetch(lemma: string, _: LearningLanguage) {
+	async fetch(lemma: string, _: LearningLanguage): Promise<Result[] | undefined> {
 		const response = await fetch(
 			`${constants.endpoints.wordnik.relatedWords(lemma)}?useCanonical=true&api_key=${this.token}`,
 			{
