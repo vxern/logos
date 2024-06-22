@@ -5,6 +5,7 @@ import { code, trim } from "logos:core/formatting";
 import type { Definition, DictionaryEntry, Expression } from "logos/adapters/dictionaries/adapter";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
+import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice.ts";
 
 async function handleFindWordAutocomplete(
 	client: Client,
@@ -451,6 +452,15 @@ async function generateButtons(
 		row.push(data.showButton);
 	}
 
+	const sourceNotice = new WordSourceNotice(client, {
+		interaction,
+		sources: entry.sources.map(([link, licence]) => `[${licence.name}](${link})`),
+	});
+
+	await sourceNotice.register();
+
+	row.push(sourceNotice.button);
+
 	if (row.length > 1) {
 		paginationControls.push(row);
 	}
@@ -604,28 +614,8 @@ function entryToEmbeds(
 		}
 	}
 
-	const strings = constants.contexts.sourcedFromDictionaries({
-		localise: client.localise.bind(client),
-		locale: interaction.displayLocale,
-	});
-	const sourcesFormatted = entry.sources.map(([link, licence]) => `[${licence.name}](${link})`).join(" · ");
-	const sourceEmbed: Discord.CamelizedDiscordEmbed = {
-		description: `${constants.emojis.link} ${sourcesFormatted}`,
-		color: constants.colours.peach,
-		footer: {
-			text: strings.sourcedResponsibly({
-				dictionaries: client.pluralise(
-					"word.strings.sourcedResponsibly.dictionaries",
-					interaction.displayLocale,
-					{ quantity: entry.sources.length },
-				),
-			}),
-		},
-	};
-
 	if (!verbose) {
 		return [
-			sourceEmbed,
 			{
 				title: `${constants.emojis.word.word} ${word}`,
 				description: partOfSpeechFormatted,
@@ -635,7 +625,7 @@ function entryToEmbeds(
 		];
 	}
 
-	return [sourceEmbed, ...embeds];
+	return embeds;
 }
 
 function tagsToString(tags: string[]): string {

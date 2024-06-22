@@ -19,7 +19,6 @@ class TatoebaSourceNotice extends SourceNotice {
 		});
 		super(client, {
 			interaction,
-			showable: true,
 			sources: [`[${strings.sentence}](${sentenceLink})`, `[${strings.translation}](${translationLink})`],
 			notice: strings.sourcedFrom({ source: constants.licences.dictionaries.tatoeba.name }),
 		});

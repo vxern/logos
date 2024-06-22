@@ -25,11 +25,7 @@ abstract class SourceNotice {
 
 	constructor(
 		client: Client,
-		{
-			interaction,
-			sources,
-			notice,
-		}: { interaction: Logos.Interaction; showable: boolean; sources: string[]; notice: string },
+		{ interaction, sources, notice }: { interaction: Logos.Interaction; sources: string[]; notice: string },
 	) {
 		this.client = client;
 
