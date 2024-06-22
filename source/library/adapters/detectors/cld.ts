@@ -17,7 +17,7 @@ class CLDAdapter extends DetectorAdapter {
 
 		const detectedLanguage = getCLDDetectionLanguageByLocale(detectedLocale);
 
-		return { language: detectedLanguage };
+		return { language: detectedLanguage, source: constants.licences.detectors.cld };
 	}
 }
 

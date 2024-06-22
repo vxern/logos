@@ -87,6 +87,24 @@ You must also include, in your app or site, wherever you provide attributions or
 			link: "https://lingvanex.com/translate/",
 		},
 	} satisfies Record<string, Licence>,
+	detectors: {
+		cld: {
+			name: "CLD",
+			link: "https://npmjs.com/package/cldpre",
+		},
+		eld: {
+			name: "ELD",
+			link: "https://github.com/vxern/efficient-language-detector-js",
+		},
+		fasttext: {
+			name: "fastText",
+			link: "https://npmjs.com/package/fasttext.wasm.js",
+		},
+		tinyld: {
+			name: "TinyLD",
+			link: "https://npmjs.com/package/tinyld",
+		},
+	} satisfies Record<string, Licence>,
 	software: {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
 		cldpre: apache("Copyright (c) Authors of cldpre"),
