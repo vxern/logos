@@ -1,5 +1,5 @@
-import { SourceNotice } from "logos/commands/components/source-notices/source-notice.ts";
 import type { Client } from "logos/client.ts";
+import { SourceNotice } from "logos/commands/components/source-notices/source-notice.ts";
 
 class TatoebaSourceNotice extends SourceNotice {
 	constructor(

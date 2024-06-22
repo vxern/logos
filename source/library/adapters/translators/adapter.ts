@@ -1,7 +1,7 @@
 import type { Languages, TranslationLanguage } from "logos:constants/languages";
+import type { Licence } from "logos:constants/licences.ts";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
-import { Licence } from "logos:constants/licences.ts";
 
 interface TranslationResult {
 	/** The language detected from the text sent to be translated. */

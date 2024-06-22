@@ -7,7 +7,6 @@ import languages, {
 import { trim } from "logos:core/formatting";
 import type { TranslationResult } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
-import { SourceNotice } from "logos/commands/components/source-notices/source-notice.ts";
 import { TranslationSourceNotice } from "logos/commands/components/source-notices/translation-source-notice.ts";
 
 async function handleTranslateChatInputAutocomplete(
