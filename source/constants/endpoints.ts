@@ -10,12 +10,15 @@ export default Object.freeze({
 		host: "lingvanex-translate.p.rapidapi.com",
 		translate: "https://lingvanex-translate.p.rapidapi.com/translate",
 	},
+	wordnik: {
+		relatedWords: (lemma: string) => `https://api.wordnik.com/v4/word.json/${lemma}/relatedWords`,
+	},
 	wordsApi: {
 		host: "wordsapiv1.p.rapidapi.com",
-		word: (word: string) => `https://wordsapiv1.p.rapidapi.com/words/${word}`,
+		word: (lemma: string) => `https://wordsapiv1.p.rapidapi.com/words/${lemma}`,
 	},
 	dicolink: {
 		host: "dicolink.p.rapidapi.com",
-		definitions: (word: string) => `https://dicolink.p.rapidapi.com/mot/${word}/definitions`,
+		definitions: (lemma: string) => `https://dicolink.p.rapidapi.com/mot/${lemma}/definitions`,
 	},
 } as const);

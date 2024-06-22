@@ -8,10 +8,11 @@ type DictionaryProvisions =
 	/** Provides definitions of a lemma. */
 	| "definitions"
 	/** Provides a lemma's etymology. */
-	| "etymology";
-
-type RelationTypes = "synonym" | "antonym" | "diminutive" | "augmentative";
-type Relations = Partial<Record<`${RelationTypes}s`, string[]>>;
+	| "etymology"
+	/** Provides relations between a lemma and other words. */
+	| "relations"
+	/** Provides words that rhyme with a given lemma. */
+	| "rhymes";
 
 interface TaggedValue<T> {
 	tags?: string[];
@@ -25,6 +26,15 @@ interface Definition extends TaggedValue<string> {
 	expressions?: Expression[];
 	relations?: Relations;
 }
+
+interface Relations {
+	synonyms?: string[];
+	antonyms?: string[];
+	diminutives?: string[];
+	augmentatives?: string[];
+}
+
+interface Rhymes extends TaggedValue<string> {}
 
 interface Etymology extends TaggedValue<string | undefined> {}
 
@@ -42,6 +52,12 @@ interface DictionaryEntry {
 
 	/** The definitions for the lemma. */
 	definitions?: Definition[];
+
+	/** Relations between the lemma and other words. */
+	relations?: Relations;
+
+	/** Rhythmic composition of the lemma. */
+	rhymes?: Rhymes;
 
 	/** The expressions for the lemma. */
 	expressions?: Expression[];
@@ -121,4 +137,4 @@ abstract class DictionaryAdapter<DataType = unknown> {
 }
 
 export { DictionaryAdapter };
-export type { Definition, DictionaryEntry, Expression, Etymology, DictionaryProvisions };
+export type { Definition, DictionaryEntry, Relations, Rhymes, Expression, Etymology, DictionaryProvisions };

@@ -1,3 +1,4 @@
+import type { LearningLanguage } from "logos:constants/languages.ts";
 import {
 	DictionaryAdapter,
 	type DictionaryEntry,
@@ -5,7 +6,6 @@ import {
 	type Rhymes,
 } from "logos/adapters/dictionaries/adapter.ts";
 import type { Client } from "logos/client.ts";
-import type { LearningLanguage } from "logos:constants/languages.ts";
 
 interface Result {
 	readonly relationshipType: string;
