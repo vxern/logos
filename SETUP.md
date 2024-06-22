@@ -8,9 +8,11 @@ To download the release, simply download your archive of choice (.zip, .tar.gz) 
 
 ### Step 1: Let's start.
 
-To get a minimal instance of Logos up and running, you only need to have [Bun](https://bun.sh/docs/installation) installed.
+To get a minimal instance of Logos up and running, you only need to have [Bun](https://bun.sh/docs/installation)
+installed.
 
 Before you can start the bot, you will need to create an `.env` file storing your bot's Discord token:
+
 ```
 DISCORD_TOKEN=<token goes here>
 ```
@@ -23,22 +25,25 @@ bun start
 
 If everything ran smoothly, you should now have a live Logos instance!
 
-> Note: You are running a minimal instance. A large chunk of Logos' features will be unavailable yet. The rest of the setup guide will teach you how to enable (or disable!) each piece of functionality one-by-one.
+> Note: You are running a minimal instance. A large chunk of Logos' features will be unavailable yet. The rest of the
+> setup guide will teach you how to enable (or disable!) each piece of functionality one-by-one.
 
 ### Step 2: Configuring the database
 
-> Without configuration, Logos will store its documents in memory, and any documents created during the bot's lifecycle will be lost on restart.
-> 
+> Without configuration, Logos will store its documents in memory, and any documents created during the bot's lifecycle
+> will be lost on restart.
+>
 > If you'd prefer that your data be kept, you will need to configure Logos to use a database.
 >
 > [*If not, feel free to skip to the next section.*](#step-3-configuring-a-cache-database)
 
-Logos comes with a selection of NoSQL databases to use out of the box, giving you the flexibility of deciding which solution you're going with.
+Logos comes with a selection of NoSQL databases to use out of the box, giving you the flexibility of deciding which
+solution you're going with.
 
 - <details>
     <summary>MongoDB (<a href="https://mongodb.com/products/platform/atlas-database">Official Website</a>, <a href="https://mongodb.com/docs/manual/administration/install-community/">Setup Guide</a>)</summary>
 
-    To use MongoDB with Logos, add the following credentials to your `.env` file:
+  To use MongoDB with Logos, add the following credentials to your `.env` file:
 
     ```
     DATABASE_SOLUTION=mongodb # Tell Logos to use MongoDB as its database driver.  
@@ -52,7 +57,7 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
 - <details>
     <summary>RavenDB (<a href="https://ravendb.net">Official Website</a>, <a href="https://ravendb.net/docs/article-page/6.0/csharp/start/installation/setup-wizard">Setup Guide</a>)</summary>
 
-    To use RavenDB with Logos, add the following credentials to your `.env` file:
+  To use RavenDB with Logos, add the following credentials to your `.env` file:
 
     ```
     DATABASE_SOLUTION=ravendb # Tell Logos to use RavenDB as its database driver. 
@@ -66,7 +71,7 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
 - <details>
     <summary>CouchDB (<a href="https://couchdb.apache.org">Official Website</a>, <a href="https://docs.couchdb.org/en/stable/install/index.html">Setup Guide</a>)</summary>
 
-    To use CouchDB with Logos, add the following credentials to your `.env` file:
+  To use CouchDB with Logos, add the following credentials to your `.env` file:
 
     ```
     DATABASE_SOLUTION=couchdb # Tell Logos to use CouchDB as its database driver.
@@ -79,8 +84,8 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
   </details>
 - <details>
     <summary>RethinkDB (<a href="https://rethinkdb.com/">Official Website</a>, <a href="https://rethinkdb.com/docs/install/">Setup Guide</a>)</summary>
-    
-    To use RethinkDB with Logos, add the following credentials to your `.env` file:
+
+  To use RethinkDB with Logos, add the following credentials to your `.env` file:
 
     ```
     DATABASE_SOLUTION=rethinkdb # Tell Logos to use RethinkDB as its database driver.
@@ -93,12 +98,13 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
   </details>
 - <details>
     <summary>In-memory database</summary>
-    
-    To tell Logos you're fine with running an in-memory database, add the following record to your `.env` file:
-    
+
+  To tell Logos you're fine with running an in-memory database, add the following record to your `.env` file:
+
     ```
     DATABASE_SOLUTION=none # Tell Logos to store documents in memory.
     ```
+
 </details>
 
 > Note: Logos follows each database's native storage conventions when storing documents, making it predictable how your
@@ -106,15 +112,18 @@ Logos comes with a selection of NoSQL databases to use out of the box, giving yo
 
 ### Step 3: Configuring a volatile database
 
-> The `/game` command needs sentence pairs to operate. Sentence pairs are loaded onto and stored in a volatile, Redis-compatible database.
-> 
+> The `/game` command needs sentence pairs to operate. Sentence pairs are loaded onto and stored in a volatile,
+> Redis-compatible database.
+>
 > If you'd like to support the `/game` command, you will need to configure a volatile database for sentence pairs.
-> 
-> [*If not, feel free to skip to the next section.*](#step-4-configuring-the-audio-node) 
+>
+> [*If not, feel free to skip to the next section.*](#step-4-configuring-the-audio-node)
 
-Logos will work with any Redis-compatible database, whether that's Redis itself, Dragonfly, KeyDB, or something else. The choice is up to you.
+Logos will work with any Redis-compatible database, whether that's Redis itself, Dragonfly, KeyDB, or something else.
+The choice is up to you.
 
 Regardless of your choice, the credentials to add to `.env` for all of these databases are as follows:
+
 ```
 REDIS_HOST=127.0.0.1 # Address of your database instance. 
 REDIS_PORT=6379      # Port your database instance is operating at. (Redis uses 6379 by default)
@@ -124,14 +133,16 @@ REDIS_PORT=6379      # Port your database instance is operating at. (Redis uses 
 ### Step 4: Configuring the audio node
 
 > The music service needs a Lavalink node to operate.
-> 
+>
 > If you'd like Logos to play music, you will need to add credentials of a Lavalink node to connect to.
-> 
+>
 > [*If not, feel free to skip to the next section.*](#step-5-configuring-language-integrations)
 
-You do not necessarily need to set up a Lavalink node yourself; there are public nodes out there that you can connect to and use. However, if you are looking for high reliability, it would usually be a good idea to host a node yourself.
+You do not necessarily need to set up a Lavalink node yourself; there are public nodes out there that you can connect to
+and use. However, if you are looking for high reliability, it would usually be a good idea to host a node yourself.
 
 The credentials to add to `.env` for Lavalink are as follows:
+
 ```
 LAVALINK_HOST=127.0.0.1           # Address of your Lavalink instance.
 LAVALINK_PORT=2333                # Port your Lavalink instance operates at.
@@ -140,61 +151,72 @@ LAVALINK_PASSWORD=youshallnotpass # Password for authorisation.
 
 ### Step 5: Configuring language integrations
 
-> Logos relies on third-party integrations to serve much of its language content, whether that's translations, definitions, or otherwise.
-> 
-> If you'd like to set up third-party language integrations, the following steps will outline where to get each credential from, and what `.env` records to add to make each one work.
-> 
+> Logos relies on third-party integrations to serve much of its language content, whether that's translations,
+> definitions, or otherwise.
+>
+> If you'd like to set up third-party language integrations, the following steps will outline where to get each
+> credential from, and what `.env` records to add to make each one work.
+>
 > [*If not, then that's it! You're all set.*](#thats-all)
 
 ### Step 5.1: RapidAPI
 
-> RapidAPI is a collection of APIs that are each queryable using the same API token. Logos uses a number of integrations via RapidAPI.
+> RapidAPI is a collection of APIs that are each queryable using the same API token. Logos uses a number of integrations
+> via RapidAPI.
 
 1. Sign up / log in [here](https://rapidapi.com/auth).
-2. Create an app [here](https://rapidapi.com/developer/apps/new-app). Name the app 'Logos'. 
+2. Create an app [here](https://rapidapi.com/developer/apps/new-app). Name the app 'Logos'.
 3. Subscribe to APIs:
-   - Translators:
-     - [Google Translate](https://rapidapi.com/IRCTCAPI/api/google-translator9) (free plan @ 1,000 requests per month)
-     - [Lingvanex](https://rapidapi.com/dpventures/api/wordsapi) (free plan @ 500,000 characters per month)
-   - Dictionaries:
-     - [Dicolink](https://rapidapi.com/dicolink/api/dicolink) (free plan @ 500,000 requests per month (you heard right, *requests*))
-     - [WordsAPI](https://rapidapi.com/dpventures/api/wordsapi) (free plan @ 2,500 requests per day)
+    - Translators:
+        - [Google Translate](https://rapidapi.com/IRCTCAPI/api/google-translator9) (free plan @ 1,000 requests per
+          month)
+        - [Lingvanex](https://rapidapi.com/dpventures/api/wordsapi) (free plan @ 500,000 characters per month)
+    - Dictionaries:
+        - [Dicolink](https://rapidapi.com/dicolink/api/dicolink) (free plan @ 500,000 requests per month (you heard
+          right, *requests*))
+        - [WordsAPI](https://rapidapi.com/dpventures/api/wordsapi) (free plan @ 2,500 requests per day)
 4. Add a record for RapidAPI to your `.env` file:
+
 ```
 SECRET_RAPID_API=<token goes here>
 ```
 
 ### Step 5.2: DeepL
 
-> Logos uses DeepL for providing its translation services. The free plan comes with a limit of 500,000 characters per month.
+> Logos uses DeepL for providing its translation services. The free plan comes with a limit of 500,000 characters per
+> month.
 
 To get a DeepL token, you will need to have a DeepL account.
 
 1. Sign up [here](https://deepl.com/signup).
 2. Create an API key [here](https://deepl.com/your-account/keys). Name the API key 'Logos'.
 3. Add a record for DeepL to your `.env` file:
+
 ```
 SECRET_DEEPL=<token goes here>
 ```
 
-<!-- 
-The following dictionaries have integrations that were implemented on the word overhaul branch, but which aren't present
-in the main branch yet. I'll be leaving their setup entries out here for when they're added.
---->
-<!--
 ### Step 5.3: Wordnik
 
-> Logos uses Wordnik to provide information about words in English. The free plan comes with a limit of 100 calls per hour.
+> Logos uses Wordnik to provide information about words in English. The free plan comes with a limit of 100 calls per
+> hour.
 
 To get a Wordnik token, you will need to have a Wordnik account, and then request an API key.
 
 1. Sign up [here](https://wordnik.com/signup).
 2. Request an API key. The token will take a few days to arrive. You can speed up the process by donating.
 3. Add a record for Wordnik to your `.env` file:
+
 ```
 SECRET_WORDNIK=<token goes here>
 ```
 
+<!-- 
+The following dictionary has an integration that was implemented on the word overhaul branch, but which isn't present
+in the main branch yet. I'll be leaving its setup entry out here for when it're added.
+--->
+
+<!--
 ### Step 5.4: PONS
 
 > Logos uses PONS for its word services in several languages. The free plan comes with a limit of 1000 reference queries per month.
@@ -215,4 +237,5 @@ Hopefully, once you've reached this section, you would have a fully configured i
 
 If that's the case, congratulations, and welcome to the world of Logos!
 
-If not, and you've encountered difficulty along the way, [join the Logos support server to get assistance](https://discord.gg/TWdAjkTfah).
+If not, and you've encountered difficulty along the
+way, [join the Logos support server to get assistance](https://discord.gg/TWdAjkTfah).
