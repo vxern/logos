@@ -88,6 +88,24 @@
       ]
     },
     {
+      "login": "kamelNeoN",
+      "name": "Kamel",
+      "avatar_url": ".github/assets/profile-pictures/kamel.jpeg",
+      "contributions": [
+        "translation",
+        "ideas"
+      ]
+    },
+    {
+      "login": "vittorio3099",
+      "name": "Paul",
+      "avatar_url": ".github/assets/profile-pictures/paul.png",
+      "contributions": [
+        "translation",
+        "ideas"
+      ]
+    },
+    {
       "login": "asterfields_",
       "name": "Asterfields",
       "profile": "https://x.com/_stechi_",
@@ -126,15 +144,6 @@
       "avatar_url": ".github/assets/profile-pictures/haniel.jpeg",
       "contributions": [
         "translation"
-      ]
-    },
-    {
-      "login": "kamelNeoN",
-      "name": "Kamel",
-      "avatar_url": ".github/assets/profile-pictures/kamel.jpeg",
-      "contributions": [
-        "translation",
-        "ideas"
       ]
     },
     {
@@ -185,14 +194,6 @@
       "avatar_url": ".github/assets/profile-pictures/okruch-chleba.png",
       "contributions": [
         "translation"
-      ]
-    },
-    {
-      "login": "vittorio3099",
-      "name": "Paul",
-      "avatar_url": ".github/assets/profile-pictures/paul.png",
-      "contributions": [
-        "ideas"
       ]
     },
     {
