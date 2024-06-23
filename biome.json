@@ -43,11 +43,9 @@
   },
   "javascript": {
     "globals": [
+      "Bun",
       "Discord",
       "Logos",
-      "Events",
-      "WithRequired",
-      "Timer",
       "constants"
     ]
   }

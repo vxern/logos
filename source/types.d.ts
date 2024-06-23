@@ -2,6 +2,7 @@ import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
 import type { Properties } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
+import type { WithRequired } from "logos:core/utilities.ts";
 import type * as Discord from "@discordeno/bot";
 import type { EntryRequest } from "logos/models/entry-request";
 import type { Praise } from "logos/models/praise";
@@ -36,8 +37,6 @@ declare global {
 			[K in keyof O as O[K]]: K;
 		};
 	}
-
-	type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 }
 
 declare global {
@@ -170,8 +169,6 @@ declare global {
 	}
 
 	const constants: typeof constants_;
-
-	type Events = Logos.Events & Discord.Events;
 }
 
 declare global {

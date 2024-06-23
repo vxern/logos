@@ -11,10 +11,9 @@
 ### Language Support
 
 - 📖 Definitions available for words in the above listed languages, sourced variously from **Wiktionary**, **Dexonline**,
-  **Dicolink**, and **WordsAPI**, with **PONS** and **Wordnik** integrations on the way.
+  **Dicolink**, **Wordnik**, and **WordsAPI**, with a **PONS** integration on the way.
 - 🌐 Translation available in 140 languages, provided variously by **DeepL**, **Google Translate** and **Lingvanex**.
-- 🔍 Detection available in 200 languages, provided variously by `tinyld` and `cld`, with `fasttext` and `eld`
-  integrations on the way.
+- 🔍 Detection available in 200 languages, provided variously by `tinyld`, `cld`, `fasttext` and `eld`.
 - 🔤 Localisations available for 18 languages:
     - Great support (90%+): 🇩🇪 German 🇵🇱 Polish 🇷🇴 Romanian
     - Good support (60%+): 🇫🇷 French 🇳🇱 Dutch 🇹🇷 Turkish 🇳🇴 Norwegian

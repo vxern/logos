@@ -3,7 +3,7 @@ import { GlobalService } from "logos/services/service";
 
 class StatusService extends GlobalService {
 	#currentIndex: number;
-	#timer?: Timer;
+	#timer?: globalThis.Timer;
 
 	get status(): string {
 		return constants.statuses[this.#currentIndex]!;

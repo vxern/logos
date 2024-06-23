@@ -1,4 +1,5 @@
 import type { FeatureLanguage, Locale } from "logos:constants/languages";
+import type * as Discord from "@discordeno/bot";
 import type { Client } from "logos/client";
 import guildBanAdd from "logos/stores/journalling/discord/guild-ban-add";
 import guildBanRemove from "logos/stores/journalling/discord/guild-ban-remove";
@@ -25,6 +26,8 @@ import slowmodeEnable from "logos/stores/journalling/logos/slowmode-enable";
 import slowmodeUpgrade from "logos/stores/journalling/logos/slowmode-upgrade";
 import suggestionSend from "logos/stores/journalling/logos/suggestion-send";
 import ticketOpen from "logos/stores/journalling/logos/ticket-open";
+
+type Events = Logos.Events & Discord.Events;
 
 const loggers = Object.freeze({
 	guildBanAdd,

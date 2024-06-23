@@ -1,3 +1,4 @@
+import type { WithRequired } from "logos:core/utilities.ts";
 import type { InputTextComponent } from "@discordeno/bot";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
