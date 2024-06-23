@@ -88,6 +88,24 @@
       ]
     },
     {
+      "login": "kamelNeoN",
+      "name": "Kamel",
+      "avatar_url": "https://cdn.discordapp.com/avatars/311489852824616961/bd594c224c551a04fce50b7d5e408958",
+      "contributions": [
+        "translation",
+        "ideas"
+      ]
+    },
+    {
+      "login": "vittorio3099",
+      "name": "Paul",
+      "avatar_url": "https://cdn.discordapp.com/avatars/399515144482455553/d42543f2f90bbd8496c39903d1be3ed0",
+      "contributions": [
+        "translation",
+        "ideas"
+      ]
+    },
+    {
       "login": "asterfields_",
       "name": "Asterfields",
       "profile": "https://x.com/_stechi_",
@@ -126,15 +144,6 @@
       "avatar_url": "https://cdn.discordapp.com/avatars/775308215470391317/04dbc74b010d1a5736f5a8d911589f29",
       "contributions": [
         "translation"
-      ]
-    },
-    {
-      "login": "kamelNeoN",
-      "name": "Kamel",
-      "avatar_url": "https://cdn.discordapp.com/avatars/311489852824616961/bd594c224c551a04fce50b7d5e408958",
-      "contributions": [
-        "translation",
-        "ideas"
       ]
     },
     {
@@ -185,14 +194,6 @@
       "avatar_url": "https://cdn.discordapp.com/avatars/403581106042961930/121e69ac1270d5ee429babb4a0a9e71f",
       "contributions": [
         "translation"
-      ]
-    },
-    {
-      "login": "vittorio3099",
-      "name": "Paul",
-      "avatar_url": "https://cdn.discordapp.com/avatars/399515144482455553/d42543f2f90bbd8496c39903d1be3ed0",
-      "contributions": [
-        "ideas"
       ]
     },
     {
