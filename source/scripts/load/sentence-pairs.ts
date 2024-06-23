@@ -44,10 +44,12 @@ async function getFiles(directoryPath: string): Promise<SentencePairFile[]> {
 
 		const locale = getLocaleByLearningLanguage(language);
 
+		winston.info(`Located sentence file for ${locale} at ${filePath}.`);
+
 		files.push({ path: filePath, locale });
 	}
 
-	winston.info(`Found ${files.length} sentence pair files in ${directoryPath}.`);
+	winston.info(`Located ${files.length} sentence pair files in ${directoryPath}.`);
 
 	return files;
 }
@@ -65,7 +67,6 @@ async function subscribeToReadStream(readStream: stream.Writable, file: Sentence
 	const stream = fsSync.createReadStream(file.path, { encoding: "utf-8", autoClose: true, emitClose: true });
 
 	stream.once("end", () => {
-		winston.info(`Finished reading sentence pairs for ${file.locale}.`);
 		stream.close();
 		resolve();
 	});
@@ -112,7 +113,7 @@ const entryBuffer: EntryBuffer = {
 		this.size = 0;
 	},
 	flush() {
-		winston.info(`Flushing buffer (${this.size} entries)...`);
+		winston.info(`Writing buffer (${this.size} entries)...`);
 		client.mset(this.entries).then();
 		this.reset();
 	},
@@ -150,6 +151,7 @@ readStream.end();
 {
 	const pipeline = client.pipeline();
 	for (const locale of locales) {
+		winston.info(`Writing index for ${locale}...`);
 		pipeline.sadd(`${locale}:index`, indexes[locale]);
 	}
 	await pipeline.exec();
