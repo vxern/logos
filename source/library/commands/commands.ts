@@ -65,6 +65,14 @@ import {
 } from "logos/commands/handlers/translate";
 import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
 import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
+import {
+	handleDisplayDetectorLicence,
+	handleDisplayDetectorLicenceAutocomplete,
+} from "logos/commands/handlers/licence/detector.ts";
+import {
+	handleDisplayTranslatorLicence,
+	handleDisplayTranslatorLicenceAutocomplete,
+} from "logos/commands/handlers/licence/translator.ts";
 
 /**
  * @privateRemarks
@@ -258,6 +266,20 @@ const commands = Object.freeze({
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
 		options: {
+			detector: {
+				identifier: "detector",
+				type: Discord.ApplicationCommandOptionTypes.SubCommand,
+				handle: handleDisplayDetectorLicence,
+				handleAutocomplete: handleDisplayDetectorLicenceAutocomplete,
+				options: {
+					dictionary: {
+						identifier: "detector",
+						type: Discord.ApplicationCommandOptionTypes.String,
+						required: true,
+						autocomplete: true,
+					},
+				},
+			},
 			dictionary: {
 				identifier: "dictionary",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
@@ -280,6 +302,20 @@ const commands = Object.freeze({
 				options: {
 					package: {
 						identifier: "package",
+						type: Discord.ApplicationCommandOptionTypes.String,
+						required: true,
+						autocomplete: true,
+					},
+				},
+			},
+			translator: {
+				identifier: "translator",
+				type: Discord.ApplicationCommandOptionTypes.SubCommand,
+				handle: handleDisplayTranslatorLicence,
+				handleAutocomplete: handleDisplayTranslatorLicenceAutocomplete,
+				options: {
+					dictionary: {
+						identifier: "translator",
 						type: Discord.ApplicationCommandOptionTypes.String,
 						required: true,
 						autocomplete: true,
