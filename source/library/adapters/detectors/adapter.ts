@@ -1,7 +1,7 @@
 import type { DetectionLanguage } from "logos:constants/languages";
+import type { Licence } from "logos:constants/licences.ts";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
-import type { Licence } from "logos:constants/licences.ts";
 
 interface SingleDetectionResult {
 	readonly language: DetectionLanguage;

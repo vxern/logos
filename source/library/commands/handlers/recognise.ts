@@ -1,6 +1,7 @@
 import type { DetectionLanguage } from "logos:constants/languages";
 import { list } from "logos:core/formatting";
 import type { Client } from "logos/client";
+import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-notice.ts";
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,
@@ -69,6 +70,10 @@ async function handleRecogniseLanguage(
 		return;
 	}
 
+	const sourceNotice = new RecognitionSourceNotice(client, { interaction, sources: detectedLanguages.sources });
+
+	await sourceNotice.register();
+
 	if (detectedLanguages.likely.length === 1 && detectedLanguages.possible.length === 0) {
 		const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
 		if (language === undefined) {
@@ -79,8 +84,19 @@ async function handleRecogniseLanguage(
 			...constants.contexts.likelyMatch({ localise: client.localise.bind(client), locale: interaction.locale }),
 			...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
 		};
+
 		await client.noticed(interaction, {
-			description: strings.description({ language: strings.language(language) }),
+			embeds: [
+				{
+					description: strings.description({ language: strings.language(language) }),
+				},
+			],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [sourceNotice.button],
+				},
+			],
 		});
 		return;
 	}
@@ -160,7 +176,15 @@ async function handleRecogniseLanguage(
 			});
 		}
 
-		await client.noticed(interaction, { fields });
+		await client.noticed(interaction, {
+			embeds: [{ fields }],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [sourceNotice.button],
+				},
+			],
+		});
 	}
 }
 

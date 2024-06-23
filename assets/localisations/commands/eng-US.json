@@ -104,6 +104,7 @@
 	"recognise.strings.fields.possibleMatches.title": "Other options",
 	"recognise.strings.fields.possibleMatches.description.single": "The language is less likely to be {language}.",
 	"recognise.strings.fields.possibleMatches.description.multiple": "These choices are less likely, but the language could also be one of:",
+	"recognise.strings.recognitionsMadeBy": "Recognitions made by the above libraries.",
 	"game.name": "game",
 	"game.description": "Pick the correct word out of four to fit in the blank.",
 	"game.strings.sentence": "Sentence",

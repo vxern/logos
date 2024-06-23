@@ -1,11 +1,11 @@
 import type { DetectionLanguage, Detector } from "logos:constants/languages";
+import type { Licence } from "logos:constants/licences.ts";
 import type { DetectorAdapter, SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import { CLDAdapter } from "logos/adapters/detectors/cld";
 import { ELDAdapter } from "logos/adapters/detectors/eld";
 import { FastTextAdapter } from "logos/adapters/detectors/fasttext";
 import { TinyLDAdapter } from "logos/adapters/detectors/tinyld";
 import type { Client } from "logos/client";
-import type { Licence } from "logos:constants/licences.ts";
 
 interface DetectionResult {
 	readonly likely: DetectionLanguage[];
