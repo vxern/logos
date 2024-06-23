@@ -1,7 +1,7 @@
+import { isValidLicensedSoftware } from "logos:constants/licences.ts";
 import { code } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { SoftwareLicenceView } from "logos/commands/components/paginated-views/software-licence-view";
-import { isValidLicensedSoftware } from "logos:constants/licences.ts";
 import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple.ts";
 
 async function handleDisplaySoftwareLicenceAutocomplete(

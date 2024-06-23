@@ -9,6 +9,10 @@ import type { InteractionHandler } from "logos/commands/handlers/handler";
 import { handleDisplayBotInformation } from "logos/commands/handlers/information/bot";
 import { handleDisplayGuildInformation } from "logos/commands/handlers/information/guild";
 import {
+	handleDisplayDetectorLicence,
+	handleDisplayDetectorLicenceAutocomplete,
+} from "logos/commands/handlers/licence/detector.ts";
+import {
 	handleDisplayDictionaryLicence,
 	handleDisplayDictionaryLicenceAutocomplete,
 } from "logos/commands/handlers/licence/dictionary";
@@ -16,6 +20,10 @@ import {
 	handleDisplaySoftwareLicence,
 	handleDisplaySoftwareLicenceAutocomplete,
 } from "logos/commands/handlers/licence/software";
+import {
+	handleDisplayTranslatorLicence,
+	handleDisplayTranslatorLicenceAutocomplete,
+} from "logos/commands/handlers/licence/translator.ts";
 import {
 	handleDisplayAuthorPraises,
 	handleDisplayPraisesAutocomplete,
@@ -65,14 +73,6 @@ import {
 } from "logos/commands/handlers/translate";
 import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
 import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
-import {
-	handleDisplayDetectorLicence,
-	handleDisplayDetectorLicenceAutocomplete,
-} from "logos/commands/handlers/licence/detector.ts";
-import {
-	handleDisplayTranslatorLicence,
-	handleDisplayTranslatorLicenceAutocomplete,
-} from "logos/commands/handlers/licence/translator.ts";
 
 /**
  * @privateRemarks
