@@ -1,43 +1,39 @@
 import { code } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { SoftwareLicenceView } from "logos/commands/components/paginated-views/software-licence-view";
+import { isValidLicensedSoftware } from "logos:constants/licences.ts";
+import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple.ts";
 
 async function handleDisplaySoftwareLicenceAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { package: string }>,
 ): Promise<void> {
-	const packageLowercase = interaction.parameters.package.trim().toLowerCase();
-	const choices = Object.keys(constants.licences.software)
-		.map((packageName) => {
-			return {
-				name: packageName,
-				value: packageName,
-			};
-		})
-		.filter((choice) => choice.name.toLowerCase().includes(packageLowercase));
-
-	await client.respond(interaction, choices);
+	await handleSimpleAutocomplete(client, interaction, {
+		query: interaction.parameters.package,
+		elements: Object.keys(constants.licences.software),
+		getOption: (identifier) => ({ name: identifier, value: identifier }),
+	});
 }
 
 async function handleDisplaySoftwareLicence(
 	client: Client,
 	interaction: Logos.Interaction<any, { package: string }>,
 ): Promise<void> {
-	if (!(interaction.parameters.package in constants.licences.software)) {
+	if (!isValidLicensedSoftware(interaction.parameters.package)) {
 		await displayError(client, interaction);
 		return;
 	}
 
-	const packageName = interaction.parameters.package as keyof typeof constants.licences.software;
+	const packageName = interaction.parameters.package;
 
-	const strings = constants.contexts.softwareLicence({
+	const strings = constants.contexts.licence({
 		localise: client.localise.bind(client),
 		locale: interaction.locale,
 	});
 
 	const view = new SoftwareLicenceView(client, {
 		interaction,
-		title: strings.license({ entity: code(packageName) }),
+		title: strings.title({ entity: code(packageName) }),
 		sections: Array.from(constants.licences.software[packageName]),
 	});
 

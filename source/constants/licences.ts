@@ -128,16 +128,47 @@ You must also include, in your app or site, wherever you provide attributions or
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
 } as const);
-type Dictionary = keyof (typeof licences)["dictionaries"];
+type LicensedDictionary = keyof (typeof licences)["dictionaries"];
+type LicensedTranslator = keyof (typeof licences)["translators"];
+type LicensedDetector = keyof (typeof licences)["detectors"];
+type LicensedSoftware = keyof (typeof licences)["software"];
 
-function isValidDictionary(dictionary: string): dictionary is Dictionary {
+function isValidLicensedDictionary(dictionary: string): dictionary is LicensedDictionary {
 	return dictionary in licences.dictionaries;
 }
 
-function getDictionaryLicenceByDictionary(dictionary: Dictionary): Licence {
+function isValidLicensedTranslator(translator: string): translator is LicensedTranslator {
+	return translator in licences.translators;
+}
+
+function isValidLicensedDetector(detector: string): detector is LicensedDetector {
+	return detector in licences.detectors;
+}
+
+function isValidLicensedSoftware(software: string): software is LicensedSoftware {
+	return software in licences.software;
+}
+
+function getDictionaryLicence(dictionary: LicensedDictionary): Licence {
 	return licences.dictionaries[dictionary];
 }
 
+function getTranslatorLicence(translator: LicensedTranslator): Licence {
+	return licences.translators[translator];
+}
+
+function getDetectorLicence(detector: LicensedDetector): Licence {
+	return licences.detectors[detector];
+}
+
 export default licences;
-export { isValidDictionary, getDictionaryLicenceByDictionary };
+export {
+	isValidLicensedDictionary,
+	isValidLicensedTranslator,
+	isValidLicensedDetector,
+	isValidLicensedSoftware,
+	getDictionaryLicence,
+	getTranslatorLicence,
+	getDetectorLicence,
+};
 export type { Licence };
