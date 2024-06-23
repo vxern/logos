@@ -1,6 +1,7 @@
 import { code } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { SoftwareLicenceView } from "logos/commands/components/paginated-views/software-licence-view";
+import { isValidLicensedSoftware } from "logos:constants/licences.ts";
 
 async function handleDisplaySoftwareLicenceAutocomplete(
 	client: Client,
@@ -23,21 +24,21 @@ async function handleDisplaySoftwareLicence(
 	client: Client,
 	interaction: Logos.Interaction<any, { package: string }>,
 ): Promise<void> {
-	if (!(interaction.parameters.package in constants.licences.software)) {
+	if (!isValidLicensedSoftware(interaction.parameters.package)) {
 		await displayError(client, interaction);
 		return;
 	}
 
-	const packageName = interaction.parameters.package as keyof typeof constants.licences.software;
+	const packageName = interaction.parameters.package;
 
-	const strings = constants.contexts.softwareLicence({
+	const strings = constants.contexts.licence({
 		localise: client.localise.bind(client),
 		locale: interaction.locale,
 	});
 
 	const view = new SoftwareLicenceView(client, {
 		interaction,
-		title: strings.license({ entity: code(packageName) }),
+		title: strings.title({ entity: code(packageName) }),
 		sections: Array.from(constants.licences.software[packageName]),
 	});
 

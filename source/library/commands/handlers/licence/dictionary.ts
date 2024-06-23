@@ -1,4 +1,4 @@
-import { getDictionaryLicenceByDictionary, isValidDictionary } from "logos:constants/licences";
+import { getDictionaryLicence, isValidLicensedDictionary } from "logos:constants/licences";
 import type { Client } from "logos/client";
 
 async function handleDisplayDictionaryLicenceAutocomplete(
@@ -22,14 +22,14 @@ async function handleDisplayDictionaryLicence(
 	client: Client,
 	interaction: Logos.Interaction<any, { dictionary: string }>,
 ): Promise<void> {
-	if (!isValidDictionary(interaction.parameters.dictionary)) {
+	if (!isValidLicensedDictionary(interaction.parameters.dictionary)) {
 		await displayError(client, interaction);
 		return;
 	}
 
-	const licence = getDictionaryLicenceByDictionary(interaction.parameters.dictionary);
+	const licence = getDictionaryLicence(interaction.parameters.dictionary);
 
-	const strings = constants.contexts.dictionaryLicence({
+	const strings = constants.contexts.licence({
 		localise: client.localise.bind(client),
 		locale: interaction.locale,
 	});

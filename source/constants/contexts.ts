@@ -73,15 +73,12 @@ export default Object.freeze({
 		home: localise("information.options.server.strings.languageTypes.home", locale)(),
 		target: localise("information.options.server.strings.languageTypes.target", locale)(),
 	}),
-	dictionaryLicence: ({ localise, locale }) => ({
+	licence: ({ localise, locale }) => ({
 		title: localise("licence.strings.license", locale),
 		fields: {
 			source: localise("licence.strings.source", locale)(),
 			copyright: localise("licence.strings.copyright", locale)(),
 		},
-	}),
-	softwareLicence: ({ localise, locale }) => ({
-		license: localise("licence.strings.license", locale),
 	}),
 	invalidLicence: ({ localise, locale }) => ({
 		title: localise("licence.strings.invalid.title", locale)(),

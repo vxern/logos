@@ -128,16 +128,21 @@ You must also include, in your app or site, wherever you provide attributions or
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
 } as const);
-type Dictionary = keyof (typeof licences)["dictionaries"];
+type LicensedDictionary = keyof (typeof licences)["dictionaries"];
+type LicensedSoftware = keyof (typeof licences)["software"];
 
-function isValidDictionary(dictionary: string): dictionary is Dictionary {
+function isValidLicensedDictionary(dictionary: string): dictionary is LicensedDictionary {
 	return dictionary in licences.dictionaries;
 }
 
-function getDictionaryLicenceByDictionary(dictionary: Dictionary): Licence {
+function isValidLicensedSoftware(software: string): software is LicensedSoftware {
+	return software in licences.software;
+}
+
+function getDictionaryLicence(dictionary: LicensedDictionary): Licence {
 	return licences.dictionaries[dictionary];
 }
 
 export default licences;
-export { isValidDictionary, getDictionaryLicenceByDictionary };
+export { isValidLicensedDictionary, isValidLicensedSoftware, getDictionaryLicence };
 export type { Licence };
