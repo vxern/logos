@@ -80,14 +80,6 @@
       ]
     },
     {
-      "login": "at.peace",
-      "name": "Alaska",
-      "avatar_url": ".github/assets/profile-pictures/alaska.png",
-      "contributions": [
-        "translation"
-      ]
-    },
-    {
       "login": "kamelNeoN",
       "name": "Kamel",
       "avatar_url": ".github/assets/profile-pictures/kamel.jpeg",
@@ -103,6 +95,14 @@
       "contributions": [
         "translation",
         "ideas"
+      ]
+    },
+    {
+      "login": "at.peace",
+      "name": "Alaska",
+      "avatar_url": ".github/assets/profile-pictures/alaska.png",
+      "contributions": [
+        "translation"
       ]
     },
     {

@@ -64,7 +64,6 @@
       <td align="center" valign="top" width="14.28%"><img src=".github/assets/profile-pictures/noxys.png" width="100px;" alt="Noxys"/><br /><sub><b>Noxys</b></sub><br /><a href="#translation-noxys" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><img src=".github/assets/profile-pictures/okruch-chleba.png" width="100px;" alt="Okruch Chleba"/><br /><sub><b>Okruch Chleba</b></sub><br /><a href="#translation-okruchchleba" title="Translation">🌍</a></td>
       <td align="center" valign="top" width="14.28%"><img src=".github/assets/profile-pictures/pascu.png" width="100px;" alt="Pascu"/><br /><sub><b>Pascu</b></sub><br /><a href="#ideas-pascu" title="Ideas, Planning, & Feedback">🤔</a></td>
-
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><img src=".github/assets/profile-pictures/rodut-notira.png" width="100px;" alt="Rodut Notira"/><br /><sub><b>Rodut Notira</b></sub><br /><a href="#translation-rodutnotira" title="Translation">🌍</a></td>
