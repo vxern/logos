@@ -17,7 +17,7 @@ class ELDAdapter extends DetectorAdapter {
 
 		const detectedLanguage = getELDDetectionLanguageByLocale(result.language);
 
-		return { language: detectedLanguage };
+		return { language: detectedLanguage, source: constants.licences.detectors.eld };
 	}
 }
 

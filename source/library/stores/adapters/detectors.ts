@@ -1,4 +1,5 @@
 import type { DetectionLanguage, Detector } from "logos:constants/languages";
+import type { Licence } from "logos:constants/licences.ts";
 import type { DetectorAdapter, SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import { CLDAdapter } from "logos/adapters/detectors/cld";
 import { ELDAdapter } from "logos/adapters/detectors/eld";
@@ -9,9 +10,9 @@ import type { Client } from "logos/client";
 interface DetectionResult {
 	readonly likely: DetectionLanguage[];
 	readonly possible: DetectionLanguage[];
+	readonly sources: Licence[];
 }
 
-type DetectionFrequencies = Partial<Record<DetectionLanguage, number>>;
 class DetectorStore {
 	readonly adapters: {
 		readonly cld: CLDAdapter;
@@ -51,25 +52,30 @@ class DetectorStore {
 	}
 
 	compileDetections({ detections }: { detections: SingleDetectionResult[] }): DetectionResult {
-		const sortedByFrequency = detections.reduce<DetectionFrequencies>((sorted, detection) => {
-			if (detection.language in sorted) {
-				sorted[detection.language]! += 1;
-			} else {
-				sorted[detection.language] = 1;
-			}
+		const sortedByFrequency = detections.reduce<Partial<Record<DetectionLanguage, Licence[]>>>(
+			(sorted, detection) => {
+				if (detection.language in sorted) {
+					sorted[detection.language]!.push(detection.source);
+				} else {
+					sorted[detection.language] = [detection.source];
+				}
 
-			return sorted;
-		}, {});
+				return sorted;
+			},
+			{},
+		);
 
-		const mode = Math.max(...Object.values(sortedByFrequency));
+		const mode = Math.max(...Object.values(sortedByFrequency).map((sources) => sources.length));
 
-		const result: DetectionResult = { likely: [], possible: [] };
-		for (const [language, frequency] of Object.entries(sortedByFrequency) as [DetectionLanguage, number][]) {
-			if (frequency === mode) {
+		const result: DetectionResult = { likely: [], possible: [], sources: [] };
+		for (const [language, sources] of Object.entries(sortedByFrequency) as [DetectionLanguage, Licence[]][]) {
+			if (sources.length === mode) {
 				result.likely.push(language);
 			} else {
 				result.possible.push(language);
 			}
+
+			result.sources.push(...sources);
 		}
 
 		return result;

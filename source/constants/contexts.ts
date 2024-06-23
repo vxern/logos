@@ -865,6 +865,12 @@ export default Object.freeze({
 		translation: localise("game.strings.translation", locale)(),
 		sourcedFrom: localise("game.strings.sourcedFrom", locale),
 	}),
+	translationsSourcedFrom: ({ localise, locale }) => ({
+		sourcedFrom: localise("translate.strings.sourcedFrom", locale),
+	}),
+	recognitionsMadeBy: ({ localise, locale }) => ({
+		recognitionsMadeBy: localise("recognise.strings.recognitionsMadeBy", locale)(),
+	}),
 	pardoned: ({ localise, locale }) => ({
 		title: localise("pardon.strings.pardoned.title", locale)(),
 		description: localise("pardon.strings.pardoned.description", locale),

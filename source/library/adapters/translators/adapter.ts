@@ -1,4 +1,5 @@
 import type { Languages, TranslationLanguage } from "logos:constants/languages";
+import type { Licence } from "logos:constants/licences.ts";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
@@ -8,6 +9,9 @@ interface TranslationResult {
 
 	/** The translation result. */
 	readonly text: string;
+
+	/** The source of the result. */
+	readonly source: Licence;
 }
 
 abstract class TranslatorAdapter<Language extends string = TranslationLanguage> {

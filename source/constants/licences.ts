@@ -2,11 +2,11 @@ import apache from "logos:constants/licences/apache";
 import bsd from "logos:constants/licences/bsd";
 import mit from "logos:constants/licences/mit";
 
-interface DictionaryLicence {
+interface Licence {
 	readonly name: string;
 	readonly link: string;
 	readonly faviconLink?: string;
-	readonly notices: {
+	readonly notices?: {
 		readonly licence: string;
 		readonly copyright?: string;
 		readonly badgeLink?: string;
@@ -72,7 +72,39 @@ You must also include, in your app or site, wherever you provide attributions or
 					"You may cache and thus store API Data on your system for up to 24 hours, after which such cached API Data must be purged. Subject to that exception, you will not copy, store, archive, distribute to any third party (other than to End Users as contemplated in this Agreement) any API Data, any metadata or any Link. You agree that any cached API Data will be used by you only for the purpose of populating the Developer Application.",
 			},
 		},
-	} satisfies Record<string, DictionaryLicence>,
+	} satisfies Record<string, Licence>,
+	translators: {
+		deepl: {
+			name: "DeepL",
+			link: "https://www.deepl.com/translator/",
+		},
+		googleTranslate: {
+			name: "Google Translate",
+			link: "https://translate.google.com/",
+		},
+		lingvanex: {
+			name: "Lingvanex",
+			link: "https://lingvanex.com/translate/",
+		},
+	} satisfies Record<string, Licence>,
+	detectors: {
+		cld: {
+			name: "CLD",
+			link: "https://npmjs.com/package/cldpre",
+		},
+		eld: {
+			name: "ELD",
+			link: "https://github.com/vxern/efficient-language-detector-js",
+		},
+		fasttext: {
+			name: "fastText",
+			link: "https://npmjs.com/package/fasttext.wasm.js",
+		},
+		tinyld: {
+			name: "TinyLD",
+			link: "https://npmjs.com/package/tinyld",
+		},
+	} satisfies Record<string, Licence>,
 	software: {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
 		cldpre: apache("Copyright (c) Authors of cldpre"),
@@ -102,10 +134,10 @@ function isValidDictionary(dictionary: string): dictionary is Dictionary {
 	return dictionary in licences.dictionaries;
 }
 
-function getDictionaryLicenceByDictionary(dictionary: Dictionary): DictionaryLicence {
+function getDictionaryLicenceByDictionary(dictionary: Dictionary): Licence {
 	return licences.dictionaries[dictionary];
 }
 
 export default licences;
 export { isValidDictionary, getDictionaryLicenceByDictionary };
-export type { DictionaryLicence };
+export type { Licence };

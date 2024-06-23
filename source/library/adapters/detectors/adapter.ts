@@ -1,9 +1,11 @@
 import type { DetectionLanguage } from "logos:constants/languages";
+import type { Licence } from "logos:constants/licences.ts";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
 interface SingleDetectionResult {
 	readonly language: DetectionLanguage;
+	readonly source: Licence;
 }
 
 abstract class DetectorAdapter {

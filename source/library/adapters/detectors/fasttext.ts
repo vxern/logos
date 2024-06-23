@@ -19,7 +19,7 @@ class FastTextAdapter extends DetectorAdapter {
 
 		const detectedLanguage = getFastTextDetectionLanguageByLocale(result.alpha3);
 
-		return { language: detectedLanguage };
+		return { language: detectedLanguage, source: constants.licences.detectors.fasttext };
 	}
 }
 

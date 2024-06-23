@@ -24,7 +24,7 @@ class TinyLDAdapter extends DetectorAdapter {
 
 		const detectedLanguage = getTinyLDDetectionLanguageByLocale(detectedLocale);
 
-		return { language: detectedLanguage };
+		return { language: detectedLanguage, source: constants.licences.detectors.tinyld };
 	}
 }
 

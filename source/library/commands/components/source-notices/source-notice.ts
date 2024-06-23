@@ -7,7 +7,7 @@ abstract class SourceNotice {
 	readonly #buttonPresses: InteractionCollector;
 	readonly #interaction: Logos.Interaction;
 	readonly #sources: string[];
-	readonly #notice: string;
+	readonly #notice?: string;
 
 	get button(): Discord.ButtonComponent {
 		const strings = constants.contexts.source({
@@ -25,7 +25,7 @@ abstract class SourceNotice {
 
 	constructor(
 		client: Client,
-		{ interaction, sources, notice }: { interaction: Logos.Interaction; sources: string[]; notice: string },
+		{ interaction, sources, notice }: { interaction: Logos.Interaction; sources: string[]; notice?: string },
 	) {
 		this.client = client;
 
@@ -45,7 +45,7 @@ abstract class SourceNotice {
 					{
 						description: `${constants.emojis.link} ${sourcesFormatted}`,
 						color: constants.colours.blue,
-						footer: { text: this.#notice },
+						footer: this.#notice !== undefined ? { text: this.#notice } : undefined,
 					},
 				],
 			},
