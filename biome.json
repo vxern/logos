@@ -45,6 +45,7 @@
     "globals": [
       "Discord",
       "Logos",
+      "Bun",
       "Events",
       "WithRequired",
       "Timer",
