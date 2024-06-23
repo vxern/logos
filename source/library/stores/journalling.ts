@@ -1,8 +1,11 @@
 import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
+import type * as Discord from "@discordeno/bot";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
 import loggers from "logos/stores/journalling/loggers";
+
+type Events = Logos.Events & Discord.Events;
 
 class JournallingStore {
 	readonly log: Logger;

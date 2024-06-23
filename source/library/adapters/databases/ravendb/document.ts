@@ -1,4 +1,5 @@
 import type { Collection } from "logos:constants/database";
+import type { WithRequired } from "logos:core/utilities.ts";
 import type * as ravendb from "ravendb";
 
 interface RavenDBDocumentMetadataContainer {
