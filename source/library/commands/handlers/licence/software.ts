@@ -2,22 +2,17 @@ import { code } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { SoftwareLicenceView } from "logos/commands/components/paginated-views/software-licence-view";
 import { isValidLicensedSoftware } from "logos:constants/licences.ts";
+import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple.ts";
 
 async function handleDisplaySoftwareLicenceAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { package: string }>,
 ): Promise<void> {
-	const packageLowercase = interaction.parameters.package.trim().toLowerCase();
-	const choices = Object.keys(constants.licences.software)
-		.map((packageName) => {
-			return {
-				name: packageName,
-				value: packageName,
-			};
-		})
-		.filter((choice) => choice.name.toLowerCase().includes(packageLowercase));
-
-	await client.respond(interaction, choices);
+	await handleSimpleAutocomplete(client, interaction, {
+		query: interaction.parameters.package,
+		elements: Object.keys(constants.licences.software),
+		getOption: (identifier) => ({ name: identifier, value: identifier }),
+	});
 }
 
 async function handleDisplaySoftwareLicence(
