@@ -140,22 +140,18 @@ async function handleFindWord(
 			localise: client.localise.bind(client),
 			locale: interaction.displayLocale,
 		});
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description({ word: interaction.parameters.word }),
-					color: constants.colours.dullYellow,
-				},
-			],
-		});
-
-		setTimeout(
-			() =>
-				client.deleteReply(interaction).catch(() => {
-					client.log.warn(`Failed to delete "no results for word" message.`);
-				}),
-			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		await client.editReply(
+			interaction,
+			{
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description({ word: interaction.parameters.word }),
+						color: constants.colours.dullYellow,
+					},
+				],
+			},
+			{ autoDelete: true },
 		);
 
 		return;

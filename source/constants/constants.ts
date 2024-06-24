@@ -39,6 +39,7 @@ const constants = Object.freeze({
 	STATUS_CYCLE_PERIOD: 1000 * 10, // 10 seconds in milliseconds.
 	INTERACTION_TOKEN_EXPIRY: 1000 * 60 * 15 - 1000 * 10, // 14 minutes, 50 seconds in milliseconds.
 	SLOWMODE_COLLISION_TIMEOUT: 1000 * 20, // 20 seconds in milliseconds.
+	AUTO_DELETE_MESSAGE_TIMEOUT: 1000 * 10, // 10 seconds in milliseconds.
 	PICK_MISSING_WORD_CHOICES: 4,
 	SHORT_TEXT_LENGTH: 60,
 	LOCALISATIONS_DIRECTORY: "./assets/localisations",
