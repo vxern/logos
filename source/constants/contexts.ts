@@ -332,7 +332,6 @@ export default Object.freeze({
 		},
 	}),
 	correction: ({ localise, locale }) => ({
-		correction: localise("correction.strings.correction", locale)(),
 		suggestedBy: localise("correction.strings.suggestedBy", locale),
 	}),
 	tooManyReports: ({ localise, locale }) => ({
