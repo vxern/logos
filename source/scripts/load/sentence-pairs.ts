@@ -27,11 +27,30 @@ const contentsAll = await Promise.all(promises);
 
 const client = new Redis();
 
+// Sentence index. The key is '<locale>:index', the value is an array of sentence IDs for the given locale.
+//
+// Example:
+// ron:index | [1, 2, 3, 4, 5]
 const indexes: Record<string, number[]> = {};
 for (const [locale, contents] of contentsAll) {
 	indexes[locale] = [];
 
-	const entries: Record<string, string> = {};
+	const segmenter = new Intl.Segmenter(locale, { granularity: "word" });
+
+	// Sentence entry. The key is '<locale>:<sentence id>', the value is a stringified JSON with contents
+	// [sentence ID, sentence, translation ID, translation].
+	//
+	// Example:
+	// ron:1 | "[1,"Acesta este o propoziție în română.",2,"This is a sentence in Romanian."]"
+	const sentences: Record<string, string> = {};
+	let sentenceCount = 0;
+	// Word index. The key is '<locale>:<sentence>', the value is an array of sentence IDs featuring the word in the
+	// given language.
+	//
+	// Example:
+	// ron::cuvânt | [1, 2, 3, 4, 5]
+	const words: Record<string, number[]> = {};
+	let wordCount = 0;
 	for (const line of contents.split("\n")) {
 		const record = line.split("\t") as [
 			sentenceId: string,
@@ -40,28 +59,43 @@ for (const [locale, contents] of contentsAll) {
 			translation: string,
 		];
 
-		entries[`${locale}:${record[0]}`] = JSON.stringify(record[1]);
+		for (const segment of segmenter.segment(record[1])) {
+			const key = `${locale}::${segment.segment}`;
+
+			if (!(key in words)) {
+				words[key] = [];
+			}
+
+			words[key]!.push(Number(record));
+			wordCount += 1;
+		}
+
+		sentences[`${locale}:${record[0]}`] = JSON.stringify(record);
+		sentenceCount += 1;
 		indexes[locale]!.push(Number(record[0]));
 	}
 
 	// Remove the empty elements created by trying to parse the last, empty line in the files.
-	delete entries[`${locale}:`];
+	delete sentences[`${locale}:`];
+	delete words[`${locale}::`];
 	indexes[locale]!.pop();
 
-	await client.mset(entries);
+	await client.mset(sentences);
 
-	winston.info(`Wrote ${indexes[locale]!.length} sentences for ${locale}...`);
+	winston.info(`Wrote ${sentenceCount} sentences for ${locale}.`);
+
+	await client.mset(words);
+
+	winston.info(`Wrote ${wordCount} words for ${locale}.`);
 }
 
-// Save new entries to the indexes.
-{
-	const pipeline = client.pipeline();
-	for (const locale of locales) {
-		winston.info(`Writing index for ${locale}...`);
-		pipeline.sadd(`${locale}:index`, indexes[locale]!);
-	}
-	await pipeline.exec();
+const pipeline = client.pipeline();
+for (const locale of locales) {
+	pipeline.sadd(`${locale}:index`, indexes[locale]!);
 }
+await pipeline.exec();
+
+winston.info("Wrote indexes.");
 
 await client.quit();
 
