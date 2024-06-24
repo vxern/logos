@@ -487,7 +487,10 @@ class Client {
 
 		const executedAt = Date.now();
 
-		if (this.#commands.hasRateLimit(interaction)) {
+		if (
+			interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete &&
+			this.#commands.hasRateLimit(interaction)
+		) {
 			const rateLimit = this.#commands.getRateLimit(interaction, { executedAt });
 			if (rateLimit !== undefined) {
 				const nextUsable = rateLimit.nextAllowedUsageTimestamp - executedAt;
