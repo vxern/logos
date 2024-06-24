@@ -2,6 +2,7 @@ import * as Discord from "@discordeno/bot";
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
 import { handleAnswer } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
+import { handleFindInContext, handleFindInContextAutocomplete } from "logos/commands/handlers/context";
 import { handleMakeFullCorrection, handleMakePartialCorrection } from "logos/commands/handlers/correction";
 import { handleDisplayCredits } from "logos/commands/handlers/credits";
 import { handleStartGame } from "logos/commands/handlers/game";
@@ -79,7 +80,6 @@ import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handl
  * Commands, command groups and options are ordered alphabetically.
  */
 const commands = Object.freeze({
-	// Information
 	information: {
 		identifier: "information",
 		type: Discord.ApplicationCommandTypes.ChatInput,
@@ -131,7 +131,6 @@ const commands = Object.freeze({
 			},
 		},
 	},
-	// Language
 	answerMessage: {
 		identifier: "answer.message",
 		type: Discord.ApplicationCommandTypes.Message,
@@ -249,7 +248,27 @@ const commands = Object.freeze({
 		},
 		flags: { hasRateLimit: true, isShowable: true },
 	},
-	// Meta
+	context: {
+		identifier: "context",
+		type: Discord.ApplicationCommandTypes.ChatInput,
+		defaultMemberPermissions: ["VIEW_CHANNEL"],
+		handle: handleFindInContext,
+		handleAutocomplete: handleFindInContextAutocomplete,
+		options: {
+			phrase: {
+				identifier: "phrase",
+				type: Discord.ApplicationCommandOptionTypes.String,
+				required: true,
+			},
+			language: {
+				identifier: "language",
+				type: Discord.ApplicationCommandOptionTypes.String,
+				autocomplete: true,
+			},
+			show: constants.parameters.show,
+		},
+		flags: { hasRateLimit: true, isShowable: true },
+	},
 	acknowledgements: {
 		identifier: "acknowledgements",
 		type: Discord.ApplicationCommandTypes.ChatInput,
@@ -362,7 +381,6 @@ const commands = Object.freeze({
 			},
 		},
 	},
-	// Moderation
 	pardon: {
 		identifier: "pardon",
 		type: Discord.ApplicationCommandTypes.ChatInput,
@@ -510,7 +528,6 @@ const commands = Object.freeze({
 			},
 		},
 	},
-	// Social
 	music: {
 		identifier: "music",
 		type: Discord.ApplicationCommandTypes.ChatInput,

@@ -1,4 +1,3 @@
-import defaults from "logos:constants/defaults";
 import { isLocalisationLanguage } from "logos:constants/languages";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";

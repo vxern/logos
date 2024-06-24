@@ -235,6 +235,7 @@
 	"context.options.language.description": "The language to search for the phrase in.",
 	"context.strings.noSentencesFound.title": "No sentences found",
 	"context.strings.noSentencesFound.description": "Could not find sentences containing the specified phrase.",
+	"context.strings.phraseInContext.title": "Phrase '{phrase}' in context",
 	"list.name": "list",
 	"list.description": "Allows the viewing of various information about users.",
 	"list.options.warnings.name": "warnings",
