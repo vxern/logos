@@ -6,35 +6,13 @@ import type { Definition, DictionaryEntry, Expression } from "logos/adapters/dic
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice.ts";
+import { autocompleteLanguage } from "logos/commands/fragments/autocomplete/language.ts";
 
 async function handleFindWordAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const languageQueryTrimmed = interaction.parameters.language?.trim();
-	if (languageQueryTrimmed === undefined || languageQueryTrimmed.length === 0) {
-		const strings = constants.contexts.autocompleteLanguage({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
-		return;
-	}
-
-	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
-	const choices = constants.languages.languages.localisation
-		.map((language) => ({
-			name: client.localise(constants.localisations.languages[language], interaction.locale)(),
-			value: language,
-		}))
-		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
-
-	await client.respond(interaction, choices);
+	await autocompleteLanguage(client, interaction);
 }
 
 /** Allows the user to look up a word and get information about it. */
