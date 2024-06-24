@@ -86,6 +86,30 @@ class VolatileStore {
 		return this.redis.scard(constants.keys.redis.sentencePairIndex({ locale: learningLocale }));
 	}
 
+	async getSentencePairs({
+		sentenceIds,
+		learningLocale,
+	}: { sentenceIds: string[]; learningLocale: Locale }): Promise<SentencePair[]> {
+		const encodedPairs: SentencePairEncoded[] = [];
+		for (const sentenceId of sentenceIds) {
+			const pairEncoded = await this.redis.get(
+				constants.keys.redis.sentencePair({ locale: learningLocale, sentenceId }),
+			);
+			if (pairEncoded === null) {
+				throw new Error(`Failed to get sentence pair for locale ${learningLocale} and ID ${sentenceId}.`);
+			}
+
+			encodedPairs.push(JSON.parse(pairEncoded) as SentencePairEncoded);
+		}
+
+		return encodedPairs.map(([sentenceId, sentence, translationId, translation]) => ({
+			sentenceId,
+			sentence,
+			translationId,
+			translation,
+		}));
+	}
+
 	async getRandomSentencePairs({
 		learningLocale,
 		count,
@@ -100,33 +124,37 @@ class VolatileStore {
 			throw new Error("Failed to get random indexes for sentence pairs.");
 		}
 
-		const ids: string[] = [];
-		for (const [error, id] of results) {
-			if (error !== null || id === null) {
-				throw new Error(`Failed to get random index for sentence pair: ${id}`);
+		const sentenceIds: string[] = [];
+		for (const [error, sentenceId] of results) {
+			if (error !== null || sentenceId === null) {
+				throw new Error(`Failed to get random index for sentence pair: ${sentenceId}`);
 			}
 
-			ids.push(id as string);
+			sentenceIds.push(sentenceId as string);
 		}
 
-		const encodedPairs: SentencePairEncoded[] = [];
-		for (const id of ids) {
-			const pairEncoded = await this.redis.get(
-				constants.keys.redis.sentencePair({ locale: learningLocale, sentenceId: id }),
-			);
-			if (pairEncoded === null) {
-				throw new Error(`Failed to get sentence pair for locale ${learningLocale} and index ${id}.`);
-			}
+		return this.getSentencePairs({ sentenceIds, learningLocale });
+	}
 
-			encodedPairs.push(JSON.parse(pairEncoded) as SentencePairEncoded);
+	async searchForPhrase({
+		phrase,
+		learningLocale,
+	}: { phrase: string; learningLocale: Locale }): Promise<SentencePair[]> {
+		const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
+		const lemmas = Array.from(segmenter.segment(phrase)).map((data) => data.segment);
+		const keys = lemmas.map((lemma) => constants.keys.redis.lemmaIndex({ locale: learningLocale, lemma }));
+		if (keys.length === 0) {
+			return [];
 		}
 
-		return encodedPairs.map(([sentenceId, sentence, translationId, translation]) => ({
-			sentenceId,
-			sentence,
-			translationId,
-			translation,
-		}));
+		let sentenceIds: string[];
+		if (keys.length === 1) {
+			sentenceIds = await this.redis.smembers(keys.at(0)!);
+		} else {
+			sentenceIds = await this.redis.sinter(keys);
+		}
+
+		return this.getSentencePairs({ sentenceIds, learningLocale });
 	}
 }
 
