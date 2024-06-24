@@ -43,14 +43,12 @@ for (const [locale, contents] of contentsAll) {
 	// Example:
 	// ron:1 | "[1,"Acesta este o propoziție în română.",2,"This is a sentence in Romanian."]"
 	const sentences: Record<string, string> = {};
-	let sentenceCount = 0;
 	// Lemma index. The key is '<locale>:<sentence>', the value is an array of sentence IDs featuring the lemma in the
 	// given language.
 	//
 	// Example:
 	// ron::cuvânt | [1, 2, 3, 4, 5]
 	const lemmas: Record<string, number[]> = {};
-	let lemmaCount = 0;
 	for (const line of contents.split("\n")) {
 		const record = line.split("\t") as [
 			sentenceId: string,
@@ -59,6 +57,8 @@ for (const [locale, contents] of contentsAll) {
 			translation: string,
 		];
 
+		const sentenceId = Number(record[0]);
+
 		for (const data of segmenter.segment(record[1])) {
 			const key = constants.keys.redis.lemmaIndex({ locale, lemma: data.segment });
 
@@ -66,13 +66,11 @@ for (const [locale, contents] of contentsAll) {
 				lemmas[key] = [];
 			}
 
-			lemmas[key]!.push(Number(record));
-			lemmaCount += 1;
+			lemmas[key]!.push(sentenceId);
 		}
 
-		sentences[constants.keys.redis.sentencePair({ locale, sentenceId: record[0] })] = JSON.stringify(record);
-		sentenceCount += 1;
-		indexes[locale]!.push(Number(record[0]));
+		sentences[constants.keys.redis.sentencePair({ locale, sentenceId })] = JSON.stringify(record);
+		indexes[locale]!.push(sentenceId);
 	}
 
 	// Remove the empty elements created by trying to parse the last, empty line in the files.
@@ -82,11 +80,15 @@ for (const [locale, contents] of contentsAll) {
 
 	await client.mset(sentences);
 
-	winston.info(`Wrote ${sentenceCount} sentences for ${locale}.`);
+	winston.info(`Wrote sentences for ${locale}.`);
 
-	await client.mset(lemmas);
+	const pipeline = client.pipeline();
+	for (const [key, sentenceIds] of Object.entries(lemmas)) {
+		pipeline.sadd(key, sentenceIds);
+	}
+	await pipeline.exec();
 
-	winston.info(`Wrote ${lemmaCount} lemmas for ${locale}.`);
+	winston.info(`Wrote lemmas for ${locale}.`);
 }
 
 const pipeline = client.pipeline();
