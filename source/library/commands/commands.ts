@@ -237,6 +237,7 @@ const commands = Object.freeze({
 				identifier: "verbose",
 				type: Discord.ApplicationCommandOptionTypes.Boolean,
 			},
+			show: constants.parameters.show,
 		},
 		flags: { hasRateLimit: true, isShowable: true },
 	},
