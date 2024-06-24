@@ -9,6 +9,7 @@ import dictionaries from "logos:constants/dictionaries";
 import emojis from "logos:constants/emojis";
 import endpoints from "logos:constants/endpoints";
 import gifs from "logos:constants/gifs";
+import keys from "logos:constants/keys";
 import languages from "logos:constants/languages";
 import licences from "logos:constants/licences";
 import links from "logos:constants/links";
@@ -57,6 +58,7 @@ export default Object.freeze({
 	emojis,
 	endpoints,
 	gifs,
+	keys,
 	languages,
 	licences,
 	links,

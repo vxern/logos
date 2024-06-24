@@ -83,7 +83,7 @@ class VolatileStore {
 	}
 
 	getSentencePairCount({ learningLocale }: { learningLocale: Locale }): Promise<number> {
-		return this.redis.scard(`${learningLocale}:index`);
+		return this.redis.scard(constants.keys.redis.sentencePairIndex({ locale: learningLocale }));
 	}
 
 	async getRandomSentencePairs({
@@ -92,7 +92,7 @@ class VolatileStore {
 	}: { learningLocale: Locale; count: number }): Promise<SentencePair[]> {
 		const pipeline = this.redis.pipeline();
 		for (const _ of new Array(count).keys()) {
-			pipeline.srandmember(`${learningLocale}:index`);
+			pipeline.srandmember(constants.keys.redis.sentencePairIndex({ locale: learningLocale }));
 		}
 
 		const results = await pipeline.exec();
@@ -111,7 +111,9 @@ class VolatileStore {
 
 		const encodedPairs: SentencePairEncoded[] = [];
 		for (const id of ids) {
-			const pairEncoded = await this.redis.get(`${learningLocale}:${id}`);
+			const pairEncoded = await this.redis.get(
+				constants.keys.redis.sentencePair({ locale: learningLocale, sentenceId: id }),
+			);
 			if (pairEncoded === null) {
 				throw new Error(`Failed to get sentence pair for locale ${learningLocale} and index ${id}.`);
 			}

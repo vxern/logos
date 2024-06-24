@@ -44,13 +44,13 @@ for (const [locale, contents] of contentsAll) {
 	// ron:1 | "[1,"Acesta este o propoziție în română.",2,"This is a sentence in Romanian."]"
 	const sentences: Record<string, string> = {};
 	let sentenceCount = 0;
-	// Word index. The key is '<locale>:<sentence>', the value is an array of sentence IDs featuring the word in the
+	// Lemma index. The key is '<locale>:<sentence>', the value is an array of sentence IDs featuring the lemma in the
 	// given language.
 	//
 	// Example:
 	// ron::cuvânt | [1, 2, 3, 4, 5]
-	const words: Record<string, number[]> = {};
-	let wordCount = 0;
+	const lemmas: Record<string, number[]> = {};
+	let lemmaCount = 0;
 	for (const line of contents.split("\n")) {
 		const record = line.split("\t") as [
 			sentenceId: string,
@@ -59,39 +59,39 @@ for (const [locale, contents] of contentsAll) {
 			translation: string,
 		];
 
-		for (const segment of segmenter.segment(record[1])) {
-			const key = `${locale}::${segment.segment}`;
+		for (const data of segmenter.segment(record[1])) {
+			const key = constants.keys.redis.lemmaIndex({ locale, lemma: data.segment });
 
-			if (!(key in words)) {
-				words[key] = [];
+			if (!(key in lemmas)) {
+				lemmas[key] = [];
 			}
 
-			words[key]!.push(Number(record));
-			wordCount += 1;
+			lemmas[key]!.push(Number(record));
+			lemmaCount += 1;
 		}
 
-		sentences[`${locale}:${record[0]}`] = JSON.stringify(record);
+		sentences[constants.keys.redis.sentencePair({ locale, sentenceId: record[0] })] = JSON.stringify(record);
 		sentenceCount += 1;
 		indexes[locale]!.push(Number(record[0]));
 	}
 
 	// Remove the empty elements created by trying to parse the last, empty line in the files.
-	delete sentences[`${locale}:`];
-	delete words[`${locale}::`];
+	delete sentences[constants.keys.redis.sentencePair({ locale, sentenceId: "" })];
+	delete lemmas[constants.keys.redis.lemmaIndex({ locale, lemma: "" })];
 	indexes[locale]!.pop();
 
 	await client.mset(sentences);
 
 	winston.info(`Wrote ${sentenceCount} sentences for ${locale}.`);
 
-	await client.mset(words);
+	await client.mset(lemmas);
 
-	winston.info(`Wrote ${wordCount} words for ${locale}.`);
+	winston.info(`Wrote ${lemmaCount} lemmas for ${locale}.`);
 }
 
 const pipeline = client.pipeline();
 for (const locale of locales) {
-	pipeline.sadd(`${locale}:index`, indexes[locale]!);
+	pipeline.sadd(constants.keys.redis.sentencePairIndex({ locale }), indexes[locale]!);
 }
 await pipeline.exec();
 
