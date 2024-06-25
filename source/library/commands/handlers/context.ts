@@ -1,7 +1,8 @@
 import { getLocaleByLearningLanguage, isLocalisationLanguage } from "logos:constants/languages.ts";
+import { shuffle } from "ioredis/built/utils";
 import type { Client } from "logos/client.ts";
 import { autocompleteLanguage } from "logos/commands/fragments/autocomplete/language.ts";
-import { shuffle } from "ioredis/built/utils";
+import type { SentencePair } from "logos/stores/volatile.ts";
 
 async function handleFindInContextAutocomplete(
 	client: Client,
@@ -69,11 +70,23 @@ async function handleFindInContext(
 		locale: interaction.displayLocale,
 	});
 	await client.noticed(interaction, {
-		title: strings.title({ phrase: interaction.parameters.phrase }),
-		fields: sentencePairSelection.map((sentencePair) => ({
-			name: sentencePair.sentence.replaceAll(phrasePattern, `__${interaction.parameters.phrase}__`),
-			value: sentencePair.translation,
-		})),
+		embeds: [
+			{
+				title: strings.title({ phrase: interaction.parameters.phrase }),
+				fields: sentencePairSelection.map((sentencePair) => ({
+					name: sentencePair.sentence.replaceAll(phrasePattern, `__${interaction.parameters.phrase}__`),
+					value: sentencePair.translation,
+				})),
+			},
+		],
+		components: interaction.parameters.show
+			? undefined
+			: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: [client.interactionRepetitionService.getShowButton(interaction)],
+					},
+				],
 	});
 }
 
