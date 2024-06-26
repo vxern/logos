@@ -190,9 +190,8 @@ class VolatileStore {
 			),
 		);
 
-		let sentenceIds: string[];
-		if (lemmaUseKeysAll.length === 1) {
-			const lemmaUseKeys = lemmaUseKeysAll.at(0)!;
+		const sentenceIdSets: string[][] = [];
+		for (const lemmaUseKeys of lemmaUseKeysAll) {
 			const pipeline = this.redis.pipeline();
 			for (const lemmaUseKey of lemmaUseKeys) {
 				pipeline.smembers(lemmaUseKey);
@@ -202,10 +201,23 @@ class VolatileStore {
 				throw new Error(`Could not retrieve uses of one of the provided lemmas: ${lemmaUseKeys.join(", ")}`);
 			}
 
-			sentenceIds = result.flatMap(([_, sentenceIds]) => sentenceIds as string[]);
+			const sentenceIds = result.flatMap(([_, sentenceIds]) => sentenceIds as string[]);
+			sentenceIdSets.push(sentenceIds);
+		}
+
+		let sentenceIds: string[];
+		if (sentenceIdSets.length === 1) {
+			sentenceIds = sentenceIdSets.at(0)!;
 		} else {
-			// TODO(vxern): Implement.
-			sentenceIds = [];
+			sentenceIds = Array.from(
+				sentenceIdSets.reduce((sentenceIdsAll, sentenceIds) => {
+					for (const sentenceId of sentenceIds) {
+						sentenceIdsAll.add(sentenceId);
+					}
+
+					return sentenceIdsAll;
+				}, new Set<string>()),
+			);
 		}
 
 		return this.getSentencePairs({ sentenceIds, learningLocale });
