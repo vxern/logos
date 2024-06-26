@@ -265,10 +265,9 @@ const commands = Object.freeze({
 				type: Discord.ApplicationCommandOptionTypes.String,
 				autocomplete: true,
 			},
-			caseSensitive: {
-				identifier: "case-sensitive",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				autocomplete: true,
+			"case-sensitive": {
+				identifier: "caseSensitive",
+				type: Discord.ApplicationCommandOptionTypes.Boolean,
 			},
 			show: constants.parameters.show,
 		},

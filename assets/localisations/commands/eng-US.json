@@ -233,7 +233,7 @@
 	"context.options.phrase.description": "The phrase to search for.",
 	"context.options.language.name": "language",
 	"context.options.language.description": "The language to search for the phrase in.",
-	"context.options.caseSensitive.title": "case-sensitive",
+	"context.options.caseSensitive.name": "case-sensitive",
 	"context.options.caseSensitive.description": "Whether to make the search case-sensitive.",
 	"context.strings.noSentencesFound.title": "No sentences found",
 	"context.strings.noSentencesFound.description": "Could not find sentences containing the specified phrase.",
