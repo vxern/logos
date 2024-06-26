@@ -29,14 +29,16 @@ async function handleFindInContext(
 		return;
 	}
 
+	await client.postponeReply(interaction, { visible: interaction.parameters.show });
+
 	const learningLanguage =
 		interaction.parameters.language !== undefined ? interaction.parameters.language : interaction.learningLanguage;
 	const learningLocale = getLocaleByLearningLanguage(learningLanguage);
 
-	await client.postponeReply(interaction, { visible: interaction.parameters.show });
-
-	const sentencePairs = await client.volatile?.searchForPhraseUses({
-		phrase: interaction.parameters.phrase,
+	const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
+	const lemmas = Array.from(segmenter.segment(interaction.parameters.phrase)).map((data) => data.segment);
+	const sentencePairs = await client.volatile?.searchForLemmaUses({
+		lemmas,
 		learningLocale: learningLocale,
 	});
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
@@ -63,7 +65,10 @@ async function handleFindInContext(
 		sentencePairSelection = shuffle(sentencePairs).slice(0, constants.SENTENCE_PAIRS_TO_SHOW);
 	}
 
-	const phrasePattern = constants.patterns.wholeWord(interaction.parameters.phrase);
+	const lemmaPatterns = lemmas.map<[lemma: string, pattern: RegExp]>((lemma) => [
+		lemma,
+		constants.patterns.wholeWord(lemma, { caseSensitive: true }),
+	]);
 
 	const strings = constants.contexts.phraseInContext({
 		localise: client.localise.bind(client),
@@ -73,10 +78,17 @@ async function handleFindInContext(
 		embeds: [
 			{
 				title: strings.title({ phrase: interaction.parameters.phrase }),
-				fields: sentencePairSelection.map((sentencePair) => ({
-					name: sentencePair.sentence.replaceAll(phrasePattern, `__${interaction.parameters.phrase}__`),
-					value: sentencePair.translation,
-				})),
+				fields: sentencePairSelection.map((sentencePair) => {
+					let sentenceFormatted = sentencePair.sentence;
+					for (const [lemma, pattern] of lemmaPatterns) {
+						sentenceFormatted = sentenceFormatted.replaceAll(pattern, `__${lemma}__`);
+					}
+
+					return {
+						name: sentenceFormatted,
+						value: sentencePair.translation,
+					};
+				}),
 			},
 		],
 		components: interaction.parameters.show

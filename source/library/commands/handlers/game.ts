@@ -142,7 +142,9 @@ async function getGameView(
 
 	await sourceNotice.register();
 
-	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]);
+	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1], {
+		caseSensitive: false,
+	});
 	const mask = constants.special.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
 
 	const strings = constants.contexts.game({ localise: client.localise.bind(client), locale: interaction.locale });

@@ -136,14 +136,11 @@ class VolatileStore {
 		return this.getSentencePairs({ sentenceIds, learningLocale });
 	}
 
-	async searchForPhraseUses({
-		phrase,
+	searchForLemmaUses({
+		lemmas,
 		learningLocale,
 		caseSensitive = false,
-	}: { phrase: string; learningLocale: Locale; caseSensitive?: boolean }): Promise<SentencePair[]> {
-		const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
-		const lemmas = Array.from(segmenter.segment(phrase)).map((data) => data.segment);
-
+	}: { lemmas: string[]; learningLocale: Locale; caseSensitive?: boolean }): Promise<SentencePair[]> {
 		if (caseSensitive) {
 			return this.#searchForLemmaUsesCaseSensitive({ lemmas, learningLocale });
 		}
