@@ -136,22 +136,76 @@ class VolatileStore {
 		return this.getSentencePairs({ sentenceIds, learningLocale });
 	}
 
-	async searchForPhrase({
+	async searchForPhraseUses({
 		phrase,
 		learningLocale,
-	}: { phrase: string; learningLocale: Locale }): Promise<SentencePair[]> {
+		caseSensitive = false,
+	}: { phrase: string; learningLocale: Locale; caseSensitive?: boolean }): Promise<SentencePair[]> {
 		const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
 		const lemmas = Array.from(segmenter.segment(phrase)).map((data) => data.segment);
-		const keys = lemmas.map((lemma) => constants.keys.redis.lemmaIndex({ locale: learningLocale, lemma }));
-		if (keys.length === 0) {
-			return [];
+
+		if (caseSensitive) {
+			return this.#searchForLemmaUsesCaseSensitive({ lemmas, learningLocale });
 		}
+
+		return this.#searchForLemmaUsesCaseInsensitive({ lemmas, learningLocale });
+	}
+
+	async #searchForLemmaUsesCaseSensitive({
+		lemmas,
+		learningLocale,
+	}: { lemmas: string[]; learningLocale: Locale }): Promise<SentencePair[]> {
+		const keys = lemmas.map((lemma) => constants.keys.redis.lemmaUseIndex({ locale: learningLocale, lemma }));
 
 		let sentenceIds: string[];
 		if (keys.length === 1) {
 			sentenceIds = await this.redis.smembers(keys.at(0)!);
 		} else {
 			sentenceIds = await this.redis.sinter(keys);
+		}
+
+		return this.getSentencePairs({ sentenceIds, learningLocale });
+	}
+
+	async #searchForLemmaUsesCaseInsensitive({
+		lemmas,
+		learningLocale,
+	}: { lemmas: string[]; learningLocale: Locale }): Promise<SentencePair[]> {
+		const lemmaFormKeys = lemmas.map((lemma) =>
+			constants.keys.redis.lemmaFormIndex({ locale: learningLocale, lemma }),
+		);
+
+		const pipeline = this.redis.pipeline();
+		for (const lemmaFormKey of lemmaFormKeys) {
+			pipeline.smembers(lemmaFormKey);
+		}
+		const result = await pipeline.exec();
+		if (result === null || result.some(([error, _]) => error !== null)) {
+			throw new Error(`Could not retrieve forms of one of the provided lemmas: ${lemmaFormKeys.join(", ")}`);
+		}
+
+		const lemmaUseKeysAll = result.map(([_, lemmaForms]) =>
+			(lemmaForms as string[]).map((lemmaForm) =>
+				constants.keys.redis.lemmaUseIndex({ locale: learningLocale, lemma: lemmaForm }),
+			),
+		);
+
+		let sentenceIds: string[];
+		if (lemmaUseKeysAll.length === 1) {
+			const lemmaUseKeys = lemmaUseKeysAll.at(0)!;
+			const pipeline = this.redis.pipeline();
+			for (const lemmaUseKey of lemmaUseKeys) {
+				pipeline.smembers(lemmaUseKey);
+			}
+			const result = await pipeline.exec();
+			if (result === null || result.some(([error, _]) => error !== null)) {
+				throw new Error(`Could not retrieve uses of one of the provided lemmas: ${lemmaUseKeys.join(", ")}`);
+			}
+
+			sentenceIds = result.flatMap(([_, sentenceIds]) => sentenceIds as string[]);
+		} else {
+			// TODO(vxern): Implement.
+			sentenceIds = [];
 		}
 
 		return this.getSentencePairs({ sentenceIds, learningLocale });

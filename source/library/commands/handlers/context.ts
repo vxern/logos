@@ -35,7 +35,7 @@ async function handleFindInContext(
 
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
-	const sentencePairs = await client.volatile?.searchForPhrase({
+	const sentencePairs = await client.volatile?.searchForPhraseUses({
 		phrase: interaction.parameters.phrase,
 		learningLocale: learningLocale,
 	});

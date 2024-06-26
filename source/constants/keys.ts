@@ -4,7 +4,7 @@ const keys = Object.freeze({
 		sentencePair: ({ locale, sentenceId }: { locale: string; sentenceId: string | number }) =>
 			`${locale}:S:${sentenceId}`,
 		lemmaUseIndex: ({ locale, lemma }: { locale: string; lemma: string }) => `${locale}:LI:${lemma}`,
-		lemmaFormIndex: ({ locale, lemma }: { locale: string; lemma: string }) => `${locale}:LF:${lemma}`,
+		lemmaFormIndex: ({ locale, lemma }: { locale: string; lemma: string }) => `${locale}:LF:${lemma.toLowerCase()}`,
 	},
 });
 
