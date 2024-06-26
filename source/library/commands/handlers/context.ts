@@ -13,7 +13,10 @@ async function handleFindInContextAutocomplete(
 
 async function handleFindInContext(
 	client: Client,
-	interaction: Logos.Interaction<any, { phrase: string; language: string | undefined }>,
+	interaction: Logos.Interaction<
+		any,
+		{ phrase: string; language: string | undefined; "case-sensitive": boolean | undefined }
+	>,
 ): Promise<void> {
 	if (interaction.parameters.language !== undefined && !isLocalisationLanguage(interaction.parameters.language)) {
 		const strings = constants.contexts.invalidLanguage({ localise: client.localise, locale: interaction.locale });
@@ -40,6 +43,7 @@ async function handleFindInContext(
 	const sentencePairs = await client.volatile?.searchForLemmaUses({
 		lemmas,
 		learningLocale: learningLocale,
+		caseSensitive: interaction.parameters["case-sensitive"],
 	});
 	if (sentencePairs === undefined || sentencePairs.length === 0) {
 		const strings = constants.contexts.noSentencesFound({
