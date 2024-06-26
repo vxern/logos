@@ -65,6 +65,7 @@ async function handleFindInContext(
 		sentencePairSelection = shuffle(sentencePairs).slice(0, constants.SENTENCE_PAIRS_TO_SHOW);
 	}
 
+	// TODO(vxern): Get lemmas from `searchForLemmaUses()` to highlight words regardless of original capitalisation.
 	const lemmaPatterns = lemmas.map<[lemma: string, pattern: RegExp]>((lemma) => [
 		lemma,
 		constants.patterns.wholeWord(lemma, { caseSensitive: true }),
