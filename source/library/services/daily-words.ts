@@ -54,6 +54,9 @@ class DailyWordService extends LocalService {
 
 	async #postWord(): Promise<void> {
 		// TODO(vxern): Pick word to post.
+
+		const tomorrow = new Date().setHours(0, 0, 0, 0) + constants.time.day + this.#postTime;
+		this.#postTimer = setTimeout(this.#postWord.bind(this), tomorrow);
 	}
 }
 
