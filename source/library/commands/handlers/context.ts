@@ -92,7 +92,7 @@ async function handleFindInContext(
 
 					return {
 						name: sentenceFormatted,
-						value: sentencePair.translation,
+						value: `> ${sentencePair.translation}`,
 					};
 				}),
 			},
