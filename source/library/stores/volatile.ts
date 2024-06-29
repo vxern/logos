@@ -10,6 +10,10 @@ interface SentencePair {
 	readonly translation: string;
 }
 type SentencePairEncoded = [sentenceId: number, sentence: string, translationId: number, translation: string];
+interface LemmaUses {
+	readonly sentencePairs: SentencePair[];
+	readonly lemmas: string[];
+}
 
 class VolatileStore {
 	readonly log: Logger;
@@ -140,7 +144,7 @@ class VolatileStore {
 		lemmas,
 		learningLocale,
 		caseSensitive = false,
-	}: { lemmas: string[]; learningLocale: Locale; caseSensitive?: boolean }): Promise<SentencePair[]> {
+	}: { lemmas: string[]; learningLocale: Locale; caseSensitive?: boolean }): Promise<LemmaUses> {
 		if (caseSensitive) {
 			return this.#searchForLemmaUsesCaseSensitive({ lemmas, learningLocale });
 		}
@@ -151,7 +155,7 @@ class VolatileStore {
 	async #searchForLemmaUsesCaseSensitive({
 		lemmas,
 		learningLocale,
-	}: { lemmas: string[]; learningLocale: Locale }): Promise<SentencePair[]> {
+	}: { lemmas: string[]; learningLocale: Locale }): Promise<LemmaUses> {
 		const keys = lemmas.map((lemma) => constants.keys.redis.lemmaUseIndex({ locale: learningLocale, lemma }));
 
 		let sentenceIds: string[];
@@ -161,13 +165,15 @@ class VolatileStore {
 			sentenceIds = await this.redis.sinter(keys);
 		}
 
-		return this.getSentencePairs({ sentenceIds, learningLocale });
+		const sentencePairs = await this.getSentencePairs({ sentenceIds, learningLocale });
+
+		return { sentencePairs, lemmas };
 	}
 
 	async #searchForLemmaUsesCaseInsensitive({
 		lemmas,
 		learningLocale,
-	}: { lemmas: string[]; learningLocale: Locale }): Promise<SentencePair[]> {
+	}: { lemmas: string[]; learningLocale: Locale }): Promise<LemmaUses> {
 		const lemmaFormKeys = lemmas.map((lemma) =>
 			constants.keys.redis.lemmaFormIndex({ locale: learningLocale, lemma }),
 		);
@@ -181,8 +187,9 @@ class VolatileStore {
 			throw new Error(`Could not retrieve forms of one of the provided lemmas: ${lemmaFormKeys.join(", ")}`);
 		}
 
-		const lemmaUseKeysAll = result.map(([_, lemmaForms]) =>
-			(lemmaForms as string[]).map((lemmaForm) =>
+		const lemmaForms = result.map(([_, lemmaForms]) => lemmaForms as string[]);
+		const lemmaUseKeysAll = lemmaForms.map((lemmaForms) =>
+			lemmaForms.map((lemmaForm) =>
 				constants.keys.redis.lemmaUseIndex({ locale: learningLocale, lemma: lemmaForm }),
 			),
 		);
@@ -217,7 +224,9 @@ class VolatileStore {
 			);
 		}
 
-		return this.getSentencePairs({ sentenceIds, learningLocale });
+		const sentencePairs = await this.getSentencePairs({ sentenceIds, learningLocale });
+
+		return { sentencePairs, lemmas: lemmaForms.flat() };
 	}
 }
 

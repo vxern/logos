@@ -40,12 +40,12 @@ async function handleFindInContext(
 
 	const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
 	const lemmas = Array.from(segmenter.segment(interaction.parameters.phrase)).map((data) => data.segment);
-	const sentencePairs = await client.volatile?.searchForLemmaUses({
+	const lemmaUses = await client.volatile?.searchForLemmaUses({
 		lemmas,
 		learningLocale: learningLocale,
 		caseSensitive: interaction.parameters["case-sensitive"],
 	});
-	if (sentencePairs === undefined || sentencePairs.length === 0) {
+	if (lemmaUses === undefined || lemmaUses.sentencePairs.length === 0) {
 		const strings = constants.contexts.noSentencesFound({
 			localise: client.localise.bind(client),
 			locale: interaction.displayLocale,
@@ -62,15 +62,16 @@ async function handleFindInContext(
 		return;
 	}
 
+	shuffle(lemmaUses.sentencePairs);
+
 	let sentencePairSelection: SentencePair[];
-	if (sentencePairs.length <= constants.SENTENCE_PAIRS_TO_SHOW) {
-		sentencePairSelection = sentencePairs;
+	if (lemmaUses.sentencePairs.length <= constants.SENTENCE_PAIRS_TO_SHOW) {
+		sentencePairSelection = lemmaUses.sentencePairs;
 	} else {
-		sentencePairSelection = shuffle(sentencePairs).slice(0, constants.SENTENCE_PAIRS_TO_SHOW);
+		sentencePairSelection = lemmaUses.sentencePairs.slice(0, constants.SENTENCE_PAIRS_TO_SHOW);
 	}
 
-	// TODO(vxern): Get lemmas from `searchForLemmaUses()` to highlight words regardless of original capitalisation.
-	const lemmaPatterns = lemmas.map<[lemma: string, pattern: RegExp]>((lemma) => [
+	const lemmaPatterns = lemmaUses.lemmas.map<[lemma: string, pattern: RegExp]>((lemma) => [
 		lemma,
 		constants.patterns.wholeWord(lemma, { caseSensitive: true }),
 	]);
