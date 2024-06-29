@@ -77,6 +77,12 @@ interface GuildFeatures {
 
 			word?: Activatable;
 
+			/** @since v4.8.0 */
+			dailyWords?: Activatable<{
+				channelId: string;
+				time: TimeStruct[];
+			}>;
+
 			/** @since v4.7.0 */
 			context?: Activatable;
 
@@ -472,6 +478,15 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		}
 
 		return languageFeatures.word;
+	}
+
+	get dailyWords(): Enabled<NonNullable<Guild["languageFeatures"]>["dailyWords"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.dailyWords?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.dailyWords;
 	}
 
 	get context(): Enabled<NonNullable<Guild["languageFeatures"]>["context"]> | undefined {
