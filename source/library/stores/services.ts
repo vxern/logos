@@ -2,6 +2,7 @@ import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
 import { AlertService } from "logos/services/alert";
+import { DailyWordService } from "logos/services/daily-words.ts";
 import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channels";
 import { EntryService } from "logos/services/entry";
 import { InteractionRepetitionService } from "logos/services/interaction-repetition";
@@ -33,6 +34,7 @@ class ServiceStore {
 	};
 	readonly local: {
 		readonly alerts: Map<bigint, AlertService>;
+		readonly dailyWords: Map<bigint, DailyWordService>;
 		readonly dynamicVoiceChannels: Map<bigint, DynamicVoiceChannelService>;
 		readonly entry: Map<bigint, EntryService>;
 		readonly music: Map<bigint, MusicService>;
@@ -78,6 +80,7 @@ class ServiceStore {
 		};
 		this.local = {
 			alerts: new Map(),
+			dailyWords: new Map(),
 			dynamicVoiceChannels: new Map(),
 			entry: new Map(),
 			music: new Map(),
@@ -179,6 +182,15 @@ class ServiceStore {
 
 					this.local.notices.welcome.set(guildId, service);
 				}
+			}
+		}
+
+		if (guildDocument.hasEnabled("languageFeatures")) {
+			if (guildDocument.hasEnabled("dailyWords")) {
+				const service = new DailyWordService(client, { guildId });
+				services.push(service);
+
+				this.local.dailyWords.set(guildId, service);
 			}
 		}
 
