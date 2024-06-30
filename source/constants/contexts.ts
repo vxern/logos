@@ -1567,5 +1567,8 @@ export default Object.freeze({
 			cannotUseUntil: localise("interactions.rateLimited.description.cannotUseAgainUntil", locale),
 		},
 	}),
+	verificationAnswers: ({ localise, locale }) => ({
+		verificationAnswers: localise("entry.verification.inquiry.verificationAnswers", locale)(),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };
