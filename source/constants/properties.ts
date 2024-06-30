@@ -50,6 +50,7 @@ const properties = {
 		content: true,
 		embeds: true,
 		author: true,
+		attachments: true,
 		interaction: {},
 		messageReference: {},
 	},
@@ -67,7 +68,12 @@ const properties = {
 		roles: true,
 		user: true,
 	},
-	attachment: {},
+	attachment: {
+		filename: true,
+		contentType: true,
+		url: true,
+		proxyUrl: true,
+	},
 	interaction: {
 		id: true,
 		applicationId: true,
