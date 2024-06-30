@@ -69,6 +69,7 @@ const properties = {
 		user: true,
 	},
 	attachment: {
+		id: true,
 		filename: true,
 		contentType: true,
 		url: true,
