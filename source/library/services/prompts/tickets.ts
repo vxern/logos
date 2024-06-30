@@ -1,5 +1,7 @@
-import { mention, trim } from "logos:core/formatting";
+import { codeMultiline, mention, trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
+import type { EntryRequest } from "logos/models/entry-request.ts";
+import { Model } from "logos/models/model.ts";
 import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
@@ -199,7 +201,7 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		});
 
-		this.client.bot.helpers
+		await this.client.bot.helpers
 			.sendMessage(channel.id, {
 				embeds: [
 					{
@@ -212,6 +214,48 @@ class TicketPromptService extends PromptService<{
 				this.client.log.warn("Failed to send a topic message in the ticket channel.");
 				return undefined;
 			});
+
+		if (type === "inquiry") {
+			const entryRequest = this.client.documents.entryRequests.get(
+				Model.buildPartialId<EntryRequest>({ guildId: this.guildIdString, authorId: user.id.toString() }),
+			);
+			if (entryRequest === undefined) {
+				throw new Error(`Could not get entry request of ${this.client.diagnostics.user(user.id)}.`);
+			}
+
+			const strings = {
+				...constants.contexts.verificationAnswers({
+					localise: this.client.localise.bind(this.client),
+					locale: this.guildLocale,
+				}),
+				...constants.contexts.verificationModal({
+					localise: this.client.localise.bind(this.client),
+					locale: this.guildLocale,
+				}),
+			};
+			await this.client.bot.helpers.sendMessage(channel.id, {
+				embeds: [
+					{
+						title: strings.verificationAnswers,
+						color: constants.colours.husky,
+						fields: [
+							{
+								name: strings.fields.reason({ language: this.guildDocument.featureLanguage }),
+								value: codeMultiline(entryRequest.formData.reason),
+							},
+							{
+								name: strings.fields.aim,
+								value: codeMultiline(entryRequest.formData.aim),
+							},
+							{
+								name: strings.fields.whereFound,
+								value: codeMultiline(entryRequest.formData.whereFound),
+							},
+						],
+					},
+				],
+			});
+		}
 
 		const ticketDocument = await Ticket.create(this.client, {
 			guildId: this.guildIdString,
