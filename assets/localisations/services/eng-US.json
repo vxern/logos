@@ -8,15 +8,17 @@
 	"notices.resources.description.contributable.usingCommand": "Using the {command} command.",
 	"notices.resources.description.contributable.openingIssue": "Opening an issue in the repository, mentioning the resources to add.",
 	"notices.resources.description.contributable.makingPullRequest": "Forking the repository, adding the resources as needed, and creating a pull request.",
-
 	"reports.users": "Reported users",
 	"reports.reason": "Reason for report",
 	"reports.link": "Link to message",
 	"reports.noLinkProvided": "No link to message provided.",
 	"reports.previousInfractions": "Previous infractions of {username}",
-
+	"reports.noReports": "There are no unresolved user reports.",
+	"resources.noResources": "There are no new resource submissions.",
 	"suggestion.suggestion": "Suggestion",
-
+	"suggestion.noSuggestions": "There are no new server suggestions.",
+	"ticket.noTickets": "There are no open tickets.",
+	"verifications.noEntryRequests": "There are no unresolved requests to enter the server.",
 	"submittedBy": "Submitted by",
 	"submittedAt": "Submitted at",
 	"markResolved": "Mark issue as resolved",
@@ -30,5 +32,6 @@
 	"cannotRemovePrompt.description": "You cannot remove this prompt.",
 	"close": "Close",
 	"cannotCloseIssue.title": "Cannot close issue",
-	"cannotCloseIssue.description": "You cannot close this issue."
+	"cannotCloseIssue.description": "You cannot close this issue.",
+	"allUpToDate": "All up to date!"
 }
