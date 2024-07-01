@@ -73,10 +73,6 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 			return;
 		}
 
-		resourceService.registerDocument(resourceDocument);
-		resourceService.registerPrompt(prompt, interaction.user.id, resourceDocument);
-		resourceService.registerHandler(resourceDocument);
-
 		const strings = constants.contexts.resourceSent({
 			localise: client.localise.bind(client),
 			locale: interaction.locale,

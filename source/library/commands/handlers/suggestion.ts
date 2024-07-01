@@ -73,10 +73,6 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 			return;
 		}
 
-		suggestionService.registerDocument(suggestionDocument);
-		suggestionService.registerPrompt(prompt, interaction.user.id, suggestionDocument);
-		suggestionService.registerHandler(suggestionDocument);
-
 		const strings = constants.contexts.suggestionSent({
 			localise: client.localise.bind(client),
 			locale: interaction.locale,
