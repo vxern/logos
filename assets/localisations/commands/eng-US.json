@@ -642,7 +642,7 @@
 	"praise.options.comment.name": "comment",
 	"praise.options.comment.description": "A comment to attach to the praise.",
 	"praise.strings.praised.title": "User praised!",
-	"praise.strings.praised.description": "{user_mention} has just been notified that you have praised them.",
+	"praise.strings.praised.description": "You have praised {user_mention}.",
 	"praise.strings.cannotPraiseSelf.title": "Cannot praise self",
 	"praise.strings.cannotPraiseSelf.description": "You cannot praise yourself.",
 	"praise.strings.failed.title": "Failed to praise user",
