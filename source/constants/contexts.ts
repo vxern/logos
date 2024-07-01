@@ -1567,5 +1567,25 @@ export default Object.freeze({
 			cannotUseUntil: localise("interactions.rateLimited.description.cannotUseAgainUntil", locale),
 		},
 	}),
+	noReports: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("reports.noReports", locale)(),
+	}),
+	noResources: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("resources.noResources", locale)(),
+	}),
+	noSuggestions: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("suggestions.noSuggestions", locale)(),
+	}),
+	noTickets: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("tickets.noTickets", locale)(),
+	}),
+	noEntryRequests: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("entryRequests.noEntryRequests", locale)(),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

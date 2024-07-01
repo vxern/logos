@@ -242,6 +242,23 @@ class VerificationPromptService extends PromptService<{
 		};
 	}
 
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions | undefined {
+		const strings = constants.contexts.noEntryRequests({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+				},
+			],
+		};
+	}
+
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isAccept: string]>,
 	): Promise<EntryRequest | null | undefined> {

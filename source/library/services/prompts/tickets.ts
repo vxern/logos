@@ -91,6 +91,23 @@ class TicketPromptService extends PromptService<{
 		};
 	}
 
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions | undefined {
+		const strings = constants.contexts.noTickets({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+				},
+			],
+		};
+	}
+
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Ticket | null | undefined> {

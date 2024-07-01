@@ -429,6 +429,7 @@ abstract class PromptService<
 		user: Logos.User,
 		promptDocument: Generic["model"],
 	): Discord.CreateMessageOptions | undefined;
+	abstract getNoPromptsMessageContent(): Discord.CreateMessageOptions | undefined;
 
 	extractPartialId(prompt: Discord.Message): string | undefined {
 		const partialId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);

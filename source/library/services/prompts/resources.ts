@@ -80,6 +80,23 @@ class ResourcePromptService extends PromptService<{
 		};
 	}
 
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions | undefined {
+		const strings = constants.contexts.noResources({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+				},
+			],
+		};
+	}
+
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Resource | null | undefined> {

@@ -18,7 +18,7 @@
 	"suggestion.suggestion": "Suggestion",
 	"suggestion.noSuggestions": "There are no new server suggestions.",
 	"ticket.noTickets": "There are no open tickets.",
-	"verifications.noEntryRequests": "There are no unresolved requests to enter the server.",
+	"entryRequests.noEntryRequests": "There are no unresolved requests to enter the server.",
 	"submittedBy": "Submitted by",
 	"submittedAt": "Submitted at",
 	"markResolved": "Mark issue as resolved",
