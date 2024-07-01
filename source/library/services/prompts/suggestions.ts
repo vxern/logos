@@ -84,7 +84,7 @@ class SuggestionPromptService extends PromptService<{
 		};
 	}
 
-	getNoPromptsMessageContent(): Discord.CreateMessageOptions | undefined {
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
 		const strings = constants.contexts.noSuggestions({
 			localise: this.client.localise.bind(this.client),
 			locale: this.guildLocale,

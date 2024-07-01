@@ -140,6 +140,8 @@ abstract class PromptService<
 		await this.client.registerCollector("messageDelete", this.#messageDeletes);
 		await this.client.registerInteractionCollector(this.magicButton);
 		await this.client.registerInteractionCollector(this.removeButton);
+
+		await this.#tryPostNoPromptsMessage();
 	}
 
 	async stop(): Promise<void> {
@@ -290,6 +292,8 @@ abstract class PromptService<
 			return;
 		}
 
+		await this.#tryPostNoPromptsMessage();
+
 		const promptDocument = this.#documentByPromptId.get(id);
 		if (promptDocument === undefined) {
 			return;
@@ -429,7 +433,23 @@ abstract class PromptService<
 		user: Logos.User,
 		promptDocument: Generic["model"],
 	): Discord.CreateMessageOptions | undefined;
-	abstract getNoPromptsMessageContent(): Discord.CreateMessageOptions | undefined;
+	abstract getNoPromptsMessageContent(): Discord.CreateMessageOptions;
+
+	async #tryPostNoPromptsMessage(): Promise<Discord.Message | undefined> {
+		if (this.#documentByPromptId.size > 0) {
+			return;
+		}
+
+		return await this.client.bot.helpers
+			.sendMessage(this.channelId, this.getNoPromptsMessageContent())
+			.catch((reason) => {
+				this.log.warn(
+					`Failed to send message to ${this.client.diagnostics.channel(this.channelId)}: ${reason}`,
+				);
+
+				return undefined;
+			});
+	}
 
 	extractPartialId(prompt: Discord.Message): string | undefined {
 		const partialId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
@@ -441,18 +461,13 @@ abstract class PromptService<
 	}
 
 	async savePrompt(user: Logos.User, promptDocument: Generic["model"]): Promise<Discord.Message | undefined> {
-		const channelId = this.channelId;
-		if (channelId === undefined) {
-			return undefined;
-		}
-
 		const content = this.getPromptContent(user, promptDocument);
 		if (content === undefined) {
 			return undefined;
 		}
 
-		const prompt = await this.client.bot.helpers.sendMessage(channelId, content).catch(() => {
-			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
+		const prompt = await this.client.bot.helpers.sendMessage(this.channelId, content).catch((reason) => {
+			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(this.channelId)}: ${reason}`);
 
 			return undefined;
 		});

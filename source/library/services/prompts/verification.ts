@@ -242,7 +242,7 @@ class VerificationPromptService extends PromptService<{
 		};
 	}
 
-	getNoPromptsMessageContent(): Discord.CreateMessageOptions | undefined {
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
 		const strings = constants.contexts.noEntryRequests({
 			localise: this.client.localise.bind(this.client),
 			locale: this.guildLocale,
