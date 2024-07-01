@@ -24,6 +24,11 @@ type PromptType = keyof ServiceStore["local"]["prompts"];
 
 type PromptDeleteMode = "delete" | "close" | "none";
 
+interface ExistingPrompts {
+	readonly valid: [partialId: string, prompt: Discord.Message][];
+	readonly invalid: Discord.Message[];
+}
+
 abstract class PromptService<
 	Generic extends {
 		type: PromptType;
@@ -71,8 +76,8 @@ abstract class PromptService<
 		return this.#configuration(this.guildDocument)!;
 	}
 
-	get channelId(): bigint | undefined {
-		return this.configuration.channelId !== undefined ? BigInt(this.configuration.channelId) : undefined;
+	get channelId(): bigint {
+		return BigInt(this.configuration.channelId);
 	}
 
 	constructor(
@@ -120,11 +125,38 @@ abstract class PromptService<
 	}
 
 	async start(): Promise<void> {
-		const channelId = this.channelId;
-		if (channelId === undefined) {
-			return;
-		}
+		this.#restoreDocuments();
 
+		const existingPrompts = await this.#getExistingPrompts();
+		const expiredPrompts = await this.#restoreValidPrompts(existingPrompts.valid);
+		await this.#deleteInvalidPrompts([...existingPrompts.invalid, ...expiredPrompts.values()]);
+
+		this.#messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
+		this.#messageDeletes.onCollect(this.#handleMessageDelete.bind(this));
+		this.magicButton.onInteraction(this.#handleMagicButtonPress.bind(this));
+		this.removeButton.onInteraction(this.#handlePromptRemove.bind(this));
+
+		await this.client.registerCollector("messageUpdate", this.#messageUpdates);
+		await this.client.registerCollector("messageDelete", this.#messageDeletes);
+		await this.client.registerInteractionCollector(this.magicButton);
+		await this.client.registerInteractionCollector(this.removeButton);
+	}
+
+	async stop(): Promise<void> {
+		await this.#messageUpdates.close();
+		await this.#messageDeletes.close();
+		await this.magicButton.close();
+		await this.removeButton.close();
+
+		this.documents.clear();
+		this.promptByPartialId.clear();
+
+		this.#handlerByPartialId.clear();
+		this.#documentByPromptId.clear();
+		this.#userIdByPromptId.clear();
+	}
+
+	#restoreDocuments(): void {
 		const documents = this.getAllDocuments();
 
 		this.log.info(
@@ -134,28 +166,51 @@ abstract class PromptService<
 		for (const [partialId, document] of documents.entries()) {
 			this.documents.set(partialId, document);
 		}
+	}
 
+	async #getExistingPrompts(): Promise<ExistingPrompts> {
+		const channelId = this.channelId!;
 		const messages = (await this.getAllMessages({ channelId })) ?? [];
-		const [validPrompts, invalidPrompts] = this.filterPrompts(messages);
+
+		const valid: [partialId: string, prompt: Discord.Message][] = [];
+		const invalid: Discord.Message[] = [];
+
+		for (const prompt of messages) {
+			const partialId = this.extractPartialId(prompt);
+			if (partialId === undefined) {
+				invalid.push(prompt);
+				continue;
+			}
+
+			valid.push([partialId, prompt]);
+		}
 
 		this.log.info(
 			`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}, of which ${
-				invalidPrompts.length
+				invalid.length
 			} aren't prompts or are invalid.`,
 		);
 
-		if (validPrompts.length > 0) {
-			this.log.info(`Restoring state for ${validPrompts.length} ${this.#type} documents...`);
+		return { valid, invalid };
+	}
+
+	async #restoreValidPrompts(
+		prompts: [partialId: string, prompt: Discord.Message][],
+	): Promise<Map<string, Discord.Message>> {
+		if (prompts.length === 0) {
+			return new Map();
 		}
 
-		const prompts = new Map(validPrompts);
+		this.log.info(`Restoring state for ${prompts.length} ${this.#type} documents...`);
+
+		const remainingPrompts = new Map(prompts);
 		for (const [_, document] of this.documents) {
 			const userDocument = await this.getUserDocument(document);
 			const userId = BigInt(userDocument.userId);
 
-			let prompt = prompts.get(document.partialId);
+			let prompt = remainingPrompts.get(document.partialId);
 			if (prompt !== undefined) {
-				prompts.delete(document.partialId);
+				remainingPrompts.delete(document.partialId);
 			} else {
 				this.log.warn(
 					`Could not find existing prompt for ${document.id}. Has it been manually deleted? Recreating...`,
@@ -181,142 +236,25 @@ abstract class PromptService<
 			this.registerHandler(document);
 		}
 
-		const expiredPrompts = Array.from(prompts.values());
-		if (expiredPrompts.length > 0) {
-			this.log.warn(
-				`Could not restore the prompt-to-document link between ${prompts.size} prompts. Considering these prompts expired and deleting...`,
-			);
+		if (remainingPrompts.size > 0) {
+			this.log.warn(`Could not restore the prompt-to-document link between ${remainingPrompts.size} prompts.`);
 		}
 
-		for (const prompt of [...invalidPrompts, ...expiredPrompts]) {
+		return remainingPrompts;
+	}
+
+	async #deleteInvalidPrompts(prompts: Discord.Message[]): Promise<void> {
+		if (prompts.length === 0) {
+			return;
+		}
+
+		this.log.warn(`Deleting ${prompts.length} invalid or expired prompts...`);
+
+		for (const prompt of prompts) {
 			await this.client.bot.helpers.deleteMessage(prompt.channelId, prompt.id).catch((reason) => {
 				this.log.warn("Failed to delete invalid or expired prompt:", reason);
 			});
 		}
-
-		this.#messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
-		this.#messageDeletes.onCollect(this.#handleMessageDelete.bind(this));
-
-		this.magicButton.onInteraction((buttonPress) => {
-			const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
-			if (handle === undefined) {
-				return;
-			}
-
-			handle(buttonPress);
-		});
-
-		this.removeButton.onInteraction(async (buttonPress) => {
-			const customId = buttonPress.data?.customId;
-			if (customId === undefined) {
-				return;
-			}
-
-			const guildId = buttonPress.guildId;
-			if (guildId === undefined) {
-				return;
-			}
-
-			const member = buttonPress.member;
-			if (member === undefined) {
-				return;
-			}
-
-			let management: { roles?: string[]; users?: string[] } | undefined;
-			switch (this.#type) {
-				case "verification": {
-					management = (this.configuration as Guild["verification"])?.management;
-					break;
-				}
-				case "reports": {
-					management = (this.configuration as Guild["reports"])?.management;
-					break;
-				}
-				case "resources": {
-					management = (this.configuration as Guild["resourceSubmissions"])?.management;
-					break;
-				}
-				case "suggestions": {
-					management = (this.configuration as Guild["suggestions"])?.management;
-					break;
-				}
-				case "tickets": {
-					management = (this.configuration as Guild["tickets"])?.management;
-					break;
-				}
-				default: {
-					management = undefined;
-					break;
-				}
-			}
-
-			const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
-			const userIds = management?.users?.map((userId) => BigInt(userId));
-
-			const isAuthorised =
-				member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-				(userIds?.includes(buttonPress.user.id) ?? false);
-			if (!isAuthorised) {
-				if (this.#deleteMode === "delete") {
-					const strings = constants.contexts.cannotRemovePrompt({
-						localise: this.client.localise.bind(this.client),
-						locale: buttonPress.locale,
-					});
-					await this.client.warning(buttonPress, {
-						title: strings.title,
-						description: strings.description,
-					});
-					return;
-				}
-
-				if (this.#deleteMode === "close") {
-					const strings = constants.contexts.cannotCloseIssue({
-						localise: this.client.localise.bind(this.client),
-						locale: buttonPress.locale,
-					});
-					await this.client.warning(buttonPress, {
-						title: strings.title,
-						description: strings.description,
-					});
-					return;
-				}
-
-				return;
-			}
-
-			await this.client.acknowledge(buttonPress);
-
-			const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
-			if (prompt === undefined) {
-				return;
-			}
-
-			const promptDocument = this.#documentByPromptId.get(prompt.id);
-			if (promptDocument === undefined) {
-				return;
-			}
-
-			await this.handleDelete(promptDocument);
-		});
-
-		await this.client.registerCollector("messageUpdate", this.#messageUpdates);
-		await this.client.registerCollector("messageDelete", this.#messageDeletes);
-		await this.client.registerInteractionCollector(this.magicButton);
-		await this.client.registerInteractionCollector(this.removeButton);
-	}
-
-	async stop(): Promise<void> {
-		await this.#messageUpdates.close();
-		await this.#messageDeletes.close();
-		await this.magicButton.close();
-		await this.removeButton.close();
-
-		this.documents.clear();
-		this.promptByPartialId.clear();
-
-		this.#handlerByPartialId.clear();
-		this.#documentByPromptId.clear();
-		this.#userIdByPromptId.clear();
 	}
 
 	// Anti-tampering feature; detects prompts being changed from the outside (embeds being deleted).
@@ -383,9 +321,110 @@ abstract class PromptService<
 		this.#userIdByPromptId.delete(id);
 	}
 
+	#handleMagicButtonPress(buttonPress: Logos.Interaction<Generic["metadata"], any>): void {
+		const handle = this.#handlerByPartialId.get(buttonPress.metadata[1]);
+		if (handle === undefined) {
+			return;
+		}
+
+		handle(buttonPress);
+	}
+
+	async #handlePromptRemove(buttonPress: Logos.Interaction): Promise<void> {
+		const customId = buttonPress.data?.customId;
+		if (customId === undefined) {
+			return;
+		}
+
+		const guildId = buttonPress.guildId;
+		if (guildId === undefined) {
+			return;
+		}
+
+		const member = buttonPress.member;
+		if (member === undefined) {
+			return;
+		}
+
+		let management: { roles?: string[]; users?: string[] } | undefined;
+		switch (this.#type) {
+			case "verification": {
+				management = (this.configuration as Guild["verification"])?.management;
+				break;
+			}
+			case "reports": {
+				management = (this.configuration as Guild["reports"])?.management;
+				break;
+			}
+			case "resources": {
+				management = (this.configuration as Guild["resourceSubmissions"])?.management;
+				break;
+			}
+			case "suggestions": {
+				management = (this.configuration as Guild["suggestions"])?.management;
+				break;
+			}
+			case "tickets": {
+				management = (this.configuration as Guild["tickets"])?.management;
+				break;
+			}
+			default: {
+				management = undefined;
+				break;
+			}
+		}
+
+		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
+		const userIds = management?.users?.map((userId) => BigInt(userId));
+
+		const isAuthorised =
+			member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
+			(userIds?.includes(buttonPress.user.id) ?? false);
+		if (!isAuthorised) {
+			if (this.#deleteMode === "delete") {
+				const strings = constants.contexts.cannotRemovePrompt({
+					localise: this.client.localise.bind(this.client),
+					locale: buttonPress.locale,
+				});
+				await this.client.warning(buttonPress, {
+					title: strings.title,
+					description: strings.description,
+				});
+				return;
+			}
+
+			if (this.#deleteMode === "close") {
+				const strings = constants.contexts.cannotCloseIssue({
+					localise: this.client.localise.bind(this.client),
+					locale: buttonPress.locale,
+				});
+				await this.client.warning(buttonPress, {
+					title: strings.title,
+					description: strings.description,
+				});
+				return;
+			}
+
+			return;
+		}
+
+		await this.client.acknowledge(buttonPress);
+
+		const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
+		if (prompt === undefined) {
+			return;
+		}
+
+		const promptDocument = this.#documentByPromptId.get(prompt.id);
+		if (promptDocument === undefined) {
+			return;
+		}
+
+		await this.handleDelete(promptDocument);
+	}
+
 	abstract getAllDocuments(): Map<string, Generic["model"]>;
 	abstract getUserDocument(promptDocument: Generic["model"]): Promise<User>;
-
 	abstract getPromptContent(
 		user: Logos.User,
 		promptDocument: Generic["model"],
@@ -398,25 +437,6 @@ abstract class PromptService<
 		}
 
 		return partialId;
-	}
-
-	filterPrompts(
-		prompts: Discord.Message[],
-	): [valid: [partialId: string, prompt: Discord.Message][], invalid: Discord.Message[]] {
-		const valid: [partialId: string, prompt: Discord.Message][] = [];
-		const invalid: Discord.Message[] = [];
-
-		for (const prompt of prompts) {
-			const partialId = this.extractPartialId(prompt);
-			if (partialId === undefined) {
-				invalid.push(prompt);
-				continue;
-			}
-
-			valid.push([partialId, prompt]);
-		}
-
-		return [valid, invalid];
 	}
 
 	async savePrompt(user: Logos.User, promptDocument: Generic["model"]): Promise<Discord.Message | undefined> {
