@@ -451,11 +451,20 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		return await this.client.bot.helpers.sendMessage(channelId, content).catch(() => {
+		const prompt = await this.client.bot.helpers.sendMessage(channelId, content).catch(() => {
 			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 
 			return undefined;
 		});
+		if (prompt === undefined) {
+			return undefined;
+		}
+
+		this.registerDocument(promptDocument);
+		this.registerPrompt(prompt, user.id, promptDocument);
+		this.registerHandler(promptDocument);
+
+		return prompt;
 	}
 
 	registerDocument(promptDocument: Generic["model"]): void {
