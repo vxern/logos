@@ -27,7 +27,7 @@ type PromptDeleteMode = "delete" | "close" | "none";
 interface ExistingPrompts {
 	readonly valid: [partialId: string, prompt: Discord.Message][];
 	readonly invalid: Discord.Message[];
-	readonly noPromptsMessageExists: boolean;
+	readonly noPromptsMessage: Discord.Message | undefined;
 }
 
 abstract class PromptService<
@@ -60,6 +60,7 @@ abstract class PromptService<
 	readonly promptByPartialId: Map</*partialId: */ string, Discord.Message>;
 	readonly magicButton: InteractionCollector<Generic["metadata"]>;
 	readonly removeButton: InteractionCollector<[partialId: string]>;
+	#noPromptsMessage: Discord.Message | undefined;
 
 	readonly #type: Generic["type"];
 	readonly #deleteMode: PromptDeleteMode;
@@ -132,7 +133,9 @@ abstract class PromptService<
 		const expiredPrompts = await this.#restoreValidPrompts(existingPrompts.valid);
 		await this.#deleteInvalidPrompts([...existingPrompts.invalid, ...expiredPrompts.values()]);
 
-		if (!existingPrompts.noPromptsMessageExists) {
+		if (existingPrompts.noPromptsMessage !== undefined) {
+			this.#registerNoPromptsMessage(existingPrompts.noPromptsMessage);
+		} else {
 			await this.#tryPostNoPromptsMessage();
 		}
 
@@ -179,26 +182,26 @@ abstract class PromptService<
 
 		const valid: [partialId: string, prompt: Discord.Message][] = [];
 		const invalid: Discord.Message[] = [];
-		let noPromptsMessageExists = false;
+		let noPromptsMessage: Discord.Message | undefined;
 
-		for (const prompt of messages) {
-			const metadata = this.getMetadata(prompt);
+		for (const message of messages) {
+			const metadata = this.getMetadata(message);
 			if (metadata === undefined) {
-				invalid.push(prompt);
+				invalid.push(message);
 				continue;
 			}
 
 			if (metadata === constants.components.noPrompts) {
-				if (noPromptsMessageExists) {
-					invalid.push(prompt);
+				if (noPromptsMessage !== undefined) {
+					invalid.push(message);
 					continue;
 				}
 
-				noPromptsMessageExists = true;
+				noPromptsMessage = message;
 				continue;
 			}
 
-			valid.push([metadata, prompt]);
+			valid.push([metadata, message]);
 		}
 
 		this.log.info(`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}.`);
@@ -209,7 +212,7 @@ abstract class PromptService<
 			);
 		}
 
-		return { valid, invalid, noPromptsMessageExists };
+		return { valid, invalid, noPromptsMessage };
 	}
 
 	async #restoreValidPrompts(
@@ -308,7 +311,11 @@ abstract class PromptService<
 			return;
 		}
 
-		await this.#tryPostNoPromptsMessage();
+		if (this.#noPromptsMessage !== undefined && id === this.#noPromptsMessage.id) {
+			this.#unregisterNoPromptsMessage();
+			await this.#tryPostNoPromptsMessage();
+			return;
+		}
 
 		const promptDocument = this.#documentByPromptId.get(id);
 		if (promptDocument === undefined) {
@@ -456,7 +463,7 @@ abstract class PromptService<
 			return;
 		}
 
-		return await this.client.bot.helpers
+		const message = await this.client.bot.helpers
 			.sendMessage(this.channelId, this.getNoPromptsMessageContent())
 			.catch((reason) => {
 				this.log.warn(
@@ -465,6 +472,13 @@ abstract class PromptService<
 
 				return undefined;
 			});
+		if (message === undefined) {
+			return undefined;
+		}
+
+		this.#registerNoPromptsMessage(message);
+
+		return message;
 	}
 
 	getMetadata(prompt: Discord.Message): string | undefined {
@@ -491,6 +505,14 @@ abstract class PromptService<
 		this.registerHandler(promptDocument);
 
 		return prompt;
+	}
+
+	#registerNoPromptsMessage(message: Discord.Message): void {
+		this.#noPromptsMessage = message;
+	}
+
+	#unregisterNoPromptsMessage(): void {
+		this.#noPromptsMessage = undefined;
 	}
 
 	registerDocument(promptDocument: Generic["model"]): void {
