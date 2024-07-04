@@ -130,6 +130,7 @@ abstract class PromptService<
 		const existingPrompts = await this.#getExistingPrompts();
 		const expiredPrompts = await this.#restoreValidPrompts(existingPrompts.valid);
 		await this.#deleteInvalidPrompts([...existingPrompts.invalid, ...expiredPrompts.values()]);
+		await this.#tryPostNoPromptsMessage();
 
 		this.#messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
 		this.#messageDeletes.onCollect(this.#handleMessageDelete.bind(this));
@@ -140,8 +141,6 @@ abstract class PromptService<
 		await this.client.registerCollector("messageDelete", this.#messageDeletes);
 		await this.client.registerInteractionCollector(this.magicButton);
 		await this.client.registerInteractionCollector(this.removeButton);
-
-		await this.#tryPostNoPromptsMessage();
 	}
 
 	async stop(): Promise<void> {
