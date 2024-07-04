@@ -3,6 +3,9 @@ import type { Client } from "logos/client";
 import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
+import { EntryRequest } from "logos/models/entry-request.ts";
+import { Model } from "logos/models/model.ts";
+import { ticket } from "logos:test/helpers.ts";
 
 class TicketPromptService extends PromptService<{
 	type: "tickets";
@@ -132,6 +135,26 @@ class TicketPromptService extends PromptService<{
 
 		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {
 			this.log.warn("Failed to delete ticket channel.");
+		});
+
+		if (ticketDocument.type === "inquiry") {
+			await this.#handleCloseInquiry(ticketDocument);
+		}
+	}
+
+	async #handleCloseInquiry(ticketDocument: Ticket): Promise<void> {
+		const entryRequestDocument = this.client.documents.entryRequests.get(
+			Model.buildPartialId<EntryRequest>({
+				guildId: ticketDocument.guildId,
+				authorId: ticketDocument.authorId,
+			}),
+		);
+		if (entryRequestDocument === undefined || entryRequestDocument.ticketChannelId === undefined) {
+			return;
+		}
+
+		await entryRequestDocument.update(this.client, () => {
+			entryRequestDocument.ticketChannelId = undefined;
 		});
 	}
 
