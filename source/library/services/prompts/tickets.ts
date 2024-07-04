@@ -53,7 +53,7 @@ class TicketPromptService extends PromptService<{
 					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({
+						iconUrl: PromptService.encodeMetadataInUserAvatar({
 							user,
 							partialId: ticketDocument.partialId,
 						}),
@@ -103,6 +103,13 @@ class TicketPromptService extends PromptService<{
 					title: strings.title,
 					description: strings.description,
 					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
 				},
 			],
 		};

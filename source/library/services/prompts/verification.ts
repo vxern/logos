@@ -181,7 +181,7 @@ class VerificationPromptService extends PromptService<{
 					],
 					footer: {
 						text: this.guild.name,
-						iconUrl: PromptService.encodePartialIdInGuildIcon({
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
 							guild: this.guild,
 							partialId: entryRequestDocument.partialId,
 						}),
@@ -254,6 +254,13 @@ class VerificationPromptService extends PromptService<{
 					title: strings.title,
 					description: strings.description,
 					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
 				},
 			],
 		};

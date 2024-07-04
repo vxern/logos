@@ -46,7 +46,7 @@ class SuggestionPromptService extends PromptService<{
 					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({
+						iconUrl: PromptService.encodeMetadataInUserAvatar({
 							user,
 							partialId: suggestionDocument.partialId,
 						}),
@@ -96,6 +96,13 @@ class SuggestionPromptService extends PromptService<{
 					title: strings.title,
 					description: strings.description,
 					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
 				},
 			],
 		};

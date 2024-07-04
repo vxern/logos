@@ -12,4 +12,5 @@ export default Object.freeze({
 	removePrompt: "remove_prompt",
 	selectRoles: "select_roles",
 	showInChat: "show_in_chat",
+	noPrompts: "no_prompts",
 } as const);

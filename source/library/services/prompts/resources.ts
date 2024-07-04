@@ -42,7 +42,7 @@ class ResourcePromptService extends PromptService<{
 					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({
+						iconUrl: PromptService.encodeMetadataInUserAvatar({
 							user,
 							partialId: resourceDocument.partialId,
 						}),
@@ -92,6 +92,13 @@ class ResourcePromptService extends PromptService<{
 					title: strings.title,
 					description: strings.description,
 					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
 				},
 			],
 		};

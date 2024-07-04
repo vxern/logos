@@ -73,7 +73,7 @@ class ReportPromptService extends PromptService<{
 					],
 					footer: {
 						text: this.guild.name,
-						iconUrl: PromptService.encodePartialIdInGuildIcon({
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
 							guild: this.guild,
 							partialId: reportDocument.partialId,
 						}),
@@ -124,6 +124,13 @@ class ReportPromptService extends PromptService<{
 					title: strings.title,
 					description: strings.description,
 					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
 				},
 			],
 		};

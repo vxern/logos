@@ -27,6 +27,7 @@ type PromptDeleteMode = "delete" | "close" | "none";
 interface ExistingPrompts {
 	readonly valid: [partialId: string, prompt: Discord.Message][];
 	readonly invalid: Discord.Message[];
+	readonly noPromptsMessageExists: boolean;
 }
 
 abstract class PromptService<
@@ -108,7 +109,7 @@ abstract class PromptService<
 		this.#messageDeletes = new Collector<"messageDelete">({ guildId });
 	}
 
-	static encodePartialIdInUserAvatar({ user, partialId }: { user: Logos.User; partialId: string }): string {
+	static encodeMetadataInUserAvatar({ user, partialId }: { user: Logos.User; partialId: string }): string {
 		const iconUrl = Discord.avatarUrl(user.id, user.discriminator, {
 			avatar: user.avatar,
 			size: 64,
@@ -118,7 +119,7 @@ abstract class PromptService<
 		return `${iconUrl}&metadata=${partialId}`;
 	}
 
-	static encodePartialIdInGuildIcon({ guild, partialId }: { guild: Logos.Guild; partialId: string }): string {
+	static encodeMetadataInGuildIcon({ guild, partialId }: { guild: Logos.Guild; partialId: string }): string {
 		const iconUrl = Discord.guildIconUrl(guild.id, guild.icon);
 
 		return `${iconUrl}&metadata=${partialId}`;
@@ -130,7 +131,10 @@ abstract class PromptService<
 		const existingPrompts = await this.#getExistingPrompts();
 		const expiredPrompts = await this.#restoreValidPrompts(existingPrompts.valid);
 		await this.#deleteInvalidPrompts([...existingPrompts.invalid, ...expiredPrompts.values()]);
-		await this.#tryPostNoPromptsMessage();
+
+		if (!existingPrompts.noPromptsMessageExists) {
+			await this.#tryPostNoPromptsMessage();
+		}
 
 		this.#messageUpdates.onCollect(this.#handleMessageUpdate.bind(this));
 		this.#messageDeletes.onCollect(this.#handleMessageDelete.bind(this));
@@ -175,24 +179,37 @@ abstract class PromptService<
 
 		const valid: [partialId: string, prompt: Discord.Message][] = [];
 		const invalid: Discord.Message[] = [];
+		let noPromptsMessageExists = false;
 
 		for (const prompt of messages) {
-			const partialId = this.extractPartialId(prompt);
-			if (partialId === undefined) {
+			const metadata = this.getMetadata(prompt);
+			if (metadata === undefined) {
 				invalid.push(prompt);
 				continue;
 			}
 
-			valid.push([partialId, prompt]);
+			if (metadata === constants.components.noPrompts) {
+				if (noPromptsMessageExists) {
+					invalid.push(prompt);
+					continue;
+				}
+
+				noPromptsMessageExists = true;
+				continue;
+			}
+
+			valid.push([metadata, prompt]);
 		}
 
-		this.log.info(
-			`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}, of which ${
-				invalid.length
-			} aren't prompts or are invalid.`,
-		);
+		this.log.info(`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}.`);
 
-		return { valid, invalid };
+		if (invalid.length > 0) {
+			this.log.warn(
+				`${invalid.length} messages in ${this.client.diagnostics.channel(channelId)} aren't prompts or are invalid.`,
+			);
+		}
+
+		return { valid, invalid, noPromptsMessageExists };
 	}
 
 	async #restoreValidPrompts(
@@ -313,7 +330,7 @@ abstract class PromptService<
 			return;
 		}
 
-		const partialId = this.extractPartialId(prompt);
+		const partialId = this.getMetadata(prompt);
 		if (partialId === undefined) {
 			return;
 		}
@@ -450,13 +467,8 @@ abstract class PromptService<
 			});
 	}
 
-	extractPartialId(prompt: Discord.Message): string | undefined {
-		const partialId = prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
-		if (partialId === undefined) {
-			return undefined;
-		}
-
-		return partialId;
+	getMetadata(prompt: Discord.Message): string | undefined {
+		return prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
 	}
 
 	async savePrompt(user: Logos.User, promptDocument: Generic["model"]): Promise<Discord.Message | undefined> {
