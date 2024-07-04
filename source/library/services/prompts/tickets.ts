@@ -3,9 +3,8 @@ import type { Client } from "logos/client";
 import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
-import { EntryRequest } from "logos/models/entry-request.ts";
+import type { EntryRequest } from "logos/models/entry-request.ts";
 import { Model } from "logos/models/model.ts";
-import { ticket } from "logos:test/helpers.ts";
 
 class TicketPromptService extends PromptService<{
 	type: "tickets";

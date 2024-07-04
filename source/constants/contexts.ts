@@ -1567,5 +1567,9 @@ export default Object.freeze({
 			cannotUseUntil: localise("interactions.rateLimited.description.cannotUseAgainUntil", locale),
 		},
 	}),
+	inquiryInProgress: ({ localise, locale }) => ({
+		title: localise("entry.verification.vote.inquiryInProgress.title", locale)(),
+		description: localise("entry.verification.vote.inquiryInProgress.description", locale)(),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };
