@@ -319,6 +319,7 @@ abstract class PromptService<
 
 		const promptDocument = this.#documentByPromptId.get(id);
 		if (promptDocument === undefined) {
+			await this.#tryPostNoPromptsMessage();
 			return;
 		}
 
