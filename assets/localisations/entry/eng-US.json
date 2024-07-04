@@ -61,7 +61,7 @@
   "entry.verification.vote.sureToForce.yes": "Yes, I am sure",
   "entry.verification.vote.sureToForce.no": "No, cancel",
   "entry.verification.vote.inquiryInProgress.title": "Cannot vote during inquiry",
-  "entry.verification.vote.inquiryInProgress.description": "Voting on this entry request is currently disabled because an inquiry is in progress.\n\n",
+  "entry.verification.vote.inquiryInProgress.description": "Voting on this entry request is currently disabled because an inquiry is in progress.",
   "entry.verification.inquiry.inquiry": "Inquiry",
   "entry.verification.inquiry.open": "Open Inquiry",
   "entry.verification.inquiry.channel": "Inquiry channel for {user}.",
