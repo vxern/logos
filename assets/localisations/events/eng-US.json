@@ -14,6 +14,8 @@
 	"events.messageUpdate.description": "{user} has updated their message in {channel}.",
 	"events.messageUpdate.fields.before": "Before",
 	"events.messageUpdate.fields.after": "After",
+	"events.memberKick.title": "User kicked",
+	"events.memberKick.description": "{user} has been kicked by {moderator}.",
 	"events.entryRequestAccept.title": "Entry request accepted",
 	"events.entryRequestAccept.description": "{user}'s entry request has been accepted by {moderator}.",
 	"events.entryRequestReject.title": "Entry request rejected",

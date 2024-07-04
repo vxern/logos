@@ -20,6 +20,7 @@ export default Object.freeze({
 			unbanned: "😇",
 			joined: "😁",
 			left: "😔",
+			kicked: "🚪",
 		},
 		message: {
 			updated: "⬆️",

@@ -132,12 +132,22 @@ class JournallingStore {
 	}
 
 	async #guildMemberRemove(user: Discord.User, guildId: bigint): Promise<void> {
-		const wasKicked = await this.#wasKicked({ user, guildId });
-		if (wasKicked) {
-			await this.tryLog("guildMemberKick", { guildId, args: [user, guildId] });
-		} else {
-			await this.tryLog("guildMemberRemove", { guildId, args: [user, guildId] });
+		const kickInformation = await this.#getKickInformation({ user, guildId });
+		if (kickInformation !== undefined) {
+			if (kickInformation.userId === null) {
+				return;
+			}
+
+			const authorMember = this.#client.entities.members.get(guildId)?.get(BigInt(kickInformation.userId));
+			if (authorMember === undefined) {
+				return;
+			}
+
+			await this.tryLog("guildMemberKick", { guildId, args: [user, authorMember] });
+			return;
 		}
+
+		await this.tryLog("guildMemberRemove", { guildId, args: [user, guildId] });
 	}
 
 	async #messageDelete(
@@ -161,13 +171,25 @@ class JournallingStore {
 		await this.tryLog("messageUpdate", { guildId, args: [message, oldMessage] });
 	}
 
-	async #wasKicked({ user, guildId }: { user: Logos.User; guildId: bigint }): Promise<boolean> {
+	async #getKickInformation({
+		user,
+		guildId,
+	}: { user: Logos.User; guildId: bigint }): Promise<Discord.CamelizedDiscordAuditLogEntry | undefined> {
 		const now = Date.now();
 
-		const auditLog = await this.#client.bot.helpers.getAuditLog(guildId, { actionType: AuditLogEvents.MemberKick });
+		const auditLog = await this.#client.bot.helpers
+			.getAuditLog(guildId, { actionType: AuditLogEvents.MemberKick })
+			.catch((reason) => {
+				this.log.warn(`Could not get audit log for ${this.#client.diagnostics.guild(guildId)}:`, reason);
+				return undefined;
+			});
+		if (auditLog === undefined) {
+			return undefined;
+		}
+
 		return auditLog.auditLogEntries
 			.filter((entry) => snowflakeToTimestamp(BigInt(entry.id)) >= now - constants.time.second * 5)
-			.some((entry) => entry.targetId === user.id.toString());
+			.find((entry) => entry.targetId === user.id.toString());
 	}
 }
 
