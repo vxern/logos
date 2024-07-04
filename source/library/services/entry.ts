@@ -277,10 +277,6 @@ class EntryService extends LocalService {
 				return;
 			}
 
-			verificationService.registerDocument(entryRequestDocument);
-			verificationService.registerPrompt(prompt, buttonPress.user.id, entryRequestDocument);
-			verificationService.registerHandler(entryRequestDocument);
-
 			const strings = constants.contexts.verificationAnswersSubmitted({
 				localise: this.client.localise.bind(this.client),
 				locale: submission.locale,
