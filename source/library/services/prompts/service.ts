@@ -346,6 +346,8 @@ abstract class PromptService<
 
 		this.#documentByPromptId.delete(id);
 		this.#userIdByPromptId.delete(id);
+
+		await this.#tryPostNoPromptsMessage();
 	}
 
 	#handleMagicButtonPress(buttonPress: Logos.Interaction<Generic["metadata"], any>): void {
