@@ -483,6 +483,16 @@ abstract class PromptService<
 		return message;
 	}
 
+	async #tryDeleteNoPromptsMessage(): Promise<void> {
+		if (this.#documentByPromptId.size === 0 || this.#noPromptsMessage === undefined) {
+			return;
+		}
+
+		await this.client.bot.helpers
+			.deleteMessage(this.#noPromptsMessage.channelId, this.#noPromptsMessage.id)
+			.catch(() => this.log.warn("Failed to delete no prompts message."));
+	}
+
 	getMetadata(prompt: Discord.Message): string | undefined {
 		return prompt.embeds?.at(-1)?.footer?.iconUrl?.split("&metadata=").at(-1);
 	}
@@ -505,6 +515,8 @@ abstract class PromptService<
 		this.registerDocument(promptDocument);
 		this.registerPrompt(prompt, user.id, promptDocument);
 		this.registerHandler(promptDocument);
+
+		await this.#tryDeleteNoPromptsMessage();
 
 		return prompt;
 	}
@@ -559,7 +571,7 @@ abstract class PromptService<
 				this.#documentByPromptId.set(prompt.id, updatedDocument);
 			}
 
-			this.client.bot.helpers
+			await this.client.bot.helpers
 				.deleteMessage(prompt.channelId, prompt.id)
 				.catch(() => this.log.warn("Failed to delete prompt."));
 		});
