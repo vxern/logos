@@ -4,6 +4,7 @@ import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
 import loggers from "logos/stores/journalling/loggers";
+import { AuditLogEvents, snowflakeToTimestamp } from "@discordeno/bot";
 
 type Events = Logos.Events & Discord.Events;
 
@@ -131,7 +132,12 @@ class JournallingStore {
 	}
 
 	async #guildMemberRemove(user: Discord.User, guildId: bigint): Promise<void> {
-		await this.tryLog("guildMemberRemove", { guildId, args: [user, guildId] });
+		const wasKicked = await this.#wasKicked({ user, guildId });
+		if (wasKicked) {
+			await this.tryLog("guildMemberKick", { guildId, args: [user, guildId] });
+		} else {
+			await this.tryLog("guildMemberRemove", { guildId, args: [user, guildId] });
+		}
 	}
 
 	async #messageDelete(
@@ -153,6 +159,15 @@ class JournallingStore {
 		}
 
 		await this.tryLog("messageUpdate", { guildId, args: [message, oldMessage] });
+	}
+
+	async #wasKicked({ user, guildId }: { user: Logos.User; guildId: bigint }): Promise<boolean> {
+		const now = Date.now();
+
+		const auditLog = await this.#client.bot.helpers.getAuditLog(guildId, { actionType: AuditLogEvents.MemberKick });
+		return auditLog.auditLogEntries
+			.filter((entry) => snowflakeToTimestamp(BigInt(entry.id)) >= now - constants.time.second * 5)
+			.some((entry) => entry.targetId === user.id.toString());
 	}
 }
 

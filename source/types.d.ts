@@ -99,6 +99,9 @@ declare global {
 
 		/** Type representing events that occur within a guild. */
 		type Events = {
+			/** Fill-in Discord event for a member having been kicked. */
+			guildMemberKick: [user: Logos.User, guildId: bigint];
+		} & {
 			/** An entry request has been submitted. */
 			entryRequestSubmit: [user: Logos.User, entryRequest: EntryRequest];
 
