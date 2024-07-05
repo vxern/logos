@@ -564,10 +564,23 @@ async function handlePurgeMessages(
 		)} as requested by ${client.diagnostics.user(interaction.user)}.`,
 	);
 
+	const messageLog = messages
+		.map((message) => {
+			const postingTime = new Date(Discord.snowflakeToTimestamp(message.id)).toLocaleString();
+			const username = client.diagnostics.user(message.author);
+			const content = message.content
+				.split("\n")
+				.map((line) => `  ${line}`)
+				.join("\n");
+
+			return `[${postingTime}] ${username}:\n\n${content}`;
+		})
+		.join("\n\n");
+
 	await client.tryLog("purgeEnd", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
-		args: [member, channel, deletedCount],
+		args: [member, channel, deletedCount, messageLog],
 	});
 
 	clearTimeout(responseDeletionTimeoutId);

@@ -142,7 +142,13 @@ declare global {
 			purgeBegin: [member: Logos.Member, channel: Logos.Channel, messageCount: number, author?: Logos.User];
 
 			/** A purging of messages is complete. */
-			purgeEnd: [member: Logos.Member, channel: Logos.Channel, messageCount: number, author?: Logos.User];
+			purgeEnd: [
+				member: Logos.Member,
+				channel: Logos.Channel,
+				messageCount: number,
+				messageLog: string,
+				author?: Logos.User,
+			];
 
 			/** A user has enabled slowmode in a channel. */
 			slowmodeEnable: [user: Logos.User, channel: Logos.Channel, level: SlowmodeLevel];
