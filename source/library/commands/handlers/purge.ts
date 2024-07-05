@@ -570,7 +570,7 @@ async function handlePurgeMessages(
 			const username = client.diagnostics.user(message.author);
 			const content = message.content
 				.split("\n")
-				.map((line) => `  ${line}`)
+				.map((line) => `    ${line}`)
 				.join("\n");
 
 			return `[${postingTime}] ${username}:\n\n${content}`;
