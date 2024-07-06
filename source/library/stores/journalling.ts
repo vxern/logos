@@ -1,10 +1,8 @@
 import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
-import type * as Discord from "@discordeno/bot";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
 import loggers from "logos/stores/journalling/loggers";
-import { AuditLogEvents, snowflakeToTimestamp } from "@discordeno/bot";
 
 type Events = Logos.Events & Discord.Events;
 
@@ -178,7 +176,7 @@ class JournallingStore {
 		const now = Date.now();
 
 		const auditLog = await this.#client.bot.helpers
-			.getAuditLog(guildId, { actionType: AuditLogEvents.MemberKick })
+			.getAuditLog(guildId, { actionType: Discord.AuditLogEvents.MemberKick })
 			.catch((reason) => {
 				this.log.warn(`Could not get audit log for ${this.#client.diagnostics.guild(guildId)}:`, reason);
 				return undefined;
@@ -188,7 +186,7 @@ class JournallingStore {
 		}
 
 		return auditLog.auditLogEntries
-			.filter((entry) => snowflakeToTimestamp(BigInt(entry.id)) >= now - constants.time.second * 5)
+			.filter((entry) => Discord.snowflakeToTimestamp(BigInt(entry.id)) >= now - constants.time.second * 5)
 			.find((entry) => entry.targetId === user.id.toString());
 	}
 }
