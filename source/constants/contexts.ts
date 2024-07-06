@@ -166,7 +166,7 @@ export default Object.freeze({
 	}),
 	ticketModal: ({ localise, locale }) => ({
 		title: localise("ticket.title", locale)(),
-		topic: localise("ticket.fields.topic", locale)(),
+		topic: localise("ticket.fields.topic.question", locale)(),
 	}),
 	failedToSubmitForm: ({ localise, locale }) => ({
 		title: localise("form.failedToSubmit.title", locale)(),
@@ -1323,7 +1323,14 @@ export default Object.freeze({
 		title: localise("events.ticketOpen.title", locale)(),
 		description: localise("events.ticketOpen.description", locale),
 		fields: {
-			topic: localise("events.ticketOpen.fields.topic", locale)(),
+			topic: localise("ticket.fields.topic.title", locale)(),
+		},
+	}),
+	ticketClose: ({ localise, locale }) => ({
+		title: localise("events.ticketClose.title", locale)(),
+		description: localise("events.ticketClose.description", locale),
+		fields: {
+			topic: localise("ticket.fields.topic.title", locale)(),
 		},
 	}),
 	autocompleteLanguage: ({ localise, locale }) => ({

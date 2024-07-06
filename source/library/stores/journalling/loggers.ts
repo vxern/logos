@@ -25,6 +25,7 @@ import slowmodeDowngrade from "logos/stores/journalling/logos/slowmode-downgrade
 import slowmodeEnable from "logos/stores/journalling/logos/slowmode-enable";
 import slowmodeUpgrade from "logos/stores/journalling/logos/slowmode-upgrade";
 import suggestionSend from "logos/stores/journalling/logos/suggestion-send";
+import ticketClose from "logos/stores/journalling/logos/ticket-close";
 import ticketOpen from "logos/stores/journalling/logos/ticket-open";
 
 type Events = Logos.Events & Discord.Events;
@@ -47,6 +48,7 @@ const loggers = Object.freeze({
 	reportSubmit,
 	resourceSend,
 	suggestionSend,
+	ticketClose,
 	ticketOpen,
 	inquiryOpen,
 	purgeBegin,

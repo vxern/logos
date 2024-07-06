@@ -135,6 +135,9 @@ declare global {
 			/** A ticket has been opened. */
 			ticketOpen: [member: Logos.Member, ticket: Ticket];
 
+			/** A ticket has been closed. */
+			ticketClose: [member: Logos.Member, ticket: Ticket, by: Logos.User, messageLog: string];
+
 			/** An inquiry has been opened. */
 			inquiryOpen: [member: Logos.Member, ticket: Ticket];
 

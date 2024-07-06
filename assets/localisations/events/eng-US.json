@@ -71,5 +71,6 @@
 	"events.suggestionSend.fields.suggestion": "Suggestion",
 	"events.ticketOpen.title": "Ticket opened",
 	"events.ticketOpen.description": "{user} has opened a ticket.",
-	"events.ticketOpen.fields.topic": "Topic"
+	"events.ticketClose.title": "Ticket opened",
+	"events.ticketClose.description": "{moderator} has closed a ticket opened by {user}."
 }
