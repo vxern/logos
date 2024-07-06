@@ -7,6 +7,7 @@ import guildMemberAdd from "logos/stores/journalling/discord/guild-member-add";
 import guildMemberRemove from "logos/stores/journalling/discord/guild-member-remove";
 import messageDelete from "logos/stores/journalling/discord/message-delete";
 import messageUpdate from "logos/stores/journalling/discord/message-update";
+import guildMemberKick from "logos/stores/journalling/logos/guild-member-kick";
 import entryRequestAccept from "logos/stores/journalling/logos/entry-request-accept";
 import entryRequestReject from "logos/stores/journalling/logos/entry-request-reject";
 import entryRequestSubmit from "logos/stores/journalling/logos/entry-request-submit";
@@ -36,6 +37,7 @@ const loggers = Object.freeze({
 	guildMemberRemove,
 	messageDelete,
 	messageUpdate,
+	guildMemberKick,
 	entryRequestSubmit,
 	entryRequestAccept,
 	entryRequestReject,
