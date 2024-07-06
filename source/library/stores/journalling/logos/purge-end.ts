@@ -1,7 +1,11 @@
 import { mention } from "logos:core/formatting";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"purgeEnd"> = (client, [member, channel, messageCount, author], { guildLocale }) => {
+const logger: EventLogger<"purgeEnd"> = (
+	client,
+	[member, channel, messageCount, messageLog, author],
+	{ guildLocale },
+) => {
 	const strings = constants.contexts.purgeEnd({ localise: client.localise.bind(client), locale: guildLocale });
 	return {
 		embeds: [
@@ -26,6 +30,7 @@ const logger: EventLogger<"purgeEnd"> = (client, [member, channel, messageCount,
 						: undefined,
 			},
 		],
+		files: [{ name: "log.txt", blob: new Blob([messageLog]) } as Discord.FileContent],
 	};
 };
 
