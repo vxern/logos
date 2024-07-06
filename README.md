@@ -30,6 +30,96 @@
 
 #### [Message @vxern for a demo](https://discord.com/users/217319536485990400) · [Join the Logos community](https://discord.gg/TWdAjkTfah) · [Contribute to the project](CONTRIBUTING.md) · [Set the bot up for yourself](CONTRIBUTING.md)
 
+<table>
+  <tbody>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/bot-information.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/word.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/cefr.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/translation.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/context-menu.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/game.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/recognition.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/resource-notice.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/music.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/profile.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/purge.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/server-information.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/logs.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/report.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/role-categories.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/correction.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/roles.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/rule.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/slowmode.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/resource.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/suggestion.png">
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ### Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
