@@ -146,10 +146,18 @@ class JournallingStore {
 	static #messageLogEntry(client: Client, message: Logos.Message): string {
 		const postingTime = new Date(Discord.snowflakeToTimestamp(message.id)).toLocaleString();
 		const username = client.diagnostics.user(message.author);
-		const content = message.content
-			.split("\n")
-			.map((line) => `    ${line}`)
-			.join("\n");
+
+		let content: string;
+		if (message.content !== undefined) {
+			content = message.content
+				.split("\n")
+				.map((line) => `    ${line}`)
+				.join("\n");
+		} else if (message.embeds !== undefined && message.embeds.length > 0) {
+			content = "[embeds]";
+		} else {
+			content = "[no message content]";
+		}
 
 		return `[${postingTime}] ${username}:\n\n${content}`;
 	}
