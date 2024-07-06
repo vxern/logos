@@ -122,6 +122,11 @@ class DiscordConnection {
 	#transformMessage(_: Discord.Bot, payload: Parameters<Discord.Transformers["message"]>[1]): Discord.Message {
 		const result = Discord.transformMessage(this.bot, payload);
 
+		// REMINDER(vxern): Remove this at some point.
+		if (result.content === undefined) {
+			result.content = "";
+		}
+
 		const previousMessage = this.cache.messages.latest.get(result.id);
 		if (previousMessage !== undefined) {
 			this.cache.messages.previous.set(result.id, previousMessage);
