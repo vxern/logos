@@ -196,4 +196,9 @@ declare module "@discordeno/bot" {
 	type Events = {
 		[T in keyof Discord.EventHandlers]: Parameters<Discord.EventHandlers[T]>;
 	};
+
+	interface Message {
+		// REMINDER(vxern): Monkey-patch for Discordeno messages.
+		content?: string;
+	}
 }
