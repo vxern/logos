@@ -296,7 +296,7 @@ abstract class PromptService<
 				return;
 			}
 
-			await this.handleDelete(promptDocument);
+			await this.handleDelete(promptDocument, buttonPress);
 		});
 
 		await this.client.registerCollector("messageUpdate", this.#messageUpdates);
@@ -493,7 +493,7 @@ abstract class PromptService<
 		interaction: Logos.Interaction<Generic["metadata"]>,
 	): Promise<Generic["model"] | undefined | null>;
 
-	async handleDelete(promptDocument: Generic["model"]): Promise<void> {
+	async handleDelete(promptDocument: Generic["model"], _: Logos.Interaction): Promise<void> {
 		await promptDocument.delete(this.client);
 
 		const prompt = this.promptByPartialId.get(promptDocument.partialId);
