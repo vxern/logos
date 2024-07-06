@@ -3,6 +3,7 @@ import { mention, timestamp, trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { Guild } from "logos/models/guild";
+import { JournallingStore } from "logos/stores/journalling.ts";
 
 async function handlePurgeMessagesAutocomplete(
 	client: Client,
@@ -564,19 +565,7 @@ async function handlePurgeMessages(
 		)} as requested by ${client.diagnostics.user(interaction.user)}.`,
 	);
 
-	const messageLog = messages
-		.map((message) => {
-			const postingTime = new Date(Discord.snowflakeToTimestamp(message.id)).toLocaleString();
-			const username = client.diagnostics.user(message.author);
-			const content = message.content
-				.split("\n")
-				.map((line) => `    ${line}`)
-				.join("\n");
-
-			return `[${postingTime}] ${username}:\n\n${content}`;
-		})
-		.join("\n\n");
-
+	const messageLog = JournallingStore.generateMessageLog(client, { messages });
 	await client.tryLog("purgeEnd", {
 		guildId: guild.id,
 		journalling: configuration.journaling,

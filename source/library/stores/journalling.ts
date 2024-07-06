@@ -1,5 +1,4 @@
 import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
-import type * as Discord from "@discordeno/bot";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
@@ -138,6 +137,21 @@ class JournallingStore {
 			.catch((reason) =>
 				this.log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}:`, reason),
 			);
+	}
+
+	static generateMessageLog(client: Client, { messages }: { messages: Logos.Message[] }): string {
+		return messages.map((message) => JournallingStore.#messageLogEntry(client, message)).join("\n\n");
+	}
+
+	static #messageLogEntry(client: Client, message: Logos.Message): string {
+		const postingTime = new Date(Discord.snowflakeToTimestamp(message.id)).toLocaleString();
+		const username = client.diagnostics.user(message.author);
+		const content = message.content
+			.split("\n")
+			.map((line) => `    ${line}`)
+			.join("\n");
+
+		return `[${postingTime}] ${username}:\n\n${content}`;
 	}
 }
 
