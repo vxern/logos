@@ -552,9 +552,17 @@ function getInteractionCallbackData(embedOrData: EmbedOrCallbackData): Discord.I
 
 function setCallbackColour(embedOrData: EmbedOrCallbackData, { colour }: { colour: number }): EmbedOrCallbackData {
 	if (isEmbed(embedOrData)) {
+		if (embedOrData.color !== undefined) {
+			return embedOrData;
+		}
+
 		embedOrData.color = colour;
 	} else if (embedOrData.embeds !== undefined) {
 		for (const embed of embedOrData.embeds) {
+			if (embed.color !== undefined) {
+				continue;
+			}
+
 			embed.color = colour;
 		}
 	}
