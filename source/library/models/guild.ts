@@ -1,5 +1,6 @@
-import type { LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
+import type { LocalisationLanguage } from "logos:constants/languages";
 import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
+import type { LearningLanguage } from "logos:constants/languages/learning.ts";
 import type { TimeStruct } from "logos:constants/time";
 import type { Client } from "logos/client";
 import { GuildStatistics } from "logos/models/guild-statistics";

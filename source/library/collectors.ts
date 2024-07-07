@@ -1,10 +1,6 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
-import {
-	type LearningLanguage,
-	getDiscordLocalisationLanguageByLocale,
-	getLocaleByLearningLanguage,
-	getLocaleByLocalisationLanguage,
-} from "logos:constants/languages";
+import { getDiscordLocalisationLanguageByLocale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
+import { type LearningLanguage, getLocaleByLearningLanguage } from "logos:constants/languages/learning.ts";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 import { User } from "logos/models/user";

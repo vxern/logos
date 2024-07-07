@@ -1,4 +1,5 @@
-import type { LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
+import type { LocalisationLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning.ts";
 import english from "logos:constants/parts-of-speech/english";
 import french from "logos:constants/parts-of-speech/french";
 import romanian from "logos:constants/parts-of-speech/romanian";

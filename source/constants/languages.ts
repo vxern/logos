@@ -1,11 +1,6 @@
 import type { DetectionLanguage } from "logos:constants/languages/detection";
 import { type FeatureLanguage, isFeatureLanguage } from "logos:constants/languages/feature";
-import {
-	type Language as LearningLanguage,
-	getLocaleByLanguage as getLocaleByLearningLanguage,
-	isLanguage as isLearningLanguage,
-	isLocale as isLearningLocale,
-} from "logos:constants/languages/learning";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import {
 	type DiscordLocale,
 	type Locale,
@@ -125,9 +120,6 @@ export {
 	getLocalisationLanguageByLocale,
 	isDiscordLocalisationLanguage,
 	isLocalisationLanguage,
-	getLocaleByLearningLanguage,
-	isLearningLanguage,
-	isLearningLocale,
 	isTranslationLanguage,
 	getDeepLLocaleByTranslationLanguage,
 	getGoogleTranslateLocaleByTranslationLanguage,
@@ -145,7 +137,6 @@ export {
 };
 export type {
 	Translator,
-	LearningLanguage,
 	LocalisationLanguage,
 	TranslationLanguage,
 	Language,

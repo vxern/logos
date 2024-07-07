@@ -1,5 +1,6 @@
-import type { LearningLanguage, Locale, LocalisationLanguage, TranslationLanguage } from "logos:constants/languages";
+import type { Locale, LocalisationLanguage, TranslationLanguage } from "logos:constants/languages";
 import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
+import type { LearningLanguage } from "logos:constants/languages/learning.ts";
 import type { RateLimit, TimeStruct } from "logos/models/guild";
 
 const FEATURE_LOCALE: Locale = "eng-US";
