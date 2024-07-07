@@ -965,13 +965,13 @@ type CLDLanguage = (typeof languages.cld)[number];
 type TinyLDLanguage = (typeof languages.tinyld)[number];
 type FastTextLanguage = (typeof languages.fasttext)[number];
 type ELDLanguage = (typeof languages.eld)[number];
-type Language = CLDLanguage | TinyLDLanguage | FastTextLanguage | ELDLanguage;
+type DetectionLanguage = CLDLanguage | TinyLDLanguage | FastTextLanguage | ELDLanguage;
 
 type CLDLocale = (typeof languageToLocale.cld)[keyof typeof languageToLocale.cld];
 type TinyLDLocale = (typeof languageToLocale.tinyld)[keyof typeof languageToLocale.tinyld];
 type FastTextLocale = (typeof languageToLocale.fasttext)[keyof typeof languageToLocale.fasttext];
 type ELDLocale = (typeof languageToLocale.eld)[keyof typeof languageToLocale.eld];
-type Locale = CLDLocale | TinyLDLocale | FastTextLocale | ELDLocale;
+type DetectionLocale = CLDLocale | TinyLDLocale | FastTextLocale | ELDLocale;
 
 const localeToLanguage = {
 	cld: Object.mirror(languageToLocale.cld),
@@ -1024,8 +1024,8 @@ export {
 };
 export type {
 	Detector,
-	Language,
-	Locale,
+	DetectionLanguage,
+	DetectionLocale,
 	TinyLDLanguage,
 	TinyLDLocale,
 	CLDLanguage,
