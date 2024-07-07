@@ -5,18 +5,18 @@ import {
 	getGoogleTranslateLocaleByLanguage,
 	isDeepLLocale,
 	isGoogleTranslateLocale,
-	isLanguage,
+	isTranslationLanguage,
 } from "logos:constants/languages/translation";
 import { expect } from "chai";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported translation language.", () => {
-		expect(isLanguage("English/American")).to.be.true;
-		expect(isLanguage("French")).to.be.true;
+		expect(isTranslationLanguage("English/American")).to.be.true;
+		expect(isTranslationLanguage("French")).to.be.true;
 	});
 
 	it("returns false if the passed language is not a supported translation language.", () => {
-		expect(isLanguage("this-is-not-a-supported-translation-language")).to.be.false;
+		expect(isTranslationLanguage("this-is-not-a-supported-translation-language")).to.be.false;
 	});
 });
 

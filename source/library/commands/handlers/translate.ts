@@ -1,9 +1,5 @@
-import languages, {
-	type Languages,
-	type TranslationLanguage,
-	getTranslationLanguage,
-	isTranslationLanguage,
-} from "logos:constants/languages";
+import languages, { type Languages, getTranslationLanguage, isTranslationLanguage } from "logos:constants/languages";
+import type { TranslationLanguage } from "logos:constants/languages/translation.ts";
 import { trim } from "logos:core/formatting";
 import type { TranslationResult } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
