@@ -1,4 +1,4 @@
-import type { Locale } from "logos:constants/languages";
+import type { Locale } from "logos:constants/languages/localisation";
 import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
 import type { Client } from "logos/client";

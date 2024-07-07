@@ -3,14 +3,7 @@ import { type FeatureLanguage, isFeatureLanguage } from "logos:constants/languag
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import {
 	type DiscordLocale,
-	type Locale,
-	type Language as LocalisationLanguage,
-	getDiscordLocaleByLanguage as getDiscordLocaleByLocalisationLanguage,
-	getDiscordLanguageByLocale as getDiscordLocalisationLanguageByLocale,
-	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
-	getLogosLanguageByLocale as getLocalisationLanguageByLocale,
-	isDiscordLanguage as isDiscordLocalisationLanguage,
-	isLogosLanguage as isLocalisationLanguage,
+	type LocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
 } from "logos:constants/languages/localisation";
@@ -96,17 +89,5 @@ interface Languages<Language extends string> {
 }
 
 export default languages;
-export {
-	getDiscordLocaleByLocalisationLanguage,
-	getLocaleByLocalisationLanguage,
-	getDiscordLocalisationLanguageByLocale,
-	getLocalisationLanguageByLocale,
-	isDiscordLocalisationLanguage,
-	isLocalisationLanguage,
-	isTranslationLanguage,
-	isFeatureLanguage,
-	getTranslationLanguage,
-	getFeatureLanguage,
-	getBaseLanguage,
-};
-export type { LocalisationLanguage, Language, Locale, Languages, WithBaseLanguage };
+export { getTranslationLanguage, getFeatureLanguage, getBaseLanguage };
+export type { Language, Languages, WithBaseLanguage };

@@ -1,4 +1,4 @@
-import type { Locale } from "logos:constants/languages";
+import type { Locale } from "logos:constants/languages/localisation";
 import type { Environment } from "logos:core/loaders/environment";
 import Redis from "ioredis";
 import { Logger } from "logos/logger";

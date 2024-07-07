@@ -87,15 +87,15 @@ const localeToLanguage = Object.freeze({
 	logos: Object.mirror(languageToLocale.logos),
 });
 
-const locales = Object.freeze(Object.keys(localeToLanguage.logos) as Locale[]);
+const locales = Object.freeze(Object.keys(localeToLanguage.logos) as LocalisationLocale[]);
 
 type DiscordLanguage = (typeof languages.discord)[number];
 type LogosLanguage = (typeof languages.logos)[number];
-type Language = LogosLanguage;
+type LocalisationLanguage = LogosLanguage | DiscordLanguage;
 
 type DiscordLocale = (typeof languageToLocale.discord)[keyof typeof languageToLocale.discord];
 type LogosLocale = (typeof languageToLocale.logos)[keyof typeof languageToLocale.logos];
-type Locale = LogosLocale;
+type LocalisationLocale = LogosLocale | DiscordLocale;
 
 function isDiscordLanguage(language: string): language is DiscordLanguage {
 	return (languages.discord as readonly string[]).includes(language);
@@ -105,8 +105,20 @@ function isLogosLanguage(language: string): language is LogosLanguage {
 	return (languages.logos as readonly string[]).includes(language);
 }
 
+function isLocalisationLanguage(language: string): language is LocalisationLanguage {
+	return isLogosLanguage(language) ?? isDiscordLanguage(language);
+}
+
+function isDiscordLocale(locale: string): locale is DiscordLocale {
+	return locale in localeToLanguage.discord;
+}
+
 function isLogosLocale(locale: string): locale is LogosLocale {
 	return locale in localeToLanguage.logos;
+}
+
+function isLocalisationLocale(locale: string): locale is LocalisationLocale {
+	return isLogosLanguage(locale) ?? isDiscordLocale(locale);
 }
 
 function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
@@ -115,6 +127,10 @@ function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
 
 function getLogosLocaleByLanguage(language: LogosLanguage): LogosLocale {
 	return languageToLocale.logos[language];
+}
+
+function getLocalisationLocaleByLanguage(language: LocalisationLanguage): LocalisationLocale {
+	return getLogosLocaleByLanguage(language);
 }
 
 function getDiscordLanguageByLocale(locale: string | undefined): DiscordLanguage | undefined {
@@ -135,10 +151,21 @@ export {
 	getDiscordLanguageByLocale,
 	getLogosLanguageByLocale,
 	isDiscordLanguage,
+	isDiscordLocale,
 	isLogosLanguage,
 	isLogosLocale,
+	isLocalisationLanguage,
+	isLocalisationLocale,
+	getLocalisationLocaleByLanguage,
 	languages,
 	languageToLocale,
 	locales,
 };
-export type { Language, Locale, DiscordLocale };
+export type {
+	LocalisationLanguage,
+	LocalisationLocale as Locale,
+	DiscordLanguage,
+	LogosLanguage,
+	DiscordLocale,
+	LogosLocale,
+};

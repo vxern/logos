@@ -1,4 +1,4 @@
-import { getLocaleByLocalisationLanguage } from "logos:constants/languages";
+import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import type * as Discord from "@discordeno/bot";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
@@ -119,7 +119,7 @@ class JournallingStore {
 			return;
 		}
 
-		const guildLocale = getLocaleByLocalisationLanguage(guildDocument.localisationLanguage);
+		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.localisationLanguage);
 		const message = await generateMessage(
 			this.#client,
 			// @ts-ignore: This is fine.

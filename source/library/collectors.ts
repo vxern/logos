@@ -1,6 +1,6 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
-import { getDiscordLocalisationLanguageByLocale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
 import { type LearningLanguage, getLocaleByLearningLanguage } from "logos:constants/languages/learning.ts";
+import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation.ts";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 import { User } from "logos/models/user";
@@ -299,14 +299,14 @@ class InteractionCollector<
 		const guildLanguage = guildDocument.isTargetLanguageOnly(interaction.channelId!.toString())
 			? targetLanguage
 			: guildDocument.localisationLanguage;
-		const guildLocale = getLocaleByLocalisationLanguage(guildLanguage);
+		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
 		const featureLanguage = guildDocument.featureLanguage;
 
 		if (!isAutocomplete(interaction)) {
 			// If the user has configured a custom locale, use the user's preferred locale.
 			if (userDocument.preferredLanguage !== undefined) {
 				const language = userDocument.preferredLanguage;
-				const locale = getLocaleByLocalisationLanguage(language);
+				const locale = getLocalisationLocaleByLanguage(language);
 				return {
 					locale,
 					language,
@@ -321,8 +321,8 @@ class InteractionCollector<
 
 		// Otherwise default to the user's app language.
 		const appLocale = interaction.locale;
-		const language = getDiscordLocalisationLanguageByLocale(appLocale) ?? constants.defaults.LOCALISATION_LANGUAGE;
-		const locale = getLocaleByLocalisationLanguage(language);
+		const language = getDiscordLanguageByLocale(appLocale) ?? constants.defaults.LOCALISATION_LANGUAGE;
+		const locale = getLocalisationLocaleByLanguage(language);
 		return { locale, language, guildLocale, guildLanguage, learningLocale, learningLanguage, featureLanguage };
 	}
 

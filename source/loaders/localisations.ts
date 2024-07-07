@@ -1,5 +1,9 @@
 import fs from "node:fs/promises";
-import { type Locale, type LocalisationLanguage, getLocalisationLanguageByLocale } from "logos:constants/languages";
+import {
+	type LocalisationLanguage,
+	type LogosLocale,
+	getLogosLanguageByLocale,
+} from "logos:constants/languages/localisation";
 import type { Environment } from "logos:core/loaders/environment";
 import { Logger } from "logos/logger";
 
@@ -38,8 +42,8 @@ async function loadLocalisations({
 				continue;
 			}
 
-			const [locale, _] = entryPath.split(".") as [Locale, string];
-			const language = getLocalisationLanguageByLocale(locale);
+			const [locale, _] = entryPath.split(".") as [LogosLocale, string];
+			const language = getLogosLanguageByLocale(locale);
 			if (language === undefined) {
 				continue;
 			}

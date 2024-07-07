@@ -1,10 +1,10 @@
 import type { WithBaseLanguage } from "logos:constants/languages";
 import {
 	type Locale,
-	type Language as LocalisationLanguage,
-	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
-	isLogosLanguage as isLocalisationLanguage,
-	isLogosLocale as isLocalisationLocale,
+	type LocalisationLanguage,
+	getLocalisationLocaleByLanguage,
+	isLocalisationLanguage,
+	isLocalisationLocale,
 } from "logos:constants/languages/localisation";
 
 type LearningLanguage = LocalisationLanguage;
@@ -18,7 +18,7 @@ function isLearningLocale(locale: string): locale is Locale {
 }
 
 function getLocaleByLearningLanguage(language: LearningLanguage): Locale {
-	return getLocaleByLocalisationLanguage(language);
+	return getLocalisationLocaleByLanguage(language);
 }
 
 const wiktionaryLanguageNames = Object.freeze({
