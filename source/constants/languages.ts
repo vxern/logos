@@ -1,5 +1,5 @@
 import type { DetectionLanguage } from "logos:constants/languages/detection";
-import { type Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "logos:constants/languages/feature";
+import { type FeatureLanguage, isFeatureLanguage } from "logos:constants/languages/feature";
 import {
 	type Language as LearningLanguage,
 	getLocaleByLanguage as getLocaleByLearningLanguage,
@@ -146,7 +146,6 @@ export {
 export type {
 	Translator,
 	LearningLanguage,
-	FeatureLanguage,
 	LocalisationLanguage,
 	TranslationLanguage,
 	Language,
