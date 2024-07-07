@@ -91,11 +91,11 @@ const locales = Object.freeze(Object.keys(localeToLanguage.logos) as Localisatio
 
 type DiscordLanguage = (typeof languages.discord)[number];
 type LogosLanguage = (typeof languages.logos)[number];
-type LocalisationLanguage = LogosLanguage | DiscordLanguage;
+type LocalisationLanguage = LogosLanguage;
 
 type DiscordLocale = (typeof languageToLocale.discord)[keyof typeof languageToLocale.discord];
 type LogosLocale = (typeof languageToLocale.logos)[keyof typeof languageToLocale.logos];
-type LocalisationLocale = LogosLocale | DiscordLocale;
+type LocalisationLocale = LogosLocale;
 
 function isDiscordLanguage(language: string): language is DiscordLanguage {
 	return (languages.discord as readonly string[]).includes(language);
@@ -118,7 +118,7 @@ function isLogosLocale(locale: string): locale is LogosLocale {
 }
 
 function isLocalisationLocale(locale: string): locale is LocalisationLocale {
-	return isLogosLanguage(locale) ?? isDiscordLocale(locale);
+	return isLogosLocale(locale) ?? isDiscordLocale(locale);
 }
 
 function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
