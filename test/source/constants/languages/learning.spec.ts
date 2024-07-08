@@ -27,14 +27,14 @@ describe("isLocale()", () => {
 
 describe("getLocaleByLanguage()", () => {
 	it("returns the language corresponding to the passed learning locale.", () => {
-		expect(getLogosLocaleByLanguage("English/American")).to.equal("eng-US");
+		expect(getLogosLocaleByLanguage("English/British")).to.equal("eng-GB");
 		expect(getLogosLocaleByLanguage("German")).to.equal("deu");
 	});
 });
 
 describe("getWiktionaryLanguageName()", () => {
 	it("returns the Wiktionary name for the learning language if available.", () => {
-		expect(getWiktionaryLanguageName("English/American")).to.equal("English");
+		expect(getWiktionaryLanguageName("English/British")).to.equal("English");
 		expect(getWiktionaryLanguageName("Norwegian/Bokmal")).to.equal("Norwegian Bokmål");
 	});
 });
