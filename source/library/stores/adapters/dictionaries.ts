@@ -2,11 +2,11 @@ import type { Dictionary } from "logos:constants/dictionaries";
 import type { LearningLanguage } from "logos:constants/languages";
 import { isDefined } from "logos:core/utilities";
 import type { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
-import { DexonlineAdapter } from "logos/adapters/dictionaries/dexonline";
-import { DicolinkAdapter } from "logos/adapters/dictionaries/dicolink";
-import { WiktionaryAdapter } from "logos/adapters/dictionaries/wiktionary";
-import { WordnikAdapter } from "logos/adapters/dictionaries/wordnik.ts";
-import { WordsAPIAdapter } from "logos/adapters/dictionaries/words-api";
+import { DexonlineAdapter } from "logos/adapters/dictionaries/adapters/dexonline";
+import { DicolinkAdapter } from "logos/adapters/dictionaries/adapters/dicolink";
+import { WiktionaryAdapter } from "logos/adapters/dictionaries/adapters/wiktionary";
+import { WordnikAdapter } from "logos/adapters/dictionaries/adapters/wordnik.ts";
+import { WordsAPIAdapter } from "logos/adapters/dictionaries/adapters/words-api";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
