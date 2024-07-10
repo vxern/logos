@@ -16,7 +16,7 @@ const sections = [
 	"etymology",
 	"notes",
 ] as const;
-type DictionarySection = keyof typeof sections;
+type DictionarySection = (typeof sections)[number];
 
 type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "wordnik" | "words-api";
 
