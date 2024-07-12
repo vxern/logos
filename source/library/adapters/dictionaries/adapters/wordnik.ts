@@ -1,10 +1,6 @@
 import type { LearningLanguage } from "logos:constants/languages.ts";
-import {
-	DictionaryAdapter,
-	type DictionaryEntry,
-	type Relations,
-	type Rhymes,
-} from "logos/adapters/dictionaries/adapter.ts";
+import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter.ts";
+import type { RelationField, RhymeField } from "logos/adapters/dictionaries/dictionary-entry.ts";
 import type { Client } from "logos/client.ts";
 
 interface WordnikResult {
@@ -73,7 +69,7 @@ class WordnikAdapter extends DictionaryAdapter<WordnikResult[]> {
 			}
 		}
 
-		let relationField: Relations | undefined;
+		let relationField: RelationField | undefined;
 		if (synonyms.length > 0 || antonyms.length > 0) {
 			relationField = {};
 
@@ -86,7 +82,7 @@ class WordnikAdapter extends DictionaryAdapter<WordnikResult[]> {
 			}
 		}
 
-		let rhymeField: Rhymes | undefined;
+		let rhymeField: RhymeField | undefined;
 		if (rhymes.length > 0) {
 			rhymeField = { value: rhymes.join(", ") };
 		}
