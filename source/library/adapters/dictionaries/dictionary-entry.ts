@@ -8,10 +8,9 @@ type LabelledField = {
 };
 
 type LemmaField = LabelledField;
-type PartOfSpeechField = LabelledField &
-	Partial<{
-		detected: PartOfSpeech;
-	}>;
+type PartOfSpeechField = LabelledField & {
+	detected: PartOfSpeech;
+};
 type MeaningField = LabelledField &
 	Partial<{
 		relations: RelationField;
@@ -53,7 +52,7 @@ interface DictionaryEntrySource {
 	licence: Licence;
 }
 
-interface DictionaryEntry extends Record<DictionarySection, unknown> {
+interface DictionaryEntry extends Partial<Record<DictionarySection, unknown>> {
 	/** Sources of information about the lemma. */
 	sources: DictionaryEntrySource[];
 
@@ -61,46 +60,46 @@ interface DictionaryEntry extends Record<DictionarySection, unknown> {
 	lemma: LemmaField;
 
 	/** Part of speech of the lemma. */
-	partOfSpeech: PartOfSpeechField;
+	partOfSpeech?: PartOfSpeechField;
 
 	/** Definitions belonging to the lemma. */
-	definitions: DefinitionField[];
+	definitions?: DefinitionField[];
 
 	/** Translations of the lemma. */
-	translations: TranslationField[];
+	translations?: TranslationField[];
 
 	/** Relations between the lemma and other words. */
-	relations: RelationField;
+	relations?: RelationField;
 
 	/** Syllable composition of the lemma. */
-	syllables: SyllableField;
+	syllables?: SyllableField;
 
 	/** Pronunciation of the lemma. */
-	pronunciation: PronunciationField;
+	pronunciation?: PronunciationField;
 
 	/** Rhythmic composition of the lemma. */
-	rhymes: RhymeField;
+	rhymes?: RhymeField;
 
 	/** Audio example of pronunciation of the lemma. */
-	audio: AudioField[];
+	audio?: AudioField[];
 
 	/** Expressions featuring the lemma. */
-	expressions: ExpressionField[];
+	expressions?: ExpressionField[];
 
 	/** Examples of the lemma used in a sentence. */
-	examples: ExampleField[];
+	examples?: ExampleField[];
 
 	/** Indication of how frequently the lemma is used. */
-	frequency: FrequencyField;
+	frequency?: FrequencyField;
 
 	/** Inflection of the lemma. */
-	inflection: InflectionField;
+	inflection?: InflectionField;
 
 	/** Origin of the lemma. */
-	etymology: EtymologyField;
+	etymology?: EtymologyField;
 
 	/** Additional notes on usage, prevalence, etc. */
-	notes: NoteField;
+	notes?: NoteField;
 }
 
 // TODO(vxern): Include.
