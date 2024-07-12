@@ -1,23 +1,24 @@
 import type { LearningLanguage } from "logos:constants/languages";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
-import { type Definition, DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
 import type { Client } from "logos/client";
 
 type SearchResult = {
 	readonly results: {
-		readonly definition: string;
 		readonly partOfSpeech: string;
+		readonly definition: string;
 		readonly synonyms?: string[];
 		readonly typeof?: string[];
 		readonly derivation?: string[];
 	}[];
-	readonly syllables: {
+	readonly syllables?: {
 		readonly count: number;
 		readonly list: string[];
 	};
-	readonly pronunciation: {
+	readonly pronunciation?: Record<string, string> & {
 		readonly all: string;
 	};
+	readonly frequency?: number;
 };
 
 class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
@@ -26,7 +27,7 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 	constructor(client: Client, { token }: { token: string }) {
 		super(client, {
 			identifier: "WordsAPI",
-			provides: ["definitions"],
+			provides: ["partOfSpeech", "definitions", "relations", "syllables", "pronunciation", "frequency"],
 			supports: ["English/American", "English/British"],
 			isFallback: true,
 		});
@@ -63,32 +64,46 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 		learningLanguage: LearningLanguage,
 		searchResult: SearchResult,
 	): DictionaryEntry[] {
+		const { results, pronunciation, syllables, frequency } = searchResult;
+
 		const entries: DictionaryEntry[] = [];
-		for (const result of searchResult.results) {
-			const partOfSpeech = getPartOfSpeech({
-				terms: { exact: result.partOfSpeech, approximate: result.partOfSpeech },
+		for (const { partOfSpeech, definition, synonyms } of results) {
+			const [partOfSpeechFuzzy] = partOfSpeech.split(" ").reverse();
+			const detection = getPartOfSpeech({
+				terms: { exact: partOfSpeech, approximate: partOfSpeechFuzzy },
 				learningLanguage,
 			});
 
-			const definition: Definition = { value: result.definition };
-			if (result.synonyms !== undefined && result.synonyms.length > 0) {
-				definition.relations = { synonyms: result.synonyms };
-			}
-
 			const lastEntry = entries.at(-1);
-			if (
-				lastEntry !== undefined &&
-				(lastEntry.partOfSpeech[0] === partOfSpeech[0] || lastEntry.partOfSpeech[1] === partOfSpeech[1])
-			) {
-				lastEntry.nativeDefinitions?.push(definition);
+			if (lastEntry !== undefined && lastEntry.partOfSpeech !== undefined) {
+				if (
+					lastEntry.partOfSpeech.detected === detection.detected ||
+					lastEntry.partOfSpeech.value === partOfSpeech
+				) {
+					lastEntry.definitions?.push({ value: definition });
+				}
 				continue;
 			}
 
 			entries.push({
-				lemma,
-				partOfSpeech,
-				nativeDefinitions: [definition],
-				sources: [[constants.links.wordsAPIDefinition(), constants.licences.dictionaries.wordsApi]],
+				lemma: { value: lemma },
+				partOfSpeech: { value: partOfSpeech, detected: detection.detected },
+				definitions: [{ value: definition, relations: { synonyms } }],
+				syllables:
+					syllables !== undefined
+						? { labels: [syllables.count.toString()], value: syllables.list.join("|") }
+						: undefined,
+				pronunciation:
+					pronunciation !== undefined && partOfSpeech in pronunciation
+						? { labels: ["IPA"], value: pronunciation[partOfSpeech]! }
+						: undefined,
+				frequency: frequency !== undefined ? { value: frequency / 5 } : undefined,
+				sources: [
+					{
+						link: constants.links.wordsAPIDefinition(),
+						licence: constants.licences.dictionaries.wordsApi,
+					},
+				],
 			});
 		}
 		return entries;
