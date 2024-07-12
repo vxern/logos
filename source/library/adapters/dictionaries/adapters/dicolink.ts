@@ -1,6 +1,6 @@
 import type { LearningLanguage } from "logos:constants/languages";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
-import { type Definition, DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter.ts";
 import type { Client } from "logos/client";
 
 interface DicolinkResult {
@@ -22,7 +22,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 	constructor(client: Client, { token }: { token: string }) {
 		super(client, {
 			identifier: "Dicolink",
-			provides: ["definitions"],
+			provides: ["partOfSpeech", "definitions"],
 			supports: ["French"],
 		});
 
@@ -55,7 +55,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 		}
 
 		const data = (await response.json()) as Record<string, unknown>[];
-		const resultsAll = data.map<DicolinkResult>((result: any) => ({
+		const results = data.map<DicolinkResult>((result: any) => ({
 			id: result.id,
 			partOfSpeech: result.nature,
 			source: result.source,
@@ -66,58 +66,50 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 			dicolinkUrl: result.dicolinkUrl,
 		}));
 
-		return this.#pickResultsFromBestSource(resultsAll);
+		return DicolinkAdapter.#pickResultsFromBestSource(results);
 	}
 
 	parse(
 		_: Logos.Interaction,
 		lemma: string,
 		learningLanguage: LearningLanguage,
-		resultsAll: DicolinkResult[],
+		results: DicolinkResult[],
 	): DictionaryEntry[] {
 		const entries: DictionaryEntry[] = [];
-
-		const sources = resultsAll.map((result) => result.source);
-		const resultsDistributed = resultsAll.reduce(
-			(distribution, result) => {
-				distribution[result.source]?.push(result);
-				return distribution;
-			},
-			Object.fromEntries(sources.map((source) => [source, []])) as Record<string, DicolinkResult[]>,
-		);
-		const results = Object.values(resultsDistributed).reduce((a, b) => {
-			return a.length > b.length ? a : b;
-		});
-
-		for (const result of results) {
-			const partOfSpeechTopicWord = result.partOfSpeech.split(" ").at(0) ?? result.partOfSpeech;
-			const partOfSpeech = getPartOfSpeech({
-				terms: { exact: result.partOfSpeech, approximate: partOfSpeechTopicWord },
+		for (const { partOfSpeech, definition } of results) {
+			const [partOfSpeechFuzzy] = partOfSpeech.split(" ");
+			const detection = getPartOfSpeech({
+				terms: { exact: partOfSpeech, approximate: partOfSpeechFuzzy },
 				learningLanguage,
 			});
 
-			const definition: Definition = { value: result.definition };
-
 			const lastEntry = entries.at(-1);
-			if (
-				lastEntry !== undefined &&
-				(lastEntry.partOfSpeech[0] === partOfSpeech[0] || lastEntry.partOfSpeech[1] === partOfSpeech[1])
-			) {
-				lastEntry.nativeDefinitions?.push(definition);
+			if (lastEntry !== undefined && lastEntry.partOfSpeech !== undefined) {
+				if (
+					lastEntry.partOfSpeech.detected === detection.detected ||
+					lastEntry.partOfSpeech.value === partOfSpeech
+				) {
+					lastEntry.definitions?.push({ value: definition });
+				}
 				continue;
 			}
 
 			entries.push({
-				lemma,
-				partOfSpeech,
-				nativeDefinitions: [definition],
-				sources: [[constants.links.dicolinkDefinition(lemma), constants.licences.dictionaries.dicolink]],
+				lemma: { value: lemma },
+				partOfSpeech: { value: partOfSpeech, detected: detection.detected },
+				definitions: [{ value: definition }],
+				sources: [
+					{
+						link: constants.links.dicolinkDefinition(lemma),
+						licence: constants.licences.dictionaries.dicolink,
+					},
+				],
 			});
 		}
 		return entries;
 	}
 
-	#pickResultsFromBestSource(resultsAll: DicolinkResult[]): DicolinkResult[] {
+	static #pickResultsFromBestSource(resultsAll: DicolinkResult[]): DicolinkResult[] {
 		const sourcesAll = Array.from(new Set(resultsAll.map((result) => result.source)).values());
 		const sources = sourcesAll.filter((source) => !DicolinkAdapter.#excludedSources.includes(source));
 

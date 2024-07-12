@@ -1,8 +1,8 @@
 import type { LearningLanguage } from "logos:constants/languages";
 import { type PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
+import { code } from "logos:core/formatting.ts";
 import * as Dexonline from "dexonline-scraper";
 import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
-import type { Client } from "logos/client";
 import type {
 	DefinitionField,
 	EtymologyField,
@@ -11,7 +11,7 @@ import type {
 	InflectionField,
 	PartOfSpeechField,
 } from "logos/adapters/dictionaries/dictionary-entry.ts";
-import { code } from "logos:core/formatting.ts";
+import type { Client } from "logos/client";
 
 class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	static readonly #supportedPartsOfSpeech: PartOfSpeech[] = ["pronoun", "noun", "verb", "adjective", "determiner"];
