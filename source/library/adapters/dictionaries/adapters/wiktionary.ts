@@ -1,12 +1,7 @@
-import { type LearningLanguage, getFeatureLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages";
 import { getWiktionaryLanguageName } from "logos:constants/languages/learning";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
-import {
-	type Definition,
-	DictionaryAdapter,
-	type DictionaryEntry,
-	type Etymology,
-} from "logos/adapters/dictionaries/adapter";
+import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
 import type { Client } from "logos/client";
 import * as Wiktionary from "wiktionary-scraper";
 
@@ -14,7 +9,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 	constructor(client: Client) {
 		super(client, {
 			identifier: "Wiktionary",
-			provides: ["definitions", "etymology"],
+			provides: ["partOfSpeech", "definitions", "translations", "etymology"],
 			supports: [
 				"Armenian/Eastern",
 				"Armenian/Western",
@@ -62,34 +57,36 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 
 	parse(
 		_: Logos.Interaction,
-		lemma: string,
-		language: LearningLanguage,
+		__: string,
+		learningLanguage: LearningLanguage,
 		results: Wiktionary.Entry[],
 	): DictionaryEntry[] {
+		const targetLanguageWiktionary = getWiktionaryLanguageName(learningLanguage);
+
 		const entries: DictionaryEntry[] = [];
-		for (const result of results) {
-			if (result.partOfSpeech === undefined || result.definitions === undefined) {
+		for (const { lemma, partOfSpeech, etymology, definitions } of results) {
+			if (partOfSpeech === undefined || definitions === undefined) {
 				continue;
 			}
 
-			const partOfSpeech = getPartOfSpeech({
-				terms: { exact: result.partOfSpeech },
-				learningLanguage: "English/American",
+			const [partOfSpeechFuzzy] = partOfSpeech.split(" ").reverse();
+			const detection = getPartOfSpeech({
+				terms: { exact: partOfSpeech, approximate: partOfSpeechFuzzy },
+				learningLanguage,
 			});
 
-			const etymologies: Etymology[] | undefined =
-				result.etymology !== undefined ? [{ value: result.etymology.paragraphs.join("\n\n") }] : undefined;
-			const definitions: Definition[] = result.definitions.flatMap((definition) =>
-				definition.fields.map<Definition>((field) => ({ value: field.value })),
-			);
+			const etymologyContents = etymology !== undefined ? etymology.paragraphs.join("\n\n") : undefined;
 
 			entries.push({
 				lemma,
-				partOfSpeech,
-				...(getFeatureLanguage(language) !== "English" ? { definitions } : { nativeDefinitions: definitions }),
-				etymologies,
+				partOfSpeech: { value: partOfSpeech, detected: detection.detected },
+				definitions: definitions.flatMap(({ fields }) => fields.map((field) => ({ value: field.value }))),
+				etymology: etymologyContents !== undefined ? { value: etymologyContents } : undefined,
 				sources: [
-					[constants.links.wiktionaryDefinition(lemma, language), constants.licences.dictionaries.wiktionary],
+					{
+						link: constants.links.wiktionaryDefinition(lemma.value, targetLanguageWiktionary),
+						licence: constants.licences.dictionaries.wiktionary,
+					},
 				],
 			});
 		}
