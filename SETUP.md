@@ -196,7 +196,22 @@ To get a DeepL token, you will need to have a DeepL account.
 SECRET_DEEPL=<token goes here>
 ```
 
-### Step 5.3: Wordnik
+### Step 5.3: PONS
+
+> Logos uses PONS for its word services in several languages. The free plan comes with a limit of 1000 reference queries
+> per month.
+
+To get a PONS token, you will need to have a PONS account, and then submit an API registration form.
+
+1. Sign up [here](https://account.pons.com/en/public/signup)
+2. Submit an API registration form to get an API token.
+3. Add a record for PONS to your `.env` file:
+
+```
+SECRET_PONS=<token goes here>
+```
+
+### Step 5.4: Wordnik
 
 > Logos uses Wordnik to provide information about words in English. The free plan comes with a limit of 100 calls per
 > hour.
@@ -210,26 +225,6 @@ To get a Wordnik token, you will need to have a Wordnik account, and then reques
 ```
 SECRET_WORDNIK=<token goes here>
 ```
-
-<!-- 
-The following dictionary has an integration that was implemented on the word overhaul branch, but which isn't present
-in the main branch yet. I'll be leaving its setup entry out here for when it're added.
---->
-
-<!--
-### Step 5.4: PONS
-
-> Logos uses PONS for its word services in several languages. The free plan comes with a limit of 1000 reference queries per month.
-
-To get a PONS token, you will need to have a PONS account, and then submit an API registration form.
-
-1. Sign up [here](https://account.pons.com/en/public/signup)
-2. Submit an API registration form [here]().
-3. Add a record for PONS to your `.env` file:
-```
-SECRET_PONS=<token goes here>
-```
---->
 
 ### That's all!
 
