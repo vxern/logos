@@ -509,7 +509,7 @@ function entryToEmbeds(
 	}
 	const partOfSpeechFormatted = `***${partOfSpeechDisplayed}***`;
 
-	const word = entry.lemma;
+	const word = entry.lemma.value;
 
 	const embeds: Discord.CamelizedDiscordEmbed[] = [];
 	const fields: Discord.CamelizedDiscordEmbedField[] = [];
@@ -540,8 +540,8 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.definitions !== undefined && entry.definitions.length > 0) {
-		const definitionsStringified = stringifyEntries(client, interaction, entry.definitions, "definitions");
+	if (entry.translations !== undefined && entry.translations.length > 0) {
+		const definitionsStringified = stringifyEntries(client, interaction, entry.translations, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, verbose);
 
 		if (verbose) {
