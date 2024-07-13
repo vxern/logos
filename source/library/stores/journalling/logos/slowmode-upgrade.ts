@@ -6,7 +6,7 @@ const logger: EventLogger<"slowmodeUpgrade"> = (
 	[user, channel, previousLevel, currentLevel],
 	{ guildLocale },
 ) => {
-	const strings = constants.contexts.slowmodeUpgrade({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.slowmodeUpgrade({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

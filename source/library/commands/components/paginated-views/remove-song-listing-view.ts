@@ -44,7 +44,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 	build(interaction: Logos.Interaction, page: SongListing[], pageIndex: number): View {
 		if (page.length === 0) {
 			const strings = constants.contexts.queueEmpty({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
 
@@ -56,7 +56,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 		const selectMenu = this.#buildSelectMenu(page, pageIndex);
 
 		const strings = constants.contexts.selectSongToRemove({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.locale,
 		});
 
