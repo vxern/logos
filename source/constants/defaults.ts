@@ -7,13 +7,13 @@ import type {
 } from "logos:constants/languages";
 import type { RateLimit, TimeStruct } from "logos/models/guild";
 
-const FEATURE_LOCALE: Locale = "eng-US";
+const FEATURE_LOCALE: Locale = "eng-GB";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";
-const LEARNING_LOCALE: Locale = "eng-US";
-const LEARNING_LANGUAGE: LearningLanguage = "English/American";
-const LOCALISATION_LOCALE: Locale = "eng-US";
-const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/American";
-const TRANSLATION_LANGUAGE: TranslationLanguage = "English/American";
+const LEARNING_LOCALE: Locale = "eng-GB";
+const LEARNING_LANGUAGE: LearningLanguage = "English/British";
+const LOCALISATION_LOCALE: Locale = "eng-GB";
+const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/British";
+const TRANSLATION_LANGUAGE: TranslationLanguage = "English/British";
 
 const COMMAND_RATE_LIMIT: RateLimit = { uses: 5, within: [10, "second"] };
 const REPORT_RATE_LIMIT: RateLimit = { uses: 50, within: [1, "day"] };
