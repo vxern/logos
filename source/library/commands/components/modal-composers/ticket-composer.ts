@@ -5,7 +5,7 @@ import type { TicketFormData } from "logos/models/ticket";
 class TicketComposer extends ModalComposer<TicketFormData, never> {
 	buildModal(submission: Logos.Interaction, { formData }: { formData: TicketFormData }): Modal<TicketFormData> {
 		const strings = constants.contexts.ticketModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 

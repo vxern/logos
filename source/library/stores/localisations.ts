@@ -42,7 +42,7 @@ class LocalisationStore {
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
 	}
 
-	static #buildLocalisations(localisations: Map<string, Map<LocalisationLanguage, string>>): Localisations {
+	static #buildLocalisations(localisations: RawLocalisations): Localisations {
 		const builders = new Map<string, Map<LocalisationLanguage, LocalisationBuilder>>();
 		for (const [key, languages] of localisations.entries()) {
 			const processors = new Map<LocalisationLanguage, LocalisationBuilder>();
@@ -245,7 +245,7 @@ class LocalisationStore {
 		const locale = visibility === "public" ? interaction.guildLocale : interaction.locale;
 
 		const strings = contexts
-			.map((builder) => builder({ localise: this.localise.bind(this), locale }))
+			.map((builder) => builder({ localise: this.localise, locale }))
 			.reduce<T>((combined, context) => Object.assign(combined, context), {} as T);
 
 		return await scope(strings);

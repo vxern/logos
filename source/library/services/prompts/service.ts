@@ -259,7 +259,7 @@ abstract class PromptService<
 			if (!isAuthorised) {
 				if (this.#deleteMode === "delete") {
 					const strings = constants.contexts.cannotRemovePrompt({
-						localise: this.client.localise.bind(this.client),
+						localise: this.client.localise,
 						locale: buttonPress.locale,
 					});
 					await this.client.warning(buttonPress, {
@@ -271,7 +271,7 @@ abstract class PromptService<
 
 				if (this.#deleteMode === "close") {
 					const strings = constants.contexts.cannotCloseIssue({
-						localise: this.client.localise.bind(this.client),
+						localise: this.client.localise,
 						locale: buttonPress.locale,
 					});
 					await this.client.warning(buttonPress, {

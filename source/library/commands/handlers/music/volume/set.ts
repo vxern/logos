@@ -12,7 +12,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToManage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -30,7 +30,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 
 	if (interaction.parameters.volume < 0 || interaction.parameters.volume > constants.MAXIMUM_VOLUME) {
 		const strings = constants.contexts.volumeInvalid({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -45,7 +45,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 	await musicService.session.setVolume(interaction.parameters.volume);
 
 	const strings = constants.contexts.volumeSet({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.locale,
 	});
 

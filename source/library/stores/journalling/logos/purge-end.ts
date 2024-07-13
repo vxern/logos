@@ -6,7 +6,7 @@ const logger: EventLogger<"purgeEnd"> = (
 	[member, channel, messageCount, messageLog, author],
 	{ guildLocale },
 ) => {
-	const strings = constants.contexts.purgeEnd({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.purgeEnd({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

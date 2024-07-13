@@ -5,7 +5,7 @@ import { SourceNotice } from "logos/commands/components/source-notices/source-no
 class RecognitionSourceNotice extends SourceNotice {
 	constructor(client: Client, { interaction, sources }: { interaction: Logos.Interaction; sources: Licence[] }) {
 		const strings = constants.contexts.recognitionsMadeBy({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 

@@ -124,10 +124,7 @@ async function handlePurgeMessages(
 	let messages: Discord.Message[] = [];
 
 	const getMessageFields = (): Discord.CamelizedDiscordEmbedField[] => {
-		const strings = constants.contexts.purge({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
+		const strings = constants.contexts.purge({ localise: client.localise, locale: interaction.locale });
 		return [
 			{
 				name: strings.start,
@@ -167,10 +164,7 @@ async function handlePurgeMessages(
 	};
 
 	const getIndexingProgressResponse = (): Discord.InteractionCallbackData => {
-		const strings = constants.contexts.indexing({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
+		const strings = constants.contexts.indexing({ localise: client.localise, locale: interaction.locale });
 		return {
 			embeds: [
 				{
@@ -195,10 +189,7 @@ async function handlePurgeMessages(
 		if (messages.length >= constants.MAXIMUM_INDEXABLE_MESSAGES) {
 			clearInterval(indexProgressIntervalId);
 
-			const strings = constants.contexts.rangeTooBig({
-				localise: client.localise.bind(client),
-				locale: interaction.locale,
-			});
+			const strings = constants.contexts.rangeTooBig({ localise: client.localise, locale: interaction.locale });
 			await client.warned(interaction, {
 				title: strings.title,
 				description: `${strings.description.rangeTooBig({
@@ -266,10 +257,7 @@ async function handlePurgeMessages(
 	clearInterval(indexProgressIntervalId);
 
 	if (messages.length === 0) {
-		const strings = constants.contexts.indexedNoResults({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
+		const strings = constants.contexts.indexedNoResults({ localise: client.localise, locale: interaction.locale });
 		await client.warned(interaction, {
 			title: strings.title,
 			description: `${strings.description.none}\n\n${strings.description.tryDifferentQuery}`,
@@ -304,7 +292,7 @@ async function handlePurgeMessages(
 		await client.registerInteractionCollector(cancelButton);
 
 		const strings = constants.contexts.tooManyMessagesToDelete({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.editReply(interaction, {
@@ -399,7 +387,7 @@ async function handlePurgeMessages(
 		await client.registerInteractionCollector(cancelButton);
 
 		const strings = constants.contexts.indexedFoundMessagesToDelete({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.editReply(interaction, {
@@ -463,7 +451,7 @@ async function handlePurgeMessages(
 
 	{
 		const strings = constants.contexts.purging({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.noticed(interaction, {
@@ -580,7 +568,7 @@ async function handlePurgeMessages(
 
 	{
 		const strings = constants.contexts.purged({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.succeeded(interaction, {
@@ -604,7 +592,7 @@ async function displaySnowflakesInvalidError(
 	const areBothInvalid = isStartInvalid && isEndInvalid;
 
 	const strings = constants.contexts.invalidPurgeParameters({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.locale,
 	});
 	await client.warned(
@@ -627,10 +615,7 @@ async function displaySnowflakesInvalidError(
 }
 
 async function displayIdsNotDifferentError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.idsNotDifferent({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.idsNotDifferent({ localise: client.localise, locale: interaction.locale });
 	await client.warned(interaction, {
 		title: strings.title,
 		description: strings.description,
@@ -638,10 +623,7 @@ async function displayIdsNotDifferentError(client: Client, interaction: Logos.In
 }
 
 async function displayFailedError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.purgeFailed({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.purgeFailed({ localise: client.localise, locale: interaction.locale });
 	await client.failed(interaction, {
 		title: strings.title,
 		description: strings.description,
@@ -659,11 +641,7 @@ function getMessageContent(
 
 	const content = trim(message.content ?? "", 500).trim();
 	if (content.length === 0) {
-		const strings = constants.contexts.purgeNoContent({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.purgeNoContent({ localise: client.localise, locale: interaction.locale });
 		return `> *${strings.noContent}*`;
 	}
 
