@@ -24,7 +24,7 @@ async function handleTranslateChatInputAutocomplete(
 	const languageQueryTrimmed = interaction.parameters[interaction.parameters.focused].trim();
 	if (languageQueryTrimmed.length === 0) {
 		const strings = constants.contexts.autocompleteLanguage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
@@ -34,10 +34,7 @@ async function handleTranslateChatInputAutocomplete(
 	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
 	const choices = languages.languages.translation
 		.map((language) => {
-			const strings = constants.contexts.language({
-				localise: client.localise.bind(client),
-				locale: interaction.locale,
-			});
+			const strings = constants.contexts.language({ localise: client.localise, locale: interaction.locale });
 			return {
 				name: strings.language(language),
 				value: language,
@@ -66,7 +63,7 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 	const hasEmbeds = message.embeds !== undefined && message.embeds.length > 0;
 	if (hasEmbeds) {
 		const strings = constants.contexts.cannotUseMessageForTranslation({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.warning(interaction, {
@@ -89,14 +86,13 @@ async function handleTranslate(
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
 		const strings = constants.contexts.textEmpty({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.error(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -108,7 +104,7 @@ async function handleTranslate(
 
 		if (isSourceInvalid && isTargetInvalid) {
 			const strings = constants.contexts.bothLanguagesInvalid({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
 			await client.error(interaction, {
@@ -120,7 +116,7 @@ async function handleTranslate(
 
 		if (isSourceInvalid) {
 			const strings = constants.contexts.sourceLanguageInvalid({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
 
@@ -134,30 +130,26 @@ async function handleTranslate(
 
 		if (isTargetInvalid) {
 			const strings = constants.contexts.targetLanguageInvalid({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
-
 			await client.error(interaction, {
 				title: strings.title,
 				description: strings.description,
 			});
-
 			return;
 		}
 
 		if (from !== undefined && to !== undefined) {
 			if (from === to) {
 				const strings = constants.contexts.languagesNotDifferent({
-					localise: client.localise.bind(client),
+					localise: client.localise,
 					locale: interaction.locale,
 				});
-
 				await client.pushback(interaction, {
 					title: strings.title,
 					description: strings.description,
 				});
-
 				return;
 			}
 
@@ -206,29 +198,25 @@ async function handleTranslate(
 	const translationLanguage = getTranslationLanguage(language);
 	if (translationLanguage === undefined) {
 		const strings = constants.contexts.cannotDetermineTargetLanguage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.warning(interaction, {
 			title: strings.title,
 			description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
 		});
-
 		return;
 	}
 
 	if (translationLanguage === sourceLanguage) {
 		const strings = constants.contexts.cannotDetermineSourceLanguage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.warning(interaction, {
 			title: strings.title,
 			description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
 		});
-
 		return;
 	}
 
@@ -246,14 +234,13 @@ async function translateText(
 	const adapters = client.adapters.translators.getTranslators({ languages });
 	if (adapters === undefined || adapters.length === 0) {
 		const strings = constants.contexts.noTranslationAdapters({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.unsupported(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -272,7 +259,7 @@ async function translateText(
 
 	if (translation === undefined) {
 		const strings = constants.contexts.failedToTranslate({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.failed(interaction, {
@@ -289,8 +276,8 @@ async function translateText(
 	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
 
 	const strings = {
-		...constants.contexts.translation({ localise: client.localise.bind(client), locale: interaction.locale }),
-		...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+		...constants.contexts.translation({ localise: client.localise, locale: interaction.locale }),
+		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 	};
 	let embeds: Discord.CamelizedDiscordEmbed[];
 	if (isLong) {
@@ -361,7 +348,7 @@ async function detectLanguage(
 	const detectedLanguage = detectedLanguages.likely.at(0);
 	if (detectedLanguage === undefined) {
 		const strings = constants.contexts.cannotDetermineTargetLanguage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.warning(interaction, {
@@ -375,11 +362,8 @@ async function detectLanguage(
 	const translationLanguage = getTranslationLanguage(detectedLanguage);
 	if (translationLanguage === undefined) {
 		const strings = {
-			...constants.contexts.languageNotSupported({
-				localise: client.localise.bind(client),
-				locale: interaction.locale,
-			}),
-			...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+			...constants.contexts.languageNotSupported({ localise: client.localise, locale: interaction.locale }),
+			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 		};
 		await client.unsupported(interaction, {
 			title: strings.title,

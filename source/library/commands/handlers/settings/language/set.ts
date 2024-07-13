@@ -11,14 +11,14 @@ async function handleSetLanguageAutocomplete(
 	const languageLowercase = interaction.parameters.language.trim().toLowerCase();
 	if (languageLowercase.length === 0) {
 		const strings = constants.contexts.autocompleteLanguage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
-	const strings = constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.language({ localise: client.localise, locale: interaction.locale });
 	const choices = languages.languages.localisation
 		.map((language) => ({ name: strings.language(language), value: language }))
 		.filter((choice) => choice.name.toLowerCase().includes(languageLowercase));
@@ -43,10 +43,10 @@ async function handleSetLanguage(
 	if (userDocument.preferredLanguage === language) {
 		const strings = {
 			...constants.contexts.languageAlreadySet({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			}),
-			...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 		};
 		await client.warned(interaction, {
 			title: strings.title,
@@ -62,8 +62,8 @@ async function handleSetLanguage(
 
 	const newLocale = getLocalisationLocaleByLanguage(language);
 	const strings = {
-		...constants.contexts.languageUpdated({ localise: client.localise.bind(client), locale: newLocale }),
-		...constants.contexts.language({ localise: client.localise.bind(client), locale: newLocale }),
+		...constants.contexts.languageUpdated({ localise: client.localise, locale: newLocale }),
+		...constants.contexts.language({ localise: client.localise, locale: newLocale }),
 	};
 	await client.succeeded(interaction, {
 		title: strings.title,
@@ -73,7 +73,7 @@ async function handleSetLanguage(
 
 async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = constants.contexts.languageInvalid({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.locale,
 	});
 	await client.error(interaction, {

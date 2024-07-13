@@ -147,7 +147,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		}
 
 		const strings = constants.contexts.dexonlinePronoun({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 		});
 		return [
@@ -195,7 +195,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		}
 
 		const strings = constants.contexts.dexonlineNoun({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.locale,
 		});
 		const numberColumn = {
@@ -301,7 +301,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		);
 
 		const strings = constants.contexts.dexonlineVerb({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.locale,
 		});
 		return [
@@ -463,7 +463,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		}
 
 		const strings = constants.contexts.dexonlineAdjective({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.locale,
 		});
 		return [
@@ -500,7 +500,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		}
 
 		const strings = constants.contexts.dexonlineDeterminer({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.locale,
 		});
 		return [

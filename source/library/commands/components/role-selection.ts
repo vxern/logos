@@ -173,7 +173,7 @@ async function createRoleSelectionMenu(
 				viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 			) {
 				const strings = constants.contexts.roleLimitReached({
-					localise: client.localise.bind(client),
+					localise: client.localise,
 					locale: interaction.locale,
 				});
 
@@ -347,7 +347,7 @@ async function displaySelectMenu(
 	const isInRootCategory = data.browsingData.navigationData.identifiersAccessed.length === 0;
 	if (!isInRootCategory) {
 		const strings = constants.contexts.previousRoleCategory({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -360,10 +360,10 @@ async function displaySelectMenu(
 	}
 
 	const strings = {
-		...constants.contexts.roleMenu({ localise: client.localise.bind(client), locale: interaction.locale }),
+		...constants.contexts.roleMenu({ localise: client.localise, locale: interaction.locale }),
 		...constants.contexts.role({
-			localise: client.localise.bind(client),
-			localiseRaw: client.localiseRaw.bind(client),
+			localise: client.localise,
+			localiseRaw: client.localiseRaw,
 			locale: interaction.locale,
 		}),
 	};
@@ -406,7 +406,7 @@ function createSelectOptionsFromCategories(
 	const selections: Discord.SelectOption[] = [];
 	for (const [name, category] of Object.entries(categorySelections)) {
 		const strings = constants.contexts.roleCategory({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		selections.push({
@@ -441,10 +441,10 @@ function createSelectOptionsFromCollection(
 		const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
 		const strings = {
-			...constants.contexts.assignedRoles({ localise: client.localise.bind(client), locale: interaction.locale }),
+			...constants.contexts.assignedRoles({ localise: client.localise, locale: interaction.locale }),
 			...constants.contexts.role({
-				localise: client.localise.bind(client),
-				localiseRaw: client.localiseRaw.bind(client),
+				localise: client.localise,
+				localiseRaw: client.localiseRaw,
 				locale: interaction.locale,
 			}),
 		};

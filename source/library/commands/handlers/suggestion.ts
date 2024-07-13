@@ -29,15 +29,13 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManySuggestions({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.pushback(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -77,11 +75,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		suggestionService.registerPrompt(prompt, interaction.user.id, suggestionDocument);
 		suggestionService.registerHandler(suggestionDocument);
 
-		const strings = constants.contexts.suggestionSent({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.suggestionSent({ localise: client.localise, locale: interaction.locale });
 		await client.succeeded(submission, {
 			title: strings.title,
 			description: strings.description,
