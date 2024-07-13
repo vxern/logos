@@ -80,7 +80,7 @@ class InteractionRepetitionService extends GlobalService {
 		await this.client.registerInteractionCollector(cancelButton);
 
 		const strings = constants.contexts.sureToShow({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: buttonPress.locale,
 		});
 		await this.client.pushedBack(buttonPress, {
@@ -114,7 +114,7 @@ class InteractionRepetitionService extends GlobalService {
 
 	getShowButton(interaction: Logos.Interaction): Discord.ButtonComponent {
 		const strings = constants.contexts.show({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.locale,
 		});
 		return {

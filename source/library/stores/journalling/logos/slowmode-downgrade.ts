@@ -7,7 +7,7 @@ const logger: EventLogger<"slowmodeDowngrade"> = (
 	{ guildLocale },
 ) => {
 	const strings = constants.contexts.slowmodeDowngrade({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: guildLocale,
 	});
 	return {

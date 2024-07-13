@@ -11,7 +11,7 @@ abstract class SourceNotice {
 
 	get button(): Discord.ButtonComponent {
 		const strings = constants.contexts.source({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.#interaction.displayLocale,
 		});
 

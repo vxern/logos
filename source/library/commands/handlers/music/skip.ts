@@ -19,30 +19,26 @@ async function handleSkipAction(
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.noSongToSkip({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const strings = constants.contexts.noSongCollectionToSkip({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
-
 			await client.warning(interaction, {
 				title: strings.title,
 				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
 			});
-
 			return;
 		}
 	}
@@ -50,15 +46,13 @@ async function handleSkipAction(
 	// If both the 'to' and the 'by' parameter have been supplied.
 	if (interaction.parameters.by !== undefined && interaction.parameters.to !== undefined) {
 		const strings = constants.contexts.tooManySkipArguments({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -68,15 +62,13 @@ async function handleSkipAction(
 		(interaction.parameters.to !== undefined && interaction.parameters.to <= 0)
 	) {
 		const strings = constants.contexts.invalidSkipArgument({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.error(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -85,12 +77,12 @@ async function handleSkipAction(
 	let strings: { title: string; description: string };
 	if (isSkippingCollection) {
 		strings = constants.contexts.skippedSongCollection({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.guildLocale,
 		});
 	} else {
 		strings = constants.contexts.skippedSong({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.guildLocale,
 		});
 	}

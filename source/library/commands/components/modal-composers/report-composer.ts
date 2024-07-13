@@ -5,7 +5,7 @@ import type { ReportFormData } from "logos/models/report";
 class ReportComposer extends ModalComposer<ReportFormData, never> {
 	buildModal(submission: Logos.Interaction, { formData }: { formData: ReportFormData }): Modal<ReportFormData> {
 		const strings = constants.contexts.reportModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 
