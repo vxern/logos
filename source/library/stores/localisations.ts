@@ -42,7 +42,7 @@ class LocalisationStore {
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
 	}
 
-	static #buildLocalisations(localisations: Map<string, Map<LocalisationLanguage, string>>): Localisations {
+	static #buildLocalisations(localisations: RawLocalisations): Localisations {
 		const builders = new Map<string, Map<LocalisationLanguage, LocalisationBuilder>>();
 		for (const [key, languages] of localisations.entries()) {
 			const processors = new Map<LocalisationLanguage, LocalisationBuilder>();
