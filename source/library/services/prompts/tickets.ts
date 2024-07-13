@@ -43,7 +43,7 @@ class TicketPromptService extends PromptService<{
 		}
 
 		const strings = constants.contexts.promptControls({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
 		return {
@@ -102,7 +102,7 @@ class TicketPromptService extends PromptService<{
 		const isResolved = interaction.metadata[2] === "true";
 		if (isResolved && ticketDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {
@@ -115,7 +115,7 @@ class TicketPromptService extends PromptService<{
 
 		if (!(isResolved || ticketDocument.isResolved)) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
 			await this.client.warning(interaction, {
@@ -166,7 +166,7 @@ class TicketPromptService extends PromptService<{
 		}
 
 		const strings = constants.contexts.inquiry({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
 		const channel = await this.client.bot.helpers
