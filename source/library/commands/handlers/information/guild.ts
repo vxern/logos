@@ -16,10 +16,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 		return;
 	}
 
-	const strings = constants.contexts.guildInformation({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.guildInformation({ localise: client.localise, locale: interaction.locale });
 
 	await client.notice(interaction, {
 		author: {
@@ -89,18 +86,15 @@ function getChannelInformationSection(client: Client, interaction: Logos.Interac
 	const textChannelsCount = getChannelCountByType(channels, Discord.ChannelTypes.GuildText);
 	const voiceChannelsCount = getChannelCountByType(channels, Discord.ChannelTypes.GuildVoice);
 
-	const strings = constants.contexts.channelTypes({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.channelTypes({ localise: client.localise, locale: interaction.locale });
 
 	return `${constants.emojis.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.emojis.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
 function getLanguageInformationSection(client: Client, interaction: Logos.Interaction, guildDocument: Guild): string {
 	const strings = {
-		...constants.contexts.languageTypes({ localise: client.localise.bind(client), locale: interaction.locale }),
-		...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+		...constants.contexts.languageTypes({ localise: client.localise, locale: interaction.locale }),
+		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 	};
 
 	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.language(
@@ -178,11 +172,7 @@ function formatDistribution(
 
 	const total = roleFrequencies.map(([_, value]) => value).reduce((a, b) => a + b, withoutRole);
 
-	const strings = constants.contexts.withoutProficiency({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
-
+	const strings = constants.contexts.withoutProficiency({ localise: client.localise, locale: interaction.locale });
 	const stringParts: string[] = [
 		formatFrequency(withoutRole, getPercentageComposition(withoutRole, total), strings.withoutProficiency),
 	];

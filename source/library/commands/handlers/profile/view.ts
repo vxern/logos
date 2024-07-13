@@ -32,7 +32,7 @@ async function handleDisplayProfile(
 		Warning.getAll(client, { where: { guildId: interaction.guildId.toString(), targetId: member.id.toString() } }),
 	]);
 
-	const strings = constants.contexts.profile({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.profile({ localise: client.localise, locale: interaction.locale });
 	const components: Discord.ActionRow[] | undefined = interaction.parameters.show
 		? undefined
 		: [

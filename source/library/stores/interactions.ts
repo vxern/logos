@@ -175,7 +175,7 @@ class InteractionStore {
 
 		if (interaction.parameters["@repeat"]) {
 			const strings = constants.contexts.thinking({
-				localise: this.#client.localise.bind(this.#client),
+				localise: this.#client.localise,
 				locale: interaction.guildLocale,
 			});
 			const message = await this.#client.bot.helpers
@@ -458,14 +458,13 @@ class InteractionStore {
 				interaction.type === Discord.InteractionTypes.ModalSubmit
 			) {
 				const strings = constants.contexts.invalidUser({
-					localise: this.#client.localise.bind(this.#client),
+					localise: this.#client.localise,
 					locale: interaction.locale,
 				});
 				this.error(interaction, {
 					title: strings.title,
 					description: strings.description,
 				});
-
 				return undefined;
 			}
 
