@@ -28,16 +28,11 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		configuration.rateLimit ?? constants.defaults.REPORT_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = constants.contexts.tooManyReports({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.tooManyReports({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -77,11 +72,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		reportService.registerPrompt(prompt, user.id, reportDocument);
 		reportService.registerHandler(reportDocument);
 
-		const strings = constants.contexts.reportSubmitted({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.reportSubmitted({ localise: client.localise, locale: interaction.locale });
 		await client.succeeded(submission, {
 			title: strings.title,
 			description: strings.description,

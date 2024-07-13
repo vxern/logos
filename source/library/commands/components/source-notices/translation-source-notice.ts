@@ -5,7 +5,7 @@ import { SourceNotice } from "logos/commands/components/source-notices/source-no
 class TranslationSourceNotice extends SourceNotice {
 	constructor(client: Client, { interaction, source }: { interaction: Logos.Interaction; source: Licence }) {
 		const strings = constants.contexts.translationsSourcedFrom({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 

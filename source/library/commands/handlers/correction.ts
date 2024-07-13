@@ -27,30 +27,20 @@ async function handleMakeCorrection(
 	}
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
-		const strings = constants.contexts.cannotCorrect({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.cannotCorrect({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
 	if (message.author.id === interaction.user.id) {
-		const strings = constants.contexts.cannotCorrectOwn({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.cannotCorrectOwn({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -65,32 +55,28 @@ async function handleMakeCorrection(
 	if (doNotCorrectMeRoleId !== undefined) {
 		if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
 			const strings = constants.contexts.userDoesNotWantCorrections({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
-
 			await client.warning(interaction, {
 				title: strings.title,
 				description: strings.description,
 			});
-
 			return;
 		}
 	}
 
 	if (message.content.length > constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH) {
 		const strings = constants.contexts.correctionTooLong({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.warning(interaction, {
 			title: strings.title,
 			description: `${strings.description.tooLong} ${strings.description.maximumLength({
 				character_limit: constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH,
 			})}`,
 		});
-
 		return;
 	}
 
@@ -102,13 +88,8 @@ async function handleMakeCorrection(
 
 	composer.onSubmit(async (submission, { formData }) => {
 		await client.acknowledge(submission);
-
-		const strings = constants.contexts.correction({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
-		client.bot.helpers
+		const strings = constants.contexts.correction({ localise: client.localise, locale: interaction.locale });
+		await client.bot.helpers
 			.sendMessage(message.channelId, {
 				messageReference: {
 					messageId: message.id,

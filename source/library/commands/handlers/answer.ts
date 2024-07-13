@@ -13,30 +13,20 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 	}
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
-		const strings = constants.contexts.cannotAnswer({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.cannotAnswer({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
 	if (message.author.id === interaction.user.id) {
-		const strings = constants.contexts.cannotAnswerOwn({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.cannotAnswerOwn({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -45,10 +35,7 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 	composer.onSubmit(async (submission, { formData }) => {
 		await client.acknowledge(submission);
 
-		const strings = constants.contexts.answer({
-			localise: client.localise.bind(client),
-			locale: submission.locale,
-		});
+		const strings = constants.contexts.answer({ localise: client.localise, locale: submission.locale });
 
 		await client.bot.helpers
 			.sendMessage(message.channelId, {

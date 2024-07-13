@@ -40,7 +40,7 @@ abstract class PaginatedView<T> {
 			title = embed.title;
 		} else {
 			const strings = constants.contexts.page({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: this.#anchor.locale,
 			});
 
@@ -49,7 +49,7 @@ abstract class PaginatedView<T> {
 
 		if (!this.#isOnLastPage) {
 			const strings = constants.contexts.continuedOnNextPage({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: this.#anchor.locale,
 			});
 

@@ -4,7 +4,7 @@ import { SourceNotice } from "logos/commands/components/source-notices/source-no
 class WordSourceNotice extends SourceNotice {
 	constructor(client: Client, { interaction, sources }: { interaction: Logos.Interaction; sources: string[] }) {
 		const strings = constants.contexts.sourcedFromDictionaries({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 
