@@ -14,7 +14,7 @@ class TatoebaSourceNotice extends SourceNotice {
 		const translationLink = constants.links.tatoebaSentence(translationId.toString());
 
 		const strings = constants.contexts.sentencesSourcedFrom({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 		super(client, {

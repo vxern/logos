@@ -9,7 +9,7 @@ async function handleRewindAutocomplete(
 	const timestamp = parseTimeExpression(client, interaction, interaction.parameters.timestamp);
 	if (timestamp === undefined) {
 		const strings = constants.contexts.autocompleteTimestamp({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -32,15 +32,13 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.noSongToRewind({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -52,11 +50,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 
 	await musicService.session.skipTo({ timestamp: musicService.session.playingTimeMilliseconds - timestamp });
 
-	const strings = constants.contexts.rewound({
-		localise: client.localise.bind(client),
-		locale: interaction.guildLocale,
-	});
-
+	const strings = constants.contexts.rewound({ localise: client.localise, locale: interaction.guildLocale });
 	await client.success(
 		interaction,
 		{
@@ -69,10 +63,9 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 
 async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = constants.contexts.invalidRewindTimestamp({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.locale,
 	});
-
 	await client.error(interaction, {
 		title: strings.title,
 		description: strings.description,

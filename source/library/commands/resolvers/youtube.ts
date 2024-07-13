@@ -88,10 +88,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		});
 	}
 
-	const strings = constants.contexts.selectSong({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.selectSong({ localise: client.localise, locale: interaction.locale });
 	await client.notice(interaction, {
 		embeds: [
 			{

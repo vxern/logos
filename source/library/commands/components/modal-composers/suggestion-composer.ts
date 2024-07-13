@@ -13,7 +13,7 @@ class SuggestionComposer extends ModalComposer<SuggestionFormData, never> {
 		{ formData }: { formData: SuggestionFormData },
 	): Modal<SuggestionFormData> {
 		const strings = constants.contexts.suggestionModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 
