@@ -17,7 +17,7 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 		fileContents.push(fileContent);
 	}
 
-	const strings = constants.contexts.messageDelete({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.messageDelete({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

@@ -9,7 +9,7 @@ async function handleRequestStreamPlayback(
 ): Promise<void> {
 	await client.acknowledge(interaction);
 
-	const strings = constants.contexts.stream({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.stream({ localise: client.localise, locale: interaction.locale });
 	const listing: SongListing = new SongListing({
 		queueable: new AudioStream({ title: strings.stream, url: interaction.parameters.url }),
 		userId: interaction.user.id,
@@ -39,7 +39,7 @@ async function handleRequestQueryPlayback(
 	const listing = await resolveToSongListing(client, interaction, { query: interaction.parameters.query });
 	if (listing === undefined) {
 		const strings = constants.contexts.songNotFound({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 

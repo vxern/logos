@@ -134,7 +134,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			});
 
 			const strings = constants.contexts.sureToCancelReport({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: submission.locale,
 			});
 			await this.client.warning(cancelButtonPress, {
@@ -175,7 +175,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		await this.client.registerInteractionCollector(leaveButton);
 
 		const strings = constants.contexts.failedToSubmitForm({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 

@@ -114,7 +114,7 @@ async function handlePardonUser(
 		args: [member, warningDocument, interaction.user],
 	});
 
-	const strings = constants.contexts.pardoned({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.pardoned({ localise: client.localise, locale: interaction.locale });
 	await client.success(interaction, {
 		title: strings.title,
 		description: strings.description({
@@ -125,10 +125,7 @@ async function handlePardonUser(
 }
 
 async function displayInvalidWarningError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidWarning({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.invalidWarning({ localise: client.localise, locale: interaction.locale });
 	await client.error(interaction, {
 		title: strings.title,
 		description: strings.description,
