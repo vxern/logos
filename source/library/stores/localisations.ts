@@ -2,10 +2,10 @@ import type { ContextBuilder } from "logos:constants/contexts";
 import {
 	type Locale,
 	type LocalisationLanguage,
-	getDiscordLocaleByLocalisationLanguage,
-	getLocalisationLanguageByLocale,
-	isDiscordLocalisationLanguage,
-} from "logos:constants/languages";
+	getDiscordLocaleByLanguage,
+	isDiscordLanguage,
+	getLogosLanguageByLocale,
+} from "logos:constants/languages/localisation";
 import type { Environment } from "logos:core/loaders/environment";
 import { Logger } from "logos/logger";
 import type { ReplyVisibility } from "logos/stores/interactions";
@@ -141,11 +141,11 @@ class LocalisationStore {
 	): Discord.Localization {
 		const result: Discord.Localization = {};
 		for (const [language, localise] of localisations.entries()) {
-			if (!isDiscordLocalisationLanguage(language)) {
+			if (!isDiscordLanguage(language)) {
 				continue;
 			}
 
-			const locale = getDiscordLocaleByLocalisationLanguage(language);
+			const locale = getDiscordLocaleByLanguage(language);
 			if (locale === undefined) {
 				continue;
 			}
@@ -174,7 +174,7 @@ class LocalisationStore {
 
 			let language: LocalisationLanguage;
 			if (locale !== undefined) {
-				language = getLocalisationLanguageByLocale(locale);
+				language = getLogosLanguageByLocale(locale);
 			} else {
 				language = constants.defaults.LOCALISATION_LANGUAGE;
 			}
@@ -219,7 +219,7 @@ class LocalisationStore {
 	}
 
 	pluralise(key: string, locale: Locale, { quantity }: { quantity: number }): string {
-		const language = getLocalisationLanguageByLocale(locale);
+		const language = getLogosLanguageByLocale(locale);
 
 		const pluralise = constants.localisations.transformers[language].pluralise;
 		const { one, two, many } = {

@@ -1,4 +1,4 @@
-import { type Locale, getLocaleByLocalisationLanguage } from "logos:constants/languages";
+import { type Locale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
@@ -37,7 +37,7 @@ abstract class LocalService extends Service {
 	}
 
 	get guildLocale(): Locale {
-		return getLocaleByLocalisationLanguage(this.guildDocument.localisationLanguage);
+		return getLocalisationLocaleByLanguage(this.guildDocument.localisationLanguage);
 	}
 
 	constructor(client: Client, { identifier, guildId }: { identifier: string; guildId: bigint }) {

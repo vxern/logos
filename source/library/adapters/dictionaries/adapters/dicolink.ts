@@ -1,4 +1,4 @@
-import type { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
 import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter.ts";
 import type { Client } from "logos/client";
