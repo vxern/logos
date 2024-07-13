@@ -12,10 +12,7 @@ async function handleDisplayLicence(
 		return;
 	}
 
-	const strings = constants.contexts.licence({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.licence({ localise: client.localise, locale: interaction.locale });
 
 	await client.notice(interaction, {
 		author: {
@@ -43,10 +40,7 @@ async function handleDisplayLicence(
 }
 
 async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidLicence({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.invalidLicence({ localise: client.localise, locale: interaction.locale });
 
 	await client.error(interaction, {
 		title: strings.title,

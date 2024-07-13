@@ -49,7 +49,7 @@ async function handleFindWord(
 	const dictionaries = client.adapters.dictionaries.getAdapters({ learningLanguage });
 	if (dictionaries === undefined) {
 		const strings = constants.contexts.noDictionaryAdapters({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.reply(interaction, {
@@ -135,22 +135,23 @@ async function handleFindWord(
 	}
 
 	if (entriesByPartOfSpeech.size === 0) {
-		const strings = constants.contexts.noResults({
-			localise: client.localise.bind(client),
-			locale: interaction.displayLocale,
+		const strings = constants.contexts.noResults({ localise: client.localise, locale: interaction.displayLocale });
+		await client.editReply(interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description({ word: interaction.parameters.word }),
+					color: constants.colours.dullYellow,
+				},
+			],
 		});
-		await client.editReply(
-			interaction,
-			{
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description({ word: interaction.parameters.word }),
-						color: constants.colours.dullYellow,
-					},
-				],
-			},
-			{ autoDelete: true },
+
+		setTimeout(
+			() =>
+				client.deleteReply(interaction).catch(() => {
+					client.log.warn(`Failed to delete "no results for word" message.`);
+				}),
+			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
 		);
 
 		return;
@@ -279,7 +280,7 @@ async function generateButtons(
 			await client.registerInteractionCollector(nextPageButton);
 
 			const strings = constants.contexts.wordPage({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.displayLocale,
 			});
 			paginationControls.push([
@@ -395,7 +396,7 @@ async function generateButtons(
 
 	if (entry.definitions !== undefined) {
 		const strings = constants.contexts.definitionsView({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 		row.push({
@@ -409,7 +410,7 @@ async function generateButtons(
 
 	if (entry.inflectionTable !== undefined) {
 		const strings = constants.contexts.inflectionView({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 		row.push({
@@ -453,7 +454,7 @@ function entryToEmbeds(
 	let partOfSpeechDisplayed: string;
 	if (entry.partOfSpeech === undefined) {
 		const strings = constants.contexts.partOfSpeechUnknown({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 		partOfSpeechDisplayed = strings.unknown;
@@ -464,7 +465,7 @@ function entryToEmbeds(
 			partOfSpeechDisplayed = original;
 		} else {
 			const strings = constants.contexts.partOfSpeech({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.displayLocale,
 			});
 			partOfSpeechDisplayed = strings.partOfSpeech(detected);
@@ -486,7 +487,7 @@ function entryToEmbeds(
 
 		if (verbose) {
 			const strings = constants.contexts.nativeDefinitionsForWord({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.displayLocale,
 			});
 			embeds.push({
@@ -496,7 +497,7 @@ function entryToEmbeds(
 			});
 		} else {
 			const strings = constants.contexts.nativeDefinitions({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.displayLocale,
 			});
 			fields.push({
@@ -512,7 +513,7 @@ function entryToEmbeds(
 
 		if (verbose) {
 			const strings = constants.contexts.definitionsForWord({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.displayLocale,
 			});
 			embeds.push({
@@ -522,7 +523,7 @@ function entryToEmbeds(
 			});
 		} else {
 			const strings = constants.contexts.definitions({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.displayLocale,
 			});
 			fields.push({
@@ -537,7 +538,7 @@ function entryToEmbeds(
 		const expressionsFitted = fitTextToFieldSize(client, interaction, expressionsStringified, verbose);
 
 		const strings = constants.contexts.expressions({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 		if (verbose) {
@@ -570,7 +571,7 @@ function entryToEmbeds(
 			.join("\n");
 
 		const strings = constants.contexts.etymology({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 		if (verbose) {
@@ -648,7 +649,7 @@ function stringifyEntries<
 		if (isDefinition(entry, entryType)) {
 			if (entry.relations !== undefined) {
 				const strings = constants.contexts.wordRelations({
-					localise: client.localise.bind(client),
+					localise: client.localise,
 					locale: interaction.displayLocale,
 				});
 
@@ -731,7 +732,7 @@ function fitTextToFieldSize(
 	verbose: boolean,
 ): string {
 	const strings = constants.contexts.definitionsOmitted({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.displayLocale,
 	});
 	const characterOverhead =
