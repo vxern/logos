@@ -34,7 +34,7 @@ async function handleWarnUserAutocomplete(
 		}
 		case "rule": {
 			const strings = constants.contexts.otherRuleOption({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
 			const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
@@ -68,10 +68,7 @@ async function handleWarnUser(
 	}
 
 	if (interaction.parameters.rule !== constants.components.none && !isValidRule(interaction.parameters.rule)) {
-		const strings = constants.contexts.invalidRule({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
+		const strings = constants.contexts.invalidRule({ localise: client.localise, locale: interaction.locale });
 		await client.error(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -128,11 +125,7 @@ async function handleWarnUser(
 		timeRangeMilliseconds: timeStructToMilliseconds(configuration.expiration ?? constants.defaults.WARN_EXPIRY),
 	});
 
-	const strings = constants.contexts.userWarned({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
-
+	const strings = constants.contexts.userWarned({ localise: client.localise, locale: interaction.locale });
 	await client.success(interaction, {
 		title: strings.title,
 		description: strings.description({
@@ -160,7 +153,7 @@ async function handleWarnUser(
 					);
 
 				const strings = constants.contexts.warningLimitSurpassedAndTimedOut({
-					localise: client.localise.bind(client),
+					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
 				alertService?.alert({
@@ -181,7 +174,7 @@ async function handleWarnUser(
 				});
 			} else {
 				const strings = constants.contexts.warningLimitSurpassed({
-					localise: client.localise.bind(client),
+					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
 				alertService?.alert({
@@ -205,10 +198,7 @@ async function handleWarnUser(
 
 	const reachedLimit = warningDocumentsActive.length === constants.defaults.WARN_LIMIT;
 	if (reachedLimit) {
-		const strings = constants.contexts.limitReached({
-			localise: client.localise.bind(client),
-			locale: interaction.guildLocale,
-		});
+		const strings = constants.contexts.limitReached({ localise: client.localise, locale: interaction.guildLocale });
 		if (guildDocument.hasEnabled("alerts")) {
 			const alertService = client.getAlertService(guild.id);
 			alertService?.alert({
