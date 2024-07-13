@@ -5,7 +5,7 @@ import type { ResourceFormData } from "logos/models/resource";
 class ResourceComposer extends ModalComposer<ResourceFormData, never> {
 	buildModal(submission: Logos.Interaction, { formData }: { formData: ResourceFormData }): Modal<ResourceFormData> {
 		const strings = constants.contexts.resourceModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 		return {

@@ -28,16 +28,11 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		configuration.rateLimit ?? constants.defaults.RESOURCE_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
-		const strings = constants.contexts.tooManyResources({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.tooManyResources({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -77,11 +72,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		resourceService.registerPrompt(prompt, interaction.user.id, resourceDocument);
 		resourceService.registerHandler(resourceDocument);
 
-		const strings = constants.contexts.resourceSent({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.resourceSent({ localise: client.localise, locale: interaction.locale });
 		await client.succeeded(submission, {
 			title: strings.title,
 			description: strings.description,

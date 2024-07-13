@@ -2,7 +2,7 @@ import { mention } from "logos:core/formatting";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"purgeEnd"> = (client, [member, channel, messageCount, author], { guildLocale }) => {
-	const strings = constants.contexts.purgeEnd({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.purgeEnd({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{
