@@ -13,7 +13,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToManage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -33,7 +33,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 	await musicService.session.setPaused(true);
 
 	const strings = constants.contexts.musicPaused({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
 

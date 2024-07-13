@@ -23,10 +23,7 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 				},
 			];
 
-	const strings = constants.contexts.moderationPolicy({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.moderationPolicy({ localise: client.localise, locale: interaction.locale });
 	await client.notice(
 		interaction,
 		{

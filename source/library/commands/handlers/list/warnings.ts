@@ -67,7 +67,7 @@ function getWarningPage(
 	if (warnings.length === 0) {
 		if (isSelf) {
 			const strings = constants.contexts.noWarningsForSelf({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
 
@@ -78,7 +78,7 @@ function getWarningPage(
 		}
 
 		const strings = constants.contexts.noWarningsForOther({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -88,7 +88,7 @@ function getWarningPage(
 		};
 	}
 
-	const strings = constants.contexts.warnings({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.warnings({ localise: client.localise, locale: interaction.locale });
 
 	return {
 		title: strings.title,
