@@ -1,4 +1,4 @@
-import type { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import { type PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code } from "logos:core/formatting.ts";
 import * as Dexonline from "dexonline-scraper";
