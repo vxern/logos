@@ -40,15 +40,11 @@ async function handleClearTimeout(
 
 	const notTimedOut = timedOutUntil === undefined || timedOutUntil < Date.now();
 	if (notTimedOut) {
-		const strings = constants.contexts.notTimedOut({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
+		const strings = constants.contexts.notTimedOut({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
 		});
-
 		return;
 	}
 
@@ -68,7 +64,7 @@ async function handleClearTimeout(
 	});
 
 	const strings = constants.contexts.timeoutCleared({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.locale,
 	});
 	await client.success(interaction, {

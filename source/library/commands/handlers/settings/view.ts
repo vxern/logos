@@ -5,8 +5,8 @@ async function handleDisplaySettings(client: Client, interaction: Logos.Interact
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 	const strings = {
-		...constants.contexts.settings({ localise: client.localise.bind(client), locale: interaction.locale }),
-		...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+		...constants.contexts.settings({ localise: client.localise, locale: interaction.locale }),
+		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 	};
 	await client.notice(interaction, {
 		title: strings.title,

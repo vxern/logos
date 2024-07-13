@@ -26,10 +26,7 @@ async function handleDisplaySoftwareLicence(
 
 	const packageName = interaction.parameters.package;
 
-	const strings = constants.contexts.licence({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.licence({ localise: client.localise, locale: interaction.locale });
 
 	const view = new SoftwareLicenceView(client, {
 		interaction,
@@ -41,10 +38,7 @@ async function handleDisplaySoftwareLicence(
 }
 
 async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidLicence({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.invalidLicence({ localise: client.localise, locale: interaction.locale });
 
 	await client.error(interaction, {
 		title: strings.title,
