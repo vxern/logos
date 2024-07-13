@@ -9,10 +9,9 @@ async function handleSkipToTimestampAutocomplete(
 	const timestamp = parseTimeExpression(client, interaction, interaction.parameters.timestamp);
 	if (timestamp === undefined) {
 		const strings = constants.contexts.autocompleteTimestamp({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
@@ -35,15 +34,13 @@ async function handleSkipToTimestamp(
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.noSongToSkipToTimestampInside({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
@@ -56,7 +53,7 @@ async function handleSkipToTimestamp(
 	await musicService.session.skipTo({ timestamp });
 
 	const strings = constants.contexts.skippedTo({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
 
@@ -72,7 +69,7 @@ async function handleSkipToTimestamp(
 
 async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const strings = constants.contexts.invalidSkipToTimestamp({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.locale,
 	});
 

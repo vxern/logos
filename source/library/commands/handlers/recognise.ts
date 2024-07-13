@@ -19,20 +19,17 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 	const hasEmbeds = message.embeds !== undefined && message.embeds.length > 0;
 	if (hasEmbeds) {
 		const strings = constants.contexts.cannotUseForRecognition({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
 		});
-
 		return;
 	}
 
-	const text = message.content;
-
-	await handleRecogniseLanguage(client, interaction, { text, isMessage: true });
+	await handleRecogniseLanguage(client, interaction, { text: message.content, isMessage: true });
 }
 
 async function handleRecogniseLanguage(
@@ -42,10 +39,7 @@ async function handleRecogniseLanguage(
 ): Promise<void> {
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
-		const strings = constants.contexts.textEmpty({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
+		const strings = constants.contexts.textEmpty({ localise: client.localise, locale: interaction.locale });
 		await client.warning(interaction, {
 			title: strings.title,
 			description: strings.description,
@@ -58,10 +52,7 @@ async function handleRecogniseLanguage(
 
 	const detectedLanguages = await client.adapters.detectors.detectLanguages({ text });
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
-		const strings = constants.contexts.unknownLanguage({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
+		const strings = constants.contexts.unknownLanguage({ localise: client.localise, locale: interaction.locale });
 		await client.unsupported(interaction, {
 			title: strings.title,
 			description: isMessage ? strings.description.message : strings.description.text,
@@ -81,8 +72,8 @@ async function handleRecogniseLanguage(
 		}
 
 		const strings = {
-			...constants.contexts.likelyMatch({ localise: client.localise.bind(client), locale: interaction.locale }),
-			...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+			...constants.contexts.likelyMatch({ localise: client.localise, locale: interaction.locale }),
+			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 		};
 
 		await client.noticed(interaction, {
@@ -111,11 +102,8 @@ async function handleRecogniseLanguage(
 			}
 
 			const strings = {
-				...constants.contexts.likelyMatch({
-					localise: client.localise.bind(client),
-					locale: interaction.locale,
-				}),
-				...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+				...constants.contexts.likelyMatch({ localise: client.localise, locale: interaction.locale }),
+				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
 			fields.push({
 				name: `${constants.emojis.detect.likely} ${strings.title}`,
@@ -124,11 +112,8 @@ async function handleRecogniseLanguage(
 			});
 		} else if (detectedLanguages.likely.length > 0) {
 			const strings = {
-				...constants.contexts.likelyMatches({
-					localise: client.localise.bind(client),
-					locale: interaction.locale,
-				}),
-				...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+				...constants.contexts.likelyMatches({ localise: client.localise, locale: interaction.locale }),
+				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
 			const languageNamesLocalised = detectedLanguages.likely.map((language) => strings.language(language));
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
@@ -147,11 +132,8 @@ async function handleRecogniseLanguage(
 			}
 
 			const strings = {
-				...constants.contexts.possibleMatch({
-					localise: client.localise.bind(client),
-					locale: interaction.locale,
-				}),
-				...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+				...constants.contexts.possibleMatch({ localise: client.localise, locale: interaction.locale }),
+				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
 			fields.push({
 				name: `${constants.emojis.detect.possible} ${strings.title}`,
@@ -160,11 +142,8 @@ async function handleRecogniseLanguage(
 			});
 		} else if (detectedLanguages.possible.length > 0) {
 			const strings = {
-				...constants.contexts.possibleMatches({
-					localise: client.localise.bind(client),
-					locale: interaction.locale,
-				}),
-				...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+				...constants.contexts.possibleMatches({ localise: client.localise, locale: interaction.locale }),
+				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
 			const languageNamesLocalised = detectedLanguages.possible.map((language) => strings.language(language));
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));

@@ -27,7 +27,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 		{ formData }: { formData: CorrectionFormData },
 	): Modal<CorrectionFormData> {
 		const strings = constants.contexts.correctionModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 
@@ -79,7 +79,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 		switch (error) {
 			case "texts-not-different": {
 				const strings = constants.contexts.correctionTextsNotDifferent({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: submission.locale,
 				});
 

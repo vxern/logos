@@ -18,7 +18,7 @@ async function handleDisplayCurrentlyPlaying(
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.noSongToShowInformationAbout({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -33,7 +33,7 @@ async function handleDisplayCurrentlyPlaying(
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const strings = constants.contexts.noSongCollectionToShowInformationAbout({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
 
@@ -48,7 +48,7 @@ async function handleDisplayCurrentlyPlaying(
 		const collection = musicService.session.queueable as SongCollection;
 
 		const strings = constants.contexts.nowPlayingSong({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 		});
 
@@ -64,7 +64,7 @@ async function handleDisplayCurrentlyPlaying(
 	}
 
 	const strings = constants.contexts.nowPlayingSongCollection({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 	});
 
