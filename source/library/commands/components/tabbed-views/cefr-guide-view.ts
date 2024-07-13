@@ -48,7 +48,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		switch (bracket) {
 			case "a": {
 				const strings = constants.contexts.cefrGuideBracketA({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
 
@@ -77,7 +77,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 			}
 			case "b": {
 				const strings = constants.contexts.cefrGuideBracketB({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
 
@@ -98,7 +98,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 			}
 			case "c": {
 				const strings = constants.contexts.cefrGuideBracketC({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
 
@@ -137,7 +137,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		switch (bracket) {
 			case "a": {
 				const strings = constants.contexts.cefrExamplesBracketA({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
 
@@ -166,7 +166,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 			}
 			case "b": {
 				const strings = constants.contexts.cefrExamplesBracketB({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
 
@@ -187,7 +187,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 			}
 			case "c": {
 				const strings = constants.contexts.cefrExamplesBracketC({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
 
@@ -222,7 +222,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		{ bracket, mode }: { bracket: Bracket; mode: Mode },
 	): Discord.MessageComponents {
 		const strings = constants.contexts.cefrButtons({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.locale,
 		});
 

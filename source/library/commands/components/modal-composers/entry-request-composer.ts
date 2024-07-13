@@ -8,7 +8,7 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 		{ formData }: { formData: EntryRequestFormData },
 	): Modal<EntryRequestFormData> {
 		const strings = constants.contexts.verificationModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 		return {

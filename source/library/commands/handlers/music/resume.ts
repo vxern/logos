@@ -12,7 +12,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToManage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -26,7 +26,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 
 	if (!musicService.session.player.paused) {
 		const strings = constants.contexts.notPaused({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -40,11 +40,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 
 	await musicService.session.setPaused(false);
 
-	const strings = constants.contexts.resumed({
-		localise: client.localise.bind(client),
-		locale: interaction.guildLocale,
-	});
-
+	const strings = constants.contexts.resumed({ localise: client.localise, locale: interaction.guildLocale });
 	await client.success(
 		interaction,
 		{
