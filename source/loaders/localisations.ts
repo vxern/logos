@@ -26,10 +26,6 @@ async function loadLocalisations({
 
 	const localisationFiles: [language: LocalisationLanguage, path: string, normalise: boolean][] = [];
 	for (const directoryPath of directoryPaths) {
-		if (!(await fs.stat(directoryPath)).isDirectory()) {
-			continue;
-		}
-
 		const normalise = directoryPath.endsWith("/commands") || directoryPath.endsWith("/parameters");
 
 		for (const entryPath of await fs.readdir(directoryPath)) {
