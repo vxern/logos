@@ -5,6 +5,7 @@ interface Environment {
 	readonly discordSecret: string;
 	readonly deeplSecret?: string;
 	readonly rapidApiSecret?: string;
+	readonly ponsSecret?: string;
 	readonly wordnikSecret?: string;
 	readonly databaseSolution?: string;
 	readonly mongodbUsername?: string;
@@ -51,6 +52,7 @@ function loadEnvironment(): Environment {
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
 		rapidApiSecret: process.env.SECRET_RAPID_API,
+		ponsSecret: process.env.SECRET_PONS,
 		wordnikSecret: process.env.SECRET_WORDNIK,
 		databaseSolution: process.env.DATABASE_SOLUTION,
 		mongodbUsername: process.env.MONGODB_USERNAME || undefined,

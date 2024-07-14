@@ -45,6 +45,7 @@
 	},
 	"dependencies": {
 		"@discordeno/bot": "19.0.0-next.d81b28a",
+		"cheerio": "^1.0.0-rc.12",
 		"cldpre": "^2.9.0",
 		"dexonline-scraper": "^0.2.1",
 		"dotenv": "^16.4.5",

@@ -1,24 +1,24 @@
-import type { LearningLanguage, WithBaseLanguage } from "logos:constants/languages";
+import { type WithBaseLanguage, getFeatureLanguage } from "logos:constants/languages";
 import {
 	type Locale,
-	type Language as LocalisationLanguage,
-	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
-	isLogosLanguage as isLocalisationLanguage,
-	isLogosLocale as isLocalisationLocale,
+	type LocalisationLanguage,
+	getLocalisationLocaleByLanguage,
+	isLocalisationLanguage,
+	isLocalisationLocale,
 } from "logos:constants/languages/localisation";
 
-type Language = LocalisationLanguage;
+type LearningLanguage = LocalisationLanguage;
 
-function isLanguage(language: string): language is Language {
+function isLearningLanguage(language: string): language is LearningLanguage {
 	return isLocalisationLanguage(language);
 }
 
-function isLocale(locale: string): locale is Locale {
+function isLearningLocale(locale: string): locale is Locale {
 	return isLocalisationLocale(locale);
 }
 
-function getLocaleByLanguage(language: Language): Locale {
-	return getLocaleByLocalisationLanguage(language);
+function getLocaleByLearningLanguage(language: LearningLanguage): Locale {
+	return getLocalisationLocaleByLanguage(language);
 }
 
 const wiktionaryLanguageNames = Object.freeze({
@@ -33,5 +33,75 @@ function getWiktionaryLanguageName(language: LearningLanguage): string {
 	return (wiktionaryLanguageNames as Record<string, string>)[language] ?? language;
 }
 
-export { getLocaleByLanguage, isLanguage, isLocale, getWiktionaryLanguageName };
-export type { Language };
+const languageToLocale = {
+	pons: {
+		"English/American": "en",
+		"English/British": "en",
+		French: "fr",
+		German: "de",
+		Greek: "el",
+		// "Italian": "it",
+		Polish: "pl",
+		// "Portuguese": "pt",
+		Russian: "ru",
+		// "Slovenian": "sl",
+		// "Spanish": "es",
+		Turkish: "tr",
+		// "Chinese": "zh",
+	} as const satisfies Partial<Record<LearningLanguage, string>>,
+};
+
+const localeToLanguage = Object.freeze({
+	pons: Object.mirror(languageToLocale.pons),
+});
+
+const ponsLanguageNames: Record<string, string> = {
+	"English/American": "English",
+	"English/British": "English",
+} satisfies Record<WithBaseLanguage<PonsLanguage>, string>;
+
+type PonsLanguage = keyof typeof languageToLocale.pons;
+type PonsLocale = (typeof languageToLocale.pons)[keyof typeof languageToLocale.pons];
+
+function isPonsLanguage(language: string): language is PonsLanguage {
+	return language in languageToLocale.pons;
+}
+
+function getPonsLanguageName(language: PonsLanguage): string {
+	return (ponsLanguageNames as Record<string, string>)[language] ?? language;
+}
+
+function isPonsLocale(locale: string): locale is PonsLanguage {
+	return locale in localeToLanguage.pons;
+}
+
+function getPonsLocaleByLanguage(language: PonsLanguage): PonsLocale {
+	return languageToLocale.pons[language];
+}
+
+function isSearchMonolingual<SourceLanguage extends LearningLanguage>(
+	sourceLanguage: SourceLanguage,
+	targetLanguage: LearningLanguage,
+): targetLanguage is SourceLanguage {
+	if (sourceLanguage === targetLanguage) {
+		return true;
+	}
+
+	const sourceFeatureLanguage = getFeatureLanguage(sourceLanguage);
+	const targetFeatureLanguage = getFeatureLanguage(targetLanguage);
+
+	return sourceFeatureLanguage === targetFeatureLanguage;
+}
+
+export {
+	isLearningLanguage,
+	isLearningLocale,
+	getLocaleByLearningLanguage,
+	getWiktionaryLanguageName,
+	isPonsLanguage,
+	getPonsLocaleByLanguage,
+	isPonsLocale,
+	getPonsLanguageName,
+	isSearchMonolingual,
+};
+export type { LearningLanguage, PonsLanguage, PonsLocale };

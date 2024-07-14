@@ -15,12 +15,11 @@ const languages = Object.freeze([
 	"Swedish",
 	"Turkish",
 ] as const);
+type FeatureLanguage = (typeof languages)[number];
 
-type Language = (typeof languages)[number];
-
-function isLanguage(language: string): language is Language {
+function isFeatureLanguage(language: string): language is FeatureLanguage {
 	return (languages as readonly string[]).includes(language);
 }
 
-export { isLanguage };
-export type { Language };
+export { isFeatureLanguage };
+export type { FeatureLanguage };

@@ -1,4 +1,4 @@
-import type { DetectionLanguage, Detector } from "logos:constants/languages";
+import type { DetectionLanguage, Detector } from "logos:constants/languages/detection";
 import type { Licence } from "logos:constants/licences.ts";
 import type { DetectorAdapter, SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import { CLDAdapter } from "logos/adapters/detectors/cld";

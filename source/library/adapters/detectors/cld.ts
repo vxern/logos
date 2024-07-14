@@ -1,4 +1,4 @@
-import { getCLDDetectionLanguageByLocale, isCLDLocale } from "logos:constants/languages";
+import { getCLDLanguageByLocale, isCLDLocale } from "logos:constants/languages/detection.ts";
 import cld from "cldpre";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import type { Client } from "logos/client";
@@ -15,7 +15,7 @@ class CLDAdapter extends DetectorAdapter {
 			return undefined;
 		}
 
-		const detectedLanguage = getCLDDetectionLanguageByLocale(detectedLocale);
+		const detectedLanguage = getCLDLanguageByLocale(detectedLocale);
 
 		return { language: detectedLanguage, source: constants.licences.detectors.cld };
 	}

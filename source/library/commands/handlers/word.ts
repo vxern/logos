@@ -1,8 +1,9 @@
 import defaults from "logos:constants/defaults";
-import { isLocalisationLanguage } from "logos:constants/languages";
+import { isLocalisationLanguage } from "logos:constants/languages/localisation.ts";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";
-import type { Definition, DictionaryEntry, Expression } from "logos/adapters/dictionaries/adapter";
+import type { DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import type { DefinitionField, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry.ts";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice.ts";
@@ -89,10 +90,11 @@ async function handleFindWord(
 
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
+	const identifiersFormatted = dictionaries.map((dictionary) => dictionary.identifier).join(", ");
 	client.log.info(
 		`Looking up the word '${interaction.parameters.word}' from ${
 			dictionaries.length
-		} dictionaries as requested by ${client.diagnostics.user(interaction.user)} on ${guild.name}...`,
+		} dictionaries (${identifiersFormatted}) as requested by ${client.diagnostics.user(interaction.user)} on ${guild.name}...`,
 	);
 
 	const unclassifiedEntries: DictionaryEntry[] = [];
@@ -110,7 +112,12 @@ async function handleFindWord(
 
 		const organised = new Map<PartOfSpeech, DictionaryEntry[]>();
 		for (const entry of entries) {
-			const [partOfSpeech, _] = entry.partOfSpeech;
+			if (entry.partOfSpeech === undefined) {
+				continue;
+			}
+
+			const partOfSpeech = entry.partOfSpeech.detected;
+
 			if (partOfSpeech === "unknown") {
 				unclassifiedEntries.push(entry);
 				continue;
@@ -198,9 +205,11 @@ async function handleFindWord(
 
 function sanitiseEntries(entries: DictionaryEntry[]): DictionaryEntry[] {
 	for (const entry of entries) {
-		for (const etymology of entry.etymologies ?? []) {
-			etymology.value = etymology.value?.replaceAll("*", "\\*");
+		if (entry.etymology === undefined) {
+			continue;
 		}
+
+		entry.etymology.value = entry.etymology.value?.replaceAll("*", "\\*");
 	}
 	return entries;
 }
@@ -242,7 +251,7 @@ function generateEmbeds(
 			return entryToEmbeds(client, interaction, entry, data.verbose);
 		}
 		case ContentTabs.Inflection: {
-			const inflectionTable = entry.inflectionTable?.at(data.inflectionTableIndex);
+			const inflectionTable = entry.inflection?.tabs?.at(data.inflectionTableIndex);
 			if (inflectionTable === undefined) {
 				return [];
 			}
@@ -332,11 +341,11 @@ async function generateButtons(
 			break;
 		}
 		case ContentTabs.Inflection: {
-			if (entry.inflectionTable === undefined) {
+			if (entry.inflection === undefined) {
 				return [];
 			}
 
-			const rows = entry.inflectionTable.toChunked(5).reverse();
+			const rows = entry.inflection.tabs.toChunked(5).reverse();
 
 			const button = new InteractionCollector<MenuButtonID>(client, {
 				only: interaction.parameters.show ? [interaction.user.id] : undefined,
@@ -345,7 +354,7 @@ async function generateButtons(
 			button.onInteraction(async (buttonPress) => {
 				await client.acknowledge(buttonPress);
 
-				if (entry.inflectionTable === undefined) {
+				if (entry.inflection === undefined) {
 					await displayMenu(client, interaction, data);
 					return;
 				}
@@ -358,7 +367,7 @@ async function generateButtons(
 				const [_, indexString] = InteractionCollector.decodeId<MenuButtonID>(customId);
 				const index = Number(indexString);
 
-				if (index >= 0 && index <= entry.inflectionTable?.length) {
+				if (index >= 0 && index <= entry.inflection?.tabs?.length) {
 					data.inflectionTableIndex = index;
 				}
 
@@ -367,7 +376,7 @@ async function generateButtons(
 
 			await client.registerInteractionCollector(button);
 
-			for (const [row, rowIndex] of rows.map<[typeof entry.inflectionTable, number]>((r, i) => [r, i])) {
+			for (const [row, rowIndex] of rows.map<[typeof entry.inflection.tabs, number]>((r, i) => [r, i])) {
 				const buttons = row.map<Discord.ButtonComponent>((table, index) => {
 					const index_ = rowIndex * 5 + index;
 
@@ -431,7 +440,7 @@ async function generateButtons(
 		});
 	}
 
-	if (entry.inflectionTable !== undefined) {
+	if (entry.inflection !== undefined) {
 		const strings = constants.contexts.inflectionView({
 			localise: client.localise,
 			locale: interaction.displayLocale,
@@ -451,7 +460,7 @@ async function generateButtons(
 
 	const sourceNotice = new WordSourceNotice(client, {
 		interaction,
-		sources: entry.sources.map(([link, licence]) => `[${licence.name}](${link})`),
+		sources: entry.sources.map(({ link, licence }) => `[${licence.name}](${link})`),
 	});
 
 	await sourceNotice.register();
@@ -482,30 +491,29 @@ function entryToEmbeds(
 		});
 		partOfSpeechDisplayed = strings.unknown;
 	} else {
-		const [detected, original] = entry.partOfSpeech;
-
-		if (detected === "unknown") {
-			partOfSpeechDisplayed = original;
+		const partOfSpeech = entry.partOfSpeech.detected;
+		if (partOfSpeech === "unknown") {
+			partOfSpeechDisplayed = partOfSpeech;
 		} else {
 			const strings = constants.contexts.partOfSpeech({
 				localise: client.localise,
 				locale: interaction.displayLocale,
 			});
-			partOfSpeechDisplayed = strings.partOfSpeech(detected);
-			if (isUnknownPartOfSpeech(detected)) {
-				partOfSpeechDisplayed += ` — '${original}'`;
+			partOfSpeechDisplayed = strings.partOfSpeech(partOfSpeech);
+			if (isUnknownPartOfSpeech(partOfSpeech)) {
+				partOfSpeechDisplayed += ` — '${partOfSpeech}'`;
 			}
 		}
 	}
 	const partOfSpeechFormatted = `***${partOfSpeechDisplayed}***`;
 
-	const word = entry.lemma;
+	const word = entry.lemma.value;
 
 	const embeds: Discord.CamelizedDiscordEmbed[] = [];
 	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
-	if (entry.nativeDefinitions !== undefined && entry.nativeDefinitions.length > 0) {
-		const definitionsStringified = stringifyEntries(client, interaction, entry.nativeDefinitions, "definitions");
+	if (entry.definitions !== undefined && entry.definitions.length > 0) {
+		const definitionsStringified = stringifyEntries(client, interaction, entry.definitions, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, verbose);
 
 		if (verbose) {
@@ -530,8 +538,8 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.definitions !== undefined && entry.definitions.length > 0) {
-		const definitionsStringified = stringifyEntries(client, interaction, entry.definitions, "definitions");
+	if (entry.translations !== undefined && entry.translations.length > 0) {
+		const definitionsStringified = stringifyEntries(client, interaction, entry.translations, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, verbose);
 
 		if (verbose) {
@@ -578,20 +586,15 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.etymologies !== undefined && entry.etymologies.length > 0) {
-		const etymology = entry.etymologies
-			.map((etymology) => {
-				if (etymology.tags === undefined) {
-					return etymology.value;
-				}
-
-				if (etymology.value === undefined || etymology.value.length === 0) {
-					return tagsToString(etymology.tags);
-				}
-
-				return `${tagsToString(etymology.tags)} ${etymology.value}`;
-			})
-			.join("\n");
+	if (entry.etymology !== undefined) {
+		let etymology: string;
+		if (entry.etymology.labels === undefined) {
+			etymology = entry.etymology.value;
+		} else if (entry.etymology.value === undefined || entry.etymology.value.length === 0) {
+			etymology = tagsToString(entry.etymology.labels);
+		} else {
+			etymology = `${tagsToString(entry.etymology.labels)} ${entry.etymology.value}`;
+		}
 
 		const strings = constants.contexts.etymology({
 			localise: client.localise,
@@ -631,7 +634,7 @@ function tagsToString(tags: string[]): string {
 
 type EntryType = "definitions" | "expressions";
 
-function isDefinition(_entry: Definition | Expression, entryType: EntryType): _entry is Definition {
+function isDefinition(_entry: DefinitionField | ExpressionField, entryType: EntryType): _entry is DefinitionField {
 	return entryType === "definitions";
 }
 
@@ -639,7 +642,7 @@ const parenthesesExpression = /\((.+?)\)/g;
 
 function stringifyEntries<
 	T extends EntryType,
-	E extends Definition[] | Expression[] = T extends "definitions" ? Definition[] : Expression[],
+	E extends DefinitionField[] | ExpressionField[] = T extends "definitions" ? DefinitionField[] : ExpressionField[],
 >(
 	client: Client,
 	interaction: Logos.Interaction,
@@ -668,7 +671,7 @@ function stringifyEntries<
 			entry.value,
 		);
 
-		let anchor = entry.tags === undefined ? value : `${tagsToString(entry.tags)} ${value}`;
+		let anchor = entry.labels === undefined ? value : `${tagsToString(entry.labels)} ${value}`;
 		if (isDefinition(entry, entryType)) {
 			if (entry.relations !== undefined) {
 				const strings = constants.contexts.wordRelations({

@@ -596,12 +596,12 @@ const languageToLocale = Object.freeze({
 type DeepLLanguage = (typeof languages.deepl)[number];
 type GoogleTranslateLanguage = (typeof languages.google)[number];
 type LingvanexLanguage = (typeof languages.lingvanex)[number];
-type Language = DeepLLanguage | GoogleTranslateLanguage | LingvanexLanguage;
+type TranslationLanguage = DeepLLanguage | GoogleTranslateLanguage | LingvanexLanguage;
 
 type DeepLLocale = (typeof languageToLocale.deepl)[keyof typeof languageToLocale.deepl];
 type GoogleTranslateLocale = (typeof languageToLocale.google)[keyof typeof languageToLocale.google];
 type LingvanexLocale = (typeof languageToLocale.lingvanex)[keyof typeof languageToLocale.lingvanex];
-type Locale = DeepLLocale | GoogleTranslateLocale | LingvanexLocale;
+type TranslationLocale = DeepLLocale | GoogleTranslateLocale | LingvanexLocale;
 
 const localeToLanguage = {
 	deepl: Object.mirror(languageToLocale.deepl),
@@ -609,7 +609,7 @@ const localeToLanguage = {
 	lingvanex: Object.mirror(languageToLocale.lingvanex),
 };
 
-function isLanguage(language: string): language is Language {
+function isTranslationLanguage(language: string): language is TranslationLanguage {
 	return language in languageToLocale.deepl || language in languageToLocale.google;
 }
 
@@ -652,7 +652,7 @@ function getLingvanexLanguageByLocale(locale: LingvanexLocale): LingvanexLanguag
 export {
 	languages,
 	languageToLocale,
-	isLanguage,
+	isTranslationLanguage,
 	isDeepLLocale,
 	isLingvanexLocale,
 	isGoogleTranslateLocale,
@@ -665,8 +665,8 @@ export {
 };
 export type {
 	Translator,
-	Language,
-	Locale,
+	TranslationLanguage,
+	TranslationLocale,
 	DeepLLanguage,
 	DeepLLocale,
 	GoogleTranslateLanguage,
