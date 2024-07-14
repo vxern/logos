@@ -23,6 +23,9 @@ export default Object.freeze({
 		trail: "...",
 		continued: "(...)",
 	},
+	word: {
+		ponsSyllableSeparator: "·",
+	},
 	missingString: "?",
 	roles: {
 		back: "..",

@@ -18,7 +18,7 @@ const sections = [
 ] as const;
 type DictionarySection = (typeof sections)[number];
 
-type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "wordnik" | "words-api";
+type Dictionary = "dexonline" | "dicolink" | "pons" | "wiktionary" | "wordnik" | "words-api";
 
 const dictionariesByLanguage = Object.freeze({
 	"Armenian/Eastern": ["wiktionary"],
@@ -29,7 +29,7 @@ const dictionariesByLanguage = Object.freeze({
 	"English/British": ["wiktionary", "wordnik", "words-api"],
 	Finnish: ["wiktionary"],
 	French: ["dicolink", "wiktionary"],
-	German: ["wiktionary"],
+	German: ["pons", "wiktionary"],
 	Greek: ["wiktionary"],
 	Hungarian: ["wiktionary"],
 	"Norwegian/Bokmal": ["wiktionary"],

@@ -35,6 +35,8 @@ const patterns = Object.freeze({
 	digit: /[0-9]/,
 	/** Used for matching against description localisations. */
 	localisationDescription: /\.description$/,
+	/** Used for matching against lemma headers in PONS. */
+	ponsHeader: /^\d+\. ?(.*?) ?(?:\(([^()]+)\) ?)?:?$/,
 } as const);
 
 function isValidSnowflake(snowflake: string): boolean {

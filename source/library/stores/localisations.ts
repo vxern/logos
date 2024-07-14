@@ -3,8 +3,8 @@ import {
 	type Locale,
 	type LocalisationLanguage,
 	getDiscordLocaleByLanguage,
-	isDiscordLanguage,
 	getLogosLanguageByLocale,
+	isDiscordLanguage,
 } from "logos:constants/languages/localisation";
 import type { Environment } from "logos:core/loaders/environment";
 import { Logger } from "logos/logger";

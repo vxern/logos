@@ -4,6 +4,7 @@ import { isDefined } from "logos:core/utilities";
 import type { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
 import { DexonlineAdapter } from "logos/adapters/dictionaries/adapters/dexonline";
 import { DicolinkAdapter } from "logos/adapters/dictionaries/adapters/dicolink";
+import { PonsAdapter } from "logos/adapters/dictionaries/adapters/pons.ts";
 import { WiktionaryAdapter } from "logos/adapters/dictionaries/adapters/wiktionary";
 import { WordnikAdapter } from "logos/adapters/dictionaries/adapters/wordnik.ts";
 import { WordsAPIAdapter } from "logos/adapters/dictionaries/adapters/words-api";
@@ -15,6 +16,7 @@ class DictionaryStore {
 	readonly adapters: {
 		readonly dexonline: DexonlineAdapter;
 		readonly dicolink?: DicolinkAdapter;
+		readonly pons?: PonsAdapter;
 		readonly wiktionary: WiktionaryAdapter;
 		readonly wordnik?: WordsAPIAdapter;
 		readonly "words-api"?: WordsAPIAdapter;
@@ -26,6 +28,11 @@ class DictionaryStore {
 		const dicolinkAdapter = DicolinkAdapter.tryCreate(client);
 		if (dicolinkAdapter === undefined) {
 			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a Dicolink integration.");
+		}
+
+		const ponsAdapter = PonsAdapter.tryCreate(client);
+		if (ponsAdapter === undefined) {
+			this.log.warn("`SECRET_PONS` has not been provided. Logos will run without a PONS integration.");
 		}
 
 		const wordnikAdapter = WordnikAdapter.tryCreate(client);
@@ -41,6 +48,7 @@ class DictionaryStore {
 		this.adapters = {
 			dexonline: new DexonlineAdapter(client),
 			dicolink: dicolinkAdapter,
+			pons: ponsAdapter,
 			wiktionary: new WiktionaryAdapter(client),
 			"words-api": wordsApiAdapter,
 		};
