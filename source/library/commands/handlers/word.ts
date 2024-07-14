@@ -3,10 +3,10 @@ import { isLocalisationLanguage } from "logos:constants/languages/localisation.t
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";
 import type { DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import type { DefinitionField, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry.ts";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice.ts";
-import type { DefinitionField, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry.ts";
 
 async function handleFindWordAutocomplete(
 	client: Client,
@@ -90,10 +90,11 @@ async function handleFindWord(
 
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
+	const identifiersFormatted = dictionaries.map((dictionary) => dictionary.identifier).join(", ");
 	client.log.info(
 		`Looking up the word '${interaction.parameters.word}' from ${
 			dictionaries.length
-		} dictionaries as requested by ${client.diagnostics.user(interaction.user)} on ${guild.name}...`,
+		} dictionaries (${identifiersFormatted}) as requested by ${client.diagnostics.user(interaction.user)} on ${guild.name}...`,
 	);
 
 	const unclassifiedEntries: DictionaryEntry[] = [];
