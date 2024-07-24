@@ -68,10 +68,6 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 			return;
 		}
 
-		reportService.registerDocument(reportDocument);
-		reportService.registerPrompt(prompt, user.id, reportDocument);
-		reportService.registerHandler(reportDocument);
-
 		const strings = constants.contexts.reportSubmitted({ localise: client.localise, locale: interaction.locale });
 		await client.succeeded(submission, {
 			title: strings.title,

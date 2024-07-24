@@ -12,6 +12,7 @@ class DiscordConnection {
 		readonly messages: {
 			readonly latest: Map<bigint, Logos.Message>;
 			readonly previous: Map<bigint, Logos.Message>;
+			readonly fileContents: Map<bigint, Discord.FileContent>;
 		};
 		readonly roles: Map<bigint, Logos.Role>;
 	};
@@ -31,6 +32,7 @@ class DiscordConnection {
 			messages: {
 				latest: new Map(),
 				previous: new Map(),
+				fileContents: new Map(),
 			},
 			roles: new Map(),
 		};
@@ -151,7 +153,36 @@ class DiscordConnection {
 			}
 		}
 
+		const uncachedAttachments = result.attachments?.filter(
+			(attachment) => !this.cache.messages.fileContents.has(attachment.id),
+		);
+
+		DiscordConnection.#downloadAttachments(uncachedAttachments ?? []).then((downloaded) => {
+			for (const [attachment, fileContent] of downloaded) {
+				this.cache.messages.fileContents.set(attachment.id, fileContent);
+			}
+		});
+
 		return result;
+	}
+
+	static async #downloadAttachments(
+		attachments: Discord.Attachment[],
+	): Promise<[attachment: Discord.Attachment, fileContent: Discord.FileContent][]> {
+		if (attachments.length === 0) {
+			return [];
+		}
+
+		return Promise.all(
+			attachments.map((attachment) =>
+				fetch(attachment.url)
+					.then((response) => response.blob())
+					.then<[attachment: Discord.Attachment, fileContent: Discord.FileContent]>((blob) => [
+						attachment,
+						{ name: attachment.filename, blob } as Discord.FileContent,
+					]),
+			),
+		);
 	}
 
 	#transformRole(_: Discord.Bot, payload: Parameters<Discord.Transformers["role"]>[1]): Discord.Role {

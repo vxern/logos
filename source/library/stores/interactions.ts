@@ -210,7 +210,7 @@ class InteractionStore {
 	async reply(
 		interaction: Logos.Interaction,
 		embedOrData: EmbedOrCallbackData,
-		{ visible = false }: { visible?: boolean } = {},
+		{ visible = false, autoDelete = false }: { visible?: boolean; autoDelete?: boolean } = {},
 	): Promise<void> {
 		const data = getInteractionCallbackData(embedOrData);
 
@@ -239,9 +239,17 @@ class InteractionStore {
 				data,
 			})
 			.catch((reason) => this.log.error("Failed to reply to interaction:", reason));
+
+		if (autoDelete) {
+			this.#autoDeleteReply(interaction);
+		}
 	}
 
-	async editReply(interaction: Logos.Interaction, embedOrData: EmbedOrCallbackData): Promise<void> {
+	async editReply(
+		interaction: Logos.Interaction,
+		embedOrData: EmbedOrCallbackData,
+		{ autoDelete = false }: { autoDelete?: boolean } = {},
+	): Promise<void> {
 		const data = getInteractionCallbackData(embedOrData);
 
 		if (interaction.parameters["@repeat"]) {
@@ -258,6 +266,10 @@ class InteractionStore {
 		await this.#client.bot.helpers
 			.editOriginalInteractionResponse(interaction.token, data)
 			.catch((reason) => this.log.error("Failed to edit reply to interaction:", reason));
+
+		if (autoDelete) {
+			this.#autoDeleteReply(interaction);
+		}
 	}
 
 	async deleteReply(interaction: Logos.Interaction): Promise<void> {
@@ -314,6 +326,16 @@ class InteractionStore {
 
 			await this.editReply(interaction, embedOrData);
 		};
+	}
+
+	#autoDeleteReply(interaction: Logos.Interaction): void {
+		setTimeout(
+			() =>
+				this.#client.deleteReply(interaction).catch(() => {
+					this.log.warn("Failed to auto-delete message.");
+				}),
+			constants.AUTO_DELETE_MESSAGE_TIMEOUT,
+		);
 	}
 
 	#resolveIdentifierToMembers({

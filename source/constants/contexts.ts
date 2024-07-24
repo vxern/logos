@@ -1214,6 +1214,10 @@ export default Object.freeze({
 			after: localise("events.messageUpdate.fields.after", locale)(),
 		},
 	}),
+	memberKick: ({ localise, locale }) => ({
+		title: localise("events.memberKick.title", locale)(),
+		description: localise("events.memberKick.description", locale),
+	}),
 	entryRequestAccept: ({ localise, locale }) => ({
 		title: localise("events.entryRequestAccept.title", locale)(),
 		description: localise("events.entryRequestAccept.description", locale),
@@ -1566,6 +1570,40 @@ export default Object.freeze({
 			tooManyUses: localise("interactions.rateLimited.description.tooManyUses", locale),
 			cannotUseUntil: localise("interactions.rateLimited.description.cannotUseAgainUntil", locale),
 		},
+	}),
+	inquiryInProgress: ({ localise, locale }) => ({
+		title: localise("entry.verification.vote.inquiryInProgress.title", locale)(),
+		description: localise("entry.verification.vote.inquiryInProgress.description", locale)(),
+	}),
+	noReports: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("reports.noReports", locale)(),
+	}),
+	noResources: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("resources.noResources", locale)(),
+	}),
+	noSuggestions: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("suggestions.noSuggestions", locale)(),
+	}),
+	noTickets: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("tickets.noTickets", locale)(),
+	}),
+	noEntryRequests: ({ localise, locale }) => ({
+		title: localise("allUpToDate", locale)(),
+		description: localise("entryRequests.noEntryRequests", locale)(),
+	}),
+	verificationAnswers: ({ localise, locale }) => ({
+		verificationAnswers: localise("entry.verification.inquiry.verificationAnswers", locale)(),
+	}),
+	noSentencesFound: ({ localise, locale }) => ({
+		title: localise("context.strings.noSentencesFound.title", locale)(),
+		description: localise("context.strings.noSentencesFound.description", locale)(),
+	}),
+	phraseInContext: ({ localise, locale }) => ({
+		title: localise("context.strings.phraseInContext.title", locale),
 	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

@@ -73,7 +73,7 @@ class ReportPromptService extends PromptService<{
 					],
 					footer: {
 						text: this.guild.name,
-						iconUrl: PromptService.encodePartialIdInGuildIcon({
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
 							guild: this.guild,
 							partialId: reportDocument.partialId,
 						}),
@@ -107,6 +107,30 @@ class ReportPromptService extends PromptService<{
 									customId: this.magicButton.encodeId([reportDocument.partialId, `${true}`]),
 								},
 							],
+				},
+			],
+		};
+	}
+
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
+		const strings = constants.contexts.noReports({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
 				},
 			],
 		};

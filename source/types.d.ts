@@ -3,7 +3,6 @@ import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } 
 import type { Properties } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
 import type { WithRequired } from "logos:core/utilities.ts";
-import type * as Discord from "@discordeno/bot";
 import type { EntryRequest } from "logos/models/entry-request";
 import type { Praise } from "logos/models/praise";
 import type { Report } from "logos/models/report";
@@ -99,6 +98,9 @@ declare global {
 
 		/** Type representing events that occur within a guild. */
 		type Events = {
+			/** Fill-in Discord event for a member having been kicked. */
+			guildMemberKick: [user: Logos.User, by: Logos.Member];
+		} & {
 			/** An entry request has been submitted. */
 			entryRequestSubmit: [user: Logos.User, entryRequest: EntryRequest];
 
