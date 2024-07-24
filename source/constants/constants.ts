@@ -9,6 +9,7 @@ import dictionaries from "logos:constants/dictionaries";
 import emojis from "logos:constants/emojis";
 import endpoints from "logos:constants/endpoints";
 import gifs from "logos:constants/gifs";
+import keys from "logos:constants/keys";
 import languages from "logos:constants/languages";
 import licences from "logos:constants/licences";
 import links from "logos:constants/links";
@@ -34,12 +35,15 @@ const constants = Object.freeze({
 	MAXIMUM_HISTORY_ENTRIES: 100,
 	MAXIMUM_QUEUE_ENTRIES: 100,
 	MAXIMUM_EMBED_FIELD_LENGTH: 1024,
+	MAXIMUM_EMBED_DESCRIPTION_LENGTH: 3072,
 	RESULTS_PER_PAGE: 10,
 	STATUS_CYCLE_PERIOD: 1000 * 10, // 10 seconds in milliseconds.
 	INTERACTION_TOKEN_EXPIRY: 1000 * 60 * 15 - 1000 * 10, // 14 minutes, 50 seconds in milliseconds.
 	SLOWMODE_COLLISION_TIMEOUT: 1000 * 20, // 20 seconds in milliseconds.
+	AUTO_DELETE_MESSAGE_TIMEOUT: 1000 * 10, // 10 seconds in milliseconds.
 	PICK_MISSING_WORD_CHOICES: 4,
 	SHORT_TEXT_LENGTH: 60,
+	SENTENCE_PAIRS_TO_SHOW: 5,
 	LOCALISATIONS_DIRECTORY: "./assets/localisations",
 	SENTENCE_PAIRS_DIRECTORY: "./assets/sentences",
 } as const);
@@ -57,6 +61,7 @@ export default Object.freeze({
 	emojis,
 	endpoints,
 	gifs,
+	keys,
 	languages,
 	licences,
 	links,

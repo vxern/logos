@@ -79,6 +79,9 @@ interface GuildFeatures {
 
 			word?: Activatable;
 
+			/** @since v4.7.0 */
+			context?: Activatable;
+
 			/** @since v3.8.0 */
 			targetOnly?: Activatable<{
 				channelIds: string[];
@@ -471,6 +474,15 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		}
 
 		return languageFeatures.word;
+	}
+
+	get context(): Enabled<NonNullable<Guild["languageFeatures"]>["context"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.context?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.context;
 	}
 
 	get targetOnly(): Enabled<NonNullable<Guild["languageFeatures"]>["targetOnly"]> | undefined {

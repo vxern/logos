@@ -10,7 +10,7 @@ const logger: EventLogger<"purgeBegin"> = (client, [member, channel, messageCoun
 				color: constants.colours.warning,
 				description: strings.description({
 					moderator: client.diagnostics.member(member),
-					message_count: client.pluralise("events.purgeBegin.description.messages", guildLocale, {
+					messages: client.pluralise("events.purgeBegin.description.messages", guildLocale, {
 						quantity: messageCount,
 					}),
 					channel: mention(channel.id, { type: "channel" }),

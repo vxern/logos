@@ -79,7 +79,7 @@ async function handleRecogniseLanguage(
 		await client.noticed(interaction, {
 			embeds: [
 				{
-					description: strings.description({ language: strings.language(language) }),
+					description: `> *${text}*\n\n${strings.description({ language: strings.language(language) })}`,
 				},
 			],
 			components: [
@@ -156,7 +156,12 @@ async function handleRecogniseLanguage(
 		}
 
 		await client.noticed(interaction, {
-			embeds: [{ fields }],
+			embeds: [
+				{
+					description: `> *${text}*\n\n`,
+					fields,
+				},
+			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,

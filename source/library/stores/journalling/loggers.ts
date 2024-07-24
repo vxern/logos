@@ -1,7 +1,7 @@
 import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
 import type { Locale } from "logos:constants/languages/localisation";
-import type * as Discord from "@discordeno/bot";
-import type { Client } from "logos/client";
+import type * as Discord from "@discordeno/bot";import type { Client } from "logos/client";
+
 import guildBanAdd from "logos/stores/journalling/discord/guild-ban-add";
 import guildBanRemove from "logos/stores/journalling/discord/guild-ban-remove";
 import guildMemberAdd from "logos/stores/journalling/discord/guild-member-add";
@@ -11,6 +11,7 @@ import messageUpdate from "logos/stores/journalling/discord/message-update";
 import entryRequestAccept from "logos/stores/journalling/logos/entry-request-accept";
 import entryRequestReject from "logos/stores/journalling/logos/entry-request-reject";
 import entryRequestSubmit from "logos/stores/journalling/logos/entry-request-submit";
+import guildMemberKick from "logos/stores/journalling/logos/guild-member-kick";
 import inquiryOpen from "logos/stores/journalling/logos/inquiry-open";
 import memberTimeoutAdd from "logos/stores/journalling/logos/member-timeout-add";
 import memberTimeoutRemove from "logos/stores/journalling/logos/member-timeout-remove";
@@ -37,6 +38,7 @@ const loggers = Object.freeze({
 	guildMemberRemove,
 	messageDelete,
 	messageUpdate,
+	guildMemberKick,
 	entryRequestSubmit,
 	entryRequestAccept,
 	entryRequestReject,
