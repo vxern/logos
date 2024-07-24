@@ -5,6 +5,7 @@ import { Model } from "logos/models/model.ts";
 import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
+import { JournallingStore } from "logos/stores/journalling.ts";
 import type { EntryRequest } from "logos/models/entry-request.ts";
 import { Model } from "logos/models/model.ts";
 
@@ -155,8 +156,27 @@ class TicketPromptService extends PromptService<{
 		return ticketDocument;
 	}
 
-	async handleDelete(ticketDocument: Ticket): Promise<void> {
-		await super.handleDelete(ticketDocument);
+	async handleDelete(ticketDocument: Ticket, interaction: Logos.Interaction): Promise<void> {
+		const [member, author] = [
+			this.client.entities.members.get(this.guildId)?.get(BigInt(ticketDocument.authorId)),
+			this.client.entities.users.get(interaction.user.id),
+		];
+		if (member === undefined || author === undefined) {
+			return;
+		}
+
+		const messages = await this.getAllMessages({ channelId: BigInt(ticketDocument.channelId) });
+		if (messages === undefined) {
+			return;
+		}
+
+		const messageLog = JournallingStore.generateMessageLog(this.client, { messages });
+		await this.client.tryLog("ticketClose", {
+			guildId: this.guildId,
+			args: [member, ticketDocument, author, messageLog],
+		});
+
+		await super.handleDelete(ticketDocument, interaction);
 
 		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {
 			this.log.warn("Failed to delete ticket channel.");
