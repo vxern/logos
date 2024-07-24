@@ -66,5 +66,6 @@
   "entry.verification.inquiry.failed.title": "Failed to open inquiry",
   "entry.verification.inquiry.failed.description": "Due to unknown reasons, opening an inquiry with this user failed.",
   "entry.verification.inquiry.opened.title": "Inquiry opened!",
-  "entry.verification.inquiry.opened.description": "An inquiry has been opened to review the user's request to join {guild_name}."
+  "entry.verification.inquiry.opened.description": "An inquiry has been opened to review the user's request to join {guild_name}.",
+  "entry.verification.inquiry.verificationAnswers": "Verification Answers"
 }

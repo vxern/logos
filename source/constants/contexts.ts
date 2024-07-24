@@ -1567,6 +1567,9 @@ export default Object.freeze({
 			cannotUseUntil: localise("interactions.rateLimited.description.cannotUseAgainUntil", locale),
 		},
 	}),
+	verificationAnswers: ({ localise, locale }) => ({
+		verificationAnswers: localise("entry.verification.inquiry.verificationAnswers", locale)(),
+	}),
 	noSentencesFound: ({ localise, locale }) => ({
 		title: localise("context.strings.noSentencesFound.title", locale)(),
 		description: localise("context.strings.noSentencesFound.description", locale)(),
