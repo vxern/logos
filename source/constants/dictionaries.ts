@@ -1,4 +1,4 @@
-import type { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 
 type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "wordnik" | "words-api";
 

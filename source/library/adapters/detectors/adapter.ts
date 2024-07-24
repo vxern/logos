@@ -1,4 +1,4 @@
-import type { DetectionLanguage } from "logos:constants/languages";
+import type { DetectionLanguage } from "logos:constants/languages/detection";
 import type { Licence } from "logos:constants/licences.ts";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";

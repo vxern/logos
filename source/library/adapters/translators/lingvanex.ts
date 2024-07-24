@@ -1,11 +1,11 @@
+import type { Languages } from "logos:constants/languages";
 import {
-	type Languages,
 	type LingvanexLanguage,
 	type TranslationLocale,
-	getLingvanexLocaleByTranslationLanguage,
-	getLingvanexTranslationLanguageByLocale,
+	getLingvanexLanguageByLocale,
+	getLingvanexLocaleByLanguage,
 	isLingvanexLocale,
-} from "logos:constants/languages";
+} from "logos:constants/languages/translation.ts";
 import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 
@@ -40,8 +40,8 @@ class LingvanexAdapter extends TranslatorAdapter<LingvanexLanguage> {
 		text,
 		languages,
 	}: { text: string; languages: Languages<LingvanexLanguage> }): Promise<TranslationResult | undefined> {
-		const sourceLocale = getLingvanexLocaleByTranslationLanguage(languages.source);
-		const targetLocale = getLingvanexLocaleByTranslationLanguage(languages.target);
+		const sourceLocale = getLingvanexLocaleByLanguage(languages.source);
+		const targetLocale = getLingvanexLocaleByLanguage(languages.target);
 
 		const locales: Languages<TranslationLocale> = { source: sourceLocale, target: targetLocale };
 
@@ -72,7 +72,7 @@ class LingvanexAdapter extends TranslatorAdapter<LingvanexLanguage> {
 		const detectedSourceLanguage =
 			detectedSourceLocale === undefined || !isLingvanexLocale(detectedSourceLocale)
 				? undefined
-				: getLingvanexTranslationLanguageByLocale(detectedSourceLocale);
+				: getLingvanexLanguageByLocale(detectedSourceLocale);
 
 		return { detectedSourceLanguage, text: translatedText, source: constants.licences.translators.lingvanex };
 	}

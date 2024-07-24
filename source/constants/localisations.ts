@@ -1,4 +1,5 @@
-import type { Language, LocalisationLanguage } from "logos:constants/languages";
+import type { Language } from "logos:constants/languages";
+import type { LocalisationLanguage } from "logos:constants/languages/localisation.ts";
 import type { PartOfSpeech } from "logos:constants/parts-of-speech";
 import armenian from "logos:constants/transformers/armenian";
 import danish from "logos:constants/transformers/danish";

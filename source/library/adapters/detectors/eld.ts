@@ -1,4 +1,4 @@
-import { getELDDetectionLanguageByLocale, isELDLocale } from "logos:constants/languages";
+import { getELDLanguageByLocale, isELDLocale } from "logos:constants/languages/detection.ts";
 // @ts-expect-error: ELD is ES2015.
 import { eld } from "eld";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
@@ -15,7 +15,7 @@ class ELDAdapter extends DetectorAdapter {
 			return undefined;
 		}
 
-		const detectedLanguage = getELDDetectionLanguageByLocale(result.language);
+		const detectedLanguage = getELDLanguageByLocale(result.language);
 
 		return { language: detectedLanguage, source: constants.licences.detectors.eld };
 	}

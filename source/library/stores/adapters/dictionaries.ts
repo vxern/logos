@@ -1,5 +1,5 @@
 import type { Dictionary } from "logos:constants/dictionaries";
-import type { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import { isDefined } from "logos:core/utilities";
 import type { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
 import { DexonlineAdapter } from "logos/adapters/dictionaries/dexonline";

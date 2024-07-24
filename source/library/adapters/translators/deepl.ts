@@ -1,10 +1,10 @@
+import type { Languages } from "logos:constants/languages";
 import {
 	type DeepLLanguage,
-	type Languages,
-	getDeepLLocaleByTranslationLanguage,
-	getDeepLTranslationLanguageByLocale,
+	getDeepLLanguageByLocale,
+	getDeepLLocaleByLanguage,
 	isDeepLLocale,
-} from "logos:constants/languages";
+} from "logos:constants/languages/translation.ts";
 import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 
@@ -33,8 +33,8 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 			return undefined;
 		}
 
-		const sourceLocaleComplete = getDeepLLocaleByTranslationLanguage(languages.source);
-		const targetLocale = getDeepLLocaleByTranslationLanguage(languages.target);
+		const sourceLocaleComplete = getDeepLLocaleByLanguage(languages.source);
+		const targetLocale = getDeepLLocaleByLanguage(languages.target);
 
 		const [sourceLocale, _] = sourceLocaleComplete.split("-");
 		if (sourceLocale === undefined) {
@@ -84,7 +84,7 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 		}
 
 		const detectedSourceLanguage = isDeepLLocale(detectedSourceLocale)
-			? getDeepLTranslationLanguageByLocale(detectedSourceLocale)
+			? getDeepLLanguageByLocale(detectedSourceLocale)
 			: undefined;
 
 		return { detectedSourceLanguage, text: translation.text, source: constants.licences.translators.deepl };

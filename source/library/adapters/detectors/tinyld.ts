@@ -1,4 +1,4 @@
-import { getTinyLDDetectionLanguageByLocale, isTinyLDLocale } from "logos:constants/languages";
+import { getTinyLDLanguageByLocale, isTinyLDLocale } from "logos:constants/languages/detection.ts";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
 // REMINDER(vxern): Re-enable the package once it's fixed on Bun. (Weird exception getting thrown on startup)
 import type { Client } from "logos/client";
@@ -22,7 +22,7 @@ class TinyLDAdapter extends DetectorAdapter {
 			return undefined;
 		}
 
-		const detectedLanguage = getTinyLDDetectionLanguageByLocale(detectedLocale);
+		const detectedLanguage = getTinyLDLanguageByLocale(detectedLocale);
 
 		return { language: detectedLanguage, source: constants.licences.detectors.tinyld };
 	}

@@ -1,4 +1,5 @@
-import { isLocalisationLanguage } from "logos:constants/languages";
+import defaults from "logos:constants/defaults";
+import { isLocalisationLanguage } from "logos:constants/languages/localisation.ts";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";
 import type { Definition, DictionaryEntry, Expression } from "logos/adapters/dictionaries/adapter";

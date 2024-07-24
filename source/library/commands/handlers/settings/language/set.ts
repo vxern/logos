@@ -1,4 +1,5 @@
-import languages, { getLocaleByLocalisationLanguage, isLocalisationLanguage } from "logos:constants/languages";
+import languages from "logos:constants/languages";
+import { getLocalisationLocaleByLanguage, isLocalisationLanguage } from "logos:constants/languages/localisation.ts";
 import { trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { User } from "logos/models/user";
@@ -59,7 +60,7 @@ async function handleSetLanguage(
 		userDocument.preferredLanguage = language;
 	});
 
-	const newLocale = getLocaleByLocalisationLanguage(language);
+	const newLocale = getLocalisationLocaleByLanguage(language);
 	const strings = {
 		...constants.contexts.languageUpdated({ localise: client.localise, locale: newLocale }),
 		...constants.contexts.language({ localise: client.localise, locale: newLocale }),

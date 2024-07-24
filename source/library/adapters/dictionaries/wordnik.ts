@@ -1,4 +1,4 @@
-import type { LearningLanguage } from "logos:constants/languages.ts";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import {
 	DictionaryAdapter,
 	type DictionaryEntry,
