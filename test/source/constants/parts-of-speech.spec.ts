@@ -33,11 +33,11 @@ describe("getPartOfSpeech()", () => {
 
 	it("returns the part of speech matched to the exact term in the given language.", () => {
 		const [detected, original] = getPartOfSpeech({
-			terms: { exact: "rzeczownik" },
-			learningLanguage: "Polish",
+			terms: { exact: "substantiv" },
+			learningLanguage: "Romanian",
 		});
 		expect(detected).to.equal("noun" satisfies PartOfSpeech);
-		expect(original).to.equal("rzeczownik");
+		expect(original).to.equal("substantiv");
 	});
 
 	it(

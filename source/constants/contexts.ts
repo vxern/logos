@@ -1567,5 +1567,12 @@ export default Object.freeze({
 			cannotUseUntil: localise("interactions.rateLimited.description.cannotUseAgainUntil", locale),
 		},
 	}),
+	noSentencesFound: ({ localise, locale }) => ({
+		title: localise("context.strings.noSentencesFound.title", locale)(),
+		description: localise("context.strings.noSentencesFound.description", locale)(),
+	}),
+	phraseInContext: ({ localise, locale }) => ({
+		title: localise("context.strings.phraseInContext.title", locale),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

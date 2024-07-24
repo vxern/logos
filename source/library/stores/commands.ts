@@ -415,6 +415,10 @@ class CommandStore {
 			if (guildDocument.hasEnabled("word")) {
 				commands.push(this.commands.word);
 			}
+
+			if (guildDocument.hasEnabled("context")) {
+				commands.push(this.commands.context);
+			}
 		}
 
 		if (guildDocument.hasEnabled("moderationFeatures")) {
