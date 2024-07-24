@@ -1,6 +1,6 @@
 import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
 import type { Locale } from "logos:constants/languages/localisation";
-import type * as Discord from "@discordeno/bot";import type { Client } from "logos/client";
+import type { Client } from "logos/client";
 
 import guildBanAdd from "logos/stores/journalling/discord/guild-ban-add";
 import guildBanRemove from "logos/stores/journalling/discord/guild-ban-remove";

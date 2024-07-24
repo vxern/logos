@@ -1,4 +1,3 @@
-import defaults from "logos:constants/defaults";
 import { isLocalisationLanguage } from "logos:constants/languages/localisation.ts";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";
@@ -137,22 +136,18 @@ async function handleFindWord(
 
 	if (entriesByPartOfSpeech.size === 0) {
 		const strings = constants.contexts.noResults({ localise: client.localise, locale: interaction.displayLocale });
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description({ word: interaction.parameters.word }),
-					color: constants.colours.dullYellow,
-				},
-			],
-		});
-
-		setTimeout(
-			() =>
-				client.deleteReply(interaction).catch(() => {
-					client.log.warn(`Failed to delete "no results for word" message.`);
-				}),
-			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		await client.editReply(
+			interaction,
+			{
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description({ word: interaction.parameters.word }),
+						color: constants.colours.dullYellow,
+					},
+				],
+			},
+			{ autoDelete: true },
 		);
 
 		return;

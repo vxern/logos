@@ -1,4 +1,5 @@
-import { getLocaleByLearningLanguage, isLocalisationLanguage } from "logos:constants/languages.ts";
+import { isLocalisationLanguage } from "logos:constants/languages/localisation";
+import { getLocaleByLearningLanguage } from "logos:constants/languages/learning";
 import { shuffle } from "ioredis/built/utils";
 import type { Client } from "logos/client.ts";
 import { autocompleteLanguage } from "logos/commands/fragments/autocomplete/language.ts";

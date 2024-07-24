@@ -5,8 +5,6 @@ import { Model } from "logos/models/model.ts";
 import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
-import type { EntryRequest } from "logos/models/entry-request.ts";
-import { Model } from "logos/models/model.ts";
 
 class TicketPromptService extends PromptService<{
 	type: "tickets";

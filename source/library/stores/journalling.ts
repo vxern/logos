@@ -1,5 +1,4 @@
 import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
-import type * as Discord from "@discordeno/bot";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { Logger } from "logos/logger";
@@ -141,7 +140,7 @@ class JournallingStore {
 		return `[${postingTime}] ${username}:\n\n${content}`;
 	}
 
-  async #guildBanAdd(user: Discord.User, guildId: bigint): Promise<void> {
+	async #guildBanAdd(user: Discord.User, guildId: bigint): Promise<void> {
 		await this.tryLog("guildBanAdd", { guildId, args: [user, guildId] });
 	}
 
