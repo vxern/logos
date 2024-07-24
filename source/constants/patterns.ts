@@ -26,7 +26,8 @@ const patterns = Object.freeze({
 	/** Used for matching short time expressions, e.g. 22:51:09 */
 	conciseTimeExpression: /^(?:(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):))?(0?[0-9]|[1-5][0-9]|60)$/,
 	/** Used for matching a full word and nothing else around. */
-	wholeWord: (word: string) => new RegExp(`(?<=^|\\p{Z}|\\p{P})${word}(?=\\p{Z}|\\p{P}|$)`, "giu"),
+	wholeWord: (word: string, { caseSensitive }: { caseSensitive: boolean }) =>
+		new RegExp(`(?<=^|\\p{Z}|\\p{P})${word}(?=\\p{Z}|\\p{P}|$)`, `gu${caseSensitive ? "" : "i"}`),
 	/** Used for matching emojis, e.g. ✨ */
 	emojiExpression: /\p{Extended_Pictographic}/u,
 	/** Used for matching word separators to determine if a word is a compound in the game command. */
