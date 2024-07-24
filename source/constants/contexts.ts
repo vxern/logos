@@ -1214,6 +1214,10 @@ export default Object.freeze({
 			after: localise("events.messageUpdate.fields.after", locale)(),
 		},
 	}),
+	memberKick: ({ localise, locale }) => ({
+		title: localise("events.memberKick.title", locale)(),
+		description: localise("events.memberKick.description", locale),
+	}),
 	entryRequestAccept: ({ localise, locale }) => ({
 		title: localise("events.entryRequestAccept.title", locale)(),
 		description: localise("events.entryRequestAccept.description", locale),

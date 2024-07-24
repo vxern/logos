@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
 import { handleAnswer } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
