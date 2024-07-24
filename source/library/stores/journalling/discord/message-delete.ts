@@ -7,8 +7,14 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 		return undefined;
 	}
 
-	if (message.content === undefined) {
-		return undefined;
+	const fileContents: Discord.FileContent[] = [];
+	for (const attachment of message.attachments ?? []) {
+		const fileContent = client.entities.messages.fileContents.get(attachment.id);
+		if (fileContent === undefined) {
+			continue;
+		}
+
+		fileContents.push(fileContent);
 	}
 
 	const strings = constants.contexts.messageDelete({ localise: client.localise, locale: guildLocale });
@@ -21,14 +27,18 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 					user: client.diagnostics.user(message.author),
 					channel: mention(message.channelId, { type: "channel" }),
 				}),
-				fields: [
-					{
-						name: strings.fields.content,
-						value: codeMultiline(message.content),
-					},
-				],
+				fields:
+					message.content !== undefined
+						? [
+								{
+									name: strings.fields.content,
+									value: codeMultiline(message.content),
+								},
+							]
+						: undefined,
 			},
 		],
+		files: fileContents.length > 0 ? fileContents : undefined,
 	};
 };
 
