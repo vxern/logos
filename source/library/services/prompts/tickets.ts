@@ -55,7 +55,7 @@ class TicketPromptService extends PromptService<{
 					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({
+						iconUrl: PromptService.encodeMetadataInUserAvatar({
 							user,
 							partialId: ticketDocument.partialId,
 						}),
@@ -88,6 +88,30 @@ class TicketPromptService extends PromptService<{
 									customId: this.magicButton.encodeId([ticketDocument.partialId, `${true}`]),
 								},
 							],
+				},
+			],
+		};
+	}
+
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
+		const strings = constants.contexts.noTickets({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
 				},
 			],
 		};
