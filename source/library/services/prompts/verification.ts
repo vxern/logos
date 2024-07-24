@@ -4,7 +4,6 @@ import { InteractionCollector } from "logos/collectors";
 import type { EntryRequest, VoteType } from "logos/models/entry-request";
 import type { Guild } from "logos/models/guild";
 import { Model } from "logos/models/model";
-import { Ticket } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
@@ -274,18 +273,31 @@ class VerificationPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const newVote: VoteType = interaction.metadata[2] === "true" ? "for" : "against";
-
-		const voter = interaction.member;
-		if (voter === undefined) {
-			return undefined;
-		}
-
 		const entryRequestDocument = this.client.documents.entryRequests.get(
 			Model.buildPartialId<EntryRequest>({ guildId, authorId }),
 		);
 		if (entryRequestDocument === undefined) {
 			await this.#displayVoteError(interaction);
+			return undefined;
+		}
+
+		if (entryRequestDocument.ticketChannelId !== undefined) {
+			const strings = constants.contexts.inquiryInProgress({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
+			await this.client.warning(interaction, {
+				title: strings.title,
+				description: strings.description,
+				color: constants.colours.warning,
+			});
+			return;
+		}
+
+		const newVote: VoteType = interaction.metadata[2] === "true" ? "for" : "against";
+
+		const voter = interaction.member;
+		if (voter === undefined) {
 			return undefined;
 		}
 
@@ -600,24 +612,6 @@ class VerificationPromptService extends PromptService<{
 				);
 
 			await this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
-		}
-
-		if (entryRequestDocument.ticketChannelId !== undefined) {
-			const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
-			if (ticketService !== undefined) {
-				const [ticketDocument] = await Ticket.getAll(this.client, {
-					where: { guildId: this.guildIdString, channelId: entryRequestDocument.ticketChannelId },
-				});
-				if (ticketDocument === undefined) {
-					throw new Error("Unable to find ticket document.");
-				}
-
-				await ticketService.handleDelete(ticketDocument);
-
-				await entryRequestDocument.update(this.client, () => {
-					entryRequestDocument.ticketChannelId = undefined;
-				});
-			}
 		}
 
 		return true;

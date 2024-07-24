@@ -5,6 +5,8 @@ import { Model } from "logos/models/model.ts";
 import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
+import type { EntryRequest } from "logos/models/entry-request.ts";
+import { Model } from "logos/models/model.ts";
 
 class TicketPromptService extends PromptService<{
 	type: "tickets";
@@ -38,12 +40,6 @@ class TicketPromptService extends PromptService<{
 	}
 
 	getPromptContent(user: Logos.User, ticketDocument: Ticket): Discord.CreateMessageOptions | undefined {
-		// Inquiry tickets are hidden, and are not meant to be interactable.
-		// For all intents and purposes, verification prompts are kind of like their controller.
-		if (ticketDocument.type === "inquiry") {
-			return undefined;
-		}
-
 		const strings = constants.contexts.promptControls({
 			localise: this.client.localise,
 			locale: this.guildLocale,
@@ -164,6 +160,26 @@ class TicketPromptService extends PromptService<{
 
 		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {
 			this.log.warn("Failed to delete ticket channel.");
+		});
+
+		if (ticketDocument.type === "inquiry") {
+			await this.#handleCloseInquiry(ticketDocument);
+		}
+	}
+
+	async #handleCloseInquiry(ticketDocument: Ticket): Promise<void> {
+		const entryRequestDocument = this.client.documents.entryRequests.get(
+			Model.buildPartialId<EntryRequest>({
+				guildId: ticketDocument.guildId,
+				authorId: ticketDocument.authorId,
+			}),
+		);
+		if (entryRequestDocument === undefined || entryRequestDocument.ticketChannelId === undefined) {
+			return;
+		}
+
+		await entryRequestDocument.update(this.client, () => {
+			entryRequestDocument.ticketChannelId = undefined;
 		});
 	}
 
@@ -308,19 +324,10 @@ class TicketPromptService extends PromptService<{
 			}
 		}
 
-		ticketService.registerDocument(ticketDocument);
-		ticketService.registerHandler(ticketDocument);
-
-		if (type === "inquiry") {
-			return ticketDocument;
-		}
-
 		const prompt = await ticketService.savePrompt(user, ticketDocument);
 		if (prompt === undefined) {
 			return undefined;
 		}
-
-		ticketService.registerPrompt(prompt, user.id, ticketDocument);
 
 		return ticketDocument;
 	}
