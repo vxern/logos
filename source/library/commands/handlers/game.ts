@@ -32,17 +32,13 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
-
-		setTimeout(
-			() =>
-				client.deleteReply(interaction).catch(() => {
-					client.log.warn(`Failed to delete "no results for word" message.`);
-				}),
-			constants.defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		await client.warning(
+			interaction,
+			{
+				title: strings.title,
+				description: strings.description,
+			},
+			{ autoDelete: true },
 		);
 
 		return;
@@ -146,7 +142,9 @@ async function getGameView(
 
 	await sourceNotice.register();
 
-	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1]);
+	const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1], {
+		caseSensitive: false,
+	});
 	const mask = constants.special.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
 
 	const strings = constants.contexts.game({ localise: client.localise, locale: interaction.locale });

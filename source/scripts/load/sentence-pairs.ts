@@ -1,5 +1,4 @@
 import constants from "logos:constants/constants";
-import { locales } from "logos:constants/languages/localisation";
 import Redis from "ioredis";
 import winston from "winston";
 
@@ -27,11 +26,30 @@ const contentsAll = await Promise.all(promises);
 
 const client = new Redis();
 
-const indexes: Record<string, number[]> = {};
 for (const [locale, contents] of contentsAll) {
-	indexes[locale] = [];
+	const segmenter = new Intl.Segmenter(locale, { granularity: "word" });
 
-	const entries: Record<string, string> = {};
+	// Sentence index. The value is an array of sentence IDs for the given locale.
+	//
+	// Example:
+	// [1, 2, 3, 4, 5]
+	const sentencePairIndex: number[] = [];
+	// Sentence entry. The value is a stringified JSON with contents [sentence ID, sentence, translation ID,
+	// translation].
+	//
+	// Example:
+	// [1, "Acesta este o propoziție în română.", 2, "This is a sentence in Romanian."]
+	const sentencePairs: Record<string, string> = {};
+	// Lemma use index. The value is an array of sentence IDs that feature the lemma in the given language.
+	//
+	// Example:
+	// [1, 2, 3, 4, 5]
+	const lemmaUseIndexes: Record<string, number[]> = {};
+	// Lemma form index. The value is an array of different forms the lemma is found under.
+	//
+	// Example:
+	// ["polish", "Polish", "POLISH"]
+	const lemmaFormIndexes: Record<string, string[]> = {};
 	for (const line of contents.split("\n")) {
 		const record = line.split("\t") as [
 			sentenceId: string,
@@ -40,27 +58,53 @@ for (const [locale, contents] of contentsAll) {
 			translation: string,
 		];
 
-		entries[`${locale}:${record[0]}`] = JSON.stringify(record[1]);
-		indexes[locale]!.push(Number(record[0]));
+		const sentenceId = Number(record[0]);
+
+		for (const data of segmenter.segment(record[1])) {
+			const lemmaUseKey = constants.keys.redis.lemmaUseIndex({ locale, lemma: data.segment });
+			(lemmaUseIndexes[lemmaUseKey] ??= []).push(sentenceId);
+
+			const lemmaFormKey = constants.keys.redis.lemmaFormIndex({ locale, lemma: data.segment.toLowerCase() });
+			(lemmaFormIndexes[lemmaFormKey] ??= []).push(data.segment);
+		}
+
+		sentencePairs[constants.keys.redis.sentencePair({ locale, sentenceId })] = JSON.stringify(record);
+		sentencePairIndex.push(sentenceId);
 	}
 
 	// Remove the empty elements created by trying to parse the last, empty line in the files.
-	delete entries[`${locale}:`];
-	indexes[locale]!.pop();
+	sentencePairIndex.pop();
+	delete sentencePairs[constants.keys.redis.sentencePair({ locale, sentenceId: "" })];
+	delete lemmaUseIndexes[constants.keys.redis.lemmaUseIndex({ locale, lemma: "" })];
+	delete lemmaFormIndexes[constants.keys.redis.lemmaFormIndex({ locale, lemma: "" })];
 
-	await client.mset(entries);
+	await client.sadd(constants.keys.redis.sentencePairIndex({ locale }), sentencePairIndex);
 
-	winston.info(`Wrote ${indexes[locale]!.length} sentences for ${locale}...`);
-}
+	winston.info(`Wrote sentence pair index for ${locale}.`);
 
-// Save new entries to the indexes.
-{
-	const pipeline = client.pipeline();
-	for (const locale of locales) {
-		winston.info(`Writing index for ${locale}...`);
-		pipeline.sadd(`${locale}:index`, indexes[locale]!);
+	await client.mset(sentencePairs);
+
+	winston.info(`Wrote sentence pairs for ${locale}.`);
+
+	{
+		const pipeline = client.pipeline();
+		for (const [key, sentenceIds] of Object.entries(lemmaUseIndexes)) {
+			pipeline.sadd(key, sentenceIds);
+		}
+		await pipeline.exec();
+
+		winston.info(`Wrote lemma index for ${locale}.`);
 	}
-	await pipeline.exec();
+
+	{
+		const pipeline = client.pipeline();
+		for (const [key, sentenceIds] of Object.entries(lemmaFormIndexes)) {
+			pipeline.sadd(key, sentenceIds);
+		}
+		await pipeline.exec();
+
+		winston.info(`Wrote lemma forms for ${locale}.`);
+	}
 }
 
 await client.quit();

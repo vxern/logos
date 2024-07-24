@@ -1570,5 +1570,12 @@ export default Object.freeze({
 	verificationAnswers: ({ localise, locale }) => ({
 		verificationAnswers: localise("entry.verification.inquiry.verificationAnswers", locale)(),
 	}),
+	noSentencesFound: ({ localise, locale }) => ({
+		title: localise("context.strings.noSentencesFound.title", locale)(),
+		description: localise("context.strings.noSentencesFound.description", locale)(),
+	}),
+	phraseInContext: ({ localise, locale }) => ({
+		title: localise("context.strings.phraseInContext.title", locale),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

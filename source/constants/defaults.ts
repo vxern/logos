@@ -31,8 +31,6 @@ const MUSIC_DISCONNECT_TIMEOUT: TimeStruct = [2, "minute"];
 const MINIMUM_VOICE_CHANNELS = 0;
 const MAXIMUM_VOICE_CHANNELS = 5;
 
-const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
-
 export default Object.freeze({
 	LOCALISATION_LANGUAGE,
 	LOCALISATION_LOCALE,
@@ -53,5 +51,4 @@ export default Object.freeze({
 	MUSIC_DISCONNECT_TIMEOUT,
 	MINIMUM_VOICE_CHANNELS,
 	MAXIMUM_VOICE_CHANNELS,
-	WARN_MESSAGE_DELETE_TIMEOUT,
 });
