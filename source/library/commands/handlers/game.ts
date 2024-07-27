@@ -3,7 +3,7 @@ import { capitalise } from "logos:core/formatting";
 import * as levenshtein from "fastest-levenshtein";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { TatoebaSourceNotice } from "logos/commands/components/source-notices/tatoeba-source-notice.ts";
+import { TatoebaSourceNotice } from "logos/commands/components/source-notices/tatoeba-source-notice";
 import { GuildStatistics } from "logos/models/guild-statistics";
 import { User } from "logos/models/user";
 import type { SentencePair } from "logos/stores/volatile";

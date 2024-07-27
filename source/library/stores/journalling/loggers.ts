@@ -1,4 +1,4 @@
-import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
+import type { FeatureLanguage } from "logos:constants/languages/feature";
 import type { Locale } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 

@@ -4,8 +4,8 @@ import {
 	type DictionaryEntry,
 	type Relations,
 	type Rhymes,
-} from "logos/adapters/dictionaries/adapter.ts";
-import type { Client } from "logos/client.ts";
+} from "logos/adapters/dictionaries/adapter";
+import type { Client } from "logos/client";
 
 interface Result {
 	readonly relationshipType: string;

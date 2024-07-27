@@ -1,7 +1,7 @@
 import { codeMultiline, mention, trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import type { EntryRequest } from "logos/models/entry-request.ts";
-import { Model } from "logos/models/model.ts";
+import type { EntryRequest } from "logos/models/entry-request";
+import { Model } from "logos/models/model";
 import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";

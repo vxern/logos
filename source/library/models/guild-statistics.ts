@@ -1,4 +1,4 @@
-import type { Locale } from "logos:constants/languages/localisation.ts";
+import type { Locale } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";

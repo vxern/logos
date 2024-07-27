@@ -4,7 +4,7 @@ import {
 	getDeepLLanguageByLocale,
 	getDeepLLocaleByLanguage,
 	isDeepLLocale,
-} from "logos:constants/languages/translation.ts";
+} from "logos:constants/languages/translation";
 import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 

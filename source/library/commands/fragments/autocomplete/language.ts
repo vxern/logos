@@ -1,6 +1,6 @@
-import { trim } from "logos:core/formatting.ts";
-import type { Client } from "logos/client.ts";
-import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple.ts";
+import { trim } from "logos:core/formatting";
+import type { Client } from "logos/client";
+import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
 
 async function autocompleteLanguage(
 	client: Client,

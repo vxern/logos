@@ -1,11 +1,11 @@
-import { isLocalisationLanguage } from "logos:constants/languages/localisation.ts";
+import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";
 import type { Definition, DictionaryEntry, Expression } from "logos/adapters/dictionaries/adapter";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice.ts";
-import { autocompleteLanguage } from "logos/commands/fragments/autocomplete/language.ts";
+import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
+import { autocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
 
 async function handleFindWordAutocomplete(
 	client: Client,

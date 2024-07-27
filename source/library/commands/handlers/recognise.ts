@@ -1,7 +1,7 @@
 import type { DetectionLanguage } from "logos:constants/languages/detection";
 import { list } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-notice.ts";
+import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-notice";
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,

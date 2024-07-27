@@ -1,4 +1,4 @@
-import type { WithRequired } from "logos:core/utilities.ts";
+import type { WithRequired } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 

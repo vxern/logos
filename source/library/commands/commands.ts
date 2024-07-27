@@ -11,7 +11,7 @@ import { handleDisplayGuildInformation } from "logos/commands/handlers/informati
 import {
 	handleDisplayDetectorLicence,
 	handleDisplayDetectorLicenceAutocomplete,
-} from "logos/commands/handlers/licence/detector.ts";
+} from "logos/commands/handlers/licence/detector";
 import {
 	handleDisplayDictionaryLicence,
 	handleDisplayDictionaryLicenceAutocomplete,
@@ -23,7 +23,7 @@ import {
 import {
 	handleDisplayTranslatorLicence,
 	handleDisplayTranslatorLicenceAutocomplete,
-} from "logos/commands/handlers/licence/translator.ts";
+} from "logos/commands/handlers/licence/translator";
 import {
 	handleDisplayAuthorPraises,
 	handleDisplayPraisesAutocomplete,

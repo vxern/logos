@@ -1,5 +1,5 @@
-import type { Licence } from "logos:constants/licences.ts";
-import type { Client } from "logos/client.ts";
+import type { Licence } from "logos:constants/licences";
+import type { Client } from "logos/client";
 
 async function handleDisplayLicence(
 	client: Client,

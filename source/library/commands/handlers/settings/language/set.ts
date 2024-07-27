@@ -1,5 +1,5 @@
 import languages from "logos:constants/languages";
-import { getLocalisationLocaleByLanguage, isLocalisationLanguage } from "logos:constants/languages/localisation.ts";
+import { getLocalisationLocaleByLanguage, isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { User } from "logos/models/user";

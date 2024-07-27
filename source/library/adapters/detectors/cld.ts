@@ -1,4 +1,4 @@
-import { getCLDLanguageByLocale, isCLDLocale } from "logos:constants/languages/detection.ts";
+import { getCLDLanguageByLocale, isCLDLocale } from "logos:constants/languages/detection";
 import cld from "cldpre";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import type { Client } from "logos/client";

@@ -1,4 +1,4 @@
-import { getFastTextLanguageByLocale, isFastTextLocale } from "logos:constants/languages/detection.ts";
+import { getFastTextLanguageByLocale, isFastTextLocale } from "logos:constants/languages/detection";
 import { getLanguageIdentificationModel } from "fasttext.wasm.js";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import type { Client } from "logos/client";
