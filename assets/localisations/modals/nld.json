@@ -20,5 +20,6 @@
     "prompts.stay": "Teruggaan",
     "prompts.leave": "Verlaten",
     "resource.title": "Bron",
-    "resource.fields.resource": "Welke bron wil je indienen?"
+    "resource.fields.resource": "Welke bron wil je indienen?",
+    "form.failedToSubmit.title": "Er ging iets mis"
 }
