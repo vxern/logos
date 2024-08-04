@@ -47,8 +47,8 @@ abstract class LocalService extends Service {
 		this.guildIdString = guildId.toString();
 	}
 
-	abstract start(): void | Promise<void>;
-	abstract stop(): void | Promise<void>;
+	abstract start(): Promise<void>;
+	abstract stop(): Promise<void>;
 
 	async getAllMessages({ channelId }: { channelId: bigint }): Promise<Discord.Message[] | undefined> {
 		const buffer: Discord.Message[] = [];

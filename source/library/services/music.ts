@@ -8,6 +8,7 @@ import { LocalService } from "logos/services/service";
 import * as shoukaku from "shoukaku";
 
 type PlaybackActionType = "manage" | "check";
+
 class MusicService extends LocalService {
 	readonly #voiceStateUpdates: Collector<"voiceStateUpdate">;
 	#managerDisconnects!: (name: string, count: number) => void;
@@ -45,7 +46,7 @@ class MusicService extends LocalService {
 		this.#voiceStateUpdates = new Collector({ guildId });
 	}
 
-	start(): void {
+	async start(): Promise<void> {
 		this.#voiceStateUpdates.onCollect(this.#handleVoiceStateUpdate.bind(this));
 
 		this.client.lavalinkService!.manager.on(
@@ -424,6 +425,7 @@ class ListingManager extends EventEmitter {
 }
 
 type QueueableMode = "song-collection" | "playable";
+
 class MusicSession extends EventEmitter {
 	readonly log: Logger;
 	readonly client: Client;
@@ -909,6 +911,7 @@ class AudioStream extends Playable {
 }
 
 type MoveDirection = "forward" | "backward";
+
 /**
  * Represents a collection of {@link Song}s.
  *
