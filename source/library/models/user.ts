@@ -1,4 +1,4 @@
-import type { Locale, LocalisationLanguage } from "logos:constants/languages";
+import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import type { GameType } from "logos/models/guild-statistics";
 import { type IdentifierData, Model } from "logos/models/model";

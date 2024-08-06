@@ -42,7 +42,7 @@ class ResourcePromptService extends PromptService<{
 					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({
+						iconUrl: PromptService.encodeMetadataInUserAvatar({
 							user,
 							partialId: resourceDocument.partialId,
 						}),
@@ -75,6 +75,30 @@ class ResourcePromptService extends PromptService<{
 									customId: this.magicButton.encodeId([resourceDocument.partialId, `${true}`]),
 								},
 							],
+				},
+			],
+		};
+	}
+
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
+		const strings = constants.contexts.noResources({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
 				},
 			],
 		};

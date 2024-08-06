@@ -37,7 +37,7 @@ describe("getPartOfSpeech()", () => {
 			learningLanguage: "Polish",
 		});
 		expect(detected).to.equal("noun" satisfies PartOfSpeech);
-		expect(original).to.equal("rzeczownik");
+		expect(original).to.equal("substantiv");
 	});
 
 	it(

@@ -1,5 +1,9 @@
-import type { Languages, TranslationLanguage, Translator } from "logos:constants/languages";
-import { languageToLocale as languagesByIdentifier } from "logos:constants/languages/translation";
+import type { Languages } from "logos:constants/languages";
+import {
+	type TranslationLanguage,
+	type Translator,
+	languageToLocale as languagesByIdentifier,
+} from "logos:constants/languages/translation";
 import { isDefined } from "logos:core/utilities";
 import type { TranslatorAdapter } from "logos/adapters/translators/adapter";
 import { DeepLAdapter } from "logos/adapters/translators/deepl";

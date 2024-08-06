@@ -1,41 +1,18 @@
-import defaults from "logos:constants/defaults";
-import { isLocalisationLanguage } from "logos:constants/languages";
+import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";
 import type { DictionaryEntry } from "logos/adapters/dictionaries/adapter";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice.ts";
-import type { DefinitionField, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry.ts";
+import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
+import type { DefinitionField, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
+import { autocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
 
 async function handleFindWordAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const languageQueryTrimmed = interaction.parameters.language?.trim();
-	if (languageQueryTrimmed === undefined || languageQueryTrimmed.length === 0) {
-		const strings = constants.contexts.autocompleteLanguage({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
-		return;
-	}
-
-	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
-	const choices = constants.languages.languages.localisation
-		.map((language) => ({
-			name: client.localise(constants.localisations.languages[language], interaction.locale)(),
-			value: language,
-		}))
-		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
-
-	await client.respond(interaction, choices);
+	await autocompleteLanguage(client, interaction);
 }
 
 /** Allows the user to look up a word and get information about it. */
@@ -165,22 +142,18 @@ async function handleFindWord(
 
 	if (entriesByPartOfSpeech.size === 0) {
 		const strings = constants.contexts.noResults({ localise: client.localise, locale: interaction.displayLocale });
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description({ word: interaction.parameters.word }),
-					color: constants.colours.dullYellow,
-				},
-			],
-		});
-
-		setTimeout(
-			() =>
-				client.deleteReply(interaction).catch(() => {
-					client.log.warn(`Failed to delete "no results for word" message.`);
-				}),
-			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
+		await client.editReply(
+			interaction,
+			{
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description({ word: interaction.parameters.word }),
+						color: constants.colours.dullYellow,
+					},
+				],
+			},
+			{ autoDelete: true },
 		);
 
 		return;

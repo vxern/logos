@@ -1,5 +1,6 @@
-import type { Languages, TranslationLanguage } from "logos:constants/languages";
-import type { Licence } from "logos:constants/licences.ts";
+import type { Languages } from "logos:constants/languages";
+import type { TranslationLanguage } from "logos:constants/languages/translation";
+import type { Licence } from "logos:constants/licences";
 import type { Client } from "logos/client";
 import { Logger } from "logos/logger";
 
