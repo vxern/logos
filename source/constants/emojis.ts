@@ -56,8 +56,13 @@ export default Object.freeze({
 	word: {
 		word: "📜",
 		definitions: "📚",
+		translations: "🌐",
+		relations: "🌳",
+		pronunciation: "🗣️",
 		expressions: "💐",
-		etymology: "🌐",
+		examples: "🏷️",
+		etymology: "🌱",
+		notes: "📝",
 	},
 	music: {
 		song: "🎵",
