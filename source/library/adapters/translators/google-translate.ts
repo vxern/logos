@@ -1,10 +1,11 @@
+import type { Languages } from "logos:constants/languages";
 import {
 	type GoogleTranslateLanguage,
-	type Languages,
 	type TranslationLocale,
-	getGoogleTranslateLocaleByTranslationLanguage,
-} from "logos:constants/languages";
-import { getGoogleTranslateLanguageByLocale, isGoogleTranslateLocale } from "logos:constants/languages/translation";
+	getGoogleTranslateLanguageByLocale,
+	getGoogleTranslateLocaleByLanguage,
+	isGoogleTranslateLocale,
+} from "logos:constants/languages/translation";
 import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 
@@ -42,8 +43,8 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 			return undefined;
 		}
 
-		const sourceLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.source);
-		const targetLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.target);
+		const sourceLocale = getGoogleTranslateLocaleByLanguage(languages.source);
+		const targetLocale = getGoogleTranslateLocaleByLanguage(languages.target);
 
 		const locales: Languages<TranslationLocale> = { source: sourceLocale, target: targetLocale };
 

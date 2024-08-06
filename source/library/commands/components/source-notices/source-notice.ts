@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors.ts";
+import { InteractionCollector } from "logos/collectors";
 
 abstract class SourceNotice {
 	readonly client: Client;

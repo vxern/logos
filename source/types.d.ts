@@ -2,8 +2,7 @@ import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
 import type { Properties } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
-import type { WithRequired } from "logos:core/utilities.ts";
-import type * as Discord from "@discordeno/bot";
+import type { WithRequired } from "logos:core/utilities";
 import type { EntryRequest } from "logos/models/entry-request";
 import type { Praise } from "logos/models/praise";
 import type { Report } from "logos/models/report";
@@ -99,6 +98,9 @@ declare global {
 
 		/** Type representing events that occur within a guild. */
 		type Events = {
+			/** Fill-in Discord event for a member having been kicked. */
+			guildMemberKick: [user: Logos.User, by: Logos.Member];
+		} & {
 			/** An entry request has been submitted. */
 			entryRequestSubmit: [user: Logos.User, entryRequest: EntryRequest];
 
@@ -142,7 +144,13 @@ declare global {
 			purgeBegin: [member: Logos.Member, channel: Logos.Channel, messageCount: number, author?: Logos.User];
 
 			/** A purging of messages is complete. */
-			purgeEnd: [member: Logos.Member, channel: Logos.Channel, messageCount: number, author?: Logos.User];
+			purgeEnd: [
+				member: Logos.Member,
+				channel: Logos.Channel,
+				messageCount: number,
+				messageLog: string,
+				author?: Logos.User,
+			];
 
 			/** A user has enabled slowmode in a channel. */
 			slowmodeEnable: [user: Logos.User, channel: Logos.Channel, level: SlowmodeLevel];
@@ -187,4 +195,9 @@ declare module "@discordeno/bot" {
 	type Events = {
 		[T in keyof Discord.EventHandlers]: Parameters<Discord.EventHandlers[T]>;
 	};
+
+	interface Message {
+		// REMINDER(vxern): Monkey-patch for Discordeno messages.
+		content?: string;
+	}
 }

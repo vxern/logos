@@ -1,7 +1,7 @@
-import type { DetectionLanguage } from "logos:constants/languages";
+import type { DetectionLanguage } from "logos:constants/languages/detection";
 import { list } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-notice.ts";
+import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-notice";
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,
@@ -79,7 +79,7 @@ async function handleRecogniseLanguage(
 		await client.noticed(interaction, {
 			embeds: [
 				{
-					description: strings.description({ language: strings.language(language) }),
+					description: `> *${text}*\n\n${strings.description({ language: strings.language(language) })}`,
 				},
 			],
 			components: [
@@ -156,7 +156,12 @@ async function handleRecogniseLanguage(
 		}
 
 		await client.noticed(interaction, {
-			embeds: [{ fields }],
+			embeds: [
+				{
+					description: `> *${text}*\n\n`,
+					fields,
+				},
+			],
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,

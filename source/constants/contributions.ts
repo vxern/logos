@@ -1,4 +1,4 @@
-import type { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 
 interface Contributor {
 	readonly username: string;

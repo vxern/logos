@@ -1,4 +1,4 @@
-import type { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import type { Licence } from "logos:constants/licences";
 import type { PartOfSpeech } from "logos:constants/parts-of-speech";
 import type { Client } from "logos/client";

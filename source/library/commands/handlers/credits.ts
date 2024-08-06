@@ -1,5 +1,5 @@
 import type { Translation } from "logos:constants/contributions";
-import type { LocalisationLanguage } from "logos:constants/languages";
+import type { LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {

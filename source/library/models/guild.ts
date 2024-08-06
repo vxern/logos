@@ -1,4 +1,6 @@
-import type { FeatureLanguage, LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
+import type { FeatureLanguage } from "logos:constants/languages/feature";
+import type { LearningLanguage } from "logos:constants/languages/learning";
+import type { LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { TimeStruct } from "logos:constants/time";
 import type { Client } from "logos/client";
 import { GuildStatistics } from "logos/models/guild-statistics";
@@ -76,6 +78,9 @@ interface GuildFeatures {
 			translate?: Activatable;
 
 			word?: Activatable;
+
+			/** @since v4.7.0 */
+			context?: Activatable;
 
 			/** @since v3.8.0 */
 			targetOnly?: Activatable<{
@@ -469,6 +474,15 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		}
 
 		return languageFeatures.word;
+	}
+
+	get context(): Enabled<NonNullable<Guild["languageFeatures"]>["context"]> | undefined {
+		const languageFeatures = this.languageFeatures;
+		if (!languageFeatures?.context?.enabled) {
+			return undefined;
+		}
+
+		return languageFeatures.context;
 	}
 
 	get targetOnly(): Enabled<NonNullable<Guild["languageFeatures"]>["targetOnly"]> | undefined {

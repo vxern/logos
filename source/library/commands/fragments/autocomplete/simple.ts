@@ -1,4 +1,4 @@
-import type { Client } from "logos/client.ts";
+import type { Client } from "logos/client";
 
 async function handleSimpleAutocomplete<T>(
 	client: Client,
