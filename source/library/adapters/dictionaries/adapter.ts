@@ -1,4 +1,4 @@
-import type { DictionarySection } from "logos:constants/dictionaries.ts";
+import type { DictionarySection } from "logos:constants/dictionaries";
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";

@@ -1,6 +1,6 @@
-import type { DictionarySection } from "logos:constants/dictionaries.ts";
-import type { Licence } from "logos:constants/licences.ts";
-import type { PartOfSpeech } from "logos:constants/parts-of-speech.ts";
+import type { DictionarySection } from "logos:constants/dictionaries";
+import type { Licence } from "logos:constants/licences";
+import type { PartOfSpeech } from "logos:constants/parts-of-speech";
 
 type LabelledField = {
 	labels?: string[];
