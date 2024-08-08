@@ -120,6 +120,16 @@ interface GuildFeatures {
 				journaling: boolean;
 			}>;
 
+			// TODO(vxern): Add @since comment.
+			antiFlood: Activatable<{
+				journaling: boolean;
+				interval?: TimeStruct;
+				messageCount?: number;
+				autoTimeout?: Activatable<{
+					duration?: TimeStruct;
+				}>;
+			}>;
+
 			/** Warning and pardoning users. */
 			warns?: Activatable<{
 				journaling: boolean;
@@ -518,6 +528,15 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		}
 
 		return moderationFeatures.alerts;
+	}
+
+	get antiFlood(): Enabled<NonNullable<Guild["moderationFeatures"]>["antiFlood"]> | undefined {
+		const moderationFeatures = this.moderationFeatures;
+		if (!moderationFeatures?.antiFlood?.enabled) {
+			return undefined;
+		}
+
+		return moderationFeatures.antiFlood;
 	}
 
 	get policy(): Enabled<NonNullable<Guild["moderationFeatures"]>["policy"]> | undefined {

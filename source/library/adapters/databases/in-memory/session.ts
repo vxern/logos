@@ -16,7 +16,6 @@ class InMemoryDocumentSession extends DocumentSession {
 		) as Record<Collection, Map<string, Model>>;
 	}
 
-	// biome-ignore lint/suspicious/useAwait: This did not want to work with a T | Promise<T> typing, unfortunately.
 	async load<M extends Model>(id: string): Promise<M | undefined> {
 		const [collection, partialId] = Model.decomposeId(id);
 
