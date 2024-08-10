@@ -1,18 +1,14 @@
 import type { LearningLanguage } from "logos:constants/languages/learning";
-import {
-	DictionaryAdapter,
-	type DictionaryEntry,
-	type Relations,
-	type Rhymes,
-} from "logos/adapters/dictionaries/adapter";
+import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import type { RelationField, RhymeField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 
-interface Result {
+interface WordnikResult {
 	readonly relationshipType: string;
 	readonly words: string[];
 }
 
-class WordnikAdapter extends DictionaryAdapter<Result[]> {
+class WordnikAdapter extends DictionaryAdapter<WordnikResult[]> {
 	readonly token: string;
 
 	constructor(client: Client, { token }: { token: string }) {
@@ -34,7 +30,7 @@ class WordnikAdapter extends DictionaryAdapter<Result[]> {
 		return new WordnikAdapter(client, { token: client.environment.wordnikSecret });
 	}
 
-	async fetch(lemma: string, _: LearningLanguage): Promise<Result[] | undefined> {
+	async fetch(lemma: string, _: LearningLanguage): Promise<WordnikResult[] | undefined> {
 		const response = await fetch(
 			`${constants.endpoints.wordnik.relatedWords(lemma)}?useCanonical=true&api_key=${this.token}`,
 			{
@@ -47,10 +43,10 @@ class WordnikAdapter extends DictionaryAdapter<Result[]> {
 			return undefined;
 		}
 
-		return (await response.json()) as Result[];
+		return (await response.json()) as WordnikResult[];
 	}
 
-	parse(_: Logos.Interaction, lemma: string, __: LearningLanguage, results: Result[]): DictionaryEntry[] {
+	parse(_: Logos.Interaction, lemma: string, __: LearningLanguage, results: WordnikResult[]): DictionaryEntry[] {
 		const synonyms: string[] = [];
 		const antonyms: string[] = [];
 		const rhymes: string[] = [];
@@ -73,7 +69,7 @@ class WordnikAdapter extends DictionaryAdapter<Result[]> {
 			}
 		}
 
-		let relationField: Relations | undefined;
+		let relationField: RelationField | undefined;
 		if (synonyms.length > 0 || antonyms.length > 0) {
 			relationField = {};
 
@@ -86,7 +82,7 @@ class WordnikAdapter extends DictionaryAdapter<Result[]> {
 			}
 		}
 
-		let rhymeField: Rhymes | undefined;
+		let rhymeField: RhymeField | undefined;
 		if (rhymes.length > 0) {
 			rhymeField = { value: rhymes.join(", ") };
 		}
@@ -97,11 +93,15 @@ class WordnikAdapter extends DictionaryAdapter<Result[]> {
 
 		return [
 			{
-				lemma,
-				partOfSpeech: ["unknown", "unknown"],
+				lemma: { value: lemma },
 				relations: relationField,
 				rhymes: rhymeField,
-				sources: [[constants.links.wordnikDefinitionLink(lemma), constants.licences.dictionaries.wordnik]],
+				sources: [
+					{
+						link: constants.links.wordnikDefinitionLink(lemma),
+						licence: constants.licences.dictionaries.wordnik,
+					},
+				],
 			},
 		];
 	}

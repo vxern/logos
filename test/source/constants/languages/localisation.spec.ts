@@ -34,7 +34,7 @@ describe("isLogosLanguage()", () => {
 
 describe("isLogosLocale()", () => {
 	it("returns true if the passed locale is supported by Logos.", () => {
-		expect(isLogosLocale("eng-US")).to.be.true; // American English
+		expect(isLogosLocale("eng-GB")).to.be.true; // British English
 	});
 
 	it("returns false if the passed locale is not supported by Logos.", () => {
@@ -44,21 +44,21 @@ describe("isLogosLocale()", () => {
 
 describe("getDiscordLocaleByLanguage()", () => {
 	it("returns the language corresponding to the passed locale.", () => {
-		expect(getDiscordLocaleByLanguage("English/American")).to.equal("en-US");
+		expect(getDiscordLocaleByLanguage("English/British")).to.equal("en-GB");
 		expect(getDiscordLocaleByLanguage("German")).to.equal("de");
 	});
 });
 
 describe("getLogosLocaleByLanguage()", () => {
 	it("returns the language corresponding to the passed locale.", () => {
-		expect(getLogosLocaleByLanguage("English/American")).to.equal("eng-US");
+		expect(getLogosLocaleByLanguage("English/British")).to.equal("eng-GB");
 		expect(getLogosLocaleByLanguage("German")).to.equal("deu");
 	});
 });
 
 describe("getDiscordLanguageByLocale()", () => {
 	it("returns the language corresponding to the passed locale if the locale is valid.", () => {
-		expect(getDiscordLanguageByLocale("en-US")).to.equal("English/American");
+		expect(getDiscordLanguageByLocale("en-GB")).to.equal("English/British");
 		expect(getDiscordLanguageByLocale("ro")).to.equal("Romanian");
 	});
 
@@ -70,7 +70,7 @@ describe("getDiscordLanguageByLocale()", () => {
 
 describe("getLogosLanguageByLocale()", () => {
 	it("returns the language corresponding to the passed locale.", () => {
-		expect(getLogosLanguageByLocale("eng-US")).to.equal("English/American");
+		expect(getLogosLanguageByLocale("eng-GB")).to.equal("English/British");
 		expect(getLogosLanguageByLocale("ron")).to.equal("Romanian");
 	});
 });
