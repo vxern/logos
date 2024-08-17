@@ -40,7 +40,9 @@ async function handleFindInContext(
 	const learningLocale = getLocaleByLearningLanguage(learningLanguage);
 
 	const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
-	const lemmas = Array.from(segmenter.segment(interaction.parameters.phrase)).map((data) => data.segment);
+	const lemmas = Array.from(segmenter.segment(interaction.parameters.phrase))
+		.filter((data) => data.isWordLike)
+		.map((data) => data.segment);
 	const lemmaUses = await client.volatile?.searchForLemmaUses({
 		lemmas,
 		learningLocale: learningLocale,

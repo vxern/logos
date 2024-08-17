@@ -61,6 +61,10 @@ for (const [locale, contents] of contentsAll) {
 		const sentenceId = Number(record[0]);
 
 		for (const data of segmenter.segment(record[1])) {
+			if (!data.isWordLike) {
+				continue;
+			}
+
 			const lemmaUseKey = constants.keys.redis.lemmaUseIndex({ locale, lemma: data.segment });
 			(lemmaUseIndexes[lemmaUseKey] ??= []).push(sentenceId);
 
