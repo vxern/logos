@@ -194,7 +194,7 @@ class VolatileStore {
 			),
 		);
 
-		const sentenceIdSets: string[][] = [];
+		const sentenceIdBatches: string[][] = [];
 		for (const lemmaUseKeys of lemmaUseKeysAll) {
 			const pipeline = this.redis.pipeline();
 			for (const lemmaUseKey of lemmaUseKeys) {
@@ -206,21 +206,20 @@ class VolatileStore {
 			}
 
 			const sentenceIds = result.flatMap(([_, sentenceIds]) => sentenceIds as string[]);
-			sentenceIdSets.push(sentenceIds);
+			sentenceIdBatches.push(sentenceIds);
 		}
 
 		let sentenceIds: string[];
-		if (sentenceIdSets.length === 1) {
-			sentenceIds = sentenceIdSets.at(0)!;
+		if (sentenceIdBatches.length === 0) {
+			sentenceIds = [];
+		} else if (sentenceIdBatches.length === 1) {
+			sentenceIds = sentenceIdBatches.at(0)!;
 		} else {
 			sentenceIds = Array.from(
-				sentenceIdSets.reduce((sentenceIdsAll, sentenceIds) => {
-					for (const sentenceId of sentenceIds) {
-						sentenceIdsAll.add(sentenceId);
-					}
-
-					return sentenceIdsAll;
-				}, new Set<string>()),
+				sentenceIdBatches.reduce(
+					(buffer, sentenceIds) => new Set(sentenceIds.filter((sentenceId) => buffer.has(sentenceId))),
+					new Set(sentenceIdBatches.at(0)!),
+				),
 			);
 		}
 
