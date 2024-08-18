@@ -57,10 +57,14 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 	async #display(): Promise<void> {
 		const view = this.#view;
 
-		await this.client.reply(this.#anchor, {
-			embeds: [view.embed],
-			components: view.components,
-		});
+		await this.client.reply(
+			this.#anchor,
+			{
+				embeds: [view.embed],
+				components: view.components,
+			},
+			{ visible: this.#anchor.parameters.show },
+		);
 	}
 
 	async refresh(): Promise<void> {
