@@ -20,7 +20,12 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 		if (this.#showable && !this.#anchor.parameters.show) {
 			const showButton = this.client.interactionRepetitionService.getShowButton(this.#anchor);
 
-			for (const { components } of view.components ?? []) {
+			if (view.components === undefined) {
+				view.components = [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+				return view;
+			}
+
+			for (const { components } of view.components.toReversed()) {
 				if (components.length >= 5) {
 					continue;
 				}
