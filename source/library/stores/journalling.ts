@@ -15,6 +15,7 @@ class JournallingStore {
 	readonly #guildMemberAddCollector: Collector<"guildMemberAdd">;
 	readonly #guildMemberRemoveCollector: Collector<"guildMemberRemove">;
 	readonly #messageDeleteCollector: Collector<"messageDelete">;
+	readonly #messageDeleteBulkCollector: Collector<"messageDeleteBulk">;
 	readonly #messageUpdateCollector: Collector<"messageUpdate">;
 
 	constructor(client: Client) {
@@ -26,6 +27,7 @@ class JournallingStore {
 		this.#guildMemberAddCollector = new Collector();
 		this.#guildMemberRemoveCollector = new Collector();
 		this.#messageDeleteCollector = new Collector();
+		this.#messageDeleteBulkCollector = new Collector();
 		this.#messageUpdateCollector = new Collector();
 	}
 
@@ -37,6 +39,7 @@ class JournallingStore {
 		this.#guildMemberAddCollector.onCollect(this.#guildMemberAdd.bind(this));
 		this.#guildMemberRemoveCollector.onCollect(this.#guildMemberRemove.bind(this));
 		this.#messageDeleteCollector.onCollect(this.#messageDelete.bind(this));
+		this.#messageDeleteBulkCollector.onCollect(this.#messageDeleteBulk.bind(this));
 		this.#messageUpdateCollector.onCollect(this.#messageUpdate.bind(this));
 
 		await this.#client.registerCollector("guildBanAdd", this.#guildBanAddCollector);
@@ -44,6 +47,7 @@ class JournallingStore {
 		await this.#client.registerCollector("guildMemberAdd", this.#guildMemberAddCollector);
 		await this.#client.registerCollector("guildMemberRemove", this.#guildMemberRemoveCollector);
 		await this.#client.registerCollector("messageDelete", this.#messageDeleteCollector);
+		await this.#client.registerCollector("messageDeleteBulk", this.#messageDeleteBulkCollector);
 		await this.#client.registerCollector("messageUpdate", this.#messageUpdateCollector);
 
 		this.log.info("Journalling store set up.");
@@ -57,6 +61,7 @@ class JournallingStore {
 		this.#guildMemberAddCollector.close();
 		this.#guildMemberRemoveCollector.close();
 		this.#messageDeleteCollector.close();
+		this.#messageDeleteBulkCollector.close();
 		this.#messageUpdateCollector.close();
 
 		this.log.info("Journalling store torn down.");
@@ -181,6 +186,15 @@ class JournallingStore {
 		}
 
 		await this.tryLog("messageDelete", { guildId, args: [payload, message] });
+	}
+
+	async #messageDeleteBulk(payload: Discord.Events["messageDeleteBulk"][0]): Promise<void> {
+		const guildId = payload.guildId;
+		if (guildId === undefined) {
+			return;
+		}
+
+		await this.tryLog("messageDeleteBulk", { guildId, args: [payload] });
 	}
 
 	async #messageUpdate(message: Discord.Message): Promise<void> {
