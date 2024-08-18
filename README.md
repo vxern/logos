@@ -50,7 +50,7 @@
     </tr>
     <tr>
       <td style="text-align: center">
-        <img src=".github/assets/screenshots/context-menu.png">
+        <img src=".github/assets/screenshots/context.png">
       </td>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/game.png">
@@ -58,16 +58,21 @@
     </tr>
     <tr>
       <td style="text-align: center">
-        <img src=".github/assets/screenshots/recognition.png">
+        <img src=".github/assets/screenshots/context-menu.png">
       </td>
       <td style="text-align: center">
-        <img src=".github/assets/screenshots/resource-notice.png">
+        <img src=".github/assets/screenshots/recognition.png">
       </td>
     </tr>
     <tr>
       <td style="text-align: center">
+        <img src=".github/assets/screenshots/resource-notice.png">
+      </td>
+      <td style="text-align: center">
         <img src=".github/assets/screenshots/music.png">
       </td>
+    </tr>
+    <tr>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/profile.png">
       </td>
@@ -77,42 +82,37 @@
         <img src=".github/assets/screenshots/purge.png">
       </td>
       <td style="text-align: center">
-        <img src=".github/assets/screenshots/server-information.png">
+        <img src=".github/assets/screenshots/logs.png">
       </td>
     </tr>
     <tr>
-      <td style="text-align: center">
-        <img src=".github/assets/screenshots/logs.png">
-      </td>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/report.png">
       </td>
-    </tr>
-    <tr>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/role-categories.png">
       </td>
+    </tr>
+    <tr>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/correction.png">
       </td>
-    </tr>
-    <tr>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/roles.png">
       </td>
+    </tr>
+    <tr>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/rule.png">
       </td>
-    </tr>
-    <tr>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/slowmode.png">
       </td>
+    </tr>
+    <tr>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/resource.png">
       </td>
-    </tr>
-    <tr>
       <td style="text-align: center">
         <img src=".github/assets/screenshots/suggestion.png">
       </td>
