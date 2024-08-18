@@ -33,8 +33,8 @@ describe("getPartOfSpeech()", () => {
 
 	it("returns the part of speech matched to the exact term in the given language.", () => {
 		const { detected, original } = getPartOfSpeech({
-			terms: { exact: "rzeczownik" },
-			learningLanguage: "Polish",
+			terms: { exact: "substantiv" },
+			learningLanguage: "Romanian",
 		});
 		expect(detected).to.equal("noun" satisfies PartOfSpeech);
 		expect(original).to.equal("substantiv");
@@ -46,7 +46,7 @@ describe("getPartOfSpeech()", () => {
 		() => {
 			const { detected, original } = getPartOfSpeech({
 				terms: { exact: "this.will.not.match", approximate: "proper noun" },
-				learningLanguage: "English/American",
+				learningLanguage: "English/British",
 			});
 			expect(detected).to.equal("proper-noun" satisfies PartOfSpeech);
 			expect(original).to.equal("proper noun");
@@ -56,7 +56,7 @@ describe("getPartOfSpeech()", () => {
 	it("returns 'unknown' if there is no match", () => {
 		const { detected, original } = getPartOfSpeech({
 			terms: { exact: "this.will.not.match" },
-			learningLanguage: "English/American",
+			learningLanguage: "English/British",
 		});
 		expect(detected).to.equal("unknown" satisfies PartOfSpeech);
 		expect(original).to.equal("this.will.not.match");

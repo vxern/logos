@@ -26,7 +26,7 @@ describe("LocalisationStore", () => {
 					[
 						"command.options.option.name",
 						new Map([
-							["English/American", "example"],
+							["English/British", "example"],
 							["Polish", "przykład"],
 							["Romanian", "exemplu"],
 						]),
@@ -36,7 +36,7 @@ describe("LocalisationStore", () => {
 			expect(instance.buildNameLocalisations({ key: "command.options.option" })).to.deep.equal({
 				name: "example",
 				nameLocalizations: {
-					"en-US": "example",
+					"en-GB": "example",
 					pl: "przykład",
 					ro: "exemplu",
 				},
@@ -50,7 +50,7 @@ describe("LocalisationStore", () => {
 					[
 						"parameters.option.name",
 						new Map([
-							["English/American", "example"],
+							["English/British", "example"],
 							["Polish", "przykład"],
 							["Romanian", "exemplu"],
 						]),
@@ -60,7 +60,7 @@ describe("LocalisationStore", () => {
 			expect(instance.buildNameLocalisations({ key: "option" })).to.deep.equal({
 				name: "example",
 				nameLocalizations: {
-					"en-US": "example",
+					"en-GB": "example",
 					pl: "przykład",
 					ro: "exemplu",
 				},
@@ -84,7 +84,7 @@ describe("LocalisationStore", () => {
 					[
 						"command.options.option.description",
 						new Map([
-							["English/American", "This is a sample description."],
+							["English/British", "This is a sample description."],
 							["Polish", "To jest przykładowy opis."],
 							["Romanian", "Aceasta este un exemplu de o descriere."],
 						]),
@@ -94,7 +94,7 @@ describe("LocalisationStore", () => {
 			expect(instance.buildDescriptionLocalisations({ key: "command.options.option" })).to.deep.equal({
 				description: "This is a sample description.",
 				descriptionLocalizations: {
-					"en-US": "This is a sample description.",
+					"en-GB": "This is a sample description.",
 					pl: "To jest przykładowy opis.",
 					ro: "Aceasta este un exemplu de o descriere.",
 				},
@@ -108,7 +108,7 @@ describe("LocalisationStore", () => {
 					[
 						"parameters.option.description",
 						new Map([
-							["English/American", "This is a sample description."],
+							["English/British", "This is a sample description."],
 							["Polish", "To jest przykładowy opis."],
 							["Romanian", "Aceasta este un exemplu de o descriere."],
 						]),
@@ -118,7 +118,7 @@ describe("LocalisationStore", () => {
 			expect(instance.buildDescriptionLocalisations({ key: "option" })).to.deep.equal({
 				description: "This is a sample description.",
 				descriptionLocalizations: {
-					"en-US": "This is a sample description.",
+					"en-GB": "This is a sample description.",
 					pl: "To jest przykładowy opis.",
 					ro: "Aceasta este un exemplu de o descriere.",
 				},
@@ -182,7 +182,7 @@ describe("LocalisationStore", () => {
 			const instance = new LocalisationStore({
 				environment: mockEnvironment,
 
-				localisations: new Map([["key", new Map([["English/American", "This is a sample localisation."]])]]),
+				localisations: new Map([["key", new Map([["English/British", "This is a sample localisation."]])]]),
 			});
 			expect(instance.localise("key", "pol")()).to.equal("This is a sample localisation.");
 		});
