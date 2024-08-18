@@ -183,13 +183,13 @@ class JournallingStore {
 		await this.tryLog("messageDelete", { guildId, args: [payload, message] });
 	}
 
-	async #messageUpdate(message: Discord.Message, oldMessage: Discord.Message | undefined): Promise<void> {
+	async #messageUpdate(message: Discord.Message): Promise<void> {
 		const guildId = message.guildId;
 		if (guildId === undefined) {
 			return;
 		}
 
-		await this.tryLog("messageUpdate", { guildId, args: [message, oldMessage] });
+		await this.tryLog("messageUpdate", { guildId, args: [message] });
 	}
 
 	async #getKickInformation({

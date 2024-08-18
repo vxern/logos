@@ -32,8 +32,7 @@ class EventStore {
 				this.collectEvent(payload.guildId, "messageDelete", { args: [payload, message] }),
 			messageDeleteBulk: (payload) =>
 				this.collectEvent(payload.guildId, "messageDeleteBulk", { args: [payload] }),
-			messageUpdate: (message, oldMessage) =>
-				this.collectEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] }),
+			messageUpdate: (message) => this.collectEvent(message.guildId, "messageUpdate", { args: [message] }),
 			voiceServerUpdate: (payload) =>
 				this.collectEvent(payload.guildId, "voiceServerUpdate", { args: [payload] }),
 			voiceStateUpdate: (voiceState) =>
