@@ -3,7 +3,6 @@ import { mention, timestamp, trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { Guild } from "logos/models/guild";
-import { JournallingStore } from "logos/stores/journalling";
 
 async function handlePurgeMessagesAutocomplete(
 	client: Client,
@@ -553,11 +552,10 @@ async function handlePurgeMessages(
 		)} as requested by ${client.diagnostics.user(interaction.user)}.`,
 	);
 
-	const messageLog = JournallingStore.generateMessageLog(client, { messages });
 	await client.tryLog("purgeEnd", {
 		guildId: guild.id,
 		journalling: configuration.journaling,
-		args: [member, channel, deletedCount, messageLog],
+		args: [member, channel, deletedCount],
 	});
 
 	clearTimeout(responseDeletionTimeoutId);

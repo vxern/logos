@@ -1206,6 +1206,10 @@ export default Object.freeze({
 			content: localise("events.messageDelete.fields.content", locale)(),
 		},
 	}),
+	messageDeleteBulk: ({ localise, locale }) => ({
+		title: localise("events.messageDeleteBulk.title", locale)(),
+		description: localise("events.messageDeleteBulk.description", locale),
+	}),
 	messageUpdate: ({ localise, locale }) => ({
 		title: localise("events.messageUpdate.title", locale)(),
 		description: localise("events.messageUpdate.description", locale),
