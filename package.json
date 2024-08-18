@@ -46,6 +46,7 @@
 	"dependencies": {
 		"@discordeno/bot": "19.0.0-next.d81b28a",
 		"cldpre": "^2.9.0",
+		"dayjs": "^1.11.11",
 		"dexonline-scraper": "^0.2.1",
 		"dotenv": "^16.4.5",
 		"eld": "github:vxern/efficient-language-detector-js#b8f7a21413bef94fc71207241748f4a1d0089cd3",
