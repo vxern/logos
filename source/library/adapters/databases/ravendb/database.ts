@@ -25,7 +25,11 @@ class RavenDBAdapter extends DatabaseAdapter {
 		const protocol = certificate !== undefined ? "https" : "http";
 
 		const url = `${protocol}://${host}:${port}`;
-		this.#database = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
+		if (certificate !== undefined) {
+			this.#database = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
+		} else {
+			this.#database = new ravendb.DocumentStore(url, database);
+		}
 
 		// @ts-expect-error: We don't want RavenDB to be setting the `id` property on documents since we handle that
 		// ourselves.
