@@ -2,17 +2,17 @@ import constants from "logos:constants/constants";
 import Redis from "ioredis";
 import winston from "winston";
 
-winston.info(`Looking for files in ${constants.SENTENCE_PAIRS_DIRECTORY}...`);
+winston.info(`Looking for files in ${constants.directories.assets.sentences}...`);
 
-const files = await Array.fromAsync(new Bun.Glob("*.tsv").scan(constants.SENTENCE_PAIRS_DIRECTORY)).then((filenames) =>
-	filenames.map((filename) => Bun.file(`${constants.SENTENCE_PAIRS_DIRECTORY}/${filename}`)),
+const files = await Array.fromAsync(new Bun.Glob("*.tsv").scan(constants.directories.assets.sentences)).then(
+	(filenames) => filenames.map((filename) => Bun.file(`${constants.directories.assets.sentences}/${filename}`)),
 );
 
 for (const file of files) {
 	winston.info(`Located sentence file at ${file.name}.`);
 }
 
-winston.info(`Located ${files.length} sentence files in total in ${constants.SENTENCE_PAIRS_DIRECTORY}.`);
+winston.info(`Located ${files.length} sentence files in total in ${constants.directories.assets.sentences}.`);
 
 const promises: Promise<[locale: string, contents: string]>[] = [];
 for (const file of files) {
