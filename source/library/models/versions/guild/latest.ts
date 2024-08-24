@@ -6,10 +6,10 @@ import type { TimeStruct } from "logos:constants/time.ts";
 interface GuildDocument {
 	createdAt: number;
 	isNative: boolean;
-	languages?: {
-		localisation?: LocalisationLanguage;
-		target?: LearningLanguage;
-		feature?: FeatureLanguage;
+	languages: {
+		localisation: LocalisationLanguage;
+		target: LearningLanguage;
+		feature: FeatureLanguage;
 	};
 	enabledModules: {
 		information: boolean;
@@ -66,7 +66,7 @@ interface GuildDocument {
 		tickets: boolean;
 		praises: boolean;
 	};
-	features?: {
+	features: {
 		journalling?: {
 			channelId: string;
 		};
