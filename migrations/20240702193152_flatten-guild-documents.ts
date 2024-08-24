@@ -26,14 +26,6 @@ async function up(database: DatabaseStore): Promise<void> {
 				continue;
 			}
 
-			result.enabledModules = {
-				information: features.information?.enabled ?? false,
-				language: features.language?.enabled ?? false,
-				moderation: features.moderation?.enabled ?? false,
-				server: features.server?.enabled ?? false,
-				social: features.social?.enabled ?? false,
-			};
-
 			result.enabledFeatures = {
 				journalling: features.information?.features?.journaling?.enabled ?? false,
 				notices: features.information?.features?.notices?.enabled ?? false,

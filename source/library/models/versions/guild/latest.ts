@@ -11,13 +11,6 @@ interface GuildDocument {
 		target: LearningLanguage;
 		feature: FeatureLanguage;
 	};
-	enabledModules: {
-		information: boolean;
-		language: boolean;
-		moderation: boolean;
-		server: boolean;
-		social: boolean;
-	};
 	enabledFeatures: {
 		journalling: boolean;
 		notices: boolean;
@@ -146,15 +139,11 @@ interface GuildDocument {
 			};
 		};
 		dynamicVoiceChannels?: {
-			channels: {
-				id: string;
-				minimum?: number;
-				maximum?: number;
-			}[];
+			channels: DynamicVoiceChannel[];
 		};
 		roleIndicators?: {
 			limit: number;
-			roles: { roleId: string; indicator: string }[];
+			roles: RoleWithIndicator[];
 		};
 		suggestions?: {
 			channelId: string;
@@ -191,9 +180,20 @@ interface GuildDocument {
 	};
 }
 
-type RateLimit = {
+interface DynamicVoiceChannel {
+	id: string;
+	minimum?: number;
+	maximum?: number;
+}
+
+interface RoleWithIndicator {
+	roleId: string;
+	indicator: string;
+}
+
+interface RateLimit {
 	uses: number;
 	within: TimeStruct;
-};
+}
 
-export type { GuildDocument, RateLimit };
+export type { GuildDocument, DynamicVoiceChannel, RoleWithIndicator, RateLimit };
