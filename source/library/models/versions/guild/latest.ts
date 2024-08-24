@@ -1,0 +1,199 @@
+import type { LocalisationLanguage } from "logos:constants/languages/localisation.ts";
+import type { LearningLanguage } from "logos:constants/languages/learning.ts";
+import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
+import type { TimeStruct } from "logos:constants/time.ts";
+
+interface GuildDocument {
+	createdAt: number;
+	isNative: boolean;
+	languages?: {
+		localisation?: LocalisationLanguage;
+		target?: LearningLanguage;
+		feature?: FeatureLanguage;
+	};
+	enabledModules: {
+		information: boolean;
+		language: boolean;
+		moderation: boolean;
+		server: boolean;
+		social: boolean;
+	};
+	enabledFeatures: {
+		journalling: boolean;
+		notices: boolean;
+		informationNotices: boolean;
+		resourceNotices: boolean;
+		roleNotices: boolean;
+		welcomeNotices: boolean;
+		answers: boolean;
+		corrections: boolean;
+		cefr: boolean;
+		game: boolean;
+		resources: boolean;
+		translate: boolean;
+		word: boolean;
+		context: boolean;
+		targetOnly: boolean;
+		roleLanguages: boolean;
+		alerts: boolean;
+		policy: boolean;
+		rules: boolean;
+		purging: boolean;
+		slowmode: boolean;
+		timeouts: boolean;
+		warns: boolean;
+		reports: boolean;
+		verification: boolean;
+		dynamicVoiceChannels: boolean;
+		entry: boolean;
+		roleIndicators: boolean;
+		suggestions: boolean;
+		resourceSubmissions: boolean;
+		tickets: boolean;
+		music: boolean;
+		praises: boolean;
+		profile: boolean;
+	};
+	journalling: {
+		purging: boolean;
+		slowmode: boolean;
+		timeouts: boolean;
+		warns: boolean;
+		reports: boolean;
+		verification: boolean;
+		suggestions: boolean;
+		resourceSubmissions: boolean;
+		tickets: boolean;
+		praises: boolean;
+	};
+	features?: {
+		journalling?: {
+			channelId: string;
+		};
+		informationNotices?: {
+			channelId: string;
+			inviteLink: string;
+		};
+		/** Relies on guild.features.language.features.resources.url */
+		resourceNotices?: {
+			channelId: string;
+		};
+		roleNotices?: {
+			channelId: string;
+		};
+		welcomeNotices?: {
+			channelId: string;
+			ruleChannelId: string;
+		};
+		cefr?: {
+			examples: {
+				a1: string;
+				a2: string;
+				b1: string;
+				b2: string;
+				c1: string;
+				c2: string;
+			};
+		};
+		resources?: {
+			url: string;
+		};
+		targetOnly?: {
+			channelIds: string[];
+		};
+		roleLanguages?: {
+			ids: Record<string, LocalisationLanguage>;
+		};
+		alerts?: {
+			channelId: string;
+		};
+		warns?: {
+			expiration?: TimeStruct;
+			limit: number;
+			autoTimeout?: {
+				duration: TimeStruct;
+			};
+		};
+		reports?: {
+			channelId: string;
+			// TODO(vxern): Move rate limits into a common object like with journalling.
+			rateLimit?: RateLimit;
+			// TODO(vxern): Move management into a common object like with journalling.
+			management?: {
+				roles?: string[];
+				users?: string[];
+			};
+		};
+		/** Relies on guild.features.server.tickets.categoryId */
+		verification?: {
+			channelId: string;
+			/** Users that can partake in accepting / rejecting verification answers. */
+			voting: {
+				roles: string[];
+				users?: string[];
+				verdict: {
+					acceptance: { type: "fraction" | "number"; value: number };
+					rejection: { type: "fraction" | "number"; value: number };
+				};
+			};
+			activation: {
+				type: "account-age";
+				value: TimeStruct;
+			}[];
+			management?: {
+				roles?: string[];
+				users?: string[];
+			};
+		};
+		dynamicVoiceChannels?: {
+			channels: {
+				id: string;
+				minimum?: number;
+				maximum?: number;
+			}[];
+		};
+		roleIndicators?: {
+			limit: number;
+			roles: { roleId: string; indicator: string }[];
+		};
+		suggestions?: {
+			channelId: string;
+			rateLimit?: RateLimit;
+			management?: {
+				roles?: string[];
+				users?: string[];
+			};
+		};
+		resourceSubmissions?: {
+			channelId: string;
+			rateLimit?: RateLimit;
+			management?: {
+				roles?: string[];
+				users?: string[];
+			};
+		};
+		tickets?: {
+			channelId: string;
+			categoryId: string;
+			rateLimit?: RateLimit;
+			limit?: number;
+			management?: {
+				roles?: string[];
+				users?: string[];
+			};
+		};
+		music?: {
+			implicitVolume: number;
+		};
+		praises?: {
+			rateLimit?: RateLimit;
+		};
+	};
+}
+
+type RateLimit = {
+	uses: number;
+	within: TimeStruct;
+};
+
+export type { GuildDocument, RateLimit };
