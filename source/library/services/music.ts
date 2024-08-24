@@ -627,7 +627,7 @@ class MusicSession extends EventEmitter {
 			this.queueable.title = track.info.title;
 		}
 
-		await this.player.playTrack({ track: track.encoded });
+		await this.player.playTrack({ track: { encoded: track.encoded } });
 
 		const strings = constants.contexts.nowPlaying({
 			localise: this.client.localise,

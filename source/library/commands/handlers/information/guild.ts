@@ -145,7 +145,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		const roleId = member.roles.filter((roleId) => proficiencyRoleIds.includes(roleId)).at(0);
 
 		if (roleId !== undefined) {
-			roleFrequencies[`${roleId}`] += 1;
+			roleFrequencies[`${roleId}`]! += 1;
 		} else {
 			withoutProficiencyRole += 1;
 		}
