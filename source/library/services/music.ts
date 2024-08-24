@@ -394,7 +394,7 @@ class ListingManager extends EventEmitter {
 	moveFromHistoryToQueue({ count }: { count: number }): void {
 		count = Math.min(Math.max(count, 0), this.history.count);
 
-		for (const _ of new Array().keys()) {
+		for (const _ of new Array(count).keys()) {
 			this.queue.addOld(this.history.removeNewest());
 		}
 
