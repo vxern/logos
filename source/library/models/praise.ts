@@ -1,8 +1,11 @@
 import type { Client } from "logos/client";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type { PraiseDocument } from "logos/models/documents/praise/latest";
 
-type CreatePraiseOptions = { comment?: string } & IdentifierData<Praise>;
+type CreatePraiseOptions = Partial<PraiseDocument> & IdentifierData<Praise>;
+
+interface Praise extends PraiseDocument {}
 
 class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
 	get guildId(): string {
@@ -20,8 +23,6 @@ class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "author
 	get createdAt(): number {
 		return Number(this.idParts[3]);
 	}
-
-	comment?: string;
 
 	constructor(database: DatabaseStore, { comment, ...data }: CreatePraiseOptions) {
 		super(database, data, { collection: "Praises" });
