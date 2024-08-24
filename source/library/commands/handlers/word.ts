@@ -1,8 +1,7 @@
 import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code, trim } from "logos:core/formatting";
-import type { DictionaryEntry } from "logos/adapters/dictionaries/adapter";
-import type { DefinitionField, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
+import type { DefinitionField, DictionaryEntry, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
