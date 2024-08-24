@@ -65,13 +65,22 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		return this.enabledFeatures[feature];
 	}
 
-	feature<K extends keyof Guild["features"]>(feature: K): Guild["features"][K] {
+	feature<K extends keyof Guild["features"]>(feature: K): NonNullable<Guild["features"][K]> {
 		// If the guild does not have the feature enabled, do not return any data about the feature.
 		if (!this.hasEnabled(feature)) {
-			return undefined;
+			throw new Error(
+				`Attempted to get guild feature '${feature}' that was not enabled on guild with ID ${this.guildId}.`,
+			);
 		}
 
-		return this.features[feature];
+		const configuration = this.features[feature];
+		if (configuration === undefined) {
+			throw new Error(
+				`Guild feature '${feature}' is enabled on guild with ID ${this.guildId}, but missing a configuration.`,
+			);
+		}
+
+		return configuration;
 	}
 
 	// TODO(vxern): Create method to check for a feature being journalled.
