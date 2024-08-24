@@ -3,8 +3,8 @@ import { timeStructToMilliseconds } from "logos:constants/time";
 import { capitalise, decapitalise } from "logos:core/formatting";
 import type { DocumentConventions } from "logos/adapters/databases/adapter";
 import type { Client } from "logos/client";
-import type { RateLimit } from "logos/models/guild";
 import type { DatabaseStore } from "logos/stores/database";
+import type { RateLimit } from "logos/models/guild";
 
 type ClientOrDatabaseStore = Client | DatabaseStore;
 
@@ -15,9 +15,8 @@ type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: stri
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
 type IdentifierDataOrMetadata<M extends Model, Metadata = any> = IdentifierData<M> | Metadata;
 abstract class Model<Generic extends { collection: Collection; idParts: readonly string[] } = any> {
+	abstract readonly createdAt: number;
 	readonly #conventions: DocumentConventions;
-
-	abstract get createdAt(): number;
 
 	declare id: string;
 

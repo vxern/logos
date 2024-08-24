@@ -20,7 +20,8 @@
         "all": true,
         "noExplicitAny": "off",
         "noAssignInExpressions": "off",
-        "noEmptyBlockStatements": "off"
+        "noEmptyBlockStatements": "off",
+        "noUnsafeDeclarationMerging": "off"
       },
       "complexity": {
         "all": true,
