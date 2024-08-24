@@ -1,13 +1,12 @@
 import type { Client } from "logos/client";
-import { GuildStatistics } from "logos/models/guild-statistics";
-import { type IdentifierData, Model } from "logos/models/model";
 // biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
 import type { GuildDocument, RateLimit } from "logos/models/documents/guild/latest";
+import { GuildStatistics } from "logos/models/guild-statistics";
+import { type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 type CreateGuildOptions = Partial<GuildDocument> & IdentifierData<Guild>;
 
-// biome-ignore lint/correctness/noUnusedVariables: Used for merging declarations.
 interface Guild extends GuildDocument {}
 
 /** @since v3.0.0 */
