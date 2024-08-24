@@ -66,16 +66,16 @@ async function up(database: DatabaseStore): Promise<void> {
 			};
 
 			result.journalling = {
-				purging: false,
-				slowmode: false,
-				timeouts: false,
-				warns: false,
-				reports: false,
-				verification: false,
-				suggestions: false,
-				resourceSubmissions: false,
-				tickets: false,
-				praises: false,
+				purging: features.moderation?.features?.purging?.journaling ?? false,
+				slowmode: features.moderation?.features?.slowmode?.journaling ?? false,
+				timeouts: features.moderation?.features?.timeouts?.journaling ?? false,
+				warns: features.moderation?.features?.warns?.journaling ?? false,
+				reports: features.moderation?.features?.reports?.journaling ?? false,
+				verification: features.moderation?.features?.verification?.journaling ?? false,
+				suggestions: features.server?.features?.suggestions?.journaling ?? false,
+				resourceSubmissions: features.server?.features?.resources?.journaling ?? false,
+				tickets: features.server?.features?.tickets?.journaling ?? false,
+				praises: features.social?.features?.praises?.journaling ?? false,
 			};
 
 			result.features = {};
@@ -160,24 +160,8 @@ async function up(database: DatabaseStore): Promise<void> {
 				};
 			}
 
-			const purging = features.moderation?.features?.purging;
-			if (purging !== undefined && purging.journaling !== undefined) {
-				result.journalling.purging = purging.journaling;
-			}
-
-			const slowmode = features.moderation?.features?.slowmode;
-			if (slowmode !== undefined && slowmode.journaling !== undefined) {
-				result.journalling.slowmode = slowmode.journaling;
-			}
-
-			const timeouts = features.moderation?.features?.timeouts;
-			if (timeouts !== undefined && timeouts.journaling !== undefined) {
-				result.journalling.timeouts = timeouts.journaling;
-			}
-
 			const warns = features.moderation?.features?.warns;
-			if (warns !== undefined && warns.journaling !== undefined && warns.limit !== undefined) {
-				result.journalling.warns = warns.journaling;
+			if (warns !== undefined && warns.limit !== undefined) {
 				result.features.warns = {
 					expiration: warns.expiration,
 					limit: warns.limit,
@@ -191,8 +175,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const reports = features.moderation?.features?.reports;
-			if (reports !== undefined && reports.journaling !== undefined && reports.channelId !== undefined) {
-				result.journalling.reports = reports.journaling;
+			if (reports !== undefined && reports.channelId !== undefined) {
 				result.features.reports = {
 					channelId: reports.channelId,
 					rateLimit: reports.rateLimit,
@@ -203,12 +186,10 @@ async function up(database: DatabaseStore): Promise<void> {
 			const verification = features.moderation?.features?.verification;
 			if (
 				verification !== undefined &&
-				verification.journaling !== undefined &&
 				verification.channelId !== undefined &&
 				verification.voting !== undefined &&
 				verification.activation !== undefined
 			) {
-				result.journalling.verification = verification.journaling;
 				result.features.verification = {
 					channelId: verification.channelId,
 					voting: verification.voting,
@@ -237,12 +218,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const suggestions = features.server?.features?.suggestions;
-			if (
-				suggestions !== undefined &&
-				suggestions.journaling !== undefined &&
-				suggestions.channelId !== undefined
-			) {
-				result.journalling.suggestions = suggestions.journaling;
+			if (suggestions !== undefined && suggestions.channelId !== undefined) {
 				result.features.suggestions = {
 					channelId: suggestions.channelId,
 					rateLimit: suggestions.rateLimit,
@@ -251,12 +227,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const resourceSubmissions = features.server?.features?.resources;
-			if (
-				resourceSubmissions !== undefined &&
-				resourceSubmissions.journaling !== undefined &&
-				resourceSubmissions.channelId !== undefined
-			) {
-				result.journalling.resourceSubmissions = resourceSubmissions.journaling;
+			if (resourceSubmissions !== undefined && resourceSubmissions.channelId !== undefined) {
 				result.features.resourceSubmissions = {
 					channelId: resourceSubmissions.channelId,
 					rateLimit: resourceSubmissions.rateLimit,
@@ -265,13 +236,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const tickets = features.server?.features?.tickets;
-			if (
-				tickets !== undefined &&
-				tickets.journaling !== undefined &&
-				tickets.channelId !== undefined &&
-				tickets.categoryId !== undefined
-			) {
-				result.journalling.tickets = tickets.journaling;
+			if (tickets !== undefined && tickets.channelId !== undefined && tickets.categoryId !== undefined) {
 				result.features.tickets = {
 					channelId: tickets.channelId,
 					categoryId: tickets.categoryId,
@@ -289,8 +254,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const praises = features.social?.features?.praises;
-			if (praises !== undefined && praises.journaling !== undefined) {
-				result.journalling.praises = praises.journaling;
+			if (praises !== undefined) {
 				result.features.praises = {
 					rateLimit: praises.rateLimit,
 				};
