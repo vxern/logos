@@ -1,6 +1,3 @@
-import type { FeatureLanguage } from "logos:constants/languages/feature";
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import type { LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { GuildStatistics } from "logos/models/guild-statistics";
 import { type IdentifierData, Model } from "logos/models/model";
@@ -19,18 +16,6 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 
 	get guildId(): string {
 		return this.idParts[0];
-	}
-
-	get localisationLanguage(): LocalisationLanguage {
-		return this.languages.localisation;
-	}
-
-	get targetLanguage(): LearningLanguage {
-		return this.languages.target;
-	}
-
-	get featureLanguage(): FeatureLanguage {
-		return this.languages.feature;
 	}
 
 	constructor(database: DatabaseStore, { createdAt, languages, features, isNative, ...data }: CreateGuildOptions) {
