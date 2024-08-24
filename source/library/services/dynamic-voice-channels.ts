@@ -2,7 +2,7 @@ import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
-import type { DynamicVoiceChannel } from "logos/models/versions/guild/latest";
+import type { DynamicVoiceChannel } from "logos/models/documents/guild/latest";
 
 type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
 
