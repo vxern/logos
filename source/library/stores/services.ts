@@ -150,112 +150,102 @@ class ServiceStore {
 	): Promise<void> {
 		const services: Service[] = [];
 
-		if (guildDocument.hasEnabled("informationFeatures")) {
-			if (guildDocument.hasEnabled("noticeFeatures")) {
-				if (guildDocument.hasEnabled("informationNotice")) {
-					const service = new InformationNoticeService(client, { guildId });
-					services.push(service);
+		if (guildDocument.hasEnabled("informationNotices")) {
+			const service = new InformationNoticeService(client, { guildId });
+			services.push(service);
 
-					this.local.notices.information.set(guildId, service);
-				}
-
-				if (guildDocument.hasEnabled("resourceNotice")) {
-					const service = new ResourceNoticeService(client, { guildId });
-					services.push(service);
-
-					this.local.notices.resources.set(guildId, service);
-				}
-
-				if (guildDocument.hasEnabled("roleNotice")) {
-					const service = new RoleNoticeService(client, { guildId });
-					services.push(service);
-
-					this.local.notices.roles.set(guildId, service);
-				}
-
-				if (guildDocument.hasEnabled("welcomeNotice")) {
-					const service = new WelcomeNoticeService(client, { guildId });
-					services.push(service);
-
-					this.local.notices.welcome.set(guildId, service);
-				}
-			}
+			this.local.notices.information.set(guildId, service);
 		}
 
-		if (guildDocument.hasEnabled("moderationFeatures")) {
-			if (guildDocument.hasEnabled("alerts")) {
-				const service = new AlertService(client, { guildId });
-				services.push(service);
+		if (guildDocument.hasEnabled("resourceNotices")) {
+			const service = new ResourceNoticeService(client, { guildId });
+			services.push(service);
 
-				this.local.alerts.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("reports")) {
-				const service = new ReportPromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.reports.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("verification")) {
-				const service = new VerificationPromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.verification.set(guildId, service);
-			}
+			this.local.notices.resources.set(guildId, service);
 		}
 
-		if (guildDocument.hasEnabled("serverFeatures")) {
-			if (guildDocument.hasEnabled("dynamicVoiceChannels")) {
-				const service = new DynamicVoiceChannelService(client, { guildId });
-				services.push(service);
+		if (guildDocument.hasEnabled("roleNotices")) {
+			const service = new RoleNoticeService(client, { guildId });
+			services.push(service);
 
-				this.local.dynamicVoiceChannels.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("entry")) {
-				const service = new EntryService(client, { guildId });
-				services.push(service);
-
-				this.local.entry.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("roleIndicators")) {
-				const service = new RoleIndicatorService(client, { guildId });
-				services.push(service);
-
-				this.local.roleIndicators.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("suggestions")) {
-				const service = new SuggestionPromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.suggestions.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("tickets")) {
-				const service = new TicketPromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.tickets.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("resourceSubmissions")) {
-				const service = new ResourcePromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.resources.set(guildId, service);
-			}
+			this.local.notices.roles.set(guildId, service);
 		}
 
-		if (guildDocument.hasEnabled("socialFeatures")) {
-			if (guildDocument.hasEnabled("music") && this.global.lavalink !== undefined) {
-				const service = new MusicService(client, { guildId });
-				services.push(service);
+		if (guildDocument.hasEnabled("welcomeNotices")) {
+			const service = new WelcomeNoticeService(client, { guildId });
+			services.push(service);
 
-				this.local.music.set(guildId, service);
-			}
+			this.local.notices.welcome.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("alerts")) {
+			const service = new AlertService(client, { guildId });
+			services.push(service);
+
+			this.local.alerts.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("reports")) {
+			const service = new ReportPromptService(client, { guildId });
+			services.push(service);
+
+			this.local.prompts.reports.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("verification")) {
+			const service = new VerificationPromptService(client, { guildId });
+			services.push(service);
+
+			this.local.prompts.verification.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("dynamicVoiceChannels")) {
+			const service = new DynamicVoiceChannelService(client, { guildId });
+			services.push(service);
+
+			this.local.dynamicVoiceChannels.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("entry")) {
+			const service = new EntryService(client, { guildId });
+			services.push(service);
+
+			this.local.entry.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("roleIndicators")) {
+			const service = new RoleIndicatorService(client, { guildId });
+			services.push(service);
+
+			this.local.roleIndicators.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("suggestions")) {
+			const service = new SuggestionPromptService(client, { guildId });
+			services.push(service);
+
+			this.local.prompts.suggestions.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("tickets")) {
+			const service = new TicketPromptService(client, { guildId });
+			services.push(service);
+
+			this.local.prompts.tickets.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("resourceSubmissions")) {
+			const service = new ResourcePromptService(client, { guildId });
+			services.push(service);
+
+			this.local.prompts.resources.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("music") && this.global.lavalink !== undefined) {
+			const service = new MusicService(client, { guildId });
+			services.push(service);
+
+			this.local.music.set(guildId, service);
 		}
 
 		await this.startLocal(client, { guildId, services });

@@ -1,12 +1,12 @@
 import type { FeatureLanguage } from "logos:constants/languages/feature";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import type { LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { GuildStatistics } from "logos/models/guild-statistics";
 import { type IdentifierData, Model } from "logos/models/model";
-import type { DatabaseStore } from "logos/stores/database";
 // biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
 import type { GuildDocument, RateLimit } from "logos/models/versions/guild/latest";
-import type { LearningLanguage } from "logos:constants/languages/learning";
+import type { DatabaseStore } from "logos/stores/database";
 
 type CreateGuildOptions = Partial<GuildDocument> & IdentifierData<Guild>;
 

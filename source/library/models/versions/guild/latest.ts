@@ -1,6 +1,6 @@
-import type { LocalisationLanguage } from "logos:constants/languages/localisation.ts";
-import type { LearningLanguage } from "logos:constants/languages/learning.ts";
 import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
+import type { LearningLanguage } from "logos:constants/languages/learning.ts";
+import type { LocalisationLanguage } from "logos:constants/languages/localisation.ts";
 import type { TimeStruct } from "logos:constants/time.ts";
 
 interface GuildDocument {
