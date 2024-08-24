@@ -120,7 +120,6 @@ interface GuildDocument {
 		/** Relies on guild.features.server.tickets.categoryId */
 		verification?: {
 			channelId: string;
-			/** Users that can partake in accepting / rejecting verification answers. */
 			voting: {
 				roles: string[];
 				users?: string[];
