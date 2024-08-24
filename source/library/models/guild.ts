@@ -18,7 +18,10 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		return this.idParts[0];
 	}
 
-	constructor(database: DatabaseStore, { createdAt, languages, features, isNative, ...data }: CreateGuildOptions) {
+	constructor(
+		database: DatabaseStore,
+		{ createdAt, languages, enabledFeatures, journalling, features, isNative, ...data }: CreateGuildOptions,
+	) {
 		super(database, data, { collection: "Guilds" });
 
 		this.createdAt = createdAt ?? Date.now();
@@ -26,6 +29,54 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 			localisation: constants.defaults.LOCALISATION_LANGUAGE,
 			target: constants.defaults.LEARNING_LANGUAGE,
 			feature: constants.defaults.FEATURE_LANGUAGE,
+		};
+		this.enabledFeatures = enabledFeatures ?? {
+			journalling: false,
+			notices: false,
+			informationNotices: false,
+			resourceNotices: false,
+			roleNotices: false,
+			welcomeNotices: false,
+			answers: false,
+			corrections: false,
+			cefr: false,
+			game: false,
+			resources: false,
+			translate: false,
+			word: false,
+			context: false,
+			targetOnly: false,
+			roleLanguages: false,
+			alerts: false,
+			policy: false,
+			rules: false,
+			purging: false,
+			slowmode: false,
+			timeouts: false,
+			warns: false,
+			reports: false,
+			verification: false,
+			dynamicVoiceChannels: false,
+			entry: false,
+			roleIndicators: false,
+			suggestions: false,
+			resourceSubmissions: false,
+			tickets: false,
+			music: false,
+			praises: false,
+			profile: false,
+		};
+		this.journalling = journalling ?? {
+			purging: false,
+			slowmode: false,
+			timeouts: false,
+			warns: false,
+			reports: false,
+			verification: false,
+			suggestions: false,
+			resourceSubmissions: false,
+			tickets: false,
+			praises: false,
 		};
 		this.features = features ?? {};
 		this.isNative = isNative ?? false;

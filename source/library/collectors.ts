@@ -375,14 +375,11 @@ class InteractionCollector<
 	}
 
 	#determineLearningLanguage(guildDocument: Guild, member: Logos.Member): LearningLanguage | undefined {
-		if (member === undefined) {
+		if (!guildDocument.hasEnabled("roleLanguages")) {
 			return undefined;
 		}
 
-		const roleLanguages = guildDocument.roleLanguages;
-		if (roleLanguages === undefined) {
-			return undefined;
-		}
+		const roleLanguages = guildDocument.feature("roleLanguages");
 
 		const userLearningLanguage = Object.entries(roleLanguages.ids).find(([key, _]) =>
 			member.roles.includes(BigInt(key)),
