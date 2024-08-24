@@ -3,6 +3,7 @@ const directories = Object.freeze({
 		localisations: "./assets/localisations",
 		sentences: "./assets/sentences",
 	},
+	migrations: "./migrations",
 } as const);
 
 export default directories;
