@@ -1,37 +1,17 @@
 import type { Client } from "logos/client";
+import type { EntryRequestDocument, ForcedVerdict, VoteVerdict } from "logos/models/documents/entry-request/latest";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-interface EntryRequestFormData {
-	readonly reason: string;
-	readonly aim: string;
-	readonly whereFound: string;
-}
-
-interface VoteStatistics {
-	for?: string[];
-	against?: string[];
-}
-
 type VoteType = "for" | "against";
-type VoteVerdict = "accepted" | "rejected";
 
-interface ForcedVerdict {
-	readonly userId: string;
-	readonly verdict: VoteVerdict;
-}
+type CreateEntryRequestOptions = EntryRequestDocument & IdentifierData<EntryRequest>;
 
-type CreateEntryRequestOptions = {
-	createdAt?: number;
-	requestedRoleId: string;
-	formData: EntryRequestFormData;
-	isFinalised?: boolean;
-	forcedVerdict?: ForcedVerdict;
-	ticketChannelId?: string;
-	votes?: VoteStatistics;
-} & IdentifierData<EntryRequest>;
+interface EntryRequest extends EntryRequestDocument {}
 
 class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guildId", "authorId"] }> {
+	readonly createdAt: number;
+
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -39,14 +19,6 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 	get authorId(): string {
 		return this.idParts[1];
 	}
-
-	readonly createdAt: number;
-	readonly requestedRoleId: string;
-	readonly formData: EntryRequestFormData;
-	isFinalised: boolean;
-	forcedVerdict?: ForcedVerdict;
-	ticketChannelId?: string;
-	votes?: VoteStatistics;
 
 	get votersFor(): string[] {
 		return this.votes?.for ?? [];
@@ -193,4 +165,4 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 }
 
 export { EntryRequest };
-export type { CreateEntryRequestOptions, EntryRequestFormData, VoteType };
+export type { CreateEntryRequestOptions, VoteType };

@@ -9,7 +9,6 @@ type CreateGuildOptions = Partial<GuildDocument> & IdentifierData<Guild>;
 
 interface Guild extends GuildDocument {}
 
-/** @since v3.0.0 */
 class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 	readonly createdAt: number;
 
