@@ -83,7 +83,9 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		return configuration;
 	}
 
-	// TODO(vxern): Create method to check for a feature being journalled.
+	isJournalled(feature: keyof Guild["journalling"]): boolean {
+		return this.journalling[feature];
+	}
 
 	// TODO(vxern): Create method to check for rate limits.
 
