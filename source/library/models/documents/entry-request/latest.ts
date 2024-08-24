@@ -4,26 +4,22 @@ interface EntryRequestFormData {
 	whereFound: string;
 }
 
-interface VoteStatistics {
-	for?: string[];
-	against?: string[];
-}
-
 type VoteVerdict = "accepted" | "rejected";
-
-interface ForcedVerdict {
-	userId: string;
-	verdict: VoteVerdict;
-}
 
 interface EntryRequestDocument {
 	createdAt: number;
 	requestedRoleId: string;
 	formData: EntryRequestFormData;
 	isFinalised: boolean;
-	forcedVerdict?: ForcedVerdict;
+	forcedVerdict?: {
+		userId: string;
+		verdict: VoteVerdict;
+	};
 	ticketChannelId?: string;
-	votes?: VoteStatistics;
+	votes?: {
+		for?: string[];
+		against?: string[];
+	};
 }
 
-export type { EntryRequestDocument, EntryRequestFormData, VoteVerdict, ForcedVerdict };
+export type { EntryRequestDocument, EntryRequestFormData, VoteVerdict };

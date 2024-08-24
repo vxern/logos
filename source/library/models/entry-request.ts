@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { EntryRequestDocument, ForcedVerdict, VoteVerdict } from "logos/models/documents/entry-request/latest";
+import type { EntryRequestDocument, VoteVerdict } from "logos/models/documents/entry-request/latest";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
@@ -159,7 +159,7 @@ class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guild
 		return undefined;
 	}
 
-	forceVerdict(forcedVerdict: ForcedVerdict): void {
+	forceVerdict(forcedVerdict: EntryRequest["forcedVerdict"]): void {
 		this.forcedVerdict = forcedVerdict;
 	}
 }
