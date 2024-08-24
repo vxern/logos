@@ -3,7 +3,7 @@
 	"name": "logos",
 	"description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
 	"license": "Apache-2.0",
-	"version": "4.21.1",
+	"version": "4.21.2",
 	"type": "module",
 	"keywords": [
 		"discord",
@@ -58,7 +58,7 @@
 		"object-hash": "^3.0.0",
 		"ravendb": "^5.4.3",
 		"rethinkdb-ts": "^2.6.1",
-		"shoukaku": "^4.0.1",
+		"shoukaku": "^4.1.0",
 		"tinyld": "^1.3.4",
 		"wiktionary-scraper": "^0.0.1-patch.3",
 		"winston": "^3.14.2",
@@ -66,7 +66,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "1.8.3",
-		"@types/bun": "^1.1.6",
+		"@types/bun": "^1.1.7",
 		"@types/chai": "^4.3.17",
 		"@types/object-hash": "^3.0.6",
 		"chai": "^5.1.1",
