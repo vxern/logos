@@ -109,9 +109,11 @@ const properties = {
 	entitlement: {},
 	sku: {},
 	voiceState: {
+		sessionId: true,
 		guildId: true,
 		channelId: true,
 		userId: true,
+		toggles: true,
 	},
 	poll: {},
 	pollAnswer: {},
