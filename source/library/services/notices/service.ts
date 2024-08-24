@@ -14,10 +14,10 @@ interface NoticeData {
 }
 
 interface Configurations {
-	information: Guild["informationNotice"];
-	resources: Guild["resourceNotice"];
-	roles: Guild["roleNotice"];
-	welcome: Guild["welcomeNotice"];
+	information: Guild["features"]["informationNotices"];
+	resources: Guild["features"]["resourceNotices"];
+	roles: Guild["features"]["roleNotices"];
+	welcome: Guild["features"]["welcomeNotices"];
 }
 
 type ConfigurationLocators = {
@@ -28,10 +28,10 @@ type NoticeTypes = keyof ServiceStore["local"]["notices"];
 
 abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
 	static readonly #configurationLocators = Object.freeze({
-		information: (guildDocument) => guildDocument.informationNotice,
-		resources: (guildDocument) => guildDocument.resourceNotice,
-		roles: (guildDocument) => guildDocument.roleNotice,
-		welcome: (guildDocument) => guildDocument.welcomeNotice,
+		information: (guildDocument) => guildDocument.feature("informationNotices"),
+		resources: (guildDocument) => guildDocument.feature("resourceNotices"),
+		roles: (guildDocument) => guildDocument.feature("roleNotices"),
+		welcome: (guildDocument) => guildDocument.feature("welcomeNotices"),
 	} as const satisfies ConfigurationLocators);
 
 	readonly #configuration: ConfigurationLocators[Generic["type"]];

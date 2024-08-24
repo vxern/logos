@@ -14,8 +14,8 @@ class MusicService extends LocalService {
 	#managerConnectionRestores!: (name: string, reconnected: boolean) => void;
 	#session?: MusicSession;
 
-	get configuration(): NonNullable<Guild["music"]> {
-		return this.guildDocument.music!;
+	get configuration(): NonNullable<Guild["features"]["music"]> {
+		return this.guildDocument.feature("music");
 	}
 
 	get hasSession(): boolean {

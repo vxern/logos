@@ -1,13 +1,14 @@
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import type { Guild, RoleWithIndicator } from "logos/models/guild";
+import type { Guild } from "logos/models/guild";
+import type { RoleWithIndicator } from "logos/models/versions/guild/latest";
 import { LocalService } from "logos/services/service";
 
 class RoleIndicatorService extends LocalService {
 	readonly #guildMemberUpdates: Collector<"guildMemberUpdate">;
 
-	get configuration(): NonNullable<Guild["roleIndicators"]> {
-		return this.guildDocument.roleIndicators!;
+	get configuration(): NonNullable<Guild["features"]["roleIndicators"]> {
+		return this.guildDocument.feature("roleIndicators");
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {

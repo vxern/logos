@@ -7,11 +7,11 @@ import { LocalService } from "logos/services/service";
 import type { ServiceStore } from "logos/stores/services";
 
 interface Configurations {
-	verification: Guild["verification"];
-	reports: Guild["reports"];
-	resources: Guild["resourceSubmissions"];
-	suggestions: Guild["suggestions"];
-	tickets: Guild["tickets"];
+	verification: Guild["features"]["verification"];
+	reports: Guild["features"]["reports"];
+	resources: Guild["features"]["resourceSubmissions"];
+	suggestions: Guild["features"]["suggestions"];
+	tickets: Guild["features"]["tickets"];
 }
 
 type ConfigurationLocators = {
@@ -42,11 +42,11 @@ abstract class PromptService<
 	},
 > extends LocalService {
 	static readonly #configurationLocators = Object.freeze({
-		verification: (guildDocument) => guildDocument.verification,
-		reports: (guildDocument) => guildDocument.reports,
-		resources: (guildDocument) => guildDocument.resourceSubmissions,
-		suggestions: (guildDocument) => guildDocument.suggestions,
-		tickets: (guildDocument) => guildDocument.tickets,
+		verification: (guildDocument) => guildDocument.feature("verification"),
+		reports: (guildDocument) => guildDocument.feature("reports"),
+		resources: (guildDocument) => guildDocument.feature("resourceSubmissions"),
+		suggestions: (guildDocument) => guildDocument.feature("suggestions"),
+		tickets: (guildDocument) => guildDocument.feature("tickets"),
 	} as const satisfies ConfigurationLocators);
 	static readonly #customIds = Object.freeze({
 		verification: constants.components.verification,
@@ -379,23 +379,23 @@ abstract class PromptService<
 		let management: { roles?: string[]; users?: string[] } | undefined;
 		switch (this.#type) {
 			case "verification": {
-				management = (this.configuration as Guild["verification"])?.management;
+				management = (this.configuration as Guild["features"]["verification"])?.management;
 				break;
 			}
 			case "reports": {
-				management = (this.configuration as Guild["reports"])?.management;
+				management = (this.configuration as Guild["features"]["reports"])?.management;
 				break;
 			}
 			case "resources": {
-				management = (this.configuration as Guild["resourceSubmissions"])?.management;
+				management = (this.configuration as Guild["features"]["resourceSubmissions"])?.management;
 				break;
 			}
 			case "suggestions": {
-				management = (this.configuration as Guild["suggestions"])?.management;
+				management = (this.configuration as Guild["features"]["suggestions"])?.management;
 				break;
 			}
 			case "tickets": {
-				management = (this.configuration as Guild["tickets"])?.management;
+				management = (this.configuration as Guild["features"]["tickets"])?.management;
 				break;
 			}
 			default: {

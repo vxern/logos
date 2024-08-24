@@ -5,11 +5,7 @@ import { Report } from "logos/models/report";
 
 async function handleMakeReport(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.reports;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("reports");
 
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
@@ -54,7 +50,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 
 		await client.tryLog("reportSubmit", {
 			guildId: guild.id,
-			journalling: configuration.journaling,
+			journalling: guildDocument.isJournalled("reports"),
 			args: [member, reportDocument],
 		});
 

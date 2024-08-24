@@ -292,15 +292,15 @@ class InteractionCollector<
 			Guild.getOrCreate(this.#client, { guildId: interaction.guildId!.toString() }),
 		]);
 
-		const targetLanguage = guildDocument.targetLanguage;
+		const targetLanguage = guildDocument.languages.target;
 		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
 		const learningLocale = getLocaleByLearningLanguage(learningLanguage);
 
 		const guildLanguage = guildDocument.isTargetLanguageOnly(interaction.channelId!.toString())
 			? targetLanguage
-			: guildDocument.localisationLanguage;
+			: guildDocument.languages.localisation;
 		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
-		const featureLanguage = guildDocument.featureLanguage;
+		const featureLanguage = guildDocument.languages.feature;
 
 		if (!isAutocomplete(interaction)) {
 			// If the user has configured a custom locale, use the user's preferred locale.

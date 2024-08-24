@@ -10,13 +10,6 @@ async function handleWarnUserAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
 ): Promise<void> {
-	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.warns;
-	if (configuration === undefined) {
-		return;
-	}
-
 	if (interaction.parameters.focused === undefined) {
 		return;
 	}
@@ -61,11 +54,7 @@ async function handleWarnUser(
 	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.warns;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("warns");
 
 	if (interaction.parameters.rule !== constants.components.none && !isValidRule(interaction.parameters.rule)) {
 		const strings = constants.contexts.invalidRule({ localise: client.localise, locale: interaction.locale });
@@ -115,7 +104,7 @@ async function handleWarnUser(
 
 	await client.tryLog("memberWarnAdd", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("warns"),
 		args: [member, warningDocument, interaction.user],
 	});
 
@@ -140,7 +129,7 @@ async function handleWarnUser(
 	if (surpassedLimit) {
 		if (guildDocument.hasEnabled("alerts")) {
 			const alertService = client.getAlertService(guild.id);
-			if (configuration.autoTimeout?.enabled) {
+			if (configuration.autoTimeout !== undefined) {
 				const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
 				const timeoutMilliseconds = timeStructToMilliseconds(timeout);
 

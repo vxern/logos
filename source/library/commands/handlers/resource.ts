@@ -5,11 +5,7 @@ import { Resource } from "logos/models/resource";
 
 async function handleSubmitResource(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.resourceSubmissions;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("resourceSubmissions");
 
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
@@ -54,7 +50,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 
 		await client.tryLog("resourceSend", {
 			guildId: guild.id,
-			journalling: configuration.journaling,
+			journalling: guildDocument.isJournalled("resourceSubmissions"),
 			args: [member, resourceDocument],
 		});
 

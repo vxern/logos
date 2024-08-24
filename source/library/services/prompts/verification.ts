@@ -7,7 +7,7 @@ import { Model } from "logos/models/model";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
-type Configuration = NonNullable<Guild["verification"]>;
+type Configuration = NonNullable<Guild["features"]["verification"]>;
 type VoteInformation = {
 	[K in keyof NonNullable<Configuration["voting"]>["verdict"]]: {
 		required: number;
@@ -620,11 +620,6 @@ class VerificationPromptService extends PromptService<{
 	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
 		await this.client.postponeReply(interaction);
 
-		const ticketConfiguration = this.guildDocument.tickets;
-		if (ticketConfiguration === undefined) {
-			return;
-		}
-
 		const entryRequestDocument = this.client.documents.entryRequests.get(partialId);
 		if (entryRequestDocument === undefined) {
 			return;
@@ -703,7 +698,7 @@ class VerificationPromptService extends PromptService<{
 
 		function getVoteInformation<VerdictType extends keyof VoteInformation>(
 			type: VerdictType,
-			configuration: Guild["verification"] & { enabled: true },
+			configuration: NonNullable<Guild["features"]["verification"]>,
 			votes: number,
 		): VoteInformation[VerdictType] {
 			const verdict = configuration.voting.verdict[type];

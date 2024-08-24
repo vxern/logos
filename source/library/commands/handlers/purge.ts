@@ -24,11 +24,6 @@ async function handlePurgeMessages(
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
-	const configuration = guildDocument.purging;
-	if (configuration === undefined) {
-		return;
-	}
-
 	await client.postponeReply(interaction);
 
 	let authorId: bigint | undefined;
@@ -491,7 +486,7 @@ async function handlePurgeMessages(
 
 	await client.tryLog("purgeBegin", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("purging"),
 		args: [member, channel, messages.length],
 	});
 
@@ -554,7 +549,7 @@ async function handlePurgeMessages(
 
 	await client.tryLog("purgeEnd", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("purging"),
 		args: [member, channel, deletedCount],
 	});
 

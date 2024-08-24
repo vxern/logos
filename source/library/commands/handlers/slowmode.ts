@@ -45,11 +45,6 @@ async function handleToggleSlowmode(
 
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
-	const configuration = guildDocument.slowmode;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const isEnabled = channel.rateLimitPerUser !== undefined && channel.rateLimitPerUser !== 0;
 	if (isEnabled) {
 		if (interaction.parameters.level !== undefined) {
@@ -69,7 +64,7 @@ async function handleToggleSlowmode(
 
 				await client.tryLog("slowmodeDowngrade", {
 					guildId: guild.id,
-					journalling: configuration.journaling,
+					journalling: guildDocument.isJournalled("slowmode"),
 					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
 				});
 
@@ -98,7 +93,7 @@ async function handleToggleSlowmode(
 
 				await client.tryLog("slowmodeUpgrade", {
 					guildId: guild.id,
-					journalling: configuration.journaling,
+					journalling: guildDocument.isJournalled("slowmode"),
 					args: [interaction.user, channel, previousLevel, interaction.parameters.level],
 				});
 
@@ -160,7 +155,7 @@ async function handleToggleSlowmode(
 
 		await client.tryLog("slowmodeDisable", {
 			guildId: guild.id,
-			journalling: configuration.journaling,
+			journalling: guildDocument.isJournalled("slowmode"),
 			args: [interaction.user, channel],
 		});
 
@@ -191,7 +186,7 @@ async function handleToggleSlowmode(
 
 	await client.tryLog("slowmodeEnable", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("slowmode"),
 		args: [interaction.user, channel, interaction.parameters.level ?? "lowest"],
 	});
 

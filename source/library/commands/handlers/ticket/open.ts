@@ -5,11 +5,7 @@ import { Ticket } from "logos/models/ticket";
 
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.tickets;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("tickets");
 
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {

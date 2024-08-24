@@ -5,11 +5,7 @@ import { Suggestion } from "logos/models/suggestion";
 
 async function handleMakeSuggestion(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.suggestions;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("suggestions");
 
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
@@ -57,7 +53,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 
 		await client.tryLog("suggestionSend", {
 			guildId: guild.id,
-			journalling: configuration.journaling,
+			journalling: guildDocument.isJournalled("suggestions"),
 			args: [member, suggestionDocument],
 		});
 

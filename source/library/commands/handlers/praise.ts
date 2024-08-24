@@ -15,11 +15,7 @@ async function handlePraiseUser(
 	interaction: Logos.Interaction<any, { user: string; comment: string | undefined }>,
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.praises;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("praises");
 
 	const member = client.resolveInteractionToMember(interaction, { identifier: interaction.parameters.user });
 	if (member === undefined) {
@@ -66,7 +62,7 @@ async function handlePraiseUser(
 
 	await client.tryLog("praiseAdd", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("praises"),
 		args: [member, praiseDocument, interaction.user],
 	});
 

@@ -278,7 +278,7 @@ class TicketPromptService extends PromptService<{
 						color: constants.colours.husky,
 						fields: [
 							{
-								name: strings.fields.reason({ language: this.guildDocument.featureLanguage }),
+								name: strings.fields.reason({ language: this.guildDocument.languages.feature }),
 								value: codeMultiline(entryRequest.formData.reason),
 							},
 							{
@@ -307,7 +307,7 @@ class TicketPromptService extends PromptService<{
 			case "standalone": {
 				await this.client.tryLog("ticketOpen", {
 					guildId: this.guildId,
-					journalling: this.configuration.journaling,
+					journalling: this.guildDocument.isJournalled("tickets"),
 					args: [member, ticketDocument],
 				});
 				break;
@@ -315,7 +315,7 @@ class TicketPromptService extends PromptService<{
 			case "inquiry": {
 				await this.client.tryLog("inquiryOpen", {
 					guildId: this.guildId,
-					journalling: this.configuration.journaling,
+					journalling: this.guildDocument.isJournalled("tickets"),
 					args: [member, ticketDocument],
 				});
 				break;

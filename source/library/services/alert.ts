@@ -3,8 +3,8 @@ import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
 
 class AlertService extends LocalService {
-	get configuration(): NonNullable<Guild["alerts"]> {
-		return this.guildDocument.alerts!;
+	get configuration(): NonNullable<Guild["features"]["alerts"]> {
+		return this.guildDocument.feature("alerts");
 	}
 
 	get channelId(): bigint | undefined {
