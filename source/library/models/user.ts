@@ -1,8 +1,8 @@
 import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
-import type { GameType } from "logos/models/guild-statistics";
 import { type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type { GameType } from "logos/models/documents/guild-statistics/latest";
 
 interface Account {
 	/**

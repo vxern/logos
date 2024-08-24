@@ -2,32 +2,24 @@ import type { Locale } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type { GameStatistics, GameType, GuildStatisticsDocument } from "logos/models/documents/guild-statistics/latest";
 
-type GameType =
-	/** @since v3.42.0 */
-	"pickMissingWord";
+type CreateGuildStatisticsOptions = GuildStatisticsDocument & IdentifierData<GuildStatistics>;
 
-interface GameStatistics {
-	totalSessions: number;
-	totalScore: number;
-	uniquePlayers: number;
-}
-
-type CreateGuildStatisticsOptions = {
-	createdAt?: number;
-	statistics?: Partial<Record<Locale, Partial<Record<GameType, GameStatistics>>>>;
-} & IdentifierData<GuildStatistics>;
+interface GuildStatistics extends GuildStatisticsDocument {}
 
 class GuildStatistics extends Model<{ collection: "GuildStatistics"; idParts: ["guildId"] }> {
-	static readonly #initialStatistics: GameStatistics = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
+	static readonly #initialStatistics: GameStatistics = {
+		totalSessions: 1,
+		totalScore: 0,
+		uniquePlayers: 1,
+	};
+
+	readonly createdAt: number;
 
 	get guildId(): string {
 		return this.idParts[0];
 	}
-
-	readonly createdAt: number;
-
-	statistics?: Partial<Record<Locale, Partial<Record<GameType, GameStatistics>>>>;
 
 	constructor(database: DatabaseStore, { createdAt, statistics, ...data }: CreateGuildStatisticsOptions) {
 		super(database, data, { collection: "GuildStatistics" });
@@ -96,4 +88,4 @@ class GuildStatistics extends Model<{ collection: "GuildStatistics"; idParts: ["
 }
 
 export { GuildStatistics };
-export type { CreateGuildStatisticsOptions, GameStatistics, GameType };
+export type { CreateGuildStatisticsOptions };
