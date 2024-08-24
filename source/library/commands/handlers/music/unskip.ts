@@ -121,7 +121,7 @@ async function handleUnskipAction(
 		return;
 	}
 
-	const strings = constants.contexts.invalidSkipArgument({
+	const strings = constants.contexts.unskipped({
 		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
