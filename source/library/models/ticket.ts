@@ -1,21 +1,15 @@
 import type { Client } from "logos/client";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type { TicketDocument } from "logos/models/documents/ticket/latest";
 
-type TicketType = "standalone" | "inquiry";
+type CreateTicketOptions = Partial<TicketDocument> & IdentifierData<Ticket>;
 
-interface TicketFormData {
-	readonly topic: string;
-}
-
-type CreateTicketOptions = {
-	createdAt?: number;
-	type: TicketType;
-	formData: TicketFormData;
-	isResolved?: boolean;
-} & IdentifierData<Ticket>;
+interface Ticket extends TicketDocument {}
 
 class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "authorId", "channelId"] }> {
+	readonly createdAt: number;
+
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -27,12 +21,6 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 	get channelId(): string {
 		return this.idParts[2];
 	}
-
-	readonly createdAt: number;
-	readonly type: TicketType;
-	readonly formData: TicketFormData;
-
-	isResolved: boolean;
 
 	constructor(database: DatabaseStore, { createdAt, type, formData, isResolved, ...data }: CreateTicketOptions) {
 		super(database, data, { collection: "Tickets" });
