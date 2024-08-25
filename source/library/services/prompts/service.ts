@@ -5,6 +5,7 @@ import type { Model } from "logos/models/model";
 import type { User } from "logos/models/user";
 import { LocalService } from "logos/services/service";
 import type { ServiceStore } from "logos/stores/services";
+import type { FeatureManagement } from "logos/models/documents/guild/latest";
 
 interface Configurations {
 	verification: Guild["features"]["verification"];
@@ -376,26 +377,26 @@ abstract class PromptService<
 			return;
 		}
 
-		let management: { roles?: string[]; users?: string[] } | undefined;
+		let management: FeatureManagement | undefined;
 		switch (this.#type) {
 			case "verification": {
-				management = (this.configuration as Guild["features"]["verification"])?.management;
+				management = this.guildDocument.management.verification;
 				break;
 			}
 			case "reports": {
-				management = (this.configuration as Guild["features"]["reports"])?.management;
-				break;
-			}
-			case "resources": {
-				management = (this.configuration as Guild["features"]["resourceSubmissions"])?.management;
+				management = this.guildDocument.management.reports;
 				break;
 			}
 			case "suggestions": {
-				management = (this.configuration as Guild["features"]["suggestions"])?.management;
+				management = this.guildDocument.management.suggestions;
+				break;
+			}
+			case "resources": {
+				management = this.guildDocument.management.resourceSubmissions;
 				break;
 			}
 			case "tickets": {
-				management = (this.configuration as Guild["features"]["tickets"])?.management;
+				management = this.guildDocument.management.tickets;
 				break;
 			}
 			default: {

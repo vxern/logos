@@ -87,6 +87,14 @@ async function up(database: DatabaseStore): Promise<void> {
 				praises: features.social?.features?.praises?.rateLimit,
 			};
 
+			result.management = {
+				reports: features.moderation?.features?.reports?.management,
+				verification: features.moderation?.features?.verification?.management,
+				suggestions: features.server?.features?.suggestions?.management,
+				resourceSubmissions: features.server?.features?.resources?.management,
+				tickets: features.server?.features?.tickets?.management,
+			};
+
 			result.features = {};
 
 			const journaling = features.information?.features?.journaling;

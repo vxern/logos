@@ -66,6 +66,13 @@ interface GuildDocument {
 		tickets?: RateLimit;
 		praises?: RateLimit;
 	};
+	management: {
+		reports?: FeatureManagement;
+		verification?: FeatureManagement;
+		suggestions?: FeatureManagement;
+		resourceSubmissions?: FeatureManagement;
+		tickets?: FeatureManagement;
+	};
 	features: {
 		journalling?: {
 			channelId: string;
@@ -116,11 +123,6 @@ interface GuildDocument {
 		};
 		reports?: {
 			channelId: string;
-			// TODO(vxern): Move management into a common object like with journalling.
-			management?: {
-				roles?: string[];
-				users?: string[];
-			};
 		};
 		/** Relies on guild.features.server.tickets.categoryId */
 		verification?: {
@@ -137,10 +139,6 @@ interface GuildDocument {
 				type: "account-age";
 				value: TimeStruct;
 			}[];
-			management?: {
-				roles?: string[];
-				users?: string[];
-			};
 		};
 		dynamicVoiceChannels?: {
 			channels: DynamicVoiceChannel[];
@@ -151,31 +149,29 @@ interface GuildDocument {
 		};
 		suggestions?: {
 			channelId: string;
-			management?: {
-				roles?: string[];
-				users?: string[];
-			};
 		};
 		resourceSubmissions?: {
 			channelId: string;
-			management?: {
-				roles?: string[];
-				users?: string[];
-			};
 		};
 		tickets?: {
 			channelId: string;
 			categoryId: string;
 			limit?: number;
-			management?: {
-				roles?: string[];
-				users?: string[];
-			};
 		};
 		music?: {
 			implicitVolume: number;
 		};
 	};
+}
+
+interface RateLimit {
+	uses: number;
+	within: TimeStruct;
+}
+
+interface FeatureManagement {
+	roles?: string[];
+	users?: string[];
 }
 
 interface DynamicVoiceChannel {
@@ -189,9 +185,4 @@ interface RoleWithIndicator {
 	indicator: string;
 }
 
-interface RateLimit {
-	uses: number;
-	within: TimeStruct;
-}
-
-export type { GuildDocument, DynamicVoiceChannel, RoleWithIndicator, RateLimit };
+export type { GuildDocument, DynamicVoiceChannel, RoleWithIndicator, RateLimit, FeatureManagement };
