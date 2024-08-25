@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
+import type { SuggestionDocument } from "logos/models/documents/suggestion/latest";
 import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
-import type { SuggestionDocument } from "logos/models/documents/suggestion/latest";
 
 type CreateSuggestionOptions = CreateModelOptions<Suggestion, SuggestionDocument, "formData">;
 interface Suggestion extends SuggestionDocument {}

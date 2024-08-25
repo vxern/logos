@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
+import type { TicketDocument } from "logos/models/documents/ticket/latest";
 import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
-import type { TicketDocument } from "logos/models/documents/ticket/latest";
 
 type CreateTicketOptions = CreateModelOptions<Ticket, TicketDocument, "type" | "formData">;
 interface Ticket extends TicketDocument {}

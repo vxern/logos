@@ -1,7 +1,7 @@
 import { getTinyLDLanguageByLocale, isTinyLDLocale } from "logos:constants/languages/detection";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
-import * as tinyld from "tinyld/heavy";
 import type { Client } from "logos/client";
+import * as tinyld from "tinyld/heavy";
 
 class TinyLDAdapter extends DetectorAdapter {
 	constructor(client: Client) {

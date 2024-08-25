@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
+import type { WarningDocument } from "logos/models/documents/warning/latest";
 import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
-import type { WarningDocument } from "logos/models/documents/warning/latest";
 
 type CreateWarningOptions = CreateModelOptions<Warning, WarningDocument, "reason" | "rule">;
 interface Warning extends WarningDocument {}

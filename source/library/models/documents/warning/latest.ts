@@ -1,4 +1,4 @@
-import type { Rule } from "logos:constants/rules.ts";
+import type { Rule } from "logos:constants/rules";
 
 interface WarningDocument {
 	reason: string;

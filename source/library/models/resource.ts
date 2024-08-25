@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
+import type { ResourceDocument } from "logos/models/documents/resource/latest";
 import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
-import type { ResourceDocument } from "logos/models/documents/resource/latest";
 
 type CreateResourceOptions = CreateModelOptions<Resource, ResourceDocument, "formData">;
 interface Resource extends ResourceDocument {}
