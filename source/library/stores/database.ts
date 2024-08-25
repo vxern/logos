@@ -7,6 +7,7 @@ import { MongoDBAdapter } from "logos/adapters/databases/mongodb/database";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb/database";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
 import { Logger } from "logos/logger";
+import { DatabaseMetadata } from "logos/models/database-metadata";
 import { EntryRequest } from "logos/models/entry-request";
 import { Guild } from "logos/models/guild";
 import { GuildStatistics } from "logos/models/guild-statistics";
@@ -21,6 +22,7 @@ import { Warning } from "logos/models/warning";
 
 class DatabaseStore {
 	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({
+		DatabaseMetadata: DatabaseMetadata,
 		EntryRequests: EntryRequest,
 		GuildStatistics: GuildStatistics,
 		Guilds: Guild,
@@ -47,6 +49,7 @@ class DatabaseStore {
 		readonly users: Map<string, User>;
 		readonly warningsByTarget: Map<string, Map<string, Warning>>;
 	};
+	metadata!: DatabaseMetadata;
 
 	readonly #environment: Environment;
 	readonly #adapter: DatabaseAdapter;
@@ -114,7 +117,15 @@ class DatabaseStore {
 			adapter = new InMemoryAdapter({ environment });
 		}
 
-		return new DatabaseStore({ environment, log, adapter });
+		const database = new DatabaseStore({ environment, log, adapter });
+		const metadata = await DatabaseMetadata.get(database);
+		if (metadata !== undefined) {
+			throw new Error(
+				"Could not retrieve database metadata. If running the bot manually, ensure you've run the migration script.",
+			);
+		}
+
+		return database;
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {
