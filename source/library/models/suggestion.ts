@@ -1,12 +1,11 @@
 import type { Client } from "logos/client";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type { SuggestionDocument } from "logos/models/documents/suggestion/latest";
 
-interface SuggestionFormData {
-	readonly suggestion: string;
-}
+type CreateSuggestionOptions = Partial<SuggestionDocument> & IdentifierData<Suggestion>;
 
-type CreateSuggestionOptions = { formData: SuggestionFormData; isResolved?: boolean } & IdentifierData<Suggestion>;
+interface Suggestion extends SuggestionDocument {}
 
 class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
@@ -20,10 +19,6 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 	get createdAt(): number {
 		return Number(this.idParts[2]);
 	}
-
-	readonly formData: SuggestionFormData;
-
-	isResolved: boolean;
 
 	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateSuggestionOptions) {
 		super(database, data, { collection: "Suggestions" });
@@ -55,4 +50,4 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 }
 
 export { Suggestion };
-export type { CreateSuggestionOptions, SuggestionFormData };
+export type { CreateSuggestionOptions };

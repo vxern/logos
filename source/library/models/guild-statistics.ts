@@ -1,8 +1,8 @@
 import type { Locale } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
+import type { GameStatistics, GameType, GuildStatisticsDocument } from "logos/models/documents/guild-statistics/latest";
 import { type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
-import type { GameStatistics, GameType, GuildStatisticsDocument } from "logos/models/documents/guild-statistics/latest";
 
 type CreateGuildStatisticsOptions = GuildStatisticsDocument & IdentifierData<GuildStatistics>;
 

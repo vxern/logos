@@ -1,7 +1,7 @@
 import type { Client } from "logos/client";
+import type { PraiseDocument } from "logos/models/documents/praise/latest";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
-import type { PraiseDocument } from "logos/models/documents/praise/latest";
 
 type CreatePraiseOptions = Partial<PraiseDocument> & IdentifierData<Praise>;
 
