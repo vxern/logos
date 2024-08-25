@@ -5,7 +5,6 @@ import { Suggestion } from "logos/models/suggestion";
 
 async function handleMakeSuggestion(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-	const configuration = guildDocument.feature("suggestions");
 
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
@@ -21,7 +20,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		await Suggestion.getAll(client, {
 			where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() },
 		}),
-		configuration.rateLimit ?? constants.defaults.SUGGESTION_RATE_LIMIT,
+		guildDocument.rateLimit("suggestions") ?? constants.defaults.SUGGESTION_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManySuggestions({

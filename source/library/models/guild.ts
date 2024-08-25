@@ -135,7 +135,9 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		return this.journalling[feature];
 	}
 
-	// TODO(vxern): Create method to check for rate limits.
+	rateLimit(feature: keyof Guild["rateLimits"]): RateLimit | undefined {
+		return this.rateLimits[feature];
+	}
 
 	// TODO(vxern): Create method to check for management over a feature.
 

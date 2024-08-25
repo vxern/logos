@@ -59,6 +59,13 @@ interface GuildDocument {
 		tickets: boolean;
 		praises: boolean;
 	};
+	rateLimits: {
+		reports?: RateLimit;
+		suggestions?: RateLimit;
+		resourceSubmissions?: RateLimit;
+		tickets?: RateLimit;
+		praises?: RateLimit;
+	};
 	features: {
 		journalling?: {
 			channelId: string;
@@ -109,8 +116,6 @@ interface GuildDocument {
 		};
 		reports?: {
 			channelId: string;
-			// TODO(vxern): Move rate limits into a common object like with journalling.
-			rateLimit?: RateLimit;
 			// TODO(vxern): Move management into a common object like with journalling.
 			management?: {
 				roles?: string[];
@@ -146,7 +151,6 @@ interface GuildDocument {
 		};
 		suggestions?: {
 			channelId: string;
-			rateLimit?: RateLimit;
 			management?: {
 				roles?: string[];
 				users?: string[];
@@ -154,7 +158,6 @@ interface GuildDocument {
 		};
 		resourceSubmissions?: {
 			channelId: string;
-			rateLimit?: RateLimit;
 			management?: {
 				roles?: string[];
 				users?: string[];
@@ -163,7 +166,6 @@ interface GuildDocument {
 		tickets?: {
 			channelId: string;
 			categoryId: string;
-			rateLimit?: RateLimit;
 			limit?: number;
 			management?: {
 				roles?: string[];
@@ -172,9 +174,6 @@ interface GuildDocument {
 		};
 		music?: {
 			implicitVolume: number;
-		};
-		praises?: {
-			rateLimit?: RateLimit;
 		};
 	};
 }

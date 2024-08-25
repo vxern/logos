@@ -5,7 +5,6 @@ import { Ticket } from "logos/models/ticket";
 
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-	const configuration = guildDocument.feature("tickets");
 
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
@@ -21,7 +20,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		await Ticket.getAll(client, {
 			where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() },
 		}),
-		configuration.rateLimit ?? constants.defaults.TICKET_RATE_LIMIT,
+		guildDocument.rateLimit("tickets") ?? constants.defaults.TICKET_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyTickets({

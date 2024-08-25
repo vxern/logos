@@ -5,7 +5,6 @@ import { Resource } from "logos/models/resource";
 
 async function handleSubmitResource(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-	const configuration = guildDocument.feature("resourceSubmissions");
 
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
@@ -21,7 +20,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		await Resource.getAll(client, {
 			where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() },
 		}),
-		configuration.rateLimit ?? constants.defaults.RESOURCE_RATE_LIMIT,
+		guildDocument.rateLimit("resourceSubmissions") ?? constants.defaults.RESOURCE_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyResources({ localise: client.localise, locale: interaction.locale });

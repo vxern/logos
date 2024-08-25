@@ -1,11 +1,12 @@
 import type { DatabaseStore } from "logos/stores/database";
 import type { GuildDocument as Previous } from "logos/models/documents/guild/4.21.0";
 import type { GuildDocument as Next } from "logos/models/documents/guild/latest";
+import type { Guild } from "logos/models/guild";
 
 // This block is executed when the migration is enacted.
 async function up(database: DatabaseStore): Promise<void> {
 	await database.withSession(async (session) => {
-		const documents = await session.query<Previous>({ collection: "Guilds" }).run();
+		const documents = (await session.query<Guild>({ collection: "Guilds" }).run()) as Previous[];
 
 		const transformed: Record<string, Next> = {};
 		for (const document of documents) {
@@ -76,6 +77,14 @@ async function up(database: DatabaseStore): Promise<void> {
 				resourceSubmissions: features.server?.features?.resources?.journaling ?? false,
 				tickets: features.server?.features?.tickets?.journaling ?? false,
 				praises: features.social?.features?.praises?.journaling ?? false,
+			};
+
+			result.rateLimits = {
+				reports: features.moderation?.features?.reports?.rateLimit,
+				suggestions: features.server?.features?.suggestions?.rateLimit,
+				resourceSubmissions: features.server?.features?.resources?.rateLimit,
+				tickets: features.server?.features?.tickets?.rateLimit,
+				praises: features.social?.features?.praises?.rateLimit,
 			};
 
 			result.features = {};
@@ -178,7 +187,6 @@ async function up(database: DatabaseStore): Promise<void> {
 			if (reports !== undefined && reports.channelId !== undefined) {
 				result.features.reports = {
 					channelId: reports.channelId,
-					rateLimit: reports.rateLimit,
 					management: reports.management,
 				};
 			}
@@ -221,7 +229,6 @@ async function up(database: DatabaseStore): Promise<void> {
 			if (suggestions !== undefined && suggestions.channelId !== undefined) {
 				result.features.suggestions = {
 					channelId: suggestions.channelId,
-					rateLimit: suggestions.rateLimit,
 					management: suggestions.management,
 				};
 			}
@@ -230,7 +237,6 @@ async function up(database: DatabaseStore): Promise<void> {
 			if (resourceSubmissions !== undefined && resourceSubmissions.channelId !== undefined) {
 				result.features.resourceSubmissions = {
 					channelId: resourceSubmissions.channelId,
-					rateLimit: resourceSubmissions.rateLimit,
 					management: resourceSubmissions.management,
 				};
 			}
@@ -240,7 +246,6 @@ async function up(database: DatabaseStore): Promise<void> {
 				result.features.tickets = {
 					channelId: tickets.channelId,
 					categoryId: tickets.categoryId,
-					rateLimit: tickets.rateLimit,
 					limit: tickets.limit,
 					management: tickets.management,
 				};
@@ -250,13 +255,6 @@ async function up(database: DatabaseStore): Promise<void> {
 			if (music !== undefined && music.implicitVolume !== undefined) {
 				result.features.music = {
 					implicitVolume: music.implicitVolume,
-				};
-			}
-
-			const praises = features.social?.features?.praises;
-			if (praises !== undefined) {
-				result.features.praises = {
-					rateLimit: praises.rateLimit,
 				};
 			}
 		}
