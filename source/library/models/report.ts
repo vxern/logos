@@ -1,14 +1,11 @@
 import type { Client } from "logos/client";
+import type { ReportDocument } from "logos/models/documents/report/latest";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-interface ReportFormData {
-	readonly reason: string;
-	readonly users: string;
-	messageLink?: string;
-}
+type CreateReportOptions = Partial<ReportDocument> & IdentifierData<Report>;
 
-type CreateReportOptions = { formData: ReportFormData; isResolved?: boolean } & IdentifierData<Report>;
+interface Report extends ReportDocument {}
 
 class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
@@ -22,10 +19,6 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 	get createdAt(): number {
 		return Number(this.idParts[2]);
 	}
-
-	readonly formData: ReportFormData;
-
-	isResolved: boolean;
 
 	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateReportOptions) {
 		super(database, data, { collection: "Reports" });
@@ -57,4 +50,4 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 }
 
 export { Report };
-export type { CreateReportOptions, ReportFormData };
+export type { CreateReportOptions };
