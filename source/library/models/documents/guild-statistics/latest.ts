@@ -1,4 +1,4 @@
-import type { Locale } from "logos:constants/languages/localisation.ts";
+import type { Locale } from "logos:constants/languages/localisation";
 
 type GameType = "pickMissingWord";
 
