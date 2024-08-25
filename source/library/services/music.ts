@@ -99,7 +99,6 @@ class MusicService extends LocalService {
 	}
 
 	async destroySession(): Promise<void> {
-		await this.client.lavalinkService!.manager.leaveVoiceChannel(this.guildIdString);
 		await this.#session?.stop();
 
 		this.#session = undefined;
@@ -486,7 +485,8 @@ class MusicSession extends EventEmitter {
 		this.player.off("exception", this.#trackExceptions);
 
 		this.listings.dispose();
-		await this.player.destroy();
+		await this.client.lavalinkService!.manager.leaveVoiceChannel(this.service.guildIdString);
+		await this.client.bot.gateway.leaveVoiceChannel(this.service.guildId);
 		this.emit("end");
 		this.removeAllListeners();
 	}
