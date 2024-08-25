@@ -7,13 +7,13 @@ import type { RateLimit } from "logos/models/guild";
 import type { DatabaseStore } from "logos/stores/database";
 
 type ClientOrDatabaseStore = Client | DatabaseStore;
-
 type ModelConstructor = { new (database: DatabaseStore, data: any): Model };
-
 type IdentifierParts<M extends Model> = M["idParts"];
 type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: string };
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
 type IdentifierDataOrMetadata<M extends Model, Metadata = any> = IdentifierData<M> | Metadata;
+type CreateModelOptions<M extends Model, D, R extends keyof D = never> = (Partial<D> & Pick<D, R>) & IdentifierData<M>;
+
 abstract class Model<Generic extends { collection: Collection; idParts: readonly string[] } = any> {
 	abstract readonly createdAt: number;
 	readonly #conventions: DocumentConventions;
@@ -178,4 +178,11 @@ function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {
 }
 
 export { Model };
-export type { IdentifierParts, IdentifierData, IdentifierDataOrMetadata, ClientOrDatabaseStore, ModelConstructor };
+export type {
+	IdentifierParts,
+	IdentifierData,
+	IdentifierDataOrMetadata,
+	ClientOrDatabaseStore,
+	ModelConstructor,
+	CreateModelOptions,
+};

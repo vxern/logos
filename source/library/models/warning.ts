@@ -1,10 +1,9 @@
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import type { WarningDocument } from "logos/models/documents/warning/latest";
 
-type CreateWarningOptions = Partial<WarningDocument> & IdentifierData<Warning>;
-
+type CreateWarningOptions = CreateModelOptions<Warning, WarningDocument, "reason" | "rule">;
 interface Warning extends WarningDocument {}
 
 class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {

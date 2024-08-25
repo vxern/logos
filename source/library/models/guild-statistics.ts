@@ -1,11 +1,10 @@
 import type { Locale } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import type { GameStatistics, GameType, GuildStatisticsDocument } from "logos/models/documents/guild-statistics/latest";
-import { type IdentifierData, Model } from "logos/models/model";
+import { type CreateModelOptions, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-type CreateGuildStatisticsOptions = GuildStatisticsDocument & IdentifierData<GuildStatistics>;
-
+type CreateGuildStatisticsOptions = CreateModelOptions<GuildStatistics, GuildStatisticsDocument>;
 interface GuildStatistics extends GuildStatisticsDocument {}
 
 class GuildStatistics extends Model<{ collection: "GuildStatistics"; idParts: ["guildId"] }> {
@@ -25,7 +24,7 @@ class GuildStatistics extends Model<{ collection: "GuildStatistics"; idParts: ["
 		super(database, data, { collection: "GuildStatistics" });
 
 		this.createdAt = createdAt ?? Date.now();
-		this.statistics = statistics;
+		this.statistics = statistics ?? {};
 	}
 
 	static getOrCreate(client: Client, data: CreateGuildStatisticsOptions): GuildStatistics | Promise<GuildStatistics> {

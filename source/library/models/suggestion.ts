@@ -1,10 +1,9 @@
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import type { SuggestionDocument } from "logos/models/documents/suggestion/latest";
 
-type CreateSuggestionOptions = Partial<SuggestionDocument> & IdentifierData<Suggestion>;
-
+type CreateSuggestionOptions = CreateModelOptions<Suggestion, SuggestionDocument, "formData">;
 interface Suggestion extends SuggestionDocument {}
 
 class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId", "authorId", "createdAt"] }> {

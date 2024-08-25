@@ -1,14 +1,13 @@
 import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import type { GameType } from "logos/models/documents/guild-statistics/latest";
-import { type IdentifierData, Model } from "logos/models/model";
+import { type CreateModelOptions, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import type { GameScores, UserDocument } from "logos/models/documents/user/latest";
 
 type AuthorisationStatus = "authorised" | "rejected";
 
-type CreateUserOptions = Partial<UserDocument> & IdentifierData<User>;
-
+type CreateUserOptions = CreateModelOptions<User, UserDocument, "account" | "scores">;
 interface User extends UserDocument {}
 
 class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {

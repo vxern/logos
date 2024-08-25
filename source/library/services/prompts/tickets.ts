@@ -2,9 +2,10 @@ import { codeMultiline, mention, trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import type { EntryRequest } from "logos/models/entry-request";
 import { Model } from "logos/models/model";
-import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
+import { Ticket } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
+import type { TicketFormData, TicketType } from "logos/models/documents/ticket/latest";
 
 class TicketPromptService extends PromptService<{
 	type: "tickets";

@@ -2,11 +2,10 @@ import type { Client } from "logos/client";
 // biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
 import type { GuildDocument, RateLimit } from "logos/models/documents/guild/latest";
 import { GuildStatistics } from "logos/models/guild-statistics";
-import { type IdentifierData, Model } from "logos/models/model";
+import { type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-type CreateGuildOptions = Partial<GuildDocument> & IdentifierData<Guild>;
-
+type CreateGuildOptions = CreateModelOptions<Guild, GuildDocument>;
 interface Guild extends GuildDocument {}
 
 class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
@@ -18,7 +17,7 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 
 	constructor(
 		database: DatabaseStore,
-		{ createdAt, languages, enabledFeatures, journalling, features, isNative, ...data }: CreateGuildOptions,
+		{ createdAt, isNative, languages, enabledFeatures, journalling, features, ...data }: CreateGuildOptions,
 	) {
 		super(database, data, { collection: "Guilds" });
 

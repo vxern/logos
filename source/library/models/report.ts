@@ -1,10 +1,9 @@
 import type { Client } from "logos/client";
 import type { ReportDocument } from "logos/models/documents/report/latest";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-type CreateReportOptions = Partial<ReportDocument> & IdentifierData<Report>;
-
+type CreateReportOptions = CreateModelOptions<Report, ReportDocument, "formData">;
 interface Report extends ReportDocument {}
 
 class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }> {

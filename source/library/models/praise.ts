@@ -1,10 +1,9 @@
 import type { Client } from "logos/client";
 import type { PraiseDocument } from "logos/models/documents/praise/latest";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-type CreatePraiseOptions = Partial<PraiseDocument> & IdentifierData<Praise>;
-
+type CreatePraiseOptions = CreateModelOptions<Praise, PraiseDocument>;
 interface Praise extends PraiseDocument {}
 
 class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {

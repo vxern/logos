@@ -1,10 +1,9 @@
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import type { TicketDocument } from "logos/models/documents/ticket/latest";
 
-type CreateTicketOptions = Partial<TicketDocument> & IdentifierData<Ticket>;
-
+type CreateTicketOptions = CreateModelOptions<Ticket, TicketDocument, "type" | "formData">;
 interface Ticket extends TicketDocument {}
 
 class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "authorId", "channelId"] }> {
