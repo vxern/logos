@@ -600,6 +600,12 @@ class MusicSession extends EventEmitter {
 
 		if (this.queueable instanceof SongCollection) {
 			this.#advanceSongCollection({ queueable: this.queueable });
+
+			if (!this.hasCurrent) {
+				await this.playNext();
+				return;
+			}
+
 			await this.play({ playable: this.playable });
 			return;
 		}
