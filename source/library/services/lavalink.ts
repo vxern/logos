@@ -141,4 +141,73 @@ class LavalinkService extends GlobalService {
 	}
 }
 
+// REMINDER(vxern): Some evils are necessary.
+function patchShoukakuWebSockets(): void {
+	// @ts-expect-error: Private symbol.
+	shoukaku.Node.prototype.open = function (_) {
+		this.reconnects = 0;
+		this.state = shoukaku.Constants.State.NEARLY;
+	};
+	shoukaku.Node.prototype.connect = function () {
+		if (!this.manager.id) {
+			throw new Error("Don't connect a node when the library is not yet ready");
+		}
+
+		// @ts-expect-error: Private symbol.
+		if (this.destroyed) {
+			throw new Error(
+				"You can't re-use the same instance of a node once disconnected, please re-add the node again",
+			);
+		}
+
+		this.state = shoukaku.Constants.State.CONNECTING;
+
+		const headers: shoukaku.NonResumableHeaders | shoukaku.ResumableHeaders = {
+			"Client-Name": shoukaku.Constants.ShoukakuClientInfo,
+			"User-Agent": this.manager.options.userAgent,
+			// @ts-expect-error: This is fine.
+			Authorization: this.auth,
+			"User-Id": this.manager.id,
+		};
+
+		if (this.sessionId) {
+			headers["Session-Id"] = this.sessionId;
+		}
+		// @ts-expect-error: Private symbol.
+		if (!this.initialized) {
+			// @ts-expect-error: Private symbol.
+			this.initialized = true;
+		}
+
+		// @ts-expect-error: This is fine.
+		const onOpen = (event) => this.open(event);
+		// @ts-expect-error: This is fine.
+		const onClose = (event) => this.close(event.code, event.reason);
+		// @ts-expect-error: This is fine.
+		const onError = (event) => this.error(event.error);
+		// @ts-expect-error: This is fine.
+		const onMessage = (event) => this.message(event.data).catch((error) => this.error(error as Error));
+
+		this.ws = new WebSocket(
+			// @ts-expect-error: Private symbol.
+			this.url,
+			{ headers },
+		);
+		this.ws.addEventListener("open", onOpen, { once: true });
+		this.ws.addEventListener("close", onClose, { once: true });
+		this.ws.addEventListener("error", onError);
+		this.ws.addEventListener("message", onMessage);
+
+		// @ts-expect-error: This is fine.
+		this.ws.removeAllListeners = function (_) {
+			this.removeEventListener("open", onOpen);
+			this.removeEventListener("close", onClose);
+			this.removeEventListener("error", onError);
+			this.removeEventListener("message", onMessage);
+		};
+	};
+}
+
+patchShoukakuWebSockets();
+
 export { LavalinkService };

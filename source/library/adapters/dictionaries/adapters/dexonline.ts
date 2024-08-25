@@ -2,9 +2,10 @@ import type { LearningLanguage } from "logos:constants/languages/learning";
 import { type PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
 import { code } from "logos:core/formatting";
 import * as Dexonline from "dexonline-scraper";
-import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
 import type {
 	DefinitionField,
+	DictionaryEntry,
 	EtymologyField,
 	ExampleField,
 	ExpressionField,

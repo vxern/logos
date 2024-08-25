@@ -1,6 +1,6 @@
 import type { LearningLanguage } from "logos:constants/languages/learning";
-import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
-import type { RelationField, RhymeField } from "logos/adapters/dictionaries/dictionary-entry";
+import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
+import type { DictionaryEntry, RelationField, RhymeField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 
 interface WordnikResult {

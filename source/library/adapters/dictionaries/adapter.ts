@@ -70,4 +70,3 @@ abstract class DictionaryAdapter<DataType = unknown> {
 }
 
 export { DictionaryAdapter };
-export type { DictionaryEntry };
