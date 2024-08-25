@@ -54,4 +54,4 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 }
 
 export { Ticket };
-export type { CreateTicketOptions, TicketType, TicketFormData };
+export type { CreateTicketOptions };

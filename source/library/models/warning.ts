@@ -1,9 +1,11 @@
-import type { Rule } from "logos:constants/rules";
 import type { Client } from "logos/client";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type { WarningDocument } from "logos/models/documents/warning/latest";
 
-type CreateWarningOptions = { reason: string; rule?: Rule } & IdentifierData<Warning>;
+type CreateWarningOptions = Partial<WarningDocument> & IdentifierData<Warning>;
+
+interface Warning extends WarningDocument {}
 
 class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
 	get guildId(): string {
@@ -21,11 +23,6 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 	get createdAt(): number {
 		return Number(this.idParts[3]);
 	}
-
-	readonly reason: string;
-
-	/** @since v3.37.0 */
-	rule?: Rule;
 
 	constructor(database: DatabaseStore, { reason, rule, ...data }: CreateWarningOptions) {
 		super(database, data, { collection: "Warnings" });
