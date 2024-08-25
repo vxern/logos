@@ -1,12 +1,11 @@
 import type { Client } from "logos/client";
 import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type { ResourceDocument } from "logos/models/documents/resource/latest";
 
-interface ResourceFormData {
-	readonly resource: string;
-}
+type CreateResourceOptions = Partial<ResourceDocument> & IdentifierData<Resource>;
 
-type CreateResourceOptions = { formData: ResourceFormData; isResolved?: boolean } & IdentifierData<Resource>;
+interface Resource extends ResourceDocument {}
 
 class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "authorId", "createdAt"] }> {
 	get guildId(): string {
@@ -20,10 +19,6 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 	get createdAt(): number {
 		return Number(this.idParts[2]);
 	}
-
-	readonly formData: ResourceFormData;
-
-	isResolved: boolean;
 
 	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateResourceOptions) {
 		super(database, data, { collection: "Resources" });
@@ -55,4 +50,4 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 }
 
 export { Resource };
-export type { CreateResourceOptions, ResourceFormData };
+export type { CreateResourceOptions };
