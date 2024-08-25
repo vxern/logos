@@ -99,6 +99,7 @@ class MusicService extends LocalService {
 	}
 
 	async destroySession(): Promise<void> {
+		await this.client.lavalinkService!.manager.leaveVoiceChannel(this.guildIdString);
 		await this.#session?.stop();
 
 		this.#session = undefined;
@@ -113,7 +114,7 @@ class MusicService extends LocalService {
 	}
 
 	async #handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
-		if (this.#isLogosAlone === true) {
+		if (this.#isLogosAlone) {
 			await this.#handleSessionAbandoned();
 		}
 	}
