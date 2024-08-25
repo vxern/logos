@@ -758,11 +758,13 @@ class MusicSession extends EventEmitter {
 		controls,
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
 		if (controls.by !== undefined) {
-			queueable.moveBy({ count: controls.by, direction: "forward" });
+			queueable.moveBy({ count: controls.by - 1, direction: "forward" });
+			return;
 		}
 
 		if (controls.to !== undefined) {
 			queueable.moveTo({ index: controls.to - 1 });
+			return;
 		}
 	}
 
@@ -805,11 +807,15 @@ class MusicSession extends EventEmitter {
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
 		if (controls.by !== undefined) {
 			queueable.moveBy({ count: controls.by, direction: "backward" });
+			return;
 		}
 
 		if (controls.to !== undefined) {
 			queueable.moveTo({ index: controls.to - 1 });
+			return;
 		}
+
+		queueable.moveBy({ count: 1, direction: "backward" });
 	}
 
 	#unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
@@ -908,6 +914,13 @@ class AudioStream extends Playable {
 	}
 }
 
+/** Special playable unit used as a placeholder. */
+class None extends Playable {
+	constructor() {
+		super({ title: "None", url: "about:blank", emoji: "❓" });
+	}
+}
+
 type MoveDirection = "forward" | "backward";
 /**
  * Represents a collection of {@link Song}s.
@@ -923,7 +936,7 @@ class SongCollection extends Queueable {
 	index: number;
 
 	get playable(): Playable {
-		return this.songs[this.index]!;
+		return this.songs[this.index] ?? new None();
 	}
 
 	get isFirstInCollection(): boolean {
@@ -968,7 +981,7 @@ class SongCollection extends Queueable {
 				break;
 			}
 			case "backward": {
-				this.index -= Math.min(count, this.#precedingSongCount);
+				this.index -= Math.min(count, this.#precedingSongCount) + 1;
 				break;
 			}
 		}
@@ -976,7 +989,7 @@ class SongCollection extends Queueable {
 
 	moveTo({ index }: { index: number }): void {
 		this.playable.reset();
-		this.index = Math.min(Math.max(index, 0), this.songs.length - 1);
+		this.index = Math.min(Math.max(index, 0), this.songs.length - 1) - 1;
 	}
 }
 
