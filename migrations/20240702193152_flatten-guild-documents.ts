@@ -195,7 +195,6 @@ async function up(database: DatabaseStore): Promise<void> {
 			if (reports !== undefined && reports.channelId !== undefined) {
 				result.features.reports = {
 					channelId: reports.channelId,
-					management: reports.management,
 				};
 			}
 
@@ -210,7 +209,6 @@ async function up(database: DatabaseStore): Promise<void> {
 					channelId: verification.channelId,
 					voting: verification.voting,
 					activation: verification.activation,
-					management: verification.management,
 				};
 			}
 
@@ -237,7 +235,6 @@ async function up(database: DatabaseStore): Promise<void> {
 			if (suggestions !== undefined && suggestions.channelId !== undefined) {
 				result.features.suggestions = {
 					channelId: suggestions.channelId,
-					management: suggestions.management,
 				};
 			}
 
@@ -245,7 +242,6 @@ async function up(database: DatabaseStore): Promise<void> {
 			if (resourceSubmissions !== undefined && resourceSubmissions.channelId !== undefined) {
 				result.features.resourceSubmissions = {
 					channelId: resourceSubmissions.channelId,
-					management: resourceSubmissions.management,
 				};
 			}
 
@@ -255,7 +251,6 @@ async function up(database: DatabaseStore): Promise<void> {
 					channelId: tickets.channelId,
 					categoryId: tickets.categoryId,
 					limit: tickets.limit,
-					management: tickets.management,
 				};
 			}
 

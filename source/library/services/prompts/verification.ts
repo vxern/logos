@@ -303,8 +303,7 @@ class VerificationPromptService extends PromptService<{
 
 		const currentVote = entryRequestDocument.getUserVote({ userId: interaction.user.id.toString() });
 
-		const management = this.configuration.management;
-
+		const management = this.guildDocument.management.verification;
 		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
 		const userIds = management?.users?.map((userId) => BigInt(userId));
 
