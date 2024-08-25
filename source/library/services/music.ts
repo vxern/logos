@@ -45,8 +45,10 @@ class MusicService extends LocalService {
 		this.#voiceStateUpdates = new Collector({ guildId });
 	}
 
-	start(): void {
+	async start(): Promise<void> {
 		this.#voiceStateUpdates.onCollect(this.#handleVoiceStateUpdate.bind(this));
+
+		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
 		this.client.lavalinkService!.manager.on(
 			"disconnect",
