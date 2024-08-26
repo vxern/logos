@@ -21,19 +21,23 @@ class DatabaseMetadata extends DatabaseMetadataModel {
 		this.migrations = migrations;
 	}
 
-	static async getOrCreate(
+	static async get(
+		clientOrDatabase: ClientOrDatabaseStore,
+		data: CreateDatabaseMetadataOptions,
+	): Promise<DatabaseMetadata | undefined> {
+		return getDatabase(clientOrDatabase).withSession(async (session) => {
+			return session.get<DatabaseMetadata>(
+				Model.buildId<DatabaseMetadata>(data, { collection: "DatabaseMetadata" }),
+			);
+		});
+	}
+
+	static async create(
 		clientOrDatabase: ClientOrDatabaseStore,
 		data: CreateDatabaseMetadataOptions,
 	): Promise<DatabaseMetadata> {
 		const database = getDatabase(clientOrDatabase);
 		return database.withSession(async (session) => {
-			const userDocument = await session.get<DatabaseMetadata>(
-				Model.buildId<DatabaseMetadata>(data, { collection: "DatabaseMetadata" }),
-			);
-			if (userDocument !== undefined) {
-				return userDocument;
-			}
-
 			return session.set(new DatabaseMetadata(database, data));
 		});
 	}
