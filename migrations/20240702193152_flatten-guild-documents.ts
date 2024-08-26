@@ -1,34 +1,29 @@
 import type { DatabaseStore } from "logos/stores/database";
 import type { GuildDocument as Previous } from "logos/models/documents/guild/4.21.0";
 import type { GuildDocument as Next } from "logos/models/documents/guild/latest";
-import type { Guild } from "logos/models/guild";
-import type { Model } from "logos/models/model.ts";
+import type { Model } from "logos/models/model";
 
 // This block is executed when the migration is enacted.
 async function up(database: DatabaseStore): Promise<void> {
-	await database.withSession(async (session) => {
-		const documents = (await session.query<Guild>({ collection: "Guilds" }).run()) as (Model & Previous)[];
+	const documents = await database.withSession(async (session) => {
+		return session.query<Model & Previous>({ collection: "Guilds" }).run();
+	});
 
-		const transformed: Record<string, Next> = {};
-		for (const document of documents) {
-			const result: Next = Object.create(null);
-			transformed[document.id] = result;
-
-			result.createdAt = document.createdAt;
-			result.isNative = document.isNative;
-
-			result.languages = {
-				localisation: document.languages?.localisation ?? constants.defaults.LOCALISATION_LANGUAGE,
-				target: document.languages?.target ?? constants.defaults.LEARNING_LANGUAGE,
-				feature: document.languages?.feature ?? constants.defaults.FEATURE_LANGUAGE,
+	for (const previous of documents) {
+		const next = previous as Model & Next;
+		await next.update(database, async () => {
+			next.languages = {
+				localisation: previous.languages?.localisation ?? constants.defaults.LOCALISATION_LANGUAGE,
+				target: previous.languages?.target ?? constants.defaults.LEARNING_LANGUAGE,
+				feature: previous.languages?.feature ?? constants.defaults.FEATURE_LANGUAGE,
 			};
 
-			const features = document.features;
+			const features = previous.features;
 			if (features === undefined) {
-				continue;
+				return;
 			}
 
-			result.enabledFeatures = {
+			next.enabledFeatures = {
 				journalling: features.information?.features?.journaling?.enabled ?? false,
 				notices: features.information?.features?.notices?.enabled ?? false,
 				informationNotices: features.information?.features?.notices?.features?.information?.enabled ?? false,
@@ -67,7 +62,7 @@ async function up(database: DatabaseStore): Promise<void> {
 				profile: features.social?.features?.profile?.enabled ?? false,
 			};
 
-			result.journalling = {
+			next.journalling = {
 				purging: features.moderation?.features?.purging?.journaling ?? false,
 				slowmode: features.moderation?.features?.slowmode?.journaling ?? false,
 				timeouts: features.moderation?.features?.timeouts?.journaling ?? false,
@@ -80,7 +75,7 @@ async function up(database: DatabaseStore): Promise<void> {
 				praises: features.social?.features?.praises?.journaling ?? false,
 			};
 
-			result.rateLimits = {
+			next.rateLimits = {
 				reports: features.moderation?.features?.reports?.rateLimit,
 				suggestions: features.server?.features?.suggestions?.rateLimit,
 				resourceSubmissions: features.server?.features?.resources?.rateLimit,
@@ -88,7 +83,7 @@ async function up(database: DatabaseStore): Promise<void> {
 				praises: features.social?.features?.praises?.rateLimit,
 			};
 
-			result.management = {
+			next.management = {
 				reports: features.moderation?.features?.reports?.management,
 				verification: features.moderation?.features?.verification?.management,
 				suggestions: features.server?.features?.suggestions?.management,
@@ -96,11 +91,11 @@ async function up(database: DatabaseStore): Promise<void> {
 				tickets: features.server?.features?.tickets?.management,
 			};
 
-			result.features = {};
+			next.features = {};
 
 			const journaling = features.information?.features?.journaling;
 			if (journaling !== undefined && journaling.channelId !== undefined) {
-				result.features.journalling = {
+				next.features.journalling = {
 					channelId: journaling.channelId,
 				};
 			}
@@ -113,7 +108,7 @@ async function up(database: DatabaseStore): Promise<void> {
 					information.channelId !== undefined &&
 					information.inviteLink !== undefined
 				) {
-					result.features.informationNotices = {
+					next.features.informationNotices = {
 						channelId: information.channelId,
 						inviteLink: information.inviteLink,
 					};
@@ -121,21 +116,21 @@ async function up(database: DatabaseStore): Promise<void> {
 
 				const resources = notices.features?.resources;
 				if (resources !== undefined && resources.channelId !== undefined) {
-					result.features.resourceNotices = {
+					next.features.resourceNotices = {
 						channelId: resources.channelId,
 					};
 				}
 
 				const roles = notices.features?.roles;
 				if (roles !== undefined && roles.channelId !== undefined) {
-					result.features.roleNotices = {
+					next.features.roleNotices = {
 						channelId: roles.channelId,
 					};
 				}
 
 				const welcome = notices.features?.welcome;
 				if (welcome !== undefined && welcome.channelId !== undefined && welcome.ruleChannelId !== undefined) {
-					result.features.welcomeNotices = {
+					next.features.welcomeNotices = {
 						channelId: welcome.channelId,
 						ruleChannelId: welcome.ruleChannelId,
 					};
@@ -145,48 +140,48 @@ async function up(database: DatabaseStore): Promise<void> {
 			const cefr = features.language?.features?.cefr?.examples?.levels;
 			if (cefr !== undefined) {
 				const { a1, a2, b1, b2, c1, c2 } = cefr;
-				result.features.cefr = {
+				next.features.cefr = {
 					examples: { a1, a2, b1, b2, c1, c2 },
 				};
 			}
 
 			const resources = features.language?.features?.resources;
 			if (resources !== undefined && resources.url !== undefined) {
-				result.features.resources = {
+				next.features.resources = {
 					url: resources.url,
 				};
 			}
 
 			const targetOnly = features.language?.features?.targetOnly;
 			if (targetOnly !== undefined && targetOnly.channelIds !== undefined) {
-				result.features.targetOnly = {
+				next.features.targetOnly = {
 					channelIds: targetOnly.channelIds,
 				};
 			}
 
 			const roleLanguages = features.language?.features?.roleLanguages;
 			if (roleLanguages !== undefined && roleLanguages.ids !== undefined) {
-				result.features.roleLanguages = {
+				next.features.roleLanguages = {
 					ids: roleLanguages.ids,
 				};
 			}
 
 			const alerts = features.moderation?.features?.alerts;
 			if (alerts !== undefined && alerts.channelId !== undefined) {
-				result.features.alerts = {
+				next.features.alerts = {
 					channelId: alerts.channelId,
 				};
 			}
 
 			const warns = features.moderation?.features?.warns;
 			if (warns !== undefined && warns.limit !== undefined) {
-				result.features.warns = {
+				next.features.warns = {
 					expiration: warns.expiration,
 					limit: warns.limit,
 				};
 
 				if (warns.autoTimeout?.duration !== undefined) {
-					result.features.warns.autoTimeout = {
+					next.features.warns.autoTimeout = {
 						duration: warns.autoTimeout.duration,
 					};
 				}
@@ -194,7 +189,7 @@ async function up(database: DatabaseStore): Promise<void> {
 
 			const reports = features.moderation?.features?.reports;
 			if (reports !== undefined && reports.channelId !== undefined) {
-				result.features.reports = {
+				next.features.reports = {
 					channelId: reports.channelId,
 				};
 			}
@@ -206,7 +201,7 @@ async function up(database: DatabaseStore): Promise<void> {
 				verification.voting !== undefined &&
 				verification.activation !== undefined
 			) {
-				result.features.verification = {
+				next.features.verification = {
 					channelId: verification.channelId,
 					voting: verification.voting,
 					activation: verification.activation,
@@ -215,7 +210,7 @@ async function up(database: DatabaseStore): Promise<void> {
 
 			const dynamicVoiceChannels = features.server?.features?.dynamicVoiceChannels;
 			if (dynamicVoiceChannels !== undefined && dynamicVoiceChannels.channels !== undefined) {
-				result.features.dynamicVoiceChannels = {
+				next.features.dynamicVoiceChannels = {
 					channels: dynamicVoiceChannels.channels,
 				};
 			}
@@ -226,7 +221,7 @@ async function up(database: DatabaseStore): Promise<void> {
 				roleIndicators.limit !== undefined &&
 				roleIndicators.roles !== undefined
 			) {
-				result.features.roleIndicators = {
+				next.features.roleIndicators = {
 					limit: roleIndicators.limit,
 					roles: roleIndicators.roles,
 				};
@@ -234,21 +229,21 @@ async function up(database: DatabaseStore): Promise<void> {
 
 			const suggestions = features.server?.features?.suggestions;
 			if (suggestions !== undefined && suggestions.channelId !== undefined) {
-				result.features.suggestions = {
+				next.features.suggestions = {
 					channelId: suggestions.channelId,
 				};
 			}
 
 			const resourceSubmissions = features.server?.features?.resources;
 			if (resourceSubmissions !== undefined && resourceSubmissions.channelId !== undefined) {
-				result.features.resourceSubmissions = {
+				next.features.resourceSubmissions = {
 					channelId: resourceSubmissions.channelId,
 				};
 			}
 
 			const tickets = features.server?.features?.tickets;
 			if (tickets !== undefined && tickets.channelId !== undefined && tickets.categoryId !== undefined) {
-				result.features.tickets = {
+				next.features.tickets = {
 					channelId: tickets.channelId,
 					categoryId: tickets.categoryId,
 					limit: tickets.limit,
@@ -257,12 +252,12 @@ async function up(database: DatabaseStore): Promise<void> {
 
 			const music = features.social?.features?.music;
 			if (music !== undefined && music.implicitVolume !== undefined) {
-				result.features.music = {
+				next.features.music = {
 					implicitVolume: music.implicitVolume,
 				};
 			}
-		}
-	});
+		});
+	}
 }
 
 // This block is executed when the migration is rolled back.
