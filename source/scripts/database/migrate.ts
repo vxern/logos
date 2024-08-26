@@ -4,9 +4,10 @@ import { DatabaseMetadata } from "logos/models/database-metadata.ts";
 import constants from "logos:constants/constants.ts";
 import winston from "winston";
 
+winston.info("Checking for migrations...");
+
 const environment = loadEnvironment();
 const database = await DatabaseStore.create({ environment });
-
 await database.setup({ prefetchDocuments: false });
 
 const migrationFilenames = await Array.fromAsync(new Bun.Glob("*.ts").scan(constants.directories.migrations)).then(
@@ -23,17 +24,25 @@ const metadata = await DatabaseMetadata.getOrCreate(database, {
 const migrationsComplete = new Set(metadata.migrations);
 
 const migrationsLeftToRun = migrationsAvailableWithFilename.filter(
-	(migration) => !migrationsComplete.has(migration[1]),
+	(migration) => !migrationsComplete.has(migration[0]),
 );
 if (migrationsLeftToRun.length === 0) {
-	winston.info("Migrations up to date.");
+	winston.info("Migrations up to date!");
 	process.exit(0);
 }
 
 for (const [migration, filename] of migrationsLeftToRun) {
-	const result = await Bun.$`bun run ${filename}`;
-	if (result.exitCode !== 0) {
-		winston.error(`Failed to run migration '${filename}': ${result.stderr}`);
+	const module: {
+		up(database: DatabaseStore): Promise<void>;
+		down(database: DatabaseStore): Promise<void>;
+	} = await import(`../../../${constants.directories.migrations}/${filename}`);
+
+	winston.info(`Running migration: ${filename}`);
+
+	try {
+		await module.up(database);
+	} catch (error) {
+		winston.error(`Failed to run migration '${filename}': ${error}`);
 		process.exit(1);
 	}
 
