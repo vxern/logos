@@ -18,7 +18,7 @@ if (message.trim().length === 0) {
 }
 
 function withLeadingZero(number: number): string {
-	if (number % 10 === 0) {
+	if (number > 10) {
 		return number.toString();
 	}
 
@@ -29,7 +29,7 @@ const date = new Date();
 const timestamp = [
 	date.getUTCFullYear(),
 	withLeadingZero(date.getUTCMonth()),
-	withLeadingZero(date.getUTCDay()),
+	withLeadingZero(date.getUTCDate()),
 	date.getUTCHours(),
 	date.getUTCMinutes(),
 	date.getUTCSeconds(),
