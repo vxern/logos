@@ -21,13 +21,10 @@ class DatabaseMetadata extends DatabaseMetadataModel {
 		this.migrations = migrations;
 	}
 
-	static async get(
-		clientOrDatabase: ClientOrDatabaseStore,
-		data: CreateDatabaseMetadataOptions,
-	): Promise<DatabaseMetadata | undefined> {
+	static async get(clientOrDatabase: ClientOrDatabaseStore): Promise<DatabaseMetadata | undefined> {
 		return getDatabase(clientOrDatabase).withSession(async (session) => {
 			return session.get<DatabaseMetadata>(
-				Model.buildId<DatabaseMetadata>(data, { collection: "DatabaseMetadata" }),
+				Model.buildId<DatabaseMetadata>({}, { collection: "DatabaseMetadata" }),
 			);
 		});
 	}
