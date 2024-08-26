@@ -44,7 +44,6 @@ class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "author
 
 	static async create(client: Client, data: Omit<CreatePraiseOptions, "createdAt">): Promise<Praise> {
 		const praiseDocument = new Praise(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await praiseDocument.create(client);
 
 		return praiseDocument;

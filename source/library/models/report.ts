@@ -41,7 +41,6 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 
 	static async create(client: Client, data: Omit<CreateReportOptions, "createdAt">): Promise<Report> {
 		const reportDocument = new Report(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await reportDocument.create(client);
 
 		return reportDocument;

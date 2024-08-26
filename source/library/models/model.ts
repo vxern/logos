@@ -177,7 +177,7 @@ function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {
 	return clientOrDatabase;
 }
 
-export { Model };
+export { Model, getDatabase };
 export type {
 	IdentifierParts,
 	IdentifierData,

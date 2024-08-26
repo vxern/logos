@@ -41,7 +41,6 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 
 	static async create(client: Client, data: Omit<CreateResourceOptions, "createdAt">): Promise<Resource> {
 		const resourceDocument = new Resource(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await resourceDocument.create(client);
 
 		return resourceDocument;

@@ -45,7 +45,6 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 
 	static async create(client: Client, data: CreateTicketOptions): Promise<Ticket> {
 		const ticketDocument = new Ticket(client.database, data);
-
 		await ticketDocument.create(client);
 
 		return ticketDocument;

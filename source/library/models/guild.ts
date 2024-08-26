@@ -86,7 +86,7 @@ class Guild extends Model<{ collection: "Guilds"; idParts: ["guildId"] }> {
 		}
 
 		return client.database.withSession((session) => {
-			return session.get<Guild>(Model.buildId(data, { collection: "Guilds" }));
+			return session.get<Guild>(Model.buildId<Guild>(data, { collection: "Guilds" }));
 		});
 	}
 

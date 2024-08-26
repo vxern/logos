@@ -41,7 +41,6 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 
 	static async create(client: Client, data: Omit<CreateSuggestionOptions, "createdAt">): Promise<Suggestion> {
 		const suggestionDocument = new Suggestion(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await suggestionDocument.create(client);
 
 		return suggestionDocument;

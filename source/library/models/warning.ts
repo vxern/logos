@@ -45,7 +45,6 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 
 	static async create(client: Client, data: Omit<CreateWarningOptions, "createdAt">): Promise<Warning> {
 		const warningDocument = new Warning(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await warningDocument.create(client);
 
 		return warningDocument;

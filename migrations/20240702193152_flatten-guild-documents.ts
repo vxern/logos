@@ -2,11 +2,12 @@ import type { DatabaseStore } from "logos/stores/database";
 import type { GuildDocument as Previous } from "logos/models/documents/guild/4.21.0";
 import type { GuildDocument as Next } from "logos/models/documents/guild/latest";
 import type { Guild } from "logos/models/guild";
+import type { Model } from "logos/models/model.ts";
 
 // This block is executed when the migration is enacted.
 async function up(database: DatabaseStore): Promise<void> {
 	await database.withSession(async (session) => {
-		const documents = (await session.query<Guild>({ collection: "Guilds" }).run()) as Previous[];
+		const documents = (await session.query<Guild>({ collection: "Guilds" }).run()) as (Model & Previous)[];
 
 		const transformed: Record<string, Next> = {};
 		for (const document of documents) {
