@@ -49,7 +49,6 @@ class DatabaseStore {
 		readonly users: Map<string, User>;
 		readonly warningsByTarget: Map<string, Map<string, Warning>>;
 	};
-	metadata!: DatabaseMetadata;
 
 	readonly #environment: Environment;
 	readonly #adapter: DatabaseAdapter;
@@ -117,15 +116,7 @@ class DatabaseStore {
 			adapter = new InMemoryAdapter({ environment });
 		}
 
-		const database = new DatabaseStore({ environment, log, adapter });
-		const metadata = await DatabaseMetadata.get(database);
-		if (metadata !== undefined) {
-			throw new Error(
-				"Could not retrieve database metadata. If running the bot manually, ensure you've run the migration script.",
-			);
-		}
-
-		return database;
+		return new DatabaseStore({ environment, log, adapter });
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {

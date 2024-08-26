@@ -9,7 +9,6 @@ function useDatabaseStore(): DependencyProvider<DatabaseStore> {
 
 	beforeEach(async () => {
 		database = await DatabaseStore.create({ environment: mockEnvironment });
-
 		await database.setup({ prefetchDocuments: false });
 	});
 

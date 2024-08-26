@@ -34,7 +34,6 @@ if (!constants.patterns.discord.snowflake.test(id)) {
 
 const environment = loadEnvironment();
 const database = await DatabaseStore.create({ environment });
-
 await database.setup({ prefetchDocuments: false });
 
 if (values.all) {
