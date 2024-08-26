@@ -1,12 +1,18 @@
 import type { Client } from "logos/client";
 import type { ResourceDocument } from "logos/models/documents/resource/latest";
-import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	ResourceModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 type CreateResourceOptions = CreateModelOptions<Resource, ResourceDocument, "formData">;
-interface Resource extends ResourceDocument {}
 
-class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "authorId", "createdAt"] }> {
+interface Resource extends ResourceDocument {}
+class Resource extends ResourceModel {
 	get guildId(): string {
 		return this.idParts[0];
 	}

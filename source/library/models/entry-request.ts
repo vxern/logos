@@ -1,14 +1,20 @@
 import type { Client } from "logos/client";
 import type { EntryRequestDocument, VoteVerdict } from "logos/models/documents/entry-request/latest";
-import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	EntryRequestModel,
+	type IdentifierData,
+	Model,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 type VoteType = "for" | "against";
 
 type CreateEntryRequestOptions = CreateModelOptions<EntryRequest, EntryRequestDocument, "requestedRoleId" | "formData">;
-interface EntryRequest extends EntryRequestDocument {}
 
-class EntryRequest extends Model<{ collection: "EntryRequests"; idParts: ["guildId", "authorId"] }> {
+interface EntryRequest extends EntryRequestDocument {}
+class EntryRequest extends EntryRequestModel {
 	readonly createdAt: number;
 
 	get guildId(): string {

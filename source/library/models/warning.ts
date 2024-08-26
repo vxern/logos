@@ -1,12 +1,18 @@
 import type { Client } from "logos/client";
 import type { WarningDocument } from "logos/models/documents/warning/latest";
-import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	WarningModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 type CreateWarningOptions = CreateModelOptions<Warning, WarningDocument, "reason" | "rule">;
-interface Warning extends WarningDocument {}
 
-class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
+interface Warning extends WarningDocument {}
+class Warning extends WarningModel {
 	get guildId(): string {
 		return this.idParts[0];
 	}

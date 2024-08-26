@@ -169,6 +169,18 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 }
 
+const DatabaseMetadataModel = Model<{ collection: "DatabaseMetadata"; idParts: [] }>;
+const EntryRequestModel = Model<{ collection: "EntryRequests"; idParts: ["guildId", "authorId"] }>;
+const GuildModel = Model<{ collection: "Guilds"; idParts: ["guildId"] }>;
+const GuildStatisticsModel = Model<{ collection: "GuildStatistics"; idParts: ["guildId"] }>;
+const PraiseModel = Model<{ collection: "Praises"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }>;
+const ReportModel = Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }>;
+const ResourceModel = Model<{ collection: "Resources"; idParts: ["guildId", "authorId", "createdAt"] }>;
+const SuggestionModel = Model<{ collection: "Suggestions"; idParts: ["guildId", "authorId", "createdAt"] }>;
+const TicketModel = Model<{ collection: "Tickets"; idParts: ["guildId", "authorId", "channelId"] }>;
+const UserModel = Model<{ collection: "Users"; idParts: ["userId"] }>;
+const WarningModel = Model<{ collection: "Warnings"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }>;
+
 function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {
 	if ("database" in clientOrDatabase) {
 		return clientOrDatabase.database;
@@ -177,7 +189,21 @@ function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {
 	return clientOrDatabase;
 }
 
-export { Model, getDatabase };
+export {
+	Model,
+	DatabaseMetadataModel,
+	EntryRequestModel,
+	GuildModel,
+	GuildStatisticsModel,
+	PraiseModel,
+	ReportModel,
+	ResourceModel,
+	SuggestionModel,
+	TicketModel,
+	UserModel,
+	WarningModel,
+	getDatabase,
+};
 export type {
 	IdentifierParts,
 	IdentifierData,

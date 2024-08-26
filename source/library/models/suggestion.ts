@@ -1,12 +1,18 @@
 import type { Client } from "logos/client";
 import type { SuggestionDocument } from "logos/models/documents/suggestion/latest";
-import { type ClientOrDatabaseStore, type CreateModelOptions, type IdentifierData, Model } from "logos/models/model";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	SuggestionModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 type CreateSuggestionOptions = CreateModelOptions<Suggestion, SuggestionDocument, "formData">;
-interface Suggestion extends SuggestionDocument {}
 
-class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId", "authorId", "createdAt"] }> {
+interface Suggestion extends SuggestionDocument {}
+class Suggestion extends SuggestionModel {
 	get guildId(): string {
 		return this.idParts[0];
 	}

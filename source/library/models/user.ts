@@ -2,15 +2,15 @@ import type { Locale, LocalisationLanguage } from "logos:constants/languages/loc
 import type { Client } from "logos/client";
 import type { GameType } from "logos/models/documents/guild-statistics/latest";
 import type { GameScores, UserDocument } from "logos/models/documents/user/latest";
-import { type CreateModelOptions, Model } from "logos/models/model";
+import { type CreateModelOptions, Model, UserModel } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
 type AuthorisationStatus = "authorised" | "rejected";
 
 type CreateUserOptions = CreateModelOptions<User, UserDocument, "account" | "scores">;
-interface User extends UserDocument {}
 
-class User extends Model<{ collection: "Users"; idParts: ["userId"] }> {
+interface User extends UserDocument {}
+class User extends UserModel {
 	static readonly #initialScores: GameScores = { totalScore: 0, sessionCount: 1 };
 
 	readonly createdAt: number;
