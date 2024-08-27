@@ -7,10 +7,6 @@ import type { SongListing } from "logos/services/music";
 class RemoveSongListingView extends PaginatedView<SongListing> {
 	readonly #selectMenuSelection: InteractionCollector;
 
-	get onInteraction(): InteractionCollector["onInteraction"] {
-		return this.#selectMenuSelection.onInteraction.bind(this);
-	}
-
 	constructor(
 		client: Client,
 		{ interaction, listings }: { interaction: Logos.Interaction; listings: SongListing[] },
@@ -64,6 +60,10 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 			embed: { title: strings.title, description: strings.description, color: constants.colours.notice },
 			components: [selectMenu],
 		};
+	}
+
+	onRemove(callback: Parameters<InteractionCollector["onInteraction"]>[0]): void {
+		this.#selectMenuSelection.onInteraction(callback);
 	}
 
 	async open(): Promise<void> {
