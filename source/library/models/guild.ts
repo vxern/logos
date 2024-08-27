@@ -1,6 +1,6 @@
 import type { Client } from "logos/client";
 // biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
-import type { GuildDocument, RateLimit } from "logos/models/documents/guild/latest";
+import type { FeatureManagement, GuildDocument, RateLimit } from "logos/models/documents/guild/latest";
 import { GuildStatistics } from "logos/models/guild-statistics";
 import { type CreateModelOptions, type IdentifierData, GuildModel, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
@@ -139,7 +139,9 @@ class Guild extends GuildModel {
 		return this.rateLimits[feature];
 	}
 
-	// TODO(vxern): Create method to check for management over a feature.
+	managers(feature: keyof Guild["management"]): FeatureManagement | undefined {
+		return this.management[feature];
+	}
 
 	isTargetLanguageOnly(channelId: string): boolean {
 		return this.feature("targetOnly")?.channelIds?.includes(channelId) ?? false;

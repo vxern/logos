@@ -380,23 +380,23 @@ abstract class PromptService<
 		let management: FeatureManagement | undefined;
 		switch (this.#type) {
 			case "verification": {
-				management = this.guildDocument.management.verification;
+				management = this.guildDocument.managers("verification");
 				break;
 			}
 			case "reports": {
-				management = this.guildDocument.management.reports;
+				management = this.guildDocument.managers("reports");
 				break;
 			}
 			case "suggestions": {
-				management = this.guildDocument.management.suggestions;
+				management = this.guildDocument.managers("suggestions");
 				break;
 			}
 			case "resources": {
-				management = this.guildDocument.management.resourceSubmissions;
+				management = this.guildDocument.managers("resourceSubmissions");
 				break;
 			}
 			case "tickets": {
-				management = this.guildDocument.management.tickets;
+				management = this.guildDocument.managers("tickets");
 				break;
 			}
 			default: {
@@ -405,12 +405,9 @@ abstract class PromptService<
 			}
 		}
 
-		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
-		const userIds = management?.users?.map((userId) => BigInt(userId));
-
 		const isAuthorised =
-			member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-			(userIds?.includes(buttonPress.user.id) ?? false);
+			member.roles.some((roleId) => management?.roles?.includes(roleId.toString()) ?? false) ||
+			(management?.users?.includes(buttonPress.user.id.toString()) ?? false);
 		if (!isAuthorised) {
 			if (this.#deleteMode === "delete") {
 				const strings = constants.contexts.cannotRemovePrompt({

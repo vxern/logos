@@ -303,14 +303,12 @@ class VerificationPromptService extends PromptService<{
 
 		const currentVote = entryRequestDocument.getUserVote({ userId: interaction.user.id.toString() });
 
-		const management = this.guildDocument.management.verification;
-		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
-		const userIds = management?.users?.map((userId) => BigInt(userId));
+		const management = this.guildDocument.managers("verification");
 
 		if (currentVote === "for" && newVote === "for") {
 			const isAuthorised =
-				voter.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-				(userIds?.includes(interaction.user.id) ?? false);
+				voter.roles.some((roleId) => management?.roles?.includes(roleId.toString()) ?? false) ||
+				(management?.users?.includes(interaction.user.id.toString()) ?? false);
 
 			if (isAuthorised) {
 				const { promise, resolve } = Promise.withResolvers<null | undefined>();
@@ -405,8 +403,8 @@ class VerificationPromptService extends PromptService<{
 
 		if (currentVote === "against" && newVote === "against") {
 			const isAuthorised =
-				voter.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-				(userIds?.includes(interaction.user.id) ?? false);
+				voter.roles.some((roleId) => management?.roles?.includes(roleId.toString()) ?? false) ||
+				(management?.users?.includes(interaction.user.id.toString()) ?? false);
 
 			if (isAuthorised) {
 				const { promise, resolve } = Promise.withResolvers<null | undefined>();
