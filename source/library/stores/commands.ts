@@ -441,8 +441,6 @@ class CommandStore {
 
 		if (guildDocument.hasEnabled("warns")) {
 			commands.push(this.commands.warn, this.commands.pardon);
-			// TODO(vxern): We need fragmented commands. ASAP.
-			//  `list` has applications in both warnings and praises.
 			commands.push(this.commands.list);
 		}
 
@@ -470,7 +468,6 @@ class CommandStore {
 			commands.push(this.commands.praise);
 		}
 
-		// TODO(vxern): The `/profile view` command should be enabled on all servers.
 		if (guildDocument.hasEnabled("profile")) {
 			commands.push(this.commands.profile);
 		}
