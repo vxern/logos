@@ -53,6 +53,10 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 
 	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {
+		if (Object.keys(data).length === 0) {
+			return "document";
+		}
+
 		const parts: string[] = [];
 		for (const part of constants.database.identifierParts) {
 			if (!(part in data)) {
