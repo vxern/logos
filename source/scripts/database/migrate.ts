@@ -67,7 +67,7 @@ if (direction === "up") {
 			`../../../${constants.directories.migrations}/${filename}`
 		);
 
-		winston.info(`Running ${filename}...`);
+		winston.info(`Executing ${filename}...`);
 
 		try {
 			await module.up(database);
@@ -102,7 +102,7 @@ if (direction === "up") {
 			return [migration, filename];
 		})
 		.toReversed()
-		.slice(step);
+		.slice(0, step);
 
 	for (const [_, filename] of migrations) {
 		const module: { down(database: DatabaseStore): Promise<void> } = await import(
@@ -123,5 +123,5 @@ if (direction === "up") {
 		});
 	}
 
-	winston.info("Migrated!");
+	winston.info("Rolled back!");
 }
