@@ -56,3 +56,5 @@ function down(_: DatabaseStore): void {}
 export { up, down };
 `.trim(),
 );
+
+process.exit(0);

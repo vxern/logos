@@ -125,3 +125,5 @@ if (direction === "up") {
 
 	winston.info("Rolled back!");
 }
+
+process.exit(0);

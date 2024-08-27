@@ -262,3 +262,5 @@ if (values.none) {
 }
 
 await database.teardown();
+
+process.exit(0);
