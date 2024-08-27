@@ -3,6 +3,31 @@ import { DatabaseStore } from "logos/stores/database.ts";
 import { DatabaseMetadata } from "logos/models/database-metadata.ts";
 import constants from "logos:constants/constants.ts";
 import winston from "winston";
+import bun from "bun";
+import { parseArgs } from "node:util";
+
+const { values } = parseArgs({
+	args: bun.argv,
+	options: {
+		rollback: {
+			type: "boolean",
+			short: "b",
+		},
+		step: {
+			type: "string",
+		},
+	},
+	strict: true,
+	allowPositionals: true,
+});
+
+if (values.step !== undefined && !Number.isSafeInteger(Number(values.step))) {
+	winston.error(`'${values.step}' is not a valid integer.`);
+	process.exit(1);
+}
+
+const direction = values.rollback ? "down" : "up";
+const step = values.step !== undefined ? Number(values.step) : 1;
 
 winston.info("Checking for migrations...");
 
@@ -10,43 +35,93 @@ const environment = loadEnvironment();
 const database = await DatabaseStore.create({ environment });
 await database.setup({ prefetchDocuments: false });
 
-const migrationFilenames = await Array.fromAsync(new Bun.Glob("*.ts").scan(constants.directories.migrations)).then(
-	(filenames) => filenames.toSorted(),
-);
-const migrationsAvailableWithFilename = migrationFilenames.map<[migration: string, filename: string]>((filename) => [
-	filename.split("_").at(0)!,
-	filename,
-]);
+type AvailableMigrations = Record<string, string>;
+async function getAvailableMigrations(): Promise<AvailableMigrations> {
+	const migrationFilenames = await Array.fromAsync(new Bun.Glob("*.ts").scan(constants.directories.migrations)).then(
+		(filenames) => filenames.toSorted(),
+	);
 
-const metadata = await DatabaseMetadata.getOrCreate(database, {
-	migrations: migrationsAvailableWithFilename.map((migrationAvailable) => migrationAvailable[0]),
-});
-const migrationsComplete = new Set(metadata.migrations);
-
-const migrationsLeftToRun = migrationsAvailableWithFilename.filter(
-	(migration) => !migrationsComplete.has(migration[0]),
-);
-if (migrationsLeftToRun.length === 0) {
-	winston.info("Migrations up to date!");
-	process.exit(0);
+	return Object.fromEntries(migrationFilenames.map((filename) => [filename.split("_").at(0)!, filename]));
 }
 
-for (const [migration, filename] of migrationsLeftToRun) {
-	const module: {
-		up(database: DatabaseStore): Promise<void>;
-		down(database: DatabaseStore): Promise<void>;
-	} = await import(`../../../${constants.directories.migrations}/${filename}`);
+const availableMigrations = await getAvailableMigrations();
+const metadata =
+	(await DatabaseMetadata.get(database)) ??
+	(await DatabaseMetadata.create(database, { migrations: Object.keys(availableMigrations) }));
 
-	winston.info(`Running migration: ${filename}`);
-
-	try {
-		await module.up(database);
-	} catch (error) {
-		winston.error(`Failed to run migration '${filename}': ${error}`);
-		process.exit(1);
+type Migration = [migration: string, filename: string];
+if (direction === "up") {
+	const completeMigrations = new Set(metadata.migrations);
+	const migrationsToExecute = Object.entries(availableMigrations).filter(
+		(migration) => !completeMigrations.has(migration[0]),
+	);
+	if (migrationsToExecute.length === 0) {
+		winston.info("Migrations up to date!");
+		process.exit(0);
 	}
 
-	await metadata.update(database, () => {
-		metadata.migrations.push(migration);
-	});
+	winston.info(`Found ${migrationsToExecute.length} migration(s) to execute.`);
+
+	for (const [migration, filename] of migrationsToExecute) {
+		const module: { up(database: DatabaseStore): Promise<void> } = await import(
+			`../../../${constants.directories.migrations}/${filename}`
+		);
+
+		winston.info(`Running ${filename}...`);
+
+		try {
+			await module.up(database);
+		} catch (error) {
+			winston.error(`Failed to run migration '${filename}': ${error}`);
+			process.exit(1);
+		}
+
+		await metadata.update(database, () => {
+			metadata.migrations.push(migration);
+		});
+	}
+
+	winston.info("Migrated!");
+} else {
+	const migrationsToRollback = metadata.migrations;
+	if (migrationsToRollback.length === 0) {
+		winston.info("There are no migrations to roll back.");
+		process.exit(0);
+	}
+
+	winston.info(`Found ${migrationsToRollback.length} migration(s) to roll back.`);
+
+	const migrations = migrationsToRollback
+		.map<Migration>((migration) => {
+			const filename = availableMigrations[migration];
+			if (filename === undefined) {
+				winston.error(`Could not find file for migration '${migration}'. Does it exist?`);
+				process.exit(1);
+			}
+
+			return [migration, filename];
+		})
+		.toReversed()
+		.slice(step);
+
+	for (const [_, filename] of migrations) {
+		const module: { down(database: DatabaseStore): Promise<void> } = await import(
+			`../../../${constants.directories.migrations}/${filename}`
+		);
+
+		winston.info(`Rolling back ${filename}...`);
+
+		try {
+			await module.down(database);
+		} catch (error) {
+			winston.error(`Failed to roll back ${filename}: ${error}`);
+			process.exit(1);
+		}
+
+		await metadata.update(database, () => {
+			metadata.migrations.pop();
+		});
+	}
+
+	winston.info("Migrated!");
 }
