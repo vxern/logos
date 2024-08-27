@@ -41,11 +41,6 @@ async function handleSetTimeout(
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
-	const configuration = guildDocument.timeouts;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const member = client.resolveInteractionToMember(interaction, {
 		identifier: interaction.parameters.user,
 		options: {
@@ -91,7 +86,7 @@ async function handleSetTimeout(
 
 	await client.tryLog("memberTimeoutAdd", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("timeouts"),
 		args: [member, until, interaction.parameters.reason, interaction.user],
 	});
 

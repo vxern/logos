@@ -98,9 +98,9 @@ function getLanguageInformationSection(client: Client, interaction: Logos.Intera
 	};
 
 	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.language(
-		guildDocument.localisationLanguage,
+		guildDocument.languages.localisation,
 	)}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${strings.language(
-		guildDocument.featureLanguage,
+		guildDocument.languages.feature,
 	)}`;
 }
 

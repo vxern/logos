@@ -6,6 +6,7 @@ import contributions from "logos:constants/contributions";
 import database from "logos:constants/database";
 import defaults from "logos:constants/defaults";
 import dictionaries from "logos:constants/dictionaries";
+import directories from "logos:constants/directories";
 import emojis from "logos:constants/emojis";
 import endpoints from "logos:constants/endpoints";
 import gifs from "logos:constants/gifs";
@@ -44,8 +45,6 @@ const constants = Object.freeze({
 	PICK_MISSING_WORD_CHOICES: 4,
 	SHORT_TEXT_LENGTH: 60,
 	SENTENCE_PAIRS_TO_SHOW: 5,
-	LOCALISATIONS_DIRECTORY: "./assets/localisations",
-	SENTENCE_PAIRS_DIRECTORY: "./assets/sentences",
 } as const);
 
 export default Object.freeze({
@@ -58,6 +57,7 @@ export default Object.freeze({
 	database,
 	defaults,
 	dictionaries,
+	directories,
 	emojis,
 	endpoints,
 	gifs,

@@ -1,14 +1,6 @@
 import type { Client } from "logos/client";
-import { Guild } from "logos/models/guild";
 
 async function handleDisplayModerationPolicy(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.policy;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;

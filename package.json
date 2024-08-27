@@ -38,10 +38,13 @@
 	],
 	"scripts": {
 		"configure:guild": "bun run ./source/scripts/configure/guild.ts",
-		"load:sentence-pairs": "bun run ./source/scripts/load/sentence-pairs.ts",
-		"setup": "bun load:sentence-pairs",
+		"database:migrate": "bun run ./source/scripts/database/migrate.ts",
+		"generate:migration": "bun run ./source/scripts/generate/migration.ts",
+		"load:sentence_pairs": "bun run ./source/scripts/load/sentence-pairs.ts",
+		"setup": "bun load:sentence_pairs",
 		"lint": "biome check --write --unsafe ./source/ ./test/",
-		"start": "bun run ./source/index.ts"
+		"before_start": "bun database:migrate",
+		"start": "bun before_start && bun run ./source/index.ts"
 	},
 	"dependencies": {
 		"@discordeno/bot": "19.0.0-next.a0510da",

@@ -86,11 +86,7 @@ class JournallingStore {
 			return;
 		}
 
-		const configuration = guildDocument.journalling;
-		if (configuration === undefined) {
-			return;
-		}
-
+		const configuration = guildDocument.feature("journalling");
 		const channelId = BigInt(configuration.channelId);
 		if (channelId === undefined) {
 			return;
@@ -101,14 +97,14 @@ class JournallingStore {
 			return;
 		}
 
-		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.localisationLanguage);
+		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.languages.localisation);
 		const message = await generateMessage(
 			this.#client,
-			// @ts-ignore: This is fine.
+			// @ts-expect-error: This is fine.
 			args,
 			{
 				guildLocale,
-				featureLanguage: guildDocument.featureLanguage,
+				featureLanguage: guildDocument.languages.feature,
 			},
 		);
 		if (message === undefined) {

@@ -16,11 +16,6 @@ async function handlePraiseUser(
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
-	const configuration = guildDocument.praises;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const member = client.resolveInteractionToMember(interaction, { identifier: interaction.parameters.user });
 	if (member === undefined) {
 		return;
@@ -41,7 +36,7 @@ async function handlePraiseUser(
 		await Praise.getAll(client, {
 			where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() },
 		}),
-		configuration.rateLimit ?? constants.defaults.PRAISE_RATE_LIMIT,
+		guildDocument.rateLimit("praises") ?? constants.defaults.PRAISE_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyPraises({ localise: client.localise, locale: interaction.locale });
@@ -66,7 +61,7 @@ async function handlePraiseUser(
 
 	await client.tryLog("praiseAdd", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("praises"),
 		args: [member, praiseDocument, interaction.user],
 	});
 

@@ -7,6 +7,7 @@ import { MongoDBAdapter } from "logos/adapters/databases/mongodb/database";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb/database";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
 import { Logger } from "logos/logger";
+import { DatabaseMetadata } from "logos/models/database-metadata";
 import { EntryRequest } from "logos/models/entry-request";
 import { Guild } from "logos/models/guild";
 import { GuildStatistics } from "logos/models/guild-statistics";
@@ -21,6 +22,7 @@ import { Warning } from "logos/models/warning";
 
 class DatabaseStore {
 	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({
+		DatabaseMetadata: DatabaseMetadata,
 		EntryRequests: EntryRequest,
 		GuildStatistics: GuildStatistics,
 		Guilds: Guild,

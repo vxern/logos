@@ -17,8 +17,8 @@ async function loadLocalisations({
 	log.info("Loading localisations...");
 
 	const directoryPaths: string[] = [];
-	for (const entryPath of await fs.readdir(constants.LOCALISATIONS_DIRECTORY)) {
-		const combinedPath = `${constants.LOCALISATIONS_DIRECTORY}/${entryPath}`;
+	for (const entryPath of await fs.readdir(constants.directories.assets.localisations)) {
+		const combinedPath = `${constants.directories.assets.localisations}/${entryPath}`;
 		if (!(await fs.stat(combinedPath)).isDirectory()) {
 			continue;
 		}

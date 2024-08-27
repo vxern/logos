@@ -1,19 +1,11 @@
 import { type Rule, isValidRule } from "logos:constants/rules";
 import type { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
-import { Guild } from "logos/models/guild";
 
 async function handleCiteRuleAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { rule: string }>,
 ): Promise<void> {
-	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.warns;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const ruleLowercase = interaction.parameters.rule.trim().toLowerCase();
 	const choices = constants.rules
 		.map((rule) => {

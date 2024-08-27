@@ -1,16 +1,18 @@
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import type { ReportDocument } from "logos/models/documents/report/latest";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	ReportModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-interface ReportFormData {
-	readonly reason: string;
-	readonly users: string;
-	messageLink?: string;
-}
+type CreateReportOptions = CreateModelOptions<Report, ReportDocument, "formData">;
 
-type CreateReportOptions = { formData: ReportFormData; isResolved?: boolean } & IdentifierData<Report>;
-
-class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }> {
+interface Report extends ReportDocument {}
+class Report extends ReportModel {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -22,10 +24,6 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 	get createdAt(): number {
 		return Number(this.idParts[2]);
 	}
-
-	readonly formData: ReportFormData;
-
-	isResolved: boolean;
 
 	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateReportOptions) {
 		super(database, data, { collection: "Reports" });
@@ -49,7 +47,6 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 
 	static async create(client: Client, data: Omit<CreateReportOptions, "createdAt">): Promise<Report> {
 		const reportDocument = new Report(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await reportDocument.create(client);
 
 		return reportDocument;
@@ -57,4 +54,4 @@ class Report extends Model<{ collection: "Reports"; idParts: ["guildId", "author
 }
 
 export { Report };
-export type { CreateReportOptions, ReportFormData };
+export type { CreateReportOptions };

@@ -1,14 +1,18 @@
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import type { ResourceDocument } from "logos/models/documents/resource/latest";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	ResourceModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-interface ResourceFormData {
-	readonly resource: string;
-}
+type CreateResourceOptions = CreateModelOptions<Resource, ResourceDocument, "formData">;
 
-type CreateResourceOptions = { formData: ResourceFormData; isResolved?: boolean } & IdentifierData<Resource>;
-
-class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "authorId", "createdAt"] }> {
+interface Resource extends ResourceDocument {}
+class Resource extends ResourceModel {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -20,10 +24,6 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 	get createdAt(): number {
 		return Number(this.idParts[2]);
 	}
-
-	readonly formData: ResourceFormData;
-
-	isResolved: boolean;
 
 	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateResourceOptions) {
 		super(database, data, { collection: "Resources" });
@@ -47,7 +47,6 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 
 	static async create(client: Client, data: Omit<CreateResourceOptions, "createdAt">): Promise<Resource> {
 		const resourceDocument = new Resource(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await resourceDocument.create(client);
 
 		return resourceDocument;
@@ -55,4 +54,4 @@ class Resource extends Model<{ collection: "Resources"; idParts: ["guildId", "au
 }
 
 export { Resource };
-export type { CreateResourceOptions, ResourceFormData };
+export type { CreateResourceOptions };

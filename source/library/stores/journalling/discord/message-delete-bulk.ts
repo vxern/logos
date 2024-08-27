@@ -1,7 +1,7 @@
 import { mention } from "logos:core/formatting";
+import { isDefined } from "logos:core/utilities";
+import { JournallingStore } from "logos/stores/journalling";
 import type { EventLogger } from "logos/stores/journalling/loggers";
-import { JournallingStore } from "logos/stores/journalling.ts";
-import { isDefined } from "logos:core/utilities.ts";
 
 const logger: EventLogger<"messageDeleteBulk"> = (client, [payload], { guildLocale }) => {
 	const messages = payload.ids

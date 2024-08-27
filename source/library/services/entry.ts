@@ -11,12 +11,8 @@ import { LocalService } from "logos/services/service";
 class EntryService extends LocalService {
 	readonly #acceptedRulesButton: InteractionCollector;
 
-	get configuration(): NonNullable<Guild["entry"]> {
-		return this.guildDocument.entry!;
-	}
-
-	get verificationConfiguration(): NonNullable<Guild["verification"]> {
-		return this.guildDocument.verification!;
+	get configuration(): NonNullable<Guild["features"]["verification"]> {
+		return this.guildDocument.feature("verification");
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -330,7 +326,7 @@ class EntryService extends LocalService {
 	}
 
 	#requiresVerification(user: Logos.User): boolean | undefined {
-		const verificationConfiguration = this.verificationConfiguration;
+		const verificationConfiguration = this.configuration;
 		if (verificationConfiguration === undefined) {
 			return undefined;
 		}
