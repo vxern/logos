@@ -86,6 +86,10 @@ class JournallingStore {
 			return;
 		}
 
+		if (!guildDocument.hasEnabled("journalling")) {
+			return;
+		}
+
 		const configuration = guildDocument.feature("journalling");
 		const channelId = BigInt(configuration.channelId);
 		if (channelId === undefined) {
