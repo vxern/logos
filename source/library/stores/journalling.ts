@@ -212,6 +212,15 @@ class JournallingStore {
 	}: { user: Logos.User; guildId: bigint }): Promise<Discord.CamelizedDiscordAuditLogEntry | undefined> {
 		const now = Date.now();
 
+		const guildDocument = this.#client.documents.guilds.get(guildId.toString());
+		if (guildDocument === undefined) {
+			return undefined;
+		}
+
+		if (!guildDocument.hasEnabled("journalling")) {
+			return undefined;
+		}
+
 		const auditLog = await this.#client.bot.helpers
 			.getAuditLog(guildId, { actionType: Discord.AuditLogEvents.MemberKick })
 			.catch((reason) => {
