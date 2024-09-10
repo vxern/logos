@@ -46,7 +46,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 
 		const server = nano({
 			url,
-			requestDefaults: { agent: constants.USER_AGENT, headers: { "User-Agent": constants.USER_AGENT } },
+			requestDefaults: { headers: { "User-Agent": constants.USER_AGENT } },
 		});
 		this.#documents = server.db.use(database);
 	}
