@@ -152,6 +152,9 @@ if (values.all) {
 			targetOnly: {
 				channelIds: ["1175841127019053139"],
 			},
+			roleLanguages: {
+				ids: {},
+			},
 			alerts: {
 				channelId: "1175841126750625914",
 			},
