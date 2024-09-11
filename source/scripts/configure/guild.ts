@@ -195,6 +195,10 @@ if (values.all) {
 					},
 				],
 			},
+			roleIndicators: {
+				limit: 1,
+				roles: [],
+			},
 			suggestions: {
 				channelId: "1175841126301839456",
 			},
