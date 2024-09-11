@@ -95,12 +95,7 @@ if (values.all) {
 			tickets: true,
 			praises: true,
 		};
-		document.rateLimits = {
-			reports: {
-				uses: 10,
-				within: [1, "hour"],
-			},
-		};
+		document.rateLimits = {};
 		document.management = {
 			verification: {
 				roles: ["1175841125651718182", "1175841125651718181"],
