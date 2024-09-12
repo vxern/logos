@@ -106,7 +106,7 @@ describe("Guild", () => {
 		});
 	});
 
-	describe("isTargetLanguageOnly()", () => {
+	describe("isTargetLanguageOnlyChannel()", () => {
 		it("returns true when target-only channels are configured and the passed channel ID is defined as one.", () => {
 			const model = new Guild(database(), {
 				guildId: `${123}`,
@@ -115,12 +115,12 @@ describe("Guild", () => {
 			model.features.targetOnly = {
 				channelIds: [`${456}`],
 			};
-			expect(model.isTargetLanguageOnly(`${456}`)).to.be.true;
+			expect(model.isTargetLanguageOnlyChannel(`${456}`)).to.be.true;
 		});
 
 		it("returns false when target-only channels are not configured or the passed channel ID is not defined as one.", () => {
 			const model = new Guild(database(), { guildId: `${123}` });
-			expect(model.isTargetLanguageOnly(`${456}`)).to.be.false;
+			expect(model.isTargetLanguageOnlyChannel(`${456}`)).to.be.false;
 		});
 	});
 });

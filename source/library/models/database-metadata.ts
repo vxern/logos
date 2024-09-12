@@ -2,9 +2,9 @@ import type { DatabaseMetadataDocument } from "logos/models/documents/database-m
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,
+	DatabaseMetadataModel,
 	Model,
 	getDatabase,
-	DatabaseMetadataModel,
 } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 

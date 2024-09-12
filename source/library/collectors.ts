@@ -296,7 +296,7 @@ class InteractionCollector<
 		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
 		const learningLocale = getLocaleByLearningLanguage(learningLanguage);
 
-		const guildLanguage = guildDocument.isTargetLanguageOnly(interaction.channelId!.toString())
+		const guildLanguage = guildDocument.isTargetLanguageOnlyChannel(interaction.channelId!.toString())
 			? targetLanguage
 			: guildDocument.languages.localisation;
 		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
