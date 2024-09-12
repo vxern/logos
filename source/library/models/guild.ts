@@ -144,7 +144,11 @@ class Guild extends GuildModel {
 	}
 
 	isTargetLanguageOnly(channelId: string): boolean {
-		return this.feature("targetOnly")?.channelIds?.includes(channelId) ?? false;
+		if (!this.hasEnabled("targetOnly")) {
+			return false;
+		}
+
+		return this.feature("targetOnly").channelIds.includes(channelId) ?? false;
 	}
 }
 
