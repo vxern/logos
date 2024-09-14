@@ -28,6 +28,12 @@ import time from "logos:constants/time";
 const constants = Object.freeze({
 	PROJECT_NAME: "Logos",
 	USER_AGENT: "Logos (https://github.com/vxern/logos)",
+	TEST_GUILD_TEMPLATE_CODE: "EaEy336gYh3C",
+	TEST_GUILD_NAME: "Logos Test Environment",
+	TEST_GUILD_ICON_URL: Discord.guildIconUrl(1175841125546856608n, "24adda5d3f30a46aef193b621e3952b4", {
+		format: "png",
+		size: 1024,
+	}),
 	MAXIMUM_DELETABLE_MESSAGES: 500,
 	MAXIMUM_INDEXABLE_MESSAGES: 1000,
 	MAXIMUM_CORRECTION_MESSAGE_LENGTH: 3072,
