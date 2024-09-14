@@ -3,7 +3,7 @@
 	"name": "logos",
 	"description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
 	"license": "Apache-2.0",
-	"version": "4.22.3",
+	"version": "4.23.0",
 	"type": "module",
 	"keywords": [
 		"discord",
@@ -37,10 +37,10 @@
 		}
 	],
 	"scripts": {
-		"configure:guild": "bun run ./source/scripts/configure/guild.ts",
 		"database:migrate": "bun run ./source/scripts/database/migrate.ts",
 		"generate:migration": "bun run ./source/scripts/generate/migration.ts",
 		"load:sentence_pairs": "bun run ./source/scripts/load/sentence-pairs.ts",
+		"develop": "bun run ./source/scripts/develop.ts",
 		"setup": "bun load:sentence_pairs",
 		"lint": "biome check --write --unsafe ./source/ ./test/",
 		"before_start": "bun database:migrate",
