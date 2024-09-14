@@ -312,21 +312,11 @@ class Client {
 			token: environment.discordSecret,
 			intents:
 				Discord.Intents.Guilds |
-				Discord.Intents.GuildMembers | // Members joining, leaving, changing.
-				Discord.Intents.GuildModeration | // Access to audit log.
+				Discord.Intents.GuildMembers |
+				Discord.Intents.GuildModeration |
 				Discord.Intents.GuildVoiceStates |
 				Discord.Intents.GuildMessages |
 				Discord.Intents.MessageContent,
-			events: {},
-			gateway: {
-				token: environment.discordSecret,
-				events: {},
-				cache: {
-					requestMembers: {
-						enabled: true,
-					},
-				},
-			},
 		});
 
 		const database = await DatabaseStore.create({ environment });
