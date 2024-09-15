@@ -28,6 +28,8 @@ if (values.step !== undefined && !Number.isSafeInteger(Number(values.step))) {
 	process.exit(1);
 }
 
+log.info("Checking for migrations...");
+
 const environment = loadEnvironment({ log: constants.loggers.silent });
 const database = await DatabaseStore.create({ log: constants.loggers.silent, environment });
 await database.setup({ prefetchDocuments: false });
