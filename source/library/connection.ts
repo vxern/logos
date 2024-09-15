@@ -1,5 +1,5 @@
-import type pino from "pino";
 import type { Environment } from "logos:core/loaders/environment.ts";
+import type pino from "pino";
 
 class DiscordConnection {
 	readonly log: pino.Logger;
@@ -55,6 +55,7 @@ class DiscordConnection {
 					bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
 				},
 			},
+			loggerFactory: (name) => constants.loggers.discordeno.child({ name: name.toLowerCase() }),
 		});
 		this.cache = {
 			guilds: new Map(),
