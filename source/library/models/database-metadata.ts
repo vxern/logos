@@ -38,6 +38,18 @@ class DatabaseMetadata extends DatabaseMetadataModel {
 			return session.set(new DatabaseMetadata(database, data));
 		});
 	}
+
+	static async getOrCreate(
+		clientOrDatabase: ClientOrDatabaseStore,
+		data: CreateDatabaseMetadataOptions,
+	): Promise<DatabaseMetadata> {
+		const databaseMetadataDocument = await DatabaseMetadata.get(clientOrDatabase);
+		if (databaseMetadataDocument !== undefined) {
+			return databaseMetadataDocument;
+		}
+
+		return DatabaseMetadata.create(clientOrDatabase, data);
+	}
 }
 
 export { DatabaseMetadata };
