@@ -24,6 +24,8 @@ import slowmode from "logos:constants/slowmode";
 import special from "logos:constants/special";
 import statuses from "logos:constants/statuses";
 import time from "logos:constants/time";
+import logTargets from "logos:constants/log-targets.ts";
+import loggers from "logos:constants/loggers.ts";
 
 const constants = Object.freeze({
 	PROJECT_NAME: "Logos",
@@ -34,8 +36,6 @@ const constants = Object.freeze({
 		format: "png",
 		size: 1024,
 	}),
-	STANDARD_LOG_FILENAME: "log.os",
-	DEBUG_LOG_FILENAME: "debug-log.os",
 	MAXIMUM_DELETABLE_MESSAGES: 500,
 	MAXIMUM_INDEXABLE_MESSAGES: 1000,
 	MAXIMUM_CORRECTION_MESSAGE_LENGTH: 3072,
@@ -74,6 +74,8 @@ export default Object.freeze({
 	licences,
 	links,
 	localisations,
+	logTargets,
+	loggers,
 	parameters,
 	patterns,
 	properties,
