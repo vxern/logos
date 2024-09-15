@@ -14,12 +14,20 @@ export default Object.freeze({
 		debug: {
 			target: "pino/file",
 			level: "debug",
-			options: { destination: `${directories.logs}/debug-log.os` },
+			options: { destination: `${directories.logs}/debug-log.os`, mkdir: true },
 		},
 		standard: {
 			target: "pino/file",
 			level: "info",
-			options: { destination: `${directories.logs}/log.os` },
+			options: { destination: `${directories.logs}/log.os`, mkdir: true },
+		},
+		discordeno: {
+			target: "pino/file",
+			level: "debug",
+			options: {
+				destination: `${directories.logs}/discordeno-log.os`,
+				mkdir: true,
+			},
 		},
 	},
 } as const);

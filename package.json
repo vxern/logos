@@ -37,7 +37,7 @@
 		}
 	],
 	"scripts": {
-		"lint": "biome check --write --unsafe ./migrations/ ./scripts/ ./source/ ./test/",
+		"lint": "biome check --write --unsafe ./scripts/ ./source/ ./test/",
 		"database:migrate": "bun run ./scripts/database/migrate.ts",
 		"generate:migration": "bun run ./scripts/generate/migration.ts",
 		"load:sentence_pairs": "bun run ./scripts/load/sentence-pairs.ts",

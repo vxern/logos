@@ -10,4 +10,5 @@ export default Object.freeze({
 		}),
 	),
 	standard: pino(pino.transport(logTargets.file.standard)),
+	discordeno: pino(pino.transport(logTargets.file.discordeno)),
 } as const);
