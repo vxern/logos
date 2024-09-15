@@ -1,17 +1,14 @@
 import { type Locale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
+import type pino from "pino";
 
 abstract class Service {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly client: Client;
 
 	constructor(client: Client, { identifier }: { identifier: string }) {
-		this.log = Logger.create({
-			identifier: `Client/ServiceStore/${identifier}`,
-			isDebug: client.environment.isDebug,
-		});
+		this.log = client.log.child({ name: identifier });
 		this.client = client;
 	}
 
