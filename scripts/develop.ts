@@ -46,7 +46,7 @@ await database.setup({ prefetchDocuments: false });
 const availableMigrations = await getAvailableMigrations();
 const metadata = await DatabaseMetadata.getOrCreate(database, { migrations: Object.keys(availableMigrations) });
 
-await migrate({ log: silent, database, metadata, availableMigrations });
+await migrate({ log: constants.loggers.silent, database, metadata, availableMigrations });
 
 const metadataDocument = await DatabaseMetadata.get(database);
 if (metadataDocument === undefined) {
