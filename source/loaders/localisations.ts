@@ -4,15 +4,14 @@ import {
 	type LogosLocale,
 	getLogosLanguageByLocale,
 } from "logos:constants/languages/localisation";
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 const decoder = new TextDecoder();
 
 async function loadLocalisations({
-	environment,
-}: { environment: Environment }): Promise<Map<string, Map<LocalisationLanguage, string>>> {
-	const log = Logger.create({ identifier: "Loaders/Localisations", isDebug: environment.isDebug });
+	log,
+}: { log: pino.Logger }): Promise<Map<string, Map<LocalisationLanguage, string>>> {
+	log = log.child({ name: "Localisations" });
 
 	log.info("Loading localisations...");
 

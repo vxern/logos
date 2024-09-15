@@ -1,4 +1,4 @@
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 interface Environment {
 	readonly isDebug?: boolean;
@@ -35,13 +35,14 @@ interface Environment {
 	readonly lavalinkPassword?: string;
 }
 
-function loadEnvironment(): Environment {
-	const log = Logger.create({ identifier: "Loaders/Environment", isDebug: false });
+function loadEnvironment({ log }: { log: pino.Logger }): Environment {
+	log = log.child({ name: "Environment" });
+
+	log.info("Loading environment...");
 
 	if (process.env.SECRET_DISCORD === undefined) {
 		log.error(
-			"Logos cannot start without a Discord token. " +
-				"Make sure you've included one in the environment variables with the key `SECRET_DISCORD`.",
+			"Logos cannot start without a Discord token. Make sure you've included one in the environment variables with the key `SECRET_DISCORD`.",
 		);
 		process.exit(1);
 	}
