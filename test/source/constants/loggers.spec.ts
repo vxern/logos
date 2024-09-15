@@ -1,6 +1,6 @@
 import { describe, it } from "bun:test";
-import { expect } from "chai";
 import loggers from "logos:constants/loggers.ts";
+import { expect } from "chai";
 
 describe("The loggers object", () => {
 	it("is immutable.", () => {

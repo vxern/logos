@@ -15,6 +15,8 @@ import languages from "logos:constants/languages";
 import licences from "logos:constants/licences";
 import links from "logos:constants/links";
 import localisations from "logos:constants/localisations";
+import logTargets from "logos:constants/log-targets.ts";
+import loggers from "logos:constants/loggers.ts";
 import parameters from "logos:constants/parameters";
 import patterns from "logos:constants/patterns";
 import properties from "logos:constants/properties";
@@ -24,8 +26,6 @@ import slowmode from "logos:constants/slowmode";
 import special from "logos:constants/special";
 import statuses from "logos:constants/statuses";
 import time from "logos:constants/time";
-import logTargets from "logos:constants/log-targets.ts";
-import loggers from "logos:constants/loggers.ts";
 
 const constants = Object.freeze({
 	PROJECT_NAME: "Logos",
