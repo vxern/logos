@@ -2,6 +2,7 @@ import { loadEnvironment } from "logos:core/loaders/environment.ts";
 import { DatabaseMetadata } from "logos/models/database-metadata.ts";
 import { Guild } from "logos/models/guild.ts";
 import { DatabaseStore } from "logos/stores/database.ts";
+import { getAvailableMigrations, migrate } from "logos:core/runners/migrator.ts";
 
 const log = constants.loggers.feedback;
 
@@ -41,6 +42,11 @@ bot.start();
 
 const database = await DatabaseStore.create({ log: constants.loggers.silent, environment });
 await database.setup({ prefetchDocuments: false });
+
+const availableMigrations = await getAvailableMigrations();
+const metadata = await DatabaseMetadata.getOrCreate(database, { migrations: Object.keys(availableMigrations) });
+
+await migrate({ log: silent, database, metadata, availableMigrations });
 
 const metadataDocument = await DatabaseMetadata.get(database);
 if (metadataDocument === undefined) {
