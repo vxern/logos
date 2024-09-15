@@ -47,7 +47,7 @@ function loadEnvironment({ log }: { log: pino.Logger }): Environment {
 		process.exit(1);
 	}
 
-	return {
+	const environment: Environment = {
 		isDebug: process.env.IS_DEBUG === "true",
 		discordSecret: process.env.SECRET_DISCORD,
 		deeplSecret: process.env.SECRET_DEEPL,
@@ -81,6 +81,10 @@ function loadEnvironment({ log }: { log: pino.Logger }): Environment {
 		lavalinkPort: process.env.LAVALINK_PORT,
 		lavalinkPassword: process.env.LAVALINK_PASSWORD,
 	};
+
+	log.info("Environment loaded.");
+
+	return environment;
 }
 
 export { loadEnvironment };
