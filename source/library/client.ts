@@ -253,13 +253,11 @@ class Client {
 		log,
 		environment,
 		database,
-		bot,
 		localisations,
 	}: {
 		log: pino.Logger;
 		environment: Environment;
 		database: DatabaseStore;
-		bot: Discord.Bot;
 		localisations: RawLocalisations;
 	}) {
 		this.environment = environment;
@@ -278,7 +276,7 @@ class Client {
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);
 		this.#adapters = new AdapterStore(this);
-		this.#connection = new DiscordConnection({ log, bot, events: this.#events.buildEventHandlers() });
+		this.#connection = new DiscordConnection({ log, environment, events: this.#events.buildEventHandlers() });
 
 		this.#guildReloadLock = new ActionLock();
 		this.#guildCreateCollector = new Collector<"guildCreate">();
@@ -304,20 +302,9 @@ class Client {
 
 		log.info("Bootstrapping the client...");
 
-		const bot = Discord.createBot({
-			token: environment.discordSecret,
-			intents:
-				Discord.Intents.Guilds |
-				Discord.Intents.GuildMembers |
-				Discord.Intents.GuildModeration |
-				Discord.Intents.GuildVoiceStates |
-				Discord.Intents.GuildMessages |
-				Discord.Intents.MessageContent,
-		});
-
 		const database = await DatabaseStore.create({ log, environment });
 
-		return new Client({ log, environment, database, bot, localisations });
+		return new Client({ log, environment, database, localisations });
 	}
 
 	async #setupCollectors(): Promise<void> {

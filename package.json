@@ -37,14 +37,13 @@
 		}
 	],
 	"scripts": {
+		"lint": "biome check --write --unsafe ./migrations/ ./scripts/ ./source/ ./test/",
 		"database:migrate": "bun run ./scripts/database/migrate.ts",
 		"generate:migration": "bun run ./scripts/generate/migration.ts",
 		"load:sentence_pairs": "bun run ./scripts/load/sentence-pairs.ts",
 		"develop": "bun run ./scripts/develop.ts",
-		"setup": "bun load:sentence_pairs",
-		"lint": "biome check --write --unsafe ./source/ ./test/",
-		"before_start": "bun database:migrate",
-		"start": "bun before_start && bun run ./source/index.ts"
+		"start": "bun run ./scripts/run.ts",
+		"setup": "bun load:sentence_pairs"
 	},
 	"dependencies": {
 		"@discordeno/bot": "19.0.0-next.a0510da",
