@@ -1,3 +1,7 @@
+import pino from "pino";
+
+const silent = pino({ level: "silent" });
+
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
 
 function* chunk<T>(array: T[], size: number): Generator<T[], void, void> {
@@ -22,5 +26,5 @@ function isDefined<T>(element: T | undefined): element is T {
 	return element !== undefined;
 }
 
-export { chunk, isDefined };
+export { chunk, isDefined, silent };
 export type { WithRequired };
