@@ -45,7 +45,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 				userAgent: constants.USER_AGENT,
 			});
 		} catch (exception) {
-			this.client.log.error(`The request for lemma "${lemma}" to ${this.identifier} failed:`, exception);
+			this.client.log.error(`The request for lemma "${lemma}" failed:`, exception);
 			return undefined;
 		}
 

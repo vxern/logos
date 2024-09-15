@@ -1,7 +1,7 @@
 import type { DetectionLanguage } from "logos:constants/languages/detection";
 import type { Licence } from "logos:constants/licences";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 interface SingleDetectionResult {
 	readonly language: DetectionLanguage;
@@ -9,11 +9,11 @@ interface SingleDetectionResult {
 }
 
 abstract class DetectorAdapter {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly client: Client;
 
 	constructor(client: Client, { identifier }: { identifier: string }) {
-		this.log = Logger.create({ identifier, isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: identifier });
 		this.client = client;
 	}
 

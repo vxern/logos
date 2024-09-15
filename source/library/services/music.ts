@@ -2,9 +2,9 @@ import { EventEmitter } from "node:events";
 import { mention } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
+import type pino from "pino";
 import * as shoukaku from "shoukaku";
 
 type PlaybackActionType = "manage" | "check";
@@ -427,7 +427,7 @@ class ListingManager extends EventEmitter {
 
 type QueueableMode = "song-collection" | "playable";
 class MusicSession extends EventEmitter {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly client: Client;
 	readonly service: MusicService;
 	readonly player: shoukaku.Player;
@@ -468,7 +468,7 @@ class MusicSession extends EventEmitter {
 
 		this.setMaxListeners(0);
 
-		this.log = Logger.create({ identifier: "MusicSession", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "MusicSession" });
 		this.client = client;
 		this.service = service;
 		this.player = player;

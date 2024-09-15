@@ -1,5 +1,4 @@
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
 import { AlertService } from "logos/services/alert";
 import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channels";
@@ -22,9 +21,10 @@ import { RealtimeUpdateService } from "logos/services/realtime-updates";
 import { RoleIndicatorService } from "logos/services/role-indicators";
 import type { Service } from "logos/services/service";
 import { StatusService } from "logos/services/status";
+import type pino from "pino";
 
 class ServiceStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly global: {
 		readonly lavalink?: LavalinkService;
 		readonly interactionRepetition: InteractionRepetitionService;
@@ -61,7 +61,7 @@ class ServiceStore {
 	};
 
 	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "Client/ServiceStore", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "ServiceStore" });
 
 		const lavalinkService = LavalinkService.tryCreate(client);
 		if (lavalinkService === undefined) {

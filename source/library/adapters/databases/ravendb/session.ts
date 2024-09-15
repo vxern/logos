@@ -1,5 +1,4 @@
 import type { Collection } from "logos:constants/database";
-import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
 import type { RavenDBDocument } from "logos/adapters/databases/ravendb/document";
@@ -11,12 +10,8 @@ import type * as ravendb from "ravendb";
 class RavenDBDocumentSession extends DocumentSession {
 	readonly #session: ravendb.IDocumentSession;
 
-	constructor({
-		environment,
-		database,
-		session,
-	}: { environment: Environment; database: DatabaseStore; session: ravendb.IDocumentSession }) {
-		super({ identifier: "RavenDB", environment, database });
+	constructor({ database, session }: { database: DatabaseStore; session: ravendb.IDocumentSession }) {
+		super({ identifier: "RavenDB", database });
 
 		this.#session = session;
 

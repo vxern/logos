@@ -1,8 +1,7 @@
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 class DiscordConnection {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly bot: Discord.Bot;
 	readonly cache: {
 		readonly guilds: Map<bigint, Logos.Guild>;
@@ -17,12 +16,8 @@ class DiscordConnection {
 		readonly roles: Map<bigint, Logos.Role>;
 	};
 
-	constructor({
-		environment,
-		bot,
-		events,
-	}: { environment: Environment; bot: Discord.Bot; events: Partial<Discord.EventHandlers> }) {
-		this.log = Logger.create({ identifier: "Client/DiscordConnection", isDebug: environment.isDebug });
+	constructor({ log, bot, events }: { log: pino.Logger; bot: Discord.Bot; events: Partial<Discord.EventHandlers> }) {
+		this.log = log.child({ name: "DiscordConnection" });
 		this.bot = bot;
 		this.cache = {
 			guilds: new Map(),

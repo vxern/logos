@@ -1,13 +1,13 @@
 import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Logger } from "logos/logger";
 import loggers from "logos/stores/journalling/loggers";
+import type pino from "pino";
 
 type Events = Logos.Events & Discord.Events;
 
 class JournallingStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #client: Client;
 	readonly #guildBanAddCollector: Collector<"guildBanAdd">;
@@ -19,7 +19,7 @@ class JournallingStore {
 	readonly #messageUpdateCollector: Collector<"messageUpdate">;
 
 	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "JournallingStore", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "JournallingStore" });
 
 		this.#client = client;
 		this.#guildBanAddCollector = new Collector();

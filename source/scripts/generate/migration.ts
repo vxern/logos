@@ -1,6 +1,8 @@
 import { parseArgs } from "node:util";
 import bun from "bun";
-import winston from "winston";
+import pino from "pino";
+
+const log = pino();
 
 const { positionals } = parseArgs({
 	args: bun.argv,
@@ -13,7 +15,8 @@ const message = positionals
 	.replaceAll(/[^a-zA-Z-]/g, "")
 	.toLowerCase();
 if (message.trim().length === 0) {
-	winston.error("You must provide a message.");
+	log.error("You must provide a message.");
+
 	process.exit(1);
 }
 
@@ -38,7 +41,8 @@ const filename = `${timestamp}_${message}.ts`;
 const file = Bun.file(`${constants.directories.migrations}/${filename}`);
 
 if (await file.exists()) {
-	winston.error(`Migration '${filename}' already exists.`);
+	log.error(`Migration '${filename}' already exists.`);
+
 	process.exit(1);
 }
 

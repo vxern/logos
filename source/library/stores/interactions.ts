@@ -1,7 +1,7 @@
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
 import { trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
 type EmbedOrCallbackData = Discord.CamelizedDiscordEmbed | InteractionCallbackData;
@@ -10,7 +10,7 @@ interface ReplyData {
 }
 type ReplyVisibility = "public" | "private";
 class InteractionStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #client: Client;
 	readonly #interactions: Map<bigint, Logos.Interaction>;
@@ -111,10 +111,9 @@ class InteractionStore {
 	}
 
 	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "Interactions", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "InteractionStore" });
 
 		this.#client = client;
-
 		this.#interactions = new Map();
 		this.#replies = new Map();
 		this.#messages = new Map();

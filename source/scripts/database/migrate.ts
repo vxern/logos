@@ -1,10 +1,13 @@
 import { parseArgs } from "node:util";
 import constants from "logos:constants/constants.ts";
 import { loadEnvironment } from "logos:core/loaders/environment.ts";
+import { silent } from "logos:core/utilities.ts";
 import bun from "bun";
 import { DatabaseMetadata } from "logos/models/database-metadata.ts";
 import { DatabaseStore } from "logos/stores/database.ts";
-import winston from "winston";
+import pino from "pino";
+
+const log = pino();
 
 const { values } = parseArgs({
 	args: bun.argv,
@@ -22,17 +25,18 @@ const { values } = parseArgs({
 });
 
 if (values.step !== undefined && !Number.isSafeInteger(Number(values.step))) {
-	winston.error(`'${values.step}' is not a valid integer.`);
+	log.error(`'${values.step}' is not a valid integer.`);
+
 	process.exit(1);
 }
 
 const direction = values.rollback ? "down" : "up";
 const step = values.step !== undefined ? Number(values.step) : 1;
 
-winston.info("Checking for migrations...");
+log.info("Checking for migrations...");
 
-const environment = loadEnvironment();
-const database = await DatabaseStore.create({ environment });
+const environment = loadEnvironment({ log: silent });
+const database = await DatabaseStore.create({ log: silent, environment });
 await database.setup({ prefetchDocuments: false });
 
 type AvailableMigrations = Record<string, string>;
@@ -56,23 +60,25 @@ if (direction === "up") {
 		(migration) => !completeMigrations.has(migration[0]),
 	);
 	if (migrationsToExecute.length === 0) {
-		winston.info("Migrations up to date!");
+		log.info("Migrations up to date!");
+
 		process.exit(0);
 	}
 
-	winston.info(`Found ${migrationsToExecute.length} migration(s) to execute.`);
+	log.info(`Found ${migrationsToExecute.length} migration(s) to execute.`);
 
 	for (const [migration, filename] of migrationsToExecute) {
 		const module: { up(database: DatabaseStore): Promise<void> } = await import(
 			`../../../${constants.directories.migrations}/${filename}`
 		);
 
-		winston.info(`Executing ${filename}...`);
+		log.info(`Executing ${filename}...`);
 
 		try {
 			await module.up(database);
 		} catch (error) {
-			winston.error(`Failed to run migration '${filename}': ${error}`);
+			log.error(`Failed to run migration '${filename}': ${error}`);
+
 			process.exit(1);
 		}
 
@@ -81,21 +87,23 @@ if (direction === "up") {
 		});
 	}
 
-	winston.info("Migrated!");
+	log.info("Migrated!");
 } else {
 	const migrationsToRollback = metadata.migrations;
 	if (migrationsToRollback.length === 0) {
-		winston.info("There are no migrations to roll back.");
+		log.info("There are no migrations to roll back.");
+
 		process.exit(0);
 	}
 
-	winston.info(`Found ${migrationsToRollback.length} migration(s) to roll back.`);
+	log.info(`Found ${migrationsToRollback.length} migration(s) to roll back.`);
 
 	const migrations = migrationsToRollback
 		.map<Migration>((migration) => {
 			const filename = availableMigrations[migration];
 			if (filename === undefined) {
-				winston.error(`Could not find file for migration '${migration}'. Does it exist?`);
+				log.error(`Could not find file for migration '${migration}'. Does it exist?`);
+
 				process.exit(1);
 			}
 
@@ -109,12 +117,13 @@ if (direction === "up") {
 			`../../../${constants.directories.migrations}/${filename}`
 		);
 
-		winston.info(`Rolling back ${filename}...`);
+		log.info(`Rolling back ${filename}...`);
 
 		try {
 			await module.down(database);
 		} catch (error) {
-			winston.error(`Failed to roll back ${filename}: ${error}`);
+			log.error(`Failed to roll back ${filename}: ${error}`);
+
 			process.exit(1);
 		}
 
@@ -123,7 +132,7 @@ if (direction === "up") {
 		});
 	}
 
-	winston.info("Rolled back!");
+	log.info("Rolled back!");
 }
 
 process.exit(0);
