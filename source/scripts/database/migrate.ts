@@ -1,13 +1,11 @@
 import { parseArgs } from "node:util";
 import { loadEnvironment } from "logos:core/loaders/environment.ts";
-import { silent } from "logos:core/utilities.ts";
 import bun from "bun";
 import { DatabaseStore } from "logos/stores/database.ts";
-import pino from "pino";
 import { getAvailableMigrations, migrate, rollback } from "logos:core/runners/migrator.ts";
 import { DatabaseMetadata } from "logos/models/database-metadata.ts";
 
-const log = pino();
+const log = constants.loggers.feedback;
 
 const { values } = parseArgs({
 	args: bun.argv,
@@ -30,8 +28,8 @@ if (values.step !== undefined && !Number.isSafeInteger(Number(values.step))) {
 	process.exit(1);
 }
 
-const environment = loadEnvironment({ log: silent });
-const database = await DatabaseStore.create({ log: silent, environment });
+const environment = loadEnvironment({ log: constants.loggers.silent });
+const database = await DatabaseStore.create({ log: constants.loggers.silent, environment });
 await database.setup({ prefetchDocuments: false });
 
 const availableMigrations = await getAvailableMigrations();

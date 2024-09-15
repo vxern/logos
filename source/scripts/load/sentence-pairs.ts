@@ -1,8 +1,7 @@
 import constants from "logos:constants/constants";
 import Redis from "ioredis";
-import pino from "pino";
 
-const log = pino();
+const log = constants.loggers.feedback;
 
 log.info(`Looking for files in ${constants.directories.assets.sentences}...`);
 
