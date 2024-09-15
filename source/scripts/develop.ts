@@ -1,14 +1,18 @@
 import { loadEnvironment } from "logos:core/loaders/environment.ts";
+import { silent } from "logos:core/utilities.ts";
 import { DatabaseMetadata } from "logos/models/database-metadata.ts";
 import { Guild } from "logos/models/guild.ts";
 import { DatabaseStore } from "logos/stores/database.ts";
-import winston from "winston";
+import pino from "pino";
+
+const log = pino();
 
 function idByName<T extends { id: bigint; name?: string }>(entities: T[], name: string): string {
 	const entity = entities.find((entity) => entity.name?.includes(name));
 	if (entity === undefined) {
-		winston.error(`Could not find entity with the name '${name}' in the test environment.`);
-		winston.error("If you haven't messed around with the guild yourself, report this error.");
+		log.error(`Could not find entity with the name '${name}' in the test environment.`);
+		log.error("If you haven't messed around with the guild yourself, report this error.");
+
 		process.exit(1);
 	}
 
@@ -28,7 +32,7 @@ async function getInviteCode({ guildId }: { guildId: bigint }): Promise<string |
 		.then((invite) => invite?.code);
 }
 
-const environment = loadEnvironment();
+const environment = loadEnvironment({ log: silent });
 const bot = Discord.createBot({
 	token: environment.discordSecret,
 	intents: Discord.Intents.Guilds | Discord.Intents.GuildMembers,
@@ -37,13 +41,14 @@ const bot = Discord.createBot({
 
 bot.start();
 
-const database = await DatabaseStore.create({ environment });
+const database = await DatabaseStore.create({ log: silent, environment });
 await database.setup({ prefetchDocuments: false });
 
 const metadataDocument = await DatabaseMetadata.get(database);
 if (metadataDocument === undefined) {
-	winston.error("Could not find database metadata.");
-	winston.error("Do not run this script manually: It depends on the migration script.");
+	log.error("Could not find database metadata.");
+	log.error("Do not run this script manually: It depends on the migration script.");
+
 	process.exit(1);
 }
 
@@ -55,7 +60,7 @@ if (metadataDocument.testGuildId !== undefined) {
 			(await getInviteCode({ guildId: guild.id })) ??
 			(await generateNewInviteCode({ channels: await bot.helpers.getChannels(guild.id) }));
 
-		winston.info(`You can find the test environment at: https://discord.gg/${existingInviteCode}`);
+		log.info(`You can find the test environment at: https://discord.gg/${existingInviteCode}`);
 
 		process.exit(0);
 	}
@@ -82,8 +87,8 @@ await bot.rest.addRole(guild.id, bot.id, idByName(roles, "Server Bot"));
 const promise = Promise.withResolvers<Discord.Member>();
 bot.events.guildMemberAdd = (member) => promise.resolve(member);
 
-winston.info(`Join the test environment at: https://discord.gg/${inviteCode}`);
-winston.info("Waiting for you to join...");
+log.info(`Join the test environment at: https://discord.gg/${inviteCode}`);
+log.info("Waiting for you to join...");
 
 const member = await promise.promise;
 
@@ -270,7 +275,7 @@ await metadataDocument.update(database, () => {
 	metadataDocument.testGuildId = guild.id.toString();
 });
 
-winston.info("The test environment is ready.");
+log.info("The test environment is ready.");
 
 await shutdown;
 
