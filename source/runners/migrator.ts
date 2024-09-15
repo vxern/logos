@@ -20,8 +20,7 @@ async function migrate({
 	);
 	if (migrationsToExecute.length === 0) {
 		log.info("Migrations up to date!");
-
-		process.exit(0);
+		return;
 	}
 
 	log.info(`Found ${migrationsToExecute.length} migration(s) to execute.`);
@@ -66,8 +65,7 @@ async function rollback({
 	const migrationsToRollback = metadata.migrations;
 	if (migrationsToRollback.length === 0) {
 		log.info("There are no migrations to roll back.");
-
-		process.exit(0);
+		return;
 	}
 
 	log.info(`Found ${migrationsToRollback.length} migration(s) to roll back.`);
