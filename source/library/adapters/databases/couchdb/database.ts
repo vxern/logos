@@ -4,16 +4,16 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { CouchDBDocumentConventions } from "logos/adapters/databases/couchdb/conventions";
 import type { CouchDBDocumentMetadata } from "logos/adapters/databases/couchdb/document";
 import { CouchDBDocumentSession } from "logos/adapters/databases/couchdb/session";
-import type { Logger } from "logos/logger";
 import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import nano from "nano";
+import type pino from "pino";
 
 class CouchDBAdapter extends DatabaseAdapter {
 	readonly #documents: nano.DocumentScope<unknown>;
 
 	constructor({
-		environment,
+		log,
 		username,
 		password,
 		protocol,
@@ -21,7 +21,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		port,
 		database,
 	}: {
-		environment: Environment;
+		log: pino.Logger;
 		username: string;
 		password: string;
 		protocol?: string;
@@ -29,7 +29,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		port: string;
 		database: string;
 	}) {
-		super({ identifier: "CouchDB", environment });
+		super({ identifier: "CouchDB", log });
 
 		protocol = "http";
 
@@ -51,7 +51,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		this.#documents = server.db.use(database);
 	}
 
-	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): CouchDBAdapter | undefined {
+	static tryCreate({ log, environment }: { log: pino.Logger; environment: Environment }): CouchDBAdapter | undefined {
 		if (
 			environment.couchdbUsername === undefined ||
 			environment.couchdbPassword === undefined ||
@@ -66,7 +66,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		}
 
 		return new CouchDBAdapter({
-			environment,
+			log,
 			username: environment.couchdbUsername,
 			password: environment.couchdbPassword,
 			host: environment.couchdbHost,
@@ -91,11 +91,8 @@ class CouchDBAdapter extends DatabaseAdapter {
 		return new CouchDBDocumentConventions({ document, data, collection });
 	}
 
-	openSession({
-		environment,
-		database,
-	}: { environment: Environment; database: DatabaseStore }): CouchDBDocumentSession {
-		return new CouchDBDocumentSession({ environment, database, documents: this.#documents });
+	openSession({ database }: { database: DatabaseStore }): CouchDBDocumentSession {
+		return new CouchDBDocumentSession({ database, documents: this.#documents });
 	}
 }
 

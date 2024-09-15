@@ -4,9 +4,9 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
 import type { RethinkDBDocumentMetadata } from "logos/adapters/databases/rethinkdb/document";
 import { RethinkDBDocumentSession } from "logos/adapters/databases/rethinkdb/session";
-import type { Logger } from "logos/logger";
 import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type pino from "pino";
 import rethinkdb from "rethinkdb-ts";
 
 class RethinkDBAdapter extends DatabaseAdapter {
@@ -14,26 +14,29 @@ class RethinkDBAdapter extends DatabaseAdapter {
 	#connection!: rethinkdb.Connection;
 
 	constructor({
-		environment,
+		log,
 		username,
 		password,
 		host,
 		port,
 		database,
 	}: {
-		environment: Environment;
+		log: pino.Logger;
 		username?: string;
 		password?: string;
 		host: string;
 		port: string;
 		database: string;
 	}) {
-		super({ environment, identifier: "RethinkDB" });
+		super({ identifier: "RethinkDB", log });
 
 		this.#connectionOptions = { host, port: Number(port), db: database, user: username, password };
 	}
 
-	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): RethinkDBAdapter | undefined {
+	static tryCreate({
+		log,
+		environment,
+	}: { log: pino.Logger; environment: Environment }): RethinkDBAdapter | undefined {
 		if (
 			environment.rethinkdbHost === undefined ||
 			environment.rethinkdbPort === undefined ||
@@ -46,7 +49,7 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		}
 
 		return new RethinkDBAdapter({
-			environment,
+			log,
 			username: environment.rethinkdbUsername,
 			password: environment.rethinkdbPassword,
 			host: environment.rethinkdbHost,
@@ -76,11 +79,8 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		return new RethinkDBDocumentConventions({ document, data, collection });
 	}
 
-	openSession({
-		environment,
-		database,
-	}: { environment: Environment; database: DatabaseStore }): RethinkDBDocumentSession {
-		return new RethinkDBDocumentSession({ environment, database, connection: this.#connection });
+	openSession({ database }: { database: DatabaseStore }): RethinkDBDocumentSession {
+		return new RethinkDBDocumentSession({ database, connection: this.#connection });
 	}
 
 	async #createMissingTables(): Promise<void> {

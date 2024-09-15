@@ -1,5 +1,4 @@
 import type { Collection } from "logos:constants/database";
-import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { MongoDBDocumentConventions } from "logos/adapters/databases/mongodb/conventions";
 import type { MongoDBDocument } from "logos/adapters/databases/mongodb/document";
@@ -11,12 +10,8 @@ import type mongodb from "mongodb";
 class MongoDBDocumentSession extends DocumentSession {
 	readonly #mongoDatabase: mongodb.Db;
 
-	constructor({
-		environment,
-		database,
-		mongoDatabase,
-	}: { environment: Environment; database: DatabaseStore; mongoDatabase: mongodb.Db }) {
-		super({ identifier: "MongoDB", environment, database });
+	constructor({ database, mongoDatabase }: { database: DatabaseStore; mongoDatabase: mongodb.Db }) {
+		super({ identifier: "MongoDB", database });
 
 		this.#mongoDatabase = mongoDatabase;
 	}
