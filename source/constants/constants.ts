@@ -34,6 +34,8 @@ const constants = Object.freeze({
 		format: "png",
 		size: 1024,
 	}),
+	STANDARD_LOG_FILENAME: "log.os",
+	DEBUG_LOG_FILENAME: "debug-log.os",
 	MAXIMUM_DELETABLE_MESSAGES: 500,
 	MAXIMUM_INDEXABLE_MESSAGES: 1000,
 	MAXIMUM_CORRECTION_MESSAGE_LENGTH: 3072,
