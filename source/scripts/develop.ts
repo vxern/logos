@@ -1,12 +1,10 @@
 import { loadEnvironment } from "logos:core/loaders/environment.ts";
-import { silent } from "logos:core/utilities.ts";
 import { DatabaseMetadata } from "logos/models/database-metadata.ts";
 import { Guild } from "logos/models/guild.ts";
 import { DatabaseStore } from "logos/stores/database.ts";
-import pino from "pino";
 import { getAvailableMigrations, migrate } from "logos:core/runners/migrator.ts";
 
-const log = pino();
+const log = constants.loggers.feedback;
 
 function idByName<T extends { id: bigint; name?: string }>(entities: T[], name: string): string {
 	const entity = entities.find((entity) => entity.name?.includes(name));
@@ -33,7 +31,7 @@ async function getInviteCode({ guildId }: { guildId: bigint }): Promise<string |
 		.then((invite) => invite?.code);
 }
 
-const environment = loadEnvironment({ log: silent });
+const environment = loadEnvironment({ log: constants.loggers.silent });
 const bot = Discord.createBot({
 	token: environment.discordSecret,
 	intents: Discord.Intents.Guilds | Discord.Intents.GuildMembers,
@@ -42,7 +40,7 @@ const bot = Discord.createBot({
 
 bot.start();
 
-const database = await DatabaseStore.create({ log: silent, environment });
+const database = await DatabaseStore.create({ log: constants.loggers.silent, environment });
 await database.setup({ prefetchDocuments: false });
 
 const availableMigrations = await getAvailableMigrations();

@@ -15,6 +15,8 @@ import languages from "logos:constants/languages";
 import licences from "logos:constants/licences";
 import links from "logos:constants/links";
 import localisations from "logos:constants/localisations";
+import logTargets from "logos:constants/log-targets.ts";
+import loggers from "logos:constants/loggers.ts";
 import parameters from "logos:constants/parameters";
 import patterns from "logos:constants/patterns";
 import properties from "logos:constants/properties";
@@ -34,8 +36,6 @@ const constants = Object.freeze({
 		format: "png",
 		size: 1024,
 	}),
-	STANDARD_LOG_FILENAME: "log.os",
-	DEBUG_LOG_FILENAME: "debug-log.os",
 	MAXIMUM_DELETABLE_MESSAGES: 500,
 	MAXIMUM_INDEXABLE_MESSAGES: 1000,
 	MAXIMUM_CORRECTION_MESSAGE_LENGTH: 3072,
@@ -74,6 +74,8 @@ export default Object.freeze({
 	licences,
 	links,
 	localisations,
+	logTargets,
+	loggers,
 	parameters,
 	patterns,
 	properties,

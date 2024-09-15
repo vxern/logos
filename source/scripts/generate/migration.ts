@@ -1,8 +1,7 @@
 import { parseArgs } from "node:util";
 import bun from "bun";
-import pino from "pino";
 
-const log = pino();
+const log = constants.loggers.feedback;
 
 const { positionals } = parseArgs({
 	args: bun.argv,
