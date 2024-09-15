@@ -6,7 +6,6 @@ import { InMemoryAdapter } from "logos/adapters/databases/in-memory/database";
 import { MongoDBAdapter } from "logos/adapters/databases/mongodb/database";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb/database";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
-import { Logger } from "logos/logger";
 import { DatabaseMetadata } from "logos/models/database-metadata";
 import { EntryRequest } from "logos/models/entry-request";
 import { Guild } from "logos/models/guild";
@@ -19,6 +18,7 @@ import { Suggestion } from "logos/models/suggestion";
 import { Ticket } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { Warning } from "logos/models/warning";
+import type pino from "pino";
 
 class DatabaseStore {
 	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({
@@ -35,7 +35,7 @@ class DatabaseStore {
 		Warnings: Warning,
 	} as const);
 
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly cache: {
 		readonly entryRequests: Map<string, EntryRequest>;
 		readonly guildStatistics: Map<string, GuildStatistics>;
@@ -50,7 +50,6 @@ class DatabaseStore {
 		readonly warningsByTarget: Map<string, Map<string, Warning>>;
 	};
 
-	readonly #environment: Environment;
 	readonly #adapter: DatabaseAdapter;
 
 	get conventionsFor(): DatabaseAdapter["conventionsFor"] {
@@ -58,10 +57,10 @@ class DatabaseStore {
 	}
 
 	get withSession(): <T>(callback: (session: DocumentSession) => T | Promise<T>) => Promise<T> {
-		return (callback) => this.#adapter.withSession(callback, { environment: this.#environment, database: this });
+		return (callback) => this.#adapter.withSession(callback, { database: this });
 	}
 
-	constructor({ environment, log, adapter }: { environment: Environment; log: Logger; adapter: DatabaseAdapter }) {
+	constructor({ log, adapter }: { log: pino.Logger; adapter: DatabaseAdapter }) {
 		this.log = log;
 		this.cache = {
 			entryRequests: new Map(),
@@ -77,29 +76,28 @@ class DatabaseStore {
 			warningsByTarget: new Map(),
 		};
 
-		this.#environment = environment;
 		this.#adapter = adapter;
 	}
 
-	static async create({ environment }: { environment: Environment }): Promise<DatabaseStore> {
-		const log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: environment.isDebug });
+	static async create({ log, environment }: { log: pino.Logger; environment: Environment }): Promise<DatabaseStore> {
+		log = log.child({ name: "DatabaseStore" });
 
 		let adapter: DatabaseAdapter | undefined;
 		switch (environment.databaseSolution) {
 			case "mongodb": {
-				adapter = MongoDBAdapter.tryCreate({ environment, log });
+				adapter = MongoDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 			case "ravendb": {
-				adapter = await RavenDBAdapter.tryCreate({ environment, log });
+				adapter = await RavenDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 			case "couchdb": {
-				adapter = CouchDBAdapter.tryCreate({ environment, log });
+				adapter = CouchDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 			case "rethinkdb": {
-				adapter = RethinkDBAdapter.tryCreate({ environment, log });
+				adapter = RethinkDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 		}
@@ -113,10 +111,10 @@ class DatabaseStore {
 
 			log.info("Logos is running in memory. Data will not persist in-between sessions.");
 
-			adapter = new InMemoryAdapter({ environment });
+			adapter = new InMemoryAdapter({ log });
 		}
 
-		return new DatabaseStore({ environment, log, adapter });
+		return new DatabaseStore({ log, adapter });
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {

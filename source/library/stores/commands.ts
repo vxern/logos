@@ -17,7 +17,6 @@ import type {
 	OptionTemplate,
 } from "logos/commands/commands";
 import type { InteractionHandler } from "logos/commands/handlers/handler";
-import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
 import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
 
@@ -89,7 +88,7 @@ class CommandStore {
 			templates: CommandTemplates;
 		},
 	): CommandStore {
-		const log = Logger.create({ identifier: "Client/CommandStore", isDebug: client.environment.isDebug });
+		const log = client.log.child({ name: "CommandStore" });
 
 		// Build commands from templates.
 		const commands: Partial<BuiltCommands> = {};

@@ -10,7 +10,6 @@ import { DeepLAdapter } from "logos/adapters/translators/deepl";
 import { GoogleTranslateAdapter } from "logos/adapters/translators/google-translate";
 import { LingvanexAdapter } from "logos/adapters/translators/lingvanex";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
 
 class TranslatorStore {
 	static readonly priority: Translator[] = ["deepl", "google", "lingvanex"];
@@ -22,7 +21,7 @@ class TranslatorStore {
 	} & Partial<Record<Translator, TranslatorAdapter>>;
 
 	constructor(client: Client) {
-		const log = Logger.create({ identifier: "TranslatorStore", isDebug: client.environment.isDebug });
+		const log = client.log.child({ name: "TranslatorStore" });
 
 		const deeplAdapter = DeepLAdapter.tryCreate(client);
 		if (deeplAdapter === undefined) {

@@ -1,7 +1,7 @@
 import type { Locale } from "logos:constants/languages/localisation";
-import type { Environment } from "logos:core/loaders/environment";
 import Redis from "ioredis";
-import { Logger } from "logos/logger";
+import type { Client } from "logos/client.ts";
+import type pino from "pino";
 
 interface SentencePair {
 	readonly sentenceId: number;
@@ -16,8 +16,7 @@ interface LemmaUses {
 }
 
 class VolatileStore {
-	readonly log: Logger;
-
+	readonly log: pino.Logger;
 	readonly redis: Redis;
 
 	constructor({
@@ -25,7 +24,7 @@ class VolatileStore {
 		host,
 		port,
 		password,
-	}: { log: Logger; host: string; port: string; password: string | undefined }) {
+	}: { log: pino.Logger; host: string; port: string; password: string | undefined }) {
 		this.log = log;
 		this.redis = new Redis({
 			host,
@@ -36,10 +35,10 @@ class VolatileStore {
 		});
 	}
 
-	static tryCreate({ environment }: { environment: Environment }): VolatileStore | undefined {
-		const log = Logger.create({ identifier: "Client/VolatileStore", isDebug: environment.isDebug });
+	static tryCreate(client: Client): VolatileStore | undefined {
+		const log = client.log.child({ name: "VolatileStore" });
 
-		if (environment.redisHost === undefined || environment.redisPort === undefined) {
+		if (client.environment.redisHost === undefined || client.environment.redisPort === undefined) {
 			log.warn(
 				"One of `REDIS_HOST` or `REDIS_PORT` have not been provided. Logos will run without a Redis integration.",
 			);
@@ -48,9 +47,9 @@ class VolatileStore {
 
 		return new VolatileStore({
 			log,
-			host: environment.redisHost,
-			port: environment.redisPort,
-			password: environment.redisPassword,
+			host: client.environment.redisHost,
+			port: client.environment.redisPort,
+			password: client.environment.redisPassword,
 		});
 	}
 
