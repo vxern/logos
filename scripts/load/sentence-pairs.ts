@@ -1,18 +1,19 @@
 import constants from "logos:constants/constants";
 import Redis from "ioredis";
-import winston from "winston";
 
-winston.info(`Looking for files in ${constants.SENTENCE_PAIRS_DIRECTORY}...`);
+const log = constants.loggers.feedback;
 
-const files = await Array.fromAsync(new Bun.Glob("*.tsv").scan(constants.SENTENCE_PAIRS_DIRECTORY)).then((filenames) =>
-	filenames.map((filename) => Bun.file(`${constants.SENTENCE_PAIRS_DIRECTORY}/${filename}`)),
+log.info(`Looking for files in ${constants.directories.assets.sentences}...`);
+
+const files = await Array.fromAsync(new Bun.Glob("*.tsv").scan(constants.directories.assets.sentences)).then(
+	(filenames) => filenames.map((filename) => Bun.file(`${constants.directories.assets.sentences}/${filename}`)),
 );
 
 for (const file of files) {
-	winston.info(`Located sentence file at ${file.name}.`);
+	log.info(`Located sentence file at ${file.name}.`);
 }
 
-winston.info(`Located ${files.length} sentence files in total in ${constants.SENTENCE_PAIRS_DIRECTORY}.`);
+log.info(`Located ${files.length} sentence files in total in ${constants.directories.assets.sentences}.`);
 
 const promises: Promise<[locale: string, contents: string]>[] = [];
 for (const file of files) {
@@ -61,6 +62,10 @@ for (const [locale, contents] of contentsAll) {
 		const sentenceId = Number(record[0]);
 
 		for (const data of segmenter.segment(record[1])) {
+			if (!data.isWordLike) {
+				continue;
+			}
+
 			const lemmaUseKey = constants.keys.redis.lemmaUseIndex({ locale, lemma: data.segment });
 			(lemmaUseIndexes[lemmaUseKey] ??= []).push(sentenceId);
 
@@ -80,11 +85,11 @@ for (const [locale, contents] of contentsAll) {
 
 	await client.sadd(constants.keys.redis.sentencePairIndex({ locale }), sentencePairIndex);
 
-	winston.info(`Wrote sentence pair index for ${locale}.`);
+	log.info(`Wrote sentence pair index for ${locale}.`);
 
 	await client.mset(sentencePairs);
 
-	winston.info(`Wrote sentence pairs for ${locale}.`);
+	log.info(`Wrote sentence pairs for ${locale}.`);
 
 	{
 		const pipeline = client.pipeline();
@@ -93,7 +98,7 @@ for (const [locale, contents] of contentsAll) {
 		}
 		await pipeline.exec();
 
-		winston.info(`Wrote lemma index for ${locale}.`);
+		log.info(`Wrote lemma index for ${locale}.`);
 	}
 
 	{
@@ -103,7 +108,7 @@ for (const [locale, contents] of contentsAll) {
 		}
 		await pipeline.exec();
 
-		winston.info(`Wrote lemma forms for ${locale}.`);
+		log.info(`Wrote lemma forms for ${locale}.`);
 	}
 }
 

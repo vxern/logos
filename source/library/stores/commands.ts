@@ -17,7 +17,6 @@ import type {
 	OptionTemplate,
 } from "logos/commands/commands";
 import type { InteractionHandler } from "logos/commands/handlers/handler";
-import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
 import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
 
@@ -89,7 +88,7 @@ class CommandStore {
 			templates: CommandTemplates;
 		},
 	): CommandStore {
-		const log = Logger.create({ identifier: "Client/CommandStore", isDebug: client.environment.isDebug });
+		const log = client.log.child({ name: "CommandStore" });
 
 		// Build commands from templates.
 		const commands: Partial<BuiltCommands> = {};
@@ -387,98 +386,89 @@ class CommandStore {
 	getEnabledCommands(guildDocument: Guild): Command[] {
 		const commands: CommandBuilder[] = [];
 
-		if (guildDocument.hasEnabled("languageFeatures")) {
-			if (guildDocument.hasEnabled("answers")) {
-				commands.push(this.commands.answerMessage);
-			}
-
-			if (guildDocument.hasEnabled("corrections")) {
-				commands.push(this.commands.correctionFullMessage, this.commands.correctionPartialMessage);
-			}
-
-			if (guildDocument.hasEnabled("cefr")) {
-				commands.push(this.commands.cefr);
-			}
-
-			if (guildDocument.hasEnabled("game") && this.#client.volatile) {
-				commands.push(this.commands.game);
-			}
-
-			if (guildDocument.hasEnabled("resources")) {
-				commands.push(this.commands.resources);
-			}
-
-			if (guildDocument.hasEnabled("translate")) {
-				commands.push(this.commands.translate, this.commands.translateMessage);
-			}
-
-			if (guildDocument.hasEnabled("word")) {
-				commands.push(this.commands.word);
-			}
-
-			if (guildDocument.hasEnabled("context")) {
-				commands.push(this.commands.context);
-			}
+		if (guildDocument.hasEnabled("answers")) {
+			commands.push(this.commands.answerMessage);
 		}
 
-		if (guildDocument.hasEnabled("moderationFeatures")) {
+		if (guildDocument.hasEnabled("corrections")) {
+			commands.push(this.commands.correctionFullMessage, this.commands.correctionPartialMessage);
+		}
+
+		if (guildDocument.hasEnabled("cefr")) {
+			commands.push(this.commands.cefr);
+		}
+
+		if (guildDocument.hasEnabled("game") && this.#client.volatile) {
+			commands.push(this.commands.game);
+		}
+
+		if (guildDocument.hasEnabled("resources")) {
+			commands.push(this.commands.resources);
+		}
+
+		if (guildDocument.hasEnabled("translate")) {
+			commands.push(this.commands.translate, this.commands.translateMessage);
+		}
+
+		if (guildDocument.hasEnabled("word")) {
+			commands.push(this.commands.word);
+		}
+
+		if (guildDocument.hasEnabled("context")) {
+			commands.push(this.commands.context);
+		}
+
+		if (guildDocument.hasEnabled("policy")) {
+			commands.push(this.commands.policy);
+		}
+
+		if (guildDocument.hasEnabled("rules")) {
+			commands.push(this.commands.rule);
+		}
+
+		if (guildDocument.hasEnabled("slowmode")) {
+			commands.push(this.commands.slowmode);
+		}
+
+		if (guildDocument.hasEnabled("timeouts")) {
+			commands.push(this.commands.timeout);
+		}
+
+		if (guildDocument.hasEnabled("purging")) {
+			commands.push(this.commands.purge);
+		}
+
+		if (guildDocument.hasEnabled("warns")) {
+			commands.push(this.commands.warn, this.commands.pardon);
 			commands.push(this.commands.list);
-
-			if (guildDocument.hasEnabled("policy")) {
-				commands.push(this.commands.policy);
-			}
-
-			if (guildDocument.hasEnabled("rules")) {
-				commands.push(this.commands.rule);
-			}
-
-			if (guildDocument.hasEnabled("slowmode")) {
-				commands.push(this.commands.slowmode);
-			}
-
-			if (guildDocument.hasEnabled("timeouts")) {
-				commands.push(this.commands.timeout);
-			}
-
-			if (guildDocument.hasEnabled("purging")) {
-				commands.push(this.commands.purge);
-			}
-
-			if (guildDocument.hasEnabled("warns")) {
-				commands.push(this.commands.warn, this.commands.pardon);
-			}
-
-			if (guildDocument.hasEnabled("reports")) {
-				commands.push(this.commands.report);
-			}
 		}
 
-		if (guildDocument.hasEnabled("serverFeatures")) {
-			if (guildDocument.hasEnabled("suggestions")) {
-				commands.push(this.commands.suggestion);
-			}
-
-			if (guildDocument.hasEnabled("tickets")) {
-				commands.push(this.commands.ticket);
-			}
-
-			if (guildDocument.hasEnabled("resourceSubmissions")) {
-				commands.push(this.commands.resource);
-			}
+		if (guildDocument.hasEnabled("reports")) {
+			commands.push(this.commands.report);
 		}
 
-		if (guildDocument.hasEnabled("socialFeatures")) {
-			if (guildDocument.hasEnabled("music") && this.#client.lavalinkService !== undefined) {
-				commands.push(this.commands.music);
-			}
+		if (guildDocument.hasEnabled("suggestions")) {
+			commands.push(this.commands.suggestion);
+		}
 
-			if (guildDocument.hasEnabled("praises")) {
-				commands.push(this.commands.praise);
-			}
+		if (guildDocument.hasEnabled("tickets")) {
+			commands.push(this.commands.ticket);
+		}
 
-			if (guildDocument.hasEnabled("profile")) {
-				commands.push(this.commands.profile);
-			}
+		if (guildDocument.hasEnabled("resourceSubmissions")) {
+			commands.push(this.commands.resource);
+		}
+
+		if (guildDocument.hasEnabled("music") && this.#client.lavalinkService !== undefined) {
+			commands.push(this.commands.music);
+		}
+
+		if (guildDocument.hasEnabled("praises")) {
+			commands.push(this.commands.praise);
+		}
+
+		if (guildDocument.hasEnabled("profile")) {
+			commands.push(this.commands.profile);
 		}
 
 		return [...this.#defaultCommands.map((command) => command.built), ...commands.map((command) => command.built)];

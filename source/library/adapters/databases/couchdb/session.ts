@@ -1,5 +1,4 @@
 import type { Collection } from "logos:constants/database";
-import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBDocumentConventions } from "logos/adapters/databases/couchdb/conventions";
 import type { CouchDBDocument } from "logos/adapters/databases/couchdb/document";
@@ -11,12 +10,8 @@ import type nano from "nano";
 class CouchDBDocumentSession extends DocumentSession {
 	readonly #documents: nano.DocumentScope<unknown>;
 
-	constructor({
-		environment,
-		database,
-		documents,
-	}: { environment: Environment; database: DatabaseStore; documents: nano.DocumentScope<unknown> }) {
-		super({ identifier: "CouchDB", environment, database });
+	constructor({ database, documents }: { database: DatabaseStore; documents: nano.DocumentScope<unknown> }) {
+		super({ identifier: "CouchDB", database });
 
 		this.#documents = documents;
 	}

@@ -1,5 +1,6 @@
 import type { Client } from "logos/client";
 import { Collector, InteractionCollector } from "logos/collectors";
+import type { FeatureManagement } from "logos/models/documents/guild/latest";
 import type { Guild } from "logos/models/guild";
 import type { Model } from "logos/models/model";
 import type { User } from "logos/models/user";
@@ -7,11 +8,11 @@ import { LocalService } from "logos/services/service";
 import type { ServiceStore } from "logos/stores/services";
 
 interface Configurations {
-	verification: Guild["verification"];
-	reports: Guild["reports"];
-	resources: Guild["resourceSubmissions"];
-	suggestions: Guild["suggestions"];
-	tickets: Guild["tickets"];
+	verification: Guild["features"]["verification"];
+	reports: Guild["features"]["reports"];
+	resources: Guild["features"]["resourceSubmissions"];
+	suggestions: Guild["features"]["suggestions"];
+	tickets: Guild["features"]["tickets"];
 }
 
 type ConfigurationLocators = {
@@ -42,11 +43,11 @@ abstract class PromptService<
 	},
 > extends LocalService {
 	static readonly #configurationLocators = Object.freeze({
-		verification: (guildDocument) => guildDocument.verification,
-		reports: (guildDocument) => guildDocument.reports,
-		resources: (guildDocument) => guildDocument.resourceSubmissions,
-		suggestions: (guildDocument) => guildDocument.suggestions,
-		tickets: (guildDocument) => guildDocument.tickets,
+		verification: (guildDocument) => guildDocument.feature("verification"),
+		reports: (guildDocument) => guildDocument.feature("reports"),
+		resources: (guildDocument) => guildDocument.feature("resourceSubmissions"),
+		suggestions: (guildDocument) => guildDocument.feature("suggestions"),
+		tickets: (guildDocument) => guildDocument.feature("tickets"),
 	} as const satisfies ConfigurationLocators);
 	static readonly #customIds = Object.freeze({
 		verification: constants.components.verification,
@@ -376,26 +377,26 @@ abstract class PromptService<
 			return;
 		}
 
-		let management: { roles?: string[]; users?: string[] } | undefined;
+		let management: FeatureManagement | undefined;
 		switch (this.#type) {
 			case "verification": {
-				management = (this.configuration as Guild["verification"])?.management;
+				management = this.guildDocument.managers("verification");
 				break;
 			}
 			case "reports": {
-				management = (this.configuration as Guild["reports"])?.management;
-				break;
-			}
-			case "resources": {
-				management = (this.configuration as Guild["resourceSubmissions"])?.management;
+				management = this.guildDocument.managers("reports");
 				break;
 			}
 			case "suggestions": {
-				management = (this.configuration as Guild["suggestions"])?.management;
+				management = this.guildDocument.managers("suggestions");
+				break;
+			}
+			case "resources": {
+				management = this.guildDocument.managers("resourceSubmissions");
 				break;
 			}
 			case "tickets": {
-				management = (this.configuration as Guild["tickets"])?.management;
+				management = this.guildDocument.managers("tickets");
 				break;
 			}
 			default: {
@@ -404,12 +405,9 @@ abstract class PromptService<
 			}
 		}
 
-		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
-		const userIds = management?.users?.map((userId) => BigInt(userId));
-
 		const isAuthorised =
-			member.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-			(userIds?.includes(buttonPress.user.id) ?? false);
+			member.roles.some((roleId) => management?.roles?.includes(roleId.toString()) ?? false) ||
+			(management?.users?.includes(buttonPress.user.id.toString()) ?? false);
 		if (!isAuthorised) {
 			if (this.#deleteMode === "delete") {
 				const strings = constants.contexts.cannotRemovePrompt({

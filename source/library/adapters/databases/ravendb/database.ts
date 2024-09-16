@@ -5,22 +5,22 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
 import type { RavenDBDocumentMetadataContainer } from "logos/adapters/databases/ravendb/document";
 import { RavenDBDocumentSession } from "logos/adapters/databases/ravendb/session";
-import type { Logger } from "logos/logger";
 import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type pino from "pino";
 import * as ravendb from "ravendb";
 
 class RavenDBAdapter extends DatabaseAdapter {
 	readonly #database: ravendb.DocumentStore;
 
 	constructor({
-		environment,
+		log,
 		host,
 		port,
 		database,
 		certificate,
-	}: { environment: Environment; host: string; port: string; database: string; certificate?: Buffer }) {
-		super({ identifier: "RavenDB", environment });
+	}: { log: pino.Logger; host: string; port: string; database: string; certificate?: Buffer }) {
+		super({ identifier: "RavenDB", log });
 
 		const protocol = certificate !== undefined ? "https" : "http";
 
@@ -39,7 +39,7 @@ class RavenDBAdapter extends DatabaseAdapter {
 	static async tryCreate({
 		environment,
 		log,
-	}: { environment: Environment; log: Logger }): Promise<RavenDBAdapter | undefined> {
+	}: { log: pino.Logger; environment: Environment }): Promise<RavenDBAdapter | undefined> {
 		if (
 			environment.ravendbHost === undefined ||
 			environment.ravendbPort === undefined ||
@@ -55,7 +55,7 @@ class RavenDBAdapter extends DatabaseAdapter {
 		}
 
 		return new RavenDBAdapter({
-			environment,
+			log,
 			host: environment.ravendbHost,
 			port: environment.ravendbPort,
 			database: environment.ravendbDatabase,
@@ -83,13 +83,10 @@ class RavenDBAdapter extends DatabaseAdapter {
 		return new RavenDBDocumentConventions({ document, data, collection });
 	}
 
-	openSession({
-		environment,
-		database,
-	}: { environment: Environment; database: DatabaseStore }): RavenDBDocumentSession {
+	openSession({ database }: { database: DatabaseStore }): RavenDBDocumentSession {
 		const rawSession = this.#database.openSession();
 
-		return new RavenDBDocumentSession({ environment, database, session: rawSession });
+		return new RavenDBDocumentSession({ database, session: rawSession });
 	}
 }
 

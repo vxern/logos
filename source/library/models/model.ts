@@ -7,17 +7,16 @@ import type { RateLimit } from "logos/models/guild";
 import type { DatabaseStore } from "logos/stores/database";
 
 type ClientOrDatabaseStore = Client | DatabaseStore;
-
 type ModelConstructor = { new (database: DatabaseStore, data: any): Model };
-
 type IdentifierParts<M extends Model> = M["idParts"];
 type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: string };
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
 type IdentifierDataOrMetadata<M extends Model, Metadata = any> = IdentifierData<M> | Metadata;
-abstract class Model<Generic extends { collection: Collection; idParts: readonly string[] } = any> {
-	readonly #conventions: DocumentConventions;
+type CreateModelOptions<M extends Model, D, R extends keyof D = never> = (Partial<D> & Pick<D, R>) & IdentifierData<M>;
 
-	abstract get createdAt(): number;
+abstract class Model<Generic extends { collection: Collection; idParts: readonly string[] } = any> {
+	abstract readonly createdAt: number;
+	readonly #conventions: DocumentConventions;
 
 	declare id: string;
 
@@ -54,6 +53,10 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 
 	static buildPartialId<M extends Model>(data: IdentifierData<M>): string {
+		if (Object.keys(data).length === 0) {
+			return "document";
+		}
+
 		const parts: string[] = [];
 		for (const part of constants.database.identifierParts) {
 			if (!(part in data)) {
@@ -170,6 +173,18 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 }
 
+const DatabaseMetadataModel = Model<{ collection: "DatabaseMetadata"; idParts: [] }>;
+const EntryRequestModel = Model<{ collection: "EntryRequests"; idParts: ["guildId", "authorId"] }>;
+const GuildModel = Model<{ collection: "Guilds"; idParts: ["guildId"] }>;
+const GuildStatisticsModel = Model<{ collection: "GuildStatistics"; idParts: ["guildId"] }>;
+const PraiseModel = Model<{ collection: "Praises"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }>;
+const ReportModel = Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }>;
+const ResourceModel = Model<{ collection: "Resources"; idParts: ["guildId", "authorId", "createdAt"] }>;
+const SuggestionModel = Model<{ collection: "Suggestions"; idParts: ["guildId", "authorId", "createdAt"] }>;
+const TicketModel = Model<{ collection: "Tickets"; idParts: ["guildId", "authorId", "channelId"] }>;
+const UserModel = Model<{ collection: "Users"; idParts: ["userId"] }>;
+const WarningModel = Model<{ collection: "Warnings"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }>;
+
 function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {
 	if ("database" in clientOrDatabase) {
 		return clientOrDatabase.database;
@@ -178,5 +193,26 @@ function getDatabase(clientOrDatabase: ClientOrDatabaseStore): DatabaseStore {
 	return clientOrDatabase;
 }
 
-export { Model };
-export type { IdentifierParts, IdentifierData, IdentifierDataOrMetadata, ClientOrDatabaseStore, ModelConstructor };
+export {
+	Model,
+	DatabaseMetadataModel,
+	EntryRequestModel,
+	GuildModel,
+	GuildStatisticsModel,
+	PraiseModel,
+	ReportModel,
+	ResourceModel,
+	SuggestionModel,
+	TicketModel,
+	UserModel,
+	WarningModel,
+	getDatabase,
+};
+export type {
+	IdentifierParts,
+	IdentifierData,
+	IdentifierDataOrMetadata,
+	ClientOrDatabaseStore,
+	ModelConstructor,
+	CreateModelOptions,
+};

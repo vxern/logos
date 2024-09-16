@@ -1,5 +1,4 @@
 import type { Collection } from "logos:constants/database";
-import type { Environment } from "logos:core/loaders/environment";
 import { type DocumentQuery, DocumentSession } from "logos/adapters/databases/adapter";
 import { InMemoryDocumentQuery } from "logos/adapters/databases/in-memory/query";
 import { Model } from "logos/models/model";
@@ -8,8 +7,8 @@ import type { DatabaseStore } from "logos/stores/database";
 class InMemoryDocumentSession extends DocumentSession {
 	readonly #documents: Record<Collection, Map<string, Model>>;
 
-	constructor({ environment, database }: { environment: Environment; database: DatabaseStore }) {
-		super({ environment, identifier: "InMemory", database });
+	constructor({ database }: { database: DatabaseStore }) {
+		super({ identifier: "InMemory", database });
 
 		this.#documents = Object.fromEntries(
 			constants.database.collections.map((collection) => [collection, new Map()]),

@@ -1,14 +1,13 @@
 import type { Collection } from "logos:constants/database";
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
 import { type IdentifierData, type IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type pino from "pino";
 
 abstract class DatabaseAdapter {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
-	constructor({ identifier, environment }: { identifier: string; environment: Environment }) {
-		this.log = Logger.create({ identifier: `DatabaseAdapter(${identifier})`, isDebug: environment.isDebug });
+	constructor({ identifier, log }: { identifier: string; log: pino.Logger }) {
+		this.log = log.child({ name: identifier });
 	}
 
 	abstract setup(): void | Promise<void>;
@@ -21,16 +20,13 @@ abstract class DatabaseAdapter {
 		collection,
 	}: { document: Model; data: IdentifierDataOrMetadata<Model>; collection: Collection }): DocumentConventions;
 
-	abstract openSession({
-		environment,
-		database,
-	}: { environment: Environment; database: DatabaseStore }): DocumentSession;
+	abstract openSession({ database }: { database: DatabaseStore }): DocumentSession;
 
 	async withSession<T>(
 		callback: (session: DocumentSession) => T | Promise<T>,
-		{ environment, database }: { environment: Environment; database: DatabaseStore },
+		{ database }: { database: DatabaseStore },
 	): Promise<T> {
-		const session = this.openSession({ environment, database });
+		const session = this.openSession({ database });
 
 		const result = await callback(session);
 
@@ -41,15 +37,11 @@ abstract class DatabaseAdapter {
 }
 
 abstract class DocumentSession {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly database: DatabaseStore;
 
-	constructor({
-		identifier,
-		environment,
-		database,
-	}: { environment: Environment; identifier: string; database: DatabaseStore }) {
-		this.log = Logger.create({ identifier: `DocumentSession(${identifier})`, isDebug: environment.isDebug });
+	constructor({ identifier, database }: { identifier: string; database: DatabaseStore }) {
+		this.log = database.log.child({ name: identifier });
 		this.database = database;
 	}
 

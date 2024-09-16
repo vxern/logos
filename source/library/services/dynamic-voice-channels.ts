@@ -1,6 +1,7 @@
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import type { DynamicVoiceChannel, Guild } from "logos/models/guild";
+import type { DynamicVoiceChannel } from "logos/models/documents/guild/latest";
+import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
 
 type VoiceChannel = Logos.Channel & { type: Discord.ChannelTypes.GuildVoice };
@@ -21,8 +22,8 @@ class DynamicVoiceChannelService extends LocalService {
 
 	readonly #voiceStateUpdates: Collector<"voiceStateUpdate">;
 
-	get configuration(): NonNullable<Guild["dynamicVoiceChannels"]> {
-		return this.guildDocument.dynamicVoiceChannels!;
+	get configuration(): NonNullable<Guild["features"]["dynamicVoiceChannels"]> {
+		return this.guildDocument.feature("dynamicVoiceChannels");
 	}
 
 	get channels(): DynamicVoiceChannelData[] {

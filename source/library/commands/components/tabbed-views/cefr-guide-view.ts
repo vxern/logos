@@ -13,8 +13,8 @@ interface TabGroups {
 class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	readonly #guildDocument: Guild;
 
-	get #configuration(): NonNullable<Guild["cefr"]> {
-		return this.#guildDocument.cefr!;
+	get #configuration(): NonNullable<Guild["features"]["cefr"]> {
+		return this.#guildDocument.feature("cefr");
 	}
 
 	constructor(
@@ -56,14 +56,6 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 					title: strings.brackets.a,
 					color: constants.colours.green,
 					fields: [
-						...(this.#configuration.extended
-							? [
-									{
-										name: strings.levels.a0.title,
-										value: strings.levels.a0.description,
-									},
-								]
-							: []),
 						{
 							name: strings.levels.a1.title,
 							value: strings.levels.a1.description,
@@ -114,14 +106,6 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 							name: strings.levels.c2.title,
 							value: strings.levels.c2.description,
 						},
-						...(this.#configuration.extended
-							? [
-									{
-										name: strings.levels.c3.title,
-										value: strings.levels.c3.description,
-									},
-								]
-							: []),
 					],
 				};
 			}
@@ -129,10 +113,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	}
 
 	getExampleEmbed(interaction: Logos.Interaction, { bracket }: { bracket: Bracket }): Discord.CamelizedDiscordEmbed {
-		const examples = this.#configuration.examples?.levels;
-		if (examples === undefined) {
-			throw new Error("Attempted to get example embed when the CEFR configuration was missing examples.");
-		}
+		const examples = this.#configuration.examples;
 
 		switch (bracket) {
 			case "a": {
@@ -145,14 +126,6 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 					title: strings.brackets.a,
 					color: constants.colours.green,
 					fields: [
-						...(this.#configuration.extended
-							? [
-									{
-										name: strings.levels.a0.title,
-										value: examples.a0,
-									},
-								]
-							: []),
 						{
 							name: strings.levels.a1.title,
 							value: examples.a1,
@@ -203,14 +176,6 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 							name: strings.levels.c2.title,
 							value: examples.c2,
 						},
-						...(this.#configuration.extended
-							? [
-									{
-										name: strings.levels.c3.title,
-										value: examples.c3,
-									},
-								]
-							: []),
 					],
 				};
 			}
@@ -252,15 +217,6 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 				style: Discord.ButtonStyles.Secondary,
 			},
 		] as const satisfies Discord.ButtonComponent[];
-
-		if (!this.#configuration.examples?.enabled) {
-			return [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: bracketButtonComponents,
-				},
-			];
-		}
 
 		const tabButtonComponents = [
 			{

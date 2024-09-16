@@ -1,21 +1,20 @@
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import type { TicketDocument } from "logos/models/documents/ticket/latest";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	TicketModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-type TicketType = "standalone" | "inquiry";
+type CreateTicketOptions = CreateModelOptions<Ticket, TicketDocument, "type" | "formData">;
 
-interface TicketFormData {
-	readonly topic: string;
-}
+interface Ticket extends TicketDocument {}
+class Ticket extends TicketModel {
+	readonly createdAt: number;
 
-type CreateTicketOptions = {
-	createdAt?: number;
-	type: TicketType;
-	formData: TicketFormData;
-	isResolved?: boolean;
-} & IdentifierData<Ticket>;
-
-class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "authorId", "channelId"] }> {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -27,12 +26,6 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 	get channelId(): string {
 		return this.idParts[2];
 	}
-
-	readonly createdAt: number;
-	readonly type: TicketType;
-	readonly formData: TicketFormData;
-
-	isResolved: boolean;
 
 	constructor(database: DatabaseStore, { createdAt, type, formData, isResolved, ...data }: CreateTicketOptions) {
 		super(database, data, { collection: "Tickets" });
@@ -58,7 +51,6 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 
 	static async create(client: Client, data: CreateTicketOptions): Promise<Ticket> {
 		const ticketDocument = new Ticket(client.database, data);
-
 		await ticketDocument.create(client);
 
 		return ticketDocument;
@@ -66,4 +58,4 @@ class Ticket extends Model<{ collection: "Tickets"; idParts: ["guildId", "author
 }
 
 export { Ticket };
-export type { CreateTicketOptions, TicketType, TicketFormData };
+export type { CreateTicketOptions };

@@ -4,21 +4,20 @@ import {
 	type LogosLocale,
 	getLogosLanguageByLocale,
 } from "logos:constants/languages/localisation";
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 const decoder = new TextDecoder();
 
 async function loadLocalisations({
-	environment,
-}: { environment: Environment }): Promise<Map<string, Map<LocalisationLanguage, string>>> {
-	const log = Logger.create({ identifier: "Loaders/Localisations", isDebug: environment.isDebug });
+	log,
+}: { log: pino.Logger }): Promise<Map<string, Map<LocalisationLanguage, string>>> {
+	log = log.child({ name: "Localisations" });
 
 	log.info("Loading localisations...");
 
 	const directoryPaths: string[] = [];
-	for (const entryPath of await fs.readdir(constants.LOCALISATIONS_DIRECTORY)) {
-		const combinedPath = `${constants.LOCALISATIONS_DIRECTORY}/${entryPath}`;
+	for (const entryPath of await fs.readdir(constants.directories.assets.localisations)) {
+		const combinedPath = `${constants.directories.assets.localisations}/${entryPath}`;
 		if (!(await fs.stat(combinedPath)).isDirectory()) {
 			continue;
 		}

@@ -1,8 +1,8 @@
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
+import type { Environment } from "logos:core/loaders/environment.ts";
+import type pino from "pino";
 
 class DiscordConnection {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly bot: Discord.Bot;
 	readonly cache: {
 		readonly guilds: Map<bigint, Logos.Guild>;
@@ -18,12 +18,45 @@ class DiscordConnection {
 	};
 
 	constructor({
+		log,
 		environment,
-		bot,
 		events,
-	}: { environment: Environment; bot: Discord.Bot; events: Partial<Discord.EventHandlers> }) {
-		this.log = Logger.create({ identifier: "Client/DiscordConnection", isDebug: environment.isDebug });
-		this.bot = bot;
+	}: { log: pino.Logger; environment: Environment; events: Partial<Discord.EventHandlers> }) {
+		this.log = log.child({ name: "DiscordConnection" });
+		this.bot = Discord.createBot({
+			token: environment.discordSecret,
+			intents:
+				Discord.Intents.Guilds |
+				Discord.Intents.GuildMembers |
+				Discord.Intents.GuildModeration |
+				Discord.Intents.GuildVoiceStates |
+				Discord.Intents.GuildMessages |
+				Discord.Intents.MessageContent,
+			events: events,
+			transformers: Discord.createTransformers({
+				desiredProperties: constants.properties as unknown as Discord.Transformers["desiredProperties"],
+				guild: this.#transformGuild.bind(this),
+				channel: this.#transformChannel.bind(this),
+				user: this.#transformUser.bind(this),
+				member: this.#transformMember.bind(this),
+				message: this.#transformMessage.bind(this),
+				role: this.#transformRole.bind(this),
+				voiceState: this.#transformVoiceState.bind(this),
+			}),
+			handlers: {
+				// We override the `MESSAGE_UPDATE` handler to prevent Discordeno from discarding message updates when
+				// an embed is removed from a message.
+				MESSAGE_UPDATE: async (bot, data) => {
+					const payload = data.d as Discord.DiscordMessage;
+					if (!payload.author) {
+						return;
+					}
+
+					bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
+				},
+			},
+			loggerFactory: (name) => constants.loggers.discordeno.child({ name: name.toLowerCase() }),
+		});
 		this.cache = {
 			guilds: new Map(),
 			users: new Map(),
@@ -36,41 +69,10 @@ class DiscordConnection {
 			},
 			roles: new Map(),
 		};
-
-		// REMINDER(vxern): This is a monkey-patch for the Discordeno MESSAGE_UPDATE handler filtering out `MESSAGE_UPDATE`s caused by an embed being removed from a message.
-		this.bot.handlers.MESSAGE_UPDATE = (bot, data) => {
-			const payload = data.d as Discord.DiscordMessage;
-			if (!payload.author) {
-				return;
-			}
-
-			bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
-		};
-		this.bot.events = events;
-		this.bot.transformers = this.#buildTransformers();
-	}
-
-	#buildTransformers(): Discord.Transformers {
-		const transformers = Discord.createTransformers({
-			guild: this.#transformGuild.bind(this),
-			channel: this.#transformChannel.bind(this),
-			user: this.#transformUser.bind(this),
-			member: this.#transformMember.bind(this),
-			message: this.#transformMessage.bind(this),
-			role: this.#transformRole.bind(this),
-			voiceState: this.#transformVoiceState.bind(this),
-		});
-
-		transformers.desiredProperties = constants.properties as unknown as Discord.Transformers["desiredProperties"];
-
-		return transformers;
 	}
 
 	#transformGuild(_: Discord.Bot, payload: Parameters<Discord.Transformers["guild"]>[1]): Discord.Guild {
 		const result = Discord.transformGuild(this.bot, payload);
-
-		// REMINDER(vxern): This is a monkey-patch for Discordeno filtering out shard IDs equal to 0.
-		result.shardId = payload.shardId;
 
 		this.cache.guilds.set(result.id, result as unknown as Logos.Guild);
 

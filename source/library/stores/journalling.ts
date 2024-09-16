@@ -1,13 +1,13 @@
 import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Logger } from "logos/logger";
 import loggers from "logos/stores/journalling/loggers";
+import type pino from "pino";
 
 type Events = Logos.Events & Discord.Events;
 
 class JournallingStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #client: Client;
 	readonly #guildBanAddCollector: Collector<"guildBanAdd">;
@@ -15,10 +15,11 @@ class JournallingStore {
 	readonly #guildMemberAddCollector: Collector<"guildMemberAdd">;
 	readonly #guildMemberRemoveCollector: Collector<"guildMemberRemove">;
 	readonly #messageDeleteCollector: Collector<"messageDelete">;
+	readonly #messageDeleteBulkCollector: Collector<"messageDeleteBulk">;
 	readonly #messageUpdateCollector: Collector<"messageUpdate">;
 
 	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "JournallingStore", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "JournallingStore" });
 
 		this.#client = client;
 		this.#guildBanAddCollector = new Collector();
@@ -26,6 +27,7 @@ class JournallingStore {
 		this.#guildMemberAddCollector = new Collector();
 		this.#guildMemberRemoveCollector = new Collector();
 		this.#messageDeleteCollector = new Collector();
+		this.#messageDeleteBulkCollector = new Collector();
 		this.#messageUpdateCollector = new Collector();
 	}
 
@@ -37,6 +39,7 @@ class JournallingStore {
 		this.#guildMemberAddCollector.onCollect(this.#guildMemberAdd.bind(this));
 		this.#guildMemberRemoveCollector.onCollect(this.#guildMemberRemove.bind(this));
 		this.#messageDeleteCollector.onCollect(this.#messageDelete.bind(this));
+		this.#messageDeleteBulkCollector.onCollect(this.#messageDeleteBulk.bind(this));
 		this.#messageUpdateCollector.onCollect(this.#messageUpdate.bind(this));
 
 		await this.#client.registerCollector("guildBanAdd", this.#guildBanAddCollector);
@@ -44,6 +47,7 @@ class JournallingStore {
 		await this.#client.registerCollector("guildMemberAdd", this.#guildMemberAddCollector);
 		await this.#client.registerCollector("guildMemberRemove", this.#guildMemberRemoveCollector);
 		await this.#client.registerCollector("messageDelete", this.#messageDeleteCollector);
+		await this.#client.registerCollector("messageDeleteBulk", this.#messageDeleteBulkCollector);
 		await this.#client.registerCollector("messageUpdate", this.#messageUpdateCollector);
 
 		this.log.info("Journalling store set up.");
@@ -57,6 +61,7 @@ class JournallingStore {
 		this.#guildMemberAddCollector.close();
 		this.#guildMemberRemoveCollector.close();
 		this.#messageDeleteCollector.close();
+		this.#messageDeleteBulkCollector.close();
 		this.#messageUpdateCollector.close();
 
 		this.log.info("Journalling store torn down.");
@@ -81,11 +86,11 @@ class JournallingStore {
 			return;
 		}
 
-		const configuration = guildDocument.journalling;
-		if (configuration === undefined) {
+		if (!guildDocument.hasEnabled("journalling")) {
 			return;
 		}
 
+		const configuration = guildDocument.feature("journalling");
 		const channelId = BigInt(configuration.channelId);
 		if (channelId === undefined) {
 			return;
@@ -96,14 +101,14 @@ class JournallingStore {
 			return;
 		}
 
-		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.localisationLanguage);
+		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.languages.localisation);
 		const message = await generateMessage(
 			this.#client,
-			// @ts-ignore: This is fine.
+			// @ts-expect-error: This is fine.
 			args,
 			{
 				guildLocale,
-				featureLanguage: guildDocument.featureLanguage,
+				featureLanguage: guildDocument.languages.feature,
 			},
 		);
 		if (message === undefined) {
@@ -183,13 +188,22 @@ class JournallingStore {
 		await this.tryLog("messageDelete", { guildId, args: [payload, message] });
 	}
 
-	async #messageUpdate(message: Discord.Message, oldMessage: Discord.Message | undefined): Promise<void> {
+	async #messageDeleteBulk(payload: Discord.Events["messageDeleteBulk"][0]): Promise<void> {
+		const guildId = payload.guildId;
+		if (guildId === undefined) {
+			return;
+		}
+
+		await this.tryLog("messageDeleteBulk", { guildId, args: [payload] });
+	}
+
+	async #messageUpdate(message: Discord.Message): Promise<void> {
 		const guildId = message.guildId;
 		if (guildId === undefined) {
 			return;
 		}
 
-		await this.tryLog("messageUpdate", { guildId, args: [message, oldMessage] });
+		await this.tryLog("messageUpdate", { guildId, args: [message] });
 	}
 
 	async #getKickInformation({
@@ -197,6 +211,15 @@ class JournallingStore {
 		guildId,
 	}: { user: Logos.User; guildId: bigint }): Promise<Discord.CamelizedDiscordAuditLogEntry | undefined> {
 		const now = Date.now();
+
+		const guildDocument = this.#client.documents.guilds.get(guildId.toString());
+		if (guildDocument === undefined) {
+			return undefined;
+		}
+
+		if (!guildDocument.hasEnabled("journalling")) {
+			return undefined;
+		}
 
 		const auditLog = await this.#client.bot.helpers
 			.getAuditLog(guildId, { actionType: Discord.AuditLogEvents.MemberKick })

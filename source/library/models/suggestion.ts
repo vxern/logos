@@ -1,14 +1,18 @@
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import type { SuggestionDocument } from "logos/models/documents/suggestion/latest";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	SuggestionModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-interface SuggestionFormData {
-	readonly suggestion: string;
-}
+type CreateSuggestionOptions = CreateModelOptions<Suggestion, SuggestionDocument, "formData">;
 
-type CreateSuggestionOptions = { formData: SuggestionFormData; isResolved?: boolean } & IdentifierData<Suggestion>;
-
-class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId", "authorId", "createdAt"] }> {
+interface Suggestion extends SuggestionDocument {}
+class Suggestion extends SuggestionModel {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -20,10 +24,6 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 	get createdAt(): number {
 		return Number(this.idParts[2]);
 	}
-
-	readonly formData: SuggestionFormData;
-
-	isResolved: boolean;
 
 	constructor(database: DatabaseStore, { formData, isResolved, ...data }: CreateSuggestionOptions) {
 		super(database, data, { collection: "Suggestions" });
@@ -47,7 +47,6 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 
 	static async create(client: Client, data: Omit<CreateSuggestionOptions, "createdAt">): Promise<Suggestion> {
 		const suggestionDocument = new Suggestion(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await suggestionDocument.create(client);
 
 		return suggestionDocument;
@@ -55,4 +54,4 @@ class Suggestion extends Model<{ collection: "Suggestions"; idParts: ["guildId",
 }
 
 export { Suggestion };
-export type { CreateSuggestionOptions, SuggestionFormData };
+export type { CreateSuggestionOptions };

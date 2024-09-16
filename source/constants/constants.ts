@@ -6,6 +6,7 @@ import contributions from "logos:constants/contributions";
 import database from "logos:constants/database";
 import defaults from "logos:constants/defaults";
 import dictionaries from "logos:constants/dictionaries";
+import directories from "logos:constants/directories";
 import emojis from "logos:constants/emojis";
 import endpoints from "logos:constants/endpoints";
 import gifs from "logos:constants/gifs";
@@ -14,6 +15,8 @@ import languages from "logos:constants/languages";
 import licences from "logos:constants/licences";
 import links from "logos:constants/links";
 import localisations from "logos:constants/localisations";
+import logTargets from "logos:constants/log-targets.ts";
+import loggers from "logos:constants/loggers.ts";
 import parameters from "logos:constants/parameters";
 import patterns from "logos:constants/patterns";
 import properties from "logos:constants/properties";
@@ -27,6 +30,12 @@ import time from "logos:constants/time";
 const constants = Object.freeze({
 	PROJECT_NAME: "Logos",
 	USER_AGENT: "Logos (https://github.com/vxern/logos)",
+	TEST_GUILD_TEMPLATE_CODE: "EaEy336gYh3C",
+	TEST_GUILD_NAME: "Logos Test Environment",
+	TEST_GUILD_ICON_URL: Discord.guildIconUrl(1175841125546856608n, "24adda5d3f30a46aef193b621e3952b4", {
+		format: "png",
+		size: 1024,
+	}),
 	MAXIMUM_DELETABLE_MESSAGES: 500,
 	MAXIMUM_INDEXABLE_MESSAGES: 1000,
 	MAXIMUM_CORRECTION_MESSAGE_LENGTH: 3072,
@@ -44,8 +53,6 @@ const constants = Object.freeze({
 	PICK_MISSING_WORD_CHOICES: 4,
 	SHORT_TEXT_LENGTH: 60,
 	SENTENCE_PAIRS_TO_SHOW: 5,
-	LOCALISATIONS_DIRECTORY: "./assets/localisations",
-	SENTENCE_PAIRS_DIRECTORY: "./assets/sentences",
 } as const);
 
 export default Object.freeze({
@@ -58,6 +65,7 @@ export default Object.freeze({
 	database,
 	defaults,
 	dictionaries,
+	directories,
 	emojis,
 	endpoints,
 	gifs,
@@ -66,6 +74,8 @@ export default Object.freeze({
 	licences,
 	links,
 	localisations,
+	logTargets,
+	loggers,
 	parameters,
 	patterns,
 	properties,

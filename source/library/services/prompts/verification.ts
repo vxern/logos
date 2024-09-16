@@ -7,7 +7,7 @@ import { Model } from "logos/models/model";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
-type Configuration = NonNullable<Guild["verification"]>;
+type Configuration = NonNullable<Guild["features"]["verification"]>;
 type VoteInformation = {
 	[K in keyof NonNullable<Configuration["voting"]>["verdict"]]: {
 		required: number;
@@ -303,15 +303,12 @@ class VerificationPromptService extends PromptService<{
 
 		const currentVote = entryRequestDocument.getUserVote({ userId: interaction.user.id.toString() });
 
-		const management = this.configuration.management;
-
-		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
-		const userIds = management?.users?.map((userId) => BigInt(userId));
+		const management = this.guildDocument.managers("verification");
 
 		if (currentVote === "for" && newVote === "for") {
 			const isAuthorised =
-				voter.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-				(userIds?.includes(interaction.user.id) ?? false);
+				voter.roles.some((roleId) => management?.roles?.includes(roleId.toString()) ?? false) ||
+				(management?.users?.includes(interaction.user.id.toString()) ?? false);
 
 			if (isAuthorised) {
 				const { promise, resolve } = Promise.withResolvers<null | undefined>();
@@ -406,8 +403,8 @@ class VerificationPromptService extends PromptService<{
 
 		if (currentVote === "against" && newVote === "against") {
 			const isAuthorised =
-				voter.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-				(userIds?.includes(interaction.user.id) ?? false);
+				voter.roles.some((roleId) => management?.roles?.includes(roleId.toString()) ?? false) ||
+				(management?.users?.includes(interaction.user.id.toString()) ?? false);
 
 			if (isAuthorised) {
 				const { promise, resolve } = Promise.withResolvers<null | undefined>();
@@ -620,11 +617,6 @@ class VerificationPromptService extends PromptService<{
 	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
 		await this.client.postponeReply(interaction);
 
-		const ticketConfiguration = this.guildDocument.tickets;
-		if (ticketConfiguration === undefined) {
-			return;
-		}
-
 		const entryRequestDocument = this.client.documents.entryRequests.get(partialId);
 		if (entryRequestDocument === undefined) {
 			return;
@@ -703,7 +695,7 @@ class VerificationPromptService extends PromptService<{
 
 		function getVoteInformation<VerdictType extends keyof VoteInformation>(
 			type: VerdictType,
-			configuration: Guild["verification"] & { enabled: true },
+			configuration: NonNullable<Guild["features"]["verification"]>,
 			votes: number,
 		): VoteInformation[VerdictType] {
 			const verdict = configuration.voting.verdict[type];

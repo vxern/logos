@@ -98,9 +98,9 @@ function getLanguageInformationSection(client: Client, interaction: Logos.Intera
 	};
 
 	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.language(
-		guildDocument.localisationLanguage,
+		guildDocument.languages.localisation,
 	)}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${strings.language(
-		guildDocument.featureLanguage,
+		guildDocument.languages.feature,
 	)}`;
 }
 
@@ -132,7 +132,9 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		.sort((a, b) => a.position - b.position)
 		.map((role) => role.id);
 
-	const members = guild.members.array().filter((member) => !client.entities.users.get(member.id)?.bot ?? true);
+	const members = guild.members
+		.array()
+		.filter((member) => !client.entities.users.get(member.id)?.toggles?.has("bot") ?? true);
 
 	let withoutProficiencyRole = 0;
 	const roleFrequencies: Record<`${bigint}`, number> = Object.fromEntries(
@@ -143,7 +145,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		const roleId = member.roles.filter((roleId) => proficiencyRoleIds.includes(roleId)).at(0);
 
 		if (roleId !== undefined) {
-			roleFrequencies[`${roleId}`] += 1;
+			roleFrequencies[`${roleId}`]! += 1;
 		} else {
 			withoutProficiencyRole += 1;
 		}

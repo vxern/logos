@@ -8,7 +8,7 @@ describe("getBaseLanguage()", () => {
 	});
 
 	it("returns the base language for an extended language identifier.", () => {
-		expect(getBaseLanguage("English/American")).to.equal("English");
+		expect(getBaseLanguage("English/British")).to.equal("English");
 	});
 });
 

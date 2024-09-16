@@ -8,8 +8,7 @@ function useDatabaseStore(): DependencyProvider<DatabaseStore> {
 	let database: DatabaseStore;
 
 	beforeEach(async () => {
-		database = await DatabaseStore.create({ environment: mockEnvironment });
-
+		database = await DatabaseStore.create({ log: constants.loggers.silent, environment: mockEnvironment });
 		await database.setup({ prefetchDocuments: false });
 	});
 

@@ -292,15 +292,15 @@ class InteractionCollector<
 			Guild.getOrCreate(this.#client, { guildId: interaction.guildId!.toString() }),
 		]);
 
-		const targetLanguage = guildDocument.targetLanguage;
+		const targetLanguage = guildDocument.languages.target;
 		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
 		const learningLocale = getLocaleByLearningLanguage(learningLanguage);
 
-		const guildLanguage = guildDocument.isTargetLanguageOnly(interaction.channelId!.toString())
+		const guildLanguage = guildDocument.isTargetLanguageOnlyChannel(interaction.channelId!.toString())
 			? targetLanguage
-			: guildDocument.localisationLanguage;
+			: guildDocument.languages.localisation;
 		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
-		const featureLanguage = guildDocument.featureLanguage;
+		const featureLanguage = guildDocument.languages.feature;
 
 		if (!isAutocomplete(interaction)) {
 			// If the user has configured a custom locale, use the user's preferred locale.
@@ -375,14 +375,11 @@ class InteractionCollector<
 	}
 
 	#determineLearningLanguage(guildDocument: Guild, member: Logos.Member): LearningLanguage | undefined {
-		if (member === undefined) {
+		if (!guildDocument.hasEnabled("roleLanguages")) {
 			return undefined;
 		}
 
-		const roleLanguages = guildDocument.roleLanguages;
-		if (roleLanguages === undefined) {
-			return undefined;
-		}
+		const roleLanguages = guildDocument.feature("roleLanguages");
 
 		const userLearningLanguage = Object.entries(roleLanguages.ids).find(([key, _]) =>
 			member.roles.includes(BigInt(key)),

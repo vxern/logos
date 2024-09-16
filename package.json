@@ -3,7 +3,7 @@
 	"name": "logos",
 	"description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
 	"license": "Apache-2.0",
-	"version": "4.0.0-rc.2",
+	"version": "4.26.0",
 	"type": "module",
 	"keywords": [
 		"discord",
@@ -37,41 +37,42 @@
 		}
 	],
 	"scripts": {
-		"configure:guild": "bun run ./source/scripts/configure/guild.ts",
-		"load:sentence-pairs": "bun run ./source/scripts/load/sentence-pairs.ts",
-		"setup": "bun load:sentence-pairs",
-		"lint": "biome check --write --unsafe ./source/ ./test/",
-		"start": "bun run ./source/index.ts"
+		"lint": "biome check --write --unsafe ./scripts/ ./source/ ./test/",
+		"database:migrate": "bun run ./scripts/database/migrate.ts",
+		"generate:migration": "bun run ./scripts/generate/migration.ts",
+		"load:sentence_pairs": "bun run ./scripts/load/sentence-pairs.ts",
+		"develop": "bun run ./scripts/develop.ts",
+		"start": "bun run ./scripts/run.ts",
+		"setup": "bun load:sentence_pairs"
 	},
 	"dependencies": {
-		"@discordeno/bot": "19.0.0-next.d81b28a",
+		"@discordeno/bot": "19.0.0-next.a0510da",
 		"cldpre": "^2.9.0",
 		"dexonline-scraper": "^0.2.1",
 		"dotenv": "^16.4.5",
 		"eld": "github:vxern/efficient-language-detector-js#b8f7a21413bef94fc71207241748f4a1d0089cd3",
-		"event-stream": "^4.0.1",
 		"fastest-levenshtein": "^1.0.16",
 		"fasttext.wasm.js": "^1.0.0",
 		"ioredis": "^5.4.1",
-		"mongodb": "^6.7.0",
-		"nano": "^10.1.3",
+		"mongodb": "^6.8.0",
+		"nano": "^10.1.4",
 		"nanoid": "^5.0.7",
 		"object-hash": "^3.0.0",
-		"ravendb": "^5.4.2",
-		"rethinkdb-ts": "^2.6.0",
-		"shoukaku": "^4.0.1",
+		"pino": "^9.4.0",
+		"ravendb": "^5.4.3",
+		"rethinkdb-ts": "^2.6.1",
+		"shoukaku": "^4.1.0",
 		"tinyld": "^1.3.4",
 		"wiktionary-scraper": "^0.0.1-patch.3",
-		"winston": "^3.13.0",
 		"youtube-sr": "^4.3.11"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "1.8.1",
-		"@types/bun": "^1.1.4",
-		"@types/chai": "^4.3.16",
-		"@types/event-stream": "^4.0.5",
+		"@biomejs/biome": "1.8.3",
+		"@types/bun": "^1.1.7",
+		"@types/chai": "^4.3.17",
 		"@types/object-hash": "^3.0.6",
 		"chai": "^5.1.1",
-		"typescript": "^5.4.5"
+		"pino-pretty": "^11.2.2",
+		"typescript": "^5.5.4"
 	}
 }

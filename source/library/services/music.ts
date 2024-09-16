@@ -2,9 +2,9 @@ import { EventEmitter } from "node:events";
 import { mention } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
+import type pino from "pino";
 import * as shoukaku from "shoukaku";
 
 type PlaybackActionType = "manage" | "check";
@@ -15,8 +15,8 @@ class MusicService extends LocalService {
 	#managerConnectionRestores!: (name: string, reconnected: boolean) => void;
 	#session?: MusicSession;
 
-	get configuration(): NonNullable<Guild["music"]> {
-		return this.guildDocument.music!;
+	get configuration(): NonNullable<Guild["features"]["music"]> {
+		return this.guildDocument.feature("music");
 	}
 
 	get hasSession(): boolean {
@@ -48,6 +48,8 @@ class MusicService extends LocalService {
 
 	async start(): Promise<void> {
 		this.#voiceStateUpdates.onCollect(this.#handleVoiceStateUpdate.bind(this));
+
+		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
 		this.client.lavalinkService!.manager.on(
 			"disconnect",
@@ -114,7 +116,7 @@ class MusicService extends LocalService {
 	}
 
 	async #handleVoiceStateUpdate(_: Discord.VoiceState): Promise<void> {
-		if (this.#isLogosAlone === true) {
+		if (this.#isLogosAlone) {
 			await this.#handleSessionAbandoned();
 		}
 	}
@@ -197,7 +199,7 @@ class MusicService extends LocalService {
 	}
 
 	#canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
-		if (this.session.isDisconnected) {
+		if (this.hasSession && this.session.isDisconnected) {
 			const strings = constants.contexts.cannotManageDuringOutage({
 				localise: this.client.localise,
 				locale: this.guildLocale,
@@ -395,7 +397,7 @@ class ListingManager extends EventEmitter {
 	moveFromHistoryToQueue({ count }: { count: number }): void {
 		count = Math.min(Math.max(count, 0), this.history.count);
 
-		for (const _ of new Array().keys()) {
+		for (const _ of new Array(count).keys()) {
 			this.queue.addOld(this.history.removeNewest());
 		}
 
@@ -427,7 +429,7 @@ class ListingManager extends EventEmitter {
 type QueueableMode = "song-collection" | "playable";
 
 class MusicSession extends EventEmitter {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly client: Client;
 	readonly service: MusicService;
 	readonly player: shoukaku.Player;
@@ -468,7 +470,7 @@ class MusicSession extends EventEmitter {
 
 		this.setMaxListeners(0);
 
-		this.log = Logger.create({ identifier: "MusicSession", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "MusicSession" });
 		this.client = client;
 		this.service = service;
 		this.player = player;
@@ -487,7 +489,8 @@ class MusicSession extends EventEmitter {
 		this.player.off("exception", this.#trackExceptions);
 
 		this.listings.dispose();
-		await this.player.destroy();
+		await this.client.lavalinkService!.manager.leaveVoiceChannel(this.service.guildIdString);
+		await this.client.bot.gateway.leaveVoiceChannel(this.service.guildId);
 		this.emit("end");
 		this.removeAllListeners();
 	}
@@ -601,6 +604,12 @@ class MusicSession extends EventEmitter {
 
 		if (this.queueable instanceof SongCollection) {
 			this.#advanceSongCollection({ queueable: this.queueable });
+
+			if (!this.hasCurrent) {
+				await this.playNext();
+				return;
+			}
+
 			await this.play({ playable: this.playable });
 			return;
 		}
@@ -629,7 +638,7 @@ class MusicSession extends EventEmitter {
 			this.queueable.title = track.info.title;
 		}
 
-		await this.player.playTrack({ track: track.encoded });
+		await this.player.playTrack({ track: { encoded: track.encoded } });
 
 		const strings = constants.contexts.nowPlaying({
 			localise: this.client.localise,
@@ -760,11 +769,13 @@ class MusicSession extends EventEmitter {
 		controls,
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
 		if (controls.by !== undefined) {
-			queueable.moveBy({ count: controls.by, direction: "forward" });
+			queueable.moveBy({ count: controls.by - 1, direction: "forward" });
+			return;
 		}
 
 		if (controls.to !== undefined) {
 			queueable.moveTo({ index: controls.to - 1 });
+			return;
 		}
 	}
 
@@ -807,11 +818,15 @@ class MusicSession extends EventEmitter {
 	}: { queueable: SongCollection; controls: Partial<PositionControls> }): void {
 		if (controls.by !== undefined) {
 			queueable.moveBy({ count: controls.by, direction: "backward" });
+			return;
 		}
 
 		if (controls.to !== undefined) {
 			queueable.moveTo({ index: controls.to - 1 });
+			return;
 		}
+
+		queueable.moveBy({ count: 1, direction: "backward" });
 	}
 
 	#unskipPlayable({ controls }: { controls: Partial<PositionControls> }): void {
@@ -910,6 +925,13 @@ class AudioStream extends Playable {
 	}
 }
 
+/** Special playable unit used as a placeholder. */
+class None extends Playable {
+	constructor() {
+		super({ title: "None", url: "about:blank", emoji: "❓" });
+	}
+}
+
 type MoveDirection = "forward" | "backward";
 
 /**
@@ -926,7 +948,7 @@ class SongCollection extends Queueable {
 	index: number;
 
 	get playable(): Playable {
-		return this.songs[this.index]!;
+		return this.songs[this.index] ?? new None();
 	}
 
 	get isFirstInCollection(): boolean {
@@ -971,7 +993,7 @@ class SongCollection extends Queueable {
 				break;
 			}
 			case "backward": {
-				this.index -= Math.min(count, this.#precedingSongCount);
+				this.index -= Math.min(count, this.#precedingSongCount) + 1;
 				break;
 			}
 		}
@@ -979,7 +1001,7 @@ class SongCollection extends Queueable {
 
 	moveTo({ index }: { index: number }): void {
 		this.playable.reset();
-		this.index = Math.min(Math.max(index, 0), this.songs.length - 1);
+		this.index = Math.min(Math.max(index, 0), this.songs.length - 1) - 1;
 	}
 }
 

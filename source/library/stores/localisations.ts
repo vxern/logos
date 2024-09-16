@@ -6,9 +6,8 @@ import {
 	getLogosLanguageByLocale,
 	isDiscordLanguage,
 } from "logos:constants/languages/localisation";
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
 import type { ReplyVisibility } from "logos/stores/interactions";
+import type pino from "pino";
 
 type RawLocalisationBuilder = (data?: Record<string, unknown>) => string | undefined;
 type LocalisationBuilder = (data?: Record<string, unknown>) => string;
@@ -32,12 +31,12 @@ interface DescriptionLocalisations {
 	readonly descriptionLocalizations?: Partial<Record<Discord.Locales, string>>;
 }
 class LocalisationStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #localisations: Localisations;
 
-	constructor({ environment, localisations }: { environment: Environment; localisations: RawLocalisations }) {
-		this.log = Logger.create({ identifier: "Client/LocalisationStore", isDebug: environment.isDebug });
+	constructor({ log, localisations }: { log: pino.Logger; localisations: RawLocalisations }) {
+		this.log = log.child({ name: "LocalisationStore" });
 
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
 	}
@@ -245,7 +244,7 @@ class LocalisationStore {
 		const locale = visibility === "public" ? interaction.guildLocale : interaction.locale;
 
 		const strings = contexts
-			.map((builder) => builder({ localise: this.localise, locale }))
+			.map((builder) => builder({ localise: this.localise.bind(this), locale }))
 			.reduce<T>((combined, context) => Object.assign(combined, context), {} as T);
 
 		return await scope(strings);

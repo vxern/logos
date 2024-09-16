@@ -6,11 +6,6 @@ import { Report } from "logos/models/report";
 async function handleMakeReport(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
-	const configuration = guildDocument.reports;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
@@ -25,7 +20,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		await Report.getAll(client, {
 			where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() },
 		}),
-		configuration.rateLimit ?? constants.defaults.REPORT_RATE_LIMIT,
+		guildDocument.rateLimit("reports") ?? constants.defaults.REPORT_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyReports({ localise: client.localise, locale: interaction.locale });
@@ -54,7 +49,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 
 		await client.tryLog("reportSubmit", {
 			guildId: guild.id,
-			journalling: configuration.journaling,
+			journalling: guildDocument.isJournalled("reports"),
 			args: [member, reportDocument],
 		});
 

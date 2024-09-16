@@ -9,11 +9,7 @@ async function handlePardonUserAutocomplete(
 	interaction: Logos.Interaction<any, { user: string; warning: string }>,
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.warns;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("warns");
 
 	if (interaction.parameters.focused === undefined) {
 		return;
@@ -70,11 +66,7 @@ async function handlePardonUser(
 	interaction: Logos.Interaction<any, { user: string; warning: string }>,
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.warns;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("warns");
 
 	const member = client.resolveInteractionToMember(interaction, {
 		identifier: interaction.parameters.user,
@@ -110,7 +102,7 @@ async function handlePardonUser(
 
 	await client.tryLog("memberWarnRemove", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("warns"),
 		args: [member, warningDocument, interaction.user],
 	});
 

@@ -18,11 +18,6 @@ async function handleClearTimeout(
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
-	const configuration = guildDocument.timeouts;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const member = client.resolveInteractionToMember(interaction, {
 		identifier: interaction.parameters.user,
 		options: { restrictToNonSelf: true, excludeModerators: true },
@@ -59,7 +54,7 @@ async function handleClearTimeout(
 
 	await client.tryLog("memberTimeoutRemove", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("timeouts"),
 		args: [member, interaction.user],
 	});
 

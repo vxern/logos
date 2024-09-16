@@ -31,7 +31,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		listings: musicService.session.listings.queue.listings,
 	});
 
-	view.onInteraction(async (buttonPress) => {
+	view.onRemove(async (buttonPress) => {
 		const indexString = buttonPress.data?.values?.at(0) as string | undefined;
 		if (indexString === undefined) {
 			return;

@@ -5,7 +5,6 @@ import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
 import { Diagnostics } from "logos/diagnostics";
 import { ActionLock } from "logos/helpers/action-lock";
-import { Logger } from "logos/logger";
 import { Guild } from "logos/models/guild";
 import { Model } from "logos/models/model";
 import type { InteractionRepetitionService } from "logos/services/interaction-repetition";
@@ -21,12 +20,11 @@ import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationStore, type RawLocalisations } from "logos/stores/localisations";
 import { ServiceStore } from "logos/stores/services";
 import { VolatileStore } from "logos/stores/volatile";
+import type pino from "pino";
 
 class Client {
-	static #client?: Client;
-
+	readonly log: pino.Logger;
 	readonly environment: Environment;
-	readonly log: Logger;
 	readonly database: DatabaseStore;
 	readonly volatile?: VolatileStore;
 	readonly diagnostics: Diagnostics;
@@ -252,25 +250,23 @@ class Client {
 	}
 
 	constructor({
-		environment,
 		log,
+		environment,
 		database,
-		bot,
 		localisations,
 	}: {
+		log: pino.Logger;
 		environment: Environment;
-		log: Logger;
 		database: DatabaseStore;
-		bot: Discord.Bot;
 		localisations: RawLocalisations;
 	}) {
 		this.environment = environment;
 		this.log = log;
 		this.database = database;
-		this.volatile = VolatileStore.tryCreate({ environment });
+		this.volatile = VolatileStore.tryCreate(this);
 		this.diagnostics = new Diagnostics(this);
 
-		this.#localisations = new LocalisationStore({ environment, localisations });
+		this.#localisations = new LocalisationStore({ log, localisations });
 		this.#commands = CommandStore.create(this, {
 			localisations: this.#localisations,
 			templates: commands,
@@ -280,7 +276,7 @@ class Client {
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);
 		this.#adapters = new AdapterStore(this);
-		this.#connection = new DiscordConnection({ environment, bot, events: this.#events.buildEventHandlers() });
+		this.#connection = new DiscordConnection({ log, environment, events: this.#events.buildEventHandlers() });
 
 		this.#guildReloadLock = new ActionLock();
 		this.#guildCreateCollector = new Collector<"guildCreate">();
@@ -294,44 +290,21 @@ class Client {
 	}
 
 	static async create({
+		log,
 		environment,
 		localisations,
 	}: {
+		log: pino.Logger;
 		environment: Environment;
 		localisations: RawLocalisations;
 	}): Promise<Client> {
-		if (Client.#client !== undefined) {
-			return Client.#client;
-		}
-
-		const log = Logger.create({ identifier: "Client", isDebug: environment.isDebug });
+		log = log.child({ name: "Client" });
 
 		log.info("Bootstrapping the client...");
 
-		const bot = Discord.createBot({
-			token: environment.discordSecret,
-			intents:
-				Discord.Intents.Guilds |
-				Discord.Intents.GuildMembers | // Members joining, leaving, changing.
-				Discord.Intents.GuildModeration | // Access to audit log.
-				Discord.Intents.GuildVoiceStates |
-				Discord.Intents.GuildMessages |
-				Discord.Intents.MessageContent,
-			events: {},
-			gateway: {
-				token: environment.discordSecret,
-				events: {},
-				cache: { requestMembers: { enabled: true, pending: new Discord.Collection() } },
-			},
-		});
+		const database = await DatabaseStore.create({ log, environment });
 
-		const database = await DatabaseStore.create({ environment });
-
-		const client = new Client({ environment, log, database, bot, localisations });
-
-		Client.#client = client;
-
-		return client;
+		return new Client({ log, environment, database, localisations });
 	}
 
 	async #setupCollectors(): Promise<void> {

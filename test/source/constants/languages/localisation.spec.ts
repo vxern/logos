@@ -12,7 +12,7 @@ import { expect } from "chai";
 
 describe("isDiscordLanguage()", () => {
 	it("returns true if the passed language is a supported Discord language.", () => {
-		expect(isDiscordLanguage("English/American")).to.be.true;
+		expect(isDiscordLanguage("English/British")).to.be.true;
 		expect(isDiscordLanguage("French")).to.be.true;
 	});
 

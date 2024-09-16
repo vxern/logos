@@ -2,7 +2,8 @@ import type { FeatureLanguage } from "logos:constants/languages/feature";
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { TranslationLanguage } from "logos:constants/languages/translation";
-import type { RateLimit, TimeStruct } from "logos/models/guild";
+import type { TimeStruct } from "logos:constants/time";
+import type { RateLimit } from "logos/models/guild";
 
 const FEATURE_LOCALE: Locale = "eng-GB";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";

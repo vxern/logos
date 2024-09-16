@@ -1,5 +1,4 @@
 import type { Collection } from "logos:constants/database";
-import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { RethinkDBDocumentConventions } from "logos/adapters/databases/rethinkdb/conventions";
 import type { RethinkDBDocument } from "logos/adapters/databases/rethinkdb/document";
@@ -11,12 +10,8 @@ import rethinkdb from "rethinkdb-ts";
 class RethinkDBDocumentSession extends DocumentSession {
 	readonly #connection: rethinkdb.Connection;
 
-	constructor({
-		environment,
-		database,
-		connection,
-	}: { environment: Environment; database: DatabaseStore; connection: rethinkdb.Connection }) {
-		super({ identifier: "RethinkDB", environment, database });
+	constructor({ database, connection }: { database: DatabaseStore; connection: rethinkdb.Connection }) {
+		super({ identifier: "RethinkDB", database });
 
 		this.#connection = connection;
 	}

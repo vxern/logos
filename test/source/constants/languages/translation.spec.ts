@@ -11,7 +11,7 @@ import { expect } from "chai";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported translation language.", () => {
-		expect(isTranslationLanguage("English/American")).to.be.true;
+		expect(isTranslationLanguage("English/British")).to.be.true;
 		expect(isTranslationLanguage("French")).to.be.true;
 	});
 
