@@ -1,7 +1,7 @@
 import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import loggers, { type EventLoggers } from "logos/stores/journalling/loggers";
+import loggers from "logos/stores/journalling/loggers";
 import type pino from "pino";
 
 type Events = Logos.Events & Discord.Events;
