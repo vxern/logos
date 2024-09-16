@@ -263,7 +263,7 @@ async function generateButtons(
 				await client.acknowledge(buttonPress);
 
 				if (!isFirst) {
-					data.dictionaryEntryIndex--;
+					data.dictionaryEntryIndex -= 1;
 				}
 
 				await displayMenu(client, interaction, data);
