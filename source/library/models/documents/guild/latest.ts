@@ -36,6 +36,7 @@ interface GuildDocument {
 		timeouts: boolean;
 		warns: boolean;
 		reports: boolean;
+		antiFlood: boolean;
 		verification: boolean;
 		dynamicVoiceChannels: boolean;
 		entry: boolean;
@@ -53,6 +54,7 @@ interface GuildDocument {
 		timeouts: boolean;
 		warns: boolean;
 		reports: boolean;
+		antiFlood: boolean;
 		verification: boolean;
 		suggestions: boolean;
 		resourceSubmissions: boolean;
@@ -123,6 +125,11 @@ interface GuildDocument {
 		};
 		reports?: {
 			channelId: string;
+		};
+		antiFlood?: {
+			interval: TimeStruct;
+			messageCount: number;
+			timeoutDuration?: TimeStruct;
 		};
 		/** Relies on guild.features.server.tickets.categoryId */
 		verification?: {
