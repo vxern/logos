@@ -1,5 +1,4 @@
 import { getELDLanguageByLocale, isELDLocale } from "logos:constants/languages/detection";
-// @ts-expect-error: ELD is ES2015.
 import { eld } from "eld";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import type { Client } from "logos/client";
