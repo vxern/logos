@@ -1,5 +1,5 @@
+import { timestamp } from "logos:constants/formatting";
 import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "logos:constants/slowmode";
-import { timestamp } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 

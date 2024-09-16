@@ -1,5 +1,5 @@
+import { code } from "logos:constants/formatting";
 import { isValidLicensedSoftware } from "logos:constants/licences";
-import { code } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { SoftwareLicenceView } from "logos/commands/components/paginated-views/software-licence-view";
 import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";

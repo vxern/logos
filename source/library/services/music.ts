@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import type { Guild } from "logos/models/guild";

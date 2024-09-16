@@ -1,4 +1,4 @@
-import { codeMultiline, mention, trim } from "logos:core/formatting";
+import { codeMultiline, mention, trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import type { TicketFormData, TicketType } from "logos/models/documents/ticket/latest";
 import type { EntryRequest } from "logos/models/entry-request";

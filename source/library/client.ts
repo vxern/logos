@@ -1,4 +1,4 @@
-import { timestamp } from "logos:core/formatting";
+import { timestamp } from "logos:constants/formatting";
 import type { Environment } from "logos:core/loaders/environment";
 import { Collector, InteractionCollector } from "logos/collectors";
 import commands from "logos/commands/commands";

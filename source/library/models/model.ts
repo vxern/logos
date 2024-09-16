@@ -1,6 +1,6 @@
 import { type Collection, isValidCollection } from "logos:constants/database";
+import { capitalise, decapitalise } from "logos:constants/formatting";
 import { timeStructToMilliseconds } from "logos:constants/time";
-import { capitalise, decapitalise } from "logos:core/formatting";
 import type { DocumentConventions } from "logos/adapters/databases/adapter";
 import type { Client } from "logos/client";
 import type { RateLimit } from "logos/models/guild";

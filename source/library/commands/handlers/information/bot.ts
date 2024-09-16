@@ -1,4 +1,4 @@
-import { list } from "logos:core/formatting";
+import { list } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 
 async function handleDisplayBotInformation(client: Client, interaction: Logos.Interaction): Promise<void> {

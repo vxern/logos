@@ -1,4 +1,4 @@
-import { mention, timestamp, trim } from "logos:core/formatting";
+import { mention, timestamp, trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { parseTimeExpression } from "logos/commands/interactions";
 import { Guild } from "logos/models/guild";

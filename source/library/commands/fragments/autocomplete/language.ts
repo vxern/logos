@@ -1,4 +1,4 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
 

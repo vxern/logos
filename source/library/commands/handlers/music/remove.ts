@@ -1,4 +1,4 @@
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { RemoveSongListingView } from "logos/commands/components/paginated-views/remove-song-listing-view";
 

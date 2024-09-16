@@ -1,6 +1,6 @@
+import { code, trim } from "logos:constants/formatting";
 import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
-import { code, trim } from "logos:core/formatting";
 import type { DefinitionField, DictionaryEntry, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";

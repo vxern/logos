@@ -1,4 +1,4 @@
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
 

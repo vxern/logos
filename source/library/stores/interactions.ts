@@ -1,5 +1,5 @@
+import { trim } from "logos:constants/formatting";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
-import { trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import type pino from "pino";
 

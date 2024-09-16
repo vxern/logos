@@ -1,4 +1,4 @@
-import { mention, timestamp } from "logos:core/formatting";
+import { mention, timestamp } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import type { EntryRequest, VoteType } from "logos/models/entry-request";

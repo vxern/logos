@@ -1,4 +1,4 @@
-import { codeMultiline, mention, trim } from "logos:core/formatting";
+import { codeMultiline, mention, trim } from "logos:constants/formatting";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"messageUpdate"> = (client, [message], { guildLocale }) => {

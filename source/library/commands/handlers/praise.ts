@@ -1,4 +1,4 @@
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 import { Praise } from "logos/models/praise";

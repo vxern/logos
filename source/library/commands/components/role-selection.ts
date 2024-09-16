@@ -1,3 +1,4 @@
+import { trim } from "logos:constants/formatting";
 import {
 	type Role,
 	type RoleCategory,
@@ -10,7 +11,6 @@ import {
 	isGroup,
 	isSingle,
 } from "logos:constants/roles";
-import { trim } from "logos:core/formatting";
 import { isDefined } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";

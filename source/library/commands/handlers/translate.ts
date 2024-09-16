@@ -1,6 +1,6 @@
+import { trim } from "logos:constants/formatting";
 import languages, { type Languages, getTranslationLanguage } from "logos:constants/languages";
 import { type TranslationLanguage, isTranslationLanguage } from "logos:constants/languages/translation";
-import { trim } from "logos:core/formatting";
 import type { TranslationResult } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 import { TranslationSourceNotice } from "logos/commands/components/source-notices/translation-source-notice";

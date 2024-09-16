@@ -1,4 +1,4 @@
-import { codeMultiline, mention } from "logos:core/formatting";
+import { codeMultiline, mention } from "logos:constants/formatting";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocale }) => {

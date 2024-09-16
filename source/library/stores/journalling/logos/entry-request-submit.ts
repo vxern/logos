@@ -1,4 +1,4 @@
-import { codeMultiline } from "logos:core/formatting";
+import { codeMultiline } from "logos:constants/formatting";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest], { guildLocale, featureLanguage }) => {

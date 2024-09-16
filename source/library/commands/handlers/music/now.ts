@@ -1,4 +1,4 @@
-import { mention, timestamp } from "logos:core/formatting";
+import { mention, timestamp } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { SongCollectionView } from "logos/commands/components/paginated-views/song-collection-view";
 import { SongCollection } from "logos/services/music";
