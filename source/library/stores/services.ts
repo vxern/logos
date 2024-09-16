@@ -1,3 +1,4 @@
+import { isDefined } from "logos:core/utilities.ts";
 import type { Client } from "logos/client";
 import type { Guild } from "logos/models/guild";
 import { AlertService } from "logos/services/alert";
@@ -117,7 +118,7 @@ class ServiceStore {
 	}
 
 	async #startGlobal(): Promise<void> {
-		const services = Object.values(this.global);
+		const services = Object.values(this.global).filter(isDefined);
 		this.log.info(`Starting global services... (${services.length} services to start)`);
 
 		const promises: (void | Promise<void>)[] = [];
