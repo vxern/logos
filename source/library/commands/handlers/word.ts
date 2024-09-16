@@ -136,7 +136,7 @@ async function handleFindWord(
 			}
 		}
 
-		searchesCompleted++;
+		searchesCompleted += 1;
 	}
 
 	if (entriesByPartOfSpeech.size === 0) {
@@ -273,7 +273,7 @@ async function generateButtons(
 				await client.acknowledge(buttonPress);
 
 				if (!isLast) {
-					data.dictionaryEntryIndex++;
+					data.dictionaryEntryIndex += 1;
 				}
 
 				await displayMenu(client, interaction, data);
