@@ -180,8 +180,8 @@ async function handleToggleSlowmode(
 		.editChannel(channel.id, {
 			rateLimitPerUser: getSlowmodeDelayByLevel(interaction.parameters.level ?? "lowest"),
 		})
-		.catch((reason) =>
-			client.log.warn(`Failed to enable slowmode on ${client.diagnostics.channel(channel)}.`, reason),
+		.catch((error) =>
+			client.log.warn(error, `Failed to enable slowmode on ${client.diagnostics.channel(channel)}.`),
 		);
 
 	await client.tryLog("slowmodeEnable", {

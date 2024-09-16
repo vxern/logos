@@ -166,7 +166,7 @@ class InteractionStore {
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
 			})
-			.catch((reason) => this.log.error("Failed to acknowledge interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to acknowledge interaction."));
 	}
 
 	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
@@ -186,8 +186,8 @@ class InteractionStore {
 						},
 					],
 				})
-				.catch((reason) => {
-					this.log.error("Failed to postpone message reply to repeated interaction:", reason);
+				.catch((error) => {
+					this.log.error(error, "Failed to postpone message reply to repeated interaction.");
 					return undefined;
 				});
 			if (message === undefined) {
@@ -203,7 +203,7 @@ class InteractionStore {
 				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
 				data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
 			})
-			.catch((reason) => this.log.error("Failed to postpone reply to interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to postpone reply to interaction."));
 	}
 
 	async reply(
@@ -220,8 +220,8 @@ class InteractionStore {
 		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
-			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId!, data).catch((reason) => {
-				this.log.error("Failed to make message reply to repeated interaction:", reason);
+			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId!, data).catch((error) => {
+				this.log.error(error, "Failed to make message reply to repeated interaction.");
 				return undefined;
 			});
 			if (message === undefined) {
@@ -237,7 +237,7 @@ class InteractionStore {
 				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
 				data,
 			})
-			.catch((reason) => this.log.error("Failed to reply to interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to reply to interaction."));
 
 		if (autoDelete) {
 			this.#autoDeleteReply(interaction);
@@ -254,8 +254,8 @@ class InteractionStore {
 		if (interaction.parameters["@repeat"]) {
 			const messageId = this.#messages.get(interaction.token)!;
 
-			await this.#client.bot.helpers.editMessage(interaction.channelId!, messageId, data).catch((reason) => {
-				this.log.error("Failed to edit message reply made to repeated interaction:", reason);
+			await this.#client.bot.helpers.editMessage(interaction.channelId!, messageId, data).catch((error) => {
+				this.log.error(error, "Failed to edit message reply made to repeated interaction.");
 				return undefined;
 			});
 
@@ -264,7 +264,7 @@ class InteractionStore {
 
 		await this.#client.bot.helpers
 			.editOriginalInteractionResponse(interaction.token, data)
-			.catch((reason) => this.log.error("Failed to edit reply to interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to edit reply to interaction."));
 
 		if (autoDelete) {
 			this.#autoDeleteReply(interaction);
@@ -277,8 +277,8 @@ class InteractionStore {
 
 			this.#messages.delete(interaction.token);
 
-			await this.#client.bot.helpers.deleteMessage(interaction.channelId!, messageId).catch((reason) => {
-				this.log.error("Failed to delete message reply made to repeated interaction:", reason);
+			await this.#client.bot.helpers.deleteMessage(interaction.channelId!, messageId).catch((error) => {
+				this.log.error(error, "Failed to delete message reply made to repeated interaction.");
 				return undefined;
 			});
 
@@ -287,7 +287,7 @@ class InteractionStore {
 
 		await this.#client.bot.helpers
 			.deleteOriginalInteractionResponse(interaction.token)
-			.catch((reason) => this.log.error("Failed to delete reply to interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to delete reply to interaction."));
 	}
 
 	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
@@ -296,7 +296,7 @@ class InteractionStore {
 				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: { choices },
 			})
-			.catch((reason) => this.log.error("Failed to respond to autocomplete interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to respond to autocomplete interaction."));
 	}
 
 	async displayModal(
@@ -308,7 +308,7 @@ class InteractionStore {
 				type: Discord.InteractionResponseTypes.Modal,
 				data,
 			})
-			.catch((reason) => this.log.error("Failed to show modal:", reason));
+			.catch((error) => this.log.error(error, "Failed to show modal."));
 	}
 
 	#buildColouredReplier({ colour }: { colour: number }): InteractionStore["reply"] {

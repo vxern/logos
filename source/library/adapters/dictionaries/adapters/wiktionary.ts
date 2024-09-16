@@ -44,8 +44,8 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 				lemmaLanguage: targetLanguageWiktionary,
 				userAgent: constants.USER_AGENT,
 			});
-		} catch (exception) {
-			this.client.log.error(`The request for lemma "${lemma}" failed:`, exception);
+		} catch (error) {
+			this.client.log.error(error, `The request for lemma "${lemma}" failed.`);
 			return undefined;
 		}
 

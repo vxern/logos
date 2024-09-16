@@ -273,9 +273,9 @@ abstract class PromptService<
 		this.log.warn(`Deleting ${prompts.length} invalid or expired prompts...`);
 
 		for (const prompt of prompts) {
-			await this.client.bot.helpers.deleteMessage(prompt.channelId, prompt.id).catch((reason) => {
-				this.log.warn("Failed to delete invalid or expired prompt:", reason);
-			});
+			await this.client.bot.helpers
+				.deleteMessage(prompt.channelId, prompt.id)
+				.catch((error) => this.log.warn(error, "Failed to delete invalid or expired prompt."));
 		}
 	}
 
@@ -466,11 +466,8 @@ abstract class PromptService<
 
 		const message = await this.client.bot.helpers
 			.sendMessage(this.channelId, this.getNoPromptsMessageContent())
-			.catch((reason) => {
-				this.log.warn(
-					`Failed to send message to ${this.client.diagnostics.channel(this.channelId)}: ${reason}`,
-				);
-
+			.catch((error) => {
+				this.log.warn(error, `Failed to send message to ${this.client.diagnostics.channel(this.channelId)}.`);
 				return undefined;
 			});
 		if (message === undefined) {
@@ -502,9 +499,8 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		const prompt = await this.client.bot.helpers.sendMessage(this.channelId, content).catch((reason) => {
-			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(this.channelId)}: ${reason}`);
-
+		const prompt = await this.client.bot.helpers.sendMessage(this.channelId, content).catch((error) => {
+			this.log.warn(error, `Failed to send message to ${this.client.diagnostics.channel(this.channelId)}.`);
 			return undefined;
 		});
 		if (prompt === undefined) {

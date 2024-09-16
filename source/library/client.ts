@@ -358,8 +358,8 @@ class Client {
 
 			const members = await this.bot.gateway
 				.requestMembers(guild.id, { limit: 0, query: "", nonce: Date.now().toString() })
-				.catch((reason) => {
-					this.log.warn(`Failed to fetch members of ${this.diagnostics.guild(guild)}:`, reason);
+				.catch((error) => {
+					this.log.warn(error, `Failed to fetch members of ${this.diagnostics.guild(guild)}.`);
 					return [];
 				});
 			for (const member of members) {
@@ -380,7 +380,7 @@ class Client {
 
 		this.bot.helpers
 			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
-			.catch((reason) => this.log.warn(`Failed to upsert commands on ${this.diagnostics.guild(guild)}:`, reason));
+			.catch((error) => this.log.warn(error, `Failed to upsert commands on ${this.diagnostics.guild(guild)}.`));
 	}
 
 	async #teardownGuild({ guildId }: { guildId: bigint }): Promise<void> {
@@ -498,7 +498,7 @@ class Client {
 		this.log.info(`Handling ${this.diagnostics.interaction(interaction)}...`);
 
 		await handle(this, interaction).catch((error) =>
-			this.log.error(`Failed to handle ${this.diagnostics.interaction(interaction)}: `, error),
+			this.log.error(error, `Failed to handle ${this.diagnostics.interaction(interaction)}.`),
 		);
 	}
 }

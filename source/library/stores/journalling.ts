@@ -117,8 +117,8 @@ class JournallingStore {
 
 		await this.#client.bot.helpers
 			.sendMessage(channelId, message)
-			.catch((reason) =>
-				this.log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}:`, reason),
+			.catch((error) =>
+				this.log.warn(error, `Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`),
 			);
 	}
 
@@ -223,8 +223,8 @@ class JournallingStore {
 
 		const auditLog = await this.#client.bot.helpers
 			.getAuditLog(guildId, { actionType: Discord.AuditLogEvents.MemberKick })
-			.catch((reason) => {
-				this.log.warn(`Could not get audit log for ${this.#client.diagnostics.guild(guildId)}:`, reason);
+			.catch((error) => {
+				this.log.warn(error, `Could not get audit log for ${this.#client.diagnostics.guild(guildId)}.`);
 				return undefined;
 			});
 		if (auditLog === undefined) {

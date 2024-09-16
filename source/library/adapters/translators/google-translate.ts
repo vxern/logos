@@ -60,8 +60,8 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 				},
 				body: new URLSearchParams({ source: locales.source, target: locales.target, q: text, format: "text" }),
 			});
-		} catch (exception) {
-			this.client.log.error(`The request to translate text of length ${text.length} failed:`, exception);
+		} catch (error) {
+			this.client.log.error(error, `The request to translate text of length ${text.length} failed.`);
 			return undefined;
 		}
 
@@ -72,8 +72,8 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 		let result: GoogleTranslateResult;
 		try {
 			result = (await response.json()) as GoogleTranslateResult;
-		} catch (exception) {
-			this.client.log.error("Reading response data for text translation failed:", exception);
+		} catch (error) {
+			this.client.log.error(error, "Reading response data for text translation failed.");
 			return undefined;
 		}
 

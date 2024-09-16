@@ -206,10 +206,10 @@ async function handlePurgeMessages(
 				limit: 100,
 			})
 			.then((collection) => Array.from(collection.values()).reverse())
-			.catch((reason) => {
+			.catch((error) => {
 				client.log.warn(
-					`Failed to get messages starting with ${client.diagnostics.message(startMessage.id)}:`,
-					reason,
+					error,
+					`Failed to get messages starting with ${client.diagnostics.message(startMessage.id)}.`,
 				);
 
 				return [];
@@ -516,12 +516,12 @@ async function handlePurgeMessages(
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await client.bot.helpers.deleteMessages(interaction.channelId, messageIds).catch((reason) => {
+			await client.bot.helpers.deleteMessages(interaction.channelId, messageIds).catch((error) => {
 				client.log.warn(
+					error,
 					`Failed to delete ${messageIds.length} messages from ${client.diagnostics.channel(
 						interaction.channelId,
-					)}:`,
-					reason,
+					)}.`,
 				);
 			});
 
@@ -534,7 +534,7 @@ async function handlePurgeMessages(
 	for (const message of nonBulkDeletable) {
 		await client.bot.helpers
 			.deleteMessage(interaction.channelId, message.id)
-			.catch((reason) => client.log.warn(`Failed to delete ${client.diagnostics.message(message)}:`, reason));
+			.catch((error) => client.log.warn(error, `Failed to delete ${client.diagnostics.message(message)}.`));
 
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 

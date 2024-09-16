@@ -32,9 +32,8 @@ abstract class DictionaryAdapter<DataType = unknown> {
 		lemma: string,
 		learningLanguage: LearningLanguage,
 	): Promise<DictionaryEntry[] | undefined> {
-		const data = await this.fetch(lemma, learningLanguage).catch((reason) => {
-			this.log.error(`Failed to get results for lemma '${lemma}' in ${learningLanguage}.`);
-			this.log.error(reason);
+		const data = await this.fetch(lemma, learningLanguage).catch((error) => {
+			this.log.error(error, `Failed to get results for lemma '${lemma}' in ${learningLanguage}.`);
 			return undefined;
 		});
 		if (data === undefined) {
@@ -44,9 +43,8 @@ abstract class DictionaryAdapter<DataType = unknown> {
 		let entries: DictionaryEntry[];
 		try {
 			entries = this.parse(interaction, lemma, learningLanguage, data);
-		} catch (exception) {
-			this.log.error(`Failed to format results for lemma '${lemma}' in ${learningLanguage}.`);
-			this.log.error(exception);
+		} catch (error) {
+			this.log.error(error, `Failed to format results for lemma '${lemma}' in ${learningLanguage}.`);
 			return undefined;
 		}
 
