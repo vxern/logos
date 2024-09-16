@@ -1,7 +1,7 @@
 import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import loggers from "logos/stores/journalling/loggers";
+import loggers, { type EventLoggers } from "logos/stores/journalling/loggers";
 import type pino from "pino";
 
 type Events = Logos.Events & Discord.Events;
@@ -96,21 +96,16 @@ class JournallingStore {
 			return;
 		}
 
-		const generateMessage = loggers[event as keyof typeof loggers];
+		const generateMessage = loggers[event];
 		if (generateMessage === undefined) {
 			return;
 		}
 
 		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.languages.localisation);
-		const message = await generateMessage(
-			this.#client,
-			// @ts-expect-error: This is fine.
-			args,
-			{
-				guildLocale,
-				featureLanguage: guildDocument.languages.feature,
-			},
-		);
+		const message = await generateMessage(this.#client, args, {
+			guildLocale,
+			featureLanguage: guildDocument.languages.feature,
+		});
 		if (message === undefined) {
 			return;
 		}

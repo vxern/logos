@@ -32,7 +32,7 @@ import ticketOpen from "logos/stores/journalling/logos/ticket-open";
 
 type Events = Logos.Events & Discord.Events;
 
-const loggers = Object.freeze({
+const loggers: EventLoggers = Object.freeze({
 	guildBanAdd,
 	guildBanRemove,
 	guildMemberAdd,
@@ -60,7 +60,7 @@ const loggers = Object.freeze({
 	slowmodeDisable,
 	slowmodeUpgrade,
 	slowmodeDowngrade,
-} as const satisfies EventLoggers);
+} as const);
 
 type EventLoggers = { [Event in keyof Events]?: EventLogger<Event> };
 type EventLogger<Event extends keyof Events> = (
@@ -70,4 +70,4 @@ type EventLogger<Event extends keyof Events> = (
 ) => Discord.CreateMessageOptions | Promise<Discord.CreateMessageOptions | undefined> | undefined;
 
 export default loggers;
-export type { EventLogger };
+export type { EventLogger, EventLoggers };
