@@ -127,8 +127,8 @@ interface GuildDocument {
 			channelId: string;
 		};
 		antiFlood?: {
-			interval: TimeStruct;
-			messageCount: number;
+			interval?: TimeStruct;
+			messageCount?: number;
 			timeoutDuration?: TimeStruct;
 		};
 		/** Relies on guild.features.server.tickets.categoryId */

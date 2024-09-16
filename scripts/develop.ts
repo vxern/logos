@@ -227,6 +227,11 @@ await document.update(database, () => {
 		reports: {
 			channelId: idByName(channels, "reports"),
 		},
+		antiFlood: {
+			interval: [5, "second"],
+			messageCount: 3,
+			timeoutDuration: [1, "day"],
+		},
 		verification: {
 			channelId: idByName(channels, "verifications"),
 			voting: {
