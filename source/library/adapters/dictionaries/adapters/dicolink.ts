@@ -1,7 +1,7 @@
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
 import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
-import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry.ts";
+import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 
 interface DicolinkResult {

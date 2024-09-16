@@ -1,4 +1,4 @@
-import { isDefined } from "logos:core/utilities.ts";
+import { isDefined } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import type { Guild } from "logos/models/guild";
 import { AlertService } from "logos/services/alert";

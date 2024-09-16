@@ -1,9 +1,9 @@
 import { parseArgs } from "node:util";
-import { loadEnvironment } from "logos:core/loaders/environment.ts";
-import { getAvailableMigrations, migrate, rollback } from "logos:core/runners/migrator.ts";
+import { loadEnvironment } from "logos:core/loaders/environment";
+import { getAvailableMigrations, migrate, rollback } from "logos:core/runners/migrator";
 import bun from "bun";
-import { DatabaseMetadata } from "logos/models/database-metadata.ts";
-import { DatabaseStore } from "logos/stores/database.ts";
+import { DatabaseMetadata } from "logos/models/database-metadata";
+import { DatabaseStore } from "logos/stores/database";
 
 const log = constants.loggers.feedback;
 

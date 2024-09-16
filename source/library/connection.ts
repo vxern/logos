@@ -1,4 +1,4 @@
-import type { Environment } from "logos:core/loaders/environment.ts";
+import type { Environment } from "logos:core/loaders/environment";
 import type pino from "pino";
 
 class DiscordConnection {

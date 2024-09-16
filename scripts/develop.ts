@@ -1,8 +1,8 @@
-import { loadEnvironment } from "logos:core/loaders/environment.ts";
-import { getAvailableMigrations, migrate } from "logos:core/runners/migrator.ts";
-import { DatabaseMetadata } from "logos/models/database-metadata.ts";
-import { Guild } from "logos/models/guild.ts";
-import { DatabaseStore } from "logos/stores/database.ts";
+import { loadEnvironment } from "logos:core/loaders/environment";
+import { getAvailableMigrations, migrate } from "logos:core/runners/migrator";
+import { DatabaseMetadata } from "logos/models/database-metadata";
+import { Guild } from "logos/models/guild";
+import { DatabaseStore } from "logos/stores/database";
 
 const log = constants.loggers.feedback;
 

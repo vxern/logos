@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import logTargets from "logos:constants/log-targets.ts";
+import logTargets from "logos:constants/log-targets";
 import { expect } from "chai";
 
 describe("The logTargets object", () => {

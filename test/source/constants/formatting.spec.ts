@@ -1,5 +1,4 @@
 import { describe, it } from "bun:test";
-import { expect } from "chai";
 import {
 	capitalise,
 	code,
@@ -10,6 +9,7 @@ import {
 	timestamp,
 	trim,
 } from "logos:constants/formatting";
+import { expect } from "chai";
 
 describe("capitalise()", () => {
 	it("turns the first letter of the passed string uppercase.", () => {

@@ -1,6 +1,6 @@
-import constants from "logos:constants/constants.ts";
-import type { DatabaseMetadata } from "logos/models/database-metadata.ts";
-import type { DatabaseStore } from "logos/stores/database.ts";
+import constants from "logos:constants/constants";
+import type { DatabaseMetadata } from "logos/models/database-metadata";
+import type { DatabaseStore } from "logos/stores/database";
 import type pino from "pino";
 
 async function migrate({

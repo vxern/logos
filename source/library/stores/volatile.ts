@@ -1,6 +1,6 @@
 import type { Locale } from "logos:constants/languages/localisation";
 import Redis from "ioredis";
-import type { Client } from "logos/client.ts";
+import type { Client } from "logos/client";
 import type pino from "pino";
 
 interface SentencePair {
