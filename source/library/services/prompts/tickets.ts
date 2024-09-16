@@ -35,7 +35,7 @@ class TicketPromptService extends PromptService<{
 	}
 
 	async getUserDocument(ticketDocument: Ticket): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: ticketDocument.authorId });
+		return User.getOrCreate(this.client, { userId: ticketDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, ticketDocument: Ticket): Discord.CreateMessageOptions | undefined {

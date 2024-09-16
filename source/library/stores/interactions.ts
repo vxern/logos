@@ -41,7 +41,7 @@ class InteractionStore {
 	get success(): InteractionStore["reply"] {
 		return async (interaction, embedOrData, flags) => {
 			if (flags?.visible) {
-				return await this.notice(interaction, embedOrData, flags);
+				return this.notice(interaction, embedOrData, flags);
 			}
 
 			return this.#buildColouredReplier({ colour: constants.colours.success })(interaction, embedOrData, flags);
@@ -53,7 +53,7 @@ class InteractionStore {
 		return async (interaction, embedOrData) => {
 			const replyData = this.#replies.get(interaction.token)!;
 			if (!replyData.ephemeral) {
-				return await this.noticed(interaction, embedOrData);
+				return this.noticed(interaction, embedOrData);
 			}
 
 			return this.#buildColouredReplyEditor({ colour: constants.colours.success })(interaction, embedOrData);

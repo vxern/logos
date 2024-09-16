@@ -36,7 +36,7 @@ class Suggestion extends SuggestionModel {
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Suggestion>> },
 	): Promise<Suggestion[]> {
-		return await Model.all<Suggestion>(clientOrDatabase, {
+		return Model.all<Suggestion>(clientOrDatabase, {
 			collection: "Suggestions",
 			where: Object.assign(
 				{ guildId: undefined, authorId: undefined, createdAt: undefined },

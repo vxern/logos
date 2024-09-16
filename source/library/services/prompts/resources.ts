@@ -27,7 +27,7 @@ class ResourcePromptService extends PromptService<{
 	}
 
 	async getUserDocument(resourceDocument: Resource): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: resourceDocument.authorId });
+		return User.getOrCreate(this.client, { userId: resourceDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, resourceDocument: Resource): Discord.CreateMessageOptions | undefined {

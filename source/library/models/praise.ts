@@ -39,7 +39,7 @@ class Praise extends PraiseModel {
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Praise>> },
 	): Promise<Praise[]> {
-		return await Model.all<Praise>(clientOrDatabase, {
+		return Model.all<Praise>(clientOrDatabase, {
 			collection: "Praises",
 			where: Object.assign(
 				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },

@@ -96,7 +96,7 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
+		return User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, entryRequestDocument: EntryRequest): Discord.CreateMessageOptions | undefined {

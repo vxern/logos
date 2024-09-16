@@ -247,7 +247,7 @@ class LocalisationStore {
 			.map((builder) => builder({ localise: this.localise.bind(this), locale }))
 			.reduce<T>((combined, context) => Object.assign(combined, context), {} as T);
 
-		return await scope(strings);
+		return scope(strings);
 	}
 }
 

@@ -44,7 +44,7 @@ class RethinkDBDocumentSession extends DocumentSession {
 	}
 
 	async #alreadyExists(id: string, { collection }: { collection: Collection }): Promise<boolean> {
-		return await rethinkdb.r.table(collection).getAll(id).count().eq(1).run(this.#connection);
+		return rethinkdb.r.table(collection).getAll(id).count().eq(1).run(this.#connection);
 	}
 
 	async store<M extends Model>(document: M): Promise<void> {

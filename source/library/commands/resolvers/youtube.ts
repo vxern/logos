@@ -10,7 +10,7 @@ async function resolveYouTubeSongListings(
 	{ query }: { query: string },
 ): Promise<SongListing | undefined> {
 	if (!constants.patterns.youtubeUrl.test(query)) {
-		return await search(client, interaction, query);
+		return search(client, interaction, query);
 	}
 
 	await client.acknowledge(interaction);

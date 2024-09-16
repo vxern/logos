@@ -31,7 +31,7 @@ class SuggestionPromptService extends PromptService<{
 	}
 
 	async getUserDocument(suggestionDocument: Suggestion): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
+		return User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {

@@ -27,7 +27,7 @@ class ReportPromptService extends PromptService<{
 	}
 
 	async getUserDocument(reportDocument: Report): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: reportDocument.authorId });
+		return User.getOrCreate(this.client, { userId: reportDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
