@@ -31,13 +31,7 @@ class RethinkDBDocumentSession extends DocumentSession {
 	async loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
 		return this.loadManyTabulated(ids, {
 			loadMany: (ids, { collection }) =>
-				rethinkdb.r
-					// @ts-expect-error: The type signature of `getAll()` is invalid; The underlying JS code supports an
-					// indefinite number of IDs, so this call is completely fine.
-					//
-					// https://github.com/rethinkdb/rethinkdb-ts/issues/126
-					.getAll<RethinkDBDocument>(rethinkdb.r.table(collection), ...ids)
-					.run(this.#connection),
+				rethinkdb.r.getAll<RethinkDBDocument>(rethinkdb.r.table(collection), ...ids).run(this.#connection),
 			instantiateModel: (database, rawDocument) =>
 				RethinkDBDocumentConventions.instantiateModel<M>(database, rawDocument),
 		});
