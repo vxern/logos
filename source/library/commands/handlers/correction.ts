@@ -112,8 +112,11 @@ async function handleMakeCorrection(
 					},
 				],
 			})
-			.catch(() =>
-				client.log.warn(`Failed to send correction to ${client.diagnostics.channel(message.channelId)}.`),
+			.catch((error) =>
+				client.log.warn(
+					error,
+					`Failed to send correction to ${client.diagnostics.channel(message.channelId)}.`,
+				),
 			);
 	});
 

@@ -133,7 +133,7 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.log.warn("Failed to send stopped music message."));
+			.catch((error) => this.log.warn(error, "Failed to send stopped music message."));
 
 		await this.destroySession();
 	}
@@ -141,7 +141,7 @@ class MusicService extends LocalService {
 	async #handleConnectionLost(_: string, __: number): Promise<void> {
 		this.client.bot.gateway
 			.leaveVoiceChannel(this.guildId)
-			.catch(() => this.log.warn("Failed to leave voice channel."));
+			.catch((error) => this.log.warn(error, "Failed to leave voice channel."));
 
 		if (!this.hasSession) {
 			return;
@@ -165,7 +165,7 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.log.warn("Failed to send audio halted message."));
+			.catch((error) => this.log.warn(error, "Failed to send audio halted message."));
 
 		this.session.player.removeAllListeners();
 		this.session.isDisconnected = true;
@@ -192,7 +192,7 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.log.warn("Failed to send audio restored message."));
+			.catch((error) => this.log.warn(error, "Failed to send audio restored message."));
 	}
 
 	#canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
@@ -519,8 +519,9 @@ class MusicSession extends EventEmitter {
 					},
 				],
 			})
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to send track play failure to ${this.client.diagnostics.channel(
 						this.channelId,
 					)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,
@@ -549,7 +550,7 @@ class MusicSession extends EventEmitter {
 						},
 					],
 				})
-				.catch(() => this.log.warn("Failed to send music feedback message."));
+				.catch((error) => this.log.warn(error, "Failed to send music feedback message."));
 
 			return;
 		}
@@ -682,8 +683,9 @@ class MusicSession extends EventEmitter {
 					},
 				],
 			})
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to send now playing message to ${this.client.diagnostics.channel(
 						this.channelId,
 					)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,
@@ -729,8 +731,9 @@ class MusicSession extends EventEmitter {
 							},
 						],
 					})
-					.catch(() =>
+					.catch((error) =>
 						this.log.warn(
+							error,
 							`Failed to send track load failure to ${this.client.diagnostics.channel(
 								this.channelId,
 							)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,

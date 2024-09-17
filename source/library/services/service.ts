@@ -57,8 +57,9 @@ abstract class LocalService extends Service {
 					limit: 100,
 					before: buffer.length === 0 ? undefined : buffer.at(-1)?.id,
 				})
-				.catch(() => {
+				.catch((error) => {
 					this.client.log.warn(
+						error,
 						`Failed to get all messages from ${this.client.diagnostics.channel(channelId)}.`,
 					);
 					return undefined;

@@ -294,8 +294,9 @@ abstract class PromptService<
 		// Delete the message and allow the bot to handle the deletion.
 		this.client.bot.helpers
 			.deleteMessage(message.channelId, message.id)
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to delete prompt ${this.client.diagnostics.message(
 						message,
 					)} from ${this.client.diagnostics.channel(message.channelId)} on ${this.client.diagnostics.guild(
@@ -486,7 +487,7 @@ abstract class PromptService<
 
 		await this.client.bot.helpers
 			.deleteMessage(this.#noPromptsMessage.channelId, this.#noPromptsMessage.id)
-			.catch(() => this.log.warn("Failed to delete no prompts message."));
+			.catch((error) => this.log.warn(error, "Failed to delete no prompts message."));
 	}
 
 	getMetadata(prompt: Discord.Message): string | undefined {
@@ -568,7 +569,7 @@ abstract class PromptService<
 
 			await this.client.bot.helpers
 				.deleteMessage(prompt.channelId, prompt.id)
-				.catch(() => this.log.warn("Failed to delete prompt."));
+				.catch((error) => this.log.warn(error, "Failed to delete prompt."));
 		});
 	}
 
@@ -587,7 +588,7 @@ abstract class PromptService<
 		if (prompt !== undefined) {
 			this.client.bot.helpers
 				.deleteMessage(prompt.channelId, prompt.id)
-				.catch(() => this.log.warn("Failed to delete prompt after deleting document."));
+				.catch((error) => this.log.warn(error, "Failed to delete prompt after deleting document."));
 			this.unregisterPrompt(prompt, promptDocument);
 		}
 

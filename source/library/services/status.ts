@@ -37,7 +37,7 @@ class StatusService extends GlobalService {
 				],
 				status: "online",
 			})
-			.catch(() => this.log.warn("Unable to edit bot status."));
+			.catch((error) => this.log.warn(error, "Unable to edit bot status."));
 
 		if (this.#currentIndex === constants.statuses.length - 1) {
 			this.#currentIndex = 0;

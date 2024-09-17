@@ -218,8 +218,11 @@ class DynamicVoiceChannelService extends LocalService {
 				parentId: parent.channel.parentId,
 				position: parent.channel.position,
 			})
-			.catch(() =>
-				this.log.warn(`Failed to create voice channel on ${this.client.diagnostics.guild(this.guildId)}.`),
+			.catch((error) =>
+				this.log.warn(
+					error,
+					`Failed to create voice channel on ${this.client.diagnostics.guild(this.guildId)}.`,
+				),
 			);
 	}
 
@@ -267,8 +270,11 @@ class DynamicVoiceChannelService extends LocalService {
 
 		this.client.bot.helpers
 			.deleteChannel(lastVacantChannelId)
-			.catch(() =>
-				this.log.warn(`Failed to delete voice channel on ${this.client.diagnostics.guild(this.guildId)}.`),
+			.catch((error) =>
+				this.log.warn(
+					error,
+					`Failed to delete voice channel on ${this.client.diagnostics.guild(this.guildId)}.`,
+				),
 			);
 	}
 }

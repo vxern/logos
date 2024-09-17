@@ -120,9 +120,9 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 					return;
 				}
 
-				await this.client.bot.helpers.deleteMessage(channelId, notice.id).catch(() => {
-					this.log.warn("Failed to delete notice.");
-				});
+				await this.client.bot.helpers
+					.deleteMessage(channelId, notice.id)
+					.catch((error) => this.log.warn(error, "Failed to delete notice."));
 			}
 		}
 
@@ -137,9 +137,9 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 			const hash = contents.embeds?.at(-1)?.footer?.iconUrl?.split("&hash=").at(-1);
 			if (hash === undefined || hash !== expectedHash) {
-				await this.client.bot.helpers.deleteMessage(channelId, notice.id).catch(() => {
-					this.log.warn("Failed to delete notice.");
-				});
+				await this.client.bot.helpers
+					.deleteMessage(channelId, notice.id)
+					.catch((error) => this.log.warn(error, "Failed to delete notice."));
 
 				const newNotice = await this.#sendNotice({ contents: expectedContents, hash: expectedHash });
 				if (newNotice === undefined) {
@@ -172,8 +172,9 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 		// Delete the message and allow the bot to handle the deletion.
 		this.client.bot.helpers
 			.deleteMessage(message.channelId, message.id)
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to delete notice ${this.client.diagnostics.message(
 						message,
 					)} from ${this.client.diagnostics.channel(message.channelId)} on ${this.client.diagnostics.guild(
@@ -230,8 +231,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 		lastEmbed.footer = { text: guild.name, iconUrl: NoticeService.encodeHashInGuildIcon({ guild, hash }) };
 
-		return this.client.bot.helpers.sendMessage(channelId, contents).catch(() => {
-			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
+		return this.client.bot.helpers.sendMessage(channelId, contents).catch((error) => {
+			this.log.warn(error, `Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 			return undefined;
 		});
 	}

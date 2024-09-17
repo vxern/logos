@@ -183,8 +183,9 @@ class EntryService extends LocalService {
 
 		this.client.bot.helpers
 			.addRole(this.guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to add ${this.client.diagnostics.role(role)} to ${this.client.diagnostics.user(
 						buttonPress.user,
 					)} on ${this.client.diagnostics.guild(this.guild.id)}.`,
