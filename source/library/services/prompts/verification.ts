@@ -576,8 +576,9 @@ class VerificationPromptService extends PromptService<{
 					BigInt(entryRequestDocument.requestedRoleId),
 					"User-requested role addition.",
 				)
-				.catch(() =>
+				.catch((error) =>
 					this.log.warn(
+						error,
 						`Failed to add ${this.client.diagnostics.role(
 							entryRequestDocument.requestedRoleId,
 						)} to ${this.client.diagnostics.user(authorDocument.userId)} on ${this.client.diagnostics.guild(
@@ -600,8 +601,9 @@ class VerificationPromptService extends PromptService<{
 
 			this.client.bot.helpers
 				.banMember(this.guildId, author.id, {}, "Voted to reject entry request.")
-				.catch(() =>
+				.catch((error) =>
 					this.log.warn(
+						error,
 						`Failed to ban ${this.client.diagnostics.user(
 							authorDocument.userId,
 						)} on ${this.client.diagnostics.guild(guild)}.`,
@@ -668,7 +670,7 @@ class VerificationPromptService extends PromptService<{
 
 		await this.client.bot.helpers
 			.deleteMessage(prompt.channelId, prompt.id)
-			.catch(() => this.log.warn("Failed to delete prompt."));
+			.catch((error) => this.log.warn(error, "Failed to delete prompt."));
 
 		{
 			const strings = constants.contexts.inquiryOpened({

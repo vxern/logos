@@ -157,9 +157,9 @@ class TicketPromptService extends PromptService<{
 	async handleDelete(ticketDocument: Ticket): Promise<void> {
 		await super.handleDelete(ticketDocument);
 
-		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {
-			this.log.warn("Failed to delete ticket channel.");
-		});
+		await this.client.bot.helpers
+			.deleteChannel(ticketDocument.channelId)
+			.catch((error) => this.log.warn(error, "Failed to delete ticket channel."));
 
 		if (ticketDocument.type === "inquiry") {
 			await this.#handleCloseInquiry(ticketDocument);
@@ -225,8 +225,8 @@ class TicketPromptService extends PromptService<{
 				],
 				topic: formData.topic,
 			})
-			.catch(() => {
-				this.client.log.warn("Could not create a channel for ticket.");
+			.catch((error) => {
+				this.client.log.warn(error, "Could not create a channel for ticket.");
 				return undefined;
 			});
 		if (channel === undefined) {
@@ -235,8 +235,8 @@ class TicketPromptService extends PromptService<{
 
 		const memberMention = mention(user.id, { type: "user" });
 
-		this.client.bot.helpers.sendMessage(channel.id, { content: memberMention }).catch(() => {
-			this.client.log.warn("Failed to mention participants in ticket.");
+		this.client.bot.helpers.sendMessage(channel.id, { content: memberMention }).catch((error) => {
+			this.client.log.warn(error, "Failed to mention participants in ticket.");
 			return undefined;
 		});
 
@@ -249,8 +249,8 @@ class TicketPromptService extends PromptService<{
 					},
 				],
 			})
-			.catch(() => {
-				this.client.log.warn("Failed to send a topic message in the ticket channel.");
+			.catch((error) => {
+				this.client.log.warn(error, "Failed to send a topic message in the ticket channel.");
 				return undefined;
 			});
 

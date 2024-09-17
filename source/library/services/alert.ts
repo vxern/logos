@@ -26,8 +26,9 @@ class AlertService extends LocalService {
 
 		this.client.bot.helpers
 			.sendMessage(channelId, message)
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to send alert to ${this.client.diagnostics.channel(
 						channelId,
 					)} on ${this.client.diagnostics.guild(this.guildId)}.`,
