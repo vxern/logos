@@ -1,4 +1,4 @@
-function pluralise(
+export default function pluralise(
 	quantity: string,
 	{ one: singular, two: pluralSmall, many: pluralLarge }: Record<string, string> = {},
 ): string | undefined {
@@ -18,5 +18,3 @@ function pluralise(
 	// Once the number reaches 20, Romanian begins slotting a 'de' between the number and the plural form of the word.
 	return pluralLarge;
 }
-
-export default { pluralise };

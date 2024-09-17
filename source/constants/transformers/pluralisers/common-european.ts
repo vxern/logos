@@ -1,4 +1,7 @@
-function pluralise(quantity: string, { one: singular, two: plural }: Record<string, string> = {}): string | undefined {
+export default function pluralise(
+	quantity: string,
+	{ one: singular, two: plural }: Record<string, string> = {},
+): string | undefined {
 	if (singular === undefined || plural === undefined) {
 		return undefined;
 	}
@@ -9,5 +12,3 @@ function pluralise(quantity: string, { one: singular, two: plural }: Record<stri
 
 	return plural;
 }
-
-export default { pluralise };
