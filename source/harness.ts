@@ -39,4 +39,3 @@ Promise.createRace = async function* <T, R>(
 const globals = globalThis as any;
 globals.Discord = Discord;
 globals.constants = await import("./constants/constants.ts").then((module) => module.default);
-globals.defaults = await import("./constants/defaults.ts").then((module) => module.default);
