@@ -152,8 +152,9 @@ async function createRoleSelectionMenu(
 
 			client.bot.helpers
 				.removeRole(guild.id, member.id, role.id, "User-requested role removal.")
-				.catch(() =>
+				.catch((error) =>
 					client.log.warn(
+						error,
 						`Failed to remove ${client.diagnostics.role(role)} from ${client.diagnostics.member(
 							member,
 						)} on ${client.diagnostics.guild(guild)}.`,
@@ -191,8 +192,9 @@ async function createRoleSelectionMenu(
 
 			await client.bot.helpers
 				.addRole(guild.id, member.id, role.id, "User-requested role addition.")
-				.catch(() =>
+				.catch((error) =>
 					client.log.warn(
+						error,
 						`Failed to add ${client.diagnostics.role(role)} to ${client.diagnostics.member(
 							member,
 						)} on ${client.diagnostics.guild(guild)}.`,
@@ -203,8 +205,9 @@ async function createRoleSelectionMenu(
 				for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
 					client.bot.helpers
 						.removeRole(guild.id, member.id, memberRoleId)
-						.catch(() =>
+						.catch((error) =>
 							client.log.warn(
+								error,
 								`Failed to remove ${client.diagnostics.role(role)} from ${client.diagnostics.member(
 									member,
 								)} on ${client.diagnostics.guild(guild)}.`,

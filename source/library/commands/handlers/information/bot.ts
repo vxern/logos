@@ -4,8 +4,8 @@ import type { Client } from "logos/client";
 async function handleDisplayBotInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const botUser =
 		client.entities.users.get(client.bot.id) ??
-		(await client.bot.helpers.getUser(client.bot.id).catch(() => {
-			client.log.warn("Failed to get bot user.");
+		(await client.bot.helpers.getUser(client.bot.id).catch((error) => {
+			client.log.warn(error, "Failed to get bot user.");
 			return undefined;
 		}));
 	if (botUser === undefined) {

@@ -60,7 +60,9 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 					},
 				],
 			})
-			.catch(() => client.log.warn(`Failed to send answer to ${client.diagnostics.channel(message.channelId)}.`));
+			.catch((error) =>
+				client.log.warn(error, `Failed to send answer to ${client.diagnostics.channel(message.channelId)}.`),
+			);
 	});
 
 	await composer.open();

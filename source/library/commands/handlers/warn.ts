@@ -137,8 +137,8 @@ async function handleWarnUser(
 					.editMember(guild.id, member.id, {
 						communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
 					})
-					.catch(() =>
-						client.log.warn(`Failed to edit timeout state of ${client.diagnostics.member(member)}.`),
+					.catch((error) =>
+						client.log.warn(error, `Failed to edit timeout state of ${client.diagnostics.member(member)}.`),
 					);
 
 				const strings = constants.contexts.warningLimitSurpassedAndTimedOut({

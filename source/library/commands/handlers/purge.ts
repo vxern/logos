@@ -52,7 +52,10 @@ async function handlePurgeMessages(
 		interaction.parameters.end ??
 		(await client.bot.helpers
 			.getMessages(interaction.channelId, { limit: 1 })
-			.catch(() => undefined)
+			.catch((error) => {
+				client.log.error(error, "Failed to fetch latest message for purging.");
+				return undefined;
+			})
 			.then((messages) => messages?.at(0)?.id?.toString()));
 
 	if (end === undefined) {
@@ -89,14 +92,12 @@ async function handlePurgeMessages(
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		client.bot.helpers.getMessage(interaction.channelId, startMessageId).catch(() => {
-			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
-
+		client.bot.helpers.getMessage(interaction.channelId, startMessageId).catch((error) => {
+			client.log.warn(error, `Failed to get start message, ID ${startMessageId}.`);
 			return undefined;
 		}),
-		client.bot.helpers.getMessage(interaction.channelId, endMessageId).catch(() => {
-			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
-
+		client.bot.helpers.getMessage(interaction.channelId, endMessageId).catch((error) => {
+			client.log.warn(error, `Failed to get end message, ID ${endMessageId}.`);
 			return undefined;
 		}),
 	]);
