@@ -148,7 +148,7 @@ class DatabaseStore {
 			Ticket.getAll(this),
 		]);
 
-		const totalCount = collections.map((documents) => documents.length).reduce((a, b) => a + b);
+		const totalCount = collections.map((documents) => documents.length).reduce((a, b) => a + b, 0);
 		const counts = {
 			entryRequests: collections[0].length,
 			reports: collections[1].length,
