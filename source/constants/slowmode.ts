@@ -18,15 +18,23 @@ function isValidSlowmodeLevel(level: string): level is SlowmodeLevel {
 	return (levels as readonly string[]).includes(level);
 }
 
+/**
+ * @privateRemarks
+ * The returned value is in seconds.
+ */
 function getSlowmodeDelayByLevel(level: SlowmodeLevel): number {
 	return Math.floor(slowmodeDelayByLevel[level] / 1000);
 }
 
 function getSlowmodeLevelByDelay(delay: number): SlowmodeLevel | undefined {
-	for (const [level, delay_] of Object.entries(slowmodeDelayByLevel) as [SlowmodeLevel, number][]) {
-		if (delay === delay_) {
-			return level;
+	const delayMilliseconds = delay * 1000;
+
+	for (const [level, delay] of Object.entries(slowmodeDelayByLevel) as [SlowmodeLevel, number][]) {
+		if (delayMilliseconds !== delay) {
+			continue;
 		}
+
+		return level;
 	}
 
 	return undefined;
