@@ -36,7 +36,7 @@ class InteractionStore {
 	 * 🟩 The action intended to be performed with the interaction succeeded.
 	 *
 	 * @remarks
-	 * 🟦 Shows up as a notice if the reply is visible to.
+	 * 🟦 Shows up as a notice if the reply is public.
 	 */
 	get success(): InteractionStore["reply"] {
 		return async (interaction, embedOrData, flags) => {
