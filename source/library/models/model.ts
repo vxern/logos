@@ -7,7 +7,7 @@ import type { RateLimit } from "logos/models/guild";
 import type { DatabaseStore } from "logos/stores/database";
 
 type ClientOrDatabaseStore = Client | DatabaseStore;
-type ModelConstructor = { new (database: DatabaseStore, data: any): Model };
+type ModelConstructor = { new: (database: DatabaseStore, data: any) => Model };
 type IdentifierParts<M extends Model> = M["idParts"];
 type IdentifierData<M extends Model> = { [K in IdentifierParts<M>[number]]: string };
 type IdentifierDataWithDummies<M extends Model> = { [K in IdentifierParts<M>[number]]: string | undefined };
