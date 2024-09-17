@@ -17,10 +17,10 @@ const languages = Object.freeze({
 	languages: {
 		localisation: [
 			...new Set<LocalisationLanguage>([...localisationLanguages.discord, ...localisationLanguages.logos]),
-		].sort(),
+		].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
 		translation: [
 			...new Set<TranslationLanguage>([...translationLanguages.deepl, ...translationLanguages.google]),
-		].sort(),
+		].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
 	},
 	locales: {
 		discord: Object.values(localisationLanguageToLocale.discord) as DiscordLocale[],
