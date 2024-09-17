@@ -33,8 +33,7 @@ async function handleFindWord(
 		return;
 	}
 
-	const learningLanguage =
-		interaction.parameters.language !== undefined ? interaction.parameters.language : interaction.learningLanguage;
+	const learningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
