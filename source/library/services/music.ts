@@ -10,9 +10,10 @@ import * as shoukaku from "shoukaku";
 type PlaybackActionType = "manage" | "check";
 class MusicService extends LocalService {
 	readonly #voiceStateUpdates: Collector<"voiceStateUpdate">;
-	#managerDisconnects!: (name: string, count: number) => void;
-	#managerConnectionRestores!: (name: string, reconnected: boolean) => void;
 	#session?: MusicSession;
+
+	#managerDisconnects!: (name: string, count: number) => Promise<void>;
+	#managerConnectionRestores!: (name: string, reconnected: boolean) => Promise<void>;
 
 	get configuration(): NonNullable<Guild["features"]["music"]> {
 		return this.guildDocument.feature("music");
@@ -50,14 +51,11 @@ class MusicService extends LocalService {
 
 		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
-		this.client.lavalinkService!.manager.on(
-			"disconnect",
-			(this.#managerDisconnects = this.#handleConnectionLost.bind(this)),
-		);
-		this.client.lavalinkService!.manager.on(
-			"ready",
-			(this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this)),
-		);
+		this.#managerDisconnects = this.#handleConnectionLost.bind(this);
+		this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this);
+
+		this.client.lavalinkService!.manager.on("disconnect", this.#managerDisconnects);
+		this.client.lavalinkService!.manager.on("ready", this.#managerConnectionRestores);
 	}
 
 	async stop(): Promise<void> {
@@ -140,7 +138,7 @@ class MusicService extends LocalService {
 		await this.destroySession();
 	}
 
-	#handleConnectionLost(_: string, __: number): void {
+	async #handleConnectionLost(_: string, __: number): Promise<void> {
 		this.client.bot.gateway
 			.leaveVoiceChannel(this.guildId)
 			.catch(() => this.log.warn("Failed to leave voice channel."));
@@ -435,8 +433,8 @@ class MusicSession extends EventEmitter {
 	readonly listings: ListingManager;
 	isDisconnected: boolean;
 
-	#trackEnds!: (data: shoukaku.TrackEndEvent) => void;
-	#trackExceptions!: (data: shoukaku.TrackExceptionEvent) => void;
+	#trackEnds!: (data: shoukaku.TrackEndEvent) => Promise<void>;
+	#trackExceptions!: (data: shoukaku.TrackExceptionEvent) => Promise<void>;
 
 	get hasCurrent(): boolean {
 		return this.listings.hasCurrent;
@@ -478,8 +476,11 @@ class MusicSession extends EventEmitter {
 	}
 
 	start(): void {
-		this.player.on("end", (this.#trackEnds = this.#handleTrackEnd.bind(this)));
-		this.player.on("exception", (this.#trackExceptions = this.#handleTrackException.bind(this)));
+		this.#trackEnds = this.#handleTrackEnd.bind(this);
+		this.#trackExceptions = this.#handleTrackException.bind(this);
+
+		this.player.on("end", this.#trackEnds);
+		this.player.on("exception", this.#trackExceptions);
 	}
 
 	async stop(): Promise<void> {

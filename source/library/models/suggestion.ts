@@ -38,10 +38,7 @@ class Suggestion extends SuggestionModel {
 	): Promise<Suggestion[]> {
 		return Model.all<Suggestion>(clientOrDatabase, {
 			collection: "Suggestions",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: { guildId: undefined, authorId: undefined, createdAt: undefined, ...clauses?.where },
 		});
 	}
 

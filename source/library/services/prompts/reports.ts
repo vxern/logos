@@ -64,10 +64,7 @@ class ReportPromptService extends PromptService<{
 						},
 						{
 							name: strings.report.link,
-							value:
-								reportDocument.formData.messageLink !== undefined
-									? reportDocument.formData.messageLink
-									: `*${strings.report.noLinkProvided}*`,
+							value: reportDocument.formData.messageLink ?? `*${strings.report.noLinkProvided}*`,
 							inline: true,
 						},
 					],

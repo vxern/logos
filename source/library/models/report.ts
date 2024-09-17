@@ -38,10 +38,7 @@ class Report extends ReportModel {
 	): Promise<Report[]> {
 		return Model.all<Report>(clientOrDatabase, {
 			collection: "Reports",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: { guildId: undefined, authorId: undefined, createdAt: undefined, ...clauses?.where },
 		});
 	}
 

@@ -43,7 +43,7 @@ class ActionLock {
 	async #doAction(action: Action): Promise<void> {
 		this.#lock();
 
-		await action.call(undefined);
+		await action();
 
 		// If there is no other action ready to be performed, shut the loop down.
 		const nextAction = this.#nextAction;

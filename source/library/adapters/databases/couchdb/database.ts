@@ -31,7 +31,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 	}) {
 		super({ identifier: "CouchDB", log });
 
-		protocol = "http";
+		protocol ||= "http";
 
 		let url: string;
 		if (username !== undefined) {

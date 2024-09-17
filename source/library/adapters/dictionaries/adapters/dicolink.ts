@@ -121,7 +121,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 			},
 			Object.fromEntries(sources.map((source) => [source, []])) as Record<string, DicolinkResult[]>,
 		);
-		return Object.values(resultsDistributed).reduce((a, b) => (a.length > b.length ? a : b));
+		return Object.values(resultsDistributed).reduce((a, b) => (a.length > b.length ? a : b), []);
 	}
 }
 

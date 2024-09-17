@@ -42,10 +42,13 @@ class Warning extends WarningModel {
 	): Promise<Warning[]> {
 		return Model.all<Warning>(clientOrDatabase, {
 			collection: "Warnings",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: {
+				guildId: undefined,
+				authorId: undefined,
+				targetId: undefined,
+				createdAt: undefined,
+				...clauses?.where,
+			},
 		});
 	}
 

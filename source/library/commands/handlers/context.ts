@@ -35,8 +35,7 @@ async function handleFindInContext(
 
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
-	const learningLanguage =
-		interaction.parameters.language !== undefined ? interaction.parameters.language : interaction.learningLanguage;
+	const learningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
 	const learningLocale = getLocaleByLearningLanguage(learningLanguage);
 
 	const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
