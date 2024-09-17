@@ -3,7 +3,6 @@ import slowmode, {
 	getSlowmodeDelayByLevel,
 	getSlowmodeLevelByDelay,
 	isValidSlowmodeLevel,
-	SlowmodeLevel,
 } from "logos:constants/slowmode";
 import { expect } from "chai";
 
