@@ -50,14 +50,11 @@ class MusicService extends LocalService {
 
 		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
-		this.client.lavalinkService!.manager.on(
-			"disconnect",
-			(this.#managerDisconnects = this.#handleConnectionLost.bind(this)),
-		);
-		this.client.lavalinkService!.manager.on(
-			"ready",
-			(this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this)),
-		);
+		this.#managerDisconnects = this.#handleConnectionLost.bind(this);
+		this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this);
+
+		this.client.lavalinkService!.manager.on("disconnect", this.#managerDisconnects);
+		this.client.lavalinkService!.manager.on("ready", this.#managerConnectionRestores);
 	}
 
 	async stop(): Promise<void> {
@@ -478,8 +475,11 @@ class MusicSession extends EventEmitter {
 	}
 
 	start(): void {
-		this.player.on("end", (this.#trackEnds = this.#handleTrackEnd.bind(this)));
-		this.player.on("exception", (this.#trackExceptions = this.#handleTrackException.bind(this)));
+		this.#trackEnds = this.#handleTrackEnd.bind(this);
+		this.#trackExceptions = this.#handleTrackException.bind(this);
+
+		this.player.on("end", this.#trackEnds);
+		this.player.on("exception", this.#trackExceptions);
 	}
 
 	async stop(): Promise<void> {
