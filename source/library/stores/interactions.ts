@@ -330,9 +330,9 @@ class InteractionStore {
 	#autoDeleteReply(interaction: Logos.Interaction): void {
 		setTimeout(
 			() =>
-				this.#client.deleteReply(interaction).catch(() => {
-					this.log.warn("Failed to auto-delete message.");
-				}),
+				this.#client
+					.deleteReply(interaction)
+					.catch((error) => this.log.warn(error, "Failed to auto-delete message.")),
 			constants.AUTO_DELETE_MESSAGE_TIMEOUT,
 		);
 	}
