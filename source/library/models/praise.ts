@@ -41,10 +41,13 @@ class Praise extends PraiseModel {
 	): Promise<Praise[]> {
 		return Model.all<Praise>(clientOrDatabase, {
 			collection: "Praises",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: {
+				guildId: undefined,
+				authorId: undefined,
+				targetId: undefined,
+				createdAt: undefined,
+				...clauses?.where,
+			},
 		});
 	}
 

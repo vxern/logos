@@ -343,10 +343,10 @@ class InteractionCollector<
 			return InteractionCollector.#defaultParameters as Logos.InteractionParameters<Parameters>;
 		}
 
-		return Object.assign(
-			{ ...InteractionCollector.#defaultParameters },
-			InteractionCollector.#parseParameters(options),
-		) as Logos.InteractionParameters<Parameters>;
+		return {
+			...InteractionCollector.#defaultParameters,
+			...InteractionCollector.#parseParameters(options),
+		} as Logos.InteractionParameters<Parameters>;
 	}
 
 	static #parseParameters<Parameters extends Record<string, string | number | boolean | undefined>>(
