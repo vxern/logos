@@ -75,7 +75,7 @@ import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handl
 import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
 
 /**
- * @privateRemarks
+ * @remarks
  * Commands, command groups and options are ordered alphabetically.
  */
 const commands = Object.freeze({

@@ -19,7 +19,7 @@ class ClientConnector extends shoukaku.Connector {
 	}
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * This method is intentionally not a getter; it conforms to shoukaku's Connector signature.
 	 */
 	getId(): string {
