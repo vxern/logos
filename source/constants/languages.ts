@@ -1,5 +1,5 @@
 import type { DetectionLanguage } from "logos:constants/languages/detection";
-import { type FeatureLanguage, isFeatureLanguage } from "logos:constants/languages/feature";
+import type { FeatureLanguage } from "logos:constants/languages/feature";
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import {
 	type DiscordLocale,
