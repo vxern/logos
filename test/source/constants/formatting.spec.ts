@@ -63,10 +63,6 @@ describe("list()", () => {
 	});
 });
 
-describe("getSigilByTimestampFormat()", () => {
-	// TODO(vxern): Test.
-});
-
 describe("timestamp()", () => {
 	describe("formats the passed Unix timestamp", () => {
 		const TIMESTAMP = 7031;
@@ -100,10 +96,6 @@ describe("timestamp()", () => {
 			expect(timestamp(TIMESTAMP_MILLISECONDS, { format: "relative" })).to.equal(`<t:${TIMESTAMP}:R>`);
 		});
 	});
-});
-
-describe("getSigilByMentionType()", () => {
-	// TODO(vxern): Test.
 });
 
 describe("mention()", () => {
