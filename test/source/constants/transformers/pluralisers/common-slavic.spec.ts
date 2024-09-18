@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import pluralise from "logos:constants/transformers/pluralisers/common-slavic.ts";
+import pluralise from "logos:constants/transformers/pluralisers/common-slavic";
 import { expect } from "chai";
 
 describe("pluralise()", () => {
