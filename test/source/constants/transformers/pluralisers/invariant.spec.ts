@@ -2,9 +2,9 @@ import { describe, it } from "bun:test";
 import pluralise from "logos:constants/transformers/pluralisers/invariant";
 import { expect } from "chai";
 
-describe("pluralise()", () => {
-	const FORMS = { one: "ember" };
+const FORMS = { one: "ember" };
 
+describe("pluralise()", () => {
 	it("returns undefined if the passed object does not contain form `one`.", () => {
 		expect(pluralise("0", {})).to.be.undefined;
 	});
