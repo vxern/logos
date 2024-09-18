@@ -30,19 +30,19 @@ describe("pluralise()", () => {
 		expect(pluralise("-1", FORMS)).to.equal("casă");
 	});
 
-	it("returns the plural form when the quantity is 2 or more.", () => {
+	it("returns the short plural form when the quantity is 2 or more.", () => {
 		expect(pluralise("2", FORMS)).to.equal("case");
 	});
 
-	it("returns the plural form when the quantity is -2 or less.", () => {
+	it("returns the short plural form when the quantity is -2 or less.", () => {
 		expect(pluralise("-2", FORMS)).to.equal("case");
 	});
 
-	it("returns the plural form when the quantity is 20 or more.", () => {
+	it("returns the long plural form when the quantity is 20 or more.", () => {
 		expect(pluralise("20", FORMS)).to.equal("de case");
 	});
 
-	it("returns the plural form when the quantity is -20 or less.", () => {
+	it("returns the long plural form when the quantity is -20 or less.", () => {
 		expect(pluralise("-20", FORMS)).to.equal("de case");
 	});
 });
