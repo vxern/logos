@@ -21,6 +21,7 @@ import { LocalisationStore, type RawLocalisations } from "logos/stores/localisat
 import { ServiceStore } from "logos/stores/services";
 import { VolatileStore } from "logos/stores/volatile";
 import type pino from "pino";
+import { CacheStore } from "logos/stores/cache.ts";
 
 class Client {
 	readonly log: pino.Logger;
@@ -32,6 +33,7 @@ class Client {
 	readonly #localisations: LocalisationStore;
 	readonly #commands: CommandStore;
 	readonly #interactions: InteractionStore;
+	readonly #cache: CacheStore;
 	readonly #services: ServiceStore;
 	readonly #events: EventStore;
 	readonly #journalling: JournallingStore;
@@ -183,8 +185,8 @@ class Client {
 		return this.#events.registerCollector.bind(this.#events);
 	}
 
-	get tryLog(): JournallingStore["tryLog"] {
-		return this.#journalling.tryLog.bind(this.#journalling);
+	get entities(): CacheStore["entities"] {
+		return this.#cache.entities;
 	}
 
 	get lavalinkService(): LavalinkService | undefined {
@@ -231,6 +233,10 @@ class Client {
 		return this.#services.getPromptService.bind(this.#services);
 	}
 
+	get tryLog(): JournallingStore["tryLog"] {
+		return this.#journalling.tryLog.bind(this.#journalling);
+	}
+
 	get registerInteractionCollector(): <Metadata extends string[]>(
 		collector: InteractionCollector<Metadata>,
 	) => Promise<void> {
@@ -243,10 +249,6 @@ class Client {
 
 	get bot(): DiscordConnection["bot"] {
 		return this.#connection.bot;
-	}
-
-	get entities(): DiscordConnection["cache"] {
-		return this.#connection.cache;
 	}
 
 	constructor({
@@ -272,11 +274,17 @@ class Client {
 			templates: commands,
 		});
 		this.#interactions = new InteractionStore(this);
+		this.#cache = new CacheStore({ log });
 		this.#services = new ServiceStore(this);
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);
 		this.#adapters = new AdapterStore(this);
-		this.#connection = new DiscordConnection({ log, environment, events: this.#events.buildEventHandlers() });
+		this.#connection = new DiscordConnection({
+			log,
+			environment,
+			eventHandlers: this.#events.buildEventHandlers(),
+			cacheHandlers: this.#cache.buildCacheHandlers(),
+		});
 
 		this.#guildReloadLock = new ActionLock();
 		this.#guildCreateCollector = new Collector<"guildCreate">();

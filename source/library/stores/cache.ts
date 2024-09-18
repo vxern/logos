@@ -1,4 +1,7 @@
+import pino from "pino";
+
 class CacheStore {
+	readonly log: pino.Logger;
 	readonly entities: {
 		readonly guilds: Map<bigint, Logos.Guild>;
 		readonly users: Map<bigint, Logos.User>;
@@ -11,9 +14,11 @@ class CacheStore {
 		readonly attachments: Map<bigint, Logos.Attachment>;
 		readonly roles: Map<bigint, Logos.Role>;
 	};
+
 	readonly #fetchRequests: Set<bigint>;
 
-	constructor() {
+	constructor({ log }: { log: pino.Logger }) {
+		this.log = log.child({ name: "CacheStore" });
 		this.entities = {
 			guilds: new Map(),
 			users: new Map(),
@@ -26,6 +31,7 @@ class CacheStore {
 			attachments: new Map(),
 			roles: new Map(),
 		};
+
 		this.#fetchRequests = new Set();
 	}
 
