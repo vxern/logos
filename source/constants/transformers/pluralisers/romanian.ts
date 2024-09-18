@@ -11,7 +11,8 @@ export default function pluralise(
 	}
 
 	// Until the number 20, Romanian nouns follow the standard number + plural rule.
-	if (Number.parseInt(quantity) < 20) {
+	const quantityAsNumber = Number.parseInt(quantity);
+	if (quantityAsNumber > -20 && quantityAsNumber < 20) {
 		return pluralSmall;
 	}
 

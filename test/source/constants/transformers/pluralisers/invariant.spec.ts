@@ -5,8 +5,12 @@ import { expect } from "chai";
 const FORMS = { one: "ember" };
 
 describe("pluralise()", () => {
-	it("returns undefined if the passed object does not contain form `one`.", () => {
+	it("returns undefined if the passed object does not contain the form `one`.", () => {
 		expect(pluralise("0", {})).to.be.undefined;
+	});
+
+	it("does not return undefined when the passed object contains the form `one`.", () => {
+		expect(pluralise("1", FORMS)).to.not.be.undefined;
 	});
 
 	it("returns the singular form when the quantity is 1.", () => {
