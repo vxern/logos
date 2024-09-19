@@ -1,4 +1,4 @@
-import pino from "pino";
+import type pino from "pino";
 
 class CacheStore {
 	readonly log: pino.Logger;
@@ -112,6 +112,7 @@ class CacheStore {
 
 	#cacheRole(role: Discord.Role): void {
 		this.entities.roles.set(role.id, role);
+
 		this.entities.guilds.get(role.guildId)?.roles?.set(role.id, role);
 	}
 

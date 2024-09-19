@@ -12,6 +12,7 @@ import type { LavalinkService } from "logos/services/lavalink";
 import type { RealtimeUpdateService } from "logos/services/realtime-updates";
 import type { StatusService } from "logos/services/status";
 import { AdapterStore } from "logos/stores/adapters";
+import { CacheStore } from "logos/stores/cache.ts";
 import { CommandStore } from "logos/stores/commands";
 import { DatabaseStore } from "logos/stores/database";
 import { EventStore } from "logos/stores/events";
@@ -21,7 +22,6 @@ import { LocalisationStore, type RawLocalisations } from "logos/stores/localisat
 import { ServiceStore } from "logos/stores/services";
 import { VolatileStore } from "logos/stores/volatile";
 import type pino from "pino";
-import { CacheStore } from "logos/stores/cache.ts";
 
 class Client {
 	readonly log: pino.Logger;

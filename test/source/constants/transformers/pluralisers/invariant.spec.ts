@@ -1,6 +1,6 @@
 import { describe, it } from "bun:test";
-import { expect } from "chai";
 import pluralise from "logos:constants/transformers/pluralisers/invariant";
+import { expect } from "chai";
 
 describe("pluralise()", () => {
 	const FORMS = { one: "ember" };
