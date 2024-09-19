@@ -1,6 +1,6 @@
 import type { Client } from "logos/client";
 // biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
-import type { FeatureManagement, GuildDocument, RateLimit } from "logos/models/documents/guild/latest";
+import type { FeatureManagement, GuildDocument, RateLimit } from "logos/models/documents/guild/latest.ts";
 import { GuildStatistics } from "logos/models/guild-statistics";
 import { type CreateModelOptions, GuildModel, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
@@ -52,6 +52,7 @@ class Guild extends GuildModel {
 			timeouts: false,
 			warns: false,
 			reports: false,
+			antiFlood: false,
 			verification: false,
 			dynamicVoiceChannels: false,
 			entry: false,
@@ -69,6 +70,7 @@ class Guild extends GuildModel {
 			timeouts: false,
 			warns: false,
 			reports: false,
+			antiFlood: false,
 			verification: false,
 			suggestions: false,
 			resourceSubmissions: false,

@@ -1,5 +1,5 @@
 import type { GuildDocument as Previous } from "logos/models/documents/guild/4.21.0";
-import type { GuildDocument as Next } from "logos/models/documents/guild/latest";
+import type { GuildDocument as Next } from "logos/models/documents/guild/4.26.0";
 import type { Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
