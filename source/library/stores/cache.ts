@@ -1,4 +1,16 @@
+import type { EntryRequest } from "logos/models/entry-request";
+import type { GuildStatistics } from "logos/models/guild-statistics";
+import type { Guild } from "logos/models/guild";
+import type { Model } from "logos/models/model";
+import type { Praise } from "logos/models/praise";
+import type { Report } from "logos/models/report";
+import type { Resource } from "logos/models/resource";
+import type { Suggestion } from "logos/models/suggestion";
+import type { Ticket } from "logos/models/ticket";
+import type { User } from "logos/models/user";
+import type { Warning } from "logos/models/warning";
 import type pino from "pino";
+import type { Collection } from "logos:constants/database";
 
 class CacheStore {
 	readonly log: pino.Logger;
@@ -13,6 +25,19 @@ class CacheStore {
 		};
 		readonly attachments: Map<bigint, Logos.Attachment>;
 		readonly roles: Map<bigint, Logos.Role>;
+	};
+	readonly documents: {
+		readonly entryRequests: Map<string, EntryRequest>;
+		readonly guildStatistics: Map<string, GuildStatistics>;
+		readonly guilds: Map<string, Guild>;
+		readonly praisesByAuthor: Map<string, Map<string, Praise>>;
+		readonly praisesByTarget: Map<string, Map<string, Praise>>;
+		readonly reports: Map<string, Report>;
+		readonly resources: Map<string, Resource>;
+		readonly suggestions: Map<string, Suggestion>;
+		readonly tickets: Map<string, Ticket>;
+		readonly users: Map<string, User>;
+		readonly warningsByTarget: Map<string, Map<string, Warning>>;
 	};
 
 	readonly #fetchRequests: Set<bigint>;
@@ -30,6 +55,19 @@ class CacheStore {
 			},
 			attachments: new Map(),
 			roles: new Map(),
+		};
+		this.documents = {
+			entryRequests: new Map(),
+			guildStatistics: new Map(),
+			guilds: new Map(),
+			praisesByAuthor: new Map(),
+			praisesByTarget: new Map(),
+			reports: new Map(),
+			resources: new Map(),
+			suggestions: new Map(),
+			tickets: new Map(),
+			users: new Map(),
+			warningsByTarget: new Map(),
 		};
 
 		this.#fetchRequests = new Set();
@@ -105,7 +143,10 @@ class CacheStore {
 
 		const blob = await fetch(attachment.url).then((response) => response.blob());
 
-		this.entities.attachments.set(attachment.id, Object.assign(attachment, { blob }));
+		this.entities.attachments.set(
+			attachment.id,
+			Object.assign(attachment, { name: attachment.filename, blob: blob as Blob }),
+		);
 
 		this.#fetchRequests.delete(attachment.id);
 	}
@@ -121,6 +162,140 @@ class CacheStore {
 			this.entities.guilds.get(voiceState.guildId)?.voiceStates?.set(voiceState.userId, voiceState);
 		} else {
 			this.entities.guilds.get(voiceState.guildId)?.voiceStates?.delete(voiceState.userId);
+		}
+	}
+
+	cacheDocuments<M extends Model>(documents: M[]): void {
+		if (documents.length === 0) {
+			return;
+		}
+
+		this.log.debug(`Caching ${documents.length} documents...`);
+
+		for (const document of documents) {
+			this.cacheDocument(document);
+		}
+	}
+
+	cacheDocument(document: any): void {
+		switch (document.collection as Collection) {
+			case "DatabaseMetadata": {
+				// Uncached
+				break;
+			}
+			case "EntryRequests": {
+				this.documents.entryRequests.set(document.partialId, document);
+				break;
+			}
+			case "GuildStatistics": {
+				this.documents.guildStatistics.set(document.partialId, document);
+				break;
+			}
+			case "Guilds": {
+				this.documents.guilds.set(document.partialId, document);
+				break;
+			}
+			case "Praises": {
+				if (this.documents.praisesByAuthor.has(document.authorId)) {
+					this.documents.praisesByAuthor.get(document.authorId)?.set(document.partialId, document);
+				} else {
+					this.documents.praisesByAuthor.set(document.authorId, new Map([[document.partialId, document]]));
+				}
+
+				if (this.documents.praisesByTarget.has(document.targetId)) {
+					this.documents.praisesByTarget.get(document.targetId)?.set(document.partialId, document);
+				} else {
+					this.documents.praisesByTarget.set(document.targetId, new Map([[document.partialId, document]]));
+				}
+
+				break;
+			}
+			case "Reports": {
+				this.documents.reports.set(document.partialId, document);
+				break;
+			}
+			case "Resources": {
+				this.documents.resources.set(document.partialId, document);
+				break;
+			}
+			case "Suggestions": {
+				this.documents.suggestions.set(document.partialId, document);
+				break;
+			}
+			case "Tickets": {
+				this.documents.tickets.set(document.partialId, document);
+				break;
+			}
+			case "Users": {
+				this.documents.users.set(document.partialId, document);
+				break;
+			}
+			case "Warnings": {
+				if (this.documents.warningsByTarget.has(document.targetId)) {
+					this.documents.warningsByTarget.get(document.targetId)?.set(document.partialId, document);
+				} else {
+					this.documents.warningsByTarget.set(document.targetId, new Map([[document.partialId, document]]));
+				}
+				break;
+			}
+		}
+	}
+
+	unloadDocument(document: any): void {
+		switch (document.collection as Collection) {
+			case "DatabaseMetadata": {
+				// Uncached
+				break;
+			}
+			case "EntryRequests": {
+				this.documents.entryRequests.delete(document.partialId);
+				break;
+			}
+			case "Guilds": {
+				this.documents.guildStatistics.delete(document.partialId);
+				break;
+			}
+			case "GuildStatistics": {
+				this.documents.guilds.delete(document.partialId);
+				break;
+			}
+			case "Praises": {
+				if (this.documents.praisesByAuthor.has(document.authorId)) {
+					this.documents.praisesByAuthor.get(document.authorId)?.delete(document.partialId);
+				}
+
+				if (this.documents.praisesByTarget.has(document.targetId)) {
+					this.documents.praisesByTarget.get(document.targetId)?.delete(document.partialId);
+				}
+
+				break;
+			}
+			case "Reports": {
+				this.documents.reports.delete(document.partialId);
+				break;
+			}
+			case "Resources": {
+				this.documents.resources.delete(document.partialId);
+				break;
+			}
+			case "Suggestions": {
+				this.documents.suggestions.delete(document.partialId);
+				break;
+			}
+			case "Tickets": {
+				this.documents.tickets.delete(document.partialId);
+				break;
+			}
+			case "Users": {
+				this.documents.users.delete(document.partialId);
+				break;
+			}
+			case "Warnings": {
+				if (this.documents.warningsByTarget.has(document.targetId)) {
+					this.documents.warningsByTarget.get(document.targetId)?.delete(document.partialId);
+				}
+				break;
+			}
 		}
 	}
 }
