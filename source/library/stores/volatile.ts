@@ -217,7 +217,7 @@ class VolatileStore {
 			sentenceIds = Array.from(
 				sentenceIdBatches.reduce(
 					(buffer, sentenceIds) => new Set(sentenceIds.filter((sentenceId) => buffer.has(sentenceId))),
-					new Set(sentenceIdBatches.at(0)!),
+					new Set(sentenceIdBatches.at(0)),
 				),
 			);
 		}
