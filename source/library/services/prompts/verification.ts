@@ -587,7 +587,11 @@ class VerificationPromptService extends PromptService<{
 					),
 				);
 
-			await this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
+			await this.client.tryLog("entryRequestAccept", {
+				guildId: guild.id,
+				journalling: this.guildDocument.isJournalled("verification"),
+				args: [author, voter],
+			});
 		} else if (verdict === "rejected") {
 			await authorDocument.update(this.client, () => {
 				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "rejected" });
@@ -610,7 +614,11 @@ class VerificationPromptService extends PromptService<{
 					),
 				);
 
-			await this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
+			await this.client.tryLog("entryRequestReject", {
+				guildId: guild.id,
+				journalling: this.guildDocument.isJournalled("verification"),
+				args: [author, voter],
+			});
 		}
 
 		return true;
