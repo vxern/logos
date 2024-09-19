@@ -7,5 +7,5 @@ const log = process.env.IS_DEBUG === "true" ? constants.loggers.debug : constant
 const environment = loadEnvironment({ log });
 const localisations = await loadLocalisations({ log });
 
-const client = await Client.create({ log, environment, localisations });
+const client = new Client({ log, environment, localisations });
 await client.start();

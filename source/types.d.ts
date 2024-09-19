@@ -61,7 +61,7 @@ declare global {
 
 		type Message = Pick<Discord.Message, keyof Properties["message"]>;
 
-		type Attachment = Pick<Discord.Attachment, keyof Properties["attachment"]> & { blob: Discord.Blob };
+		type Attachment = Pick<Discord.Attachment, keyof Properties["attachment"]> & Discord.FileContent;
 
 		type Role = Pick<Discord.Role, keyof Properties["role"]>;
 

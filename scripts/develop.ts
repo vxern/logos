@@ -2,6 +2,7 @@ import { loadEnvironment } from "logos:core/loaders/environment";
 import { getAvailableMigrations, migrate } from "logos:core/runners/migrator";
 import { DatabaseMetadata } from "logos/models/database-metadata";
 import { Guild } from "logos/models/guild";
+import { CacheStore } from "logos/stores/cache";
 import { DatabaseStore } from "logos/stores/database";
 
 const log = constants.loggers.feedback;
@@ -40,7 +41,11 @@ const bot = Discord.createBot({
 
 bot.start();
 
-const database = await DatabaseStore.create({ log: constants.loggers.silent, environment });
+const database = DatabaseStore.create({
+	log: constants.loggers.silent,
+	environment,
+	cache: new CacheStore({ log: constants.loggers.silent }),
+});
 await database.setup({ prefetchDocuments: false });
 
 const availableMigrations = await getAvailableMigrations();
