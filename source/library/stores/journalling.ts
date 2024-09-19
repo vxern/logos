@@ -69,14 +69,13 @@ class JournallingStore {
 
 	async tryLog<Event extends keyof Events>(
 		event: Event,
-		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean | undefined; args: Events[Event] },
+		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean; args: Events[Event] },
 	): Promise<void> {
-		// If explicitly defined as false, do not log.
-		if (journalling === false) {
-			this.#client.log.info(
+		if (!journalling) {
+			this.#client.log.debug(
 				`Event '${event}' happened on ${this.#client.diagnostics.guild(
 					guildId,
-				)}, but journalling for that feature is explicitly turned off. Ignoring...`,
+				)}, but journalling for that feature is turned off. Ignoring...`,
 			);
 			return;
 		}
