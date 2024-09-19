@@ -63,15 +63,11 @@ describe("list()", () => {
 	});
 });
 
-describe("getSigilByTimestampFormat()", () => {
-	// TODO(vxern): Test.
-});
+const TIMESTAMP = 7031;
+const TIMESTAMP_MILLISECONDS = TIMESTAMP * 1000;
 
 describe("timestamp()", () => {
 	describe("formats the passed Unix timestamp", () => {
-		const TIMESTAMP = 7031;
-		const TIMESTAMP_MILLISECONDS = TIMESTAMP * 1000;
-
 		it("in short time format.", () => {
 			expect(timestamp(TIMESTAMP_MILLISECONDS, { format: "short-time" })).to.equal(`<t:${TIMESTAMP}:t>`);
 		});
@@ -102,10 +98,6 @@ describe("timestamp()", () => {
 	});
 });
 
-describe("getSigilByMentionType()", () => {
-	// TODO(vxern): Test.
-});
-
 describe("mention()", () => {
 	describe("formats the passed ID", () => {
 		it("as a channel mention.", () => {
@@ -122,6 +114,8 @@ describe("mention()", () => {
 	});
 });
 
+const STRING = "This is a sample sentence.";
+
 describe("trim()", () => {
 	it("returns an empty string if an empty string was passed, regardless of the desired length.", () => {
 		expect(trim("", 0)).to.equal("");
@@ -130,8 +124,6 @@ describe("trim()", () => {
 	});
 
 	it("does not trim the string if it's shorter than or of the specified length.", () => {
-		const STRING = "This is a sample sentence.";
-
 		expect(trim(STRING, STRING.length + 1)).to.equal(STRING);
 		expect(trim(STRING, STRING.length)).to.equal(STRING);
 	});

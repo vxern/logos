@@ -171,7 +171,7 @@ abstract class DocumentConventions<Metadata = any> {
 	abstract get id(): string;
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * Can optionally be overridden by the concrete convention, and by default does not retrieve any underlying value
 	 * for a revision. This is okay because only certain databases have to keep track of revisions, and most of them
 	 * never consult with this value.
@@ -181,13 +181,13 @@ abstract class DocumentConventions<Metadata = any> {
 	}
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * Same remarks as for the getter; only some conventions have a use for the revision.
 	 */
 	set revision(_: string) {}
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * Same remarks as for revision.
 	 */
 	get isDeleted(): boolean | undefined {
@@ -195,7 +195,7 @@ abstract class DocumentConventions<Metadata = any> {
 	}
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * Same remarks as for revision.
 	 */
 	set isDeleted(_: boolean) {}

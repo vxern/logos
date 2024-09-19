@@ -2,9 +2,9 @@ import { describe, it } from "bun:test";
 import pluralise from "logos:constants/transformers/pluralisers/common-slavic";
 import { expect } from "chai";
 
-describe("pluralise()", () => {
-	const FORMS = { one: "dom", two: "domy", many: "domów" };
+const FORMS = { one: "dom", two: "domy", many: "domów" };
 
+describe("pluralise()", () => {
 	it("returns undefined if the passed object does not contain forms `one`, `two` and `many`.", () => {
 		expect(pluralise("0", {})).to.be.undefined;
 		expect(pluralise("1", { one: "dom" })).to.be.undefined;
