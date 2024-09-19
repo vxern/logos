@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
 import type { Collection } from "logos:constants/database";
 import type { Environment } from "logos:core/loaders/environment";
 import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databases/adapter";
@@ -36,10 +36,7 @@ class RavenDBAdapter extends DatabaseAdapter {
 		this.#database.conventions.getIdentityProperty = () => undefined;
 	}
 
-	static async tryCreate({
-		environment,
-		log,
-	}: { log: pino.Logger; environment: Environment }): Promise<RavenDBAdapter | undefined> {
+	static tryCreate({ environment, log }: { log: pino.Logger; environment: Environment }): RavenDBAdapter | undefined {
 		if (
 			environment.ravendbHost === undefined ||
 			environment.ravendbPort === undefined ||
@@ -51,7 +48,7 @@ class RavenDBAdapter extends DatabaseAdapter {
 
 		let certificate: Buffer | undefined;
 		if (environment.ravendbSecure) {
-			certificate = await fs.readFile(".cert.pfx");
+			certificate = fs.readFileSync(".cert.pfx");
 		}
 
 		return new RavenDBAdapter({
