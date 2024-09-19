@@ -19,7 +19,7 @@ function isValidSlowmodeLevel(level: string): level is SlowmodeLevel {
 }
 
 /**
- * @privateRemarks
+ * @remarks
  * The returned value is in seconds.
  */
 function getSlowmodeDelayByLevel(level: SlowmodeLevel): number {

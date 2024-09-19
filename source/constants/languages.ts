@@ -1,5 +1,5 @@
 import type { DetectionLanguage } from "logos:constants/languages/detection";
-import { type FeatureLanguage, isFeatureLanguage } from "logos:constants/languages/feature";
+import type { FeatureLanguage } from "logos:constants/languages/feature";
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import {
 	type DiscordLocale,
@@ -54,16 +54,6 @@ function getBaseLanguage<L extends Language>(language: L): BaseLanguage<L> {
 	return baseLanguage as BaseLanguage<L>;
 }
 
-function getFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
-	const baseLanguage = getBaseLanguage(language);
-
-	if (isFeatureLanguage(baseLanguage)) {
-		return baseLanguage;
-	}
-
-	return undefined;
-}
-
 function getTranslationLanguage(language: Language): TranslationLanguage | undefined {
 	if (isTranslationLanguage(language)) {
 		return language;
@@ -89,5 +79,5 @@ interface Languages<Language extends string> {
 }
 
 export default languages;
-export { getTranslationLanguage, getFeatureLanguage, getBaseLanguage };
+export { getTranslationLanguage, getBaseLanguage };
 export type { Language, Languages, WithBaseLanguage };
