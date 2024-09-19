@@ -178,7 +178,7 @@ class InteractionStore {
 				locale: interaction.guildLocale,
 			});
 			const message = await this.#client.bot.helpers
-				.sendMessage(interaction.channelId!, {
+				.sendMessage(interaction.channelId, {
 					embeds: [
 						{
 							description: strings.thinking,
@@ -220,7 +220,7 @@ class InteractionStore {
 		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
-			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId!, data).catch((error) => {
+			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId, data).catch((error) => {
 				this.log.error(error, "Failed to make message reply to repeated interaction.");
 				return undefined;
 			});
@@ -254,7 +254,7 @@ class InteractionStore {
 		if (interaction.parameters["@repeat"]) {
 			const messageId = this.#messages.get(interaction.token)!;
 
-			await this.#client.bot.helpers.editMessage(interaction.channelId!, messageId, data).catch((error) => {
+			await this.#client.bot.helpers.editMessage(interaction.channelId, messageId, data).catch((error) => {
 				this.log.error(error, "Failed to edit message reply made to repeated interaction.");
 				return undefined;
 			});
@@ -277,7 +277,7 @@ class InteractionStore {
 
 			this.#messages.delete(interaction.token);
 
-			await this.#client.bot.helpers.deleteMessage(interaction.channelId!, messageId).catch((error) => {
+			await this.#client.bot.helpers.deleteMessage(interaction.channelId, messageId).catch((error) => {
 				this.log.error(error, "Failed to delete message reply made to repeated interaction.");
 				return undefined;
 			});
