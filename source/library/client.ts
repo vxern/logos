@@ -9,7 +9,6 @@ import { Guild } from "logos/models/guild";
 import { Model } from "logos/models/model";
 import type { InteractionRepetitionService } from "logos/services/interaction-repetition";
 import type { LavalinkService } from "logos/services/lavalink";
-import type { RealtimeUpdateService } from "logos/services/realtime-updates";
 import type { StatusService } from "logos/services/status";
 import { AdapterStore } from "logos/stores/adapters";
 import { CacheStore } from "logos/stores/cache";
@@ -203,10 +202,6 @@ class Client {
 
 	get interactionRepetitionService(): InteractionRepetitionService {
 		return this.#services.global.interactionRepetition;
-	}
-
-	get realtimeUpdateService(): RealtimeUpdateService {
-		return this.#services.global.realtimeUpdates;
 	}
 
 	get statusService(): StatusService {

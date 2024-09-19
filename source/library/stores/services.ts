@@ -18,7 +18,6 @@ import type { PromptService } from "logos/services/prompts/service";
 import { SuggestionPromptService } from "logos/services/prompts/suggestions";
 import { TicketPromptService } from "logos/services/prompts/tickets";
 import { VerificationPromptService } from "logos/services/prompts/verification";
-import { RealtimeUpdateService } from "logos/services/realtime-updates";
 import { RoleIndicatorService } from "logos/services/role-indicators";
 import type { Service } from "logos/services/service";
 import { StatusService } from "logos/services/status";
@@ -29,7 +28,6 @@ class ServiceStore {
 	readonly global: {
 		readonly lavalink?: LavalinkService;
 		readonly interactionRepetition: InteractionRepetitionService;
-		readonly realtimeUpdates: RealtimeUpdateService;
 		readonly status: StatusService;
 	};
 	readonly local: {
@@ -74,7 +72,6 @@ class ServiceStore {
 		this.global = {
 			lavalink: lavalinkService,
 			interactionRepetition: new InteractionRepetitionService(client),
-			realtimeUpdates: new RealtimeUpdateService(client),
 			status: new StatusService(client),
 		};
 		this.local = {
