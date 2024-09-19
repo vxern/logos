@@ -1,6 +1,6 @@
 import { describe, it } from "bun:test";
-import { expect } from "chai";
 import pluralise from "logos:constants/transformers/pluralisers/romanian";
+import { expect } from "chai";
 
 const FORMS = { one: "casă", two: "case", many: "de case" };
 
