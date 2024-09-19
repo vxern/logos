@@ -18,6 +18,7 @@ import { Suggestion } from "logos/models/suggestion";
 import { Ticket } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { Warning } from "logos/models/warning";
+import type { CacheStore } from "logos/stores/cache";
 import type pino from "pino";
 
 class DatabaseStore {
@@ -36,19 +37,7 @@ class DatabaseStore {
 	} as const);
 
 	readonly log: pino.Logger;
-	readonly cache: {
-		readonly entryRequests: Map<string, EntryRequest>;
-		readonly guildStatistics: Map<string, GuildStatistics>;
-		readonly guilds: Map<string, Guild>;
-		readonly praisesByAuthor: Map<string, Map<string, Praise>>;
-		readonly praisesByTarget: Map<string, Map<string, Praise>>;
-		readonly reports: Map<string, Report>;
-		readonly resources: Map<string, Resource>;
-		readonly suggestions: Map<string, Suggestion>;
-		readonly tickets: Map<string, Ticket>;
-		readonly users: Map<string, User>;
-		readonly warningsByTarget: Map<string, Map<string, Warning>>;
-	};
+	readonly cache: CacheStore;
 
 	readonly #adapter: DatabaseAdapter;
 
@@ -60,26 +49,18 @@ class DatabaseStore {
 		return (callback) => this.#adapter.withSession(callback, { database: this });
 	}
 
-	constructor({ log, adapter }: { log: pino.Logger; adapter: DatabaseAdapter }) {
+	constructor({ log, adapter, cache }: { log: pino.Logger; adapter: DatabaseAdapter; cache: CacheStore }) {
 		this.log = log;
-		this.cache = {
-			entryRequests: new Map(),
-			guildStatistics: new Map(),
-			guilds: new Map(),
-			praisesByAuthor: new Map(),
-			praisesByTarget: new Map(),
-			reports: new Map(),
-			resources: new Map(),
-			suggestions: new Map(),
-			tickets: new Map(),
-			users: new Map(),
-			warningsByTarget: new Map(),
-		};
+		this.cache = cache;
 
 		this.#adapter = adapter;
 	}
 
-	static async create({ log, environment }: { log: pino.Logger; environment: Environment }): Promise<DatabaseStore> {
+	static create({
+		log,
+		environment,
+		cache,
+	}: { log: pino.Logger; environment: Environment; cache: CacheStore }): DatabaseStore {
 		log = log.child({ name: "DatabaseStore" });
 
 		let adapter: DatabaseAdapter | undefined;
@@ -89,7 +70,7 @@ class DatabaseStore {
 				break;
 			}
 			case "ravendb": {
-				adapter = await RavenDBAdapter.tryCreate({ log, environment });
+				adapter = RavenDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 			case "couchdb": {
@@ -114,7 +95,7 @@ class DatabaseStore {
 			adapter = new InMemoryAdapter({ log });
 		}
 
-		return new DatabaseStore({ log, adapter });
+		return new DatabaseStore({ log, adapter, cache });
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {
@@ -164,133 +145,7 @@ class DatabaseStore {
 		this.log.info(`- ${counts.tickets} tickets.`);
 
 		for (const documents of collections) {
-			this.cacheDocuments<Model>(documents);
-		}
-	}
-
-	cacheDocuments<M extends Model>(documents: M[]): void {
-		if (documents.length === 0) {
-			return;
-		}
-
-		this.log.debug(`Caching ${documents.length} documents...`);
-
-		for (const document of documents) {
-			this.cacheDocument(document);
-		}
-	}
-
-	cacheDocument(document: any): void {
-		switch (true) {
-			case document instanceof EntryRequest: {
-				this.cache.entryRequests.set(document.partialId, document);
-				break;
-			}
-			case document instanceof GuildStatistics: {
-				this.cache.guildStatistics.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Guild: {
-				this.cache.guilds.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Praise: {
-				if (this.cache.praisesByAuthor.has(document.authorId)) {
-					this.cache.praisesByAuthor.get(document.authorId)?.set(document.partialId, document);
-				} else {
-					this.cache.praisesByAuthor.set(document.authorId, new Map([[document.partialId, document]]));
-				}
-
-				if (this.cache.praisesByTarget.has(document.targetId)) {
-					this.cache.praisesByTarget.get(document.targetId)?.set(document.partialId, document);
-				} else {
-					this.cache.praisesByTarget.set(document.targetId, new Map([[document.partialId, document]]));
-				}
-
-				break;
-			}
-			case document instanceof Report: {
-				this.cache.reports.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Resource: {
-				this.cache.resources.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Suggestion: {
-				this.cache.suggestions.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Ticket: {
-				this.cache.tickets.set(document.partialId, document);
-				break;
-			}
-			case document instanceof User: {
-				this.cache.users.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Warning: {
-				if (this.cache.warningsByTarget.has(document.targetId)) {
-					this.cache.warningsByTarget.get(document.targetId)?.set(document.partialId, document);
-				} else {
-					this.cache.warningsByTarget.set(document.targetId, new Map([[document.partialId, document]]));
-				}
-				break;
-			}
-		}
-	}
-
-	unloadDocument(document: any): void {
-		switch (true) {
-			case document instanceof EntryRequest: {
-				this.cache.entryRequests.delete(document.partialId);
-				break;
-			}
-			case document instanceof GuildStatistics: {
-				this.cache.guildStatistics.delete(document.partialId);
-				break;
-			}
-			case document instanceof Guild: {
-				this.cache.guilds.delete(document.partialId);
-				break;
-			}
-			case document instanceof Praise: {
-				if (this.cache.praisesByAuthor.has(document.authorId)) {
-					this.cache.praisesByAuthor.get(document.authorId)?.delete(document.partialId);
-				}
-
-				if (this.cache.praisesByTarget.has(document.targetId)) {
-					this.cache.praisesByTarget.get(document.targetId)?.delete(document.partialId);
-				}
-
-				break;
-			}
-			case document instanceof Report: {
-				this.cache.reports.delete(document.partialId);
-				break;
-			}
-			case document instanceof Resource: {
-				this.cache.resources.delete(document.partialId);
-				break;
-			}
-			case document instanceof Suggestion: {
-				this.cache.suggestions.delete(document.partialId);
-				break;
-			}
-			case document instanceof Ticket: {
-				this.cache.tickets.delete(document.partialId);
-				break;
-			}
-			case document instanceof User: {
-				this.cache.users.delete(document.partialId);
-				break;
-			}
-			case document instanceof Warning: {
-				if (this.cache.warningsByTarget.has(document.targetId)) {
-					this.cache.warningsByTarget.get(document.targetId)?.delete(document.partialId);
-				}
-				break;
-			}
+			this.cache.cacheDocuments<Model>(documents);
 		}
 	}
 }

@@ -12,6 +12,7 @@ import type { LavalinkService } from "logos/services/lavalink";
 import type { RealtimeUpdateService } from "logos/services/realtime-updates";
 import type { StatusService } from "logos/services/status";
 import { AdapterStore } from "logos/stores/adapters";
+import { CacheStore } from "logos/stores/cache";
 import { CommandStore } from "logos/stores/commands";
 import { DatabaseStore } from "logos/stores/database";
 import { EventStore } from "logos/stores/events";
@@ -25,13 +26,14 @@ import type pino from "pino";
 class Client {
 	readonly log: pino.Logger;
 	readonly environment: Environment;
-	readonly database: DatabaseStore;
-	readonly volatile?: VolatileStore;
 	readonly diagnostics: Diagnostics;
 
 	readonly #localisations: LocalisationStore;
 	readonly #commands: CommandStore;
 	readonly #interactions: InteractionStore;
+	readonly #cache: CacheStore;
+	readonly #database: DatabaseStore;
+	readonly #volatile?: VolatileStore;
 	readonly #services: ServiceStore;
 	readonly #events: EventStore;
 	readonly #journalling: JournallingStore;
@@ -42,10 +44,6 @@ class Client {
 	readonly #guildDeleteCollector: Collector<"guildDelete">;
 	readonly #interactionCollector: InteractionCollector;
 	readonly #channelDeleteCollector: Collector<"channelDelete">;
-
-	get documents(): DatabaseStore["cache"] {
-		return this.database.cache;
-	}
 
 	get localiseRaw(): LocalisationStore["localiseRaw"] {
 		return this.#localisations.localiseRaw.bind(this.#localisations);
@@ -183,8 +181,20 @@ class Client {
 		return this.#events.registerCollector.bind(this.#events);
 	}
 
-	get tryLog(): JournallingStore["tryLog"] {
-		return this.#journalling.tryLog.bind(this.#journalling);
+	get entities(): CacheStore["entities"] {
+		return this.#cache.entities;
+	}
+
+	get documents(): CacheStore["documents"] {
+		return this.#cache.documents;
+	}
+
+	get database(): DatabaseStore {
+		return this.#database;
+	}
+
+	get volatile(): VolatileStore | undefined {
+		return this.#volatile;
 	}
 
 	get lavalinkService(): LavalinkService | undefined {
@@ -231,6 +241,10 @@ class Client {
 		return this.#services.getPromptService.bind(this.#services);
 	}
 
+	get tryLog(): JournallingStore["tryLog"] {
+		return this.#journalling.tryLog.bind(this.#journalling);
+	}
+
 	get registerInteractionCollector(): <Metadata extends string[]>(
 		collector: InteractionCollector<Metadata>,
 	) => Promise<void> {
@@ -245,25 +259,17 @@ class Client {
 		return this.#connection.bot;
 	}
 
-	get entities(): DiscordConnection["cache"] {
-		return this.#connection.cache;
-	}
-
 	constructor({
 		log,
 		environment,
-		database,
 		localisations,
 	}: {
 		log: pino.Logger;
 		environment: Environment;
-		database: DatabaseStore;
 		localisations: RawLocalisations;
 	}) {
+		this.log = log.child({ name: "Client" });
 		this.environment = environment;
-		this.log = log;
-		this.database = database;
-		this.volatile = VolatileStore.tryCreate(this);
 		this.diagnostics = new Diagnostics(this);
 
 		this.#localisations = new LocalisationStore({ log, localisations });
@@ -272,11 +278,19 @@ class Client {
 			templates: commands,
 		});
 		this.#interactions = new InteractionStore(this);
+		this.#cache = new CacheStore({ log });
+		this.#database = DatabaseStore.create({ log, environment, cache: this.#cache });
+		this.#volatile = VolatileStore.tryCreate(this);
 		this.#services = new ServiceStore(this);
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);
 		this.#adapters = new AdapterStore(this);
-		this.#connection = new DiscordConnection({ log, environment, events: this.#events.buildEventHandlers() });
+		this.#connection = new DiscordConnection({
+			log,
+			environment,
+			eventHandlers: this.#events.buildEventHandlers(),
+			cacheHandlers: this.#cache.buildCacheHandlers(),
+		});
 
 		this.#guildReloadLock = new ActionLock();
 		this.#guildCreateCollector = new Collector<"guildCreate">();
@@ -287,24 +301,6 @@ class Client {
 			isPermanent: true,
 		});
 		this.#channelDeleteCollector = new Collector<"channelDelete">();
-	}
-
-	static async create({
-		log,
-		environment,
-		localisations,
-	}: {
-		log: pino.Logger;
-		environment: Environment;
-		localisations: RawLocalisations;
-	}): Promise<Client> {
-		log = log.child({ name: "Client" });
-
-		log.info("Bootstrapping the client...");
-
-		const database = await DatabaseStore.create({ log, environment });
-
-		return new Client({ log, environment, database, localisations });
 	}
 
 	async #setupCollectors(): Promise<void> {

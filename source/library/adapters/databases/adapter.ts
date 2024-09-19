@@ -52,7 +52,7 @@ abstract class DocumentSession {
 			return undefined;
 		}
 
-		this.database.cacheDocument(document);
+		this.database.cache.cacheDocument(document);
 
 		return document;
 	}
@@ -68,7 +68,7 @@ abstract class DocumentSession {
 				continue;
 			}
 
-			this.database.cacheDocument(document);
+			this.database.cache.cacheDocument(document);
 			documents.push(document);
 		}
 
@@ -78,7 +78,7 @@ abstract class DocumentSession {
 	abstract store<M extends Model>(document: M): void | Promise<void>;
 	async set<M extends Model>(document: M): Promise<M> {
 		await this.store(document);
-		this.database.cacheDocument(document);
+		this.database.cache.cacheDocument(document);
 
 		return document;
 	}
@@ -87,7 +87,7 @@ abstract class DocumentSession {
 		// We don't call any methods to delete a document here because we don't actually delete anything from the
 		// database; we merely *mark* documents as deleted.
 
-		this.database.unloadDocument(document);
+		this.database.cache.unloadDocument(document);
 	}
 
 	abstract query<M extends Model>({ collection }: { collection: Collection }): DocumentQuery<M>;
