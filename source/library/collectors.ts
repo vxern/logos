@@ -71,7 +71,6 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 
 		if (this.#isSingle) {
 			this.close();
-			return;
 		}
 	}
 
@@ -103,9 +102,11 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	}
 }
 
+type DiscordParameterType = string | number | boolean | undefined;
+
 class InteractionCollector<
 	Metadata extends string[] = [],
-	Parameters extends Record<string, string | number | boolean | undefined> = Record<string, string>,
+	Parameters extends Record<string, DiscordParameterType> = Record<string, string>,
 > extends Collector<"interactionCreate"> {
 	static readonly noneId = constants.components.none;
 
@@ -335,7 +336,7 @@ class InteractionCollector<
 		return InteractionCollector.decodeId(idEncoded);
 	}
 
-	#getParameters<Parameters extends Record<string, string | number | boolean | undefined>>(
+	#getParameters<Parameters extends Record<string, DiscordParameterType>>(
 		interaction: Discord.Interaction,
 	): Logos.InteractionParameters<Parameters> {
 		const options = interaction.data?.options;
@@ -349,10 +350,10 @@ class InteractionCollector<
 		} as Logos.InteractionParameters<Parameters>;
 	}
 
-	static #parseParameters<Parameters extends Record<string, string | number | boolean | undefined>>(
+	static #parseParameters<Parameters extends Record<string, DiscordParameterType>>(
 		options: Discord.InteractionDataOption[],
 	): Partial<Parameters> {
-		const result: Partial<Record<string, string | number | boolean | undefined>> = {};
+		const result: Partial<Record<string, DiscordParameterType>> = {};
 
 		for (const option of options) {
 			if (option.focused) {
