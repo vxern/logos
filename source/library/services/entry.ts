@@ -333,18 +333,14 @@ class EntryService extends LocalService {
 		}
 
 		for (const rule of verificationConfiguration.activation) {
-			switch (rule.type) {
-				case "account-age": {
-					const createdAt = Discord.snowflakeToTimestamp(user.id);
-					const age = Date.now() - createdAt;
+			const createdAt = Discord.snowflakeToTimestamp(user.id);
+			const age = Date.now() - createdAt;
 
-					if (age < timeStructToMilliseconds(rule.value)) {
-						return true;
-					}
-
-					break;
-				}
+			if (age >= timeStructToMilliseconds(rule.value)) {
+				continue;
 			}
+
+			return true;
 		}
 
 		return false;
