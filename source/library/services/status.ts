@@ -15,11 +15,11 @@ class StatusService extends GlobalService {
 		this.#currentIndex = 0;
 	}
 
-	start(): void {
+	async start(): Promise<void> {
 		this.#timer = setInterval(this.#cycleStatus.bind(this), constants.STATUS_CYCLE_PERIOD);
 	}
 
-	stop(): void {
+	async stop(): Promise<void> {
 		clearInterval(this.#timer);
 		this.#timer = undefined;
 

@@ -15,9 +15,6 @@ class AlertService extends LocalService {
 		super(client, { identifier: "AlertService", guildId });
 	}
 
-	async start(): Promise<void> {}
-	async stop(): Promise<void> {}
-
 	async alert(message: Discord.CreateMessageOptions): Promise<void> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {

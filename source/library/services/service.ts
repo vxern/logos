@@ -12,13 +12,19 @@ abstract class Service {
 		this.client = client;
 	}
 
-	abstract start(): void | Promise<void>;
-	abstract stop(): void | Promise<void>;
+	abstract start(): Promise<void>;
+
+	abstract stop(): Promise<void>;
 }
 
 abstract class GlobalService extends Service {
-	abstract start(): void | Promise<void>;
-	abstract stop(): void | Promise<void>;
+	async start(): Promise<void> {
+		// Do nothing.
+	}
+
+	async stop(): Promise<void> {
+		// Do nothing.
+	}
 }
 
 abstract class LocalService extends Service {
@@ -44,8 +50,13 @@ abstract class LocalService extends Service {
 		this.guildIdString = guildId.toString();
 	}
 
-	abstract start(): void | Promise<void>;
-	abstract stop(): void | Promise<void>;
+	async start(): Promise<void> {
+		// Do nothing.
+	}
+
+	async stop(): Promise<void> {
+		// Do nothing.
+	}
 
 	async getAllMessages({ channelId }: { channelId: bigint }): Promise<Discord.Message[] | undefined> {
 		const buffer: Discord.Message[] = [];
