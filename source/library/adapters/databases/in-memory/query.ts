@@ -10,7 +10,7 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		this.#documents = documents;
 	}
 
-	#whereIdRegex(pattern: RegExp): InMemoryDocumentQuery<M> {
+	#whereIdRegex(pattern: RegExp): this {
 		const newDocuments = new Map<string, M>();
 		for (const [partialId, document] of this.#documents) {
 			if (pattern.test(document.id)) {
@@ -22,7 +22,7 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		return this;
 	}
 
-	whereRegex(property: string, pattern: RegExp): InMemoryDocumentQuery<M> {
+	whereRegex(property: string, pattern: RegExp): this {
 		if (property === "id") {
 			return this.#whereIdRegex(pattern);
 		}
@@ -43,7 +43,7 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		return this;
 	}
 
-	#whereIdEquals(value: unknown): InMemoryDocumentQuery<M> {
+	#whereIdEquals(value: unknown): this {
 		const newDocuments = new Map<string, M>();
 		for (const [partialId, document] of this.#documents) {
 			if (value === document.id) {
@@ -55,7 +55,7 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		return this;
 	}
 
-	whereEquals(property: string, value: unknown): InMemoryDocumentQuery<M> {
+	whereEquals(property: string, value: unknown): this {
 		if (property === "id") {
 			return this.#whereIdEquals(value);
 		}

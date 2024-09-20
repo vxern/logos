@@ -18,12 +18,12 @@ class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		this.#query = this.#session.query({});
 	}
 
-	whereRegex(property: string, pattern: RegExp): RavenDBDocumentQuery<M> {
+	whereRegex(property: string, pattern: RegExp): this {
 		this.#query = this.#query.whereRegex(property === "id" ? "id()" : property, pattern.source);
 		return this;
 	}
 
-	whereEquals(property: string, value: unknown): RavenDBDocumentQuery<M> {
+	whereEquals(property: string, value: unknown): this {
 		this.#query = this.#query.whereEquals(property === "id" ? "id()" : property, value);
 		return this;
 	}

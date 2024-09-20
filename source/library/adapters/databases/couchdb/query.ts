@@ -16,14 +16,14 @@ class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		this.#query = { selector: {} };
 	}
 
-	whereRegex(property: string, pattern: RegExp): CouchDBDocumentQuery<M> {
+	whereRegex(property: string, pattern: RegExp): this {
 		Object.assign(this.#query.selector, {
 			[property === "id" ? "_id" : property]: { $regex: pattern.source },
 		});
 		return this;
 	}
 
-	whereEquals(property: string, value: unknown): CouchDBDocumentQuery<M> {
+	whereEquals(property: string, value: unknown): this {
 		Object.assign(this.#query.selector, { [property === "id" ? "_id" : property]: { $eq: value } });
 		return this;
 	}

@@ -173,7 +173,7 @@ class TicketPromptService extends PromptService<{
 				authorId: ticketDocument.authorId,
 			}),
 		);
-		if (entryRequestDocument === undefined || entryRequestDocument.ticketChannelId === undefined) {
+		if (entryRequestDocument?.ticketChannelId === undefined) {
 			return;
 		}
 

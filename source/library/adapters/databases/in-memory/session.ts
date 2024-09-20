@@ -29,8 +29,6 @@ class InMemoryDocumentSession extends DocumentSession {
 		this.#documents[object.collection].set(object.id, object);
 	}
 
-	async dispose(): Promise<void> {}
-
 	query<M extends Model>({ collection }: { collection: Collection }): DocumentQuery<M> {
 		return new InMemoryDocumentQuery<M>({ documents: this.#documents[collection] as Map<string, M> });
 	}

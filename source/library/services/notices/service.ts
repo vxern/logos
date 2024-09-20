@@ -151,7 +151,6 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			}
 
 			this.#registerNotice({ noticeId: notice.id, hash });
-			return;
 		}
 	}
 

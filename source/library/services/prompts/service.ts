@@ -178,8 +178,7 @@ abstract class PromptService<
 	}
 
 	async #getExistingPrompts(): Promise<ExistingPrompts> {
-		const channelId = this.channelId!;
-		const messages = (await this.getAllMessages({ channelId })) ?? [];
+		const messages = (await this.getAllMessages({ channelId: this.channelId })) ?? [];
 
 		const valid: [partialId: string, prompt: Discord.Message][] = [];
 		const invalid: Discord.Message[] = [];
@@ -205,11 +204,11 @@ abstract class PromptService<
 			valid.push([metadata, message]);
 		}
 
-		this.log.info(`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}.`);
+		this.log.info(`Found ${messages.length} messages in ${this.client.diagnostics.channel(this.channelId)}.`);
 
 		if (invalid.length > 0) {
 			this.log.warn(
-				`${invalid.length} messages in ${this.client.diagnostics.channel(channelId)} aren't prompts or are invalid.`,
+				`${invalid.length} messages in ${this.client.diagnostics.channel(this.channelId)} aren't prompts or are invalid.`,
 			);
 		}
 

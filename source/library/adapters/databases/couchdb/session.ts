@@ -93,8 +93,6 @@ class CouchDBDocumentSession extends DocumentSession {
 	query<M extends Model>(_: { collection: Collection }): CouchDBDocumentQuery<M> {
 		return new CouchDBDocumentQuery<M>({ documents: this.#documents, session: this });
 	}
-
-	async dispose(): Promise<void> {}
 }
 
 export { CouchDBDocumentSession };

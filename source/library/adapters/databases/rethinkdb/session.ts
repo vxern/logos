@@ -63,8 +63,6 @@ class RethinkDBDocumentSession extends DocumentSession {
 	query<M extends Model>({ collection }: { collection: Collection }): RethinkDBDocumentQuery<M> {
 		return new RethinkDBDocumentQuery<M>({ database: this.database, connection: this.#connection, collection });
 	}
-
-	async dispose(): Promise<void> {}
 }
 
 export { RethinkDBDocumentSession };

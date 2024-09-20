@@ -203,8 +203,6 @@ async function handleWarnUser(
 				],
 			});
 		}
-
-		return;
 	}
 }
 

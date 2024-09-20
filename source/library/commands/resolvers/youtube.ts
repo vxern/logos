@@ -40,7 +40,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	selectMenuSelection.onInteraction(async (selection) => {
 		await client.deleteReply(interaction);
 
-		const indexString = selection.data?.values?.at(0) as string | undefined;
+		const indexString = selection.data?.values?.at(0);
 		if (indexString === undefined) {
 			return resolve(undefined);
 		}
@@ -156,7 +156,7 @@ function getSongListingFromVideo(video: YouTubeSearch.Video, requestedBy: bigint
 		return undefined;
 	}
 
-	return new SongListing({ queueable: new Song({ title: video.title!, url: video.url! }), userId: requestedBy });
+	return new SongListing({ queueable: new Song({ title: video.title!, url: video.url }), userId: requestedBy });
 }
 
 export { resolveYouTubeSongListings as resolveYouTubeListings };

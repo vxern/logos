@@ -39,7 +39,9 @@ class RethinkDBDocumentConventions extends DocumentConventions<RethinkDBDocument
 	 * like `_id` or `@id`. In the case of RethinkDB, however, the document ID property *is* `id`, so we ought to omit
 	 * this getter assignment.
 	 */
-	assignAccessorsToModel(): void {}
+	assignAccessorsToModel(): void {
+		// Do nothing.
+	}
 }
 
 export { RethinkDBDocumentConventions };

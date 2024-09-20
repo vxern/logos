@@ -10,9 +10,13 @@ abstract class DatabaseAdapter {
 		this.log = log.child({ name: identifier });
 	}
 
-	abstract setup(): void | Promise<void>;
+	async setup(): Promise<void> {
+		// Do nothing.
+	}
 
-	abstract teardown(): void | Promise<void>;
+	async teardown(): Promise<void> {
+		// Do nothing.
+	}
 
 	abstract conventionsFor({
 		document,
@@ -92,8 +96,6 @@ abstract class DocumentSession {
 
 	abstract query<M extends Model>({ collection }: { collection: Collection }): DocumentQuery<M>;
 
-	abstract dispose(): void | Promise<void>;
-
 	async loadManyTabulated<M extends Model, RawDocument>(
 		ids: string[],
 		{
@@ -140,6 +142,10 @@ abstract class DocumentSession {
 
 		return resultsSorted.map(([rawDocument, _]) => instantiateModel(this.database, rawDocument));
 	}
+
+	async dispose(): Promise<void> {
+		// Do nothing.
+	}
 }
 
 abstract class DocumentQuery<M extends Model> {
@@ -184,7 +190,9 @@ abstract class DocumentConventions<Metadata = any> {
 	 * @remarks
 	 * Same remarks as for the getter; only some conventions have a use for the revision.
 	 */
-	set revision(_: string) {}
+	set revision(_: string) {
+		// Do nothing.
+	}
 
 	/**
 	 * @remarks
@@ -198,7 +206,9 @@ abstract class DocumentConventions<Metadata = any> {
 	 * @remarks
 	 * Same remarks as for revision.
 	 */
-	set isDeleted(_: boolean) {}
+	set isDeleted(_: boolean) {
+		// Do nothing.
+	}
 
 	constructor({
 		document,

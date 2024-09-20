@@ -907,7 +907,7 @@ abstract class Queueable {
 }
 
 abstract class Playable extends Queueable {
-	get playable(): Playable {
+	get playable(): this {
 		return this;
 	}
 }

@@ -114,7 +114,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 							entry.partOfSpeech.value === partOfSpeechField.value),
 				),
 			);
-			if (entry === undefined || entry.partOfSpeech === undefined) {
+			if (entry?.partOfSpeech === undefined) {
 				continue;
 			}
 

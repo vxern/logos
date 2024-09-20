@@ -85,7 +85,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 			});
 
 			const lastEntry = entries.at(-1);
-			if (lastEntry !== undefined && lastEntry.partOfSpeech !== undefined) {
+			if (lastEntry?.partOfSpeech !== undefined) {
 				if (
 					lastEntry.partOfSpeech.detected === detection.detected ||
 					lastEntry.partOfSpeech.value === partOfSpeech
