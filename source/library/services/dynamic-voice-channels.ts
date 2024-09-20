@@ -156,7 +156,7 @@ class DynamicVoiceChannelService extends LocalService {
 	async #handleVoiceStateUpdate(newVoiceState: Logos.VoiceState): Promise<void> {
 		const oldVoiceState = this.oldVoiceStates.get(newVoiceState.userId);
 
-		if (oldVoiceState === undefined || oldVoiceState.channelId === undefined) {
+		if (oldVoiceState?.channelId === undefined) {
 			await this.#handleConnect(newVoiceState);
 		} else if (newVoiceState.channelId === undefined) {
 			await this.#handleDisconnect(oldVoiceState);
