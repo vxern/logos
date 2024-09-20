@@ -777,7 +777,6 @@ class MusicSession extends EventEmitter {
 
 		if (controls.to !== undefined) {
 			queueable.moveTo({ index: controls.to - 1 });
-			return;
 		}
 	}
 
