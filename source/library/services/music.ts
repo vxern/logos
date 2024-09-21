@@ -54,21 +54,21 @@ class MusicService extends LocalService {
 		this.#managerDisconnects = this.#handleConnectionLost.bind(this);
 		this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this);
 
-		this.client.lavalinkService!.manager.on("disconnect", this.#managerDisconnects);
-		this.client.lavalinkService!.manager.on("ready", this.#managerConnectionRestores);
+		this.client.services.global("lavalink").manager.on("disconnect", this.#managerDisconnects);
+		this.client.services.global("lavalink").manager.on("ready", this.#managerConnectionRestores);
 	}
 
 	async stop(): Promise<void> {
 		await this.#voiceStateUpdates.close();
 
-		this.client.lavalinkService!.manager.off("disconnect", this.#managerDisconnects);
-		this.client.lavalinkService!.manager.off("ready", this.#managerConnectionRestores);
+		this.client.services.global("lavalink").manager.off("disconnect", this.#managerDisconnects);
+		this.client.services.global("lavalink").manager.off("ready", this.#managerConnectionRestores);
 
 		await this.destroySession();
 	}
 
 	async createSession({ channelId }: { channelId: bigint }): Promise<MusicSession> {
-		const player = await this.client.lavalinkService!.manager.joinVoiceChannel({
+		const player = await this.client.services.global("lavalink").manager.joinVoiceChannel({
 			shardId: this.guild.shardId,
 			guildId: this.guildIdString,
 			channelId: channelId.toString(),
@@ -488,7 +488,7 @@ class MusicSession extends EventEmitter {
 		this.player.off("exception", this.#trackExceptions);
 
 		this.listings.dispose();
-		await this.client.lavalinkService!.manager.leaveVoiceChannel(this.service.guildIdString);
+		await this.client.services.global("lavalink").manager.leaveVoiceChannel(this.service.guildIdString);
 		await this.client.bot.gateway.leaveVoiceChannel(this.service.guildId);
 		this.emit("end");
 		this.removeAllListeners();

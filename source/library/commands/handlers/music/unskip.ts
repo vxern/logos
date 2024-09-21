@@ -16,11 +16,7 @@ async function handleUnskipAction(
 		return;
 	}
 
-	const musicService = client.services(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}

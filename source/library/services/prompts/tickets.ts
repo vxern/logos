@@ -201,11 +201,6 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
-		if (ticketService === undefined) {
-			return undefined;
-		}
-
 		const strings = constants.contexts.inquiry({
 			localise: this.client.localise,
 			locale: this.guildLocale,
@@ -323,7 +318,9 @@ class TicketPromptService extends PromptService<{
 			}
 		}
 
-		const prompt = await ticketService.savePrompt(user, ticketDocument);
+		const prompt = await this.client.services
+			.local("ticketPrompts", { guildId: this.guildId })
+			.savePrompt(user, ticketDocument);
 		if (prompt === undefined) {
 			return undefined;
 		}

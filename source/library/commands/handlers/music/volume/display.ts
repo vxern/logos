@@ -1,11 +1,7 @@
 import type { Client } from "logos/client";
 
 async function handleDisplayVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canCheckPlayback(interaction)) {
 		return;
 	}
@@ -34,7 +30,7 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 		: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [client.interactionRepetitionService.getShowButton(interaction)],
+					components: [client.services.global("interactionRepetition").getShowButton(interaction)],
 				},
 			];
 

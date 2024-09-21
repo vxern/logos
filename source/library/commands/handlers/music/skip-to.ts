@@ -23,11 +23,7 @@ async function handleSkipToTimestamp(
 	client: Client,
 	interaction: Logos.Interaction<any, { timestamp: string }>,
 ): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}

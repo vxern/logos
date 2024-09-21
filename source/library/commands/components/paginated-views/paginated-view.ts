@@ -78,7 +78,7 @@ abstract class PaginatedView<T> {
 		];
 
 		if (this.#showable && !this.#anchor.parameters.show) {
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.#anchor);
+			const showButton = this.client.services.global("interactionRepetition").getShowButton(this.#anchor);
 
 			return [
 				{

@@ -18,7 +18,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 		const view = this.build(this.#anchor, { tabs: this.#tabs });
 
 		if (this.#showable && !this.#anchor.parameters.show) {
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.#anchor);
+			const showButton = this.client.services.global("interactionRepetition").getShowButton(this.#anchor);
 
 			if (view.components === undefined) {
 				view.components = [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];

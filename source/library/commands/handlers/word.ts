@@ -161,7 +161,7 @@ async function handleFindWord(
 
 	const showButton = interaction.parameters.show
 		? undefined
-		: client.interactionRepetitionService.getShowButton(interaction);
+		: client.services.global("interactionRepetition").getShowButton(interaction);
 
 	await displayMenu(client, interaction, {
 		entries,

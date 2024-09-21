@@ -40,16 +40,13 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 	composer.onSubmit(async (submission, { formData }) => {
 		await client.postponeReply(submission);
 
-		const ticketService = client.getPromptService(interaction.guildId, { type: "tickets" });
-		if (ticketService === undefined) {
-			return;
-		}
-
-		const ticketDocument = await ticketService.openTicket({
-			type: "standalone",
-			formData,
-			user: submission.user,
-		});
+		const ticketDocument = await client.services
+			.local("ticketPrompts", { guildId: interaction.guildId })
+			.openTicket({
+				type: "standalone",
+				formData,
+				user: submission.user,
+			});
 		if (ticketDocument === undefined) {
 			return;
 		}

@@ -224,7 +224,7 @@ class EntryService extends LocalService {
 			return;
 		}
 
-		const verificationService = this.client.getPromptService(this.guildId, { type: "verification" });
+		const verificationService = this.client.services.local("verificationPrompts", { guildId: this.guildId });
 		if (verificationService === undefined) {
 			return;
 		}

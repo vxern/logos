@@ -1,11 +1,7 @@
 import type { Client } from "logos/client";
 
 async function handleStopPlayback(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}

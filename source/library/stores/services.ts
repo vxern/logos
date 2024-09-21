@@ -297,18 +297,26 @@ class ServiceStore {
 		await Promise.all(services.map((service) => service.stop()));
 	}
 
+	hasGlobalService<K extends keyof GlobalServices>(service: K): boolean {
+		return this.#global[service] !== undefined;
+	}
+
 	/** ⚠️ If the service is not enabled, an error is raised. */
-	global<K extends keyof GlobalServices>(service: K): GlobalServices[K] {
-		if (this.#global[service] === undefined) {
+	global<K extends keyof GlobalServices>(service: K): NonNullable<GlobalServices[K]> {
+		if (!this.hasGlobalService(service)) {
 			throw new Error(`Attempted to get global service '${service}' that is not enabled.`);
 		}
 
 		return this.#global[service]!;
 	}
 
+	hasLocalService<K extends keyof LocalServices>(service: K, { guildId }: { guildId: bigint }): boolean {
+		return this.#local[service].has(guildId);
+	}
+
 	/** ⚠️ If the service is not enabled on the given guild, an error is raised. */
 	local<K extends keyof LocalServices>(service: K, { guildId }: { guildId: bigint }): LocalServices[K] {
-		if (!this.#local[service].has(guildId)) {
+		if (!this.hasLocalService(service, { guildId })) {
 			throw new Error(
 				`Attempted to get local service '${service}' that was not enabled on guild with ID ${guildId}.`,
 			);

@@ -330,7 +330,7 @@ async function translateText(
 			components: [
 				...(interaction.parameters.show
 					? []
-					: [client.interactionRepetitionService.getShowButton(interaction)]),
+					: [client.services.global("interactionRepetition").getShowButton(interaction)]),
 				sourceNotice.button,
 			] as [Discord.ButtonComponent],
 		},
