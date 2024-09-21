@@ -51,6 +51,7 @@ class ServiceStore {
 		readonly roleIndicators: Map<bigint, RoleIndicatorService>;
 	};
 
+	readonly #client: Client;
 	readonly #collection: {
 		/** Singular services running across all guilds. */
 		readonly global: Service[];
@@ -95,6 +96,7 @@ class ServiceStore {
 			roleIndicators: new Map(),
 		};
 
+		this.#client = client;
 		this.#collection = { global: [], local: new Map() };
 	}
 
@@ -142,121 +144,118 @@ class ServiceStore {
 		this.log.info("Global services stopped.");
 	}
 
-	async setupGuildServices(
-		client: Client,
-		{ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild },
-	): Promise<void> {
+	async setupGuildServices({ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild }): Promise<void> {
 		const services: Service[] = [];
 
 		if (guildDocument.hasEnabled("informationNotices")) {
-			const service = new InformationNoticeService(client, { guildId });
+			const service = new InformationNoticeService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.notices.information.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("resourceNotices")) {
-			const service = new ResourceNoticeService(client, { guildId });
+			const service = new ResourceNoticeService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.notices.resources.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("roleNotices")) {
-			const service = new RoleNoticeService(client, { guildId });
+			const service = new RoleNoticeService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.notices.roles.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("welcomeNotices")) {
-			const service = new WelcomeNoticeService(client, { guildId });
+			const service = new WelcomeNoticeService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.notices.welcome.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("alerts")) {
-			const service = new AlertService(client, { guildId });
+			const service = new AlertService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.alerts.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("reports")) {
-			const service = new ReportPromptService(client, { guildId });
+			const service = new ReportPromptService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.prompts.reports.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("verification")) {
-			const service = new VerificationPromptService(client, { guildId });
+			const service = new VerificationPromptService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.prompts.verification.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("dynamicVoiceChannels")) {
-			const service = new DynamicVoiceChannelService(client, { guildId });
+			const service = new DynamicVoiceChannelService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.dynamicVoiceChannels.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("entry")) {
-			const service = new EntryService(client, { guildId });
+			const service = new EntryService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.entry.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("roleIndicators")) {
-			const service = new RoleIndicatorService(client, { guildId });
+			const service = new RoleIndicatorService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.roleIndicators.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("suggestions")) {
-			const service = new SuggestionPromptService(client, { guildId });
+			const service = new SuggestionPromptService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.prompts.suggestions.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("tickets")) {
-			const service = new TicketPromptService(client, { guildId });
+			const service = new TicketPromptService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.prompts.tickets.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("resourceSubmissions")) {
-			const service = new ResourcePromptService(client, { guildId });
+			const service = new ResourcePromptService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.prompts.resources.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("music") && this.global.lavalink !== undefined) {
-			const service = new MusicService(client, { guildId });
+			const service = new MusicService(this.#client, { guildId });
 			services.push(service);
 
 			this.local.music.set(guildId, service);
 		}
 
-		await this.startLocal(client, { guildId, services });
+		await this.#startLocal({ guildId, services });
 	}
 
-	async startLocal(client: Client, { guildId, services }: { guildId: bigint; services: Service[] }): Promise<void> {
+	async #startLocal({ guildId, services }: { guildId: bigint; services: Service[] }): Promise<void> {
 		if (services.length === 0) {
-			this.log.info(`There were no local services to start on ${client.diagnostics.guild(guildId)}.`);
+			this.log.info(`There were no local services to start on ${this.#client.diagnostics.guild(guildId)}.`);
 			return;
 		}
 
 		this.log.info(
-			`Starting local services on ${client.diagnostics.guild(guildId)}... (${services.length} services to start)`,
+			`Starting local services on ${this.#client.diagnostics.guild(guildId)}... (${services.length} services to start)`,
 		);
 
 		this.#collection.local.set(guildId, services);
@@ -267,26 +266,26 @@ class ServiceStore {
 		}
 		await Promise.all(promises);
 
-		this.log.info(`Local services on ${client.diagnostics.guild(guildId)} started.`);
+		this.log.info(`Local services on ${this.#client.diagnostics.guild(guildId)} started.`);
 	}
 
-	async stopLocal(client: Client, { guildId }: { guildId: bigint }): Promise<void> {
+	async stopLocal({ guildId }: { guildId: bigint }): Promise<void> {
 		if (!this.#collection.local.has(guildId)) {
-			this.log.info(`There were no local services to stop on ${client.diagnostics.guild(guildId)}.`);
+			this.log.info(`There were no local services to stop on ${this.#client.diagnostics.guild(guildId)}.`);
 			return;
 		}
 
 		const services = this.#collection.local.get(guildId)!;
 
 		this.log.info(
-			`Stopping services on ${client.diagnostics.guild(guildId)}... (${services.length} services to stop)`,
+			`Stopping services on ${this.#client.diagnostics.guild(guildId)}... (${services.length} services to stop)`,
 		);
 
 		this.#collection.local.delete(guildId);
 
 		await this.#stopServices(services);
 
-		this.log.info(`Local services on ${client.diagnostics.guild(guildId)} stopped.`);
+		this.log.info(`Local services on ${this.#client.diagnostics.guild(guildId)} stopped.`);
 	}
 
 	async #stopServices(services: Service[]): Promise<void> {

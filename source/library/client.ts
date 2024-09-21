@@ -367,7 +367,7 @@ class Client {
 
 		const guildDocument = await Guild.getOrCreate(this, { guildId: guild.id.toString() });
 
-		await this.#services.setupGuildServices(this, { guildId: guild.id, guildDocument });
+		await this.#services.setupGuildServices({ guildId: guild.id, guildDocument });
 
 		this.bot.helpers
 			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
@@ -375,7 +375,7 @@ class Client {
 	}
 
 	async #teardownGuild({ guildId }: { guildId: bigint }): Promise<void> {
-		await this.#services.stopLocal(this, { guildId });
+		await this.#services.stopLocal({ guildId });
 	}
 
 	async start(): Promise<void> {
