@@ -60,11 +60,11 @@ class RavenDBAdapter extends DatabaseAdapter {
 		});
 	}
 
-	setup(): void {
+	async setup(): Promise<void> {
 		this.#database.initialize();
 	}
 
-	teardown(): void {
+	async teardown(): Promise<void> {
 		this.#database.dispose();
 	}
 

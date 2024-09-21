@@ -74,22 +74,18 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 
 	getErrorMessage(
 		submission: Logos.Interaction,
-		{ error }: { error: ValidationError },
+		_: { error: ValidationError },
 	): Discord.CamelizedDiscordEmbed | undefined {
-		switch (error) {
-			case "texts-not-different": {
-				const strings = constants.contexts.correctionTextsNotDifferent({
-					localise: this.client.localise,
-					locale: submission.locale,
-				});
+		const strings = constants.contexts.correctionTextsNotDifferent({
+			localise: this.client.localise,
+			locale: submission.locale,
+		});
 
-				return {
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.warning,
-				};
-			}
-		}
+		return {
+			title: strings.title,
+			description: strings.description,
+			color: constants.colours.warning,
+		};
 	}
 }
 

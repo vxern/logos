@@ -137,10 +137,12 @@ abstract class DocumentSession {
 			);
 		}
 
-		const resultsUnsorted = await Promise.all(promises).then((results) => results.flat());
-		const resultsSorted = resultsUnsorted.sort(([_, a], [__, b]) => a - b);
-
-		return resultsSorted.map(([rawDocument, _]) => instantiateModel(this.database, rawDocument));
+		return Promise.all(promises).then((results) =>
+			results
+				.flat()
+				.toSorted(([_, a], [__, b]) => a - b)
+				.map(([rawDocument, _]) => instantiateModel(this.database, rawDocument)),
+		);
 	}
 
 	async dispose(): Promise<void> {

@@ -26,7 +26,9 @@ class ClientConnector extends shoukaku.Connector {
 		return this.client.bot.id.toString();
 	}
 
-	listen(_: shoukaku.NodeOption[]): void {}
+	listen(_: shoukaku.NodeOption[]): void {
+		// Do nothing.
+	}
 
 	sendPacket(shardId: number, payload: Discord.ShardSocketRequest, important: boolean): void {
 		const shard = this.client.bot.gateway.shards.get(shardId);

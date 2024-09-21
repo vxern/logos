@@ -1,5 +1,4 @@
 import { list } from "logos:constants/formatting";
-import type { DetectionLanguage } from "logos:constants/languages/detection";
 import type { Client } from "logos/client";
 import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-notice";
 
@@ -66,7 +65,7 @@ async function handleRecogniseLanguage(
 	await sourceNotice.register();
 
 	if (detectedLanguages.likely.length === 1 && detectedLanguages.possible.length === 0) {
-		const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
+		const language = detectedLanguages.likely.at(0);
 		if (language === undefined) {
 			throw new Error("Detected language unexpectedly undefined.");
 		}
@@ -96,7 +95,7 @@ async function handleRecogniseLanguage(
 		const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 		if (detectedLanguages.likely.length === 1) {
-			const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
+			const language = detectedLanguages.likely.at(0);
 			if (language === undefined) {
 				throw new Error("Likely detected language unexpectedly undefined.");
 			}
@@ -126,7 +125,7 @@ async function handleRecogniseLanguage(
 		}
 
 		if (detectedLanguages.possible.length === 1) {
-			const language = detectedLanguages.possible.at(0) as DetectionLanguage | undefined;
+			const language = detectedLanguages.possible.at(0);
 			if (language === undefined) {
 				throw new Error("Possible detected language unexpectedly undefined.");
 			}
