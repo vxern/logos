@@ -6,8 +6,11 @@
 
 ##### Examples - Pronunciation - Inflection - Etymologies - Relations - Expressions - Usage Notes
 
-![Licence](https://img.shields.io/github/license/vxern/logos.svg?style=for-the-badge) ![Release](https://img.shields.io/github/release/vxern/logos.svg?style=for-the-badge) ![Pull Requests](https://img.shields.io/github/issues-pr/vxern/logos.svg?style=for-the-badge) ![Issues](https://img.shields.io/github/issues/vxern/logos.svg?style=for-the-badge) ![Wakatime](https://wakatime.com/badge/github/vxern/logos.svg?style=for-the-badge)
+![Licence](https://img.shields.io/github/license/vxern/logos.svg?style=for-the-badge) ![Release](https://img.shields.io/github/release/vxern/logos.svg?style=for-the-badge) ![Pull Requests](https://img.shields.io/github/issues-pr/vxern/logos.svg?style=for-the-badge) ![Issues](https://img.shields.io/github/issues/vxern/logos.svg?style=for-the-badge)
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=vxern_logos&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=vxern_logos) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=vxern_logos&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=vxern_logos) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=vxern_logos&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=vxern_logos) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=vxern_logos&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=vxern_logos) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=vxern_logos&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=vxern_logos) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=vxern_logos&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=vxern_logos)
+
+![Wakatime](https://wakatime.com/badge/github/vxern/logos.svg)
 
 ### Language Support
 
