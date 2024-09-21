@@ -367,7 +367,7 @@ class Client {
 
 		const guildDocument = await Guild.getOrCreate(this, { guildId: guild.id.toString() });
 
-		await this.#services.setupGuildServices({ guildId: guild.id, guildDocument });
+		await this.#services.startForGuild({ guildId: guild.id, guildDocument });
 
 		this.bot.helpers
 			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))

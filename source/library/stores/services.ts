@@ -144,7 +144,7 @@ class ServiceStore {
 		this.log.info("Global services stopped.");
 	}
 
-	async setupGuildServices({ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild }): Promise<void> {
+	async startForGuild({ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild }): Promise<void> {
 		const services: Service[] = [];
 
 		if (guildDocument.hasEnabled("informationNotices")) {
