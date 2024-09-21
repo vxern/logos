@@ -5,7 +5,6 @@ import type { Guild } from "logos/models/guild";
 import type { Model } from "logos/models/model";
 import type { User } from "logos/models/user";
 import { LocalService } from "logos/services/service";
-import type { ServiceStore } from "logos/stores/services";
 
 interface Configurations {
 	verification: Guild["features"]["verification"];
@@ -19,12 +18,9 @@ type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
-type CustomIDs = Record<keyof Configurations, string>;
-
-type PromptType = keyof ServiceStore["local"]["prompts"];
-
+type PromptType = keyof Configurations;
+type CustomIDs = Record<PromptType, string>;
 type PromptDeleteMode = "delete" | "close" | "none";
-
 interface ExistingPrompts {
 	readonly valid: [partialId: string, prompt: Discord.Message][];
 	readonly invalid: Discord.Message[];

@@ -27,11 +27,7 @@ async function handleRequestQueryPlayback(
 	interaction: Logos.Interaction<any, { query: string }>,
 	resolveToSongListing: SongListingResolver,
 ): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!(musicService.canManagePlayback(interaction) && musicService.canRequestPlayback(interaction))) {
 		return;
 	}
@@ -64,11 +60,7 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!(musicService.canManagePlayback(interaction) && musicService.canRequestPlayback(interaction))) {
 		return;
 	}

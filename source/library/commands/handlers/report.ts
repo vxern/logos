@@ -31,11 +31,6 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		return;
 	}
 
-	const reportService = client.getPromptService(guild.id, { type: "reports" });
-	if (reportService === undefined) {
-		return;
-	}
-
 	const composer = new ReportComposer(client, { interaction });
 
 	composer.onSubmit(async (submission, { formData }) => {
@@ -58,7 +53,9 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 			return;
 		}
 
-		const prompt = await reportService.savePrompt(user, reportDocument);
+		const prompt = await client.services
+			.local("reportPrompts", { guildId: interaction.guildId })
+			.savePrompt(user, reportDocument);
 		if (prompt === undefined) {
 			return;
 		}

@@ -105,5 +105,5 @@ moment, [discuss it first](https://discord.gg/TWdAjkTfah).
 #### #6: Run the formatter
 
 Ideally, you should have your IDE set up in such a way where it would re-format the file on every change. However, just
-to make sure it complies with Biome and the linter ruleset in `biome.json`, run `bun lint` before you commit your
+to make sure it complies with Biome and the linter ruleset in `biome.json`, run `bun check` before you commit your
 changes.

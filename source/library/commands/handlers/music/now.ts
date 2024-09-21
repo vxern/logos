@@ -7,11 +7,7 @@ async function handleDisplayCurrentlyPlaying(
 	client: Client,
 	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
 ): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canCheckPlayback(interaction)) {
 		return;
 	}

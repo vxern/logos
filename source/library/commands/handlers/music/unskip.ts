@@ -16,11 +16,7 @@ async function handleUnskipAction(
 		return;
 	}
 
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
@@ -46,11 +42,7 @@ async function handleUnskipAction(
 			return true;
 		}
 
-		if (interaction.parameters.collection || musicService.session.queueable.index === 0) {
-			return true;
-		}
-
-		return false;
+		return interaction.parameters.collection || musicService.session.queueable.index === 0;
 	})();
 
 	if (isUnskippingListing && musicService.session.listings.history.isEmpty) {

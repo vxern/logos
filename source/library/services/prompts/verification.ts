@@ -81,12 +81,12 @@ class VerificationPromptService extends PromptService<{
 				continue;
 			}
 
-			this.getUserDocument(entryRequestDocument).then((authorDocument) => {
+			this.getUserDocument(entryRequestDocument).then(async (authorDocument) => {
 				if (authorDocument === undefined) {
 					return;
 				}
 
-				this.#tryFinalise({ entryRequestDocument, voter: member });
+				await this.#tryFinalise({ entryRequestDocument, voter: member });
 			});
 
 			entryRequests.set(partialId, entryRequestDocument);
@@ -641,16 +641,11 @@ class VerificationPromptService extends PromptService<{
 			return;
 		}
 
-		const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
-		if (ticketService === undefined) {
-			return;
-		}
-
 		const strings = constants.contexts.inquiryChannel({
 			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
-		const ticketDocument = await ticketService.openTicket({
+		const ticketDocument = await this.client.services.local("ticketPrompts", { guildId: this.guildId }).openTicket({
 			type: "inquiry",
 			formData: { topic: strings.inquiryChannel({ user: entryRequestAuthor.username }) },
 			user: entryRequestAuthor,

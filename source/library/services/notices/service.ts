@@ -2,7 +2,6 @@ import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
-import type { ServiceStore } from "logos/stores/services";
 import { default as hashObject } from "object-hash";
 
 type HashableProperties = "embeds" | "components";
@@ -24,7 +23,7 @@ type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
-type NoticeTypes = keyof ServiceStore["local"]["notices"];
+type NoticeTypes = keyof Configurations;
 
 abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
 	static readonly #configurationLocators = Object.freeze({

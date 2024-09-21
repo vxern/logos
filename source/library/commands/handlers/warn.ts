@@ -128,7 +128,6 @@ async function handleWarnUser(
 	const surpassedLimit = warningDocumentsActive.length > configuration.limit;
 	if (surpassedLimit) {
 		if (guildDocument.hasEnabled("alerts")) {
-			const alertService = client.getAlertService(guild.id);
 			if (configuration.autoTimeout !== undefined) {
 				const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
 				const timeoutMilliseconds = timeStructToMilliseconds(timeout);
@@ -145,7 +144,7 @@ async function handleWarnUser(
 					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
-				alertService?.alert({
+				await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 					embeds: [
 						{
 							title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
@@ -166,7 +165,7 @@ async function handleWarnUser(
 					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
-				alertService?.alert({
+				await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 					embeds: [
 						{
 							title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
@@ -189,8 +188,7 @@ async function handleWarnUser(
 	if (reachedLimit) {
 		const strings = constants.contexts.limitReached({ localise: client.localise, locale: interaction.guildLocale });
 		if (guildDocument.hasEnabled("alerts")) {
-			const alertService = client.getAlertService(guild.id);
-			alertService?.alert({
+			await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 				embeds: [
 					{
 						title: `${constants.emojis.indicators.warning} ${strings.title}`,

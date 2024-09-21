@@ -11,7 +11,7 @@ async function handleDisplayModerationPolicy(client: Client, interaction: Logos.
 		: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [client.interactionRepetitionService.getShowButton(interaction)],
+					components: [client.services.global("interactionRepetition").getShowButton(interaction)],
 				},
 			];
 

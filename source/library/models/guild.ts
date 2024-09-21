@@ -114,7 +114,6 @@ class Guild extends GuildModel {
 	}
 
 	feature<K extends keyof Guild["features"]>(feature: K): NonNullable<Guild["features"][K]> {
-		// If the guild does not have the feature enabled, do not return any data about the feature.
 		if (!this.hasEnabled(feature)) {
 			throw new Error(
 				`Attempted to get guild feature '${feature}' that was not enabled on guild with ID ${this.guildId}.`,

@@ -19,6 +19,7 @@ import type {
 import type { InteractionHandler } from "logos/commands/handlers/handler";
 import type { Guild } from "logos/models/guild";
 import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
+import type pino from "pino";
 
 interface RateLimit {
 	nextAllowedUsageTimestamp: number;
@@ -30,6 +31,7 @@ type BuildResult<Object extends Command | Option> = {
 	namesWithMetadata: LocalisedNamesWithMetadata[];
 };
 class CommandStore {
+	readonly log: pino.Logger;
 	readonly commands: BuiltCommands;
 
 	readonly #client: Client;
@@ -61,6 +63,7 @@ class CommandStore {
 			autocompleteHandlers: Map<string, InteractionHandler>;
 		},
 	) {
+		this.log = client.log.child({ name: "CommandStore" });
 		this.commands = commands;
 
 		this.#client = client;
@@ -459,8 +462,14 @@ class CommandStore {
 			commands.push(this.commands.resource);
 		}
 
-		if (guildDocument.hasEnabled("music") && this.#client.lavalinkService !== undefined) {
-			commands.push(this.commands.music);
+		if (guildDocument.hasEnabled("music")) {
+			if (this.#client.services.hasGlobalService("lavalink")) {
+				commands.push(this.commands.music);
+			} else {
+				this.log.warn(
+					`The music service is enabled on ${this.#client.diagnostics.guild(guildDocument.id)}, but the bot does not have a Lavalink connection. Skipping...`,
+				);
+			}
 		}
 
 		if (guildDocument.hasEnabled("praises")) {

@@ -35,7 +35,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [client.interactionRepetitionService.getShowButton(interaction)],
+					components: [client.services.global("interactionRepetition").getShowButton(interaction)],
 				},
 			];
 

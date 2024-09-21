@@ -34,7 +34,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		return;
 	}
 
-	const suggestionService = client.getPromptService(guild.id, { type: "suggestions" });
+	const suggestionService = client.services.local("suggestionPrompts", { guildId: guild.id });
 	if (suggestionService === undefined) {
 		return;
 	}
