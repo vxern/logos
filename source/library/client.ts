@@ -375,7 +375,7 @@ class Client {
 	}
 
 	async #teardownGuild({ guildId }: { guildId: bigint }): Promise<void> {
-		await this.#services.stopLocal({ guildId });
+		await this.#services.stopForGuild({ guildId });
 	}
 
 	async start(): Promise<void> {

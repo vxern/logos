@@ -248,6 +248,10 @@ class ServiceStore {
 		await this.#startLocal({ guildId, services });
 	}
 
+	async stopForGuild({ guildId }: { guildId: bigint }): Promise<void> {
+		await this.#stopLocal({ guildId });
+	}
+
 	async #startLocal({ guildId, services }: { guildId: bigint; services: Service[] }): Promise<void> {
 		if (services.length === 0) {
 			this.log.info(`There were no local services to start on ${this.#client.diagnostics.guild(guildId)}.`);
@@ -260,16 +264,12 @@ class ServiceStore {
 
 		this.#collection.local.set(guildId, services);
 
-		const promises: (void | Promise<void>)[] = [];
-		for (const service of services) {
-			promises.push(service.start());
-		}
-		await Promise.all(promises);
+		await this.#startServices(services);
 
 		this.log.info(`Local services on ${this.#client.diagnostics.guild(guildId)} started.`);
 	}
 
-	async stopLocal({ guildId }: { guildId: bigint }): Promise<void> {
+	async #stopLocal({ guildId }: { guildId: bigint }): Promise<void> {
 		if (!this.#collection.local.has(guildId)) {
 			this.log.info(`There were no local services to stop on ${this.#client.diagnostics.guild(guildId)}.`);
 			return;
@@ -288,12 +288,12 @@ class ServiceStore {
 		this.log.info(`Local services on ${this.#client.diagnostics.guild(guildId)} stopped.`);
 	}
 
+	async #startServices(services: Service[]): Promise<void> {
+		await Promise.all(services.map((service) => service.start()));
+	}
+
 	async #stopServices(services: Service[]): Promise<void> {
-		const promises: Promise<void>[] = [];
-		for (const service of services) {
-			promises.push(Promise.resolve(service.stop()));
-		}
-		await Promise.all(promises);
+		await Promise.all(services.map((service) => service.stop()));
 	}
 
 	getAlertService(guildId: bigint): AlertService | undefined {
