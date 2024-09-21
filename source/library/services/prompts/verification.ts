@@ -81,12 +81,12 @@ class VerificationPromptService extends PromptService<{
 				continue;
 			}
 
-			this.getUserDocument(entryRequestDocument).then((authorDocument) => {
+			this.getUserDocument(entryRequestDocument).then(async (authorDocument) => {
 				if (authorDocument === undefined) {
 					return;
 				}
 
-				this.#tryFinalise({ entryRequestDocument, voter: member });
+				await this.#tryFinalise({ entryRequestDocument, voter: member });
 			});
 
 			entryRequests.set(partialId, entryRequestDocument);

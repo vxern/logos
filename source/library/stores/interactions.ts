@@ -437,11 +437,7 @@ class InteractionStore {
 				return true;
 			}
 
-			if (member.nick?.toLowerCase().includes(identifierLowercase)) {
-				return true;
-			}
-
-			return false;
+			return member.nick?.toLowerCase().includes(identifierLowercase);
 		});
 
 		return [matchedMembers, false];
