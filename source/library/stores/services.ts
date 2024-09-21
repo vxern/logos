@@ -21,30 +21,34 @@ import type { GlobalService, LocalService, Service } from "logos/services/servic
 import { StatusService } from "logos/services/status";
 import type pino from "pino";
 
+interface GlobalServices {
+	readonly lavalink?: LavalinkService;
+	readonly interactionRepetition: InteractionRepetitionService;
+	readonly status: StatusService;
+}
+
+interface LocalServices {
+	readonly alerts: AlertService;
+	readonly dynamicVoiceChannels: DynamicVoiceChannelService;
+	readonly entry: EntryService;
+	readonly music: MusicService;
+	readonly informationNoticess: InformationNoticeService;
+	readonly resourceNotices: ResourceNoticeService;
+	readonly roleNotices: RoleNoticeService;
+	readonly welcomeNotices: WelcomeNoticeService;
+	readonly reportPrompts: ReportPromptService;
+	readonly resourcePrompts: ResourcePromptService;
+	readonly suggestionPrompts: SuggestionPromptService;
+	readonly ticketPrompts: TicketPromptService;
+	readonly verificationPrompts: VerificationPromptService;
+	readonly roleIndicators: RoleIndicatorService;
+}
+
 class ServiceStore {
 	readonly log: pino.Logger;
 	readonly #client: Client;
-	readonly #global: {
-		readonly lavalink?: LavalinkService;
-		readonly interactionRepetition: InteractionRepetitionService;
-		readonly status: StatusService;
-	};
-	readonly #local: {
-		readonly alerts: Map<bigint, AlertService>;
-		readonly dynamicVoiceChannels: Map<bigint, DynamicVoiceChannelService>;
-		readonly entry: Map<bigint, EntryService>;
-		readonly music: Map<bigint, MusicService>;
-		readonly informationNoticess: Map<bigint, InformationNoticeService>;
-		readonly resourceNotices: Map<bigint, ResourceNoticeService>;
-		readonly roleNotices: Map<bigint, RoleNoticeService>;
-		readonly welcomeNotices: Map<bigint, WelcomeNoticeService>;
-		readonly reportPrompts: Map<bigint, ReportPromptService>;
-		readonly resourcePrompts: Map<bigint, ResourcePromptService>;
-		readonly suggestionPrompts: Map<bigint, SuggestionPromptService>;
-		readonly ticketPrompts: Map<bigint, TicketPromptService>;
-		readonly verificationPrompts: Map<bigint, VerificationPromptService>;
-		readonly roleIndicators: Map<bigint, RoleIndicatorService>;
-	};
+	readonly #global: GlobalServices;
+	readonly #local: { [K in keyof LocalServices]: Map<bigint, LocalServices[K]> };
 
 	get #globalServices(): GlobalService[] {
 		return Object.values(this.#global).filter(isDefined);
@@ -291,6 +295,26 @@ class ServiceStore {
 
 	async #stopServices(services: Service[]): Promise<void> {
 		await Promise.all(services.map((service) => service.stop()));
+	}
+
+	/** ⚠️ If the service is not enabled, an error is raised. */
+	global<K extends keyof GlobalServices>(service: K): GlobalServices[K] {
+		if (this.#global[service] === undefined) {
+			throw new Error(`Attempted to get global service '${service}' that is not enabled.`);
+		}
+
+		return this.#global[service]!;
+	}
+
+	/** ⚠️ If the service is not enabled on the given guild, an error is raised. */
+	local<K extends keyof LocalServices>(service: K, { guildId }: { guildId: bigint }): LocalServices[K] {
+		if (!this.#local[service].has(guildId)) {
+			throw new Error(
+				`Attempted to get local service '${service}' that was not enabled on guild with ID ${guildId}.`,
+			);
+		}
+
+		return this.#local[service].get(guildId)!;
 	}
 }
 

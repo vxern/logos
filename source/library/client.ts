@@ -7,9 +7,6 @@ import { Diagnostics } from "logos/diagnostics";
 import { ActionLock } from "logos/helpers/action-lock";
 import { Guild } from "logos/models/guild";
 import { Model } from "logos/models/model";
-import type { InteractionRepetitionService } from "logos/services/interaction-repetition";
-import type { LavalinkService } from "logos/services/lavalink";
-import type { StatusService } from "logos/services/status";
 import { AdapterStore } from "logos/stores/adapters";
 import { CacheStore } from "logos/stores/cache";
 import { CommandStore } from "logos/stores/commands";
@@ -180,6 +177,10 @@ class Client {
 		return this.#events.registerCollector.bind(this.#events);
 	}
 
+	get services(): ServiceStore {
+		return this.#services;
+	}
+
 	get entities(): CacheStore["entities"] {
 		return this.#cache.entities;
 	}
@@ -194,46 +195,6 @@ class Client {
 
 	get volatile(): VolatileStore | undefined {
 		return this.#volatile;
-	}
-
-	get lavalinkService(): LavalinkService | undefined {
-		return this.#services.global.lavalink;
-	}
-
-	get interactionRepetitionService(): InteractionRepetitionService {
-		return this.#services.global.interactionRepetition;
-	}
-
-	get statusService(): StatusService {
-		return this.#services.global.status;
-	}
-
-	get getAlertService() {
-		return this.#services.getAlertService.bind(this.#services);
-	}
-
-	get getDynamicVoiceChannelService() {
-		return this.#services.getDynamicVoiceChannelService.bind(this.#services);
-	}
-
-	get getEntryService() {
-		return this.#services.getEntryService.bind(this.#services);
-	}
-
-	get getMusicService() {
-		return this.#services.getMusicService.bind(this.#services);
-	}
-
-	get getRoleIndicatorService() {
-		return this.#services.getRoleIndicatorService.bind(this.#services);
-	}
-
-	get getNoticeService() {
-		return this.#services.getNoticeService.bind(this.#services);
-	}
-
-	get getPromptService() {
-		return this.#services.getPromptService.bind(this.#services);
 	}
 
 	get tryLog(): JournallingStore["tryLog"] {
@@ -381,8 +342,8 @@ class Client {
 	async start(): Promise<void> {
 		this.log.info("Starting client...");
 
-		await this.volatile?.setup();
-		await this.database.setup({ prefetchDocuments: true });
+		await this.#volatile?.setup();
+		await this.#database.setup({ prefetchDocuments: true });
 		await this.#services.setup();
 		await this.#journalling.setup();
 		await this.#setupCollectors();
@@ -392,8 +353,8 @@ class Client {
 	async stop(): Promise<void> {
 		await this.#guildReloadLock.dispose();
 
-		this.volatile?.teardown();
-		await this.database.teardown();
+		this.#volatile?.teardown();
+		await this.#database.teardown();
 		await this.#services.teardown();
 		this.#journalling.teardown();
 		this.#teardownCollectors();
