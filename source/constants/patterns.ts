@@ -33,7 +33,7 @@ const patterns = Object.freeze({
 	/** Used for matching word separators to determine if a word is a compound in the game command. */
 	wordSeparator: /[’'-]/,
 	/** Used for matching against digits in the game command. */
-	digit: /[0-9]/,
+	digit: /\d/,
 	/** Used for matching against description localisations. */
 	localisationDescription: /\.description$/,
 } as const);

@@ -135,7 +135,7 @@ class LavalinkService extends GlobalService {
 	async stop(): Promise<void> {
 		this.manager.removeAllListeners();
 
-		for (const player of Object.values(this.manager.players) as shoukaku.Player[]) {
+		for (const player of Object.values(this.manager.players)) {
 			await player.destroy();
 		}
 

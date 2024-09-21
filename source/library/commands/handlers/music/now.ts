@@ -45,8 +45,6 @@ async function handleDisplayCurrentlyPlaying(
 			return;
 		}
 
-		const collection = musicService.session.queueable as SongCollection;
-
 		const strings = constants.contexts.nowPlayingSong({
 			localise: client.localise,
 			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
@@ -55,7 +53,7 @@ async function handleDisplayCurrentlyPlaying(
 		const view = new SongCollectionView(client, {
 			interaction,
 			title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
-			collection,
+			collection: musicService.session.queueable,
 		});
 
 		await view.open();

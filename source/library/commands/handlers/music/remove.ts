@@ -32,7 +32,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 	});
 
 	view.onRemove(async (buttonPress) => {
-		const indexString = buttonPress.data?.values?.at(0) as string | undefined;
+		const indexString = buttonPress.data?.values?.at(0);
 		if (indexString === undefined) {
 			return;
 		}
