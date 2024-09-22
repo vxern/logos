@@ -24,17 +24,15 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyResources({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	const composer = new ResourceComposer(client, { interaction });
 
 	composer.onSubmit(async (submission, { formData }) => {
-		await client.postponeReply(submission);
+		client.postponeReply(submission).ignore();
 
 		const resourceDocument = await Resource.create(client, {
 			guildId: guild.id.toString(),
@@ -61,10 +59,12 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 		}
 
 		const strings = constants.contexts.resourceSent({ localise: client.localise, locale: interaction.locale });
-		await client.succeeded(submission, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.succeeded(submission, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
 	});
 
 	await composer.open();

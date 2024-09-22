@@ -12,11 +12,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -33,14 +29,16 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		locale: interaction.guildLocale,
 	});
 
-	await client.notice(
-		interaction,
-		{
-			title: `${constants.emojis.music.paused} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
+	client
+		.notice(
+			interaction,
+			{
+				title: `${constants.emojis.music.paused} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handlePausePlayback };

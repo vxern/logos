@@ -7,7 +7,7 @@ async function handleRequestStreamPlayback(
 	client: Client,
 	interaction: Logos.Interaction<any, { url: string }>,
 ): Promise<void> {
-	await client.acknowledge(interaction);
+	client.acknowledge(interaction).ignore();
 
 	const strings = constants.contexts.stream({ localise: client.localise, locale: interaction.locale });
 	const listing: SongListing = new SongListing({
@@ -38,11 +38,12 @@ async function handleRequestQueryPlayback(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
-		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
+			})
+			.ignore();
 
 		return;
 	}

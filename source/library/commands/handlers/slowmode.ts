@@ -15,7 +15,7 @@ async function handleToggleSlowmodeAutocomplete(
 		.map((level) => ({ name: strings.level(level), value: level }))
 		.filter((choice) => choice.name.toLowerCase().includes(levelLowercase));
 
-	await client.respond(interaction, choices);
+	client.respond(interaction, choices).ignore();
 }
 
 async function handleToggleSlowmode(
@@ -27,10 +27,7 @@ async function handleToggleSlowmode(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.error(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -73,14 +70,16 @@ async function handleToggleSlowmode(
 					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
-				await client.success(
-					interaction,
-					{
-						title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
-						description: strings.description,
-					},
-					{ visible: true },
-				);
+				client
+					.success(
+						interaction,
+						{
+							title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
+							description: strings.description,
+						},
+						{ visible: true },
+					)
+					.ignore();
 
 				return;
 			}
@@ -105,14 +104,16 @@ async function handleToggleSlowmode(
 					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
-				await client.success(
-					interaction,
-					{
-						title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
-						description: strings.description,
-					},
-					{ visible: true },
-				);
+				client
+					.success(
+						interaction,
+						{
+							title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
+							description: strings.description,
+						},
+						{ visible: true },
+					)
+					.ignore();
 
 				return;
 			}
@@ -122,10 +123,12 @@ async function handleToggleSlowmode(
 					localise: client.localise,
 					locale: interaction.locale,
 				});
-				await client.warning(interaction, {
-					title: strings.title,
-					description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
-				});
+				client
+					.warning(interaction, {
+						title: strings.title,
+						description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
+					})
+					.ignore();
 			}
 
 			return;
@@ -142,12 +145,14 @@ async function handleToggleSlowmode(
 					localise: client.localise,
 					locale: interaction.locale,
 				});
-				await client.pushback(interaction, {
-					title: strings.title,
-					description: `${strings.description.justEnabled} ${strings.description.canDisableIn({
-						relative_timestamp: timestamp(canDisableIn, { format: "relative" }),
-					})}`,
-				});
+				client
+					.pushback(interaction, {
+						title: strings.title,
+						description: `${strings.description.justEnabled} ${strings.description.canDisableIn({
+							relative_timestamp: timestamp(canDisableIn, { format: "relative" }),
+						})}`,
+					})
+					.ignore();
 
 				return;
 			}
@@ -169,14 +174,17 @@ async function handleToggleSlowmode(
 			localise: client.localise,
 			locale: interaction.guildLocale,
 		});
-		await client.notice(
-			interaction,
-			{
-				title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
-				description: strings.description,
-			},
-			{ visible: true },
-		);
+		client
+			.notice(
+				interaction,
+				{
+					title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
+					description: strings.description,
+				},
+				{ visible: true },
+			)
+			.ignore();
+
 		return;
 	}
 
@@ -197,14 +205,16 @@ async function handleToggleSlowmode(
 	});
 
 	const strings = constants.contexts.slowmodeEnabled({ localise: client.localise, locale: interaction.guildLocale });
-	await client.notice(
-		interaction,
-		{
-			title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
+	client
+		.notice(
+			interaction,
+			{
+				title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handleToggleSlowmode, handleToggleSlowmodeAutocomplete };

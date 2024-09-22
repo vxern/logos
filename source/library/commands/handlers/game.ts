@@ -32,14 +32,9 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(
-			interaction,
-			{
-				title: strings.title,
-				description: strings.description,
-			},
-			{ autoDelete: true },
-		);
+		client
+			.warning(interaction, { title: strings.title, description: strings.description }, { autoDelete: true })
+			.ignore();
 
 		return;
 	}
@@ -63,7 +58,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		userDocument.registerSession({ game: "pickMissingWord", learningLocale: interaction.learningLocale });
 	});
 
-	await client.postponeReply(interaction);
+	client.postponeReply(interaction).ignore();
 
 	const guessButton = new InteractionCollector<[index: string]>(client, {
 		only: [interaction.user.id],
@@ -71,7 +66,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	const skipButton = new InteractionCollector(client, { only: [interaction.user.id] });
 
 	guessButton.onInteraction(async (buttonPress) => {
-		await client.acknowledge(buttonPress);
+		client.acknowledge(buttonPress).ignore();
 
 		const pick = data.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
 		const isCorrect = pick === data.sentenceSelection.correctPick;
@@ -92,21 +87,23 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 			data.embedColour = constants.colours.lightGreen;
 			data.sentenceSelection = await getSentenceSelection(client, { learningLocale: interaction.learningLocale });
 
-			await client.editReply(interaction, await getGameView(client, interaction, data, userDocument, "hide"));
+			client.editReply(interaction, await getGameView(client, interaction, data, userDocument, "hide")).ignore();
 		} else {
 			data.embedColour = constants.colours.red;
 
-			await client.editReply(interaction, await getGameView(client, interaction, data, userDocument, "reveal"));
+			client
+				.editReply(interaction, await getGameView(client, interaction, data, userDocument, "reveal"))
+				.ignore();
 		}
 	});
 
 	skipButton.onInteraction(async (buttonPress) => {
-		await client.acknowledge(buttonPress);
+		client.acknowledge(buttonPress).ignore();
 
 		data.embedColour = constants.colours.blue;
 		data.sentenceSelection = await getSentenceSelection(client, { learningLocale: interaction.learningLocale });
 
-		await client.editReply(interaction, await getGameView(client, interaction, data, userDocument, "hide"));
+		client.editReply(interaction, await getGameView(client, interaction, data, userDocument, "hide")).ignore();
 	});
 
 	await client.registerInteractionCollector(guessButton);
@@ -120,7 +117,7 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		sessionScore: 0,
 	};
 
-	await client.editReply(interaction, await getGameView(client, interaction, data, userDocument, "hide"));
+	client.editReply(interaction, await getGameView(client, interaction, data, userDocument, "hide")).ignore();
 }
 
 async function getGameView(

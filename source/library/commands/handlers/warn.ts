@@ -42,8 +42,8 @@ async function handleWarnUserAutocomplete(
 					.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase)),
 				{ name: strings.option, value: constants.components.none },
 			];
+			client.respond(interaction, choices).ignore();
 
-			await client.respond(interaction, choices);
 			break;
 		}
 	}
@@ -58,10 +58,8 @@ async function handleWarnUser(
 
 	if (interaction.parameters.rule !== constants.components.none && !isValidRule(interaction.parameters.rule)) {
 		const strings = constants.contexts.invalidRule({ localise: client.localise, locale: interaction.locale });
-		await client.error(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -115,15 +113,17 @@ async function handleWarnUser(
 	});
 
 	const strings = constants.contexts.userWarned({ localise: client.localise, locale: interaction.locale });
-	await client.success(interaction, {
-		title: strings.title,
-		description: strings.description({
-			user_mention: mention(member.id, { type: "user" }),
-			warnings: client.pluralise("warn.strings.warned.description.warnings", interaction.locale, {
-				quantity: warningDocumentsActive.length,
+	client
+		.success(interaction, {
+			title: strings.title,
+			description: strings.description({
+				user_mention: mention(member.id, { type: "user" }),
+				warnings: client.pluralise("warn.strings.warned.description.warnings", interaction.locale, {
+					quantity: warningDocumentsActive.length,
+				}),
 			}),
-		}),
-	});
+		})
+		.ignore();
 
 	const surpassedLimit = warningDocumentsActive.length > configuration.limit;
 	if (surpassedLimit) {

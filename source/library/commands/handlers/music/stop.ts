@@ -11,10 +11,8 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -24,14 +22,16 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.stopped} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.stopped} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handleStopPlayback };

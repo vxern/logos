@@ -12,11 +12,7 @@ async function handleLoopPlayback(
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.noSongToLoop({ localise: client.localise, locale: interaction.locale });
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -27,11 +23,12 @@ async function handleLoopPlayback(
 				localise: client.localise,
 				locale: interaction.locale,
 			});
-
-			await client.warning(interaction, {
-				title: strings.title,
-				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-			});
+			client
+				.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+				})
+				.ignore();
 
 			return;
 		}
@@ -49,15 +46,16 @@ async function handleLoopPlayback(
 				localise: client.localise,
 				locale: interaction.guildLocale,
 			});
-
-			await client.success(
-				interaction,
-				{
-					title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
-					description: strings.description,
-				},
-				{ visible: true },
-			);
+			client
+				.success(
+					interaction,
+					{
+						title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
+						description: strings.description,
+					},
+					{ visible: true },
+				)
+				.ignore();
 
 			return;
 		}
@@ -66,14 +64,16 @@ async function handleLoopPlayback(
 			localise: client.localise,
 			locale: interaction.guildLocale,
 		});
-		await client.success(
-			interaction,
-			{
-				title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
-				description: strings.description,
-			},
-			{ visible: true },
-		);
+		client
+			.success(
+				interaction,
+				{
+					title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
+					description: strings.description,
+				},
+				{ visible: true },
+			)
+			.ignore();
 
 		return;
 	}
@@ -83,14 +83,16 @@ async function handleLoopPlayback(
 			localise: client.localise,
 			locale: interaction.guildLocale,
 		});
-		await client.success(
-			interaction,
-			{
-				title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
-				description: strings.description,
-			},
-			{ visible: true },
-		);
+		client
+			.success(
+				interaction,
+				{
+					title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
+					description: strings.description,
+				},
+				{ visible: true },
+			)
+			.ignore();
 
 		return;
 	}
@@ -99,14 +101,16 @@ async function handleLoopPlayback(
 		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handleLoopPlayback };

@@ -23,14 +23,12 @@ async function handlePraiseUser(
 
 	if (member.id === interaction.member?.id) {
 		const strings = constants.contexts.cannotPraiseSelf({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
-	await client.postponeReply(interaction);
+	client.postponeReply(interaction).ignore();
 
 	const crossesRateLimit = Guild.crossesRateLimit(
 		await Praise.getAll(client, {
@@ -40,10 +38,8 @@ async function handlePraiseUser(
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyPraises({ localise: client.localise, locale: interaction.locale });
-		await client.pushedBack(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.pushedBack(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -66,10 +62,12 @@ async function handlePraiseUser(
 	});
 
 	const strings = constants.contexts.praised({ localise: client.localise, locale: interaction.locale });
-	await client.succeeded(interaction, {
-		title: strings.title,
-		description: strings.description({ user_mention: mention(member.id, { type: "user" }) }),
-	});
+	client
+		.succeeded(interaction, {
+			title: strings.title,
+			description: strings.description({ user_mention: mention(member.id, { type: "user" }) }),
+		})
+		.ignore();
 }
 
 export { handlePraiseUser, handlePraiseUserAutocomplete };

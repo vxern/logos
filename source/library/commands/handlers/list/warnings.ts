@@ -55,7 +55,7 @@ async function handleDisplayWarnings(
 		where: { guildId: interaction.guildId.toString(), targetId: member.id.toString() },
 	});
 
-	await client.notice(interaction, getWarningPage(client, interaction, warningDocuments, isSelf));
+	client.notice(interaction, getWarningPage(client, interaction, warningDocuments, isSelf)).ignore();
 }
 
 function getWarningPage(

@@ -11,15 +11,8 @@ async function handleReplayAction(
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToReplay({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		const strings = constants.contexts.noSongToReplay({ localise: client.localise, locale: interaction.locale });
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -30,11 +23,12 @@ async function handleReplayAction(
 				localise: client.localise,
 				locale: interaction.locale,
 			});
-
-			await client.warning(interaction, {
-				title: strings.title,
-				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-			});
+			client
+				.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+				})
+				.ignore();
 
 			return;
 		}
@@ -44,14 +38,16 @@ async function handleReplayAction(
 		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.replaying} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.replaying} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 
 	await musicService.session.replay({
 		mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",

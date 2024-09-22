@@ -24,17 +24,15 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyReports({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	const composer = new ReportComposer(client, { interaction });
 
 	composer.onSubmit(async (submission, { formData }) => {
-		await client.postponeReply(submission);
+		client.postponeReply(submission).ignore();
 
 		const reportDocument = await Report.create(client, {
 			guildId: guild.id.toString(),
@@ -61,10 +59,12 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 		}
 
 		const strings = constants.contexts.reportSubmitted({ localise: client.localise, locale: interaction.locale });
-		await client.succeeded(submission, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.succeeded(submission, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
 	});
 
 	await composer.open();

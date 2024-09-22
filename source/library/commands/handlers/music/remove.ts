@@ -13,11 +13,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -44,31 +40,25 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 				localise: client.localise,
 				locale: interaction.locale,
 			});
-
-			await client.failed(buttonPress, {
-				title: strings.title,
-				description: strings.description,
-			});
+			client.failed(buttonPress, { title: strings.title, description: strings.description }).ignore();
 
 			return;
 		}
 
-		const strings = constants.contexts.removedSong({
-			localise: client.localise,
-			locale: interaction.guildLocale,
-		});
-
-		await client.success(
-			buttonPress,
-			{
-				title: `${constants.emojis.music.removed} ${strings.title}`,
-				description: strings.description({
-					title: listing.queueable.title,
-					user_mention: mention(buttonPress.user.id, { type: "user" }),
-				}),
-			},
-			{ visible: true },
-		);
+		const strings = constants.contexts.removedSong({ localise: client.localise, locale: interaction.guildLocale });
+		client
+			.success(
+				buttonPress,
+				{
+					title: `${constants.emojis.music.removed} ${strings.title}`,
+					description: strings.description({
+						title: listing.queueable.title,
+						user_mention: mention(buttonPress.user.id, { type: "user" }),
+					}),
+				},
+				{ visible: true },
+			)
+			.ignore();
 	});
 
 	const refreshView = async () => view.refresh();
