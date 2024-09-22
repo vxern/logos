@@ -19,6 +19,11 @@ declare global {
 		): AsyncGenerator<{ element: T; result?: R }, void, void>;
 	}
 
+	interface Promise {
+		/** Ignores the result of the promise. Useful in fire-and-forget situations. */
+		ignore(): void;
+	}
+
 	interface Array<T> {
 		/**
 		 * Taking an array, splits it into parts of equal sizes.

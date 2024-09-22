@@ -36,6 +36,10 @@ Promise.createRace = async function* <T, R>(
 	}
 };
 
+Promise.prototype.ignore = function (this): void {
+	this.catch();
+};
+
 const globals = globalThis as any;
 globals.Discord = Discord;
 globals.constants = await import("./constants/constants.ts").then((module) => module.default);
