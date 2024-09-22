@@ -277,7 +277,12 @@ class VerificationPromptService extends PromptService<{
 			Model.buildPartialId<EntryRequest>({ guildId, authorId }),
 		);
 		if (entryRequestDocument === undefined) {
-			await this.#displayVoteError(interaction);
+			const strings = constants.contexts.voteFailed({
+				localise: this.client.localise,
+				locale: interaction.locale,
+			});
+			this.client.failure(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return undefined;
 		}
 
@@ -286,11 +291,14 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.warning,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.warning,
+				})
+				.ignore();
+
 			return;
 		}
 
@@ -323,7 +331,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				confirmButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					if (entryRequestDocument.isFinalised) {
 						resolve(undefined);
@@ -343,7 +351,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				cancelButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					resolve(undefined);
 				});
@@ -358,33 +366,35 @@ class VerificationPromptService extends PromptService<{
 					localise: this.client.localise,
 					locale: interaction.locale,
 				});
-				await this.client.pushback(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: confirmButton.customId,
-									label: strings.yes,
-									style: Discord.ButtonStyles.Success,
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: cancelButton.customId,
-									label: strings.no,
-									style: Discord.ButtonStyles.Danger,
-								},
-							],
-						},
-					],
-				});
+				this.client
+					.pushback(interaction, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+							},
+						],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: confirmButton.customId,
+										label: strings.yes,
+										style: Discord.ButtonStyles.Success,
+									},
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: cancelButton.customId,
+										label: strings.no,
+										style: Discord.ButtonStyles.Danger,
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return promise;
 			}
@@ -393,10 +403,12 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return undefined;
 		}
@@ -419,7 +431,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				confirmButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					if (entryRequestDocument.isFinalised) {
 						resolve(undefined);
@@ -439,7 +451,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				cancelButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					resolve(undefined);
 				});
@@ -454,33 +466,35 @@ class VerificationPromptService extends PromptService<{
 					localise: this.client.localise,
 					locale: interaction.locale,
 				});
-				await this.client.pushback(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: confirmButton.customId,
-									label: strings.yes,
-									style: Discord.ButtonStyles.Success,
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: cancelButton.customId,
-									label: strings.no,
-									style: Discord.ButtonStyles.Danger,
-								},
-							],
-						},
-					],
-				});
+				this.client
+					.pushback(interaction, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+							},
+						],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: confirmButton.customId,
+										label: strings.yes,
+										style: Discord.ButtonStyles.Success,
+									},
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: cancelButton.customId,
+										label: strings.no,
+										style: Discord.ButtonStyles.Danger,
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return promise;
 			}
@@ -489,10 +503,7 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return undefined;
 		}
@@ -506,12 +517,14 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.notice(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.notice(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 		} else {
-			await this.client.acknowledge(interaction);
+			this.client.acknowledge(interaction).ignore();
 		}
 
 		const isFinalised = await this.#tryFinalise({ entryRequestDocument, voter });
@@ -625,7 +638,7 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
-		await this.client.postponeReply(interaction);
+		this.client.postponeReply(interaction).ignore();
 
 		const entryRequestDocument = this.client.documents.entryRequests.get(partialId);
 		if (entryRequestDocument === undefined) {
@@ -655,10 +668,8 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.failed(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.failed(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
@@ -680,10 +691,12 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.succeeded(interaction, {
-				title: strings.title,
-				description: strings.description({ guild_name: this.guild.name }),
-			});
+			this.client
+				.succeeded(interaction, {
+					title: strings.title,
+					description: strings.description({ guild_name: this.guild.name }),
+				})
+				.ignore();
 		}
 	}
 
@@ -727,17 +740,6 @@ class VerificationPromptService extends PromptService<{
 		);
 
 		return { acceptance, rejection };
-	}
-
-	async #displayVoteError(interaction: Logos.Interaction): Promise<void> {
-		const strings = constants.contexts.voteFailed({
-			localise: this.client.localise,
-			locale: interaction.locale,
-		});
-		await this.client.failure(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
 	}
 }
 
