@@ -39,7 +39,7 @@ class InteractionRepetitionService extends GlobalService {
 			return;
 		}
 
-		this.client.registerInteraction(interaction);
+		this.client.interactions.registerInteraction(interaction);
 	}
 
 	async #handleShowInChat(buttonPress: Logos.Interaction<[interactionId: string]>): Promise<void> {
@@ -59,7 +59,7 @@ class InteractionRepetitionService extends GlobalService {
 		confirmButton.onInteraction(async (confirmButtonPress) => {
 			this.client.deleteReply(buttonPress).ignore();
 
-			const originalInteraction = this.client.unregisterInteraction(BigInt(buttonPress.metadata[1]));
+			const originalInteraction = this.client.interactions.unregisterInteraction(BigInt(buttonPress.metadata[1]));
 			if (originalInteraction === undefined) {
 				return;
 			}
@@ -71,7 +71,7 @@ class InteractionRepetitionService extends GlobalService {
 				parameters: { "@repeat": true, show: true },
 			});
 
-			await this.client.receiveInteraction(interactionSpoofed);
+			await this.client.interactions.handleInteraction(interactionSpoofed);
 		});
 
 		cancelButton.onInteraction((_) => this.client.deleteReply(buttonPress).ignore());

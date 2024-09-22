@@ -46,6 +46,7 @@ interface LocalServices {
 
 class ServiceStore {
 	readonly log: pino.Logger;
+
 	readonly #client: Client;
 	readonly #global: GlobalServices;
 	readonly #local: { [K in keyof LocalServices]: Map<bigint, LocalServices[K]> };
