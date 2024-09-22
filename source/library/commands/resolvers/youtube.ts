@@ -13,7 +13,7 @@ async function resolveYouTubeSongListings(
 		return search(client, interaction, query);
 	}
 
-	await client.acknowledge(interaction);
+	client.acknowledge(interaction).ignore();
 
 	if (query.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
@@ -38,7 +38,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	const selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	selectMenuSelection.onInteraction(async (selection) => {
-		await client.deleteReply(interaction);
+		client.deleteReply(interaction).ignore();
 
 		const indexString = selection.data?.values?.at(0);
 		if (indexString === undefined) {
@@ -89,28 +89,30 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	}
 
 	const strings = constants.contexts.selectSong({ localise: client.localise, locale: interaction.locale });
-	await client.notice(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-			},
-		],
-		components: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						type: Discord.MessageComponentTypes.SelectMenu,
-						customId: selectMenuSelection.customId,
-						minValues: 1,
-						maxValues: 1,
-						options,
-					},
-				],
-			},
-		],
-	});
+	client
+		.notice(interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+				},
+			],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.SelectMenu,
+							customId: selectMenuSelection.customId,
+							minValues: 1,
+							maxValues: 1,
+							options,
+						},
+					],
+				},
+			],
+		})
+		.ignore();
 
 	return promise;
 }
