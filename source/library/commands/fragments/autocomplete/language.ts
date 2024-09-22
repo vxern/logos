@@ -12,7 +12,7 @@ async function autocompleteLanguage(
 	});
 
 	if (interaction.parameters.language === undefined) {
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
 		return;
 	}
 

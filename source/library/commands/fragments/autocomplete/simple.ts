@@ -13,8 +13,7 @@ async function handleSimpleAutocomplete<T>(
 	const choices = elements
 		.map((element) => getOption(element))
 		.filter((choice) => choice.name.toLowerCase().includes(queryLowercase));
-
-	await client.respond(interaction, choices);
+	client.respond(interaction, choices).ignore();
 }
 
 export { handleSimpleAutocomplete };
