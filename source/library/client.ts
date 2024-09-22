@@ -278,6 +278,7 @@ class Client {
 		await this.#services.setup();
 		await this.#journalling.setup();
 		await this.#guilds.setup();
+		await this.#interactions.setup();
 		await this.#setupCollectors();
 		await this.#connection.open();
 
@@ -292,6 +293,7 @@ class Client {
 		await this.#services.teardown();
 		this.#journalling.teardown();
 		await this.#guilds.teardown();
+		await this.#interactions.teardown();
 		this.#teardownCollectors();
 		await this.#connection.close();
 
