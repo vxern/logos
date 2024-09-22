@@ -51,44 +51,46 @@ class EntryService extends LocalService {
 			localise: this.client.localise,
 			locale: buttonPress.locale,
 		});
-		await this.client.notice(buttonPress, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.chooseProficiency({
-						language: buttonPress.featureLanguage,
-					})}\n\n${strings.description.canChangeLater({
-						command: code(
-							this.client.localiseCommand(
-								// @ts-ignore: This is fine for now.
-								this.client.commands.profile.options.roles.key,
-								buttonPress.locale,
+		this.client
+			.notice(buttonPress, {
+				embeds: [
+					{
+						title: strings.title,
+						description: `${strings.description.chooseProficiency({
+							language: buttonPress.featureLanguage,
+						})}\n\n${strings.description.canChangeLater({
+							command: code(
+								this.client.localiseCommand(
+									// @ts-ignore: This is fine for now.
+									this.client.commands.profile.options.roles.key,
+									buttonPress.locale,
+								),
 							),
-						),
-					})}`,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: Object.values(
-						constants.roles.language.categories.proficiency.collection.list,
-					).map<Discord.ButtonComponent>((proficiencyRole, index) => {
-						const strings = constants.contexts.role({
-							localise: this.client.localise,
-							locale: buttonPress.locale,
-						});
-						return {
-							type: Discord.MessageComponentTypes.Button,
-							label: strings.name({ id: proficiencyRole.id }),
-							customId: languageProficiencyButtons.encodeId([index.toString()]),
-							style: Discord.ButtonStyles.Secondary,
-							emoji: { name: proficiencyRole.emoji },
-						};
-					}) as [Discord.ButtonComponent],
-				},
-			],
-		});
+						})}`,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: Object.values(
+							constants.roles.language.categories.proficiency.collection.list,
+						).map<Discord.ButtonComponent>((proficiencyRole, index) => {
+							const strings = constants.contexts.role({
+								localise: this.client.localise,
+								locale: buttonPress.locale,
+							});
+							return {
+								type: Discord.MessageComponentTypes.Button,
+								label: strings.name({ id: proficiencyRole.id }),
+								customId: languageProficiencyButtons.encodeId([index.toString()]),
+								style: Discord.ButtonStyles.Secondary,
+								emoji: { name: proficiencyRole.emoji },
+							};
+						}) as [Discord.ButtonComponent],
+					},
+				],
+			})
+			.ignore();
 	}
 
 	async #handlePickLanguageProficiency(
@@ -140,30 +142,32 @@ class EntryService extends LocalService {
 					localise: this.client.localise,
 					locale: buttonPress.locale,
 				});
-				await this.client.notice(buttonPress, {
-					embeds: [
-						{
-							title: strings.title,
-							description: `${strings.description.verificationRequired({
-								server_name: this.guild.name,
-							})}\n\n${strings.description.honestAnswers}`,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									style: Discord.ButtonStyles.Secondary,
-									label: strings.description.understood,
-									customId: requestVerificationButton.encodeId([buttonPress.metadata[1]]),
-									emoji: { name: constants.emojis.understood },
-								},
-							],
-						},
-					],
-				});
+				this.client
+					.notice(buttonPress, {
+						embeds: [
+							{
+								title: strings.title,
+								description: `${strings.description.verificationRequired({
+									server_name: this.guild.name,
+								})}\n\n${strings.description.honestAnswers}`,
+							},
+						],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										style: Discord.ButtonStyles.Secondary,
+										label: strings.description.understood,
+										customId: requestVerificationButton.encodeId([buttonPress.metadata[1]]),
+										emoji: { name: constants.emojis.understood },
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return;
 			}
@@ -173,13 +177,15 @@ class EntryService extends LocalService {
 			localise: this.client.localise,
 			locale: buttonPress.locale,
 		});
-		await this.client.success(buttonPress, {
-			title: strings.title,
-			description: `${constants.emojis.responses.celebration} ${strings.description.nowMember({
-				server_name: this.guild.name,
-			})}\n\n${strings.description.toStart}`,
-			image: { url: constants.gifs.welcome },
-		});
+		this.client
+			.success(buttonPress, {
+				title: strings.title,
+				description: `${constants.emojis.responses.celebration} ${strings.description.nowMember({
+					server_name: this.guild.name,
+				})}\n\n${strings.description.toStart}`,
+				image: { url: constants.gifs.welcome },
+			})
+			.ignore();
 
 		this.client.bot.helpers
 			.addRole(this.guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
@@ -216,10 +222,12 @@ class EntryService extends LocalService {
 				localise: this.client.localise,
 				locale: buttonPress.locale,
 			});
-			await this.client.pushback(buttonPress, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.pushback(buttonPress, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return;
 		}
@@ -242,15 +250,12 @@ class EntryService extends LocalService {
 					localise: this.client.localise,
 					locale: submission.locale,
 				});
-				await this.client.pushback(submission, {
-					title: strings.title,
-					description: strings.description,
-				});
+				this.client.pushback(submission, { title: strings.title, description: strings.description }).ignore();
 
 				return;
 			}
 
-			await this.client.postponeReply(submission);
+			this.client.postponeReply(submission).ignore();
 
 			const entryRequestDocument = await EntryRequest.create(this.client, {
 				guildId: this.guild.id.toString(),
@@ -278,10 +283,12 @@ class EntryService extends LocalService {
 				localise: this.client.localise,
 				locale: submission.locale,
 			});
-			await this.client.succeeded(submission, {
-				title: strings.title,
-				description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
-			});
+			this.client
+				.succeeded(submission, {
+					title: strings.title,
+					description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
+				})
+				.ignore();
 		});
 
 		await composer.open();
@@ -298,10 +305,7 @@ class EntryService extends LocalService {
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.pushback(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.pushback(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return false;
 		}
@@ -315,10 +319,7 @@ class EntryService extends LocalService {
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.error(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.error(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return false;
 		}

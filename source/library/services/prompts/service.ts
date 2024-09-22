@@ -410,10 +410,8 @@ abstract class PromptService<
 					localise: this.client.localise.bind(this.client),
 					locale: buttonPress.locale,
 				});
-				await this.client.warning(buttonPress, {
-					title: strings.title,
-					description: strings.description,
-				});
+				this.client.warning(buttonPress, { title: strings.title, description: strings.description }).ignore();
+
 				return;
 			}
 
@@ -422,17 +420,15 @@ abstract class PromptService<
 					localise: this.client.localise.bind(this.client),
 					locale: buttonPress.locale,
 				});
-				await this.client.warning(buttonPress, {
-					title: strings.title,
-					description: strings.description,
-				});
+				this.client.warning(buttonPress, { title: strings.title, description: strings.description }).ignore();
+
 				return;
 			}
 
 			return;
 		}
 
-		await this.client.acknowledge(buttonPress);
+		this.client.acknowledge(buttonPress).ignore();
 
 		const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
 		if (prompt === undefined) {

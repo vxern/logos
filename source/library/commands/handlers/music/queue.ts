@@ -12,11 +12,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}

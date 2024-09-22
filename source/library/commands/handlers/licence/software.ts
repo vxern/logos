@@ -20,7 +20,9 @@ async function handleDisplaySoftwareLicence(
 	interaction: Logos.Interaction<any, { package: string }>,
 ): Promise<void> {
 	if (!isValidLicensedSoftware(interaction.parameters.package)) {
-		await displayError(client, interaction);
+		const strings = constants.contexts.invalidLicence({ localise: client.localise, locale: interaction.locale });
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -35,15 +37,6 @@ async function handleDisplaySoftwareLicence(
 	});
 
 	await view.open();
-}
-
-async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidLicence({ localise: client.localise, locale: interaction.locale });
-
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
 }
 
 export { handleDisplaySoftwareLicence, handleDisplaySoftwareLicenceAutocomplete };

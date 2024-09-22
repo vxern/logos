@@ -27,7 +27,8 @@ async function handleTranslateChatInputAutocomplete(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
+
 		return;
 	}
 
@@ -35,16 +36,13 @@ async function handleTranslateChatInputAutocomplete(
 	const choices = languages.languages.translation
 		.map((language) => {
 			const strings = constants.contexts.language({ localise: client.localise, locale: interaction.locale });
-			return {
-				name: strings.language(language),
-				value: language,
-			};
+			return { name: strings.language(language), value: language };
 		})
 		.filter((choice) => choice.name?.toLowerCase().includes(languageQueryLowercase))
 		.slice(0, 25)
 		.sort((previous, next) => previous.name.localeCompare(next.name));
 
-	await client.respond(interaction, choices);
+	client.respond(interaction, choices).ignore();
 }
 
 async function handleTranslateChatInput(
@@ -66,10 +64,8 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -89,10 +85,8 @@ async function handleTranslate(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.error(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -107,10 +101,8 @@ async function handleTranslate(
 				localise: client.localise,
 				locale: interaction.locale,
 			});
-			await client.error(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
@@ -119,11 +111,7 @@ async function handleTranslate(
 				localise: client.localise,
 				locale: interaction.locale,
 			});
-
-			await client.error(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			client.error(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return;
 		}
@@ -133,10 +121,8 @@ async function handleTranslate(
 				localise: client.localise,
 				locale: interaction.locale,
 			});
-			await client.error(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
@@ -146,10 +132,8 @@ async function handleTranslate(
 					localise: client.localise,
 					locale: interaction.locale,
 				});
-				await client.pushback(interaction, {
-					title: strings.title,
-					description: strings.description,
-				});
+				client.pushback(interaction, { title: strings.title, description: strings.description }).ignore();
+
 				return;
 			}
 
@@ -201,10 +185,13 @@ async function handleTranslate(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
+			})
+			.ignore();
+
 		return;
 	}
 
@@ -213,10 +200,13 @@ async function handleTranslate(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
+			})
+			.ignore();
+
 		return;
 	}
 
@@ -237,14 +227,12 @@ async function translateText(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.unsupported(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.unsupported(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
-	await client.postponeReply(interaction, { visible: interaction.parameters.show });
+	client.postponeReply(interaction, { visible: interaction.parameters.show }).ignore();
 
 	let translation: TranslationResult | undefined;
 	for await (const element of Promise.createRace(adapters, (adapter) => adapter.translate({ text, languages }))) {
@@ -258,14 +246,8 @@ async function translateText(
 	}
 
 	if (translation === undefined) {
-		const strings = constants.contexts.failedToTranslate({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		await client.failed(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		const strings = constants.contexts.failedToTranslate({ localise: client.localise, locale: interaction.locale });
+		client.failed(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -336,7 +318,7 @@ async function translateText(
 		},
 	];
 
-	await client.noticed(interaction, { embeds, components });
+	client.noticed(interaction, { embeds, components }).ignore();
 }
 
 async function detectLanguage(
@@ -351,10 +333,12 @@ async function detectLanguage(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
-		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.cannotDetermine}\n\n${strings.description.tryAgain}`,
+			})
+			.ignore();
 
 		return undefined;
 	}
@@ -365,10 +349,12 @@ async function detectLanguage(
 			...constants.contexts.languageNotSupported({ localise: client.localise, locale: interaction.locale }),
 			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 		};
-		await client.unsupported(interaction, {
-			title: strings.title,
-			description: strings.description({ language: strings.language(detectedLanguage) }),
-		});
+		client
+			.unsupported(interaction, {
+				title: strings.title,
+				description: strings.description({ language: strings.language(detectedLanguage) }),
+			})
+			.ignore();
 
 		return undefined;
 	}

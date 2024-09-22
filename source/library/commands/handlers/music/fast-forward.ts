@@ -12,12 +12,12 @@ async function handleFastForwardAutocomplete(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
 
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
-	await client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+	client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]).ignore();
 }
 
 async function handleFastForward(
@@ -34,18 +34,19 @@ async function handleFastForward(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
 
 	const timestamp = Number(interaction.parameters.timestamp);
 	if (!Number.isSafeInteger(timestamp)) {
-		await displayInvalidTimestampError(client, interaction);
+		const strings = constants.contexts.invalidFastForwardTimestamp({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -55,27 +56,16 @@ async function handleFastForward(
 		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
-
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
-}
-
-async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidFastForwardTimestamp({
-		localise: client.localise,
-		locale: interaction.locale,
-	});
-
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handleFastForward, handleFastForwardAutocomplete };

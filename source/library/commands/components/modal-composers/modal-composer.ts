@@ -115,20 +115,23 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		});
 
 		continueButton.onInteraction(async (buttonPress) => {
-			await this.client.deleteReply(submission);
+			this.client.deleteReply(submission).ignore();
+
 			resolve(buttonPress);
 		});
 
 		cancelButton.onInteraction(async (cancelButtonPress) => {
 			returnButton.onInteraction(async (returnButtonPress) => {
-				await this.client.deleteReply(submission);
-				await this.client.deleteReply(cancelButtonPress);
+				this.client.deleteReply(submission).ignore();
+				this.client.deleteReply(cancelButtonPress).ignore();
+
 				resolve(returnButtonPress);
 			});
 
 			leaveButton.onInteraction(async (_) => {
-				await this.client.deleteReply(submission);
-				await this.client.deleteReply(cancelButtonPress);
+				this.client.deleteReply(submission).ignore();
+				this.client.deleteReply(cancelButtonPress).ignore();
+
 				resolve(undefined);
 			});
 
@@ -136,33 +139,35 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 				localise: this.client.localise,
 				locale: submission.locale,
 			});
-			await this.client.warning(cancelButtonPress, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-					},
-				],
-				components: [
-					{
-						type: Discord.MessageComponentTypes.ActionRow,
-						components: [
-							{
-								type: Discord.MessageComponentTypes.Button,
-								customId: returnButton.customId,
-								label: strings.stay,
-								style: Discord.ButtonStyles.Success,
-							},
-							{
-								type: Discord.MessageComponentTypes.Button,
-								customId: leaveButton.customId,
-								label: strings.leave,
-								style: Discord.ButtonStyles.Danger,
-							},
-						],
-					},
-				],
-			});
+			this.client
+				.warning(cancelButtonPress, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+						},
+					],
+					components: [
+						{
+							type: Discord.MessageComponentTypes.ActionRow,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.Button,
+									customId: returnButton.customId,
+									label: strings.stay,
+									style: Discord.ButtonStyles.Success,
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									customId: leaveButton.customId,
+									label: strings.leave,
+									style: Discord.ButtonStyles.Danger,
+								},
+							],
+						},
+					],
+				})
+				.ignore();
 		});
 
 		continueButton.onDone(() => resolve(undefined));
@@ -178,33 +183,35 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			locale: submission.locale,
 		});
 
-		await this.client.editReply(submission, {
-			embeds: [
-				this.getErrorMessage(submission, { error }) ?? {
-					title: strings.title,
-					description: strings.description,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: continueButton.customId,
-							label: strings.continue,
-							style: Discord.ButtonStyles.Success,
-						},
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: cancelButton.customId,
-							label: strings.cancel,
-							style: Discord.ButtonStyles.Danger,
-						},
-					],
-				},
-			],
-		});
+		this.client
+			.editReply(submission, {
+				embeds: [
+					this.getErrorMessage(submission, { error }) ?? {
+						title: strings.title,
+						description: strings.description,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: [
+							{
+								type: Discord.MessageComponentTypes.Button,
+								customId: continueButton.customId,
+								label: strings.continue,
+								style: Discord.ButtonStyles.Success,
+							},
+							{
+								type: Discord.MessageComponentTypes.Button,
+								customId: cancelButton.customId,
+								label: strings.cancel,
+								style: Discord.ButtonStyles.Danger,
+							},
+						],
+					},
+				],
+			})
+			.ignore();
 
 		return promise;
 	}

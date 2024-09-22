@@ -27,10 +27,13 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.pushback(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.pushback(interaction, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
+
 		return;
 	}
 
@@ -42,7 +45,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 	const composer = new SuggestionComposer(client, { interaction });
 
 	composer.onSubmit(async (submission, { formData }) => {
-		await client.postponeReply(submission);
+		client.postponeReply(submission).ignore();
 
 		const suggestionDocument = await Suggestion.create(client, {
 			guildId: guild.id.toString(),
@@ -67,10 +70,12 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		}
 
 		const strings = constants.contexts.suggestionSent({ localise: client.localise, locale: interaction.locale });
-		await client.succeeded(submission, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.succeeded(submission, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
 	});
 
 	await composer.open();

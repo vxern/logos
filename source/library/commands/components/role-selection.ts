@@ -108,7 +108,7 @@ async function createRoleSelectionMenu(
 	const selectionMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
 
 	selectionMenuSelection.onInteraction(async (selection) => {
-		await client.acknowledge(selection);
+		client.acknowledge(selection).ignore();
 
 		const identifier = selection.data?.values?.at(0);
 		if (identifier === undefined) {
@@ -177,11 +177,12 @@ async function createRoleSelectionMenu(
 					localise: client.localise,
 					locale: interaction.locale,
 				});
-
-				await client.notice(interaction, {
-					title: strings.title,
-					description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
-				});
+				client
+					.notice(interaction, {
+						title: strings.title,
+						description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
+					})
+					.ignore();
 
 				displayData = await traverseRoleTreeAndDisplay(client, interaction, displayData, {
 					editResponse: true,
@@ -335,7 +336,7 @@ async function traverseRoleTreeAndDisplay(
 		return data;
 	}
 
-	await client.reply(interaction, menu);
+	client.reply(interaction, menu).ignore();
 
 	return data;
 }

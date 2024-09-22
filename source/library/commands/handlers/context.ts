@@ -21,19 +21,12 @@ async function handleFindInContext(
 ): Promise<void> {
 	if (interaction.parameters.language !== undefined && !isLocalisationLanguage(interaction.parameters.language)) {
 		const strings = constants.contexts.invalidLanguage({ localise: client.localise, locale: interaction.locale });
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
-		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
-	await client.postponeReply(interaction, { visible: interaction.parameters.show });
+	client.postponeReply(interaction, { visible: interaction.parameters.show }).ignore();
 
 	const learningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
 	const learningLocale = getLocaleByLearningLanguage(learningLanguage);
@@ -52,14 +45,9 @@ async function handleFindInContext(
 			localise: client.localise.bind(client),
 			locale: interaction.displayLocale,
 		});
-		await client.warned(
-			interaction,
-			{
-				title: strings.title,
-				description: strings.description,
-			},
-			{ autoDelete: true },
-		);
+		client
+			.warned(interaction, { title: strings.title, description: strings.description }, { autoDelete: true })
+			.ignore();
 
 		return;
 	}
@@ -82,32 +70,34 @@ async function handleFindInContext(
 		localise: client.localise.bind(client),
 		locale: interaction.displayLocale,
 	});
-	await client.noticed(interaction, {
-		embeds: [
-			{
-				title: strings.title({ phrase: interaction.parameters.phrase }),
-				fields: sentencePairSelection.map((sentencePair) => {
-					let sentenceFormatted = sentencePair.sentence;
-					for (const [lemma, pattern] of lemmaPatterns) {
-						sentenceFormatted = sentenceFormatted.replaceAll(pattern, `__${lemma}__`);
-					}
+	client
+		.noticed(interaction, {
+			embeds: [
+				{
+					title: strings.title({ phrase: interaction.parameters.phrase }),
+					fields: sentencePairSelection.map((sentencePair) => {
+						let sentenceFormatted = sentencePair.sentence;
+						for (const [lemma, pattern] of lemmaPatterns) {
+							sentenceFormatted = sentenceFormatted.replaceAll(pattern, `__${lemma}__`);
+						}
 
-					return {
-						name: sentenceFormatted,
-						value: `> ${sentencePair.translation}`,
-					};
-				}),
-			},
-		],
-		components: interaction.parameters.show
-			? undefined
-			: [
-					{
-						type: Discord.MessageComponentTypes.ActionRow,
-						components: [client.services.global("interactionRepetition").getShowButton(interaction)],
-					},
-				],
-	});
+						return {
+							name: sentenceFormatted,
+							value: `> ${sentencePair.translation}`,
+						};
+					}),
+				},
+			],
+			components: interaction.parameters.show
+				? undefined
+				: [
+						{
+							type: Discord.MessageComponentTypes.ActionRow,
+							components: [client.services.global("interactionRepetition").getShowButton(interaction)],
+						},
+					],
+		})
+		.ignore();
 }
 
 export { handleFindInContext, handleFindInContextAutocomplete };

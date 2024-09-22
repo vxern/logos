@@ -328,13 +328,7 @@ class InteractionStore {
 	}
 
 	#autoDeleteReply(interaction: Logos.Interaction): void {
-		setTimeout(
-			() =>
-				this.#client
-					.deleteReply(interaction)
-					.catch((error) => this.log.warn(error, "Failed to auto-delete message.")),
-			constants.AUTO_DELETE_MESSAGE_TIMEOUT,
-		);
+		setTimeout(() => this.#client.deleteReply(interaction).ignore(), constants.AUTO_DELETE_MESSAGE_TIMEOUT);
 	}
 
 	#resolveIdentifierToMembers({
@@ -481,7 +475,8 @@ class InteractionStore {
 				this.error(interaction, {
 					title: strings.title,
 					description: strings.description,
-				});
+				}).ignore();
+
 				return undefined;
 			}
 

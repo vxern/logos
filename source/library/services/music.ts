@@ -201,10 +201,13 @@ class MusicService extends LocalService {
 				localise: this.client.localise,
 				locale: this.guildLocale,
 			});
-			this.client.unsupported(interaction, {
-				title: strings.title,
-				description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
-			});
+			this.client
+				.unsupported(interaction, {
+					title: strings.title,
+					description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
+				})
+				.ignore();
+
 			return false;
 		}
 
@@ -214,10 +217,13 @@ class MusicService extends LocalService {
 				localise: this.client.localise,
 				locale: this.guildLocale,
 			});
-			this.client.warning(interaction, {
-				title: strings.title,
-				description: action === "manage" ? strings.description.toManage : strings.description.toCheck,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: action === "manage" ? strings.description.toManage : strings.description.toCheck,
+				})
+				.ignore();
+
 			return false;
 		}
 
@@ -226,21 +232,19 @@ class MusicService extends LocalService {
 				localise: this.client.localise,
 				locale: this.guildLocale,
 			});
-			this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return false;
 		}
 
 		return true;
 	}
 
-	canCheckPlayback(interaction: Logos.Interaction) {
+	canCheckPlayback(interaction: Logos.Interaction): boolean {
 		return this.#canPerformAction(interaction, { action: "check" });
 	}
 
-	canManagePlayback(interaction: Logos.Interaction) {
+	canManagePlayback(interaction: Logos.Interaction): boolean {
 		return this.#canPerformAction(interaction, { action: "manage" });
 	}
 
@@ -254,10 +258,12 @@ class MusicService extends LocalService {
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return false;
 		}

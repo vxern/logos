@@ -42,39 +42,41 @@ async function handleDisplayProfile(
 				},
 			];
 
-	await client.notice(
-		interaction,
-		{
-			title: strings.title({ username: target.username }),
-			thumbnail: (() => {
-				const iconURL = Discord.avatarUrl(target.id, target.discriminator, {
-					avatar: target.avatar,
-					size: 4096,
-					format: "webp",
-				});
-				if (iconURL === undefined) {
-					return undefined;
-				}
+	client
+		.notice(
+			interaction,
+			{
+				title: strings.title({ username: target.username }),
+				thumbnail: (() => {
+					const iconURL = Discord.avatarUrl(target.id, target.discriminator, {
+						avatar: target.avatar,
+						size: 4096,
+						format: "webp",
+					});
+					if (iconURL === undefined) {
+						return undefined;
+					}
 
-				return { url: iconURL };
-			})(),
-			fields: [
-				{
-					name: `${constants.emojis.profile.roles} ${strings.roles}`,
-					value: member.roles.map((roleId) => mention(roleId, { type: "role" })).join(" "),
-					inline: false,
-				},
-				{
-					name: `${constants.emojis.profile.statistics.statistics} ${strings.statistics}`,
-					value: `${constants.emojis.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praiseDocumentsByTarget.length} • ${strings.sent} – ${praiseDocumentsByAuthor.length}
+					return { url: iconURL };
+				})(),
+				fields: [
+					{
+						name: `${constants.emojis.profile.roles} ${strings.roles}`,
+						value: member.roles.map((roleId) => mention(roleId, { type: "role" })).join(" "),
+						inline: false,
+					},
+					{
+						name: `${constants.emojis.profile.statistics.statistics} ${strings.statistics}`,
+						value: `${constants.emojis.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praiseDocumentsByTarget.length} • ${strings.sent} – ${praiseDocumentsByAuthor.length}
   ${constants.emojis.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningDocuments.length}`,
-					inline: false,
-				},
-			],
-			components,
-		},
-		{ visible: interaction.parameters.show },
-	);
+						inline: false,
+					},
+				],
+				components,
+			},
+			{ visible: interaction.parameters.show },
+		)
+		.ignore();
 }
 
 export { handleDisplayProfile, handleDisplayProfileAutocomplete };

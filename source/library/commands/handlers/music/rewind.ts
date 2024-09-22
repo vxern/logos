@@ -12,12 +12,12 @@ async function handleRewindAutocomplete(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
 
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
 		return;
 	}
 
-	await client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+	client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]).ignore();
 }
 
 async function handleRewind(client: Client, interaction: Logos.Interaction<any, { timestamp: string }>): Promise<void> {
@@ -27,45 +27,36 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToRewind({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		const strings = constants.contexts.noSongToRewind({ localise: client.localise, locale: interaction.locale });
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	const timestamp = Number(interaction.parameters.timestamp);
 	if (!Number.isSafeInteger(timestamp)) {
-		await displayInvalidTimestampError(client, interaction);
+		const strings = constants.contexts.invalidRewindTimestamp({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	await musicService.session.skipTo({ timestamp: musicService.session.playingTimeMilliseconds - timestamp });
 
 	const strings = constants.contexts.rewound({ localise: client.localise, locale: interaction.guildLocale });
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.rewound} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
-}
-
-async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidRewindTimestamp({
-		localise: client.localise,
-		locale: interaction.locale,
-	});
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.rewound} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handleRewind, handleRewindAutocomplete };

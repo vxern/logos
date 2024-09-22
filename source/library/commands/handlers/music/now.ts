@@ -17,11 +17,7 @@ async function handleDisplayCurrentlyPlaying(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -32,11 +28,12 @@ async function handleDisplayCurrentlyPlaying(
 				localise: client.localise,
 				locale: interaction.locale,
 			});
-
-			await client.warning(interaction, {
-				title: strings.title,
-				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-			});
+			client
+				.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+				})
+				.ignore();
 
 			return;
 		}
@@ -62,37 +59,39 @@ async function handleDisplayCurrentlyPlaying(
 		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 	});
 
-	await client.notice(
-		interaction,
-		{
-			title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
-			fields: [
-				{
-					name: strings.title,
-					value: `[${musicService.session.queueable.title}](${musicService.session.queueable.url})`,
-					inline: false,
-				},
-				{
-					name: strings.requestedBy,
-					value: mention(musicService.session.current.userId, { type: "user" }),
-					inline: false,
-				},
-				{
-					name: strings.runningTime,
-					value: strings.playingSince({
-						relative_timestamp: timestamp(musicService.session.playingTimeMilliseconds, {
-							format: "relative",
+	client
+		.notice(
+			interaction,
+			{
+				title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
+				fields: [
+					{
+						name: strings.title,
+						value: `[${musicService.session.queueable.title}](${musicService.session.queueable.url})`,
+						inline: false,
+					},
+					{
+						name: strings.requestedBy,
+						value: mention(musicService.session.current.userId, { type: "user" }),
+						inline: false,
+					},
+					{
+						name: strings.runningTime,
+						value: strings.playingSince({
+							relative_timestamp: timestamp(musicService.session.playingTimeMilliseconds, {
+								format: "relative",
+							}),
 						}),
-					}),
-					inline: false,
+						inline: false,
+					},
+				],
+				footer: {
+					text: strings.sourcedFrom({ source: musicService.session.current.source ?? strings.theInternet }),
 				},
-			],
-			footer: {
-				text: strings.sourcedFrom({ source: musicService.session.current.source ?? strings.theInternet }),
 			},
-		},
-		{ visible: interaction.parameters.show },
-	);
+			{ visible: interaction.parameters.show },
+		)
+		.ignore();
 }
 
 export { handleDisplayCurrentlyPlaying };
