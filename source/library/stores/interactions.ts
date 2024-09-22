@@ -143,7 +143,7 @@ class InteractionStore {
 	}
 
 	async setup(): Promise<void> {
-		this.#interactionCollector.onInteraction(this.receiveInteraction.bind(this));
+		this.#interactionCollector.onInteraction(this.handleInteraction.bind(this));
 
 		await this.#client.registerInteractionCollector(this.#interactionCollector);
 	}
@@ -152,7 +152,7 @@ class InteractionStore {
 		this.#interactionCollector.close();
 	}
 
-	async receiveInteraction(interaction: Logos.Interaction): Promise<void> {
+	async handleInteraction(interaction: Logos.Interaction): Promise<void> {
 		// If it's a "none" message interaction, just acknowledge and good to go.
 		if (
 			interaction.type === Discord.InteractionTypes.MessageComponent &&
@@ -243,11 +243,13 @@ class InteractionStore {
 		return interaction;
 	}
 
-	registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: bigint }): void {
+	#registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: bigint }): void {
+		setTimeout(() => this.#unregisterMessage(interaction), constants.INTERACTION_TOKEN_EXPIRY);
+
 		this.#messages.set(interaction.token, messageId);
 	}
 
-	unregisterMessage(interaction: Logos.Interaction): void {
+	#unregisterMessage(interaction: Logos.Interaction): void {
 		this.#messages.delete(interaction.token);
 	}
 
@@ -290,7 +292,7 @@ class InteractionStore {
 				return;
 			}
 
-			this.registerMessage(interaction, { messageId: message.id });
+			this.#registerMessage(interaction, { messageId: message.id });
 			return;
 		}
 
@@ -324,7 +326,7 @@ class InteractionStore {
 				return;
 			}
 
-			this.registerMessage(interaction, { messageId: message.id });
+			this.#registerMessage(interaction, { messageId: message.id });
 			return;
 		}
 

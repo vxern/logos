@@ -92,6 +92,7 @@ class GuildStore {
 
 	async #teardownGuild({ guildId }: { guildId: bigint }): Promise<void> {
 		await this.#services.stopForGuild({ guildId });
+		// We don't unregister guild commands: They'll be updated the next time the guild is set up anyway.
 	}
 
 	async reloadGuild(guildId: bigint): Promise<void> {
