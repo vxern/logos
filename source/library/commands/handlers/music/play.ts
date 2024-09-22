@@ -18,7 +18,10 @@ async function handleRequestStreamPlayback(
 	await handleRequestPlayback(client, interaction, listing);
 }
 
-async function handleRequestYouTubePlayback(client: Client, interaction: Logos.Interaction<any, { query: string }>) {
+async function handleRequestYouTubePlayback(
+	client: Client,
+	interaction: Logos.Interaction<any, { query: string }>,
+): Promise<void> {
 	await handleRequestQueryPlayback(client, interaction, resolvers.youtube);
 }
 
