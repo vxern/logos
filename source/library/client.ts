@@ -1,6 +1,5 @@
-import { timestamp } from "logos:constants/formatting";
 import type { Environment } from "logos:core/loaders/environment";
-import { Collector, InteractionCollector } from "logos/collectors";
+import { Collector, type InteractionCollector } from "logos/collectors.ts";
 import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
 import { Diagnostics } from "logos/diagnostics";
@@ -34,7 +33,6 @@ class Client {
 	readonly #guilds: GuildStore;
 	readonly #adapters: AdapterStore;
 	readonly #connection: DiscordConnection;
-	readonly #interactionCollector: InteractionCollector;
 	readonly #channelDeleteCollector: Collector<"channelDelete">;
 
 	get localiseRaw(): LocalisationStore["localiseRaw"] {
@@ -229,7 +227,7 @@ class Client {
 			localisations: this.#localisations,
 			templates: commands,
 		});
-		this.#interactions = new InteractionStore(this);
+		this.#interactions = new InteractionStore(this, { commands: this.#commands });
 		this.#cache = new CacheStore({ log });
 		this.#database = DatabaseStore.create({ log, environment, cache: this.#cache });
 		this.#volatile = VolatileStore.tryCreate(this);
@@ -245,18 +243,12 @@ class Client {
 			cacheHandlers: this.#cache.buildCacheHandlers(),
 		});
 
-		this.#interactionCollector = new InteractionCollector(this, {
-			anyType: true,
-			anyCustomId: true,
-			isPermanent: true,
-		});
 		this.#channelDeleteCollector = new Collector<"channelDelete">();
 	}
 
 	async #setupCollectors(): Promise<void> {
 		this.log.info("Setting up event collectors...");
 
-		this.#interactionCollector.onInteraction(this.receiveInteraction.bind(this));
 		this.#channelDeleteCollector.onCollect((channel) => {
 			this.entities.channels.delete(channel.id);
 
@@ -265,7 +257,6 @@ class Client {
 			}
 		});
 
-		await this.registerInteractionCollector(this.#interactionCollector);
 		await this.registerCollector("channelDelete", this.#channelDeleteCollector);
 
 		this.log.info("Event collectors set up.");
@@ -275,7 +266,6 @@ class Client {
 		this.log.info("Tearing down event collectors...");
 
 		this.#channelDeleteCollector.close();
-		this.#interactionCollector.close();
 
 		this.log.info("Event collectors torn down.");
 	}
@@ -306,82 +296,6 @@ class Client {
 		await this.#connection.close();
 
 		this.log.info("Client stopped.");
-	}
-
-	async receiveInteraction(interaction: Logos.Interaction): Promise<void> {
-		// If it's a "none" message interaction, just acknowledge and good to go.
-		if (
-			interaction.type === Discord.InteractionTypes.MessageComponent &&
-			interaction.metadata[0] === constants.components.none
-		) {
-			this.acknowledge(interaction).ignore();
-
-			this.log.info("Component interaction acknowledged.");
-
-			return;
-		}
-
-		if (
-			interaction.type !== Discord.InteractionTypes.ApplicationCommand &&
-			interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete
-		) {
-			return;
-		}
-
-		this.log.info(`Receiving ${this.diagnostics.interaction(interaction)}...`);
-
-		const handle = this.#commands.getHandler(interaction);
-		if (handle === undefined) {
-			this.log.warn(
-				`Could not retrieve handler for ${this.diagnostics.interaction(
-					interaction,
-				)}. Is the command registered?`,
-			);
-			return;
-		}
-
-		const executedAt = Date.now();
-
-		if (
-			interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete &&
-			this.#commands.hasRateLimit(interaction)
-		) {
-			const rateLimit = this.#commands.getRateLimit(interaction, { executedAt });
-			if (rateLimit !== undefined) {
-				const nextUsable = rateLimit.nextAllowedUsageTimestamp - executedAt;
-
-				this.log.warn(
-					`User rate-limited on ${this.diagnostics.interaction(interaction)}. Next usable in ${Math.ceil(
-						nextUsable / 1000,
-					)} seconds.`,
-				);
-
-				const strings = constants.contexts.rateLimited({
-					localise: this.localise.bind(this),
-					locale: interaction.locale,
-				});
-				this.warning(interaction, {
-					title: strings.title,
-					description: `${strings.description.tooManyUses({
-						times: constants.defaults.COMMAND_RATE_LIMIT.uses,
-					})}\n\n${strings.description.cannotUseUntil({
-						relative_timestamp: timestamp(rateLimit.nextAllowedUsageTimestamp, {
-							format: "relative",
-						}),
-					})}`,
-				}).ignore();
-
-				setTimeout(() => this.deleteReply(interaction).ignore(), nextUsable);
-
-				return;
-			}
-		}
-
-		this.log.info(`Handling ${this.diagnostics.interaction(interaction)}...`);
-
-		await handle(this, interaction).catch((error) =>
-			this.log.error(error, `Failed to handle ${this.diagnostics.interaction(interaction)}.`),
-		);
 	}
 }
 

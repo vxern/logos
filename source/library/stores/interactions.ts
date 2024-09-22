@@ -1,6 +1,8 @@
-import { trim } from "logos:constants/formatting";
+import { timestamp, trim } from "logos:constants/formatting";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
 import type { Client } from "logos/client";
+import { InteractionCollector } from "logos/collectors.ts";
+import type { CommandStore } from "logos/stores/commands.ts";
 import type pino from "pino";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
@@ -13,9 +15,11 @@ class InteractionStore {
 	readonly log: pino.Logger;
 
 	readonly #client: Client;
+	readonly #commands: CommandStore;
 	readonly #interactions: Map<bigint, Logos.Interaction>;
 	readonly #replies: Map<string, ReplyData>;
 	readonly #messages: Map<string, bigint>;
+	readonly #interactionCollector: InteractionCollector;
 
 	/** ⬜ The action should have succeeded if not for the bot's limitations. */
 	get unsupported(): InteractionStore["reply"] {
@@ -110,13 +114,19 @@ class InteractionStore {
 		return this.#buildColouredReplyEditor({ colour: constants.colours.death });
 	}
 
-	constructor(client: Client) {
+	constructor(client: Client, { commands }: { commands: CommandStore }) {
 		this.log = client.log.child({ name: "InteractionStore" });
 
 		this.#client = client;
+		this.#commands = commands;
 		this.#interactions = new Map();
 		this.#replies = new Map();
 		this.#messages = new Map();
+		this.#interactionCollector = new InteractionCollector(client, {
+			anyType: true,
+			anyCustomId: true,
+			isPermanent: true,
+		});
 	}
 
 	static spoofInteraction<Interaction extends Logos.Interaction>(
@@ -130,6 +140,92 @@ class InteractionStore {
 			token: using.token,
 			id: using.id,
 		};
+	}
+
+	async setup(): Promise<void> {
+		this.#interactionCollector.onInteraction(this.receiveInteraction.bind(this));
+
+		await this.#client.registerInteractionCollector(this.#interactionCollector);
+	}
+
+	async teardown(): Promise<void> {
+		this.#interactionCollector.close();
+	}
+
+	async receiveInteraction(interaction: Logos.Interaction): Promise<void> {
+		// If it's a "none" message interaction, just acknowledge and good to go.
+		if (
+			interaction.type === Discord.InteractionTypes.MessageComponent &&
+			interaction.metadata[0] === constants.components.none
+		) {
+			this.acknowledge(interaction).ignore();
+
+			this.log.info("Component interaction acknowledged.");
+
+			return;
+		}
+
+		if (
+			interaction.type !== Discord.InteractionTypes.ApplicationCommand &&
+			interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete
+		) {
+			return;
+		}
+
+		this.log.info(`Receiving ${this.#client.diagnostics.interaction(interaction)}...`);
+
+		const handle = this.#commands.getHandler(interaction);
+		if (handle === undefined) {
+			this.log.warn(
+				`Could not retrieve handler for ${this.#client.diagnostics.interaction(
+					interaction,
+				)}. Is the command registered?`,
+			);
+			return;
+		}
+
+		const executedAt = Date.now();
+
+		if (
+			interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete &&
+			this.#commands.hasRateLimit(interaction)
+		) {
+			const rateLimit = this.#commands.getRateLimit(interaction, { executedAt });
+			if (rateLimit !== undefined) {
+				const nextUsable = rateLimit.nextAllowedUsageTimestamp - executedAt;
+
+				this.log.warn(
+					`User rate-limited on ${this.#client.diagnostics.interaction(interaction)}. Next usable in ${Math.ceil(
+						nextUsable / 1000,
+					)} seconds.`,
+				);
+
+				const strings = constants.contexts.rateLimited({
+					localise: this.#client.localise.bind(this),
+					locale: interaction.locale,
+				});
+				this.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.tooManyUses({
+						times: constants.defaults.COMMAND_RATE_LIMIT.uses,
+					})}\n\n${strings.description.cannotUseUntil({
+						relative_timestamp: timestamp(rateLimit.nextAllowedUsageTimestamp, {
+							format: "relative",
+						}),
+					})}`,
+				}).ignore();
+
+				setTimeout(() => this.deleteReply(interaction).ignore(), nextUsable);
+
+				return;
+			}
+		}
+
+		this.log.info(`Handling ${this.#client.diagnostics.interaction(interaction)}...`);
+
+		await handle(this.#client, interaction).catch((error) =>
+			this.log.error(error, `Failed to handle ${this.#client.diagnostics.interaction(interaction)}.`),
+		);
 	}
 
 	registerInteraction(interaction: Logos.Interaction): void {
