@@ -370,6 +370,14 @@ class CommandStore {
 		};
 	}
 
+	async registerGuildCommands({ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild }): Promise<void> {
+		this.#client.bot.helpers
+			.upsertGuildApplicationCommands(guildId, this.getEnabledCommands(guildDocument))
+			.catch((error) =>
+				this.log.warn(error, `Failed to upsert commands on ${this.#client.diagnostics.guild(guildId)}.`),
+			);
+	}
+
 	getHandler(interaction: Logos.Interaction): InteractionHandler | undefined {
 		if (isAutocomplete(interaction)) {
 			return this.#handlers.autocomplete.get(interaction.commandName);

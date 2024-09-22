@@ -4,14 +4,12 @@ import { Collector, InteractionCollector } from "logos/collectors";
 import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
 import { Diagnostics } from "logos/diagnostics";
-import { ActionLock } from "logos/helpers/action-lock";
-import { Guild } from "logos/models/guild";
-import { Model } from "logos/models/model";
 import { AdapterStore } from "logos/stores/adapters";
 import { CacheStore } from "logos/stores/cache";
 import { CommandStore } from "logos/stores/commands";
 import { DatabaseStore } from "logos/stores/database";
 import { EventStore } from "logos/stores/events";
+import { GuildStore } from "logos/stores/guilds";
 import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationStore, type RawLocalisations } from "logos/stores/localisations";
@@ -33,11 +31,9 @@ class Client {
 	readonly #services: ServiceStore;
 	readonly #events: EventStore;
 	readonly #journalling: JournallingStore;
+	readonly #guilds: GuildStore;
 	readonly #adapters: AdapterStore;
 	readonly #connection: DiscordConnection;
-	readonly #guildReloadLock: ActionLock;
-	readonly #guildCreateCollector: Collector<"guildCreate">;
-	readonly #guildDeleteCollector: Collector<"guildDelete">;
 	readonly #interactionCollector: InteractionCollector;
 	readonly #channelDeleteCollector: Collector<"channelDelete">;
 
@@ -240,6 +236,7 @@ class Client {
 		this.#services = new ServiceStore(this);
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);
+		this.#guilds = new GuildStore(this, { services: this.#services, commands: this.#commands });
 		this.#adapters = new AdapterStore(this);
 		this.#connection = new DiscordConnection({
 			log,
@@ -248,9 +245,6 @@ class Client {
 			cacheHandlers: this.#cache.buildCacheHandlers(),
 		});
 
-		this.#guildReloadLock = new ActionLock();
-		this.#guildCreateCollector = new Collector<"guildCreate">();
-		this.#guildDeleteCollector = new Collector<"guildDelete">();
 		this.#interactionCollector = new InteractionCollector(this, {
 			anyType: true,
 			anyCustomId: true,
@@ -262,8 +256,6 @@ class Client {
 	async #setupCollectors(): Promise<void> {
 		this.log.info("Setting up event collectors...");
 
-		this.#guildCreateCollector.onCollect((guild) => this.#setupGuild(guild));
-		this.#guildDeleteCollector.onCollect((guildId, _) => this.#teardownGuild({ guildId }));
 		this.#interactionCollector.onInteraction(this.receiveInteraction.bind(this));
 		this.#channelDeleteCollector.onCollect((channel) => {
 			this.entities.channels.delete(channel.id);
@@ -273,8 +265,6 @@ class Client {
 			}
 		});
 
-		await this.registerCollector("guildCreate", this.#guildCreateCollector);
-		await this.registerCollector("guildDelete", this.#guildDeleteCollector);
 		await this.registerInteractionCollector(this.#interactionCollector);
 		await this.registerCollector("channelDelete", this.#channelDeleteCollector);
 
@@ -284,59 +274,10 @@ class Client {
 	#teardownCollectors(): void {
 		this.log.info("Tearing down event collectors...");
 
-		this.#guildCreateCollector.close();
-		this.#guildDeleteCollector.close();
 		this.#channelDeleteCollector.close();
 		this.#interactionCollector.close();
 
 		this.log.info("Event collectors torn down.");
-	}
-
-	async #setupGuild(
-		guild: Discord.Guild | Logos.Guild,
-		{ isReload = false }: { isReload?: boolean } = {},
-	): Promise<void> {
-		if (!isReload) {
-			// This check prevents the same guild being set up multiple times. This can happen when a shard managing a given
-			// guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event again for
-			// a guild that Logos would already have been managing.
-			if (this.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
-				return;
-			}
-
-			this.log.info(`Setting Logos up on ${this.diagnostics.guild(guild)}...`);
-
-			this.log.info(`Fetching ~${guild.memberCount} members of ${this.diagnostics.guild(guild)}...`);
-
-			const members = await this.bot.gateway
-				.requestMembers(guild.id, { limit: 0, query: "", nonce: Date.now().toString() })
-				.catch((error) => {
-					this.log.warn(error, `Failed to fetch members of ${this.diagnostics.guild(guild)}.`);
-					return [];
-				});
-			for (const member of members) {
-				this.bot.transformers.member(
-					this.bot,
-					member as unknown as Discord.DiscordMember,
-					guild.id,
-					member.user.id,
-				);
-			}
-
-			this.log.info(`Fetched ~${guild.memberCount} members of ${this.diagnostics.guild(guild)}.`);
-		}
-
-		const guildDocument = await Guild.getOrCreate(this, { guildId: guild.id.toString() });
-
-		await this.#services.startForGuild({ guildId: guild.id, guildDocument });
-
-		this.bot.helpers
-			.upsertGuildApplicationCommands(guild.id, this.#commands.getEnabledCommands(guildDocument))
-			.catch((error) => this.log.warn(error, `Failed to upsert commands on ${this.diagnostics.guild(guild)}.`));
-	}
-
-	async #teardownGuild({ guildId }: { guildId: bigint }): Promise<void> {
-		await this.#services.stopForGuild({ guildId });
 	}
 
 	async start(): Promise<void> {
@@ -346,38 +287,25 @@ class Client {
 		await this.#database.setup({ prefetchDocuments: true });
 		await this.#services.setup();
 		await this.#journalling.setup();
+		await this.#guilds.setup();
 		await this.#setupCollectors();
 		await this.#connection.open();
+
+		this.log.info("Client started.");
 	}
 
 	async stop(): Promise<void> {
-		await this.#guildReloadLock.dispose();
+		this.log.info("Stopping client...");
 
 		this.#volatile?.teardown();
 		await this.#database.teardown();
 		await this.#services.teardown();
 		this.#journalling.teardown();
+		await this.#guilds.teardown();
 		this.#teardownCollectors();
 		await this.#connection.close();
-	}
 
-	async reloadGuild(guildId: bigint): Promise<void> {
-		await this.#guildReloadLock.doAction(() => this.#handleGuildReload(guildId));
-	}
-
-	async #handleGuildReload(guildId: bigint): Promise<void> {
-		const guild = this.entities.guilds.get(guildId);
-		if (guild === undefined) {
-			this.log.warn(`Tried to reload ${this.diagnostics.guild(guildId)}, but it wasn't cached.`);
-			return;
-		}
-
-		this.log.info(`Reloading ${this.diagnostics.guild(guildId)}...`);
-
-		await this.#teardownGuild({ guildId });
-		await this.#setupGuild(guild, { isReload: true });
-
-		this.log.info(`${this.diagnostics.guild(guildId)} has been reloaded.`);
+		this.log.info("Client stopped.");
 	}
 
 	async receiveInteraction(interaction: Logos.Interaction): Promise<void> {
