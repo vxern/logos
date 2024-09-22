@@ -223,9 +223,19 @@ class InteractionStore {
 
 		this.log.info(`Handling ${this.#client.diagnostics.interaction(interaction)}...`);
 
-		await handle(this.#client, interaction).catch((error) =>
-			this.log.error(error, `Failed to handle ${this.#client.diagnostics.interaction(interaction)}.`),
-		);
+		const start = Date.now();
+		await handle(this.#client, interaction)
+			.then(() => {
+				const end = Date.now();
+				const timeTakenMilliseconds = end - start;
+
+				this.log.info(
+					`Handled ${this.#client.diagnostics.interaction(interaction)} in ${timeTakenMilliseconds}ms.`,
+				);
+			})
+			.catch((error) =>
+				this.log.error(error, `Failed to handle ${this.#client.diagnostics.interaction(interaction)}.`),
+			);
 	}
 
 	registerInteraction(interaction: Logos.Interaction): void {
