@@ -386,8 +386,10 @@ class Client {
 			interaction.type === Discord.InteractionTypes.MessageComponent &&
 			interaction.metadata[0] === constants.components.none
 		) {
+			this.acknowledge(interaction).ignore();
+
 			this.log.info("Component interaction acknowledged.");
-			await this.acknowledge(interaction);
+
 			return;
 		}
 
@@ -430,7 +432,7 @@ class Client {
 					localise: this.localise.bind(this),
 					locale: interaction.locale,
 				});
-				await this.warning(interaction, {
+				this.warning(interaction, {
 					title: strings.title,
 					description: `${strings.description.tooManyUses({
 						times: constants.defaults.COMMAND_RATE_LIMIT.uses,
@@ -439,9 +441,9 @@ class Client {
 							format: "relative",
 						}),
 					})}`,
-				});
+				}).ignore();
 
-				setTimeout(() => this.deleteReply(interaction), nextUsable);
+				setTimeout(() => this.deleteReply(interaction).ignore(), nextUsable);
 
 				return;
 			}
