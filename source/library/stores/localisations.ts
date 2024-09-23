@@ -35,7 +35,10 @@ class LocalisationStore {
 
 	readonly #localisations: Localisations;
 
-	constructor({ log, localisations }: { log: pino.Logger; localisations: RawLocalisations }) {
+	constructor({
+		log = constants.loggers.silent,
+		localisations,
+	}: { log?: pino.Logger; localisations: RawLocalisations }) {
 		this.log = log.child({ name: "LocalisationStore" });
 
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
