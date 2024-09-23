@@ -45,6 +45,7 @@ class DiscordConnection {
 			},
 			loggerFactory: (name) => constants.loggers.discordeno.child({ name: name.toLowerCase() }),
 		});
+		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Logos (https://github.com/vxern/logos)" });
 	}
 
 	async open(): Promise<void> {
