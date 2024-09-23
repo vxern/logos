@@ -179,6 +179,12 @@ class JournallingStore {
 			return;
 		}
 
+		const resolvedMessage = this.#client.entities.messages.latest.get(payload.id);
+
+		if (resolvedMessage?.author.id === this.#client.bot.id) {
+			return;
+		}
+
 		await this.tryLog("messageDelete", { guildId, args: [payload, message] });
 	}
 
@@ -194,6 +200,10 @@ class JournallingStore {
 	async #messageUpdate(message: Discord.Message): Promise<void> {
 		const guildId = message.guildId;
 		if (guildId === undefined) {
+			return;
+		}
+
+		if (message.author.id === this.#client.bot.id) {
 			return;
 		}
 
