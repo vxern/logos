@@ -1,8 +1,8 @@
 import { timestamp, trim } from "logos:constants/formatting";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
 import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors.ts";
-import type { CommandStore } from "logos/stores/commands.ts";
+import { InteractionCollector } from "logos/collectors";
+import type { CommandStore } from "logos/stores/commands";
 import type pino from "pino";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;

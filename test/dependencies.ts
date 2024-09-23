@@ -1,9 +1,20 @@
 import { afterEach, beforeEach } from "bun:test";
+import { type Environment, loadEnvironment } from "logos:core/loaders/environment";
 import { mockEnvironment } from "logos:test/mocks";
 import { CacheStore } from "logos/stores/cache";
 import { DatabaseStore } from "logos/stores/database";
 
 type DependencyProvider<T> = () => T;
+
+function useEnvironment(): DependencyProvider<Environment> {
+	let environment: Environment;
+
+	beforeEach(async () => {
+		environment = loadEnvironment({ log: constants.loggers.silent });
+	});
+
+	return () => environment;
+}
 
 function useDatabaseStore(): DependencyProvider<DatabaseStore> {
 	let database: DatabaseStore;
@@ -24,4 +35,4 @@ function useDatabaseStore(): DependencyProvider<DatabaseStore> {
 	return () => database;
 }
 
-export { useDatabaseStore };
+export { useEnvironment, useDatabaseStore };

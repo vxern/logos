@@ -1,5 +1,5 @@
 import type { Environment } from "logos:core/loaders/environment";
-import { Collector, type InteractionCollector } from "logos/collectors.ts";
+import { Collector, type InteractionCollector } from "logos/collectors";
 import commands from "logos/commands/commands";
 import { DiscordConnection } from "logos/connection";
 import { Diagnostics } from "logos/diagnostics";
