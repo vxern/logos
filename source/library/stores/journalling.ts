@@ -69,7 +69,7 @@ class JournallingStore {
 
 	async tryLog<Event extends keyof Events>(
 		event: Event,
-		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean; args: Events[Event] },
+		{ guildId, journalling = true, args }: { guildId: bigint; journalling?: boolean; args: Events[Event] },
 	): Promise<void> {
 		if (!journalling) {
 			this.#client.log.debug(
@@ -90,10 +90,6 @@ class JournallingStore {
 		}
 
 		const configuration = guildDocument.feature("journalling");
-		const channelId = BigInt(configuration.channelId);
-		if (channelId === undefined) {
-			return;
-		}
 
 		const generateMessage = loggers[event];
 		if (generateMessage === undefined) {
@@ -110,7 +106,7 @@ class JournallingStore {
 		}
 
 		await this.#client.bot.helpers
-			.sendMessage(channelId, message)
+			.sendMessage(BigInt(configuration.channelId), message)
 			.catch((error) =>
 				this.log.warn(error, `Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`),
 			);
