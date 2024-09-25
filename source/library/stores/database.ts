@@ -102,7 +102,7 @@ class DatabaseStore {
 		return DatabaseStore.#classes[collection];
 	}
 
-	async setup({ prefetchDocuments }: { prefetchDocuments: boolean }): Promise<void> {
+	async setup({ prefetchDocuments = false }: { prefetchDocuments?: boolean } = {}): Promise<void> {
 		this.log.info("Setting up database store...");
 
 		await this.#adapter.setup();
