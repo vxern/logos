@@ -160,7 +160,28 @@ describe("LocalisationStore", () => {
 			expect(instance.localise("key", "pol")()).to.equal("This is a sample localisation.");
 		});
 
-		// TODO(vxern): Test template parameters.
+		it("replaces the passed template parameters with their corresponding values.", () => {
+			const instance = new LocalisationStore({
+				localisations: new Map([
+					["key", new Map([["English/British", "Hi, I'm {name}, I'm from {country}, I'm {age} years old."]])],
+				]),
+			});
+			const string = instance.localise("key", "eng-GB");
+			expect(
+				string({ name: "vxern", country: "Poland", age: 20 }),
+				"Hi, I'm vxern, I'm from Poland, I'm 20 years old.",
+			);
+		});
+
+		it("does not replace template parameters that weren't passed in.", () => {
+			const instance = new LocalisationStore({
+				localisations: new Map([
+					["key", new Map([["English/British", "Hi, I'm {name}, I'm from {country}, I'm {age} years old."]])],
+				]),
+			});
+			const string = instance.localise("key", "eng-GB");
+			expect(string(), "Hi, I'm {name}, I'm from {country}, I'm {age} years old.");
+		});
 	});
 
 	describe("localiseCommand()", () => {
