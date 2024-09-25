@@ -159,9 +159,73 @@ describe("LocalisationStore", () => {
 			});
 			expect(instance.localise("key", "pol")()).to.equal("This is a sample localisation.");
 		});
+
+		// TODO(vxern): Test template parameters.
+	});
+
+	describe("localiseCommand()", () => {
+		it("returns the correct localised string of the full command signature.", () => {
+			const instance = new LocalisationStore({
+				localisations: new Map([
+					["command.name", new Map([["English/British", "command"]])],
+					["command.options.subCommandGroup.name", new Map([["English/British", "sub-command-group"]])],
+					[
+						"command.options.subCommandGroup.options.subCommand.name",
+						new Map([["English/British", "sub-command"]]),
+					],
+				]),
+			});
+			expect(instance.localiseCommand("command.options.subCommandGroup.options.subCommand")).to.equal(
+				"/command sub-command-group sub-command",
+			);
+		});
+
+		it("resolves missing parts of the command to missing strings.", () => {
+			const instance = new LocalisationStore({
+				localisations: new Map([
+					["command.name", new Map([["English/British", "command"]])],
+					["command.options.subCommandGroup.name", new Map([["English/British", "sub-command-group"]])],
+					[
+						"command.options.subCommandGroup.options.subCommand.name",
+						new Map([["English/British", "sub-command"]]),
+					],
+				]),
+			});
+			expect(instance.localiseCommand("missing.options.missing.options.missing")).to.equal(
+				`/${constants.special.missingString} ${constants.special.missingString} ${constants.special.missingString}`,
+			);
+			expect(instance.localiseCommand("command.options.missing.options.missing")).to.equal(
+				`/command ${constants.special.missingString} ${constants.special.missingString}`,
+			);
+			expect(instance.localiseCommand("missing.options.subCommandGroup.options.missing")).to.equal(
+				`/${constants.special.missingString} ${constants.special.missingString} ${constants.special.missingString}`,
+			);
+			expect(instance.localiseCommand("command.options.subCommandGroup.options.missing")).to.equal(
+				`/command sub-command-group ${constants.special.missingString}`,
+			);
+			expect(instance.localiseCommand("missing.options.missing.options.subCommand")).to.equal(
+				`/${constants.special.missingString} ${constants.special.missingString} ${constants.special.missingString}`,
+			);
+		});
 	});
 
 	describe("pluralise()", () => {
-		// TODO(vxern): Add tests.
+		it("returns the right localised string for the given quantity.", () => {
+			const instance = new LocalisationStore({
+				localisations: new Map([
+					["things.one", new Map([["Romanian", "{one} lucru"]])],
+					["things.two", new Map([["Romanian", "{two} lucruri"]])],
+					["things.many", new Map([["Romanian", "{many} de lucruri"]])],
+				]),
+			});
+			expect(instance.pluralise("things", "ron", { quantity: 1 })).to.equal("1 lucru");
+			expect(instance.pluralise("things", "ron", { quantity: 2 })).to.equal("2 lucruri");
+			expect(instance.pluralise("things", "ron", { quantity: 20 })).to.equal("20 de lucruri");
+		});
+
+		it("resolves to a missing string when the string key does not exist.", () => {
+			const instance = new LocalisationStore({ localisations: new Map() });
+			expect(instance.pluralise("things", "eng-GB", { quantity: 1 })).to.equal(constants.special.missingString);
+		});
 	});
 });
