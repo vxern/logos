@@ -35,7 +35,10 @@ class LocalisationStore {
 
 	readonly #localisations: Localisations;
 
-	constructor({ log, localisations }: { log: pino.Logger; localisations: RawLocalisations }) {
+	constructor({
+		log = constants.loggers.silent,
+		localisations,
+	}: { log?: pino.Logger; localisations: RawLocalisations }) {
 		this.log = log.child({ name: "LocalisationStore" });
 
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
@@ -230,7 +233,7 @@ class LocalisationStore {
 		const pluralised = pluralise(`${quantity}`, { one, two, many });
 		if (pluralised === undefined) {
 			this.log.warn(`Could not pluralise string with key '${key}' in ${language}.`);
-			return key;
+			return constants.special.missingString;
 		}
 
 		return pluralised;

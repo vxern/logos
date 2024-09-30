@@ -6,15 +6,15 @@ class DiscordConnection {
 	readonly bot: Discord.Bot;
 
 	constructor({
-		log,
+		log = constants.loggers.silent,
 		environment,
-		eventHandlers,
-		cacheHandlers,
+		eventHandlers = {},
+		cacheHandlers = {},
 	}: {
-		log: pino.Logger;
+		log?: pino.Logger;
 		environment: Environment;
-		eventHandlers: Partial<Discord.EventHandlers>;
-		cacheHandlers: Partial<Discord.Transformers["customizers"]>;
+		eventHandlers?: Partial<Discord.EventHandlers>;
+		cacheHandlers?: Partial<Discord.Transformers["customizers"]>;
 	}) {
 		this.log = log.child({ name: "DiscordConnection" });
 		this.bot = Discord.createBot({
@@ -46,6 +46,17 @@ class DiscordConnection {
 			loggerFactory: (name) => constants.loggers.discordeno.child({ name: name.toLowerCase() }),
 		});
 		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Logos (https://github.com/vxern/logos)" });
+		// REMINDER(vxern): The Discordeno shutdown() method has a weird delay, so we override its definition to
+		// remove the delay.
+		this.bot.gateway.shutdown = async (code, reason, clearReshardingInterval = true) => {
+			for (const shard of this.bot.gateway.shards.values()) {
+				shard.close(code, reason);
+			}
+
+			if (clearReshardingInterval) {
+				clearInterval(this.bot.gateway.resharding.checkIntervalId);
+			}
+		};
 	}
 
 	async open(): Promise<void> {

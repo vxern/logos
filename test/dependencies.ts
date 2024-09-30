@@ -1,27 +1,74 @@
 import { afterEach, beforeEach } from "bun:test";
-import { mockEnvironment } from "logos:test/mocks";
+import { type Environment, loadEnvironment } from "logos:core/loaders/environment";
 import { CacheStore } from "logos/stores/cache";
 import { DatabaseStore } from "logos/stores/database";
+import { DiscordConnection } from "logos/connection";
 
 type DependencyProvider<T> = () => T;
 
-function useDatabaseStore(): DependencyProvider<DatabaseStore> {
-	let database: DatabaseStore;
+function createProvider<T>({
+	create,
+	destroy,
+}: {
+	create: () => Promise<T> | T;
+	destroy?: (object: T) => Promise<void> | void;
+}): () => DependencyProvider<T> {
+	let object: T;
 
-	beforeEach(async () => {
-		database = DatabaseStore.create({
-			log: constants.loggers.silent,
-			environment: mockEnvironment,
-			cache: new CacheStore({ log: constants.loggers.silent }),
-		});
-		await database.setup({ prefetchDocuments: false });
-	});
+	beforeEach(async () => (object = await create()));
 
-	afterEach(async () => {
-		await database.teardown();
-	});
+	if (destroy !== undefined) {
+		afterEach(() => destroy(object));
+	}
 
-	return () => database;
+	return () => () => object;
 }
 
-export { useDatabaseStore };
+function createEnvironment(): Environment {
+	return loadEnvironment({ log: constants.loggers.silent });
+}
+
+function createDatabaseStore(): DatabaseStore {
+	return DatabaseStore.create({
+		log: constants.loggers.silent,
+		environment: createEnvironment(),
+		cache: new CacheStore({ log: constants.loggers.silent }),
+	});
+}
+
+let connection: DiscordConnection;
+/**
+ * This is the only dependency we do not re-create on every call. It takes at least 5 seconds to establish a connection
+ * to Discord, which is definitely not the kind of overhead we want when running tests.
+ */
+function createDiscordConnection(): DiscordConnection {
+	if (connection !== undefined) {
+		return connection;
+	}
+
+	connection = new DiscordConnection({ environment: loadEnvironment({ log: constants.loggers.silent }) });
+
+	return connection;
+}
+
+const useEnvironment = createProvider({ create: () => createEnvironment() });
+const useDatabaseStore = createProvider({
+	create: async () => {
+		const database = createDatabaseStore();
+		await database.setup();
+
+		return database;
+	},
+	destroy: (database) => database.teardown(),
+});
+const useDiscordConnection = createProvider({
+	create: async () => {
+		const connection = createDiscordConnection();
+		await connection.open();
+
+		return connection;
+	},
+	destroy: (connection) => connection.close(),
+});
+
+export { useEnvironment, useDatabaseStore, useDiscordConnection };

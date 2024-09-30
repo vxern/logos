@@ -424,7 +424,7 @@ class ListingManager extends EventEmitter {
 		return listing;
 	}
 
-	dispose() {
+	dispose(): void {
 		this.removeAllListeners();
 	}
 }
