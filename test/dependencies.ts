@@ -1,8 +1,8 @@
 import { afterEach, beforeEach } from "bun:test";
 import { type Environment, loadEnvironment } from "logos:core/loaders/environment";
+import { DiscordConnection } from "logos/connection";
 import { CacheStore } from "logos/stores/cache";
 import { DatabaseStore } from "logos/stores/database";
-import { DiscordConnection } from "logos/connection";
 
 type DependencyProvider<T> = () => T;
 
