@@ -219,8 +219,7 @@ abstract class DocumentConventions<Metadata = any> {
 	}: { document: Model; data: IdentifierDataOrMetadata<Model, Metadata>; collection: Collection }) {
 		this.document = document as Model & Metadata;
 
-		this.assignAccessorsToModel();
-
+		this.#assignAccessorsToModel();
 		this.#populateModelData(data, { collection });
 
 		const partialId = this.#getPartialIdFromData(data);
@@ -229,15 +228,13 @@ abstract class DocumentConventions<Metadata = any> {
 		this.idParts = partialId.split(constants.special.database.separator);
 	}
 
-	#getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {
-		let partialId: string;
-		if (this.hasMetadata(data)) {
-			partialId = Model.decomposeId(this.id)[1];
-		} else {
-			partialId = Model.buildPartialId(data as IdentifierData<Model>);
-		}
-
-		return partialId;
+	#assignAccessorsToModel(): void {
+		const conventions = this;
+		Object.defineProperty(this.document, "id", {
+			get(): string {
+				return conventions.id;
+			},
+		});
 	}
 
 	#populateModelData(
@@ -252,13 +249,15 @@ abstract class DocumentConventions<Metadata = any> {
 		}
 	}
 
-	assignAccessorsToModel(): void {
-		const conventions = this;
-		Object.defineProperty(this.document, "id", {
-			get(): string {
-				return conventions.id;
-			},
-		});
+	#getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {
+		let partialId: string;
+		if (this.hasMetadata(data)) {
+			partialId = Model.decomposeId(this.id)[1];
+		} else {
+			partialId = Model.buildPartialId(data as IdentifierData<Model>);
+		}
+
+		return partialId;
 	}
 
 	/**
