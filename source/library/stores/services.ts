@@ -266,7 +266,7 @@ class ServiceStore {
 
 	async #stopLocalServices({ guildId }: { guildId: bigint }): Promise<void> {
 		const services = this.#localServicesFor({ guildId });
-		if (services.length > 0) {
+		if (services.length === 0) {
 			this.log.info(`There were no local services to stop on ${this.#client.diagnostics.guild(guildId)}.`);
 			return;
 		}
