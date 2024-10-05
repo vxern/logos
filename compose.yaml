@@ -1,32 +1,85 @@
+name: logos
+
 services:
-  # ravendb:
-  #   image: "ravendb/ravendb:ubuntu-latest"
-  #   environment:
-  #     RAVEN_License_Eula_Accepted: "true"
-  #     RAVEN_ARGS: "--Setup.Mode=None --Security.UnsecuredAccessAllowed=PublicNetwork" # why is this hack needed, @RavenDB?
-  #     RAVEN_ServerUrl: "http://0.0.0.0:8080"
-  #     RAVEN_ServerUrl_Tcp: "tcp://0.0.0.0:38888"
-  #   ports:
-  #     - "8080:8080"
-  # couchdb:
-  #   image: "couchdb:latest"
-  #   ports:
-  #     - "5984:5984"
-  #   volumes:
-  #     - ./local.ini:/opt/couchdb/etc/local.ini
-  # rethinkdb:
-  #   image: "rethinkdb:2.4.4-bookworm-slim"
-  #   ports:
-  #     - "8080:8080"
-  #     - "28015:28015"
-  redis:
-    image: "redis:alpine"
-    ports:
-      - "6379:6379"
-  lavalink:
-    image: "ghcr.io/lavalink-devs/lavalink:4"
+  ravendb:
+    container_name: logos_ravendb
+    image: ravendb/ravendb:ubuntu-latest
     environment:
-      SERVER_PORT: 2333
-      LAVALINK_SERVER_PASSWORD: foo
+      RAVEN_License_Eula_Accepted: true
+      RAVEN_Setup_Mode: None
+      RAVEN_Security_UnsecuredAccessAllowed: PublicNetwork
+      RAVEN_ARGS: --log-to-console
+      RAVEN_ServerUrl: http://${RAVENDB_HOST:-127.0.0.1}:${RAVENDB_PORT:-8080}
+      RAVEN_ServerUrl_Tcp: tcp://${RAVENDB_HOST:-127.0.0.1}:38888
     ports:
-      - "2333:2333"
+      - ${RAVENDB_PORT:-8080}
+    profiles:
+      - ravendb
+  couchdb:
+    container_name: logos_couchdb
+    image: couchdb:latest
+    environment:
+      COUCHDB_USER: ${COUCHDB_USERNAME:-admin}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:-password}
+    ports:
+      - "5984:${COUCHDB_PORT:-5984}"
+    profiles:
+      - couchdb
+  rethinkdb:
+    container_name: logos_rethinkdb
+    image: rethinkdb:2.4.4-bookworm-slim
+    ports:
+      - "8080"
+      - ${RETHINKDB_PORT:-28015}
+    profiles:
+      - rethinkdb
+  redis:
+    container_name: logos_redis
+    image: redis:alpine
+    environment:
+      REDIS_PORT_NUMBER: ${REDIS_PORT:-6379}
+    ports:
+      - ${REDIS_PORT:-6379}
+    profiles:
+      - redis
+  lavalink:
+    container_name: logos_lavalink
+    image: ghcr.io/lavalink-devs/lavalink:4
+    environment:
+      SERVER_ADDRESS: ${LAVALINK_HOST:-127.0.0.1}
+      SERVER_PORT: ${LAVALINK_PORT:-2333}
+      SERVER_HTTP2_ENABLED: true
+      LAVALINK_SERVER_PASSWORD: ${LAVALINK_PASSWORD:-youshallnotpass}
+    ports:
+      - ${LAVALINK_PORT:-2333}
+    profiles:
+      - lavalink
+  logos:
+    container_name: logos
+    environment:
+      REDIS_HOST: redis
+      LAVALINK_HOST: lavalink
+      MONGODB_HOST: mongodb
+      RAVENDB_HOST: ravendb
+      COUCHDB_HOST: couchdb
+      RETHINKDB_HOST: rethinkdb
+    build:
+      context: .
+    volumes:
+      - .env:/usr/src/app/.env
+    depends_on:
+      ravendb:
+        condition: service_started
+        required: false
+      couchdb:
+        condition: service_started
+        required: false
+      rethinkdb:
+        condition: service_started
+        required: false
+      lavalink:
+        condition: service_started
+        required: false
+      redis:
+        condition: service_started
+        required: false
