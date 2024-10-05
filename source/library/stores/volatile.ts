@@ -40,7 +40,7 @@ class VolatileStore {
 
 		if (client.environment.redisHost === undefined || client.environment.redisPort === undefined) {
 			log.warn(
-				"One of `REDIS_HOST` or `REDIS_PORT` have not been provided. Logos will run without a Redis integration.",
+				"One of `REDIS_HOST` or `REDIS_PORT` has not been provided. Logos will run without a Redis integration.",
 			);
 			return undefined;
 		}
