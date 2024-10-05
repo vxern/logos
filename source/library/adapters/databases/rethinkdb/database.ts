@@ -11,6 +11,7 @@ import rethinkdb from "rethinkdb-ts";
 
 class RethinkDBAdapter extends DatabaseAdapter {
 	readonly #connectionOptions: rethinkdb.RConnectionOptions;
+	readonly #databaseName: string;
 	#connection!: rethinkdb.Connection;
 
 	constructor({
@@ -30,7 +31,8 @@ class RethinkDBAdapter extends DatabaseAdapter {
 	}) {
 		super({ identifier: "RethinkDB", log });
 
-		this.#connectionOptions = { host, port: Number(port), db: database, user: username, password };
+		this.#connectionOptions = { host, port: Number(port), user: username, password, silent: true };
+		this.#databaseName = database;
 	}
 
 	static tryCreate({
@@ -59,7 +61,30 @@ class RethinkDBAdapter extends DatabaseAdapter {
 	}
 
 	async setup(): Promise<void> {
-		this.#connection = await rethinkdb.r.connect(this.#connectionOptions);
+		try {
+			this.#connection = await rethinkdb.r.connect(this.#connectionOptions);
+		} catch (error: any) {
+			this.log.error(error, `Failed to connect to database '${this.#connectionOptions.db}'.`);
+			throw error;
+		}
+
+		const databases = await rethinkdb.r.dbList().run(this.#connection);
+		const databaseExists = databases.includes(this.#databaseName);
+		if (!databaseExists) {
+			this.log.info(`The database '${this.#databaseName}' does not exist. Creating...`);
+
+			try {
+				await rethinkdb.r.dbCreate(this.#databaseName).run(this.#connection);
+			} catch (error: any) {
+				this.log.error(error, `Could not create database '${this.#databaseName}'.`);
+				throw error;
+			}
+
+			this.log.info(`Created database '${this.#databaseName}'.`);
+		}
+
+		this.#connection.use(this.#databaseName);
+
 		await this.#createMissingTables();
 	}
 
