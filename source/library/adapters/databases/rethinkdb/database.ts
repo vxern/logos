@@ -85,6 +85,8 @@ class RethinkDBAdapter extends DatabaseAdapter {
 
 		this.#connection.use(this.#databaseName);
 
+		await rethinkdb.r.db(this.#databaseName).wait().run(this.#connection);
+
 		await this.#createMissingTables();
 	}
 
