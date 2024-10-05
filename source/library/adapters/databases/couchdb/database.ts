@@ -10,7 +10,9 @@ import nano from "nano";
 import type pino from "pino";
 
 class CouchDBAdapter extends DatabaseAdapter {
-	readonly #documents: nano.DocumentScope<unknown>;
+	readonly #server: nano.ServerScope;
+	readonly #databaseName: string;
+	#documents!: nano.DocumentScope<unknown>;
 
 	constructor({
 		log,
@@ -44,11 +46,11 @@ class CouchDBAdapter extends DatabaseAdapter {
 			url = `${protocol}://${host}:${port}`;
 		}
 
-		const server = nano({
+		this.#server = nano({
 			url,
 			requestDefaults: { headers: { "User-Agent": constants.USER_AGENT } },
 		});
-		this.#documents = server.db.use(database);
+		this.#databaseName = database;
 	}
 
 	static tryCreate({ log, environment }: { log: pino.Logger; environment: Environment }): CouchDBAdapter | undefined {
@@ -73,6 +75,31 @@ class CouchDBAdapter extends DatabaseAdapter {
 			port: environment.couchdbPort,
 			database: environment.couchdbDatabase,
 		});
+	}
+
+	async setup(): Promise<void> {
+		let databaseExists = true;
+		try {
+			await this.#server.db.get(this.#databaseName);
+		} catch (error: any) {
+			if (error.statusCode !== 404) {
+				this.log.error(`Failed to get information for database '${this.#databaseName}': ${error}`);
+				throw error;
+			}
+
+			databaseExists = false;
+		}
+
+		if (!databaseExists) {
+			try {
+				await this.#server.db.create(this.#databaseName);
+			} catch (error: any) {
+				this.log.error(`Could not create database '${this.#databaseName}': ${error}`);
+				throw error;
+			}
+		}
+
+		this.#documents = this.#server.db.use(this.#databaseName);
 	}
 
 	conventionsFor({
