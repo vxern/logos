@@ -24,14 +24,6 @@ class RethinkDBDocumentConventions extends DocumentConventions<RethinkDBDocument
 		return new ModelClass(database, payload) as M;
 	}
 
-	hasMetadata(data: IdentifierDataOrMetadata<Model, RethinkDBDocumentMetadata>): boolean {
-		return "id" in data;
-	}
-
-	buildMetadata({ id, collection: _ }: { id: string; collection: Collection }): RethinkDBDocumentMetadata {
-		return { id };
-	}
-
 	/**
 	 * @remarks
 	 * This method is intentionally empty: The base implementation of this method applies an `id` getter on the managed
@@ -41,6 +33,14 @@ class RethinkDBDocumentConventions extends DocumentConventions<RethinkDBDocument
 	 */
 	assignAccessorsToModel(): void {
 		// Do nothing.
+	}
+
+	hasMetadata(data: IdentifierDataOrMetadata<Model, RethinkDBDocumentMetadata>): boolean {
+		return "id" in data;
+	}
+
+	buildMetadata({ id, collection: _ }: { id: string; collection: Collection }): RethinkDBDocumentMetadata {
+		return { id };
 	}
 }
 

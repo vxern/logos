@@ -219,7 +219,7 @@ abstract class DocumentConventions<Metadata = any> {
 	}: { document: Model; data: IdentifierDataOrMetadata<Model, Metadata>; collection: Collection }) {
 		this.document = document as Model & Metadata;
 
-		this.#assignAccessorsToModel();
+		this.assignAccessorsToModel();
 		this.#populateModelData(data, { collection });
 
 		const partialId = this.#getPartialIdFromData(data);
@@ -228,7 +228,7 @@ abstract class DocumentConventions<Metadata = any> {
 		this.idParts = partialId.split(constants.special.database.separator);
 	}
 
-	#assignAccessorsToModel(): void {
+	assignAccessorsToModel(): void {
 		const conventions = this;
 		Object.defineProperty(this.document, "id", {
 			get(): string {
