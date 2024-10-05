@@ -91,12 +91,16 @@ class CouchDBAdapter extends DatabaseAdapter {
 		}
 
 		if (!databaseExists) {
+			this.log.info(`The database '${this.#databaseName}' does not exist. Creating...`);
+
 			try {
 				await this.#server.db.create(this.#databaseName);
 			} catch (error: any) {
 				this.log.error(`Could not create database '${this.#databaseName}': ${error}`);
 				throw error;
 			}
+
+			this.log.info(`Created database '${this.#databaseName}'.`);
 		}
 
 		this.#documents = this.#server.db.use(this.#databaseName);
