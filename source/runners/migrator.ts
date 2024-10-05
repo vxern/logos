@@ -35,7 +35,7 @@ async function migrate({
 		try {
 			await module.up(database);
 		} catch (error) {
-			log.error(`Failed to run migration '${filename}': ${error}`);
+			log.error(error, `Failed to run migration '${filename}'.`);
 
 			process.exit(1);
 		}
@@ -94,7 +94,7 @@ async function rollback({
 		try {
 			await module.down(database);
 		} catch (error) {
-			log.error(`Failed to roll back ${filename}: ${error}`);
+			log.error(error, `Failed to roll back ${filename}.`);
 
 			process.exit(1);
 		}

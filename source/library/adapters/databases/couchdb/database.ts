@@ -83,7 +83,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 			await this.#server.db.get(this.#databaseName);
 		} catch (error: any) {
 			if (error.statusCode !== 404) {
-				this.log.error(`Failed to get information for database '${this.#databaseName}': ${error}`);
+				this.log.error(error, `Failed to get information for database '${this.#databaseName}'.`);
 				throw error;
 			}
 
@@ -96,7 +96,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 			try {
 				await this.#server.db.create(this.#databaseName);
 			} catch (error: any) {
-				this.log.error(`Could not create database '${this.#databaseName}': ${error}`);
+				this.log.error(error, `Could not create database '${this.#databaseName}'.`);
 				throw error;
 			}
 

@@ -118,7 +118,7 @@ class LavalinkService extends GlobalService {
 				return;
 			}
 
-			this.log.error(`The audio node has encountered an error: ${error}`);
+			this.log.error(error, "The audio node has encountered an error.");
 		});
 
 		this.manager.on("ready", (_, reconnected) => {
