@@ -9,8 +9,8 @@ services:
       RAVEN_Setup_Mode: None
       RAVEN_Security_UnsecuredAccessAllowed: PublicNetwork
       RAVEN_ARGS: --log-to-console
-      RAVEN_ServerUrl: http://${RAVENDB_HOST:-127.0.0.1}:${RAVENDB_PORT:-8080}
-      RAVEN_ServerUrl_Tcp: tcp://${RAVENDB_HOST:-127.0.0.1}:38888
+      RAVEN_ServerUrl: http://0.0.0.0:${RAVENDB_PORT:-8080}
+      RAVEN_ServerUrl_Tcp: tcp://0.0.0.0:38888
     ports:
       - ${RAVENDB_PORT:-8080}
     profiles:
@@ -22,7 +22,7 @@ services:
       COUCHDB_USER: ${COUCHDB_USERNAME:-admin}
       COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:-password}
     ports:
-      - "5984:${COUCHDB_PORT:-5984}"
+      - "${COUCHDB_PORT:-5984}:5984"
     profiles:
       - couchdb
   rethinkdb:
@@ -69,7 +69,7 @@ services:
       - .env:/usr/src/app/.env
     depends_on:
       ravendb:
-        condition: service_started
+        condition: service_healthy
         required: false
       couchdb:
         condition: service_started
