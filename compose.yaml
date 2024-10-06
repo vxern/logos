@@ -1,6 +1,14 @@
 name: logos
 
 services:
+  mongodb:
+    container_name: logos_mongodb
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-}
+    profiles:
+      - mongodb
   ravendb:
     container_name: logos_ravendb
     image: ravendb/ravendb:ubuntu-latest
@@ -68,6 +76,9 @@ services:
     volumes:
       - .env:/usr/src/app/.env
     depends_on:
+      mongodb:
+        condition: service_started
+        required: false
       ravendb:
         condition: service_healthy
         required: false
