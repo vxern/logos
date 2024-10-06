@@ -4,6 +4,7 @@ services:
   mongodb:
     container_name: logos_mongodb
     image: mongo:latest
+    restart: unless-stopped
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-}
@@ -12,6 +13,7 @@ services:
   ravendb:
     container_name: logos_ravendb
     image: ravendb/ravendb:ubuntu-latest
+    restart: unless-stopped
     environment:
       RAVEN_License_Eula_Accepted: true
       RAVEN_Setup_Mode: None
@@ -26,6 +28,7 @@ services:
   couchdb:
     container_name: logos_couchdb
     image: couchdb:latest
+    restart: unless-stopped
     environment:
       COUCHDB_USER: ${COUCHDB_USERNAME:-admin}
       COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:-password}
@@ -36,6 +39,7 @@ services:
   rethinkdb:
     container_name: logos_rethinkdb
     image: rethinkdb:2.4.4-bookworm-slim
+    restart: unless-stopped
     ports:
       - "8080"
       - ${RETHINKDB_PORT:-28015}
@@ -44,6 +48,7 @@ services:
   redis:
     container_name: logos_redis
     image: redis:alpine
+    restart: unless-stopped
     environment:
       REDIS_PORT_NUMBER: ${REDIS_PORT:-6379}
     ports:
@@ -53,6 +58,7 @@ services:
   lavalink:
     container_name: logos_lavalink
     image: ghcr.io/lavalink-devs/lavalink:4
+    restart: unless-stopped
     environment:
       SERVER_ADDRESS: ${LAVALINK_HOST:-127.0.0.1}
       SERVER_PORT: ${LAVALINK_PORT:-2333}
@@ -64,6 +70,7 @@ services:
       - lavalink
   logos:
     container_name: logos
+    restart: unless-stopped
     environment:
       REDIS_HOST: redis
       LAVALINK_HOST: lavalink
