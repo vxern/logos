@@ -64,12 +64,12 @@ class RethinkDBAdapter extends DatabaseAdapter {
 		try {
 			this.#connection = await rethinkdb.r.connect(this.#connectionOptions);
 		} catch (error: any) {
-			this.log.error(error, `Failed to connect to database '${this.#connectionOptions.db}'.`);
+			this.log.error(error, `Failed to connect to database '${this.#databaseName}'.`);
 			throw error;
 		}
 
-		const databases = await rethinkdb.r.dbList().run(this.#connection);
-		const databaseExists = databases.includes(this.#databaseName);
+		const databaseNames = await rethinkdb.r.dbList().run(this.#connection);
+		const databaseExists = databaseNames.includes(this.#databaseName);
 		if (!databaseExists) {
 			this.log.info(`The database '${this.#databaseName}' does not exist. Creating...`);
 
