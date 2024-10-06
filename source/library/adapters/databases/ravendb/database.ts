@@ -11,7 +11,8 @@ import type pino from "pino";
 import * as ravendb from "ravendb";
 
 class RavenDBAdapter extends DatabaseAdapter {
-	readonly #database: ravendb.DocumentStore;
+	readonly #documents: ravendb.DocumentStore;
+	readonly #databaseName: string;
 
 	constructor({
 		log,
@@ -26,14 +27,15 @@ class RavenDBAdapter extends DatabaseAdapter {
 
 		const url = `${protocol}://${host}:${port}`;
 		if (certificate !== undefined) {
-			this.#database = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
+			this.#documents = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
 		} else {
-			this.#database = new ravendb.DocumentStore(url, database);
+			this.#documents = new ravendb.DocumentStore(url, database);
 		}
+		this.#databaseName = database;
 
 		// @ts-expect-error: We don't want RavenDB to be setting the `id` property on documents since we handle that
 		// ourselves.
-		this.#database.conventions.getIdentityProperty = () => undefined;
+		this.#documents.conventions.getIdentityProperty = () => undefined;
 	}
 
 	static tryCreate({ environment, log }: { log: pino.Logger; environment: Environment }): RavenDBAdapter | undefined {
@@ -61,11 +63,30 @@ class RavenDBAdapter extends DatabaseAdapter {
 	}
 
 	async setup(): Promise<void> {
-		this.#database.initialize();
+		this.#documents.initialize();
+
+		const databaseNames = await this.#documents.maintenance.server.send(
+			new ravendb.GetDatabaseNamesOperation(0, 10),
+		);
+		const databaseExists = databaseNames.includes(this.#databaseName);
+		if (!databaseExists) {
+			this.log.info(`The database '${this.#databaseName}' does not exist. Creating...`);
+
+			try {
+				await this.#documents.maintenance.server.send(
+					new ravendb.CreateDatabaseOperation({ databaseName: this.#databaseName }),
+				);
+			} catch (error: any) {
+				this.log.error(error, `Could not create database '${this.#databaseName}'.`);
+				throw error;
+			}
+
+			this.log.info(`Created database '${this.#databaseName}'.`);
+		}
 	}
 
 	async teardown(): Promise<void> {
-		this.#database.dispose();
+		this.#documents.dispose();
 	}
 
 	conventionsFor({
@@ -81,7 +102,7 @@ class RavenDBAdapter extends DatabaseAdapter {
 	}
 
 	openSession({ database }: { database: DatabaseStore }): RavenDBDocumentSession {
-		const rawSession = this.#database.openSession();
+		const rawSession = this.#documents.openSession();
 
 		return new RavenDBDocumentSession({ database, session: rawSession });
 	}
