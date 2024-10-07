@@ -475,7 +475,7 @@ class CommandStore {
 				commands.push(this.commands.music);
 			} else {
 				this.log.warn(
-					`The music service is enabled on ${this.#client.diagnostics.guild(guildDocument.id)}, but the bot does not have a Lavalink connection. Skipping...`,
+					`The music service is enabled on ${this.#client.diagnostics.guild(guildDocument.guildId)}, but the bot does not have a Lavalink connection. Skipping...`,
 				);
 			}
 		}
