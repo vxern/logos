@@ -2,7 +2,7 @@ import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
 
-async function autocompleteLanguage(
+async function handleAutocompleteLanguage(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
@@ -26,4 +26,4 @@ async function autocompleteLanguage(
 	});
 }
 
-export { autocompleteLanguage };
+export { handleAutocompleteLanguage };

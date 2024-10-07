@@ -2,14 +2,14 @@ import { getLocaleByLearningLanguage } from "logos:constants/languages/learning"
 import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { shuffle } from "ioredis/built/utils";
 import type { Client } from "logos/client";
-import { autocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
+import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
 import type { SentencePair } from "logos/stores/volatile";
 
 async function handleFindInContextAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
-	await autocompleteLanguage(client, interaction);
+	await handleAutocompleteLanguage(client, interaction);
 }
 
 async function handleFindInContext(

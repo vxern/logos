@@ -1,6 +1,7 @@
 import { timestamp } from "logos:constants/formatting";
 import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "logos:constants/slowmode";
 import type { Client } from "logos/client";
+import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple.ts";
 import { Guild } from "logos/models/guild";
 
 const lastUseByGuildId = new Map<bigint, number>();
@@ -10,12 +11,11 @@ async function handleToggleSlowmodeAutocomplete(
 	interaction: Logos.Interaction<any, { level: string }>,
 ): Promise<void> {
 	const strings = constants.contexts.slowmodeLevel({ localise: client.localise, locale: interaction.locale });
-	const levelLowercase = interaction.parameters.level.trim().toLowerCase();
-	const choices = constants.slowmode.levels
-		.map((level) => ({ name: strings.level(level), value: level }))
-		.filter((choice) => choice.name.toLowerCase().includes(levelLowercase));
-
-	client.respond(interaction, choices).ignore();
+	await handleSimpleAutocomplete(client, interaction, {
+		query: interaction.parameters.level,
+		elements: Object.entries(constants.slowmode.levels),
+		getOption: ([_, level]) => ({ name: strings.level(level), value: level }),
+	});
 }
 
 async function handleToggleSlowmode(
