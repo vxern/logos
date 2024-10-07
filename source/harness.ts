@@ -1,4 +1,4 @@
-import { chunk } from "logos:core/utilities";
+import { type PromiseOr, chunk } from "logos:core/utilities";
 import * as Discord from "@discordeno/bot";
 
 Array.prototype.toChunked = function <T>(this, size: number) {
@@ -14,7 +14,7 @@ Object.mirror = <T extends Record<string, string>>(object: T) => {
 Promise.createRace = async function* <T, R>(
 	this,
 	elements: T[],
-	doAction: (element: T) => R | Promise<R | undefined> | undefined,
+	doAction: (element: T) => PromiseOr<R | undefined>,
 ): AsyncGenerator<{ element: T; result?: R }, void, void> {
 	const promisesWithResolver = elements.map(() => Promise.withResolvers<{ element: T; result?: R }>());
 

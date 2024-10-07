@@ -75,7 +75,7 @@ class InMemoryDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		return this;
 	}
 
-	execute(): M[] {
+	async execute(): Promise<M[]> {
 		return Array.from(this.#documents.values());
 	}
 }

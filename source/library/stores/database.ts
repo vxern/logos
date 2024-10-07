@@ -1,5 +1,6 @@
 import type { Collection } from "logos:constants/database";
 import type { Environment } from "logos:core/loaders/environment";
+import type { PromiseOr } from "logos:core/utilities";
 import type { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBAdapter } from "logos/adapters/databases/couchdb/database";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory/database";
@@ -45,7 +46,7 @@ class DatabaseStore {
 		return this.#adapter.conventionsFor.bind(this.#adapter);
 	}
 
-	get withSession(): <T>(callback: (session: DocumentSession) => T | Promise<T>) => Promise<T> {
+	get withSession(): <T>(callback: (session: DocumentSession) => PromiseOr<T>) => Promise<T> {
 		return (callback) => this.#adapter.withSession(callback, { database: this });
 	}
 

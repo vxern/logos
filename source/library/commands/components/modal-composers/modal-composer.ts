@@ -72,12 +72,9 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		return content as FormData;
 	}
 
-	abstract buildModal(
-		interaction: Logos.Interaction,
-		{ formData }: { formData: FormData },
-	): Modal<FormData> | Promise<Modal<FormData>>;
+	abstract buildModal(interaction: Logos.Interaction, { formData }: { formData: FormData }): Modal<FormData>;
 
-	validate(_: { formData: FormData }): ValidationError | Promise<ValidationError | undefined> | undefined {
+	validate(_: { formData: FormData }): ValidationError | undefined {
 		return undefined;
 	}
 
@@ -86,7 +83,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 	}
 
 	async #display(): Promise<void> {
-		const modal = await this.buildModal(this.anchor, { formData: this.#formData });
+		const modal = this.buildModal(this.anchor, { formData: this.#formData });
 
 		await this.client.displayModal(this.anchor, {
 			title: modal.title,
@@ -255,7 +252,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		await this.#display();
 	}
 
-	close(): void | Promise<void> {
+	async close(): Promise<void> {
 		this.#submissions.close();
 	}
 }

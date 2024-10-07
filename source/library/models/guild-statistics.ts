@@ -27,7 +27,7 @@ class GuildStatistics extends GuildStatisticsModel {
 		this.statistics = statistics ?? {};
 	}
 
-	static getOrCreate(client: Client, data: CreateGuildStatisticsOptions): GuildStatistics | Promise<GuildStatistics> {
+	static async getOrCreate(client: Client, data: CreateGuildStatisticsOptions): Promise<GuildStatistics> {
 		const partialId = Model.buildPartialId<GuildStatistics>(data);
 		if (client.documents.guildStatistics.has(partialId)) {
 			return client.documents.guildStatistics.get(partialId)!;

@@ -8,7 +8,7 @@ class TinyLDAdapter extends DetectorAdapter {
 		super(client, { identifier: "TinyLD" });
 	}
 
-	detect({ text }: { text: string }): SingleDetectionResult | undefined {
+	async detect({ text }: { text: string }): Promise<SingleDetectionResult | undefined> {
 		let detectedLocale: string;
 		try {
 			detectedLocale = tinyld.toISO3(tinyld.detect(text));

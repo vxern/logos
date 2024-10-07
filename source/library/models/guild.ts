@@ -79,7 +79,7 @@ class Guild extends GuildModel {
 		this.isNative = isNative ?? false;
 	}
 
-	static get(client: Client, data: IdentifierData<Guild>): Guild | Promise<Guild | undefined> | undefined {
+	static async get(client: Client, data: IdentifierData<Guild>): Promise<Guild | undefined> {
 		const partialId = Model.buildPartialId(data);
 		if (client.documents.guilds.has(partialId)) {
 			return client.documents.guilds.get(partialId)!;

@@ -1,4 +1,5 @@
 import type { Collection } from "logos:constants/database";
+import type { PromiseOr } from "logos:core/utilities";
 import { type IdentifierData, type IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import type pino from "pino";
@@ -27,7 +28,7 @@ abstract class DatabaseAdapter {
 	abstract openSession({ database }: { database: DatabaseStore }): DocumentSession;
 
 	async withSession<T>(
-		callback: (session: DocumentSession) => T | Promise<T>,
+		callback: (session: DocumentSession) => PromiseOr<T>,
 		{ database }: { database: DatabaseStore },
 	): Promise<T> {
 		const session = this.openSession({ database });
@@ -61,7 +62,7 @@ abstract class DocumentSession {
 		return document;
 	}
 
-	abstract loadMany<M extends Model>(ids: string[]): (M | undefined)[] | Promise<(M | undefined)[]>;
+	abstract loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
 	async getMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
 		const results = await this.loadMany<M>(ids);
 
@@ -79,7 +80,7 @@ abstract class DocumentSession {
 		return documents;
 	}
 
-	abstract store<M extends Model>(document: M): void | Promise<void>;
+	abstract store<M extends Model>(document: M): Promise<void>;
 	async set<M extends Model>(document: M): Promise<M> {
 		await this.store(document);
 		this.database.cache.cacheDocument(document);
@@ -155,7 +156,7 @@ abstract class DocumentQuery<M extends Model> {
 
 	abstract whereEquals(property: string, value: unknown): DocumentQuery<M>;
 
-	abstract execute(): M[] | Promise<M[]>;
+	abstract execute(): Promise<M[]>;
 	async run(): Promise<M[]> {
 		const documents = await this.execute();
 		return documents.filter((document) => !document.isDeleted);

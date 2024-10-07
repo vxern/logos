@@ -122,7 +122,7 @@ class ServiceStore {
 
 		this.log.info(`Starting global services... (${services.length} services to start)`);
 
-		const promises: (void | Promise<void>)[] = [];
+		const promises: Promise<void>[] = [];
 		for (const service of services) {
 			promises.push(service.start());
 		}

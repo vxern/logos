@@ -1,4 +1,5 @@
 import type { Collection } from "logos:constants/database";
+import type { PromiseOr } from "logos:core/utilities";
 import type { EntryRequest } from "logos/models/entry-request";
 import type { Guild } from "logos/models/guild";
 import type { GuildStatistics } from "logos/models/guild-statistics";
@@ -86,9 +87,7 @@ class CacheStore {
 		};
 	}
 
-	#cacheEntity<T>(
-		callback: (entity: T) => void | Promise<void>,
-	): (bot: Discord.Bot, payload: unknown, entity: T) => T {
+	#cacheEntity<T>(callback: (entity: T) => PromiseOr<void>): (bot: Discord.Bot, payload: unknown, entity: T) => T {
 		return (_, __, entity) => {
 			callback(entity);
 			return entity;

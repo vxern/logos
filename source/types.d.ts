@@ -2,7 +2,7 @@ import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
 import type { Properties } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
-import type { WithRequired } from "logos:core/utilities";
+import type { PromiseOr, WithRequired } from "logos:core/utilities";
 import type { EntryRequest } from "logos/models/entry-request";
 import type { Praise } from "logos/models/praise";
 import type { Report } from "logos/models/report";
@@ -15,7 +15,7 @@ declare global {
 	interface PromiseConstructor {
 		createRace<T, R>(
 			elements: T[],
-			doAction: (element: T) => R | Promise<R | undefined> | undefined,
+			doAction: (element: T) => PromiseOr<R | undefined>,
 		): AsyncGenerator<{ element: T; result?: R }, void, void>;
 	}
 

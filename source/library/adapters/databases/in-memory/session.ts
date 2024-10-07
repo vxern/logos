@@ -25,7 +25,7 @@ class InMemoryDocumentSession extends DocumentSession {
 		return Promise.all(ids.map((id) => this.load<M>(id)));
 	}
 
-	store(object: Model): void {
+	async store(object: Model): Promise<void> {
 		this.#documents[object.collection].set(object.id, object);
 	}
 

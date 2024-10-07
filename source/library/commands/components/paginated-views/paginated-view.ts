@@ -176,7 +176,7 @@ abstract class PaginatedView<T> {
 		await this.#display();
 	}
 
-	close(): void | Promise<void> {
+	async close(): Promise<void> {
 		this.#pageButtons.close();
 	}
 }
