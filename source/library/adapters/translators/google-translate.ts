@@ -10,7 +10,7 @@ import { type TranslationResult, TranslatorAdapter } from "logos/adapters/transl
 import type { Client } from "logos/client";
 
 interface GoogleTranslateResult {
-	readonly data: {
+	readonly data?: {
 		readonly translations: {
 			readonly detectedSourceLanguage?: string;
 			readonly translatedText: string;
@@ -77,7 +77,7 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 			return undefined;
 		}
 
-		const translation = result.data.translations?.at(0);
+		const translation = result.data?.translations?.at(0);
 		if (translation === undefined) {
 			return undefined;
 		}
