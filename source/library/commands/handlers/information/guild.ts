@@ -134,9 +134,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		.sort((a, b) => a.position - b.position)
 		.map((role) => role.id);
 
-	const members = guild.members
-		.array()
-		.filter((member) => !client.entities.users.get(member.id)?.toggles?.has("bot"));
+	const members = guild.members.array().filter((member) => !client.entities.users.get(member.id)?.bot);
 
 	let withoutProficiencyRole = 0;
 	const roleFrequencies: Record<`${bigint}`, number> = Object.fromEntries(

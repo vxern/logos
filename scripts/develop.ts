@@ -36,7 +36,8 @@ const environment = loadEnvironment({ log: constants.loggers.silent });
 const bot = Discord.createBot({
 	token: environment.discordSecret,
 	intents: Discord.Intents.Guilds | Discord.Intents.GuildMembers,
-	transformers: { desiredProperties: Discord.createDesiredPropertiesObject({}, true) },
+	events: {},
+	defaultDesiredPropertiesValue: true,
 });
 
 bot.start();

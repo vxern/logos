@@ -27,34 +27,33 @@ class DiscordConnection {
 				Discord.Intents.GuildMessages |
 				Discord.Intents.MessageContent,
 			events: eventHandlers,
-			transformers: {
-				customizers: cacheHandlers,
-				desiredProperties: constants.properties as unknown as Discord.Transformers["desiredProperties"],
-			},
-			handlers: {
-				// We override the `MESSAGE_UPDATE` handler to prevent Discordeno from discarding message updates when
-				// an embed is removed from a message.
-				MESSAGE_UPDATE: async (bot, data) => {
-					const payload = data.d as Discord.DiscordMessage;
-					if (!payload.author) {
-						return;
-					}
-
-					bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
-				},
-			},
-			loggerFactory: (name) => constants.loggers.discordeno.child({ name: name.toLowerCase() }),
 		});
+		for (const [customiser, handler] of Object.entries(cacheHandlers)) {
+			// @ts-ignore: This will be removed after updating to a new Discordeno release.
+			this.bot.transformers.customizers[customiser] = handler;
+		}
+		this.bot.transformers.desiredProperties =
+			constants.properties as unknown as Discord.Transformers["desiredProperties"];
+		this.bot.handlers = Discord.createBotGatewayHandlers({
+			// We override the `MESSAGE_UPDATE` handler to prevent Discordeno from discarding message updates when
+			// an embed is removed from a message.
+			MESSAGE_UPDATE: async (bot, data) => {
+				const payload = data.d as Discord.DiscordMessage;
+				if (!payload.author) {
+					return;
+				}
+
+				bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
+			},
+		});
+		this.bot.logger = constants.loggers.discordeno.child({ name: "Bot" });
+
 		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Logos (https://github.com/vxern/logos)" });
 		// REMINDER(vxern): The Discordeno shutdown() method has a weird delay, so we override its definition to
 		// remove the delay.
-		this.bot.gateway.shutdown = async (code, reason, clearReshardingInterval = true) => {
+		this.bot.gateway.shutdown = async (code, reason) => {
 			for (const shard of this.bot.gateway.shards.values()) {
 				shard.close(code, reason);
-			}
-
-			if (clearReshardingInterval) {
-				clearInterval(this.bot.gateway.resharding.checkIntervalId);
 			}
 		};
 	}
