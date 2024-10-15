@@ -27,13 +27,12 @@ class DiscordConnection {
 				Discord.Intents.GuildMessages |
 				Discord.Intents.MessageContent,
 			events: eventHandlers,
+			defaultDesiredPropertiesValue: true,
 		});
 		for (const [customiser, handler] of Object.entries(cacheHandlers)) {
 			// @ts-ignore: This will be removed after updating to a new Discordeno release.
 			this.bot.transformers.customizers[customiser] = handler;
 		}
-		this.bot.transformers.desiredProperties =
-			constants.properties as unknown as Discord.Transformers["desiredProperties"];
 		this.bot.handlers = Discord.createBotGatewayHandlers({
 			// We override the `MESSAGE_UPDATE` handler to prevent Discordeno from discarding message updates when
 			// an embed is removed from a message.
