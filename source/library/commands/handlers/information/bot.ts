@@ -2,12 +2,7 @@ import { list } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 
 async function handleDisplayBotInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const botUser =
-		client.entities.users.get(client.bot.id) ??
-		(await client.bot.helpers.getUser(client.bot.id).catch((error) => {
-			client.log.warn(error, "Failed to get bot user.");
-			return undefined;
-		}));
+	const botUser = client.entities.users.get(client.bot.id);
 	if (botUser === undefined) {
 		return;
 	}
