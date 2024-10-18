@@ -51,10 +51,6 @@ class Client {
 		return this.#localisations.pluralise.bind(this.#localisations);
 	}
 
-	get withContext(): LocalisationStore["withContext"] {
-		return this.#localisations.withContext.bind(this.#localisations);
-	}
-
 	get commands(): CommandStore["commands"] {
 		return this.#commands.commands;
 	}
