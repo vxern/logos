@@ -110,7 +110,7 @@ async function rollback({
 type AvailableMigrations = Record<string, string>;
 async function getAvailableMigrations(): Promise<AvailableMigrations> {
 	const migrationFilenames = await Array.fromAsync(new Bun.Glob("*.ts").scan(constants.directories.migrations)).then(
-		(filenames) => filenames.toSorted(),
+		(filenames) => filenames.toSorted((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
 	);
 
 	return Object.fromEntries(migrationFilenames.map((filename) => [filename.split("_").at(0)!, filename]));
