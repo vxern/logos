@@ -7,8 +7,6 @@ async function handleRequestStreamPlayback(
 	client: Client,
 	interaction: Logos.Interaction<any, { url: string }>,
 ): Promise<void> {
-	client.acknowledge(interaction).ignore();
-
 	const strings = constants.contexts.stream({ localise: client.localise, locale: interaction.locale });
 	const listing: SongListing = new SongListing({
 		queueable: new AudioStream({ title: strings.stream, url: interaction.parameters.url }),
@@ -50,6 +48,8 @@ async function handleRequestQueryPlayback(
 
 		return;
 	}
+
+	client.acknowledge(interaction).ignore();
 
 	await handleRequestPlayback(client, interaction, listing);
 }

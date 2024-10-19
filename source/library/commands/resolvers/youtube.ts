@@ -17,10 +17,18 @@ async function resolveYouTubeSongListings(
 
 	if (query.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
+		if (playlist == null) {
+			return undefined;
+		}
+
 		return getSongListingFromPlaylist(playlist, interaction.user.id);
 	}
 
 	const video = await YouTubeSearch.YouTube.getVideo(query);
+	if (video === null) {
+		return undefined;
+	}
+
 	return getSongListingFromVideo(video, interaction.user.id);
 }
 
@@ -60,6 +68,10 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 			}
 
 			const playlist = await YouTubeSearch.YouTube.getPlaylist(url);
+			if (playlist === null) {
+				return resolve(undefined);
+			}
+
 			return resolve(getSongListingFromPlaylist(playlist, interaction.user.id));
 		}
 
