@@ -26,9 +26,7 @@ async function resolveYouTubeSongListings(
 
 async function search(client: Client, interaction: Logos.Interaction, query: string): Promise<SongListing | undefined> {
 	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: "all", safeSearch: false });
-	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element)) as Array<
-		YouTubeSearch.Playlist | YouTubeSearch.Video
-	>;
+	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element));
 	if (results.length === 0) {
 		return undefined;
 	}
