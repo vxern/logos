@@ -4,6 +4,7 @@ import { DatabaseMetadata } from "logos/models/database-metadata";
 import { Guild } from "logos/models/guild";
 import { CacheStore } from "logos/stores/cache";
 import { DatabaseStore } from "logos/stores/database";
+import { DiscordConnection } from "logos/connection";
 
 const log = constants.loggers.feedback;
 
@@ -33,14 +34,13 @@ async function getInviteCode({ guildId }: { guildId: bigint }): Promise<string |
 }
 
 const environment = loadEnvironment({ log: constants.loggers.silent });
-const bot = Discord.createBot({
-	token: environment.discordSecret,
+const connection = new DiscordConnection({
+	environment,
 	intents: Discord.Intents.Guilds | Discord.Intents.GuildMembers,
-	events: {},
-	defaultDesiredPropertiesValue: true,
 });
+const bot = connection.bot;
 
-bot.start();
+await connection.open();
 
 const database = DatabaseStore.create({
 	log: constants.loggers.silent,

@@ -8,24 +8,25 @@ class DiscordConnection {
 	constructor({
 		log = constants.loggers.silent,
 		environment,
+		intents = Discord.Intents.Guilds |
+			Discord.Intents.GuildMembers |
+			Discord.Intents.GuildModeration |
+			Discord.Intents.GuildVoiceStates |
+			Discord.Intents.GuildMessages |
+			Discord.Intents.MessageContent,
 		eventHandlers = {},
 		cacheHandlers = {},
 	}: {
 		log?: pino.Logger;
 		environment: Environment;
+		intents?: Discord.GatewayIntents;
 		eventHandlers?: Partial<Discord.EventHandlers>;
 		cacheHandlers?: Partial<Discord.Transformers["customizers"]>;
 	}) {
 		this.log = log.child({ name: "DiscordConnection" });
 		this.bot = Discord.createBot({
 			token: environment.discordSecret,
-			intents:
-				Discord.Intents.Guilds |
-				Discord.Intents.GuildMembers |
-				Discord.Intents.GuildModeration |
-				Discord.Intents.GuildVoiceStates |
-				Discord.Intents.GuildMessages |
-				Discord.Intents.MessageContent,
+			intents,
 			events: eventHandlers,
 			// REMINDER(vxern): Remove this once the bot is updated to a newer Discordeno release.
 			//
