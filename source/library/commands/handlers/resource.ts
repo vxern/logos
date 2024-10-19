@@ -32,7 +32,7 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 	const composer = new ResourceComposer(client, { interaction });
 
 	composer.onSubmit(async (submission, { formData }) => {
-		client.postponeReply(submission).ignore();
+		await client.postponeReply(submission);
 
 		const resourceDocument = await Resource.create(client, {
 			guildId: guild.id.toString(),

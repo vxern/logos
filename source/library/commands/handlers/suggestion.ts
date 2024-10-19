@@ -45,7 +45,7 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 	const composer = new SuggestionComposer(client, { interaction });
 
 	composer.onSubmit(async (submission, { formData }) => {
-		client.postponeReply(submission).ignore();
+		await client.postponeReply(submission);
 
 		const suggestionDocument = await Suggestion.create(client, {
 			guildId: guild.id.toString(),

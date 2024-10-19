@@ -33,7 +33,8 @@ class Client {
 	readonly #guilds: GuildStore;
 	readonly adapters: AdapterStore;
 	readonly #connection: DiscordConnection;
-	readonly #channelDeleteCollector: Collector<"channelDelete">;
+
+	readonly #channelDeletes: Collector<"channelDelete">;
 
 	get localiseRaw(): LocalisationStore["localiseRaw"] {
 		return this.#localisations.localiseRaw.bind(this.#localisations);
@@ -211,13 +212,13 @@ class Client {
 			cacheHandlers: this.#cache.buildCacheHandlers(),
 		});
 
-		this.#channelDeleteCollector = new Collector<"channelDelete">();
+		this.#channelDeletes = new Collector<"channelDelete">();
 	}
 
 	async #setupCollectors(): Promise<void> {
 		this.log.info("Setting up event collectors...");
 
-		this.#channelDeleteCollector.onCollect((channel) => {
+		this.#channelDeletes.onCollect((channel) => {
 			this.entities.channels.delete(channel.id);
 
 			if (channel.guildId !== undefined) {
@@ -225,7 +226,7 @@ class Client {
 			}
 		});
 
-		await this.registerCollector("channelDelete", this.#channelDeleteCollector);
+		await this.registerCollector("channelDelete", this.#channelDeletes);
 
 		this.log.info("Event collectors set up.");
 	}
@@ -233,7 +234,7 @@ class Client {
 	#teardownCollectors(): void {
 		this.log.info("Tearing down event collectors...");
 
-		this.#channelDeleteCollector.close();
+		this.#channelDeletes.close();
 
 		this.log.info("Event collectors torn down.");
 	}

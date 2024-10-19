@@ -40,7 +40,7 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 	const composer = new TicketComposer(client, { interaction });
 
 	composer.onSubmit(async (submission, { formData }) => {
-		client.postponeReply(submission).ignore();
+		await client.postponeReply(submission);
 
 		const ticketDocument = await client.services
 			.local("ticketPrompts", { guildId: interaction.guildId })

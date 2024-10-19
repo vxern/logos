@@ -40,7 +40,7 @@ async function handleSetLanguage(
 
 	const language = interaction.parameters.language;
 
-	client.postponeReply(interaction).ignore();
+	await client.postponeReply(interaction);
 
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 	if (userDocument.preferredLanguage === language) {

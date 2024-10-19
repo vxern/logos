@@ -49,7 +49,7 @@ async function handleFindWord(
 		return;
 	}
 
-	client.postponeReply(interaction, { visible: interaction.parameters.show }).ignore();
+	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
 	client.log.info(
 		`Looking up the word '${interaction.parameters.word}' from ${

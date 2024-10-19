@@ -10,16 +10,16 @@ type EmbedOrCallbackData = Discord.CamelizedDiscordEmbed | InteractionCallbackDa
 interface ReplyData {
 	readonly ephemeral: boolean;
 }
-type ReplyVisibility = "public" | "private";
 class InteractionStore {
 	readonly log: pino.Logger;
 
 	readonly #client: Client;
 	readonly #commands: CommandStore;
-	readonly #interactions: Map<bigint, Logos.Interaction>;
-	readonly #replies: Map<string, ReplyData>;
-	readonly #messages: Map<string, bigint>;
-	readonly #interactionCollector: InteractionCollector;
+	readonly #registeredInteractions: Map<bigint, Logos.Interaction>;
+	readonly #replies: Map</* token: */ string, ReplyData>;
+	readonly #messages: Map</* token: */ string, bigint>;
+
+	readonly #interactions: InteractionCollector;
 
 	/** ⬜ The action should have succeeded if not for the bot's limitations. */
 	get unsupported(): InteractionStore["reply"] {
@@ -119,10 +119,10 @@ class InteractionStore {
 
 		this.#client = client;
 		this.#commands = commands;
-		this.#interactions = new Map();
+		this.#registeredInteractions = new Map();
 		this.#replies = new Map();
 		this.#messages = new Map();
-		this.#interactionCollector = new InteractionCollector(client, {
+		this.#interactions = new InteractionCollector(client, {
 			anyType: true,
 			anyCustomId: true,
 			isPermanent: true,
@@ -143,13 +143,13 @@ class InteractionStore {
 	}
 
 	async setup(): Promise<void> {
-		this.#interactionCollector.onInteraction(this.handleInteraction.bind(this));
+		this.#interactions.onInteraction(this.handleInteraction.bind(this));
 
-		await this.#client.registerInteractionCollector(this.#interactionCollector);
+		await this.#client.registerInteractionCollector(this.#interactions);
 	}
 
 	async teardown(): Promise<void> {
-		this.#interactionCollector.close();
+		this.#interactions.close();
 	}
 
 	async handleInteraction(interaction: Logos.Interaction): Promise<void> {
@@ -239,16 +239,16 @@ class InteractionStore {
 	}
 
 	registerInteraction(interaction: Logos.Interaction): void {
-		this.#interactions.set(interaction.id, interaction);
+		this.#registeredInteractions.set(interaction.id, interaction);
 	}
 
 	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
-		const interaction = this.#interactions.get(interactionId);
+		const interaction = this.#registeredInteractions.get(interactionId);
 		if (interaction === undefined) {
 			return undefined;
 		}
 
-		this.#interactions.delete(interactionId);
+		this.#registeredInteractions.delete(interactionId);
 
 		return interaction;
 	}
@@ -277,6 +277,12 @@ class InteractionStore {
 			.catch((error) => this.log.error(error, "Failed to acknowledge interaction."));
 	}
 
+	/**
+	 * @remarks
+	 *
+	 * ⚠️ Make sure you await postponed replies, otherwise you risk introducing race conditions where the bot attempts
+	 * to edit a reply before the postponing finishes.
+	 */
 	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
 		this.#replies.set(interaction.token, { ephemeral: !visible });
 
@@ -690,4 +696,3 @@ function setCallbackColour(embedOrData: EmbedOrCallbackData, { colour }: { colou
 }
 
 export { InteractionStore };
-export type { ReplyVisibility };
