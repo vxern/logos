@@ -55,6 +55,14 @@ class DiscordConnection {
 			// @ts-ignore: This will be removed once the bot is updated to a new Discordeno release.
 			this.bot.transformers.customizers[customiser] = handler;
 		}
+		// REMINDER(vxern): Remove this once the issue with Discordeno filtering out '0' as a shard ID is fixed.
+		this.bot.transformers.guild = (bot, payload) => {
+			const result = Discord.transformGuild(bot, payload);
+
+			result.shardId = payload.shardId;
+
+			return result;
+		};
 		this.bot.handlers = Discord.createBotGatewayHandlers({
 			// REMINDER(vxern): Remove this once Discordeno is able to filter out embeds being resolved in a message.
 			MESSAGE_UPDATE: async (bot, data) => {
