@@ -51,7 +51,6 @@ const constants = Object.freeze({
 	INTERACTION_TOKEN_EXPIRY: 15 * time.minute - 10 * time.second,
 	SLOWMODE_COLLISION_TIMEOUT: 5 * time.second,
 	AUTO_DELETE_MESSAGE_TIMEOUT: 10 * time.second,
-	POSTPONE_MESSAGE_AFTER: time.second,
 	PICK_MISSING_WORD_CHOICES: 4,
 	SHORT_TEXT_LENGTH: 60,
 	SENTENCE_PAIRS_TO_SHOW: 5,
