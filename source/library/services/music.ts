@@ -543,7 +543,7 @@ class MusicSession extends EventEmitter {
 				localise: this.client.localise,
 				locale: this.service.guildLocale,
 			});
-			await this.client.bot.helpers
+			this.client.bot.helpers
 				.sendMessage(this.channelId, {
 					embeds: [
 						{
