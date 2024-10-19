@@ -47,8 +47,9 @@ const constants = Object.freeze({
 	MAXIMUM_EMBED_DESCRIPTION_LENGTH: 3072,
 	RESULTS_PER_PAGE: 10,
 	STATUS_CYCLE_PERIOD: 10 * time.second,
+	// The 10 seconds are to account for potential network lag.
 	INTERACTION_TOKEN_EXPIRY: 15 * time.minute - 10 * time.second,
-	SLOWMODE_COLLISION_TIMEOUT: 20 * time.second,
+	SLOWMODE_COLLISION_TIMEOUT: 5 * time.second,
 	AUTO_DELETE_MESSAGE_TIMEOUT: 10 * time.second,
 	POSTPONE_MESSAGE_AFTER: time.second,
 	PICK_MISSING_WORD_CHOICES: 4,
