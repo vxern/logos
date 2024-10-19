@@ -39,6 +39,8 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 		return;
 	}
 
+	await client.postponeReply(interaction);
+
 	const guildStatisticsDocument = await GuildStatistics.getOrCreate(client, {
 		guildId: interaction.guildId.toString(),
 	});
@@ -57,8 +59,6 @@ async function handleStartGame(client: Client, interaction: Logos.Interaction): 
 	await userDocument.update(client, () => {
 		userDocument.registerSession({ game: "pickMissingWord", learningLocale: interaction.learningLocale });
 	});
-
-	client.postponeReply(interaction).ignore();
 
 	const guessButton = new InteractionCollector<[index: string]>(client, {
 		only: [interaction.user.id],

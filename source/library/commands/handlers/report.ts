@@ -32,7 +32,7 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 	const composer = new ReportComposer(client, { interaction });
 
 	composer.onSubmit(async (submission, { formData }) => {
-		client.postponeReply(submission).ignore();
+		await client.postponeReply(submission);
 
 		const reportDocument = await Report.create(client, {
 			guildId: guild.id.toString(),

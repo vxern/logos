@@ -43,7 +43,7 @@ class InteractionRepetitionService extends GlobalService {
 	}
 
 	async #handleShowInChat(buttonPress: Logos.Interaction<[interactionId: string]>): Promise<void> {
-		this.client.postponeReply(buttonPress).ignore();
+		await this.client.postponeReply(buttonPress);
 
 		const confirmButton = new InteractionCollector(this.client, {
 			only: [buttonPress.user.id],

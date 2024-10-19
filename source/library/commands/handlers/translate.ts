@@ -232,7 +232,7 @@ async function translateText(
 		return;
 	}
 
-	client.postponeReply(interaction, { visible: interaction.parameters.show }).ignore();
+	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
 	let translation: TranslationResult | undefined;
 	for await (const element of Promise.createRace(adapters, (adapter) => adapter.translate({ text, languages }))) {

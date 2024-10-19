@@ -638,7 +638,7 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
-		this.client.postponeReply(interaction).ignore();
+		await this.client.postponeReply(interaction);
 
 		const entryRequestDocument = this.client.documents.entryRequests.get(partialId);
 		if (entryRequestDocument === undefined) {

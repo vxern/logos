@@ -26,7 +26,7 @@ async function handleFindInContext(
 		return;
 	}
 
-	client.postponeReply(interaction, { visible: interaction.parameters.show }).ignore();
+	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
 	const learningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
 	const learningLocale = getLocaleByLearningLanguage(learningLanguage);

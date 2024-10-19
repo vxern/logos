@@ -22,9 +22,7 @@ async function handlePurgeMessages(
 	client: Client,
 	interaction: Logos.Interaction<any, { start: string; end: string; author: string | undefined }>,
 ): Promise<void> {
-	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	client.postponeReply(interaction).ignore();
+	await client.postponeReply(interaction);
 
 	let authorId: bigint | undefined;
 	if (interaction.parameters.author !== undefined) {
@@ -502,6 +500,7 @@ async function handlePurgeMessages(
 		return;
 	}
 
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 	await client.tryLog("purgeBegin", {
 		guildId: guild.id,
 		journalling: guildDocument.isJournalled("purging"),

@@ -255,7 +255,7 @@ class EntryService extends LocalService {
 				return;
 			}
 
-			this.client.postponeReply(submission).ignore();
+			await this.client.postponeReply(submission);
 
 			const entryRequestDocument = await EntryRequest.create(this.client, {
 				guildId: this.guild.id.toString(),

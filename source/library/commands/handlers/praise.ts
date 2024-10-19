@@ -14,8 +14,6 @@ async function handlePraiseUser(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; comment: string | undefined }>,
 ): Promise<void> {
-	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
 	const member = client.resolveInteractionToMember(interaction, { identifier: interaction.parameters.user });
 	if (member === undefined) {
 		return;
@@ -28,8 +26,9 @@ async function handlePraiseUser(
 		return;
 	}
 
-	client.postponeReply(interaction).ignore();
+	await client.postponeReply(interaction);
 
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 	const crossesRateLimit = Guild.crossesRateLimit(
 		await Praise.getAll(client, {
 			where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() },

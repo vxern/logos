@@ -42,7 +42,7 @@ async function handleRecogniseLanguage(
 		return;
 	}
 
-	client.postponeReply(interaction).ignore();
+	await client.postponeReply(interaction);
 
 	const detectedLanguages = await client.adapters.detectors.detectLanguages({ text });
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {

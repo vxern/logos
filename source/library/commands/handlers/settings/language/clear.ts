@@ -2,7 +2,7 @@ import type { Client } from "logos/client";
 import { User } from "logos/models/user";
 
 async function handleClearLanguage(client: Client, interaction: Logos.Interaction): Promise<void> {
-	client.postponeReply(interaction).ignore();
+	await client.postponeReply(interaction);
 
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 	if (userDocument.preferredLanguage === undefined) {
