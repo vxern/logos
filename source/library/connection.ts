@@ -27,15 +27,36 @@ class DiscordConnection {
 				Discord.Intents.GuildMessages |
 				Discord.Intents.MessageContent,
 			events: eventHandlers,
+			// REMINDER(vxern): Remove this once the bot is updated to a newer Discordeno release.
+			//
+			// The code will then be something like:
+			//
+			//    transformers: {
+			//      ...
+			// 	    desiredProperties: constants.properties as unknown as Discord.Transformers["desiredProperties"],
+			//    },
 			defaultDesiredPropertiesValue: true,
+			// REMINDER(vxern): Remove this once the bot is updated to a newer Discordeno release, since it should
+			// no longer be required. Make sure members are still being fetched, though.
+			gateway: {
+				token: environment.discordSecret,
+				events: {},
+				cache: { requestMembers: { enabled: true, pending: new Discord.Collection() } },
+			},
 		});
+		// REMINDER(vxern): Move this to the `Discord.createBot()` call once the bot is updated to a newer Discordeno
+		// release.
+		//
+		//    transformers: {
+		// 	    customizers: cacheHandlers,
+		// 	    ...
+		//    },
 		for (const [customiser, handler] of Object.entries(cacheHandlers)) {
-			// @ts-ignore: This will be removed after updating to a new Discordeno release.
+			// @ts-ignore: This will be removed once the bot is updated to a new Discordeno release.
 			this.bot.transformers.customizers[customiser] = handler;
 		}
 		this.bot.handlers = Discord.createBotGatewayHandlers({
-			// We override the `MESSAGE_UPDATE` handler to prevent Discordeno from discarding message updates when
-			// an embed is removed from a message.
+			// REMINDER(vxern): Remove this once Discordeno is able to filter out embeds being resolved in a message.
 			MESSAGE_UPDATE: async (bot, data) => {
 				const payload = data.d as Discord.DiscordMessage;
 				if (!payload.author) {
@@ -48,8 +69,7 @@ class DiscordConnection {
 		this.bot.logger = constants.loggers.discordeno.child({ name: "Bot" });
 
 		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Logos (https://github.com/vxern/logos)" });
-		// REMINDER(vxern): The Discordeno shutdown() method has a weird delay, so we override its definition to
-		// remove the delay.
+		// REMINDER(vxern): Remove this once the weird 5 second delay is removed from Discordeno's `shutdown()` call.
 		this.bot.gateway.shutdown = async (code, reason) => {
 			for (const shard of this.bot.gateway.shards.values()) {
 				shard.close(code, reason);

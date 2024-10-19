@@ -143,7 +143,8 @@ class LavalinkService extends GlobalService {
 	}
 }
 
-// REMINDER(vxern): Some evils are necessary.
+// REMINDER(vxern): Remove this once Shoukaku works correctly on Bun.
+// https://github.com/oven-sh/bun/issues/5951
 function patchShoukakuWebSockets(): void {
 	// @ts-expect-error: Private symbol.
 	shoukaku.Node.prototype.open = function (_) {
