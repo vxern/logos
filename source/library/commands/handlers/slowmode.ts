@@ -1,7 +1,7 @@
 import { timestamp } from "logos:constants/formatting";
 import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "logos:constants/slowmode";
 import type { Client } from "logos/client";
-import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple.ts";
+import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
 import { Guild } from "logos/models/guild";
 
 const lastUseByGuildId = new Map<bigint, number>();

@@ -1,6 +1,6 @@
-import { trim } from "logos:constants/formatting.ts";
-import type { Client } from "logos/client.ts";
-import { parseTimeExpression } from "logos/commands/interactions.ts";
+import { trim } from "logos:constants/formatting";
+import type { Client } from "logos/client";
+import { parseTimeExpression } from "logos/commands/interactions";
 
 async function handleAutocompleteTimestamp(
 	client: Client,
