@@ -116,4 +116,4 @@ for (const [locale, contents] of contentsAll) {
 
 await client.quit();
 
-process.exit(0);
+process.exit();

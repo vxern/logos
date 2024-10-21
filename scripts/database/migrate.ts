@@ -55,4 +55,4 @@ switch (direction) {
 	}
 }
 
-process.exit(0);
+process.exit();

@@ -72,7 +72,7 @@ if (metadataDocument.testGuildId !== undefined) {
 
 		log.info(`You can find the test environment at: https://discord.gg/${existingInviteCode}`);
 
-		process.exit(0);
+		process.exit();
 	}
 
 	// The bot no longer has access to the test environment, let's clear it.
@@ -289,4 +289,4 @@ log.info("The test environment is ready.");
 
 await shutdown;
 
-process.exit(0);
+process.exit();
