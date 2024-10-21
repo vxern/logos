@@ -36,6 +36,9 @@ class Client {
 
 	readonly #channelDeletes: Collector<"channelDelete">;
 
+	#isStopping = false;
+	#stopSignal: string | undefined;
+
 	get localiseRaw(): LocalisationStore["localiseRaw"] {
 		return this.#localisations.localiseRaw.bind(this.#localisations);
 	}
@@ -240,6 +243,8 @@ class Client {
 	}
 
 	async start(): Promise<void> {
+		this.#stopOnSignal();
+
 		this.log.info("Starting client...");
 
 		await this.volatile?.setup();
@@ -254,8 +259,20 @@ class Client {
 		this.log.info("Client started.");
 	}
 
-	async stop(): Promise<void> {
+	async stop({ signal }: { signal?: string }): Promise<void> {
+		if (this.#isStopping) {
+			if (this.#stopSignal === signal) {
+				this.log.info("The client is already being stopped...");
+				return;
+			}
+
+			return;
+		}
+
 		this.log.info("Stopping client...");
+
+		this.#isStopping = true;
+		this.#stopSignal = signal;
 
 		this.volatile?.teardown();
 		await this.database.teardown();
@@ -266,7 +283,21 @@ class Client {
 		this.#teardownCollectors();
 		await this.#connection.close();
 
+		this.#isStopping = false;
+		this.#stopSignal = undefined;
+
 		this.log.info("Client stopped.");
+	}
+
+	#stopOnSignal(): void {
+		process.on("SIGINT", async () => {
+			await this.stop({ signal: "SIGINT" });
+			process.exit();
+		});
+		process.on("SIGTERM", async () => {
+			await this.stop({ signal: "SIGTERM" });
+			process.exit();
+		});
 	}
 }
 
