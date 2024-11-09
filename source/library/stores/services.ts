@@ -2,6 +2,7 @@ import { isDefined } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import type { Guild } from "logos/models/guild";
 import { AlertService } from "logos/services/alert";
+import { AntiFloodService } from "logos/services/anti-flood";
 import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channels";
 import { EntryService } from "logos/services/entry";
 import { InteractionRepetitionService } from "logos/services/interaction-repetition";
@@ -29,6 +30,7 @@ interface GlobalServices {
 
 interface LocalServices {
 	readonly alerts: AlertService;
+	readonly antiFlood: AntiFloodService;
 	readonly dynamicVoiceChannels: DynamicVoiceChannelService;
 	readonly entry: EntryService;
 	readonly music: MusicService;
@@ -77,6 +79,7 @@ class ServiceStore {
 		};
 		this.#local = {
 			alerts: new Map(),
+			antiFlood: new Map(),
 			dynamicVoiceChannels: new Map(),
 			entry: new Map(),
 			music: new Map(),
@@ -184,6 +187,13 @@ class ServiceStore {
 			services.push(service);
 
 			this.#local.reportPrompts.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("antiFlood")) {
+			const service = new AntiFloodService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.antiFlood.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("verification")) {

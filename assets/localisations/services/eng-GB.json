@@ -33,5 +33,10 @@
 	"close": "Close",
 	"cannotCloseIssue.title": "Cannot close issue",
 	"cannotCloseIssue.description": "You cannot close this issue.",
-	"allUpToDate": "All up to date!"
+	"allUpToDate": "All up to date!",
+	"antiFlood.floodDetectedAndTimedOut.title": "Flood detected",
+	"antiFlood.floodDetectedAndTimedOut.description": "{user_mention} has been detected to be flooding the server, having posted {messages} in a span of {interval}, and has subsequently been timed out for {duration}.",
+	"antiFlood.floodDetectedAndTimedOut.description.messages.one": "{one} message",
+	"antiFlood.floodDetectedAndTimedOut.description.messages.two": "{two} messages",
+	"antiFlood.floodDetectedAndTimedOut.description.messages.many": "{many} messages"
 }

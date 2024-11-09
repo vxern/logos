@@ -8,6 +8,7 @@ import type pino from "pino";
 import * as shoukaku from "shoukaku";
 
 type PlaybackActionType = "manage" | "check";
+
 class MusicService extends LocalService {
 	readonly #voiceStateUpdates: Collector<"voiceStateUpdate">;
 	#session?: MusicSession;
@@ -430,6 +431,7 @@ class ListingManager extends EventEmitter {
 }
 
 type QueueableMode = "song-collection" | "playable";
+
 class MusicSession extends EventEmitter {
 	readonly log: pino.Logger;
 	readonly client: Client;
@@ -940,6 +942,7 @@ class None extends Playable {
 }
 
 type MoveDirection = "forward" | "backward";
+
 /**
  * Represents a collection of {@link Song}s.
  *

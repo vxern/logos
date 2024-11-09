@@ -1609,5 +1609,9 @@ export default Object.freeze({
 	phraseInContext: ({ localise, locale }) => ({
 		title: localise("context.strings.phraseInContext.title", locale),
 	}),
+	floodDetectedAndTimedOut: ({ localise, locale }) => ({
+		title: localise("antiFlood.floodDetectedAndTimedOut.title", locale)(),
+		description: localise("antiFlood.floodDetectedAndTimedOut.description", locale),
+	}),
 } satisfies Record<string, ContextBuilder<any>>);
 export type { ContextBuilder };

@@ -1,10 +1,10 @@
 import { loadEnvironment } from "logos:core/loaders/environment";
 import { getAvailableMigrations, migrate } from "logos:core/runners/migrator";
+import { DiscordConnection } from "logos/connection";
 import { DatabaseMetadata } from "logos/models/database-metadata";
 import { Guild } from "logos/models/guild";
 import { CacheStore } from "logos/stores/cache";
 import { DatabaseStore } from "logos/stores/database";
-import { DiscordConnection } from "logos/connection";
 
 const log = constants.loggers.feedback;
 
@@ -140,6 +140,7 @@ await document.update(database, () => {
 		timeouts: true,
 		warns: true,
 		reports: true,
+		antiFlood: true,
 		verification: true,
 		dynamicVoiceChannels: true,
 		entry: true,
@@ -157,6 +158,7 @@ await document.update(database, () => {
 		timeouts: true,
 		warns: true,
 		reports: true,
+		antiFlood: true,
 		verification: true,
 		suggestions: true,
 		resourceSubmissions: true,
@@ -230,6 +232,11 @@ await document.update(database, () => {
 		},
 		reports: {
 			channelId: idByName(channels, "reports"),
+		},
+		antiFlood: {
+			interval: [5, "second"],
+			messageCount: 3,
+			timeoutDuration: [1, "day"],
 		},
 		verification: {
 			channelId: idByName(channels, "verifications"),
