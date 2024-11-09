@@ -167,6 +167,11 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			return;
 		}
 
+		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
+		if ((message.embeds?.length ?? 0) > 0) {
+			return;
+		}
+
 		// Delete the message and allow the bot to handle the deletion.
 		this.client.bot.helpers
 			.deleteMessage(message.channelId, message.id)
