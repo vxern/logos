@@ -1,6 +1,6 @@
 import { describe } from "bun:test";
 
-describe("Database", () => {
+describe("DatabaseStore", () => {
 	describe("start()", () => {
 		// TODO(vxern): Add tests.
 	});
@@ -26,24 +26,6 @@ describe("Database", () => {
 	});
 
 	describe("withSession()", () => {
-		// TODO(vxern): Add tests.
-	});
-});
-
-describe("DocumentSession", () => {
-	describe("instantiateModel()", () => {
-		// TODO(vxern): Add tests.
-	});
-
-	describe("get()", () => {
-		// TODO(vxern): Add tests.
-	});
-
-	describe("set()", () => {
-		// TODO(vxern): Add tests.
-	});
-
-	describe("remove()", () => {
 		// TODO(vxern): Add tests.
 	});
 });

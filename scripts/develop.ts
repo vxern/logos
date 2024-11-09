@@ -1,8 +1,10 @@
-import { loadEnvironment } from "logos:core/loaders/environment.ts";
-import { getAvailableMigrations, migrate } from "logos:core/runners/migrator.ts";
-import { DatabaseMetadata } from "logos/models/database-metadata.ts";
-import { Guild } from "logos/models/guild.ts";
-import { DatabaseStore } from "logos/stores/database.ts";
+import { loadEnvironment } from "logos:core/loaders/environment";
+import { getAvailableMigrations, migrate } from "logos:core/runners/migrator";
+import { DatabaseMetadata } from "logos/models/database-metadata";
+import { Guild } from "logos/models/guild";
+import { CacheStore } from "logos/stores/cache";
+import { DatabaseStore } from "logos/stores/database";
+import { DiscordConnection } from "logos/connection";
 
 const log = constants.loggers.feedback;
 
@@ -32,15 +34,19 @@ async function getInviteCode({ guildId }: { guildId: bigint }): Promise<string |
 }
 
 const environment = loadEnvironment({ log: constants.loggers.silent });
-const bot = Discord.createBot({
-	token: environment.discordSecret,
+const connection = new DiscordConnection({
+	environment,
 	intents: Discord.Intents.Guilds | Discord.Intents.GuildMembers,
-	transformers: { desiredProperties: Discord.createDesiredPropertiesObject({}, true) },
 });
+const bot = connection.bot;
 
-bot.start();
+await connection.open();
 
-const database = await DatabaseStore.create({ log: constants.loggers.silent, environment });
+const database = DatabaseStore.create({
+	log: constants.loggers.silent,
+	environment,
+	cache: new CacheStore({ log: constants.loggers.silent }),
+});
 await database.setup({ prefetchDocuments: false });
 
 const availableMigrations = await getAvailableMigrations();
@@ -66,7 +72,7 @@ if (metadataDocument.testGuildId !== undefined) {
 
 		log.info(`You can find the test environment at: https://discord.gg/${existingInviteCode}`);
 
-		process.exit(0);
+		process.exit();
 	}
 
 	// The bot no longer has access to the test environment, let's clear it.
@@ -290,4 +296,4 @@ log.info("The test environment is ready.");
 
 await shutdown;
 
-process.exit(0);
+process.exit();

@@ -1,6 +1,6 @@
 import { type Collection, isValidCollection } from "logos:constants/database";
+import { capitalise, decapitalise } from "logos:constants/formatting";
 import { timeStructToMilliseconds } from "logos:constants/time";
-import { capitalise, decapitalise } from "logos:core/formatting";
 import type { DocumentConventions } from "logos/adapters/databases/adapter";
 import type { Client } from "logos/client";
 import type { RateLimit } from "logos/models/guild";
@@ -83,11 +83,11 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 			throw new Error(`Collection "${collectionCamelcase}" encoded in ID "${id}" is unknown.`);
 		}
 
-		return [collection as Collection, data as IdentifierParts<M>];
+		return [collection, data as IdentifierParts<M>];
 	}
 
 	static getDataFromPartialId<M extends Model>(partialId: string): IdentifierParts<M> {
-		return partialId.split(constants.special.database.separator) as string[] as IdentifierParts<M>;
+		return partialId.split(constants.special.database.separator) as IdentifierParts<M>;
 	}
 
 	static composeId(partialId: string, { collection }: { collection: Collection }): string {
@@ -133,20 +133,19 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 	}
 
 	static crossesRateLimit<M extends Model>(documents: M[], rateLimit: RateLimit): boolean {
-		const timestamps = documents.map((document) => document.createdAt);
-
-		const actionTimestamps = timestamps.sort((a, b) => b - a); // From most recent to least recent.
-		const relevantTimestamps = actionTimestamps.slice(0, rateLimit.uses);
-
+		const timestamps = documents
+			.map((document) => document.createdAt)
+			.toSorted((a, b) => b - a) // From most recent to least recent.
+			.slice(0, rateLimit.uses);
 		// Has not reached the limit, regardless of the limiting time period.
-		if (relevantTimestamps.length < rateLimit.uses) {
+		if (timestamps.length < rateLimit.uses) {
 			return false;
 		}
 
 		const now = Date.now();
 		const interval = timeStructToMilliseconds(rateLimit.within);
 
-		return relevantTimestamps.some((timestamp) => now - timestamp < interval);
+		return timestamps.some((timestamp) => now - timestamp < interval);
 	}
 
 	async create(clientOrDatabase: ClientOrDatabaseStore): Promise<void> {

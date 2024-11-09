@@ -1,5 +1,4 @@
-import type { DetectionLanguage } from "logos:constants/languages/detection";
-import { list } from "logos:core/formatting";
+import { list } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-notice";
 
@@ -22,10 +21,8 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -40,10 +37,7 @@ async function handleRecogniseLanguage(
 	const isTextEmpty = text.trim().length === 0;
 	if (isTextEmpty) {
 		const strings = constants.contexts.textEmpty({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -53,10 +47,12 @@ async function handleRecogniseLanguage(
 	const detectedLanguages = await client.adapters.detectors.detectLanguages({ text });
 	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
 		const strings = constants.contexts.unknownLanguage({ localise: client.localise, locale: interaction.locale });
-		await client.unsupported(interaction, {
-			title: strings.title,
-			description: isMessage ? strings.description.message : strings.description.text,
-		});
+		client
+			.unsupported(interaction, {
+				title: strings.title,
+				description: isMessage ? strings.description.message : strings.description.text,
+			})
+			.ignore();
 
 		return;
 	}
@@ -66,7 +62,7 @@ async function handleRecogniseLanguage(
 	await sourceNotice.register();
 
 	if (detectedLanguages.likely.length === 1 && detectedLanguages.possible.length === 0) {
-		const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
+		const language = detectedLanguages.likely.at(0);
 		if (language === undefined) {
 			throw new Error("Detected language unexpectedly undefined.");
 		}
@@ -75,20 +71,22 @@ async function handleRecogniseLanguage(
 			...constants.contexts.likelyMatch({ localise: client.localise, locale: interaction.locale }),
 			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 		};
+		client
+			.noticed(interaction, {
+				embeds: [
+					{
+						description: `> *${text}*\n\n${strings.description({ language: strings.language(language) })}`,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: [sourceNotice.button],
+					},
+				],
+			})
+			.ignore();
 
-		await client.noticed(interaction, {
-			embeds: [
-				{
-					description: `> *${text}*\n\n${strings.description({ language: strings.language(language) })}`,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [sourceNotice.button],
-				},
-			],
-		});
 		return;
 	}
 
@@ -96,7 +94,7 @@ async function handleRecogniseLanguage(
 		const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 		if (detectedLanguages.likely.length === 1) {
-			const language = detectedLanguages.likely.at(0) as DetectionLanguage | undefined;
+			const language = detectedLanguages.likely.at(0);
 			if (language === undefined) {
 				throw new Error("Likely detected language unexpectedly undefined.");
 			}
@@ -126,7 +124,7 @@ async function handleRecogniseLanguage(
 		}
 
 		if (detectedLanguages.possible.length === 1) {
-			const language = detectedLanguages.possible.at(0) as DetectionLanguage | undefined;
+			const language = detectedLanguages.possible.at(0);
 			if (language === undefined) {
 				throw new Error("Possible detected language unexpectedly undefined.");
 			}
@@ -155,20 +153,22 @@ async function handleRecogniseLanguage(
 			});
 		}
 
-		await client.noticed(interaction, {
-			embeds: [
-				{
-					description: `> *${text}*\n\n`,
-					fields,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [sourceNotice.button],
-				},
-			],
-		});
+		client
+			.noticed(interaction, {
+				embeds: [
+					{
+						description: `> *${text}*\n\n`,
+						fields,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: [sourceNotice.button],
+					},
+				],
+			})
+			.ignore();
 	}
 }
 

@@ -1,20 +1,11 @@
-import { codeMultiline, mention } from "logos:core/formatting";
+import { codeMultiline, mention } from "logos:constants/formatting";
+import { isDefined } from "logos:core/utilities";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocale }) => {
 	const message = client.entities.messages.latest.get(payload.id);
 	if (message === undefined) {
 		return undefined;
-	}
-
-	const fileContents: Discord.FileContent[] = [];
-	for (const attachment of message.attachments ?? []) {
-		const fileContent = client.entities.messages.fileContents.get(attachment.id);
-		if (fileContent === undefined) {
-			continue;
-		}
-
-		fileContents.push(fileContent);
 	}
 
 	const strings = constants.contexts.messageDelete({ localise: client.localise, locale: guildLocale });
@@ -38,7 +29,9 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 						: undefined,
 			},
 		],
-		files: fileContents.length > 0 ? fileContents : undefined,
+		files: message.attachments
+			?.map((attachment) => client.entities.attachments.get(attachment.id))
+			.filter(isDefined),
 	};
 };
 

@@ -1,4 +1,4 @@
-function pluralise(
+export default function pluralise(
 	quantity: string,
 	{ one: singular, two: pluralNominative, many: pluralGenitive }: Record<string, string> = {},
 ): string | undefined {
@@ -15,12 +15,10 @@ function pluralise(
 		return pluralGenitive;
 	}
 
-	// Numbers ending in 2, 3 and 4.
+	// Numbers other than 12, 13 and 14 ending in 2, 3 and 4.
 	if (["2", "3", "4"].some((digit) => quantity.endsWith(digit))) {
 		return pluralNominative;
 	}
 
 	return pluralGenitive;
 }
-
-export default { pluralise };

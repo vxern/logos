@@ -75,7 +75,7 @@ import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handl
 import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
 
 /**
- * @privateRemarks
+ * @remarks
  * Commands, command groups and options are ordered alphabetically.
  */
 const commands = Object.freeze({
@@ -88,11 +88,15 @@ const commands = Object.freeze({
 				identifier: "bot",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayBotInformation,
+				options: { show: constants.parameters.show },
+				flags: { isShowable: true },
 			},
 			server: {
 				identifier: "server",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayGuildInformation,
+				options: { show: constants.parameters.show },
+				flags: { isShowable: true },
 			},
 		},
 	},

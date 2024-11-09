@@ -1,11 +1,7 @@
 import type { Client } from "logos/client";
 
 async function handleDisplayVolume(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canCheckPlayback(interaction)) {
 		return;
 	}
@@ -15,11 +11,7 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -34,23 +26,25 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 		: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [client.interactionRepetitionService.getShowButton(interaction)],
+					components: [client.services.global("interactionRepetition").getShowButton(interaction)],
 				},
 			];
 
-	await client.notice(
-		interaction,
-		{
-			embeds: [
-				{
-					title: `${constants.emojis.music.volume} ${strings.title}`,
-					description: strings.description({ volume: musicService.session.player.volume }),
-				},
-			],
-			components,
-		},
-		{ visible: interaction.parameters.show },
-	);
+	client
+		.notice(
+			interaction,
+			{
+				embeds: [
+					{
+						title: `${constants.emojis.music.volume} ${strings.title}`,
+						description: strings.description({ volume: musicService.session.player.volume }),
+					},
+				],
+				components,
+			},
+			{ visible: interaction.parameters.show },
+		)
+		.ignore();
 }
 
 export { handleDisplayVolume };

@@ -1,4 +1,4 @@
-function pluralise(
+export default function pluralise(
 	quantity: string,
 	{ one: singular, two: pluralSmall, many: pluralLarge }: Record<string, string> = {},
 ): string | undefined {
@@ -11,12 +11,11 @@ function pluralise(
 	}
 
 	// Until the number 20, Romanian nouns follow the standard number + plural rule.
-	if (Number.parseInt(quantity) < 20) {
+	const quantityAsNumber = Number.parseInt(quantity);
+	if (quantityAsNumber > -20 && quantityAsNumber < 20) {
 		return pluralSmall;
 	}
 
 	// Once the number reaches 20, Romanian begins slotting a 'de' between the number and the plural form of the word.
 	return pluralLarge;
 }
-
-export default { pluralise };

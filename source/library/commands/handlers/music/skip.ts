@@ -8,24 +8,15 @@ async function handleSkipAction(
 		{ collection: boolean | undefined; by: number | undefined; to: number | undefined }
 	>,
 ): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToSkip({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		const strings = constants.contexts.noSongToSkip({ localise: client.localise, locale: interaction.locale });
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -35,10 +26,13 @@ async function handleSkipAction(
 				localise: client.localise,
 				locale: interaction.locale,
 			});
-			await client.warning(interaction, {
-				title: strings.title,
-				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-			});
+			client
+				.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+				})
+				.ignore();
+
 			return;
 		}
 	}
@@ -49,10 +43,8 @@ async function handleSkipAction(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -65,10 +57,8 @@ async function handleSkipAction(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.error(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -81,20 +71,18 @@ async function handleSkipAction(
 			locale: interaction.guildLocale,
 		});
 	} else {
-		strings = constants.contexts.skippedSong({
-			localise: client.localise,
-			locale: interaction.guildLocale,
-		});
+		strings = constants.contexts.skippedSong({ localise: client.localise, locale: interaction.guildLocale });
 	}
-
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.skipped} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.skipped} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 
 	await musicService.session.skip({
 		mode: interaction.parameters.collection ? "song-collection" : "playable",

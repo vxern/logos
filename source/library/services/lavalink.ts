@@ -19,14 +19,16 @@ class ClientConnector extends shoukaku.Connector {
 	}
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * This method is intentionally not a getter; it conforms to shoukaku's Connector signature.
 	 */
 	getId(): string {
 		return this.client.bot.id.toString();
 	}
 
-	listen(_: shoukaku.NodeOption[]): void {}
+	listen(_: shoukaku.NodeOption[]): void {
+		// Do nothing.
+	}
 
 	sendPacket(shardId: number, payload: Discord.ShardSocketRequest, important: boolean): void {
 		const shard = this.client.bot.gateway.shards.get(shardId);
@@ -116,7 +118,7 @@ class LavalinkService extends GlobalService {
 				return;
 			}
 
-			this.log.error(`The audio node has encountered an error: ${error}`);
+			this.log.error(error, "The audio node has encountered an error.");
 		});
 
 		this.manager.on("ready", (_, reconnected) => {
@@ -133,7 +135,7 @@ class LavalinkService extends GlobalService {
 	async stop(): Promise<void> {
 		this.manager.removeAllListeners();
 
-		for (const player of Object.values(this.manager.players) as shoukaku.Player[]) {
+		for (const player of Object.values(this.manager.players)) {
 			await player.destroy();
 		}
 
@@ -141,7 +143,8 @@ class LavalinkService extends GlobalService {
 	}
 }
 
-// REMINDER(vxern): Some evils are necessary.
+// REMINDER(vxern): Remove this once Shoukaku works correctly on Bun.
+// https://github.com/oven-sh/bun/issues/5951
 function patchShoukakuWebSockets(): void {
 	// @ts-expect-error: Private symbol.
 	shoukaku.Node.prototype.open = function (_) {

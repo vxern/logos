@@ -94,7 +94,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			next.features = {};
 
 			const journaling = features.information?.features?.journaling;
-			if (journaling !== undefined && journaling.channelId !== undefined) {
+			if (journaling?.channelId !== undefined) {
 				next.features.journalling = {
 					channelId: journaling.channelId,
 				};
@@ -103,11 +103,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			const notices = features.information?.features?.notices;
 			if (notices !== undefined) {
 				const information = notices.features?.information;
-				if (
-					information !== undefined &&
-					information.channelId !== undefined &&
-					information.inviteLink !== undefined
-				) {
+				if (information?.channelId !== undefined && information.inviteLink !== undefined) {
 					next.features.informationNotices = {
 						channelId: information.channelId,
 						inviteLink: information.inviteLink,
@@ -115,21 +111,21 @@ async function up(database: DatabaseStore): Promise<void> {
 				}
 
 				const resources = notices.features?.resources;
-				if (resources !== undefined && resources.channelId !== undefined) {
+				if (resources?.channelId !== undefined) {
 					next.features.resourceNotices = {
 						channelId: resources.channelId,
 					};
 				}
 
 				const roles = notices.features?.roles;
-				if (roles !== undefined && roles.channelId !== undefined) {
+				if (roles?.channelId !== undefined) {
 					next.features.roleNotices = {
 						channelId: roles.channelId,
 					};
 				}
 
 				const welcome = notices.features?.welcome;
-				if (welcome !== undefined && welcome.channelId !== undefined && welcome.ruleChannelId !== undefined) {
+				if (welcome?.channelId !== undefined && welcome.ruleChannelId !== undefined) {
 					next.features.welcomeNotices = {
 						channelId: welcome.channelId,
 						ruleChannelId: welcome.ruleChannelId,
@@ -146,35 +142,35 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const resources = features.language?.features?.resources;
-			if (resources !== undefined && resources.url !== undefined) {
+			if (resources?.url !== undefined) {
 				next.features.resources = {
 					url: resources.url,
 				};
 			}
 
 			const targetOnly = features.language?.features?.targetOnly;
-			if (targetOnly !== undefined && targetOnly.channelIds !== undefined) {
+			if (targetOnly?.channelIds !== undefined) {
 				next.features.targetOnly = {
 					channelIds: targetOnly.channelIds,
 				};
 			}
 
 			const roleLanguages = features.language?.features?.roleLanguages;
-			if (roleLanguages !== undefined && roleLanguages.ids !== undefined) {
+			if (roleLanguages?.ids !== undefined) {
 				next.features.roleLanguages = {
 					ids: roleLanguages.ids,
 				};
 			}
 
 			const alerts = features.moderation?.features?.alerts;
-			if (alerts !== undefined && alerts.channelId !== undefined) {
+			if (alerts?.channelId !== undefined) {
 				next.features.alerts = {
 					channelId: alerts.channelId,
 				};
 			}
 
 			const warns = features.moderation?.features?.warns;
-			if (warns !== undefined && warns.limit !== undefined) {
+			if (warns?.limit !== undefined) {
 				next.features.warns = {
 					expiration: warns.expiration,
 					limit: warns.limit,
@@ -188,7 +184,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const reports = features.moderation?.features?.reports;
-			if (reports !== undefined && reports.channelId !== undefined) {
+			if (reports?.channelId !== undefined) {
 				next.features.reports = {
 					channelId: reports.channelId,
 				};
@@ -196,8 +192,7 @@ async function up(database: DatabaseStore): Promise<void> {
 
 			const verification = features.moderation?.features?.verification;
 			if (
-				verification !== undefined &&
-				verification.channelId !== undefined &&
+				verification?.channelId !== undefined &&
 				verification.voting !== undefined &&
 				verification.activation !== undefined
 			) {
@@ -209,18 +204,14 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const dynamicVoiceChannels = features.server?.features?.dynamicVoiceChannels;
-			if (dynamicVoiceChannels !== undefined && dynamicVoiceChannels.channels !== undefined) {
+			if (dynamicVoiceChannels?.channels !== undefined) {
 				next.features.dynamicVoiceChannels = {
 					channels: dynamicVoiceChannels.channels,
 				};
 			}
 
 			const roleIndicators = features.server?.features?.roleIndicators;
-			if (
-				roleIndicators !== undefined &&
-				roleIndicators.limit !== undefined &&
-				roleIndicators.roles !== undefined
-			) {
+			if (roleIndicators?.limit !== undefined && roleIndicators.roles !== undefined) {
 				next.features.roleIndicators = {
 					limit: roleIndicators.limit,
 					roles: roleIndicators.roles,
@@ -228,21 +219,21 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const suggestions = features.server?.features?.suggestions;
-			if (suggestions !== undefined && suggestions.channelId !== undefined) {
+			if (suggestions?.channelId !== undefined) {
 				next.features.suggestions = {
 					channelId: suggestions.channelId,
 				};
 			}
 
 			const resourceSubmissions = features.server?.features?.resources;
-			if (resourceSubmissions !== undefined && resourceSubmissions.channelId !== undefined) {
+			if (resourceSubmissions?.channelId !== undefined) {
 				next.features.resourceSubmissions = {
 					channelId: resourceSubmissions.channelId,
 				};
 			}
 
 			const tickets = features.server?.features?.tickets;
-			if (tickets !== undefined && tickets.channelId !== undefined && tickets.categoryId !== undefined) {
+			if (tickets?.channelId !== undefined && tickets.categoryId !== undefined) {
 				next.features.tickets = {
 					channelId: tickets.channelId,
 					categoryId: tickets.categoryId,
@@ -251,7 +242,7 @@ async function up(database: DatabaseStore): Promise<void> {
 			}
 
 			const music = features.social?.features?.music;
-			if (music !== undefined && music.implicitVolume !== undefined) {
+			if (music?.implicitVolume !== undefined) {
 				next.features.music = {
 					implicitVolume: music.implicitVolume,
 				};
@@ -261,6 +252,8 @@ async function up(database: DatabaseStore): Promise<void> {
 }
 
 // This block is executed when the migration is rolled back.
-function down(_: DatabaseStore): void {}
+function down(_: DatabaseStore): void {
+	// Irreversible.
+}
 
 export { up, down };

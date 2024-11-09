@@ -1,5 +1,5 @@
+import { mention, timestamp, trim } from "logos:constants/formatting";
 import { isValidSnowflake } from "logos:constants/patterns";
-import { mention, timestamp, trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { Guild } from "logos/models/guild";
@@ -22,8 +22,6 @@ async function handlePurgeMessages(
 	client: Client,
 	interaction: Logos.Interaction<any, { start: string; end: string; author: string | undefined }>,
 ): Promise<void> {
-	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
 	await client.postponeReply(interaction);
 
 	let authorId: bigint | undefined;
@@ -52,16 +50,23 @@ async function handlePurgeMessages(
 		interaction.parameters.end ??
 		(await client.bot.helpers
 			.getMessages(interaction.channelId, { limit: 1 })
-			.catch(() => undefined)
+			.catch((error) => {
+				client.log.error(error, "Failed to fetch latest message for purging.");
+				return undefined;
+			})
 			.then((messages) => messages?.at(0)?.id?.toString()));
 
 	if (end === undefined) {
-		await displayFailedError(client, interaction);
+		const strings = constants.contexts.purgeFailed({ localise: client.localise, locale: interaction.locale });
+		client.failed(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	if (interaction.parameters.start === end) {
-		await displayIdsNotDifferentError(client, interaction);
+		const strings = constants.contexts.idsNotDifferent({ localise: client.localise, locale: interaction.locale });
+		client.warned(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -89,14 +94,12 @@ async function handlePurgeMessages(
 	}
 
 	const [startMessage, endMessage] = await Promise.all([
-		client.bot.helpers.getMessage(interaction.channelId, startMessageId).catch(() => {
-			client.log.warn(`Failed to get start message, ID ${startMessageId}.`);
-
+		client.bot.helpers.getMessage(interaction.channelId, startMessageId).catch((error) => {
+			client.log.warn(error, `Failed to get start message, ID ${startMessageId}.`);
 			return undefined;
 		}),
-		client.bot.helpers.getMessage(interaction.channelId, endMessageId).catch(() => {
-			client.log.warn(`Failed to get end message, ID ${endMessageId}.`);
-
+		client.bot.helpers.getMessage(interaction.channelId, endMessageId).catch((error) => {
+			client.log.warn(error, `Failed to get end message, ID ${endMessageId}.`);
 			return undefined;
 		}),
 	]);
@@ -171,10 +174,10 @@ async function handlePurgeMessages(
 		};
 	};
 
-	await client.editReply(interaction, getIndexingProgressResponse());
+	client.editReply(interaction, getIndexingProgressResponse()).ignore();
 
 	const indexProgressIntervalId = setInterval(
-		() => client.editReply(interaction, getIndexingProgressResponse()),
+		() => client.editReply(interaction, getIndexingProgressResponse()).ignore(),
 		1500,
 	);
 
@@ -184,18 +187,20 @@ async function handlePurgeMessages(
 			clearInterval(indexProgressIntervalId);
 
 			const strings = constants.contexts.rangeTooBig({ localise: client.localise, locale: interaction.locale });
-			await client.warned(interaction, {
-				title: strings.title,
-				description: `${strings.description.rangeTooBig({
-					messages: client.pluralise(
-						"purge.strings.rangeTooBig.description.rangeTooBig.messages",
-						interaction.locale,
-						{
-							quantity: constants.MAXIMUM_INDEXABLE_MESSAGES,
-						},
-					),
-				})}\n\n${strings.description.trySmaller}`,
-			});
+			client
+				.warned(interaction, {
+					title: strings.title,
+					description: `${strings.description.rangeTooBig({
+						messages: client.pluralise(
+							"purge.strings.rangeTooBig.description.rangeTooBig.messages",
+							interaction.locale,
+							{
+								quantity: constants.MAXIMUM_INDEXABLE_MESSAGES,
+							},
+						),
+					})}\n\n${strings.description.trySmaller}`,
+				})
+				.ignore();
 
 			return;
 		}
@@ -206,10 +211,10 @@ async function handlePurgeMessages(
 				limit: 100,
 			})
 			.then((collection) => Array.from(collection.values()).reverse())
-			.catch((reason) => {
+			.catch((error) => {
 				client.log.warn(
-					`Failed to get messages starting with ${client.diagnostics.message(startMessage.id)}:`,
-					reason,
+					error,
+					`Failed to get messages starting with ${client.diagnostics.message(startMessage.id)}.`,
 				);
 
 				return [];
@@ -252,11 +257,13 @@ async function handlePurgeMessages(
 
 	if (messages.length === 0) {
 		const strings = constants.contexts.indexedNoResults({ localise: client.localise, locale: interaction.locale });
-		await client.warned(interaction, {
-			title: strings.title,
-			description: `${strings.description.none}\n\n${strings.description.tryDifferentQuery}`,
-			fields: getMessageFields(),
-		});
+		client
+			.warned(interaction, {
+				title: strings.title,
+				description: `${strings.description.none}\n\n${strings.description.tryDifferentQuery}`,
+				fields: getMessageFields(),
+			})
+			.ignore();
 
 		return;
 	}
@@ -270,12 +277,14 @@ async function handlePurgeMessages(
 		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 		continueButton.onInteraction(async (buttonPress) => {
-			await client.acknowledge(buttonPress);
+			client.acknowledge(buttonPress).ignore();
+
 			resolve(true);
 		});
 
 		cancelButton.onInteraction(async (buttonPress) => {
-			await client.acknowledge(buttonPress);
+			client.acknowledge(buttonPress).ignore();
+
 			resolve(false);
 		});
 
@@ -289,69 +298,72 @@ async function handlePurgeMessages(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.indexed.title,
-					description: `${strings.indexed.description.tooMany({
-						messages: client.pluralise(
-							"purge.strings.indexed.description.tooMany.messages",
-							interaction.locale,
+		client
+			.editReply(interaction, {
+				embeds: [
+					{
+						title: strings.indexed.title,
+						description: `${strings.indexed.description.tooMany({
+							messages: client.pluralise(
+								"purge.strings.indexed.description.tooMany.messages",
+								interaction.locale,
+								{
+									quantity: messages.length,
+								},
+							),
+							maximum_deletable: constants.MAXIMUM_DELETABLE_MESSAGES,
+						})}\n\n${strings.indexed.description.limited({
+							messages: client.pluralise(
+								"purge.strings.indexed.description.limited.messages",
+								interaction.locale,
+								{
+									quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
+								},
+							),
+						})}`,
+						color: constants.colours.pushback,
+						fields: getMessageFields(),
+					},
+					{
+						title: strings.continue.title,
+						description: strings.continue.description({
+							messages: client.pluralise(
+								"purge.strings.indexed.description.limited.messages",
+								interaction.locale,
+								{
+									quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
+								},
+							),
+						}),
+						color: constants.colours.pushback,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: [
 							{
-								quantity: messages.length,
+								type: Discord.MessageComponentTypes.Button,
+								customId: continueButton.customId,
+								label: strings.yes,
+								style: Discord.ButtonStyles.Success,
 							},
-						),
-						maximum_deletable: constants.MAXIMUM_DELETABLE_MESSAGES,
-					})}\n\n${strings.indexed.description.limited({
-						messages: client.pluralise(
-							"purge.strings.indexed.description.limited.messages",
-							interaction.locale,
 							{
-								quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
+								type: Discord.MessageComponentTypes.Button,
+								customId: cancelButton.customId,
+								label: strings.no,
+								style: Discord.ButtonStyles.Danger,
 							},
-						),
-					})}`,
-					color: constants.colours.pushback,
-					fields: getMessageFields(),
-				},
-				{
-					title: strings.continue.title,
-					description: strings.continue.description({
-						messages: client.pluralise(
-							"purge.strings.indexed.description.limited.messages",
-							interaction.locale,
-							{
-								quantity: constants.MAXIMUM_DELETABLE_MESSAGES,
-							},
-						),
-					}),
-					color: constants.colours.pushback,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: continueButton.customId,
-							label: strings.yes,
-							style: Discord.ButtonStyles.Success,
-						},
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: cancelButton.customId,
-							label: strings.no,
-							style: Discord.ButtonStyles.Danger,
-						},
-					],
-				},
-			],
-		});
+						],
+					},
+				],
+			})
+			.ignore();
 
 		shouldContinue = await promise;
 		if (!shouldContinue) {
-			await client.deleteReply(interaction);
+			client.deleteReply(interaction).ignore();
+
 			return;
 		}
 
@@ -365,12 +377,14 @@ async function handlePurgeMessages(
 		const cancelButton = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 		continueButton.onInteraction(async (buttonPress) => {
-			await client.acknowledge(buttonPress);
+			client.acknowledge(buttonPress).ignore();
+
 			resolve(true);
 		});
 
 		cancelButton.onInteraction(async (buttonPress) => {
-			await client.acknowledge(buttonPress);
+			client.acknowledge(buttonPress).ignore();
+
 			resolve(false);
 		});
 
@@ -384,89 +398,91 @@ async function handlePurgeMessages(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.editReply(interaction, {
-			embeds: [
-				{
-					title: strings.indexed.title,
-					description: strings.indexed.description.some({
-						messages: client.pluralise(
-							"purge.strings.indexed.description.some.messages",
-							interaction.locale,
+		client
+			.editReply(interaction, {
+				embeds: [
+					{
+						title: strings.indexed.title,
+						description: strings.indexed.description.some({
+							messages: client.pluralise(
+								"purge.strings.indexed.description.some.messages",
+								interaction.locale,
+								{
+									quantity: messages.length,
+								},
+							),
+						}),
+						color: constants.colours.notice,
+						fields: getMessageFields(),
+					},
+					{
+						title: strings.sureToPurge.title,
+						description: strings.sureToPurge.description({
+							messages: client.pluralise(
+								"purge.strings.sureToPurge.description.messages",
+								interaction.locale,
+								{
+									quantity: messages.length,
+								},
+							),
+							channel_mention: channelMention,
+						}),
+						color: constants.colours.pushback,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: [
 							{
-								quantity: messages.length,
+								type: Discord.MessageComponentTypes.Button,
+								customId: continueButton.customId,
+								label: strings.yes,
+								style: Discord.ButtonStyles.Success,
 							},
-						),
-					}),
-					color: constants.colours.notice,
-					fields: getMessageFields(),
-				},
-				{
-					title: strings.sureToPurge.title,
-					description: strings.sureToPurge.description({
-						messages: client.pluralise(
-							"purge.strings.sureToPurge.description.messages",
-							interaction.locale,
 							{
-								quantity: messages.length,
+								type: Discord.MessageComponentTypes.Button,
+								customId: cancelButton.customId,
+								label: strings.no,
+								style: Discord.ButtonStyles.Danger,
 							},
-						),
-						channel_mention: channelMention,
-					}),
-					color: constants.colours.pushback,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: continueButton.customId,
-							label: strings.yes,
-							style: Discord.ButtonStyles.Success,
-						},
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: cancelButton.customId,
-							label: strings.no,
-							style: Discord.ButtonStyles.Danger,
-						},
-					],
-				},
-			],
-		});
+						],
+					},
+				],
+			})
+			.ignore();
 
 		const isShouldPurge = await promise;
 		if (!isShouldPurge) {
-			await client.deleteReply(interaction);
+			client.deleteReply(interaction).ignore();
+
 			return;
 		}
 	}
 
 	{
-		const strings = constants.contexts.purging({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		await client.noticed(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.purging({
-						messages: client.pluralise(
-							"purge.strings.purging.description.purging.messages",
-							interaction.locale,
-							{
-								quantity: messages.length,
-							},
-						),
-						channel_mention: channelMention,
-					})} ${strings.description.mayTakeTime}\n\n${strings.description.onceComplete}`,
-				},
-			],
-			// Passing an empty array here removes the components.
-			components: [],
-		});
+		const strings = constants.contexts.purging({ localise: client.localise, locale: interaction.locale });
+		client
+			.noticed(interaction, {
+				embeds: [
+					{
+						title: strings.title,
+						description: `${strings.description.purging({
+							messages: client.pluralise(
+								"purge.strings.purging.description.purging.messages",
+								interaction.locale,
+								{
+									quantity: messages.length,
+								},
+							),
+							channel_mention: channelMention,
+						})} ${strings.description.mayTakeTime}\n\n${strings.description.onceComplete}`,
+					},
+				],
+				// Passing an empty array here removes the components.
+				components: [],
+			})
+			.ignore();
 	}
 
 	client.log.info(
@@ -484,6 +500,7 @@ async function handlePurgeMessages(
 		return;
 	}
 
+	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 	await client.tryLog("purgeBegin", {
 		guildId: guild.id,
 		journalling: guildDocument.isJournalled("purging"),
@@ -504,7 +521,8 @@ async function handlePurgeMessages(
 
 	const responseDeletionTimeoutId = setTimeout(async () => {
 		responseDeleted = true;
-		await client.deleteReply(interaction);
+
+		client.deleteReply(interaction).ignore();
 	}, constants.time.minute);
 
 	let deletedCount = 0;
@@ -516,12 +534,12 @@ async function handlePurgeMessages(
 		for (const chunk of bulkDeletableChunks) {
 			const messageIds = chunk.map((message) => message.id);
 
-			await client.bot.helpers.deleteMessages(interaction.channelId, messageIds).catch((reason) => {
+			await client.bot.helpers.deleteMessages(interaction.channelId, messageIds).catch((error) => {
 				client.log.warn(
+					error,
 					`Failed to delete ${messageIds.length} messages from ${client.diagnostics.channel(
 						interaction.channelId,
-					)}:`,
-					reason,
+					)}.`,
 				);
 			});
 
@@ -534,7 +552,7 @@ async function handlePurgeMessages(
 	for (const message of nonBulkDeletable) {
 		await client.bot.helpers
 			.deleteMessage(interaction.channelId, message.id)
-			.catch((reason) => client.log.warn(`Failed to delete ${client.diagnostics.message(message)}:`, reason));
+			.catch((error) => client.log.warn(error, `Failed to delete ${client.diagnostics.message(message)}.`));
 
 		await new Promise((resolve) => setTimeout(resolve, 1000));
 
@@ -560,20 +578,19 @@ async function handlePurgeMessages(
 	}
 
 	{
-		const strings = constants.contexts.purged({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		await client.succeeded(interaction, {
-			title: strings.title,
-			description: strings.description({
-				messages: client.pluralise("purge.strings.purged.description.messages", interaction.locale, {
-					quantity: deletedCount,
+		const strings = constants.contexts.purged({ localise: client.localise, locale: interaction.locale });
+		client
+			.succeeded(interaction, {
+				title: strings.title,
+				description: strings.description({
+					messages: client.pluralise("purge.strings.purged.description.messages", interaction.locale, {
+						quantity: deletedCount,
+					}),
+					channel_mention: channelMention,
 				}),
-				channel_mention: channelMention,
-			}),
-			image: { url: constants.gifs.done },
-		});
+				image: { url: constants.gifs.done },
+			})
+			.ignore();
 	}
 }
 
@@ -588,39 +605,16 @@ async function displaySnowflakesInvalidError(
 		localise: client.localise,
 		locale: interaction.locale,
 	});
-	await client.warned(
-		interaction,
-		areBothInvalid
-			? {
-					title: strings.both.title,
-					description: strings.both.description,
-				}
-			: isStartInvalid
-				? {
-						title: strings.start.title,
-						description: strings.start.description,
-					}
-				: {
-						title: strings.end.title,
-						description: strings.end.description,
-					},
-	);
-}
-
-async function displayIdsNotDifferentError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.idsNotDifferent({ localise: client.localise, locale: interaction.locale });
-	await client.warned(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
-}
-
-async function displayFailedError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.purgeFailed({ localise: client.localise, locale: interaction.locale });
-	await client.failed(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	client
+		.warned(
+			interaction,
+			areBothInvalid
+				? { title: strings.both.title, description: strings.both.description }
+				: isStartInvalid
+					? { title: strings.start.title, description: strings.start.description }
+					: { title: strings.end.title, description: strings.end.description },
+		)
+		.ignore();
 }
 
 function getMessageContent(

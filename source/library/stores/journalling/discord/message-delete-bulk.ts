@@ -1,4 +1,4 @@
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import { isDefined } from "logos:core/utilities";
 import { JournallingStore } from "logos/stores/journalling";
 import type { EventLogger } from "logos/stores/journalling/loggers";

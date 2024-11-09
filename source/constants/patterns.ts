@@ -18,13 +18,13 @@ const patterns = Object.freeze({
 	userDisplay: /^.*?\(?(\d{16,20})\)?$/,
 	/** Used for matching YouTube video/playlist links, e.g. https://www.youtube.com/watch?v=zNbCbYbaE3Y */
 	youtubeUrl:
-		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9\_-]{7,15})(?:[\?&][a-zA-Z0-9\_-]+=[a-zA-Z0-9\_-]+)*$/,
+		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z\d_-]{7,15})(?:[?&][a-zA-Z\d_-]+=[a-zA-Z\d_-]+)*$/,
 	/** Used for matching against role indicators in nicknames, e.g. Logos﹘EA・WA */
 	roleIndicators: new RegExp(
 		`^(.+)${special.sigils.divider}([^${special.sigils.separator}]{2,4}(?:${special.sigils.separator}[^${special.sigils.separator}]{2,4})*)$`,
 	),
 	/** Used for matching short time expressions, e.g. 22:51:09 */
-	conciseTimeExpression: /^(?:(?:(0?[0-9]|1[0-9]|2[0-4]):)?(?:(0?[0-9]|[1-5][0-9]|60):))?(0?[0-9]|[1-5][0-9]|60)$/,
+	conciseTimeExpression: /^(?:(?:(0?\d|1\d|2[0-4]):)?(?:(0?\d|[1-5]\d|60):))?(0?\d|[1-5]\d|60)$/,
 	/** Used for matching a full word and nothing else around. */
 	wholeWord: (word: string, { caseSensitive }: { caseSensitive: boolean }) =>
 		new RegExp(`(?<=^|\\p{Z}|\\p{P})${word}(?=\\p{Z}|\\p{P}|$)`, `gu${caseSensitive ? "" : "i"}`),
@@ -33,7 +33,7 @@ const patterns = Object.freeze({
 	/** Used for matching word separators to determine if a word is a compound in the game command. */
 	wordSeparator: /[’'-]/,
 	/** Used for matching against digits in the game command. */
-	digit: /[0-9]/,
+	digit: /\d/,
 	/** Used for matching against description localisations. */
 	localisationDescription: /\.description$/,
 } as const);

@@ -1,5 +1,5 @@
+import { mention } from "logos:constants/formatting";
 import { timeStructToMilliseconds } from "logos:constants/time";
-import { mention } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 import { Warning } from "logos/models/warning";
@@ -35,7 +35,7 @@ async function handlePardonUserAutocomplete(
 				},
 			});
 			if (member === undefined) {
-				await client.respond(interaction, []);
+				client.respond(interaction, []).ignore();
 				return;
 			}
 
@@ -54,8 +54,8 @@ async function handlePardonUserAutocomplete(
 					value: warning.partialId,
 				}))
 				.filter((choice) => choice.name.toLowerCase().includes(warningLowercase));
+			client.respond(interaction, choices).ignore();
 
-			await client.respond(interaction, choices);
 			break;
 		}
 	}
@@ -89,7 +89,9 @@ async function handlePardonUser(
 		(warningDocument) => warningDocument.partialId === interaction.parameters.warning,
 	);
 	if (warningDocument === undefined) {
-		await displayInvalidWarningError(client, interaction);
+		const strings = constants.contexts.invalidWarning({ localise: client.localise, locale: interaction.locale });
+		await client.error(interaction, { title: strings.title, description: strings.description });
+
 		return;
 	}
 
@@ -107,21 +109,15 @@ async function handlePardonUser(
 	});
 
 	const strings = constants.contexts.pardoned({ localise: client.localise, locale: interaction.locale });
-	await client.success(interaction, {
-		title: strings.title,
-		description: strings.description({
-			user_mention: mention(member.id, { type: "user" }),
-			reason: warningDocument.reason,
-		}),
-	});
-}
-
-async function displayInvalidWarningError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidWarning({ localise: client.localise, locale: interaction.locale });
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	client
+		.success(interaction, {
+			title: strings.title,
+			description: strings.description({
+				user_mention: mention(member.id, { type: "user" }),
+				reason: warningDocument.reason,
+			}),
+		})
+		.ignore();
 }
 
 export { handlePardonUser, handlePardonUserAutocomplete };

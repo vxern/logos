@@ -45,8 +45,6 @@ class MongoDBDocumentSession extends DocumentSession {
 	query<M extends Model>({ collection }: { collection: Collection }): MongoDBDocumentQuery<M> {
 		return new MongoDBDocumentQuery<M>({ mongoDatabase: this.#mongoDatabase, session: this, collection });
 	}
-
-	async dispose(): Promise<void> {}
 }
 
 export { MongoDBDocumentSession };

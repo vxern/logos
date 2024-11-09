@@ -12,13 +12,19 @@ abstract class Service {
 		this.client = client;
 	}
 
-	abstract start(): void | Promise<void>;
-	abstract stop(): void | Promise<void>;
+	abstract start(): Promise<void>;
+
+	abstract stop(): Promise<void>;
 }
 
 abstract class GlobalService extends Service {
-	abstract start(): void | Promise<void>;
-	abstract stop(): void | Promise<void>;
+	async start(): Promise<void> {
+		// Do nothing.
+	}
+
+	async stop(): Promise<void> {
+		// Do nothing.
+	}
 }
 
 abstract class LocalService extends Service {
@@ -44,8 +50,13 @@ abstract class LocalService extends Service {
 		this.guildIdString = guildId.toString();
 	}
 
-	abstract start(): Promise<void>;
-	abstract stop(): Promise<void>;
+	async start(): Promise<void> {
+		// Do nothing.
+	}
+
+	async stop(): Promise<void> {
+		// Do nothing.
+	}
 
 	async getAllMessages({ channelId }: { channelId: bigint }): Promise<Discord.Message[] | undefined> {
 		const buffer: Discord.Message[] = [];
@@ -57,8 +68,9 @@ abstract class LocalService extends Service {
 					limit: 100,
 					before: buffer.length === 0 ? undefined : buffer.at(-1)?.id,
 				})
-				.catch(() => {
+				.catch((error) => {
 					this.client.log.warn(
+						error,
 						`Failed to get all messages from ${this.client.diagnostics.channel(channelId)}.`,
 					);
 					return undefined;

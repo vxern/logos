@@ -1,6 +1,7 @@
+import { timestamp } from "logos:constants/formatting";
 import { getSlowmodeDelayByLevel, getSlowmodeLevelByDelay, isValidSlowmodeLevel } from "logos:constants/slowmode";
-import { timestamp } from "logos:core/formatting";
 import type { Client } from "logos/client";
+import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
 import { Guild } from "logos/models/guild";
 
 const lastUseByGuildId = new Map<bigint, number>();
@@ -10,12 +11,11 @@ async function handleToggleSlowmodeAutocomplete(
 	interaction: Logos.Interaction<any, { level: string }>,
 ): Promise<void> {
 	const strings = constants.contexts.slowmodeLevel({ localise: client.localise, locale: interaction.locale });
-	const levelLowercase = interaction.parameters.level.trim().toLowerCase();
-	const choices = constants.slowmode.levels
-		.map((level) => ({ name: strings.level(level), value: level }))
-		.filter((choice) => choice.name.toLowerCase().includes(levelLowercase));
-
-	await client.respond(interaction, choices);
+	await handleSimpleAutocomplete(client, interaction, {
+		query: interaction.parameters.level,
+		elements: Object.entries(constants.slowmode.levels),
+		getOption: ([_, level]) => ({ name: strings.level(level), value: level }),
+	});
 }
 
 async function handleToggleSlowmode(
@@ -27,10 +27,7 @@ async function handleToggleSlowmode(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.error(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -56,8 +53,9 @@ async function handleToggleSlowmode(
 			if (newRateLimitDuration < previousRateLimitDuration) {
 				client.bot.helpers
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
-					.catch(() =>
+					.catch((error) =>
 						client.log.warn(
+							error,
 							`Failed to downgrade slowmode level on ${client.diagnostics.channel(channel)}.`,
 						),
 					);
@@ -72,14 +70,16 @@ async function handleToggleSlowmode(
 					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
-				await client.success(
-					interaction,
-					{
-						title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
-						description: strings.description,
-					},
-					{ visible: true },
-				);
+				client
+					.success(
+						interaction,
+						{
+							title: `${constants.emojis.events.slowmode.downgraded}  ${strings.title}`,
+							description: strings.description,
+						},
+						{ visible: true },
+					)
+					.ignore();
 
 				return;
 			}
@@ -87,8 +87,11 @@ async function handleToggleSlowmode(
 			if (newRateLimitDuration > previousRateLimitDuration) {
 				client.bot.helpers
 					.editChannel(channel.id, { rateLimitPerUser: newRateLimitDuration })
-					.catch(() =>
-						client.log.warn(`Failed to upgrade slowmode level on ${client.diagnostics.channel(channel)}.`),
+					.catch((error) =>
+						client.log.warn(
+							error,
+							`Failed to upgrade slowmode level on ${client.diagnostics.channel(channel)}.`,
+						),
 					);
 
 				await client.tryLog("slowmodeUpgrade", {
@@ -101,14 +104,16 @@ async function handleToggleSlowmode(
 					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
-				await client.success(
-					interaction,
-					{
-						title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
-						description: strings.description,
-					},
-					{ visible: true },
-				);
+				client
+					.success(
+						interaction,
+						{
+							title: `${constants.emojis.events.slowmode.upgraded}  ${strings.title}`,
+							description: strings.description,
+						},
+						{ visible: true },
+					)
+					.ignore();
 
 				return;
 			}
@@ -118,10 +123,12 @@ async function handleToggleSlowmode(
 					localise: client.localise,
 					locale: interaction.locale,
 				});
-				await client.warning(interaction, {
-					title: strings.title,
-					description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
-				});
+				client
+					.warning(interaction, {
+						title: strings.title,
+						description: `${strings.description.theSame}\n\n${strings.description.chooseDifferent}`,
+					})
+					.ignore();
 			}
 
 			return;
@@ -138,12 +145,14 @@ async function handleToggleSlowmode(
 					localise: client.localise,
 					locale: interaction.locale,
 				});
-				await client.pushback(interaction, {
-					title: strings.title,
-					description: `${strings.description.justEnabled} ${strings.description.canDisableIn({
-						relative_timestamp: timestamp(canDisableIn, { format: "relative" }),
-					})}`,
-				});
+				client
+					.pushback(interaction, {
+						title: strings.title,
+						description: `${strings.description.justEnabled} ${strings.description.canDisableIn({
+							relative_timestamp: timestamp(canDisableIn, { format: "relative" }),
+						})}`,
+					})
+					.ignore();
 
 				return;
 			}
@@ -151,7 +160,9 @@ async function handleToggleSlowmode(
 
 		client.bot.helpers
 			.editChannel(channel.id, { rateLimitPerUser: null })
-			.catch(() => client.log.warn(`Failed to disable slowmode on ${client.diagnostics.channel(channel)}.`));
+			.catch((error) =>
+				client.log.warn(error, `Failed to disable slowmode on ${client.diagnostics.channel(channel)}.`),
+			);
 
 		await client.tryLog("slowmodeDisable", {
 			guildId: guild.id,
@@ -163,14 +174,17 @@ async function handleToggleSlowmode(
 			localise: client.localise,
 			locale: interaction.guildLocale,
 		});
-		await client.notice(
-			interaction,
-			{
-				title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
-				description: strings.description,
-			},
-			{ visible: true },
-		);
+		client
+			.notice(
+				interaction,
+				{
+					title: `${constants.emojis.events.slowmode.disabled}  ${strings.title}`,
+					description: strings.description,
+				},
+				{ visible: true },
+			)
+			.ignore();
+
 		return;
 	}
 
@@ -180,8 +194,8 @@ async function handleToggleSlowmode(
 		.editChannel(channel.id, {
 			rateLimitPerUser: getSlowmodeDelayByLevel(interaction.parameters.level ?? "lowest"),
 		})
-		.catch((reason) =>
-			client.log.warn(`Failed to enable slowmode on ${client.diagnostics.channel(channel)}.`, reason),
+		.catch((error) =>
+			client.log.warn(error, `Failed to enable slowmode on ${client.diagnostics.channel(channel)}.`),
 		);
 
 	await client.tryLog("slowmodeEnable", {
@@ -191,14 +205,16 @@ async function handleToggleSlowmode(
 	});
 
 	const strings = constants.contexts.slowmodeEnabled({ localise: client.localise, locale: interaction.guildLocale });
-	await client.notice(
-		interaction,
-		{
-			title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
+	client
+		.notice(
+			interaction,
+			{
+				title: `${constants.emojis.events.slowmode.enabled}  ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handleToggleSlowmode, handleToggleSlowmodeAutocomplete };

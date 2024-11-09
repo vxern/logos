@@ -1,6 +1,6 @@
 import type { Locale } from "logos:constants/languages/localisation";
 import Redis from "ioredis";
-import type { Client } from "logos/client.ts";
+import type { Client } from "logos/client";
 import type pino from "pino";
 
 interface SentencePair {
@@ -40,7 +40,7 @@ class VolatileStore {
 
 		if (client.environment.redisHost === undefined || client.environment.redisPort === undefined) {
 			log.warn(
-				"One of `REDIS_HOST` or `REDIS_PORT` have not been provided. Logos will run without a Redis integration.",
+				"One of `REDIS_HOST` or `REDIS_PORT` has not been provided. Logos will run without a Redis integration.",
 			);
 			return undefined;
 		}
@@ -217,7 +217,7 @@ class VolatileStore {
 			sentenceIds = Array.from(
 				sentenceIdBatches.reduce(
 					(buffer, sentenceIds) => new Set(sentenceIds.filter((sentenceId) => buffer.has(sentenceId))),
-					new Set(sentenceIdBatches.at(0)!),
+					new Set(sentenceIdBatches.at(0)),
 				),
 			);
 		}

@@ -69,14 +69,13 @@ class JournallingStore {
 
 	async tryLog<Event extends keyof Events>(
 		event: Event,
-		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean | undefined; args: Events[Event] },
+		{ guildId, journalling = true, args }: { guildId: bigint; journalling?: boolean; args: Events[Event] },
 	): Promise<void> {
-		// If explicitly defined as false, do not log.
-		if (journalling === false) {
-			this.#client.log.info(
+		if (!journalling) {
+			this.#client.log.debug(
 				`Event '${event}' happened on ${this.#client.diagnostics.guild(
 					guildId,
-				)}, but journalling for that feature is explicitly turned off. Ignoring...`,
+				)}, but journalling for that feature is turned off. Ignoring...`,
 			);
 			return;
 		}
@@ -91,34 +90,25 @@ class JournallingStore {
 		}
 
 		const configuration = guildDocument.feature("journalling");
-		const channelId = BigInt(configuration.channelId);
-		if (channelId === undefined) {
-			return;
-		}
 
-		const generateMessage = loggers[event as keyof typeof loggers];
+		const generateMessage = loggers[event];
 		if (generateMessage === undefined) {
 			return;
 		}
 
 		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.languages.localisation);
-		const message = await generateMessage(
-			this.#client,
-			// @ts-expect-error: This is fine.
-			args,
-			{
-				guildLocale,
-				featureLanguage: guildDocument.languages.feature,
-			},
-		);
+		const message = await generateMessage(this.#client, args, {
+			guildLocale,
+			featureLanguage: guildDocument.languages.feature,
+		});
 		if (message === undefined) {
 			return;
 		}
 
 		await this.#client.bot.helpers
-			.sendMessage(channelId, message)
-			.catch((reason) =>
-				this.log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}:`, reason),
+			.sendMessage(BigInt(configuration.channelId), message)
+			.catch((error) =>
+				this.log.warn(error, `Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`),
 			);
 	}
 
@@ -185,6 +175,12 @@ class JournallingStore {
 			return;
 		}
 
+		const resolvedMessage = this.#client.entities.messages.latest.get(payload.id);
+
+		if (resolvedMessage?.author.id === this.#client.bot.id) {
+			return;
+		}
+
 		await this.tryLog("messageDelete", { guildId, args: [payload, message] });
 	}
 
@@ -200,6 +196,10 @@ class JournallingStore {
 	async #messageUpdate(message: Discord.Message): Promise<void> {
 		const guildId = message.guildId;
 		if (guildId === undefined) {
+			return;
+		}
+
+		if (message.author.id === this.#client.bot.id) {
 			return;
 		}
 
@@ -223,8 +223,8 @@ class JournallingStore {
 
 		const auditLog = await this.#client.bot.helpers
 			.getAuditLog(guildId, { actionType: Discord.AuditLogEvents.MemberKick })
-			.catch((reason) => {
-				this.log.warn(`Could not get audit log for ${this.#client.diagnostics.guild(guildId)}:`, reason);
+			.catch((error) => {
+				this.log.warn(error, `Could not get audit log for ${this.#client.diagnostics.guild(guildId)}.`);
 				return undefined;
 			});
 		if (auditLog === undefined) {

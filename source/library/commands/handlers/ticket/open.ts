@@ -27,10 +27,12 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.pushback(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.pushback(interaction, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
 
 		return;
 	}
@@ -40,25 +42,19 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 	composer.onSubmit(async (submission, { formData }) => {
 		await client.postponeReply(submission);
 
-		const ticketService = client.getPromptService(interaction.guildId, { type: "tickets" });
-		if (ticketService === undefined) {
-			return;
-		}
-
-		const ticketDocument = await ticketService.openTicket({
-			type: "standalone",
-			formData,
-			user: submission.user,
-		});
+		const ticketDocument = await client.services
+			.local("ticketPrompts", { guildId: interaction.guildId })
+			.openTicket({
+				type: "standalone",
+				formData,
+				user: submission.user,
+			});
 		if (ticketDocument === undefined) {
 			return;
 		}
 
 		const strings = constants.contexts.ticketSent({ localise: client.localise, locale: submission.locale });
-		await client.succeeded(submission, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.succeeded(submission, { title: strings.title, description: strings.description }).ignore();
 	});
 
 	await composer.open();

@@ -40,12 +40,15 @@ class Warning extends WarningModel {
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Warning>> },
 	): Promise<Warning[]> {
-		return await Model.all<Warning>(clientOrDatabase, {
+		return Model.all<Warning>(clientOrDatabase, {
 			collection: "Warnings",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: {
+				guildId: undefined,
+				authorId: undefined,
+				targetId: undefined,
+				createdAt: undefined,
+				...clauses?.where,
+			},
 		});
 	}
 

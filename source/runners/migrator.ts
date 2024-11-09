@@ -1,6 +1,6 @@
-import constants from "logos:constants/constants.ts";
-import type { DatabaseMetadata } from "logos/models/database-metadata.ts";
-import type { DatabaseStore } from "logos/stores/database.ts";
+import constants from "logos:constants/constants";
+import type { DatabaseMetadata } from "logos/models/database-metadata";
+import type { DatabaseStore } from "logos/stores/database";
 import type pino from "pino";
 
 async function migrate({
@@ -35,7 +35,7 @@ async function migrate({
 		try {
 			await module.up(database);
 		} catch (error) {
-			log.error(`Failed to run migration '${filename}': ${error}`);
+			log.error(error, `Failed to run migration '${filename}'.`);
 
 			process.exit(1);
 		}
@@ -94,7 +94,7 @@ async function rollback({
 		try {
 			await module.down(database);
 		} catch (error) {
-			log.error(`Failed to roll back ${filename}: ${error}`);
+			log.error(error, `Failed to roll back ${filename}.`);
 
 			process.exit(1);
 		}
@@ -110,7 +110,7 @@ async function rollback({
 type AvailableMigrations = Record<string, string>;
 async function getAvailableMigrations(): Promise<AvailableMigrations> {
 	const migrationFilenames = await Array.fromAsync(new Bun.Glob("*.ts").scan(constants.directories.migrations)).then(
-		(filenames) => filenames.toSorted(),
+		(filenames) => filenames.toSorted((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
 	);
 
 	return Object.fromEntries(migrationFilenames.map((filename) => [filename.split("_").at(0)!, filename]));

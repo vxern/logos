@@ -40,7 +40,7 @@ class User extends UserModel {
 		this.scores = scores;
 	}
 
-	static getOrCreate(client: Client, data: CreateUserOptions): User | Promise<User> {
+	static async getOrCreate(client: Client, data: CreateUserOptions): Promise<User> {
 		const partialId = Model.buildPartialId<User>(data);
 		if (client.documents.users.has(partialId)) {
 			return client.documents.users.get(partialId)!;

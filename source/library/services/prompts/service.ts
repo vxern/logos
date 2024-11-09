@@ -5,7 +5,6 @@ import type { Guild } from "logos/models/guild";
 import type { Model } from "logos/models/model";
 import type { User } from "logos/models/user";
 import { LocalService } from "logos/services/service";
-import type { ServiceStore } from "logos/stores/services";
 
 interface Configurations {
 	verification: Guild["features"]["verification"];
@@ -19,12 +18,9 @@ type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
-type CustomIDs = Record<keyof Configurations, string>;
-
-type PromptType = keyof ServiceStore["local"]["prompts"];
-
+type PromptType = keyof Configurations;
+type CustomIDs = Record<PromptType, string>;
 type PromptDeleteMode = "delete" | "close" | "none";
-
 interface ExistingPrompts {
 	readonly valid: [partialId: string, prompt: Discord.Message][];
 	readonly invalid: Discord.Message[];
@@ -178,8 +174,7 @@ abstract class PromptService<
 	}
 
 	async #getExistingPrompts(): Promise<ExistingPrompts> {
-		const channelId = this.channelId!;
-		const messages = (await this.getAllMessages({ channelId })) ?? [];
+		const messages = (await this.getAllMessages({ channelId: this.channelId })) ?? [];
 
 		const valid: [partialId: string, prompt: Discord.Message][] = [];
 		const invalid: Discord.Message[] = [];
@@ -205,11 +200,11 @@ abstract class PromptService<
 			valid.push([metadata, message]);
 		}
 
-		this.log.info(`Found ${messages.length} messages in ${this.client.diagnostics.channel(channelId)}.`);
+		this.log.info(`Found ${messages.length} messages in ${this.client.diagnostics.channel(this.channelId)}.`);
 
 		if (invalid.length > 0) {
 			this.log.warn(
-				`${invalid.length} messages in ${this.client.diagnostics.channel(channelId)} aren't prompts or are invalid.`,
+				`${invalid.length} messages in ${this.client.diagnostics.channel(this.channelId)} aren't prompts or are invalid.`,
 			);
 		}
 
@@ -273,9 +268,9 @@ abstract class PromptService<
 		this.log.warn(`Deleting ${prompts.length} invalid or expired prompts...`);
 
 		for (const prompt of prompts) {
-			await this.client.bot.helpers.deleteMessage(prompt.channelId, prompt.id).catch((reason) => {
-				this.log.warn("Failed to delete invalid or expired prompt:", reason);
-			});
+			await this.client.bot.helpers
+				.deleteMessage(prompt.channelId, prompt.id)
+				.catch((error) => this.log.warn(error, "Failed to delete invalid or expired prompt."));
 		}
 	}
 
@@ -294,8 +289,9 @@ abstract class PromptService<
 		// Delete the message and allow the bot to handle the deletion.
 		this.client.bot.helpers
 			.deleteMessage(message.channelId, message.id)
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to delete prompt ${this.client.diagnostics.message(
 						message,
 					)} from ${this.client.diagnostics.channel(message.channelId)} on ${this.client.diagnostics.guild(
@@ -414,10 +410,8 @@ abstract class PromptService<
 					localise: this.client.localise.bind(this.client),
 					locale: buttonPress.locale,
 				});
-				await this.client.warning(buttonPress, {
-					title: strings.title,
-					description: strings.description,
-				});
+				this.client.warning(buttonPress, { title: strings.title, description: strings.description }).ignore();
+
 				return;
 			}
 
@@ -426,17 +420,15 @@ abstract class PromptService<
 					localise: this.client.localise.bind(this.client),
 					locale: buttonPress.locale,
 				});
-				await this.client.warning(buttonPress, {
-					title: strings.title,
-					description: strings.description,
-				});
+				this.client.warning(buttonPress, { title: strings.title, description: strings.description }).ignore();
+
 				return;
 			}
 
 			return;
 		}
 
-		await this.client.acknowledge(buttonPress);
+		this.client.acknowledge(buttonPress).ignore();
 
 		const prompt = this.promptByPartialId.get(buttonPress.metadata[1]);
 		if (prompt === undefined) {
@@ -466,11 +458,8 @@ abstract class PromptService<
 
 		const message = await this.client.bot.helpers
 			.sendMessage(this.channelId, this.getNoPromptsMessageContent())
-			.catch((reason) => {
-				this.log.warn(
-					`Failed to send message to ${this.client.diagnostics.channel(this.channelId)}: ${reason}`,
-				);
-
+			.catch((error) => {
+				this.log.warn(error, `Failed to send message to ${this.client.diagnostics.channel(this.channelId)}.`);
 				return undefined;
 			});
 		if (message === undefined) {
@@ -489,7 +478,7 @@ abstract class PromptService<
 
 		await this.client.bot.helpers
 			.deleteMessage(this.#noPromptsMessage.channelId, this.#noPromptsMessage.id)
-			.catch(() => this.log.warn("Failed to delete no prompts message."));
+			.catch((error) => this.log.warn(error, "Failed to delete no prompts message."));
 	}
 
 	getMetadata(prompt: Discord.Message): string | undefined {
@@ -502,9 +491,8 @@ abstract class PromptService<
 			return undefined;
 		}
 
-		const prompt = await this.client.bot.helpers.sendMessage(this.channelId, content).catch((reason) => {
-			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(this.channelId)}: ${reason}`);
-
+		const prompt = await this.client.bot.helpers.sendMessage(this.channelId, content).catch((error) => {
+			this.log.warn(error, `Failed to send message to ${this.client.diagnostics.channel(this.channelId)}.`);
 			return undefined;
 		});
 		if (prompt === undefined) {
@@ -572,7 +560,7 @@ abstract class PromptService<
 
 			await this.client.bot.helpers
 				.deleteMessage(prompt.channelId, prompt.id)
-				.catch(() => this.log.warn("Failed to delete prompt."));
+				.catch((error) => this.log.warn(error, "Failed to delete prompt."));
 		});
 	}
 
@@ -591,7 +579,7 @@ abstract class PromptService<
 		if (prompt !== undefined) {
 			this.client.bot.helpers
 				.deleteMessage(prompt.channelId, prompt.id)
-				.catch(() => this.log.warn("Failed to delete prompt after deleting document."));
+				.catch((error) => this.log.warn(error, "Failed to delete prompt after deleting document."));
 			this.unregisterPrompt(prompt, promptDocument);
 		}
 

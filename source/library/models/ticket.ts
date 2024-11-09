@@ -42,10 +42,7 @@ class Ticket extends TicketModel {
 	): Promise<Ticket[]> {
 		return Model.all<Ticket>(clientOrDatabase, {
 			collection: "Tickets",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, channelId: undefined },
-				{ ...clauses?.where },
-			),
+			where: { guildId: undefined, authorId: undefined, channelId: undefined, ...clauses?.where },
 		});
 	}
 

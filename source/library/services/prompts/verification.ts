@@ -1,4 +1,4 @@
-import { mention, timestamp } from "logos:core/formatting";
+import { mention, timestamp } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import type { EntryRequest, VoteType } from "logos/models/entry-request";
@@ -81,12 +81,12 @@ class VerificationPromptService extends PromptService<{
 				continue;
 			}
 
-			this.getUserDocument(entryRequestDocument).then((authorDocument) => {
+			this.getUserDocument(entryRequestDocument).then(async (authorDocument) => {
 				if (authorDocument === undefined) {
 					return;
 				}
 
-				this.#tryFinalise({ entryRequestDocument, voter: member });
+				await this.#tryFinalise({ entryRequestDocument, voter: member });
 			});
 
 			entryRequests.set(partialId, entryRequestDocument);
@@ -96,7 +96,7 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
+		return User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, entryRequestDocument: EntryRequest): Discord.CreateMessageOptions | undefined {
@@ -277,7 +277,12 @@ class VerificationPromptService extends PromptService<{
 			Model.buildPartialId<EntryRequest>({ guildId, authorId }),
 		);
 		if (entryRequestDocument === undefined) {
-			await this.#displayVoteError(interaction);
+			const strings = constants.contexts.voteFailed({
+				localise: this.client.localise,
+				locale: interaction.locale,
+			});
+			this.client.failure(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return undefined;
 		}
 
@@ -286,11 +291,14 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise.bind(this.client),
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-				color: constants.colours.warning,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.warning,
+				})
+				.ignore();
+
 			return;
 		}
 
@@ -323,7 +331,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				confirmButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					if (entryRequestDocument.isFinalised) {
 						resolve(undefined);
@@ -343,7 +351,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				cancelButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					resolve(undefined);
 				});
@@ -358,33 +366,35 @@ class VerificationPromptService extends PromptService<{
 					localise: this.client.localise,
 					locale: interaction.locale,
 				});
-				await this.client.pushback(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: confirmButton.customId,
-									label: strings.yes,
-									style: Discord.ButtonStyles.Success,
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: cancelButton.customId,
-									label: strings.no,
-									style: Discord.ButtonStyles.Danger,
-								},
-							],
-						},
-					],
-				});
+				this.client
+					.pushback(interaction, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+							},
+						],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: confirmButton.customId,
+										label: strings.yes,
+										style: Discord.ButtonStyles.Success,
+									},
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: cancelButton.customId,
+										label: strings.no,
+										style: Discord.ButtonStyles.Danger,
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return promise;
 			}
@@ -393,10 +403,12 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return undefined;
 		}
@@ -419,7 +431,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				confirmButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					if (entryRequestDocument.isFinalised) {
 						resolve(undefined);
@@ -439,7 +451,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				cancelButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					resolve(undefined);
 				});
@@ -454,33 +466,35 @@ class VerificationPromptService extends PromptService<{
 					localise: this.client.localise,
 					locale: interaction.locale,
 				});
-				await this.client.pushback(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: confirmButton.customId,
-									label: strings.yes,
-									style: Discord.ButtonStyles.Success,
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: cancelButton.customId,
-									label: strings.no,
-									style: Discord.ButtonStyles.Danger,
-								},
-							],
-						},
-					],
-				});
+				this.client
+					.pushback(interaction, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+							},
+						],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: confirmButton.customId,
+										label: strings.yes,
+										style: Discord.ButtonStyles.Success,
+									},
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: cancelButton.customId,
+										label: strings.no,
+										style: Discord.ButtonStyles.Danger,
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return promise;
 			}
@@ -489,10 +503,7 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return undefined;
 		}
@@ -506,12 +517,14 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.notice(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.notice(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 		} else {
-			await this.client.acknowledge(interaction);
+			this.client.acknowledge(interaction).ignore();
 		}
 
 		const isFinalised = await this.#tryFinalise({ entryRequestDocument, voter });
@@ -576,8 +589,9 @@ class VerificationPromptService extends PromptService<{
 					BigInt(entryRequestDocument.requestedRoleId),
 					"User-requested role addition.",
 				)
-				.catch(() =>
+				.catch((error) =>
 					this.log.warn(
+						error,
 						`Failed to add ${this.client.diagnostics.role(
 							entryRequestDocument.requestedRoleId,
 						)} to ${this.client.diagnostics.user(authorDocument.userId)} on ${this.client.diagnostics.guild(
@@ -586,7 +600,11 @@ class VerificationPromptService extends PromptService<{
 					),
 				);
 
-			await this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
+			await this.client.tryLog("entryRequestAccept", {
+				guildId: guild.id,
+				journalling: this.guildDocument.isJournalled("verification"),
+				args: [author, voter],
+			});
 		} else if (verdict === "rejected") {
 			await authorDocument.update(this.client, () => {
 				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "rejected" });
@@ -600,15 +618,20 @@ class VerificationPromptService extends PromptService<{
 
 			this.client.bot.helpers
 				.banMember(this.guildId, author.id, {}, "Voted to reject entry request.")
-				.catch(() =>
+				.catch((error) =>
 					this.log.warn(
+						error,
 						`Failed to ban ${this.client.diagnostics.user(
 							authorDocument.userId,
 						)} on ${this.client.diagnostics.guild(guild)}.`,
 					),
 				);
 
-			await this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
+			await this.client.tryLog("entryRequestReject", {
+				guildId: guild.id,
+				journalling: this.guildDocument.isJournalled("verification"),
+				args: [author, voter],
+			});
 		}
 
 		return true;
@@ -631,16 +654,11 @@ class VerificationPromptService extends PromptService<{
 			return;
 		}
 
-		const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
-		if (ticketService === undefined) {
-			return;
-		}
-
 		const strings = constants.contexts.inquiryChannel({
 			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
-		const ticketDocument = await ticketService.openTicket({
+		const ticketDocument = await this.client.services.local("ticketPrompts", { guildId: this.guildId }).openTicket({
 			type: "inquiry",
 			formData: { topic: strings.inquiryChannel({ user: entryRequestAuthor.username }) },
 			user: entryRequestAuthor,
@@ -650,10 +668,8 @@ class VerificationPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.failed(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.failed(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
@@ -668,17 +684,19 @@ class VerificationPromptService extends PromptService<{
 
 		await this.client.bot.helpers
 			.deleteMessage(prompt.channelId, prompt.id)
-			.catch(() => this.log.warn("Failed to delete prompt."));
+			.catch((error) => this.log.warn(error, "Failed to delete prompt."));
 
 		{
 			const strings = constants.contexts.inquiryOpened({
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.succeeded(interaction, {
-				title: strings.title,
-				description: strings.description({ guild_name: this.guild.name }),
-			});
+			this.client
+				.succeeded(interaction, {
+					title: strings.title,
+					description: strings.description({ guild_name: this.guild.name }),
+				})
+				.ignore();
 		}
 	}
 
@@ -722,17 +740,6 @@ class VerificationPromptService extends PromptService<{
 		);
 
 		return { acceptance, rejection };
-	}
-
-	async #displayVoteError(interaction: Logos.Interaction): Promise<void> {
-		const strings = constants.contexts.voteFailed({
-			localise: this.client.localise,
-			locale: interaction.locale,
-		});
-		await this.client.failure(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
 	}
 }
 

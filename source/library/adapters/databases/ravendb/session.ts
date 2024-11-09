@@ -55,7 +55,7 @@ class RavenDBDocumentSession extends DocumentSession {
 		return new RavenDBDocumentQuery<M>({ database: this.database, session: this.#session });
 	}
 
-	dispose(): void {
+	async dispose(): Promise<void> {
 		this.#session.dispose();
 	}
 }

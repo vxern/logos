@@ -1,7 +1,7 @@
 import type { FeatureLanguage } from "logos:constants/languages/feature";
 import type { Locale } from "logos:constants/languages/localisation";
+import type { PromiseOr } from "logos:core/utilities";
 import type { Client } from "logos/client";
-
 import guildBanAdd from "logos/stores/journalling/discord/guild-ban-add";
 import guildBanRemove from "logos/stores/journalling/discord/guild-ban-remove";
 import guildMemberAdd from "logos/stores/journalling/discord/guild-member-add";
@@ -32,7 +32,7 @@ import ticketOpen from "logos/stores/journalling/logos/ticket-open";
 
 type Events = Logos.Events & Discord.Events;
 
-const loggers = Object.freeze({
+const loggers: EventLoggers = Object.freeze({
 	guildBanAdd,
 	guildBanRemove,
 	guildMemberAdd,
@@ -60,14 +60,14 @@ const loggers = Object.freeze({
 	slowmodeDisable,
 	slowmodeUpgrade,
 	slowmodeDowngrade,
-} as const satisfies EventLoggers);
+} as const);
 
 type EventLoggers = { [Event in keyof Events]?: EventLogger<Event> };
 type EventLogger<Event extends keyof Events> = (
 	client: Client,
 	event: Events[Event],
 	{ guildLocale, featureLanguage }: { guildLocale: Locale; featureLanguage: FeatureLanguage },
-) => Discord.CreateMessageOptions | Promise<Discord.CreateMessageOptions | undefined> | undefined;
+) => PromiseOr<Discord.CreateMessageOptions | undefined>;
 
 export default loggers;
-export type { EventLogger };
+export type { EventLogger, EventLoggers };

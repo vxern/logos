@@ -72,9 +72,9 @@ class EntryRequest extends EntryRequestModel {
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<EntryRequest>> },
 	): Promise<EntryRequest[]> {
-		return await Model.all<EntryRequest>(clientOrDatabase, {
+		return Model.all<EntryRequest>(clientOrDatabase, {
 			collection: "EntryRequests",
-			where: Object.assign({ guildId: undefined, authorId: undefined }, { ...clauses?.where }),
+			where: { guildId: undefined, authorId: undefined, ...clauses?.where },
 		});
 	}
 

@@ -1,9 +1,10 @@
 import { parseArgs } from "node:util";
-import { loadEnvironment } from "logos:core/loaders/environment.ts";
-import { getAvailableMigrations, migrate, rollback } from "logos:core/runners/migrator.ts";
+import { loadEnvironment } from "logos:core/loaders/environment";
+import { getAvailableMigrations, migrate, rollback } from "logos:core/runners/migrator";
 import bun from "bun";
-import { DatabaseMetadata } from "logos/models/database-metadata.ts";
-import { DatabaseStore } from "logos/stores/database.ts";
+import { DatabaseMetadata } from "logos/models/database-metadata";
+import { CacheStore } from "logos/stores/cache";
+import { DatabaseStore } from "logos/stores/database";
 
 const log = constants.loggers.feedback;
 
@@ -31,7 +32,11 @@ if (values.step !== undefined && !Number.isSafeInteger(Number(values.step))) {
 log.info("Checking for migrations...");
 
 const environment = loadEnvironment({ log: constants.loggers.silent });
-const database = await DatabaseStore.create({ log: constants.loggers.silent, environment });
+const database = DatabaseStore.create({
+	log: constants.loggers.silent,
+	environment,
+	cache: new CacheStore({ log: constants.loggers.silent }),
+});
 await database.setup({ prefetchDocuments: false });
 
 const availableMigrations = await getAvailableMigrations();
@@ -50,4 +55,4 @@ switch (direction) {
 	}
 }
 
-process.exit(0);
+process.exit();

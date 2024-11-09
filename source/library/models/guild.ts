@@ -81,7 +81,7 @@ class Guild extends GuildModel {
 		this.isNative = isNative ?? false;
 	}
 
-	static get(client: Client, data: IdentifierData<Guild>): Guild | Promise<Guild | undefined> | undefined {
+	static async get(client: Client, data: IdentifierData<Guild>): Promise<Guild | undefined> {
 		const partialId = Model.buildPartialId(data);
 		if (client.documents.guilds.has(partialId)) {
 			return client.documents.guilds.get(partialId)!;
@@ -116,7 +116,6 @@ class Guild extends GuildModel {
 	}
 
 	feature<K extends keyof Guild["features"]>(feature: K): NonNullable<Guild["features"][K]> {
-		// If the guild does not have the feature enabled, do not return any data about the feature.
 		if (!this.hasEnabled(feature)) {
 			throw new Error(
 				`Attempted to get guild feature '${feature}' that was not enabled on guild with ID ${this.guildId}.`,

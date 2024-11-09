@@ -27,7 +27,7 @@ class ReportPromptService extends PromptService<{
 	}
 
 	async getUserDocument(reportDocument: Report): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: reportDocument.authorId });
+		return User.getOrCreate(this.client, { userId: reportDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
@@ -64,10 +64,7 @@ class ReportPromptService extends PromptService<{
 						},
 						{
 							name: strings.report.link,
-							value:
-								reportDocument.formData.messageLink !== undefined
-									? reportDocument.formData.messageLink
-									: `*${strings.report.noLinkProvided}*`,
+							value: reportDocument.formData.messageLink ?? `*${strings.report.noLinkProvided}*`,
 							inline: true,
 						},
 					],
@@ -150,10 +147,13 @@ class ReportPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
+
 			return;
 		}
 
@@ -162,10 +162,13 @@ class ReportPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
+
 			return;
 		}
 

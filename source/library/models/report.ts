@@ -36,12 +36,9 @@ class Report extends ReportModel {
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Report>> },
 	): Promise<Report[]> {
-		return await Model.all<Report>(clientOrDatabase, {
+		return Model.all<Report>(clientOrDatabase, {
 			collection: "Reports",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: { guildId: undefined, authorId: undefined, createdAt: undefined, ...clauses?.where },
 		});
 	}
 

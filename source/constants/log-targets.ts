@@ -1,4 +1,4 @@
-import directories from "logos:constants/directories.ts";
+import directories from "logos:constants/directories";
 
 export default Object.freeze({
 	stdout: {

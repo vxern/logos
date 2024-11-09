@@ -17,9 +17,7 @@ abstract class DetectorAdapter {
 		this.client = client;
 	}
 
-	abstract detect({
-		text,
-	}: { text: string }): SingleDetectionResult | Promise<SingleDetectionResult | undefined> | undefined;
+	abstract detect({ text }: { text: string }): Promise<SingleDetectionResult | undefined>;
 }
 
 export { DetectorAdapter };

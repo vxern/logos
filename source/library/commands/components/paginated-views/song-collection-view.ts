@@ -1,4 +1,4 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { PaginatedView, type View } from "logos/commands/components/paginated-views/paginated-view";
 import type { Song, SongCollection } from "logos/services/music";

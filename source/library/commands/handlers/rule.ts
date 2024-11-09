@@ -16,12 +16,14 @@ async function handleCiteRuleAutocomplete(
 		})
 		.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase));
 
-	await client.respond(interaction, choices);
+	client.respond(interaction, choices).ignore();
 }
 
 async function handleCiteRule(client: Client, interaction: Logos.Interaction<any, { rule: Rule }>): Promise<void> {
 	if (!isValidRule(interaction.parameters.rule)) {
-		await displayError(client, interaction);
+		const strings = constants.contexts.ruleInvalid({ localise: client.localise, locale: interaction.locale });
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -35,7 +37,7 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 		: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: [client.interactionRepetitionService.getShowButton(interaction)],
+					components: [client.services.global("interactionRepetition").getShowButton(interaction)],
 				},
 			];
 
@@ -49,32 +51,26 @@ async function handleCiteRule(client: Client, interaction: Logos.Interaction<any
 			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 		}),
 	};
-	await client.notice(
-		interaction,
-		{
-			embeds: [
-				{
-					title: getRuleTitleFormatted(client, interaction, {
-						rule: interaction.parameters.rule,
-						mode: "display",
-					}),
-					description: strings.content(interaction.parameters.rule),
-					footer: { text: `${strings.tldr}: ${strings.summary(interaction.parameters.rule)}` },
-					image: { url: constants.gifs.chaosWithoutRules },
-				},
-			],
-			components,
-		},
-		{ visible: interaction.parameters.show },
-	);
-}
-
-async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.ruleInvalid({ localise: client.localise, locale: interaction.locale });
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	client
+		.notice(
+			interaction,
+			{
+				embeds: [
+					{
+						title: getRuleTitleFormatted(client, interaction, {
+							rule: interaction.parameters.rule,
+							mode: "display",
+						}),
+						description: strings.content(interaction.parameters.rule),
+						footer: { text: `${strings.tldr}: ${strings.summary(interaction.parameters.rule)}` },
+						image: { url: constants.gifs.chaosWithoutRules },
+					},
+				],
+				components,
+			},
+			{ visible: interaction.parameters.show },
+		)
+		.ignore();
 }
 
 export { handleCiteRule, handleCiteRuleAutocomplete };

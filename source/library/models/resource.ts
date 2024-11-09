@@ -38,10 +38,7 @@ class Resource extends ResourceModel {
 	): Promise<Resource[]> {
 		return Model.all<Resource>(clientOrDatabase, {
 			collection: "Resources",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: { guildId: undefined, authorId: undefined, createdAt: undefined, ...clauses?.where },
 		});
 	}
 

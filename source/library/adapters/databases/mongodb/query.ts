@@ -29,12 +29,12 @@ class MongoDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		this.#filter = {};
 	}
 
-	whereRegex(property: string, pattern: RegExp): MongoDBDocumentQuery<M> {
+	whereRegex(property: string, pattern: RegExp): this {
 		Object.assign(this.#filter, { [property === "id" ? "_id" : property]: { $regex: pattern } });
 		return this;
 	}
 
-	whereEquals(property: string, value: unknown): MongoDBDocumentQuery<M> {
+	whereEquals(property: string, value: unknown): this {
 		Object.assign(this.#filter, { [property === "id" ? "_id" : property]: { $eq: value } });
 		return this;
 	}

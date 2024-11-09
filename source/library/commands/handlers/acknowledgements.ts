@@ -12,10 +12,7 @@ async function handleDisplayAcknowledgements(client: Client, interaction: Logos.
 	});
 
 	const strings = constants.contexts.acknowledgements({ localise: client.localise, locale: interaction.locale });
-	await client.notice(interaction, {
-		title: strings.acknowledgements,
-		fields,
-	});
+	client.notice(interaction, { title: strings.acknowledgements, fields }).ignore();
 }
 
 export { handleDisplayAcknowledgements };

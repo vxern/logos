@@ -15,9 +15,6 @@ class AlertService extends LocalService {
 		super(client, { identifier: "AlertService", guildId });
 	}
 
-	async start(): Promise<void> {}
-	async stop(): Promise<void> {}
-
 	async alert(message: Discord.CreateMessageOptions): Promise<void> {
 		const channelId = this.channelId;
 		if (channelId === undefined) {
@@ -26,8 +23,9 @@ class AlertService extends LocalService {
 
 		this.client.bot.helpers
 			.sendMessage(channelId, message)
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to send alert to ${this.client.diagnostics.channel(
 						channelId,
 					)} on ${this.client.diagnostics.guild(this.guildId)}.`,

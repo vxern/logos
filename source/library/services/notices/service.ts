@@ -2,7 +2,6 @@ import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
-import type { ServiceStore } from "logos/stores/services";
 import { default as hashObject } from "object-hash";
 
 type HashableProperties = "embeds" | "components";
@@ -24,7 +23,7 @@ type ConfigurationLocators = {
 	[K in keyof Configurations]: (guildDocument: Guild) => Configurations[K] | undefined;
 };
 
-type NoticeTypes = keyof ServiceStore["local"]["notices"];
+type NoticeTypes = keyof Configurations;
 
 abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
 	static readonly #configurationLocators = Object.freeze({
@@ -120,9 +119,9 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 					return;
 				}
 
-				await this.client.bot.helpers.deleteMessage(channelId, notice.id).catch(() => {
-					this.log.warn("Failed to delete notice.");
-				});
+				await this.client.bot.helpers
+					.deleteMessage(channelId, notice.id)
+					.catch((error) => this.log.warn(error, "Failed to delete notice."));
 			}
 		}
 
@@ -137,9 +136,9 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 			const hash = contents.embeds?.at(-1)?.footer?.iconUrl?.split("&hash=").at(-1);
 			if (hash === undefined || hash !== expectedHash) {
-				await this.client.bot.helpers.deleteMessage(channelId, notice.id).catch(() => {
-					this.log.warn("Failed to delete notice.");
-				});
+				await this.client.bot.helpers
+					.deleteMessage(channelId, notice.id)
+					.catch((error) => this.log.warn(error, "Failed to delete notice."));
 
 				const newNotice = await this.#sendNotice({ contents: expectedContents, hash: expectedHash });
 				if (newNotice === undefined) {
@@ -151,7 +150,6 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			}
 
 			this.#registerNotice({ noticeId: notice.id, hash });
-			return;
 		}
 	}
 
@@ -169,11 +167,17 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			return;
 		}
 
+		// If the embed is still present, it wasn't an embed having been deleted. Do not do anything.
+		if ((message.embeds?.length ?? 0) > 0) {
+			return;
+		}
+
 		// Delete the message and allow the bot to handle the deletion.
 		this.client.bot.helpers
 			.deleteMessage(message.channelId, message.id)
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to delete notice ${this.client.diagnostics.message(
 						message,
 					)} from ${this.client.diagnostics.channel(message.channelId)} on ${this.client.diagnostics.guild(
@@ -230,8 +234,8 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 
 		lastEmbed.footer = { text: guild.name, iconUrl: NoticeService.encodeHashInGuildIcon({ guild, hash }) };
 
-		return this.client.bot.helpers.sendMessage(channelId, contents).catch(() => {
-			this.log.warn(`Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
+		return this.client.bot.helpers.sendMessage(channelId, contents).catch((error) => {
+			this.log.warn(error, `Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
 			return undefined;
 		});
 	}

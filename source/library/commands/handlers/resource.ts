@@ -24,15 +24,8 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyResources({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
-		return;
-	}
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
-	const resourceService = client.getPromptService(guild.id, { type: "resources" });
-	if (resourceService === undefined) {
 		return;
 	}
 
@@ -58,16 +51,20 @@ async function handleSubmitResource(client: Client, interaction: Logos.Interacti
 			return;
 		}
 
-		const prompt = await resourceService.savePrompt(user, resourceDocument);
+		const prompt = await client.services
+			.local("resourcePrompts", { guildId: interaction.guildId })
+			.savePrompt(user, resourceDocument);
 		if (prompt === undefined) {
 			return;
 		}
 
 		const strings = constants.contexts.resourceSent({ localise: client.localise, locale: interaction.locale });
-		await client.succeeded(submission, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.succeeded(submission, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
 	});
 
 	await composer.open();

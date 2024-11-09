@@ -12,10 +12,6 @@ class InMemoryAdapter extends DatabaseAdapter {
 		super({ identifier: "InMemory", log });
 	}
 
-	async setup(): Promise<void> {}
-
-	async teardown(): Promise<void> {}
-
 	conventionsFor({
 		document,
 		data,

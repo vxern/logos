@@ -1,5 +1,5 @@
 import { EventEmitter } from "node:events";
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import type { Guild } from "logos/models/guild";
@@ -11,9 +11,10 @@ type PlaybackActionType = "manage" | "check";
 
 class MusicService extends LocalService {
 	readonly #voiceStateUpdates: Collector<"voiceStateUpdate">;
-	#managerDisconnects!: (name: string, count: number) => void;
-	#managerConnectionRestores!: (name: string, reconnected: boolean) => void;
 	#session?: MusicSession;
+
+	#managerDisconnects!: (name: string, count: number) => Promise<void>;
+	#managerConnectionRestores!: (name: string, reconnected: boolean) => Promise<void>;
 
 	get configuration(): NonNullable<Guild["features"]["music"]> {
 		return this.guildDocument.feature("music");
@@ -51,27 +52,24 @@ class MusicService extends LocalService {
 
 		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
-		this.client.lavalinkService!.manager.on(
-			"disconnect",
-			(this.#managerDisconnects = this.#handleConnectionLost.bind(this)),
-		);
-		this.client.lavalinkService!.manager.on(
-			"ready",
-			(this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this)),
-		);
+		this.#managerDisconnects = this.#handleConnectionLost.bind(this);
+		this.#managerConnectionRestores = this.#handleConnectionRestored.bind(this);
+
+		this.client.services.global("lavalink").manager.on("disconnect", this.#managerDisconnects);
+		this.client.services.global("lavalink").manager.on("ready", this.#managerConnectionRestores);
 	}
 
 	async stop(): Promise<void> {
 		await this.#voiceStateUpdates.close();
 
-		this.client.lavalinkService!.manager.off("disconnect", this.#managerDisconnects);
-		this.client.lavalinkService!.manager.off("ready", this.#managerConnectionRestores);
+		this.client.services.global("lavalink").manager.off("disconnect", this.#managerDisconnects);
+		this.client.services.global("lavalink").manager.off("ready", this.#managerConnectionRestores);
 
 		await this.destroySession();
 	}
 
 	async createSession({ channelId }: { channelId: bigint }): Promise<MusicSession> {
-		const player = await this.client.lavalinkService!.manager.joinVoiceChannel({
+		const player = await this.client.services.global("lavalink").manager.joinVoiceChannel({
 			shardId: this.guild.shardId,
 			guildId: this.guildIdString,
 			channelId: channelId.toString(),
@@ -136,15 +134,15 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.log.warn("Failed to send stopped music message."));
+			.catch((error) => this.log.warn(error, "Failed to send stopped music message."));
 
 		await this.destroySession();
 	}
 
-	#handleConnectionLost(_: string, __: number): void {
+	async #handleConnectionLost(_: string, __: number): Promise<void> {
 		this.client.bot.gateway
 			.leaveVoiceChannel(this.guildId)
-			.catch(() => this.log.warn("Failed to leave voice channel."));
+			.catch((error) => this.log.warn(error, "Failed to leave voice channel."));
 
 		if (!this.hasSession) {
 			return;
@@ -168,7 +166,7 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.log.warn("Failed to send audio halted message."));
+			.catch((error) => this.log.warn(error, "Failed to send audio halted message."));
 
 		this.session.player.removeAllListeners();
 		this.session.isDisconnected = true;
@@ -195,7 +193,7 @@ class MusicService extends LocalService {
 					},
 				],
 			})
-			.catch(() => this.log.warn("Failed to send audio restored message."));
+			.catch((error) => this.log.warn(error, "Failed to send audio restored message."));
 	}
 
 	#canPerformAction(interaction: Logos.Interaction, { action }: { action: PlaybackActionType }): boolean {
@@ -204,10 +202,13 @@ class MusicService extends LocalService {
 				localise: this.client.localise,
 				locale: this.guildLocale,
 			});
-			this.client.unsupported(interaction, {
-				title: strings.title,
-				description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
-			});
+			this.client
+				.unsupported(interaction, {
+					title: strings.title,
+					description: `${strings.description.outage}\n\n${strings.description.backUpSoon}`,
+				})
+				.ignore();
+
 			return false;
 		}
 
@@ -217,10 +218,13 @@ class MusicService extends LocalService {
 				localise: this.client.localise,
 				locale: this.guildLocale,
 			});
-			this.client.warning(interaction, {
-				title: strings.title,
-				description: action === "manage" ? strings.description.toManage : strings.description.toCheck,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: action === "manage" ? strings.description.toManage : strings.description.toCheck,
+				})
+				.ignore();
+
 			return false;
 		}
 
@@ -229,21 +233,19 @@ class MusicService extends LocalService {
 				localise: this.client.localise,
 				locale: this.guildLocale,
 			});
-			this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return false;
 		}
 
 		return true;
 	}
 
-	canCheckPlayback(interaction: Logos.Interaction) {
+	canCheckPlayback(interaction: Logos.Interaction): boolean {
 		return this.#canPerformAction(interaction, { action: "check" });
 	}
 
-	canManagePlayback(interaction: Logos.Interaction) {
+	canManagePlayback(interaction: Logos.Interaction): boolean {
 		return this.#canPerformAction(interaction, { action: "manage" });
 	}
 
@@ -257,10 +259,12 @@ class MusicService extends LocalService {
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return false;
 		}
@@ -421,7 +425,7 @@ class ListingManager extends EventEmitter {
 		return listing;
 	}
 
-	dispose() {
+	dispose(): void {
 		this.removeAllListeners();
 	}
 }
@@ -437,8 +441,8 @@ class MusicSession extends EventEmitter {
 	readonly listings: ListingManager;
 	isDisconnected: boolean;
 
-	#trackEnds!: (data: shoukaku.TrackEndEvent) => void;
-	#trackExceptions!: (data: shoukaku.TrackExceptionEvent) => void;
+	#trackEnds!: (data: shoukaku.TrackEndEvent) => Promise<void>;
+	#trackExceptions!: (data: shoukaku.TrackExceptionEvent) => Promise<void>;
 
 	get hasCurrent(): boolean {
 		return this.listings.hasCurrent;
@@ -480,8 +484,11 @@ class MusicSession extends EventEmitter {
 	}
 
 	start(): void {
-		this.player.on("end", (this.#trackEnds = this.#handleTrackEnd.bind(this)));
-		this.player.on("exception", (this.#trackExceptions = this.#handleTrackException.bind(this)));
+		this.#trackEnds = this.#handleTrackEnd.bind(this);
+		this.#trackExceptions = this.#handleTrackException.bind(this);
+
+		this.player.on("end", this.#trackEnds);
+		this.player.on("exception", this.#trackExceptions);
 	}
 
 	async stop(): Promise<void> {
@@ -489,7 +496,7 @@ class MusicSession extends EventEmitter {
 		this.player.off("exception", this.#trackExceptions);
 
 		this.listings.dispose();
-		await this.client.lavalinkService!.manager.leaveVoiceChannel(this.service.guildIdString);
+		await this.client.services.global("lavalink").manager.leaveVoiceChannel(this.service.guildIdString);
 		await this.client.bot.gateway.leaveVoiceChannel(this.service.guildId);
 		this.emit("end");
 		this.removeAllListeners();
@@ -520,8 +527,9 @@ class MusicSession extends EventEmitter {
 					},
 				],
 			})
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to send track play failure to ${this.client.diagnostics.channel(
 						this.channelId,
 					)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,
@@ -537,7 +545,7 @@ class MusicSession extends EventEmitter {
 				localise: this.client.localise,
 				locale: this.service.guildLocale,
 			});
-			await this.client.bot.helpers
+			this.client.bot.helpers
 				.sendMessage(this.channelId, {
 					embeds: [
 						{
@@ -550,7 +558,7 @@ class MusicSession extends EventEmitter {
 						},
 					],
 				})
-				.catch(() => this.log.warn("Failed to send music feedback message."));
+				.catch((error) => this.log.warn(error, "Failed to send music feedback message."));
 
 			return;
 		}
@@ -683,8 +691,9 @@ class MusicSession extends EventEmitter {
 					},
 				],
 			})
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to send now playing message to ${this.client.diagnostics.channel(
 						this.channelId,
 					)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,
@@ -730,8 +739,9 @@ class MusicSession extends EventEmitter {
 							},
 						],
 					})
-					.catch(() =>
+					.catch((error) =>
 						this.log.warn(
+							error,
 							`Failed to send track load failure to ${this.client.diagnostics.channel(
 								this.channelId,
 							)} on ${this.client.diagnostics.guild(this.service.guildId)}.`,
@@ -775,7 +785,6 @@ class MusicSession extends EventEmitter {
 
 		if (controls.to !== undefined) {
 			queueable.moveTo({ index: controls.to - 1 });
-			return;
 		}
 	}
 
@@ -906,7 +915,7 @@ abstract class Queueable {
 }
 
 abstract class Playable extends Queueable {
-	get playable(): Playable {
+	get playable(): this {
 		return this;
 	}
 }

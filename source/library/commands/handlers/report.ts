@@ -24,15 +24,8 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyReports({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
-		return;
-	}
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
-	const reportService = client.getPromptService(guild.id, { type: "reports" });
-	if (reportService === undefined) {
 		return;
 	}
 
@@ -58,16 +51,20 @@ async function handleMakeReport(client: Client, interaction: Logos.Interaction):
 			return;
 		}
 
-		const prompt = await reportService.savePrompt(user, reportDocument);
+		const prompt = await client.services
+			.local("reportPrompts", { guildId: interaction.guildId })
+			.savePrompt(user, reportDocument);
 		if (prompt === undefined) {
 			return;
 		}
 
 		const strings = constants.contexts.reportSubmitted({ localise: client.localise, locale: interaction.locale });
-		await client.succeeded(submission, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.succeeded(submission, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
 	});
 
 	await composer.open();

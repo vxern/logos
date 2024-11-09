@@ -1,4 +1,4 @@
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 
@@ -36,10 +36,13 @@ async function handleClearTimeout(
 	const notTimedOut = timedOutUntil === undefined || timedOutUntil < Date.now();
 	if (notTimedOut) {
 		const strings = constants.contexts.notTimedOut({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
-		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
+			})
+			.ignore();
+
 		return;
 	}
 
@@ -50,7 +53,7 @@ async function handleClearTimeout(
 
 	await client.bot.helpers
 		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: null })
-		.catch(() => client.log.warn(`Failed to remove timeout of ${client.diagnostics.member(member)}.`));
+		.catch((error) => client.log.warn(error, `Failed to remove timeout of ${client.diagnostics.member(member)}.`));
 
 	await client.tryLog("memberTimeoutRemove", {
 		guildId: guild.id,
@@ -62,10 +65,12 @@ async function handleClearTimeout(
 		localise: client.localise,
 		locale: interaction.locale,
 	});
-	await client.success(interaction, {
-		title: strings.title,
-		description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
-	});
+	client
+		.success(interaction, {
+			title: strings.title,
+			description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
+		})
+		.ignore();
 }
 
 export { handleClearTimeout, handleClearTimeoutAutocomplete };

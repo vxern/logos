@@ -19,6 +19,7 @@ import type {
 import type { InteractionHandler } from "logos/commands/handlers/handler";
 import type { Guild } from "logos/models/guild";
 import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
+import type pino from "pino";
 
 interface RateLimit {
 	nextAllowedUsageTimestamp: number;
@@ -30,6 +31,7 @@ type BuildResult<Object extends Command | Option> = {
 	namesWithMetadata: LocalisedNamesWithMetadata[];
 };
 class CommandStore {
+	readonly log: pino.Logger;
 	readonly commands: BuiltCommands;
 
 	readonly #client: Client;
@@ -61,6 +63,7 @@ class CommandStore {
 			autocompleteHandlers: Map<string, InteractionHandler>;
 		},
 	) {
+		this.log = client.log.child({ name: "CommandStore" });
 		this.commands = commands;
 
 		this.#client = client;
@@ -367,6 +370,14 @@ class CommandStore {
 		};
 	}
 
+	async registerGuildCommands({ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild }): Promise<void> {
+		this.#client.bot.helpers
+			.upsertGuildApplicationCommands(guildId, this.getEnabledCommands(guildDocument))
+			.catch((error) =>
+				this.log.warn(error, `Failed to upsert commands on ${this.#client.diagnostics.guild(guildId)}.`),
+			);
+	}
+
 	getHandler(interaction: Logos.Interaction): InteractionHandler | undefined {
 		if (isAutocomplete(interaction)) {
 			return this.#handlers.autocomplete.get(interaction.commandName);
@@ -459,8 +470,14 @@ class CommandStore {
 			commands.push(this.commands.resource);
 		}
 
-		if (guildDocument.hasEnabled("music") && this.#client.lavalinkService !== undefined) {
-			commands.push(this.commands.music);
+		if (guildDocument.hasEnabled("music")) {
+			if (this.#client.services.hasGlobalService("lavalink")) {
+				commands.push(this.commands.music);
+			} else {
+				this.log.warn(
+					`The music service is enabled on ${this.#client.diagnostics.guild(guildDocument.guildId)}, but the bot does not have a Lavalink connection. Skipping...`,
+				);
+			}
 		}
 
 		if (guildDocument.hasEnabled("praises")) {

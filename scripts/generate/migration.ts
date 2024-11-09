@@ -60,4 +60,4 @@ export { up, down };
 `.trim(),
 );
 
-process.exit(0);
+process.exit();

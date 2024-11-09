@@ -27,14 +27,17 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.pushback(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.pushback(interaction, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
+
 		return;
 	}
 
-	const suggestionService = client.getPromptService(guild.id, { type: "suggestions" });
+	const suggestionService = client.services.local("suggestionPrompts", { guildId: guild.id });
 	if (suggestionService === undefined) {
 		return;
 	}
@@ -67,10 +70,12 @@ async function handleMakeSuggestion(client: Client, interaction: Logos.Interacti
 		}
 
 		const strings = constants.contexts.suggestionSent({ localise: client.localise, locale: interaction.locale });
-		await client.succeeded(submission, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.succeeded(submission, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
 	});
 
 	await composer.open();

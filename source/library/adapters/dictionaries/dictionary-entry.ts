@@ -102,12 +102,6 @@ interface DictionaryEntry extends Partial<Record<DictionarySection, unknown>> {
 	notes?: NoteField;
 }
 
-// TODO(vxern): Include.
-// type DictionaryEntryField = keyof DictionaryEntry;
-//
-// const requiredDictionaryEntryFields = ["sources", "lemma"] satisfies DictionaryEntryField[];
-// type RequiredDictionaryEntryFields = (typeof requiredDictionaryEntryFields)[number];
-
 export type {
 	LemmaField,
 	PartOfSpeechField,

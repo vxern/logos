@@ -27,21 +27,23 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 	];
 
 	if (!interaction.parameters.show) {
-		buttons.push(client.interactionRepetitionService.getShowButton(interaction));
+		buttons.push(client.services.global("interactionRepetition").getShowButton(interaction));
 	}
 
-	await client.reply(
-		interaction,
-		{
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: buttons as [Discord.ButtonComponent],
-				},
-			],
-		},
-		{ visible: interaction.parameters.show },
-	);
+	client
+		.reply(
+			interaction,
+			{
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: buttons as [Discord.ButtonComponent],
+					},
+				],
+			},
+			{ visible: interaction.parameters.show },
+		)
+		.ignore();
 }
 
 export { handleDisplayResources };

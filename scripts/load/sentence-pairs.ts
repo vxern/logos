@@ -67,10 +67,12 @@ for (const [locale, contents] of contentsAll) {
 			}
 
 			const lemmaUseKey = constants.keys.redis.lemmaUseIndex({ locale, lemma: data.segment });
-			(lemmaUseIndexes[lemmaUseKey] ??= []).push(sentenceId);
+			lemmaUseIndexes[lemmaUseKey] ??= [];
+			lemmaUseIndexes[lemmaUseKey].push(sentenceId);
 
 			const lemmaFormKey = constants.keys.redis.lemmaFormIndex({ locale, lemma: data.segment.toLowerCase() });
-			(lemmaFormIndexes[lemmaFormKey] ??= []).push(data.segment);
+			lemmaFormIndexes[lemmaFormKey] ??= [];
+			lemmaFormIndexes[lemmaFormKey].push(data.segment);
 		}
 
 		sentencePairs[constants.keys.redis.sentencePair({ locale, sentenceId })] = JSON.stringify(record);
@@ -114,4 +116,4 @@ for (const [locale, contents] of contentsAll) {
 
 await client.quit();
 
-process.exit(0);
+process.exit();

@@ -31,7 +31,7 @@ class SuggestionPromptService extends PromptService<{
 	}
 
 	async getUserDocument(suggestionDocument: Suggestion): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
+		return User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
@@ -122,10 +122,8 @@ class SuggestionPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
@@ -134,10 +132,8 @@ class SuggestionPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
