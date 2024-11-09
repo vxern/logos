@@ -15,7 +15,7 @@ interface CandidateFloodMessage {
 	readonly attachments?: Discord.Attachment[];
 }
 
-type FloodBuffer = Map</* createdAt: */ bigint, CandidateFloodMessage>;
+type FloodBuffer = Map</* messageId: */ bigint, CandidateFloodMessage>;
 
 class AntiFloodService extends LocalService {
 	readonly #messageCreates: Collector<"messageCreate">;
@@ -80,18 +80,17 @@ class AntiFloodService extends LocalService {
 
 		const intervalBoundary =
 			Date.now() - timeStructToMilliseconds(this.configuration.interval ?? defaults.FLOOD_INTERVAL);
-		const expiredCreatedAts = Array.from(buffer.keys()).filter(
+		const inactiveMessageIds = Array.from(buffer.keys()).filter(
 			(createdAt) => Discord.snowflakeToTimestamp(createdAt) < intervalBoundary,
 		);
-		for (const expiredCreatedAt of expiredCreatedAts) {
-			buffer.delete(expiredCreatedAt);
+		for (const inactiveMessageId of inactiveMessageIds) {
+			buffer.delete(inactiveMessageId);
 		}
 	}
 
 	#registerMessage(message: Logos.Message): void {
 		const buffer = this.#floodBuffers.get(message.guildId!)!.get(message.author.id)!;
 
-		const createdAt = snowflakeToBigint(message.id);
 		const messageCandidate: CandidateFloodMessage = {
 			id: message.id,
 			channelId: message.channelId,
@@ -99,7 +98,7 @@ class AntiFloodService extends LocalService {
 			attachments: message.attachments,
 		};
 
-		buffer.set(createdAt, messageCandidate);
+		buffer.set(message.id, messageCandidate);
 	}
 
 	async #investigateBuffer({ guildId, userId }: { guildId: bigint; userId: bigint }): Promise<void> {
@@ -111,11 +110,18 @@ class AntiFloodService extends LocalService {
 			return;
 		}
 
-		await this.#handleFlooding({ userId, messagesToDelete: duplicates });
+		await this.#handleFlooding({ guildId, userId, messagesToDelete: duplicates });
 	}
 
-	async #handleFlooding({ userId, messagesToDelete }: { userId: bigint; messagesToDelete: CandidateFloodMessage[] }) {
+	async #handleFlooding({
+		guildId,
+		userId,
+		messagesToDelete,
+	}: { guildId: bigint; userId: bigint; messagesToDelete: CandidateFloodMessage[] }) {
+		const buffer = this.#floodBuffers.get(guildId)!.get(userId)!;
 		for (const message of messagesToDelete) {
+			buffer.delete(message.id);
+
 			this.client.bot.helpers
 				.deleteMessage(message.channelId, message.id)
 				.catch((error) =>
