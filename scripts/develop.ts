@@ -1,10 +1,10 @@
 import { loadEnvironment } from "logos:core/loaders/environment";
 import { getAvailableMigrations, migrate } from "logos:core/runners/migrator";
+import { DiscordConnection } from "logos/connection";
 import { DatabaseMetadata } from "logos/models/database-metadata";
 import { Guild } from "logos/models/guild";
 import { CacheStore } from "logos/stores/cache";
 import { DatabaseStore } from "logos/stores/database";
-import { DiscordConnection } from "logos/connection";
 
 const log = constants.loggers.feedback;
 
