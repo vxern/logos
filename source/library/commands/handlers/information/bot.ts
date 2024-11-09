@@ -18,29 +18,47 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 	]);
 
 	client
-		.notice(interaction, {
-			author: {
-				iconUrl: Discord.avatarUrl(client.bot.id, botUser.discriminator, {
-					avatar: botUser.avatar ?? undefined,
-					format: "png",
-				}),
-				name: botUser.username,
+		.notice(
+			interaction,
+			{
+				embeds: [
+					{
+						author: {
+							iconUrl: Discord.avatarUrl(client.bot.id, botUser.discriminator, {
+								avatar: botUser.avatar ?? undefined,
+								format: "png",
+							}),
+							name: botUser.username,
+						},
+						fields: [
+							{
+								name: `${constants.emojis.information.bot} ${strings.concept.title}`,
+								value: strings.concept.description,
+							},
+							{
+								name: `${constants.emojis.information.function} ${strings.function.title}`,
+								value: `${strings.function.description}\n${featuresFormatted}`,
+							},
+							{
+								name: `${constants.emojis.information.languages} ${strings.languages.title}`,
+								value: strings.languages.description,
+							},
+						],
+					},
+				],
+				components: interaction.parameters.show
+					? []
+					: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									client.services.global("interactionRepetition").getShowButton(interaction),
+								],
+							},
+						],
 			},
-			fields: [
-				{
-					name: `${constants.emojis.information.bot} ${strings.concept.title}`,
-					value: strings.concept.description,
-				},
-				{
-					name: `${constants.emojis.information.function} ${strings.function.title}`,
-					value: `${strings.function.description}\n${featuresFormatted}`,
-				},
-				{
-					name: `${constants.emojis.information.languages} ${strings.languages.title}`,
-					value: strings.languages.description,
-				},
-			],
-		})
+			{ visible: interaction.parameters.show },
+		)
 		.ignore();
 }
 
