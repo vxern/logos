@@ -2,7 +2,6 @@ import defaults from "logos:constants/defaults";
 import { mention } from "logos:constants/formatting";
 import { type TimeStruct, timeStructToMilliseconds } from "logos:constants/time";
 import { isDefined } from "logos:core/utilities";
-import { snowflakeToBigint } from "@discordeno/bot";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import type { Guild } from "logos/models/guild";
