@@ -115,21 +115,15 @@ class AntiFloodService extends LocalService {
 	}
 
 	async #handleFlooding({ userId, messagesToDelete }: { userId: bigint; messagesToDelete: CandidateFloodMessage[] }) {
-		const channelId = messagesToDelete.at(0)!.channelId;
-		this.client.bot.helpers
-			.deleteMessages(
-				channelId,
-				messagesToDelete.map((message) => message.id),
-			)
-			.catch((error) =>
-				this.client.log.warn(
-					error,
-					`Failed to delete ${messagesToDelete.length} messages from ${this.client.diagnostics.channel(
-						channelId,
-					)}.`,
-				),
-			)
-			.ignore();
+		for (const message of messagesToDelete) {
+			this.client.bot.helpers
+				.deleteMessage(message.channelId, message.id)
+				.catch((error) =>
+					this.client.log.warn(error, `Failed to delete ${this.client.diagnostics.message(message.id)}`),
+				)
+				.ignore();
+		}
+
 		const timeout = this.configuration.timeoutDuration ?? defaults.FLOOD_TIMEOUT;
 
 		if (this.guildDocument.hasEnabled("alerts")) {
