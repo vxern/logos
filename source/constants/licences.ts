@@ -111,7 +111,6 @@ You must also include, in your app or site, wherever you provide attributions or
 		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
 		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
 		eld: apache("Copyright 2023 Nito T.M."),
-		"event-stream": mit("Copyright (c) 2011 Dominic Tarr"),
 		"fastest-levenshtein": mit("Copyright (c) 2020 Kasper Unn Weihe"),
 		"fasttext.wasm.js": mit("Copyright (c) 2023 Yuns <https://github.com/yunsii>"),
 		ioredis: mit("Copyright (c) 2015-2022 Zihua Li"),
@@ -119,12 +118,14 @@ You must also include, in your app or site, wherever you provide attributions or
 		nano: apache("Copyright [2016-2018] The Apache Software Foundation"),
 		nanoid: mit("Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>"),
 		"object-hash": mit("Copyright (c) 2014 object-hash contributors"),
+		pino: mit(
+			"Copyright (c) 2016-2024 Matteo Collina, David Mark Clements and the Pino contributors listed at https://github.com/pinojs/pino#the-team and in the README file.",
+		),
 		ravendb: mit("Copyright (c) 2017 Hibernating Rhinos LTD"),
 		"rethinkdb-ts": apache("Copyright (c) Authors of rethinkdb-ts"),
 		shoukaku: mit("Copyright (c) 2023 Deivu (Saya)"),
 		tinyld: mit("Copyright (c) 2021 Komodo"),
 		"wiktionary-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
-		winston: mit("Copyright (c) 2010 Charlie Robbins"),
 		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
 	},
 } as const);

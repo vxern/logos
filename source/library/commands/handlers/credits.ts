@@ -1,17 +1,17 @@
 import type { Translation } from "logos:constants/contributions";
-import type { LocalisationLanguage } from "logos:constants/languages";
+import type { LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
-	await client.notice(interaction, getTranslationView(client, interaction));
+	client.notice(interaction, getTranslationView(client, interaction)).ignore();
 }
 
 function getTranslationView(client: Client, interaction: Logos.Interaction): Discord.CamelizedDiscordEmbed {
 	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 	const strings = {
-		...constants.contexts.credits({ localise: client.localise.bind(client), locale: interaction.locale }),
-		...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+		...constants.contexts.credits({ localise: client.localise, locale: interaction.locale }),
+		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 	};
 	for (const [language, data] of (
 		Object.entries(constants.contributions.translation) as [LocalisationLanguage, Translation][]

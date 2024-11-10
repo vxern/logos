@@ -1,7 +1,7 @@
 import { getDictionaryLicence, isValidLicensedDictionary } from "logos:constants/licences";
 import type { Client } from "logos/client";
-import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple.ts";
-import { handleDisplayLicence } from "logos/commands/fragments/licence.ts";
+import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
+import { handleDisplayLicence } from "logos/commands/fragments/licence";
 
 async function handleDisplayDictionaryLicenceAutocomplete(
 	client: Client,

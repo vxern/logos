@@ -1,14 +1,14 @@
 import { describe, it } from "bun:test";
-import { isLanguage } from "logos:constants/languages/feature";
+import { isFeatureLanguage } from "logos:constants/languages/feature";
 import { expect } from "chai";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported feature language.", () => {
-		expect(isLanguage("Polish")).to.be.true;
-		expect(isLanguage("Romanian")).to.be.true;
+		expect(isFeatureLanguage("Polish")).to.be.true;
+		expect(isFeatureLanguage("Romanian")).to.be.true;
 	});
 
 	it("returns false if the passed language is not a supported feature language.", () => {
-		expect(isLanguage("this-is-not-a-supported")).to.be.false;
+		expect(isFeatureLanguage("this-is-not-a-supported")).to.be.false;
 	});
 });

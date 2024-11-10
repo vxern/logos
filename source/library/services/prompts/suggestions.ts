@@ -31,12 +31,12 @@ class SuggestionPromptService extends PromptService<{
 	}
 
 	async getUserDocument(suggestionDocument: Suggestion): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
+		return User.getOrCreate(this.client, { userId: suggestionDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, suggestionDocument: Suggestion): Discord.CreateMessageOptions | undefined {
 		const strings = constants.contexts.promptControls({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
 		return {
@@ -46,7 +46,7 @@ class SuggestionPromptService extends PromptService<{
 					color: suggestionDocument.isResolved ? constants.colours.green : constants.colours.dullYellow,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({
+						iconUrl: PromptService.encodeMetadataInUserAvatar({
 							user,
 							partialId: suggestionDocument.partialId,
 						}),
@@ -84,6 +84,30 @@ class SuggestionPromptService extends PromptService<{
 		};
 	}
 
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
+		const strings = constants.contexts.noSuggestions({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
+				},
+			],
+		};
+	}
+
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Suggestion | null | undefined> {
@@ -95,25 +119,21 @@ class SuggestionPromptService extends PromptService<{
 		const isResolved = interaction.metadata[2] === "true";
 		if (isResolved && suggestionDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
 		if (!(isResolved || suggestionDocument.isResolved)) {
 			const strings = constants.contexts.alreadyMarkedUnresolved({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 

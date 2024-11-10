@@ -1,4 +1,4 @@
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 
@@ -18,11 +18,6 @@ async function handleClearTimeout(
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
-	const configuration = guildDocument.timeouts;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const member = client.resolveInteractionToMember(interaction, {
 		identifier: interaction.parameters.user,
 		options: { restrictToNonSelf: true, excludeModerators: true },
@@ -40,14 +35,13 @@ async function handleClearTimeout(
 
 	const notTimedOut = timedOutUntil === undefined || timedOutUntil < Date.now();
 	if (notTimedOut) {
-		const strings = constants.contexts.notTimedOut({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
-		});
+		const strings = constants.contexts.notTimedOut({ localise: client.localise, locale: interaction.locale });
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
+			})
+			.ignore();
 
 		return;
 	}
@@ -59,22 +53,24 @@ async function handleClearTimeout(
 
 	await client.bot.helpers
 		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: null })
-		.catch(() => client.log.warn(`Failed to remove timeout of ${client.diagnostics.member(member)}.`));
+		.catch((error) => client.log.warn(error, `Failed to remove timeout of ${client.diagnostics.member(member)}.`));
 
 	await client.tryLog("memberTimeoutRemove", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("timeouts"),
 		args: [member, interaction.user],
 	});
 
 	const strings = constants.contexts.timeoutCleared({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.locale,
 	});
-	await client.success(interaction, {
-		title: strings.title,
-		description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
-	});
+	client
+		.success(interaction, {
+			title: strings.title,
+			description: strings.description({ user_mention: mention(user.id, { type: "user" }) }),
+		})
+		.ignore();
 }
 
 export { handleClearTimeout, handleClearTimeoutAutocomplete };

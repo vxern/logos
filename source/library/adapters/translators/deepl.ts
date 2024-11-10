@@ -1,10 +1,10 @@
+import type { Languages } from "logos:constants/languages";
 import {
 	type DeepLLanguage,
-	type Languages,
-	getDeepLLocaleByTranslationLanguage,
-	getDeepLTranslationLanguageByLocale,
+	getDeepLLanguageByLocale,
+	getDeepLLocaleByLanguage,
 	isDeepLLocale,
-} from "logos:constants/languages";
+} from "logos:constants/languages/translation";
 import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 
@@ -33,8 +33,8 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 			return undefined;
 		}
 
-		const sourceLocaleComplete = getDeepLLocaleByTranslationLanguage(languages.source);
-		const targetLocale = getDeepLLocaleByTranslationLanguage(languages.target);
+		const sourceLocaleComplete = getDeepLLocaleByLanguage(languages.source);
+		const targetLocale = getDeepLLocaleByLanguage(languages.target);
 
 		const [sourceLocale, _] = sourceLocaleComplete.split("-");
 		if (sourceLocale === undefined) {
@@ -56,8 +56,8 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 					target_lang: targetLocale,
 				}),
 			});
-		} catch (exception) {
-			this.log.error(`The request to translate text of length ${text.length} failed:`, exception);
+		} catch (error) {
+			this.log.error(error, `The request to translate text of length ${text.length} failed.`);
 			return undefined;
 		}
 
@@ -68,8 +68,8 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 		let data: any;
 		try {
 			data = await response.json();
-		} catch (exception) {
-			this.log.error("Reading response data for text translation failed:", exception);
+		} catch (error) {
+			this.log.error(error, "Reading response data for text translation failed.");
 			return undefined;
 		}
 
@@ -84,7 +84,7 @@ class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 		}
 
 		const detectedSourceLanguage = isDeepLLocale(detectedSourceLocale)
-			? getDeepLTranslationLanguageByLocale(detectedSourceLocale)
+			? getDeepLLanguageByLocale(detectedSourceLocale)
 			: undefined;
 
 		return { detectedSourceLanguage, text: translation.text, source: constants.licences.translators.deepl };

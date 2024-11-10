@@ -1,85 +1,59 @@
-import { trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { parseTimeExpression } from "logos/commands/interactions";
+import { handleAutocompleteTimestamp } from "logos/commands/fragments/autocomplete/timestamp";
 
 async function handleFastForwardAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { timestamp: string }>,
 ): Promise<void> {
-	const timestamp = parseTimeExpression(client, interaction, interaction.parameters.timestamp);
-	if (timestamp === undefined) {
-		const strings = constants.contexts.autocompleteTimestamp({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
-		return;
-	}
-
-	await client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+	await handleAutocompleteTimestamp(client, interaction);
 }
 
 async function handleFastForward(
 	client: Client,
 	interaction: Logos.Interaction<any, { timestamp: string }>,
 ): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.noSongToFastForward({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
 
 	const timestamp = Number(interaction.parameters.timestamp);
 	if (!Number.isSafeInteger(timestamp)) {
-		await displayInvalidTimestampError(client, interaction);
+		const strings = constants.contexts.invalidFastForwardTimestamp({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	await musicService.session.skipTo({ timestamp: musicService.session.player.position + timestamp });
 
 	const strings = constants.contexts.noSongToFastForward({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
-
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
-}
-
-async function displayInvalidTimestampError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidFastForwardTimestamp({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
-
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handleFastForward, handleFastForwardAutocomplete };

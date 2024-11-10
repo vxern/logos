@@ -1,4 +1,4 @@
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
 
@@ -8,10 +8,7 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const strings = constants.contexts.welcomeNotice({
-			localise: this.client.localise.bind(this.client),
-			locale: this.guildLocale,
-		});
+		const strings = constants.contexts.welcomeNotice({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
 				{

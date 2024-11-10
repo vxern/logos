@@ -1,9 +1,9 @@
-import { timestamp } from "logos:core/formatting";
+import { timestamp } from "logos:constants/formatting";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"memberTimeoutAdd"> = (client, [member, until, reason, author], { guildLocale }) => {
 	const strings = constants.contexts.memberTimeoutAdd({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: guildLocale,
 	});
 	return {

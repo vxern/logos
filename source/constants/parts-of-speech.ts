@@ -1,4 +1,5 @@
-import type { LearningLanguage, LocalisationLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
+import type { LocalisationLanguage } from "logos:constants/languages/localisation";
 import english from "logos:constants/parts-of-speech/english";
 import french from "logos:constants/parts-of-speech/french";
 import romanian from "logos:constants/parts-of-speech/romanian";
@@ -45,19 +46,20 @@ function isUnknownPartOfSpeech(partOfSpeech: PartOfSpeech): partOfSpeech is "unk
 	return partOfSpeech === "unknown";
 }
 
+interface PartOfSpeechDetection {
+	readonly detected: PartOfSpeech;
+	readonly original: string;
+}
 function getPartOfSpeech({
 	terms,
 	learningLanguage,
-}: { terms: { exact: string; approximate?: string }; learningLanguage: LearningLanguage }): [
-	detected: PartOfSpeech,
-	original: string,
-] {
+}: { terms: { exact: string; approximate?: string }; learningLanguage: LearningLanguage }): PartOfSpeechDetection {
 	if (isPartOfSpeech(terms.exact)) {
-		return [terms.exact, terms.exact];
+		return { detected: terms.exact, original: terms.exact };
 	}
 
 	if (!(learningLanguage in partsOfSpeechByLanguage)) {
-		return ["unknown", terms.exact];
+		return { detected: "unknown", original: terms.exact };
 	}
 
 	const partsOfSpeechLocalised = partsOfSpeechByLanguage[
@@ -65,14 +67,14 @@ function getPartOfSpeech({
 	] as Record<string, PartOfSpeech>;
 
 	if (terms.exact in partsOfSpeechLocalised) {
-		return [partsOfSpeechLocalised[terms.exact]!, terms.exact];
+		return { detected: partsOfSpeechLocalised[terms.exact]!, original: terms.exact };
 	}
 
 	if (terms.approximate !== undefined && terms.approximate in partsOfSpeechLocalised) {
-		return [partsOfSpeechLocalised[terms.approximate]!, terms.approximate];
+		return { detected: partsOfSpeechLocalised[terms.approximate]!, original: terms.approximate };
 	}
 
-	return ["unknown", terms.exact];
+	return { detected: "unknown", original: terms.exact };
 }
 
 export { getPartOfSpeech, isUnknownPartOfSpeech };

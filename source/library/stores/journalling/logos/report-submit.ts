@@ -1,7 +1,7 @@
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"reportSubmit"> = (client, [author, report], { guildLocale }) => {
-	const strings = constants.contexts.reportSubmit({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.reportSubmit({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

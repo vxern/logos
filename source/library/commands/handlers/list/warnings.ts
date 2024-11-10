@@ -1,4 +1,4 @@
-import { timestamp } from "logos:core/formatting";
+import { timestamp } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
 import { Warning } from "logos/models/warning";
@@ -55,7 +55,7 @@ async function handleDisplayWarnings(
 		where: { guildId: interaction.guildId.toString(), targetId: member.id.toString() },
 	});
 
-	await client.notice(interaction, getWarningPage(client, interaction, warningDocuments, isSelf));
+	client.notice(interaction, getWarningPage(client, interaction, warningDocuments, isSelf)).ignore();
 }
 
 function getWarningPage(
@@ -67,7 +67,7 @@ function getWarningPage(
 	if (warnings.length === 0) {
 		if (isSelf) {
 			const strings = constants.contexts.noWarningsForSelf({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
 
@@ -78,7 +78,7 @@ function getWarningPage(
 		}
 
 		const strings = constants.contexts.noWarningsForOther({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -88,7 +88,7 @@ function getWarningPage(
 		};
 	}
 
-	const strings = constants.contexts.warnings({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.warnings({ localise: client.localise, locale: interaction.locale });
 
 	return {
 		title: strings.title,

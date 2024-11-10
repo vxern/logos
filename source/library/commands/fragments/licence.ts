@@ -1,5 +1,5 @@
-import type { Licence } from "logos:constants/licences.ts";
-import type { Client } from "logos/client.ts";
+import type { Licence } from "logos:constants/licences";
+import type { Client } from "logos/client";
 
 async function handleDisplayLicence(
 	client: Client,
@@ -8,50 +8,39 @@ async function handleDisplayLicence(
 ) {
 	const licence = getLicence(identifier);
 	if (licence === undefined) {
-		await displayError(client, interaction);
+		const strings = constants.contexts.invalidLicence({ localise: client.localise, locale: interaction.locale });
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
-	const strings = constants.contexts.licence({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.licence({ localise: client.localise, locale: interaction.locale });
 
-	await client.notice(interaction, {
-		author: {
-			name: strings.title({ entity: licence.name }),
-			iconUrl: licence.faviconLink,
-			url: licence.link,
-		},
-		description: licence.notices !== undefined ? `*${licence.notices.licence}*` : undefined,
-		image: licence.notices?.badgeLink !== undefined ? { url: licence.notices.badgeLink } : undefined,
-		fields: [
-			{
-				name: strings.fields.source,
-				value: licence.link,
+	client
+		.notice(interaction, {
+			author: {
+				name: strings.title({ entity: licence.name }),
+				iconUrl: licence.faviconLink,
+				url: licence.link,
 			},
-			...(licence.notices?.copyright !== undefined
-				? [
-						{
-							name: strings.fields.copyright,
-							value: licence.notices.copyright,
-						},
-					]
-				: []),
-		],
-	});
-}
-
-async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.invalidLicence({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
-
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+			description: licence.notices !== undefined ? `*${licence.notices.licence}*` : undefined,
+			image: licence.notices?.badgeLink !== undefined ? { url: licence.notices.badgeLink } : undefined,
+			fields: [
+				{
+					name: strings.fields.source,
+					value: licence.link,
+				},
+				...(licence.notices?.copyright !== undefined
+					? [
+							{
+								name: strings.fields.copyright,
+								value: licence.notices.copyright,
+							},
+						]
+					: []),
+			],
+		})
+		.ignore();
 }
 
 export { handleDisplayLicence };

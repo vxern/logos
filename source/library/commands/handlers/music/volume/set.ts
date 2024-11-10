@@ -1,25 +1,17 @@
 import type { Client } from "logos/client";
 
 async function handleSetVolume(client: Client, interaction: Logos.Interaction<any, { volume: number }>): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToManage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -30,14 +22,15 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 
 	if (interaction.parameters.volume < 0 || interaction.parameters.volume > constants.MAXIMUM_VOLUME) {
 		const strings = constants.contexts.volumeInvalid({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.error(interaction, {
-			title: strings.title,
-			description: strings.description({ volume: constants.MAXIMUM_VOLUME }),
-		});
+		client
+			.error(interaction, {
+				title: strings.title,
+				description: strings.description({ volume: constants.MAXIMUM_VOLUME }),
+			})
+			.ignore();
 
 		return;
 	}
@@ -45,18 +38,19 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 	await musicService.session.setVolume(interaction.parameters.volume);
 
 	const strings = constants.contexts.volumeSet({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.locale,
 	});
-
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.volume} ${strings.title}`,
-			description: strings.description({ volume: interaction.parameters.volume }),
-		},
-		{ visible: true },
-	);
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.volume} ${strings.title}`,
+				description: strings.description({ volume: interaction.parameters.volume }),
+			},
+			{ visible: true },
+		)
+		.ignore();
 }
 
 export { handleSetVolume };

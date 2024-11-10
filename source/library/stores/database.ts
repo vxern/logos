@@ -1,12 +1,13 @@
 import type { Collection } from "logos:constants/database";
 import type { Environment } from "logos:core/loaders/environment";
+import type { PromiseOr } from "logos:core/utilities";
 import type { DatabaseAdapter, DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBAdapter } from "logos/adapters/databases/couchdb/database";
 import { InMemoryAdapter } from "logos/adapters/databases/in-memory/database";
 import { MongoDBAdapter } from "logos/adapters/databases/mongodb/database";
 import { RavenDBAdapter } from "logos/adapters/databases/ravendb/database";
 import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
-import { Logger } from "logos/logger";
+import { DatabaseMetadata } from "logos/models/database-metadata";
 import { EntryRequest } from "logos/models/entry-request";
 import { Guild } from "logos/models/guild";
 import { GuildStatistics } from "logos/models/guild-statistics";
@@ -18,9 +19,12 @@ import { Suggestion } from "logos/models/suggestion";
 import { Ticket } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { Warning } from "logos/models/warning";
+import type { CacheStore } from "logos/stores/cache";
+import type pino from "pino";
 
 class DatabaseStore {
 	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({
+		DatabaseMetadata: DatabaseMetadata,
 		EntryRequests: EntryRequest,
 		GuildStatistics: GuildStatistics,
 		Guilds: Guild,
@@ -33,71 +37,49 @@ class DatabaseStore {
 		Warnings: Warning,
 	} as const);
 
-	readonly log: Logger;
-	readonly cache: {
-		readonly entryRequests: Map<string, EntryRequest>;
-		readonly guildStatistics: Map<string, GuildStatistics>;
-		readonly guilds: Map<string, Guild>;
-		readonly praisesByAuthor: Map<string, Map<string, Praise>>;
-		readonly praisesByTarget: Map<string, Map<string, Praise>>;
-		readonly reports: Map<string, Report>;
-		readonly resources: Map<string, Resource>;
-		readonly suggestions: Map<string, Suggestion>;
-		readonly tickets: Map<string, Ticket>;
-		readonly users: Map<string, User>;
-		readonly warningsByTarget: Map<string, Map<string, Warning>>;
-	};
+	readonly log: pino.Logger;
+	readonly cache: CacheStore;
 
-	readonly #environment: Environment;
 	readonly #adapter: DatabaseAdapter;
 
 	get conventionsFor(): DatabaseAdapter["conventionsFor"] {
 		return this.#adapter.conventionsFor.bind(this.#adapter);
 	}
 
-	get withSession(): <T>(callback: (session: DocumentSession) => T | Promise<T>) => Promise<T> {
-		return (callback) => this.#adapter.withSession(callback, { environment: this.#environment, database: this });
+	get withSession(): <T>(callback: (session: DocumentSession) => PromiseOr<T>) => Promise<T> {
+		return (callback) => this.#adapter.withSession(callback, { database: this });
 	}
 
-	constructor({ environment, log, adapter }: { environment: Environment; log: Logger; adapter: DatabaseAdapter }) {
+	constructor({ log, adapter, cache }: { log: pino.Logger; adapter: DatabaseAdapter; cache: CacheStore }) {
 		this.log = log;
-		this.cache = {
-			entryRequests: new Map(),
-			guildStatistics: new Map(),
-			guilds: new Map(),
-			praisesByAuthor: new Map(),
-			praisesByTarget: new Map(),
-			reports: new Map(),
-			resources: new Map(),
-			suggestions: new Map(),
-			tickets: new Map(),
-			users: new Map(),
-			warningsByTarget: new Map(),
-		};
+		this.cache = cache;
 
-		this.#environment = environment;
 		this.#adapter = adapter;
 	}
 
-	static async create({ environment }: { environment: Environment }): Promise<DatabaseStore> {
-		const log = Logger.create({ identifier: "Client/DatabaseStore", isDebug: environment.isDebug });
+	static create({
+		log,
+		environment,
+		cache,
+	}: { log: pino.Logger; environment: Environment; cache: CacheStore }): DatabaseStore {
+		log = log.child({ name: "DatabaseStore" });
 
 		let adapter: DatabaseAdapter | undefined;
 		switch (environment.databaseSolution) {
 			case "mongodb": {
-				adapter = MongoDBAdapter.tryCreate({ environment, log });
+				adapter = MongoDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 			case "ravendb": {
-				adapter = await RavenDBAdapter.tryCreate({ environment, log });
+				adapter = RavenDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 			case "couchdb": {
-				adapter = CouchDBAdapter.tryCreate({ environment, log });
+				adapter = CouchDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 			case "rethinkdb": {
-				adapter = RethinkDBAdapter.tryCreate({ environment, log });
+				adapter = RethinkDBAdapter.tryCreate({ log, environment });
 				break;
 			}
 		}
@@ -111,17 +93,17 @@ class DatabaseStore {
 
 			log.info("Logos is running in memory. Data will not persist in-between sessions.");
 
-			adapter = new InMemoryAdapter({ environment });
+			adapter = new InMemoryAdapter({ log });
 		}
 
-		return new DatabaseStore({ environment, log, adapter });
+		return new DatabaseStore({ log, adapter, cache });
 	}
 
 	static getModelClassByCollection({ collection }: { collection: Collection }): ModelConstructor {
 		return DatabaseStore.#classes[collection];
 	}
 
-	async setup({ prefetchDocuments }: { prefetchDocuments: boolean }): Promise<void> {
+	async setup({ prefetchDocuments = false }: { prefetchDocuments?: boolean } = {}): Promise<void> {
 		this.log.info("Setting up database store...");
 
 		await this.#adapter.setup();
@@ -148,7 +130,7 @@ class DatabaseStore {
 			Ticket.getAll(this),
 		]);
 
-		const totalCount = collections.map((documents) => documents.length).reduce((a, b) => a + b);
+		const totalCount = collections.map((documents) => documents.length).reduce((a, b) => a + b, 0);
 		const counts = {
 			entryRequests: collections[0].length,
 			reports: collections[1].length,
@@ -164,133 +146,7 @@ class DatabaseStore {
 		this.log.info(`- ${counts.tickets} tickets.`);
 
 		for (const documents of collections) {
-			this.cacheDocuments<Model>(documents);
-		}
-	}
-
-	cacheDocuments<M extends Model>(documents: M[]): void {
-		if (documents.length === 0) {
-			return;
-		}
-
-		this.log.debug(`Caching ${documents.length} documents...`);
-
-		for (const document of documents) {
-			this.cacheDocument(document);
-		}
-	}
-
-	cacheDocument(document: any): void {
-		switch (true) {
-			case document instanceof EntryRequest: {
-				this.cache.entryRequests.set(document.partialId, document);
-				break;
-			}
-			case document instanceof GuildStatistics: {
-				this.cache.guildStatistics.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Guild: {
-				this.cache.guilds.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Praise: {
-				if (this.cache.praisesByAuthor.has(document.authorId)) {
-					this.cache.praisesByAuthor.get(document.authorId)?.set(document.partialId, document);
-				} else {
-					this.cache.praisesByAuthor.set(document.authorId, new Map([[document.partialId, document]]));
-				}
-
-				if (this.cache.praisesByTarget.has(document.targetId)) {
-					this.cache.praisesByTarget.get(document.targetId)?.set(document.partialId, document);
-				} else {
-					this.cache.praisesByTarget.set(document.targetId, new Map([[document.partialId, document]]));
-				}
-
-				break;
-			}
-			case document instanceof Report: {
-				this.cache.reports.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Resource: {
-				this.cache.resources.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Suggestion: {
-				this.cache.suggestions.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Ticket: {
-				this.cache.tickets.set(document.partialId, document);
-				break;
-			}
-			case document instanceof User: {
-				this.cache.users.set(document.partialId, document);
-				break;
-			}
-			case document instanceof Warning: {
-				if (this.cache.warningsByTarget.has(document.targetId)) {
-					this.cache.warningsByTarget.get(document.targetId)?.set(document.partialId, document);
-				} else {
-					this.cache.warningsByTarget.set(document.targetId, new Map([[document.partialId, document]]));
-				}
-				break;
-			}
-		}
-	}
-
-	unloadDocument(document: any): void {
-		switch (true) {
-			case document instanceof EntryRequest: {
-				this.cache.entryRequests.delete(document.partialId);
-				break;
-			}
-			case document instanceof GuildStatistics: {
-				this.cache.guildStatistics.delete(document.partialId);
-				break;
-			}
-			case document instanceof Guild: {
-				this.cache.guilds.delete(document.partialId);
-				break;
-			}
-			case document instanceof Praise: {
-				if (this.cache.praisesByAuthor.has(document.authorId)) {
-					this.cache.praisesByAuthor.get(document.authorId)?.delete(document.partialId);
-				}
-
-				if (this.cache.praisesByTarget.has(document.targetId)) {
-					this.cache.praisesByTarget.get(document.targetId)?.delete(document.partialId);
-				}
-
-				break;
-			}
-			case document instanceof Report: {
-				this.cache.reports.delete(document.partialId);
-				break;
-			}
-			case document instanceof Resource: {
-				this.cache.resources.delete(document.partialId);
-				break;
-			}
-			case document instanceof Suggestion: {
-				this.cache.suggestions.delete(document.partialId);
-				break;
-			}
-			case document instanceof Ticket: {
-				this.cache.tickets.delete(document.partialId);
-				break;
-			}
-			case document instanceof User: {
-				this.cache.users.delete(document.partialId);
-				break;
-			}
-			case document instanceof Warning: {
-				if (this.cache.warningsByTarget.has(document.targetId)) {
-					this.cache.warningsByTarget.get(document.targetId)?.delete(document.partialId);
-				}
-				break;
-			}
+			this.cache.cacheDocuments<Model>(documents);
 		}
 	}
 }

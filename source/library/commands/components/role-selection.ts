@@ -1,3 +1,4 @@
+import { trim } from "logos:constants/formatting";
 import {
 	type Role,
 	type RoleCategory,
@@ -10,7 +11,6 @@ import {
 	isGroup,
 	isSingle,
 } from "logos:constants/roles";
-import { trim } from "logos:core/formatting";
 import { isDefined } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
@@ -108,7 +108,7 @@ async function createRoleSelectionMenu(
 	const selectionMenuSelection = new InteractionCollector(client, { only: [interaction.user.id] });
 
 	selectionMenuSelection.onInteraction(async (selection) => {
-		await client.acknowledge(selection);
+		client.acknowledge(selection).ignore();
 
 		const identifier = selection.data?.values?.at(0);
 		if (identifier === undefined) {
@@ -152,8 +152,9 @@ async function createRoleSelectionMenu(
 
 			client.bot.helpers
 				.removeRole(guild.id, member.id, role.id, "User-requested role removal.")
-				.catch(() =>
+				.catch((error) =>
 					client.log.warn(
+						error,
 						`Failed to remove ${client.diagnostics.role(role)} from ${client.diagnostics.member(
 							member,
 						)} on ${client.diagnostics.guild(guild)}.`,
@@ -173,14 +174,15 @@ async function createRoleSelectionMenu(
 				viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
 			) {
 				const strings = constants.contexts.roleLimitReached({
-					localise: client.localise.bind(client),
+					localise: client.localise,
 					locale: interaction.locale,
 				});
-
-				await client.notice(interaction, {
-					title: strings.title,
-					description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
-				});
+				client
+					.notice(interaction, {
+						title: strings.title,
+						description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
+					})
+					.ignore();
 
 				displayData = await traverseRoleTreeAndDisplay(client, interaction, displayData, {
 					editResponse: true,
@@ -191,8 +193,9 @@ async function createRoleSelectionMenu(
 
 			await client.bot.helpers
 				.addRole(guild.id, member.id, role.id, "User-requested role addition.")
-				.catch(() =>
+				.catch((error) =>
 					client.log.warn(
+						error,
 						`Failed to add ${client.diagnostics.role(role)} to ${client.diagnostics.member(
 							member,
 						)} on ${client.diagnostics.guild(guild)}.`,
@@ -203,8 +206,9 @@ async function createRoleSelectionMenu(
 				for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
 					client.bot.helpers
 						.removeRole(guild.id, member.id, memberRoleId)
-						.catch(() =>
+						.catch((error) =>
 							client.log.warn(
+								error,
 								`Failed to remove ${client.diagnostics.role(role)} from ${client.diagnostics.member(
 									member,
 								)} on ${client.diagnostics.guild(guild)}.`,
@@ -332,7 +336,7 @@ async function traverseRoleTreeAndDisplay(
 		return data;
 	}
 
-	await client.reply(interaction, menu);
+	client.reply(interaction, menu).ignore();
 
 	return data;
 }
@@ -347,7 +351,7 @@ async function displaySelectMenu(
 	const isInRootCategory = data.browsingData.navigationData.identifiersAccessed.length === 0;
 	if (!isInRootCategory) {
 		const strings = constants.contexts.previousRoleCategory({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 
@@ -360,10 +364,10 @@ async function displaySelectMenu(
 	}
 
 	const strings = {
-		...constants.contexts.roleMenu({ localise: client.localise.bind(client), locale: interaction.locale }),
+		...constants.contexts.roleMenu({ localise: client.localise, locale: interaction.locale }),
 		...constants.contexts.role({
-			localise: client.localise.bind(client),
-			localiseRaw: client.localiseRaw.bind(client),
+			localise: client.localise,
+			localiseRaw: client.localiseRaw,
 			locale: interaction.locale,
 		}),
 	};
@@ -406,7 +410,7 @@ function createSelectOptionsFromCategories(
 	const selections: Discord.SelectOption[] = [];
 	for (const [name, category] of Object.entries(categorySelections)) {
 		const strings = constants.contexts.roleCategory({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
 		selections.push({
@@ -441,10 +445,10 @@ function createSelectOptionsFromCollection(
 		const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
 		const strings = {
-			...constants.contexts.assignedRoles({ localise: client.localise.bind(client), locale: interaction.locale }),
+			...constants.contexts.assignedRoles({ localise: client.localise, locale: interaction.locale }),
 			...constants.contexts.role({
-				localise: client.localise.bind(client),
-				localiseRaw: client.localiseRaw.bind(client),
+				localise: client.localise,
+				localiseRaw: client.localiseRaw,
 				locale: interaction.locale,
 			}),
 		};

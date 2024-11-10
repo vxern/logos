@@ -1,10 +1,18 @@
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import type { PraiseDocument } from "logos/models/documents/praise/latest";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	PraiseModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-type CreatePraiseOptions = { comment?: string } & IdentifierData<Praise>;
+type CreatePraiseOptions = CreateModelOptions<Praise, PraiseDocument>;
 
-class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
+interface Praise extends PraiseDocument {}
+class Praise extends PraiseModel {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -21,8 +29,6 @@ class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "author
 		return Number(this.idParts[3]);
 	}
 
-	comment?: string;
-
 	constructor(database: DatabaseStore, { comment, ...data }: CreatePraiseOptions) {
 		super(database, data, { collection: "Praises" });
 
@@ -33,18 +39,20 @@ class Praise extends Model<{ collection: "Praises"; idParts: ["guildId", "author
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Praise>> },
 	): Promise<Praise[]> {
-		return await Model.all<Praise>(clientOrDatabase, {
+		return Model.all<Praise>(clientOrDatabase, {
 			collection: "Praises",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: {
+				guildId: undefined,
+				authorId: undefined,
+				targetId: undefined,
+				createdAt: undefined,
+				...clauses?.where,
+			},
 		});
 	}
 
 	static async create(client: Client, data: Omit<CreatePraiseOptions, "createdAt">): Promise<Praise> {
 		const praiseDocument = new Praise(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await praiseDocument.create(client);
 
 		return praiseDocument;

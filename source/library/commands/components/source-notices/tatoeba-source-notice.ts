@@ -1,5 +1,5 @@
-import type { Client } from "logos/client.ts";
-import { SourceNotice } from "logos/commands/components/source-notices/source-notice.ts";
+import type { Client } from "logos/client";
+import { SourceNotice } from "logos/commands/components/source-notices/source-notice";
 
 class TatoebaSourceNotice extends SourceNotice {
 	constructor(
@@ -14,7 +14,7 @@ class TatoebaSourceNotice extends SourceNotice {
 		const translationLink = constants.links.tatoebaSentence(translationId.toString());
 
 		const strings = constants.contexts.sentencesSourcedFrom({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 		super(client, {

@@ -1,19 +1,23 @@
 import type { Collection } from "logos:constants/database";
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
+import type { PromiseOr } from "logos:core/utilities";
 import { type IdentifierData, type IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type pino from "pino";
 
 abstract class DatabaseAdapter {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
-	constructor({ identifier, environment }: { identifier: string; environment: Environment }) {
-		this.log = Logger.create({ identifier: `DatabaseAdapter(${identifier})`, isDebug: environment.isDebug });
+	constructor({ identifier, log }: { identifier: string; log: pino.Logger }) {
+		this.log = log.child({ name: identifier });
 	}
 
-	abstract setup(): void | Promise<void>;
+	async setup(): Promise<void> {
+		// Do nothing.
+	}
 
-	abstract teardown(): void | Promise<void>;
+	async teardown(): Promise<void> {
+		// Do nothing.
+	}
 
 	abstract conventionsFor({
 		document,
@@ -21,16 +25,13 @@ abstract class DatabaseAdapter {
 		collection,
 	}: { document: Model; data: IdentifierDataOrMetadata<Model>; collection: Collection }): DocumentConventions;
 
-	abstract openSession({
-		environment,
-		database,
-	}: { environment: Environment; database: DatabaseStore }): DocumentSession;
+	abstract openSession({ database }: { database: DatabaseStore }): DocumentSession;
 
 	async withSession<T>(
-		callback: (session: DocumentSession) => T | Promise<T>,
-		{ environment, database }: { environment: Environment; database: DatabaseStore },
+		callback: (session: DocumentSession) => PromiseOr<T>,
+		{ database }: { database: DatabaseStore },
 	): Promise<T> {
-		const session = this.openSession({ environment, database });
+		const session = this.openSession({ database });
 
 		const result = await callback(session);
 
@@ -41,15 +42,11 @@ abstract class DatabaseAdapter {
 }
 
 abstract class DocumentSession {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly database: DatabaseStore;
 
-	constructor({
-		identifier,
-		environment,
-		database,
-	}: { environment: Environment; identifier: string; database: DatabaseStore }) {
-		this.log = Logger.create({ identifier: `DocumentSession(${identifier})`, isDebug: environment.isDebug });
+	constructor({ identifier, database }: { identifier: string; database: DatabaseStore }) {
+		this.log = database.log.child({ name: identifier });
 		this.database = database;
 	}
 
@@ -60,12 +57,12 @@ abstract class DocumentSession {
 			return undefined;
 		}
 
-		this.database.cacheDocument(document);
+		this.database.cache.cacheDocument(document);
 
 		return document;
 	}
 
-	abstract loadMany<M extends Model>(ids: string[]): (M | undefined)[] | Promise<(M | undefined)[]>;
+	abstract loadMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]>;
 	async getMany<M extends Model>(ids: string[]): Promise<(M | undefined)[]> {
 		const results = await this.loadMany<M>(ids);
 
@@ -76,17 +73,17 @@ abstract class DocumentSession {
 				continue;
 			}
 
-			this.database.cacheDocument(document);
+			this.database.cache.cacheDocument(document);
 			documents.push(document);
 		}
 
 		return documents;
 	}
 
-	abstract store<M extends Model>(document: M): void | Promise<void>;
+	abstract store<M extends Model>(document: M): Promise<void>;
 	async set<M extends Model>(document: M): Promise<M> {
 		await this.store(document);
-		this.database.cacheDocument(document);
+		this.database.cache.cacheDocument(document);
 
 		return document;
 	}
@@ -95,12 +92,10 @@ abstract class DocumentSession {
 		// We don't call any methods to delete a document here because we don't actually delete anything from the
 		// database; we merely *mark* documents as deleted.
 
-		this.database.unloadDocument(document);
+		this.database.cache.unloadDocument(document);
 	}
 
 	abstract query<M extends Model>({ collection }: { collection: Collection }): DocumentQuery<M>;
-
-	abstract dispose(): void | Promise<void>;
 
 	async loadManyTabulated<M extends Model, RawDocument>(
 		ids: string[],
@@ -143,10 +138,16 @@ abstract class DocumentSession {
 			);
 		}
 
-		const resultsUnsorted = await Promise.all(promises).then((results) => results.flat());
-		const resultsSorted = resultsUnsorted.sort(([_, a], [__, b]) => a - b);
+		return Promise.all(promises).then((results) =>
+			results
+				.flat()
+				.toSorted(([_, a], [__, b]) => a - b)
+				.map(([rawDocument, _]) => instantiateModel(this.database, rawDocument)),
+		);
+	}
 
-		return resultsSorted.map(([rawDocument, _]) => instantiateModel(this.database, rawDocument));
+	async dispose(): Promise<void> {
+		// Do nothing.
 	}
 }
 
@@ -155,7 +156,7 @@ abstract class DocumentQuery<M extends Model> {
 
 	abstract whereEquals(property: string, value: unknown): DocumentQuery<M>;
 
-	abstract execute(): M[] | Promise<M[]>;
+	abstract execute(): Promise<M[]>;
 	async run(): Promise<M[]> {
 		const documents = await this.execute();
 		return documents.filter((document) => !document.isDeleted);
@@ -179,7 +180,7 @@ abstract class DocumentConventions<Metadata = any> {
 	abstract get id(): string;
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * Can optionally be overridden by the concrete convention, and by default does not retrieve any underlying value
 	 * for a revision. This is okay because only certain databases have to keep track of revisions, and most of them
 	 * never consult with this value.
@@ -189,13 +190,15 @@ abstract class DocumentConventions<Metadata = any> {
 	}
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * Same remarks as for the getter; only some conventions have a use for the revision.
 	 */
-	set revision(_: string) {}
+	set revision(_: string) {
+		// Do nothing.
+	}
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * Same remarks as for revision.
 	 */
 	get isDeleted(): boolean | undefined {
@@ -203,10 +206,12 @@ abstract class DocumentConventions<Metadata = any> {
 	}
 
 	/**
-	 * @privateRemarks
+	 * @remarks
 	 * Same remarks as for revision.
 	 */
-	set isDeleted(_: boolean) {}
+	set isDeleted(_: boolean) {
+		// Do nothing.
+	}
 
 	constructor({
 		document,
@@ -216,7 +221,6 @@ abstract class DocumentConventions<Metadata = any> {
 		this.document = document as Model & Metadata;
 
 		this.assignAccessorsToModel();
-
 		this.#populateModelData(data, { collection });
 
 		const partialId = this.#getPartialIdFromData(data);
@@ -225,15 +229,13 @@ abstract class DocumentConventions<Metadata = any> {
 		this.idParts = partialId.split(constants.special.database.separator);
 	}
 
-	#getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {
-		let partialId: string;
-		if (this.hasMetadata(data)) {
-			partialId = Model.decomposeId(this.id)[1];
-		} else {
-			partialId = Model.buildPartialId(data as IdentifierData<Model>);
-		}
-
-		return partialId;
+	assignAccessorsToModel(): void {
+		const conventions = this;
+		Object.defineProperty(this.document, "id", {
+			get(): string {
+				return conventions.id;
+			},
+		});
 	}
 
 	#populateModelData(
@@ -248,13 +250,15 @@ abstract class DocumentConventions<Metadata = any> {
 		}
 	}
 
-	assignAccessorsToModel(): void {
-		const conventions = this;
-		Object.defineProperty(this.document, "id", {
-			get(): string {
-				return conventions.id;
-			},
-		});
+	#getPartialIdFromData(data: IdentifierDataOrMetadata<Model, Metadata>): string {
+		let partialId: string;
+		if (this.hasMetadata(data)) {
+			partialId = Model.decomposeId(this.id)[1];
+		} else {
+			partialId = Model.buildPartialId(data as IdentifierData<Model>);
+		}
+
+		return partialId;
 	}
 
 	/**

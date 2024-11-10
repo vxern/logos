@@ -1,7 +1,7 @@
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"inquiryOpen"> = (client, [member, _], { guildLocale }) => {
-	const strings = constants.contexts.inquiryOpen({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.inquiryOpen({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

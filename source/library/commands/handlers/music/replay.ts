@@ -5,25 +5,14 @@ async function handleReplayAction(
 	client: Client,
 	interaction: Logos.Interaction<any, { collection: boolean | undefined }>,
 ): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 
 	if (!musicService.hasSession) {
-		const strings = constants.contexts.noSongToReplay({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		const strings = constants.contexts.noSongToReplay({ localise: client.localise, locale: interaction.locale });
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -31,31 +20,34 @@ async function handleReplayAction(
 	if (interaction.parameters.collection) {
 		if (!(musicService.session.queueable instanceof SongCollection)) {
 			const strings = constants.contexts.noSongCollectionToReplay({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
-
-			await client.warning(interaction, {
-				title: strings.title,
-				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-			});
+			client
+				.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+				})
+				.ignore();
 
 			return;
 		}
 	}
 
 	const strings = constants.contexts.replaying({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.guildLocale,
 	});
-	await client.success(
-		interaction,
-		{
-			title: `${constants.emojis.music.replaying} ${strings.title}`,
-			description: strings.description,
-		},
-		{ visible: true },
-	);
+	client
+		.success(
+			interaction,
+			{
+				title: `${constants.emojis.music.replaying} ${strings.title}`,
+				description: strings.description,
+			},
+			{ visible: true },
+		)
+		.ignore();
 
 	await musicService.session.replay({
 		mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",

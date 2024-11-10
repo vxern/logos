@@ -3,20 +3,23 @@ import {
 	getDeepLLanguageByLocale,
 	getDeepLLocaleByLanguage,
 	getGoogleTranslateLocaleByLanguage,
+	getLingvanexLanguageByLocale,
+	getLingvanexLocaleByLanguage,
 	isDeepLLocale,
 	isGoogleTranslateLocale,
-	isLanguage,
+	isLingvanexLocale,
+	isTranslationLanguage,
 } from "logos:constants/languages/translation";
 import { expect } from "chai";
 
 describe("isLanguage()", () => {
 	it("returns true if the passed language is a supported translation language.", () => {
-		expect(isLanguage("English/American")).to.be.true;
-		expect(isLanguage("French")).to.be.true;
+		expect(isTranslationLanguage("English/British")).to.be.true;
+		expect(isTranslationLanguage("French")).to.be.true;
 	});
 
 	it("returns false if the passed language is not a supported translation language.", () => {
-		expect(isLanguage("this-is-not-a-supported-translation-language")).to.be.false;
+		expect(isTranslationLanguage("this-is-not-a-supported-translation-language")).to.be.false;
 	});
 });
 
@@ -43,7 +46,13 @@ describe("isGoogleTranslateLocale()", () => {
 });
 
 describe("isLingvanexLocale()", () => {
-	// TODO(vxern): Implement.
+	it("returns true if the passed locale is supported by Lingvanex.", () => {
+		expect(isLingvanexLocale("ka_GE")).to.be.true; // Georgian
+	});
+
+	it("returns false if the passed locale is not supported by Lingvanex.", () => {
+		expect(isLingvanexLocale("this-is-not-a-supported-lingvanex-locale")).to.be.false;
+	});
 });
 
 describe("getDeepLLocaleByLanguage()", () => {
@@ -61,7 +70,10 @@ describe("getGoogleTranslateLocaleByLanguage()", () => {
 });
 
 describe("getLingvanexLocaleByLanguage()", () => {
-	// TODO(vxern): Implement.
+	it("returns the locale corresponding to the passed Lingvanex language.", () => {
+		expect(getLingvanexLocaleByLanguage("Amharic")).to.equal("am_ET");
+		expect(getLingvanexLocaleByLanguage("Javanese")).to.equal("jv_ID");
+	});
 });
 
 describe("getDeepLLanguageByLocale()", () => {
@@ -79,5 +91,8 @@ describe("getGoogleTranslateLanguageByLocale()", () => {
 });
 
 describe("getLingvanexLanguageByLocale()", () => {
-	// TODO(vxern): Implement.
+	it("returns the locale corresponding to the passed Lingvanex language.", () => {
+		expect(getLingvanexLanguageByLocale("am_ET")).to.equal("Amharic");
+		expect(getLingvanexLanguageByLocale("jv_ID")).to.equal("Javanese");
+	});
 });

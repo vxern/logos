@@ -2,7 +2,7 @@ import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"guildMemberRemove"> = (client, [user, _], { guildLocale }) => {
 	const strings = constants.contexts.guildMemberRemove({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: guildLocale,
 	});
 	return {

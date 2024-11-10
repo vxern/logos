@@ -1,42 +1,33 @@
-import type { Locale } from "logos:constants/languages";
+import type { Locale } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
-import { type IdentifierData, Model } from "logos/models/model";
+import type { GameStatistics, GameType, GuildStatisticsDocument } from "logos/models/documents/guild-statistics/latest";
+import { type CreateModelOptions, GuildStatisticsModel, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-type GameType =
-	/** @since v3.42.0 */
-	"pickMissingWord";
+type CreateGuildStatisticsOptions = CreateModelOptions<GuildStatistics, GuildStatisticsDocument>;
 
-interface GameStatistics {
-	totalSessions: number;
-	totalScore: number;
-	uniquePlayers: number;
-}
+interface GuildStatistics extends GuildStatisticsDocument {}
+class GuildStatistics extends GuildStatisticsModel {
+	static readonly #initialStatistics: GameStatistics = {
+		totalSessions: 1,
+		totalScore: 0,
+		uniquePlayers: 1,
+	};
 
-type CreateGuildStatisticsOptions = {
-	createdAt?: number;
-	statistics?: Partial<Record<Locale, Partial<Record<GameType, GameStatistics>>>>;
-} & IdentifierData<GuildStatistics>;
-
-class GuildStatistics extends Model<{ collection: "GuildStatistics"; idParts: ["guildId"] }> {
-	static readonly #initialStatistics: GameStatistics = { totalSessions: 1, totalScore: 0, uniquePlayers: 1 };
+	readonly createdAt: number;
 
 	get guildId(): string {
 		return this.idParts[0];
 	}
 
-	readonly createdAt: number;
-
-	statistics?: Partial<Record<Locale, Partial<Record<GameType, GameStatistics>>>>;
-
 	constructor(database: DatabaseStore, { createdAt, statistics, ...data }: CreateGuildStatisticsOptions) {
 		super(database, data, { collection: "GuildStatistics" });
 
 		this.createdAt = createdAt ?? Date.now();
-		this.statistics = statistics;
+		this.statistics = statistics ?? {};
 	}
 
-	static getOrCreate(client: Client, data: CreateGuildStatisticsOptions): GuildStatistics | Promise<GuildStatistics> {
+	static async getOrCreate(client: Client, data: CreateGuildStatisticsOptions): Promise<GuildStatistics> {
 		const partialId = Model.buildPartialId<GuildStatistics>(data);
 		if (client.documents.guildStatistics.has(partialId)) {
 			return client.documents.guildStatistics.get(partialId)!;
@@ -96,4 +87,4 @@ class GuildStatistics extends Model<{ collection: "GuildStatistics"; idParts: ["
 }
 
 export { GuildStatistics };
-export type { CreateGuildStatisticsOptions, GameStatistics, GameType };
+export type { CreateGuildStatisticsOptions };

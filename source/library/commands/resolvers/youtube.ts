@@ -1,4 +1,4 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { Song, SongCollection, SongListing } from "logos/services/music";
@@ -10,25 +10,29 @@ async function resolveYouTubeSongListings(
 	{ query }: { query: string },
 ): Promise<SongListing | undefined> {
 	if (!constants.patterns.youtubeUrl.test(query)) {
-		return await search(client, interaction, query);
+		return search(client, interaction, query);
 	}
-
-	await client.acknowledge(interaction);
 
 	if (query.includes("list=")) {
 		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
+		if (playlist == null) {
+			return undefined;
+		}
+
 		return getSongListingFromPlaylist(playlist, interaction.user.id);
 	}
 
 	const video = await YouTubeSearch.YouTube.getVideo(query);
+	if (video === null) {
+		return undefined;
+	}
+
 	return getSongListingFromVideo(video, interaction.user.id);
 }
 
 async function search(client: Client, interaction: Logos.Interaction, query: string): Promise<SongListing | undefined> {
 	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: "all", safeSearch: false });
-	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element)) as Array<
-		YouTubeSearch.Playlist | YouTubeSearch.Video
-	>;
+	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element));
 	if (results.length === 0) {
 		return undefined;
 	}
@@ -38,9 +42,9 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	const selectMenuSelection = new InteractionCollector(client, { only: [interaction.user.id], isSingle: true });
 
 	selectMenuSelection.onInteraction(async (selection) => {
-		await client.deleteReply(interaction);
+		client.deleteReply(interaction).ignore();
 
-		const indexString = selection.data?.values?.at(0) as string | undefined;
+		const indexString = selection.data?.values?.at(0);
 		if (indexString === undefined) {
 			return resolve(undefined);
 		}
@@ -62,6 +66,10 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 			}
 
 			const playlist = await YouTubeSearch.YouTube.getPlaylist(url);
+			if (playlist === null) {
+				return resolve(undefined);
+			}
+
 			return resolve(getSongListingFromPlaylist(playlist, interaction.user.id));
 		}
 
@@ -88,32 +96,31 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		});
 	}
 
-	const strings = constants.contexts.selectSong({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
-	await client.notice(interaction, {
-		embeds: [
-			{
-				title: strings.title,
-				description: strings.description,
-			},
-		],
-		components: [
-			{
-				type: Discord.MessageComponentTypes.ActionRow,
-				components: [
-					{
-						type: Discord.MessageComponentTypes.SelectMenu,
-						customId: selectMenuSelection.customId,
-						minValues: 1,
-						maxValues: 1,
-						options,
-					},
-				],
-			},
-		],
-	});
+	const strings = constants.contexts.selectSong({ localise: client.localise, locale: interaction.locale });
+	client
+		.notice(interaction, {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+				},
+			],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.SelectMenu,
+							customId: selectMenuSelection.customId,
+							minValues: 1,
+							maxValues: 1,
+							options,
+						},
+					],
+				},
+			],
+		})
+		.ignore();
 
 	return promise;
 }
@@ -159,7 +166,7 @@ function getSongListingFromVideo(video: YouTubeSearch.Video, requestedBy: bigint
 		return undefined;
 	}
 
-	return new SongListing({ queueable: new Song({ title: video.title!, url: video.url! }), userId: requestedBy });
+	return new SongListing({ queueable: new Song({ title: video.title!, url: video.url }), userId: requestedBy });
 }
 
 export { resolveYouTubeSongListings as resolveYouTubeListings };

@@ -1,4 +1,4 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { PaginatedView, type View } from "logos/commands/components/paginated-views/paginated-view";
@@ -6,10 +6,6 @@ import type { SongListing } from "logos/services/music";
 
 class RemoveSongListingView extends PaginatedView<SongListing> {
 	readonly #selectMenuSelection: InteractionCollector;
-
-	get onInteraction(): InteractionCollector["onInteraction"] {
-		return this.#selectMenuSelection.onInteraction.bind(this);
-	}
 
 	constructor(
 		client: Client,
@@ -44,7 +40,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 	build(interaction: Logos.Interaction, page: SongListing[], pageIndex: number): View {
 		if (page.length === 0) {
 			const strings = constants.contexts.queueEmpty({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
 
@@ -56,7 +52,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 		const selectMenu = this.#buildSelectMenu(page, pageIndex);
 
 		const strings = constants.contexts.selectSongToRemove({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: interaction.locale,
 		});
 
@@ -64,6 +60,10 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 			embed: { title: strings.title, description: strings.description, color: constants.colours.notice },
 			components: [selectMenu],
 		};
+	}
+
+	onRemove(callback: Parameters<InteractionCollector["onInteraction"]>[0]): void {
+		this.#selectMenuSelection.onInteraction(callback);
 	}
 
 	async open(): Promise<void> {

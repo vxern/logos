@@ -1,15 +1,14 @@
-import type { Environment } from "logos:core/loaders/environment";
 import type { Collector } from "logos/collectors";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 type Event = keyof Discord.EventHandlers;
 class EventStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #collectors: Map<Event, Set<Collector<Event>>>;
 
-	constructor({ environment }: { environment: Environment }) {
-		this.log = Logger.create({ identifier: "Client/EventStore", isDebug: environment.isDebug });
+	constructor({ log }: { log: pino.Logger }) {
+		this.log = log.child({ name: "EventStore" });
 
 		this.#collectors = new Map();
 	}
@@ -32,8 +31,7 @@ class EventStore {
 				this.collectEvent(payload.guildId, "messageDelete", { args: [payload, message] }),
 			messageDeleteBulk: (payload) =>
 				this.collectEvent(payload.guildId, "messageDeleteBulk", { args: [payload] }),
-			messageUpdate: (message, oldMessage) =>
-				this.collectEvent(message.guildId, "messageUpdate", { args: [message, oldMessage] }),
+			messageUpdate: (message) => this.collectEvent(message.guildId, "messageUpdate", { args: [message] }),
 			voiceServerUpdate: (payload) =>
 				this.collectEvent(payload.guildId, "voiceServerUpdate", { args: [payload] }),
 			voiceStateUpdate: (voiceState) =>

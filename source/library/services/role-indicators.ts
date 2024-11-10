@@ -1,13 +1,14 @@
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import type { Guild, RoleWithIndicator } from "logos/models/guild";
+import type { RoleWithIndicator } from "logos/models/documents/guild/latest";
+import type { Guild } from "logos/models/guild";
 import { LocalService } from "logos/services/service";
 
 class RoleIndicatorService extends LocalService {
 	readonly #guildMemberUpdates: Collector<"guildMemberUpdate">;
 
-	get configuration(): NonNullable<Guild["roleIndicators"]> {
-		return this.guildDocument.roleIndicators!;
+	get configuration(): NonNullable<Guild["features"]["roleIndicators"]> {
+		return this.guildDocument.feature("roleIndicators");
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -62,7 +63,7 @@ class RoleIndicatorService extends LocalService {
 			const nickname = getNicknameWithRoleIndicators(user.username, applicableIndicators);
 			this.client.bot.helpers
 				.editMember(member.guildId, user.id, { nick: nickname })
-				.catch(() => this.log.warn("Failed to set member's role indicators."));
+				.catch((error) => this.log.warn(error, "Failed to set member's role indicators."));
 
 			return;
 		}
@@ -77,7 +78,7 @@ class RoleIndicatorService extends LocalService {
 			const nickname = getNicknameWithRoleIndicators(member.nick, applicableIndicators);
 			this.client.bot.helpers
 				.editMember(member.guildId, user.id, { nick: nickname })
-				.catch(() => this.log.warn("Failed to set member's role indicators."));
+				.catch((error) => this.log.warn(error, "Failed to set member's role indicators."));
 
 			return;
 		}
@@ -90,7 +91,7 @@ class RoleIndicatorService extends LocalService {
 		if (!hasApplicableIndicators) {
 			this.client.bot.helpers
 				.editMember(member.guildId, user.id, { nick: username })
-				.catch(() => this.log.warn("Failed to reset member's role indicators."));
+				.catch((error) => this.log.warn(error, "Failed to reset member's role indicators."));
 
 			return;
 		}
@@ -106,7 +107,7 @@ class RoleIndicatorService extends LocalService {
 		const nicknameModified = getNicknameWithRoleIndicators(username, applicableIndicators);
 		this.client.bot.helpers
 			.editMember(member.guildId, user.id, { nick: nicknameModified })
-			.catch(() => this.log.warn("Failed to update member's role indicators."));
+			.catch((error) => this.log.warn(error, "Failed to update member's role indicators."));
 	}
 }
 

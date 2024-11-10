@@ -1,24 +1,24 @@
-import type { LearningLanguage, WithBaseLanguage } from "logos:constants/languages";
+import type { WithBaseLanguage } from "logos:constants/languages";
 import {
 	type Locale,
-	type Language as LocalisationLanguage,
-	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
-	isLogosLanguage as isLocalisationLanguage,
-	isLogosLocale as isLocalisationLocale,
+	type LocalisationLanguage,
+	getLocalisationLocaleByLanguage,
+	isLocalisationLanguage,
+	isLocalisationLocale,
 } from "logos:constants/languages/localisation";
 
-type Language = LocalisationLanguage;
+type LearningLanguage = LocalisationLanguage;
 
-function isLanguage(language: string): language is Language {
+function isLearningLanguage(language: string): language is LearningLanguage {
 	return isLocalisationLanguage(language);
 }
 
-function isLocale(locale: string): locale is Locale {
+function isLearningLocale(locale: string): locale is Locale {
 	return isLocalisationLocale(locale);
 }
 
-function getLocaleByLanguage(language: Language): Locale {
-	return getLocaleByLocalisationLanguage(language);
+function getLocaleByLearningLanguage(language: LearningLanguage): Locale {
+	return getLocalisationLocaleByLanguage(language);
 }
 
 const wiktionaryLanguageNames = Object.freeze({
@@ -33,5 +33,5 @@ function getWiktionaryLanguageName(language: LearningLanguage): string {
 	return (wiktionaryLanguageNames as Record<string, string>)[language] ?? language;
 }
 
-export { getLocaleByLanguage, isLanguage, isLocale, getWiktionaryLanguageName };
-export type { Language };
+export { isLearningLanguage, isLearningLocale, getLocaleByLearningLanguage, getWiktionaryLanguageName };
+export type { LearningLanguage };

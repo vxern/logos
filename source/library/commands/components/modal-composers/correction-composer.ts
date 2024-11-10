@@ -1,4 +1,4 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
 
@@ -27,7 +27,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 		{ formData }: { formData: CorrectionFormData },
 	): Modal<CorrectionFormData> {
 		const strings = constants.contexts.correctionModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 
@@ -74,22 +74,18 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 
 	getErrorMessage(
 		submission: Logos.Interaction,
-		{ error }: { error: ValidationError },
+		_: { error: ValidationError },
 	): Discord.CamelizedDiscordEmbed | undefined {
-		switch (error) {
-			case "texts-not-different": {
-				const strings = constants.contexts.correctionTextsNotDifferent({
-					localise: this.client.localise.bind(this.client),
-					locale: submission.locale,
-				});
+		const strings = constants.contexts.correctionTextsNotDifferent({
+			localise: this.client.localise,
+			locale: submission.locale,
+		});
 
-				return {
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.warning,
-				};
-			}
-		}
+		return {
+			title: strings.title,
+			description: strings.description,
+			color: constants.colours.warning,
+		};
 	}
 }
 

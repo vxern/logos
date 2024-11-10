@@ -1,11 +1,18 @@
-import type { Rule } from "logos:constants/rules";
 import type { Client } from "logos/client";
-import { type ClientOrDatabaseStore, type IdentifierData, Model } from "logos/models/model";
+import type { WarningDocument } from "logos/models/documents/warning/latest";
+import {
+	type ClientOrDatabaseStore,
+	type CreateModelOptions,
+	type IdentifierData,
+	Model,
+	WarningModel,
+} from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
-type CreateWarningOptions = { reason: string; rule?: Rule } & IdentifierData<Warning>;
+type CreateWarningOptions = CreateModelOptions<Warning, WarningDocument, "reason" | "rule">;
 
-class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }> {
+interface Warning extends WarningDocument {}
+class Warning extends WarningModel {
 	get guildId(): string {
 		return this.idParts[0];
 	}
@@ -22,11 +29,6 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 		return Number(this.idParts[3]);
 	}
 
-	readonly reason: string;
-
-	/** @since v3.37.0 */
-	rule?: Rule;
-
 	constructor(database: DatabaseStore, { reason, rule, ...data }: CreateWarningOptions) {
 		super(database, data, { collection: "Warnings" });
 
@@ -38,18 +40,20 @@ class Warning extends Model<{ collection: "Warnings"; idParts: ["guildId", "auth
 		clientOrDatabase: ClientOrDatabaseStore,
 		clauses?: { where?: Partial<IdentifierData<Warning>> },
 	): Promise<Warning[]> {
-		return await Model.all<Warning>(clientOrDatabase, {
+		return Model.all<Warning>(clientOrDatabase, {
 			collection: "Warnings",
-			where: Object.assign(
-				{ guildId: undefined, authorId: undefined, targetId: undefined, createdAt: undefined },
-				{ ...clauses?.where },
-			),
+			where: {
+				guildId: undefined,
+				authorId: undefined,
+				targetId: undefined,
+				createdAt: undefined,
+				...clauses?.where,
+			},
 		});
 	}
 
 	static async create(client: Client, data: Omit<CreateWarningOptions, "createdAt">): Promise<Warning> {
 		const warningDocument = new Warning(client.database, { ...data, createdAt: Date.now().toString() });
-
 		await warningDocument.create(client);
 
 		return warningDocument;

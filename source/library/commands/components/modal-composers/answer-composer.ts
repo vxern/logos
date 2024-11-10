@@ -1,4 +1,4 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
 
@@ -13,7 +13,7 @@ class AnswerComposer extends ModalComposer<AnswerFormData, never> {
 
 	buildModal(submission: Logos.Interaction, { formData }: { formData: AnswerFormData }): Modal<AnswerFormData> {
 		const strings = constants.contexts.answerModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 

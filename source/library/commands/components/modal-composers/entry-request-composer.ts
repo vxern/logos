@@ -1,6 +1,6 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { EntryRequestFormData } from "logos/models/entry-request";
+import type { EntryRequestFormData } from "logos/models/documents/entry-request/latest";
 
 class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 	buildModal(
@@ -8,7 +8,7 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 		{ formData }: { formData: EntryRequestFormData },
 	): Modal<EntryRequestFormData> {
 		const strings = constants.contexts.verificationModal({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: submission.locale,
 		});
 		return {

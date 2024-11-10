@@ -1,64 +1,15 @@
-import {
-	type CLDLanguage,
-	type CLDLocale,
-	type Language as DetectionLanguage,
-	type Locale as DetectionLocale,
-	type Detector,
-	type ELDLanguage,
-	type ELDLocale,
-	type FastTextLanguage,
-	type FastTextLocale,
-	type TinyLDLanguage,
-	type TinyLDLocale,
-	getCLDLanguageByLocale as getCLDDetectionLanguageByLocale,
-	getELDLanguageByLocale as getELDDetectionLanguageByLocale,
-	getFastTextLanguageByLocale as getFastTextDetectionLanguageByLocale,
-	getTinyLDLanguageByLocale as getTinyLDDetectionLanguageByLocale,
-	isCLDLocale,
-	isELDLocale,
-	isFastTextLocale,
-	isTinyLDLocale,
-} from "logos:constants/languages/detection";
-import { type Language as FeatureLanguage, isLanguage as isFeatureLanguage } from "logos:constants/languages/feature";
-import {
-	type Language as LearningLanguage,
-	getLocaleByLanguage as getLocaleByLearningLanguage,
-	isLanguage as isLearningLanguage,
-	isLocale as isLearningLocale,
-} from "logos:constants/languages/learning";
+import type { DetectionLanguage } from "logos:constants/languages/detection";
+import type { FeatureLanguage } from "logos:constants/languages/feature";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import {
 	type DiscordLocale,
-	type Locale,
-	type Language as LocalisationLanguage,
-	getDiscordLocaleByLanguage as getDiscordLocaleByLocalisationLanguage,
-	getDiscordLanguageByLocale as getDiscordLocalisationLanguageByLocale,
-	getLogosLocaleByLanguage as getLocaleByLocalisationLanguage,
-	getLogosLanguageByLocale as getLocalisationLanguageByLocale,
-	isDiscordLanguage as isDiscordLocalisationLanguage,
-	isLogosLanguage as isLocalisationLanguage,
+	type LocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
 } from "logos:constants/languages/localisation";
 import {
-	type DeepLLanguage,
-	type DeepLLocale,
-	type GoogleTranslateLanguage,
-	type GoogleTranslateLocale,
-	type LingvanexLanguage,
-	type LingvanexLocale,
-	type Language as TranslationLanguage,
-	type Locale as TranslationLocale,
-	type Translator,
-	getDeepLLocaleByLanguage as getDeepLLocaleByTranslationLanguage,
-	getDeepLLanguageByLocale as getDeepLTranslationLanguageByLocale,
-	getGoogleTranslateLocaleByLanguage as getGoogleTranslateLocaleByTranslationLanguage,
-	getGoogleTranslateLanguageByLocale as getGoogleTranslateTranslationLanguageByLocale,
-	getLingvanexLocaleByLanguage as getLingvanexLocaleByTranslationLanguage,
-	getLingvanexLanguageByLocale as getLingvanexTranslationLanguageByLocale,
-	isDeepLLocale,
-	isGoogleTranslateLocale,
-	isLingvanexLocale,
-	isLanguage as isTranslationLanguage,
+	type TranslationLanguage,
+	isTranslationLanguage,
 	languages as translationLanguages,
 } from "logos:constants/languages/translation";
 
@@ -66,10 +17,10 @@ const languages = Object.freeze({
 	languages: {
 		localisation: [
 			...new Set<LocalisationLanguage>([...localisationLanguages.discord, ...localisationLanguages.logos]),
-		].sort(),
+		].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
 		translation: [
 			...new Set<TranslationLanguage>([...translationLanguages.deepl, ...translationLanguages.google]),
-		].sort(),
+		].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
 	},
 	locales: {
 		discord: Object.values(localisationLanguageToLocale.discord) as DiscordLocale[],
@@ -103,16 +54,6 @@ function getBaseLanguage<L extends Language>(language: L): BaseLanguage<L> {
 	return baseLanguage as BaseLanguage<L>;
 }
 
-function getFeatureLanguage(language: LocalisationLanguage | LearningLanguage): FeatureLanguage | undefined {
-	const baseLanguage = getBaseLanguage(language);
-
-	if (isFeatureLanguage(baseLanguage)) {
-		return baseLanguage;
-	}
-
-	return undefined;
-}
-
 function getTranslationLanguage(language: Language): TranslationLanguage | undefined {
 	if (isTranslationLanguage(language)) {
 		return language;
@@ -138,65 +79,5 @@ interface Languages<Language extends string> {
 }
 
 export default languages;
-export {
-	getDiscordLocaleByLocalisationLanguage,
-	getLocaleByLocalisationLanguage,
-	getDiscordLocalisationLanguageByLocale,
-	getLocalisationLanguageByLocale,
-	isDiscordLocalisationLanguage,
-	isLocalisationLanguage,
-	getLocaleByLearningLanguage,
-	isLearningLanguage,
-	isLearningLocale,
-	isTranslationLanguage,
-	getDeepLLocaleByTranslationLanguage,
-	getGoogleTranslateLocaleByTranslationLanguage,
-	getDeepLTranslationLanguageByLocale,
-	getGoogleTranslateTranslationLanguageByLocale,
-	isGoogleTranslateLocale,
-	isDeepLLocale,
-	isFeatureLanguage,
-	getTinyLDDetectionLanguageByLocale,
-	isTinyLDLocale,
-	getCLDDetectionLanguageByLocale,
-	isCLDLocale,
-	getTranslationLanguage,
-	getFeatureLanguage,
-	getBaseLanguage,
-	getLingvanexTranslationLanguageByLocale,
-	getLingvanexLocaleByTranslationLanguage,
-	isLingvanexLocale,
-	getFastTextDetectionLanguageByLocale,
-	isFastTextLocale,
-	getELDDetectionLanguageByLocale,
-	isELDLocale,
-};
-export type {
-	Detector,
-	Translator,
-	LearningLanguage,
-	FeatureLanguage,
-	LocalisationLanguage,
-	TranslationLanguage,
-	Language,
-	Locale,
-	GoogleTranslateLanguage,
-	DeepLLanguage,
-	Languages,
-	TranslationLocale,
-	DeepLLocale,
-	GoogleTranslateLocale,
-	TinyLDLanguage,
-	TinyLDLocale,
-	CLDLanguage,
-	CLDLocale,
-	DetectionLanguage,
-	DetectionLocale,
-	WithBaseLanguage,
-	LingvanexLanguage,
-	LingvanexLocale,
-	FastTextLanguage,
-	FastTextLocale,
-	ELDLanguage,
-	ELDLocale,
-};
+export { getTranslationLanguage, getBaseLanguage };
+export type { Language, Languages, WithBaseLanguage };

@@ -1,5 +1,5 @@
+import { code } from "logos:constants/formatting";
 import { timeStructToMilliseconds } from "logos:constants/time";
-import { code } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { EntryRequestComposer } from "logos/commands/components/modal-composers/entry-request-composer";
@@ -11,12 +11,8 @@ import { LocalService } from "logos/services/service";
 class EntryService extends LocalService {
 	readonly #acceptedRulesButton: InteractionCollector;
 
-	get configuration(): NonNullable<Guild["entry"]> {
-		return this.guildDocument.entry!;
-	}
-
-	get verificationConfiguration(): NonNullable<Guild["verification"]> {
-		return this.guildDocument.verification!;
+	get configuration(): NonNullable<Guild["features"]["verification"]> {
+		return this.guildDocument.feature("verification");
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -52,47 +48,49 @@ class EntryService extends LocalService {
 		await this.client.registerInteractionCollector(languageProficiencyButtons);
 
 		const strings = constants.contexts.chooseProficiency({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: buttonPress.locale,
 		});
-		await this.client.notice(buttonPress, {
-			embeds: [
-				{
-					title: strings.title,
-					description: `${strings.description.chooseProficiency({
-						language: buttonPress.featureLanguage,
-					})}\n\n${strings.description.canChangeLater({
-						command: code(
-							this.client.localiseCommand(
-								// @ts-ignore: This is fine for now.
-								this.client.commands.profile.options.roles.key,
-								buttonPress.locale,
+		this.client
+			.notice(buttonPress, {
+				embeds: [
+					{
+						title: strings.title,
+						description: `${strings.description.chooseProficiency({
+							language: buttonPress.featureLanguage,
+						})}\n\n${strings.description.canChangeLater({
+							command: code(
+								this.client.localiseCommand(
+									// @ts-ignore: This is fine for now.
+									this.client.commands.profile.options.roles.key,
+									buttonPress.locale,
+								),
 							),
-						),
-					})}`,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: Object.values(
-						constants.roles.language.categories.proficiency.collection.list,
-					).map<Discord.ButtonComponent>((proficiencyRole, index) => {
-						const strings = constants.contexts.role({
-							localise: this.client.localise.bind(this.client),
-							locale: buttonPress.locale,
-						});
-						return {
-							type: Discord.MessageComponentTypes.Button,
-							label: strings.name({ id: proficiencyRole.id }),
-							customId: languageProficiencyButtons.encodeId([index.toString()]),
-							style: Discord.ButtonStyles.Secondary,
-							emoji: { name: proficiencyRole.emoji },
-						};
-					}) as [Discord.ButtonComponent],
-				},
-			],
-		});
+						})}`,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: Object.values(
+							constants.roles.language.categories.proficiency.collection.list,
+						).map<Discord.ButtonComponent>((proficiencyRole, index) => {
+							const strings = constants.contexts.role({
+								localise: this.client.localise,
+								locale: buttonPress.locale,
+							});
+							return {
+								type: Discord.MessageComponentTypes.Button,
+								label: strings.name({ id: proficiencyRole.id }),
+								customId: languageProficiencyButtons.encodeId([index.toString()]),
+								style: Discord.ButtonStyles.Secondary,
+								emoji: { name: proficiencyRole.emoji },
+							};
+						}) as [Discord.ButtonComponent],
+					},
+				],
+			})
+			.ignore();
 	}
 
 	async #handlePickLanguageProficiency(
@@ -141,54 +139,59 @@ class EntryService extends LocalService {
 			const isVerified = userDocument.isAuthorisedOn({ guildId: this.guildIdString });
 			if (!isVerified) {
 				const strings = constants.contexts.getVerified({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: buttonPress.locale,
 				});
-				await this.client.notice(buttonPress, {
-					embeds: [
-						{
-							title: strings.title,
-							description: `${strings.description.verificationRequired({
-								server_name: this.guild.name,
-							})}\n\n${strings.description.honestAnswers}`,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									style: Discord.ButtonStyles.Secondary,
-									label: strings.description.understood,
-									customId: requestVerificationButton.encodeId([buttonPress.metadata[1]]),
-									emoji: { name: constants.emojis.understood },
-								},
-							],
-						},
-					],
-				});
+				this.client
+					.notice(buttonPress, {
+						embeds: [
+							{
+								title: strings.title,
+								description: `${strings.description.verificationRequired({
+									server_name: this.guild.name,
+								})}\n\n${strings.description.honestAnswers}`,
+							},
+						],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										style: Discord.ButtonStyles.Secondary,
+										label: strings.description.understood,
+										customId: requestVerificationButton.encodeId([buttonPress.metadata[1]]),
+										emoji: { name: constants.emojis.understood },
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return;
 			}
 		}
 
 		const strings = constants.contexts.receivedAccess({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: buttonPress.locale,
 		});
-		await this.client.success(buttonPress, {
-			title: strings.title,
-			description: `${constants.emojis.responses.celebration} ${strings.description.nowMember({
-				server_name: this.guild.name,
-			})}\n\n${strings.description.toStart}`,
-			image: { url: constants.gifs.welcome },
-		});
+		this.client
+			.success(buttonPress, {
+				title: strings.title,
+				description: `${constants.emojis.responses.celebration} ${strings.description.nowMember({
+					server_name: this.guild.name,
+				})}\n\n${strings.description.toStart}`,
+				image: { url: constants.gifs.welcome },
+			})
+			.ignore();
 
 		this.client.bot.helpers
 			.addRole(this.guild.id, buttonPress.user.id, role.id, "User-requested role addition.")
-			.catch(() =>
+			.catch((error) =>
 				this.log.warn(
+					error,
 					`Failed to add ${this.client.diagnostics.role(role)} to ${this.client.diagnostics.user(
 						buttonPress.user,
 					)} on ${this.client.diagnostics.guild(this.guild.id)}.`,
@@ -216,18 +219,20 @@ class EntryService extends LocalService {
 
 		if (entryRequestDocument !== undefined) {
 			const strings = constants.contexts.alreadyAnswered({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: buttonPress.locale,
 			});
-			await this.client.pushback(buttonPress, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.pushback(buttonPress, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return;
 		}
 
-		const verificationService = this.client.getPromptService(this.guildId, { type: "verification" });
+		const verificationService = this.client.services.local("verificationPrompts", { guildId: this.guildId });
 		if (verificationService === undefined) {
 			return;
 		}
@@ -242,13 +247,10 @@ class EntryService extends LocalService {
 		composer.onSubmit(async (submission, { formData }) => {
 			if (entryRequest !== undefined) {
 				const strings = constants.contexts.alreadyAnswered({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: submission.locale,
 				});
-				await this.client.pushback(submission, {
-					title: strings.title,
-					description: strings.description,
-				});
+				this.client.pushback(submission, { title: strings.title, description: strings.description }).ignore();
 
 				return;
 			}
@@ -277,18 +279,16 @@ class EntryService extends LocalService {
 				return;
 			}
 
-			verificationService.registerDocument(entryRequestDocument);
-			verificationService.registerPrompt(prompt, buttonPress.user.id, entryRequestDocument);
-			verificationService.registerHandler(entryRequestDocument);
-
 			const strings = constants.contexts.verificationAnswersSubmitted({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: submission.locale,
 			});
-			await this.client.succeeded(submission, {
-				title: strings.title,
-				description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
-			});
+			this.client
+				.succeeded(submission, {
+					title: strings.title,
+					description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
+				})
+				.ignore();
 		});
 
 		await composer.open();
@@ -302,13 +302,10 @@ class EntryService extends LocalService {
 
 		if (entryRequestDocument !== undefined && !entryRequestDocument.isFinalised) {
 			const strings = constants.contexts.alreadyAnswered({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.pushback(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.pushback(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return false;
 		}
@@ -319,13 +316,10 @@ class EntryService extends LocalService {
 
 		if (userDocument.isRejectedOn({ guildId: this.guildIdString })) {
 			const strings = constants.contexts.rejectedBefore({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.error(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.error(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return false;
 		}
@@ -334,24 +328,20 @@ class EntryService extends LocalService {
 	}
 
 	#requiresVerification(user: Logos.User): boolean | undefined {
-		const verificationConfiguration = this.verificationConfiguration;
+		const verificationConfiguration = this.configuration;
 		if (verificationConfiguration === undefined) {
 			return undefined;
 		}
 
 		for (const rule of verificationConfiguration.activation) {
-			switch (rule.type) {
-				case "account-age": {
-					const createdAt = Discord.snowflakeToTimestamp(user.id);
-					const age = Date.now() - createdAt;
+			const createdAt = Discord.snowflakeToTimestamp(user.id);
+			const age = Date.now() - createdAt;
 
-					if (age < timeStructToMilliseconds(rule.value)) {
-						return true;
-					}
-
-					break;
-				}
+			if (age >= timeStructToMilliseconds(rule.value)) {
+				continue;
 			}
+
+			return true;
 		}
 
 		return false;

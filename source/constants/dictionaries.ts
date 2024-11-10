@@ -1,4 +1,22 @@
-import type { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
+
+const sections = [
+	"partOfSpeech",
+	"definitions",
+	"translations",
+	"relations",
+	"syllables",
+	"pronunciation",
+	"rhymes",
+	"audio",
+	"expressions",
+	"examples",
+	"frequency",
+	"inflection",
+	"etymology",
+	"notes",
+] as const;
+type DictionarySection = (typeof sections)[number];
 
 type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "wordnik" | "words-api";
 
@@ -25,4 +43,4 @@ const dictionariesByLanguage = Object.freeze({
 } satisfies Record<LearningLanguage, Dictionary[]> as Record<LearningLanguage, Dictionary[]>);
 
 export default Object.freeze({ languages: dictionariesByLanguage });
-export type { Dictionary };
+export type { Dictionary, DictionarySection };

@@ -27,12 +27,12 @@ class ReportPromptService extends PromptService<{
 	}
 
 	async getUserDocument(reportDocument: Report): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: reportDocument.authorId });
+		return User.getOrCreate(this.client, { userId: reportDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, reportDocument: Report): Discord.CreateMessageOptions | undefined {
 		const strings = constants.contexts.reportPrompt({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
 		return {
@@ -64,16 +64,13 @@ class ReportPromptService extends PromptService<{
 						},
 						{
 							name: strings.report.link,
-							value:
-								reportDocument.formData.messageLink !== undefined
-									? reportDocument.formData.messageLink
-									: `*${strings.report.noLinkProvided}*`,
+							value: reportDocument.formData.messageLink ?? `*${strings.report.noLinkProvided}*`,
 							inline: true,
 						},
 					],
 					footer: {
 						text: this.guild.name,
-						iconUrl: PromptService.encodePartialIdInGuildIcon({
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
 							guild: this.guild,
 							partialId: reportDocument.partialId,
 						}),
@@ -112,6 +109,30 @@ class ReportPromptService extends PromptService<{
 		};
 	}
 
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
+		const strings = constants.contexts.noReports({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
+				},
+			],
+		};
+	}
+
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Report | null | undefined> {
@@ -123,25 +144,31 @@ class ReportPromptService extends PromptService<{
 		const isResolved = interaction.metadata[2] === "true";
 		if (isResolved && reportDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
+
 			return;
 		}
 
 		if (!(isResolved || reportDocument.isResolved)) {
 			const strings = constants.contexts.alreadyMarkedUnresolved({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
+
 			return;
 		}
 

@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
 import { handleAnswer } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
@@ -12,7 +11,7 @@ import { handleDisplayGuildInformation } from "logos/commands/handlers/informati
 import {
 	handleDisplayDetectorLicence,
 	handleDisplayDetectorLicenceAutocomplete,
-} from "logos/commands/handlers/licence/detector.ts";
+} from "logos/commands/handlers/licence/detector";
 import {
 	handleDisplayDictionaryLicence,
 	handleDisplayDictionaryLicenceAutocomplete,
@@ -24,7 +23,7 @@ import {
 import {
 	handleDisplayTranslatorLicence,
 	handleDisplayTranslatorLicenceAutocomplete,
-} from "logos/commands/handlers/licence/translator.ts";
+} from "logos/commands/handlers/licence/translator";
 import {
 	handleDisplayAuthorPraises,
 	handleDisplayPraisesAutocomplete,
@@ -76,7 +75,7 @@ import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handl
 import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
 
 /**
- * @privateRemarks
+ * @remarks
  * Commands, command groups and options are ordered alphabetically.
  */
 const commands = Object.freeze({
@@ -89,11 +88,15 @@ const commands = Object.freeze({
 				identifier: "bot",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayBotInformation,
+				options: { show: constants.parameters.show },
+				flags: { isShowable: true },
 			},
 			server: {
 				identifier: "server",
 				type: Discord.ApplicationCommandOptionTypes.SubCommand,
 				handle: handleDisplayGuildInformation,
+				options: { show: constants.parameters.show },
+				flags: { isShowable: true },
 			},
 		},
 	},

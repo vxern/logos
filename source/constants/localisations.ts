@@ -1,47 +1,32 @@
-import type { Language, LocalisationLanguage } from "logos:constants/languages";
+import type { Language } from "logos:constants/languages";
+import type { LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { PartOfSpeech } from "logos:constants/parts-of-speech";
-import armenian from "logos:constants/transformers/armenian";
-import danish from "logos:constants/transformers/danish";
-import dutch from "logos:constants/transformers/dutch";
-import english from "logos:constants/transformers/english";
-import finnish from "logos:constants/transformers/finnish";
-import french from "logos:constants/transformers/french";
-import german from "logos:constants/transformers/german";
-import greek from "logos:constants/transformers/greek";
-import hungarian from "logos:constants/transformers/hungarian";
-import norwegian from "logos:constants/transformers/norwegian";
-import polish from "logos:constants/transformers/polish";
-import romanian from "logos:constants/transformers/romanian";
-import russian from "logos:constants/transformers/russian";
-import silesian from "logos:constants/transformers/silesian";
-import spanish from "logos:constants/transformers/spanish";
-import swedish from "logos:constants/transformers/swedish";
-import turkish from "logos:constants/transformers/turkish";
+import pluralisers from "logos:constants/transformers/pluralisers";
 
 type TransformerType = "pluralise";
 type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;
 
 const localisations = Object.freeze({
 	transformers: {
-		"Armenian/Western": armenian,
-		"Armenian/Eastern": armenian,
-		Danish: danish,
-		Dutch: dutch,
-		"English/American": english,
-		"English/British": english,
-		Finnish: finnish,
-		French: french,
-		German: german,
-		Greek: greek,
-		Hungarian: hungarian,
-		"Norwegian/Bokmal": norwegian,
-		Polish: polish,
-		Romanian: romanian,
-		Russian: russian,
-		Silesian: silesian,
-		Spanish: spanish,
-		Swedish: swedish,
-		Turkish: turkish,
+		"Armenian/Western": { pluralise: pluralisers.invariant },
+		"Armenian/Eastern": { pluralise: pluralisers.invariant },
+		Danish: { pluralise: pluralisers.commonEuropean },
+		Dutch: { pluralise: pluralisers.commonEuropean },
+		"English/American": { pluralise: pluralisers.commonEuropean },
+		"English/British": { pluralise: pluralisers.commonEuropean },
+		Finnish: { pluralise: pluralisers.commonEuropean },
+		French: { pluralise: pluralisers.commonEuropean },
+		German: { pluralise: pluralisers.commonEuropean },
+		Greek: { pluralise: pluralisers.commonEuropean },
+		Hungarian: { pluralise: pluralisers.invariant },
+		"Norwegian/Bokmal": { pluralise: pluralisers.commonEuropean },
+		Polish: { pluralise: pluralisers.commonSlavic },
+		Romanian: { pluralise: pluralisers.romanian },
+		Russian: { pluralise: pluralisers.commonSlavic },
+		Silesian: { pluralise: pluralisers.commonSlavic },
+		Spanish: { pluralise: pluralisers.commonEuropean },
+		Swedish: { pluralise: pluralisers.commonEuropean },
+		Turkish: { pluralise: pluralisers.invariant },
 	} satisfies Record<LocalisationLanguage, Record<TransformerType, Transformer>>,
 	languages: {
 		Abkhazian: "languages.abkhazian",

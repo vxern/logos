@@ -1,15 +1,16 @@
+import type { Languages } from "logos:constants/languages";
 import {
 	type GoogleTranslateLanguage,
-	type Languages,
 	type TranslationLocale,
-	getGoogleTranslateLocaleByTranslationLanguage,
-} from "logos:constants/languages";
-import { getGoogleTranslateLanguageByLocale, isGoogleTranslateLocale } from "logos:constants/languages/translation";
+	getGoogleTranslateLanguageByLocale,
+	getGoogleTranslateLocaleByLanguage,
+	isGoogleTranslateLocale,
+} from "logos:constants/languages/translation";
 import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 
 interface GoogleTranslateResult {
-	readonly data: {
+	readonly data?: {
 		readonly translations: {
 			readonly detectedSourceLanguage?: string;
 			readonly translatedText: string;
@@ -42,8 +43,8 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 			return undefined;
 		}
 
-		const sourceLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.source);
-		const targetLocale = getGoogleTranslateLocaleByTranslationLanguage(languages.target);
+		const sourceLocale = getGoogleTranslateLocaleByLanguage(languages.source);
+		const targetLocale = getGoogleTranslateLocaleByLanguage(languages.target);
 
 		const locales: Languages<TranslationLocale> = { source: sourceLocale, target: targetLocale };
 
@@ -59,8 +60,8 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 				},
 				body: new URLSearchParams({ source: locales.source, target: locales.target, q: text, format: "text" }),
 			});
-		} catch (exception) {
-			this.client.log.error(`The request to translate text of length ${text.length} failed:`, exception);
+		} catch (error) {
+			this.client.log.error(error, `The request to translate text of length ${text.length} failed.`);
 			return undefined;
 		}
 
@@ -71,12 +72,12 @@ class GoogleTranslateAdapter extends TranslatorAdapter<GoogleTranslateLanguage> 
 		let result: GoogleTranslateResult;
 		try {
 			result = (await response.json()) as GoogleTranslateResult;
-		} catch (exception) {
-			this.client.log.error("Reading response data for text translation failed:", exception);
+		} catch (error) {
+			this.client.log.error(error, "Reading response data for text translation failed.");
 			return undefined;
 		}
 
-		const translation = result.data.translations?.at(0);
+		const translation = result.data?.translations?.at(0);
 		if (translation === undefined) {
 			return undefined;
 		}

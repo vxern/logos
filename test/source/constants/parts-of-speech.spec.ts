@@ -14,7 +14,7 @@ describe("isUnknownPartOfSpeech()", () => {
 
 describe("getPartOfSpeech()", () => {
 	it("returns the part of speech if the passed exact term is a resolvable part of speech.", () => {
-		const [detected, original] = getPartOfSpeech({
+		const { detected, original } = getPartOfSpeech({
 			terms: { exact: "proper-noun" satisfies PartOfSpeech },
 			learningLanguage: "Romanian",
 		});
@@ -23,7 +23,7 @@ describe("getPartOfSpeech()", () => {
 	});
 
 	it("returns 'unknown' if the learning language is not supported.", () => {
-		const [detected, original] = getPartOfSpeech({
+		const { detected, original } = getPartOfSpeech({
 			terms: { exact: "գոյական" }, // 'noun' in Armenian
 			learningLanguage: "Armenian/Eastern",
 		});
@@ -32,7 +32,7 @@ describe("getPartOfSpeech()", () => {
 	});
 
 	it("returns the part of speech matched to the exact term in the given language.", () => {
-		const [detected, original] = getPartOfSpeech({
+		const { detected, original } = getPartOfSpeech({
 			terms: { exact: "substantiv" },
 			learningLanguage: "Romanian",
 		});
@@ -44,9 +44,9 @@ describe("getPartOfSpeech()", () => {
 		"returns the part of speech matched to the approximate term in the given language if the exact term has no" +
 			" match.",
 		() => {
-			const [detected, original] = getPartOfSpeech({
+			const { detected, original } = getPartOfSpeech({
 				terms: { exact: "this.will.not.match", approximate: "proper noun" },
-				learningLanguage: "English/American",
+				learningLanguage: "English/British",
 			});
 			expect(detected).to.equal("proper-noun" satisfies PartOfSpeech);
 			expect(original).to.equal("proper noun");
@@ -54,9 +54,9 @@ describe("getPartOfSpeech()", () => {
 	);
 
 	it("returns 'unknown' if there is no match", () => {
-		const [detected, original] = getPartOfSpeech({
+		const { detected, original } = getPartOfSpeech({
 			terms: { exact: "this.will.not.match" },
-			learningLanguage: "English/American",
+			learningLanguage: "English/British",
 		});
 		expect(detected).to.equal("unknown" satisfies PartOfSpeech);
 		expect(original).to.equal("this.will.not.match");

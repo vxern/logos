@@ -1,14 +1,11 @@
-import type { ContextBuilder } from "logos:constants/contexts";
 import {
 	type Locale,
 	type LocalisationLanguage,
-	getDiscordLocaleByLocalisationLanguage,
-	getLocalisationLanguageByLocale,
-	isDiscordLocalisationLanguage,
-} from "logos:constants/languages";
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
-import type { ReplyVisibility } from "logos/stores/interactions";
+	getDiscordLocaleByLanguage,
+	getLogosLanguageByLocale,
+	isDiscordLanguage,
+} from "logos:constants/languages/localisation";
+import type pino from "pino";
 
 type RawLocalisationBuilder = (data?: Record<string, unknown>) => string | undefined;
 type LocalisationBuilder = (data?: Record<string, unknown>) => string;
@@ -32,17 +29,20 @@ interface DescriptionLocalisations {
 	readonly descriptionLocalizations?: Partial<Record<Discord.Locales, string>>;
 }
 class LocalisationStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #localisations: Localisations;
 
-	constructor({ environment, localisations }: { environment: Environment; localisations: RawLocalisations }) {
-		this.log = Logger.create({ identifier: "Client/LocalisationStore", isDebug: environment.isDebug });
+	constructor({
+		log = constants.loggers.silent,
+		localisations,
+	}: { log?: pino.Logger; localisations: RawLocalisations }) {
+		this.log = log.child({ name: "LocalisationStore" });
 
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
 	}
 
-	static #buildLocalisations(localisations: Map<string, Map<LocalisationLanguage, string>>): Localisations {
+	static #buildLocalisations(localisations: RawLocalisations): Localisations {
 		const builders = new Map<string, Map<LocalisationLanguage, LocalisationBuilder>>();
 		for (const [key, languages] of localisations.entries()) {
 			const processors = new Map<LocalisationLanguage, LocalisationBuilder>();
@@ -141,11 +141,11 @@ class LocalisationStore {
 	): Discord.Localization {
 		const result: Discord.Localization = {};
 		for (const [language, localise] of localisations.entries()) {
-			if (!isDiscordLocalisationLanguage(language)) {
+			if (!isDiscordLanguage(language)) {
 				continue;
 			}
 
-			const locale = getDiscordLocaleByLocalisationLanguage(language);
+			const locale = getDiscordLocaleByLanguage(language);
 			if (locale === undefined) {
 				continue;
 			}
@@ -174,7 +174,7 @@ class LocalisationStore {
 
 			let language: LocalisationLanguage;
 			if (locale !== undefined) {
-				language = getLocalisationLanguageByLocale(locale);
+				language = getLogosLanguageByLocale(locale);
 			} else {
 				language = constants.defaults.LOCALISATION_LANGUAGE;
 			}
@@ -219,7 +219,7 @@ class LocalisationStore {
 	}
 
 	pluralise(key: string, locale: Locale, { quantity }: { quantity: number }): string {
-		const language = getLocalisationLanguageByLocale(locale);
+		const language = getLogosLanguageByLocale(locale);
 
 		const pluralise = constants.localisations.transformers[language].pluralise;
 		const { one, two, many } = {
@@ -231,24 +231,10 @@ class LocalisationStore {
 		const pluralised = pluralise(`${quantity}`, { one, two, many });
 		if (pluralised === undefined) {
 			this.log.warn(`Could not pluralise string with key '${key}' in ${language}.`);
-			return key;
+			return constants.special.missingString;
 		}
 
 		return pluralised;
-	}
-
-	async withContext<T extends object, R>(
-		interaction: Logos.Interaction,
-		{ contexts, visibility }: { contexts: ContextBuilder<T>[]; visibility?: ReplyVisibility },
-		scope: (strings: T) => Promise<R>,
-	): Promise<R> {
-		const locale = visibility === "public" ? interaction.guildLocale : interaction.locale;
-
-		const strings = contexts
-			.map((builder) => builder({ localise: this.localise.bind(this), locale }))
-			.reduce<T>((combined, context) => Object.assign(combined, context), {} as T);
-
-		return await scope(strings);
 	}
 }
 

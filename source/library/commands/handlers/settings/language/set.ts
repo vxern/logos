@@ -1,5 +1,6 @@
-import languages, { getLocaleByLocalisationLanguage, isLocalisationLanguage } from "logos:constants/languages";
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
+import languages from "logos:constants/languages";
+import { getLocalisationLocaleByLanguage, isLocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
 import { User } from "logos/models/user";
 
@@ -10,19 +11,20 @@ async function handleSetLanguageAutocomplete(
 	const languageLowercase = interaction.parameters.language.trim().toLowerCase();
 	if (languageLowercase.length === 0) {
 		const strings = constants.contexts.autocompleteLanguage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
+
 		return;
 	}
 
-	const strings = constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale });
+	const strings = constants.contexts.language({ localise: client.localise, locale: interaction.locale });
 	const choices = languages.languages.localisation
 		.map((language) => ({ name: strings.language(language), value: language }))
 		.filter((choice) => choice.name.toLowerCase().includes(languageLowercase));
 
-	await client.respond(interaction, choices);
+	client.respond(interaction, choices).ignore();
 }
 
 async function handleSetLanguage(
@@ -30,7 +32,9 @@ async function handleSetLanguage(
 	interaction: Logos.Interaction<any, { language: string }>,
 ): Promise<void> {
 	if (!isLocalisationLanguage(interaction.parameters.language)) {
-		await displayError(client, interaction);
+		const strings = constants.contexts.languageInvalid({ localise: client.localise, locale: interaction.locale });
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -41,16 +45,15 @@ async function handleSetLanguage(
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 	if (userDocument.preferredLanguage === language) {
 		const strings = {
-			...constants.contexts.languageAlreadySet({
-				localise: client.localise.bind(client),
-				locale: interaction.locale,
-			}),
-			...constants.contexts.language({ localise: client.localise.bind(client), locale: interaction.locale }),
+			...constants.contexts.languageAlreadySet({ localise: client.localise, locale: interaction.locale }),
+			...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 		};
-		await client.warned(interaction, {
-			title: strings.title,
-			description: strings.description({ language: strings.language(language) }),
-		});
+		client
+			.warned(interaction, {
+				title: strings.title,
+				description: strings.description({ language: strings.language(language) }),
+			})
+			.ignore();
 
 		return;
 	}
@@ -59,26 +62,17 @@ async function handleSetLanguage(
 		userDocument.preferredLanguage = language;
 	});
 
-	const newLocale = getLocaleByLocalisationLanguage(language);
+	const newLocale = getLocalisationLocaleByLanguage(language);
 	const strings = {
-		...constants.contexts.languageUpdated({ localise: client.localise.bind(client), locale: newLocale }),
-		...constants.contexts.language({ localise: client.localise.bind(client), locale: newLocale }),
+		...constants.contexts.languageUpdated({ localise: client.localise, locale: newLocale }),
+		...constants.contexts.language({ localise: client.localise, locale: newLocale }),
 	};
-	await client.succeeded(interaction, {
-		title: strings.title,
-		description: strings.description({ language: strings.language(language) }),
-	});
-}
-
-async function displayError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.languageInvalid({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	client
+		.succeeded(interaction, {
+			title: strings.title,
+			description: strings.description({ language: strings.language(language) }),
+		})
+		.ignore();
 }
 
 export { handleSetLanguage, handleSetLanguageAutocomplete };

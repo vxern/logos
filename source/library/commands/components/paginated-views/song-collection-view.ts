@@ -1,4 +1,4 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { PaginatedView, type View } from "logos/commands/components/paginated-views/paginated-view";
 import type { Song, SongCollection } from "logos/services/music";
@@ -24,7 +24,7 @@ class SongCollectionView extends PaginatedView<Song> {
 	build(interaction: Logos.Interaction, page: Song[], pageIndex: number): View {
 		if (page.length === 0) {
 			const strings = constants.contexts.listEmpty({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
 			return { embed: { title: this.#title, description: strings.listEmpty, color: constants.colours.notice } };

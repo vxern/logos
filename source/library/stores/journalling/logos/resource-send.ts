@@ -1,7 +1,7 @@
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"resourceSend"> = (client, [author, resource], { guildLocale }) => {
-	const strings = constants.contexts.resourceSend({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.resourceSend({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

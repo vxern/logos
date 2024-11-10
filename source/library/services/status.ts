@@ -15,11 +15,11 @@ class StatusService extends GlobalService {
 		this.#currentIndex = 0;
 	}
 
-	start(): void {
+	async start(): Promise<void> {
 		this.#timer = setInterval(this.#cycleStatus.bind(this), constants.STATUS_CYCLE_PERIOD);
 	}
 
-	stop(): void {
+	async stop(): Promise<void> {
 		clearInterval(this.#timer);
 		this.#timer = undefined;
 
@@ -37,7 +37,7 @@ class StatusService extends GlobalService {
 				],
 				status: "online",
 			})
-			.catch(() => this.log.warn("Unable to edit bot status."));
+			.catch((error) => this.log.warn(error, "Unable to edit bot status."));
 
 		if (this.#currentIndex === constants.statuses.length - 1) {
 			this.#currentIndex = 0;

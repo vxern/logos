@@ -2,31 +2,23 @@ import type { Client } from "logos/client";
 import { SongListingView } from "logos/commands/components/paginated-views/song-listing-view";
 
 async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canCheckPlayback(interaction)) {
 		return;
 	}
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToCheck({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
 
 	const strings = constants.contexts.queue({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
 	});
 

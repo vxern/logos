@@ -1,19 +1,17 @@
-import type {
-	FeatureLanguage,
-	LearningLanguage,
-	Locale,
-	LocalisationLanguage,
-	TranslationLanguage,
-} from "logos:constants/languages";
-import type { RateLimit, TimeStruct } from "logos/models/guild";
+import type { FeatureLanguage } from "logos:constants/languages/feature";
+import type { LearningLanguage } from "logos:constants/languages/learning";
+import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
+import type { TranslationLanguage } from "logos:constants/languages/translation";
+import type { TimeStruct } from "logos:constants/time";
+import type { RateLimit } from "logos/models/guild";
 
-const FEATURE_LOCALE: Locale = "eng-US";
+const FEATURE_LOCALE: Locale = "eng-GB";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";
-const LEARNING_LOCALE: Locale = "eng-US";
-const LEARNING_LANGUAGE: LearningLanguage = "English/American";
-const LOCALISATION_LOCALE: Locale = "eng-US";
-const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/American";
-const TRANSLATION_LANGUAGE: TranslationLanguage = "English/American";
+const LEARNING_LOCALE: Locale = "eng-GB";
+const LEARNING_LANGUAGE: LearningLanguage = "English/British";
+const LOCALISATION_LOCALE: Locale = "eng-GB";
+const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/British";
+const TRANSLATION_LANGUAGE: TranslationLanguage = "English/British";
 
 const COMMAND_RATE_LIMIT: RateLimit = { uses: 5, within: [10, "second"] };
 const REPORT_RATE_LIMIT: RateLimit = { uses: 50, within: [1, "day"] };
@@ -25,6 +23,10 @@ const PRAISE_RATE_LIMIT: RateLimit = { uses: 10, within: [1, "day"] };
 const WARN_LIMIT = 3;
 const WARN_EXPIRY: TimeStruct = [2, "month"];
 const WARN_TIMEOUT: TimeStruct = [1, "day"];
+
+const FLOOD_INTERVAL: TimeStruct = [5, "second"];
+const FLOOD_MESSAGE_COUNT = 3;
+const FLOOD_TIMEOUT: TimeStruct = [1, "day"];
 
 const MUSIC_DISCONNECT_TIMEOUT: TimeStruct = [2, "minute"];
 
@@ -53,6 +55,9 @@ export default Object.freeze({
 	WARN_LIMIT,
 	WARN_EXPIRY,
 	WARN_TIMEOUT,
+	FLOOD_INTERVAL,
+	FLOOD_MESSAGE_COUNT,
+	FLOOD_TIMEOUT,
 	MUSIC_DISCONNECT_TIMEOUT,
 	MINIMUM_VOICE_CHANNELS,
 	MAXIMUM_VOICE_CHANNELS,

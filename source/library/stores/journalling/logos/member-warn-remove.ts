@@ -1,10 +1,7 @@
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"memberWarnRemove"> = (client, [member, warning, author], { guildLocale }) => {
-	const strings = constants.contexts.memberWarnRemove({
-		localise: client.localise.bind(client),
-		locale: guildLocale,
-	});
+	const strings = constants.contexts.memberWarnRemove({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

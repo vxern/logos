@@ -1,17 +1,17 @@
 import type { Dictionary } from "logos:constants/dictionaries";
-import type { LearningLanguage } from "logos:constants/languages";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import { isDefined } from "logos:core/utilities";
 import type { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
-import { DexonlineAdapter } from "logos/adapters/dictionaries/dexonline";
-import { DicolinkAdapter } from "logos/adapters/dictionaries/dicolink";
-import { WiktionaryAdapter } from "logos/adapters/dictionaries/wiktionary";
-import { WordnikAdapter } from "logos/adapters/dictionaries/wordnik.ts";
-import { WordsAPIAdapter } from "logos/adapters/dictionaries/words-api";
+import { DexonlineAdapter } from "logos/adapters/dictionaries/adapters/dexonline";
+import { DicolinkAdapter } from "logos/adapters/dictionaries/adapters/dicolink";
+import { WiktionaryAdapter } from "logos/adapters/dictionaries/adapters/wiktionary";
+import { WordnikAdapter } from "logos/adapters/dictionaries/adapters/wordnik";
+import { WordsAPIAdapter } from "logos/adapters/dictionaries/adapters/words-api";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 class DictionaryStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly adapters: {
 		readonly dexonline: DexonlineAdapter;
 		readonly dicolink?: DicolinkAdapter;
@@ -21,7 +21,7 @@ class DictionaryStore {
 	} & Partial<Record<Dictionary, DictionaryAdapter>>;
 
 	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "Client/DictionaryStore", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "DictionaryStore" });
 
 		const dicolinkAdapter = DicolinkAdapter.tryCreate(client);
 		if (dicolinkAdapter === undefined) {

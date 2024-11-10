@@ -2,7 +2,7 @@ import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"memberTimeoutRemove"> = (client, [member, author], { guildLocale }) => {
 	const strings = constants.contexts.memberTimeoutRemove({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: guildLocale,
 	});
 	return {

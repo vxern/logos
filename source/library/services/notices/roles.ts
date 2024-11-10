@@ -1,4 +1,4 @@
-import { code } from "logos:core/formatting";
+import { code } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/roles";
@@ -35,10 +35,9 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 
 	generateNotice(): HashableMessageContents | undefined {
 		const strings = constants.contexts.howToSelectRoles({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
-
 		return {
 			embeds: [
 				{

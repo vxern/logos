@@ -25,12 +25,12 @@ class RethinkDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 		this.#query = rethinkdb.r.table(this.#collection);
 	}
 
-	whereRegex(property: string, pattern: RegExp): RethinkDBDocumentQuery<M> {
+	whereRegex(property: string, pattern: RegExp): this {
 		this.#query = this.#query.filter((document) => document(property).match(pattern.source));
 		return this;
 	}
 
-	whereEquals(property: string, value: unknown): RethinkDBDocumentQuery<M> {
+	whereEquals(property: string, value: unknown): this {
 		this.#query = this.#query.filter({ [property]: value });
 		return this;
 	}

@@ -6,11 +6,6 @@ import { Ticket } from "logos/models/ticket";
 async function handleOpenTicket(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
-	const configuration = guildDocument.tickets;
-	if (configuration === undefined) {
-		return;
-	}
-
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
@@ -25,17 +20,19 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 		await Ticket.getAll(client, {
 			where: { guildId: interaction.guildId.toString(), authorId: interaction.user.id.toString() },
 		}),
-		configuration.rateLimit ?? constants.defaults.TICKET_RATE_LIMIT,
+		guildDocument.rateLimit("tickets") ?? constants.defaults.TICKET_RATE_LIMIT,
 	);
 	if (crossesRateLimit) {
 		const strings = constants.contexts.tooManyTickets({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.pushback(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client
+			.pushback(interaction, {
+				title: strings.title,
+				description: strings.description,
+			})
+			.ignore();
 
 		return;
 	}
@@ -45,28 +42,19 @@ async function handleOpenTicket(client: Client, interaction: Logos.Interaction):
 	composer.onSubmit(async (submission, { formData }) => {
 		await client.postponeReply(submission);
 
-		const ticketService = client.getPromptService(interaction.guildId, { type: "tickets" });
-		if (ticketService === undefined) {
-			return;
-		}
-
-		const ticketDocument = await ticketService.openTicket({
-			type: "standalone",
-			formData,
-			user: submission.user,
-		});
+		const ticketDocument = await client.services
+			.local("ticketPrompts", { guildId: interaction.guildId })
+			.openTicket({
+				type: "standalone",
+				formData,
+				user: submission.user,
+			});
 		if (ticketDocument === undefined) {
 			return;
 		}
 
-		const strings = constants.contexts.ticketSent({
-			localise: client.localise.bind(client),
-			locale: submission.locale,
-		});
-		await client.succeeded(submission, {
-			title: strings.title,
-			description: strings.description,
-		});
+		const strings = constants.contexts.ticketSent({ localise: client.localise, locale: submission.locale });
+		client.succeeded(submission, { title: strings.title, description: strings.description }).ignore();
 	});
 
 	await composer.open();

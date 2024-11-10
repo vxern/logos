@@ -2,7 +2,7 @@ import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"entryRequestReject"> = (client, [user, author], { guildLocale }) => {
 	const strings = constants.contexts.entryRequestReject({
-		localise: client.localise.bind(client),
+		localise: client.localise,
 		locale: guildLocale,
 	});
 	return {

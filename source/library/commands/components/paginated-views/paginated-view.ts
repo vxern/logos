@@ -40,7 +40,7 @@ abstract class PaginatedView<T> {
 			title = embed.title;
 		} else {
 			const strings = constants.contexts.page({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: this.#anchor.locale,
 			});
 
@@ -49,7 +49,7 @@ abstract class PaginatedView<T> {
 
 		if (!this.#isOnLastPage) {
 			const strings = constants.contexts.continuedOnNextPage({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: this.#anchor.locale,
 			});
 
@@ -78,7 +78,7 @@ abstract class PaginatedView<T> {
 		];
 
 		if (this.#showable && !this.#anchor.parameters.show) {
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.#anchor);
+			const showButton = this.client.services.global("interactionRepetition").getShowButton(this.#anchor);
 
 			return [
 				{
@@ -153,7 +153,7 @@ abstract class PaginatedView<T> {
 
 	async open(): Promise<void> {
 		this.#pageButtons.onInteraction(async (buttonPress) => {
-			await this.client.acknowledge(buttonPress);
+			this.client.acknowledge(buttonPress).ignore();
 
 			switch (buttonPress.metadata[1]) {
 				case "previous": {
@@ -176,7 +176,7 @@ abstract class PaginatedView<T> {
 		await this.#display();
 	}
 
-	close(): void | Promise<void> {
+	async close(): Promise<void> {
 		this.#pageButtons.close();
 	}
 }

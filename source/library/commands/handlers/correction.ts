@@ -27,29 +27,15 @@ async function handleMakeCorrection(
 	}
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
-		const strings = constants.contexts.cannotCorrect({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		const strings = constants.contexts.cannotCorrect({ localise: client.localise, locale: interaction.locale });
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
 
 	if (message.author.id === interaction.user.id) {
-		const strings = constants.contexts.cannotCorrectOwn({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		const strings = constants.contexts.cannotCorrectOwn({ localise: client.localise, locale: interaction.locale });
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -65,14 +51,10 @@ async function handleMakeCorrection(
 	if (doNotCorrectMeRoleId !== undefined) {
 		if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
 			const strings = constants.contexts.userDoesNotWantCorrections({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
-
-			await client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return;
 		}
@@ -80,16 +62,17 @@ async function handleMakeCorrection(
 
 	if (message.content.length > constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH) {
 		const strings = constants.contexts.correctionTooLong({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: `${strings.description.tooLong} ${strings.description.maximumLength({
-				character_limit: constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH,
-			})}`,
-		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.tooLong} ${strings.description.maximumLength({
+					character_limit: constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH,
+				})}`,
+			})
+			.ignore();
 
 		return;
 	}
@@ -101,13 +84,9 @@ async function handleMakeCorrection(
 	});
 
 	composer.onSubmit(async (submission, { formData }) => {
-		await client.acknowledge(submission);
+		client.acknowledge(submission).ignore();
 
-		const strings = constants.contexts.correction({
-			localise: client.localise.bind(client),
-			locale: interaction.locale,
-		});
-
+		const strings = constants.contexts.correction({ localise: client.localise, locale: interaction.locale });
 		client.bot.helpers
 			.sendMessage(message.channelId, {
 				messageReference: {
@@ -131,9 +110,13 @@ async function handleMakeCorrection(
 					},
 				],
 			})
-			.catch(() =>
-				client.log.warn(`Failed to send correction to ${client.diagnostics.channel(message.channelId)}.`),
-			);
+			.catch((error) =>
+				client.log.warn(
+					error,
+					`Failed to send correction to ${client.diagnostics.channel(message.channelId)}.`,
+				),
+			)
+			.ignore();
 	});
 
 	await composer.open();

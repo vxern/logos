@@ -18,9 +18,14 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 		const view = this.build(this.#anchor, { tabs: this.#tabs });
 
 		if (this.#showable && !this.#anchor.parameters.show) {
-			const showButton = this.client.interactionRepetitionService.getShowButton(this.#anchor);
+			const showButton = this.client.services.global("interactionRepetition").getShowButton(this.#anchor);
 
-			for (const { components } of view.components ?? []) {
+			if (view.components === undefined) {
+				view.components = [{ type: Discord.MessageComponentTypes.ActionRow, components: [showButton] }];
+				return view;
+			}
+
+			for (const { components } of view.components.toReversed()) {
 				if (components.length >= 5) {
 					continue;
 				}
@@ -57,10 +62,14 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 	async #display(): Promise<void> {
 		const view = this.#view;
 
-		await this.client.reply(this.#anchor, {
-			embeds: [view.embed],
-			components: view.components,
-		});
+		await this.client.reply(
+			this.#anchor,
+			{
+				embeds: [view.embed],
+				components: view.components,
+			},
+			{ visible: this.#anchor.parameters.show },
+		);
 	}
 
 	async refresh(): Promise<void> {
@@ -74,7 +83,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 
 	async open(): Promise<void> {
 		this.buttonPresses.onInteraction(async (buttonPress) => {
-			await this.client.acknowledge(buttonPress);
+			this.client.acknowledge(buttonPress).ignore();
 
 			const group = buttonPress.metadata[1] as keyof Generic["groups"];
 			const tab = buttonPress.metadata[2] as Generic["groups"][typeof group];

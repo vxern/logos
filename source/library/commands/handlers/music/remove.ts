@@ -1,27 +1,19 @@
-import { mention } from "logos:core/formatting";
+import { mention } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { RemoveSongListingView } from "logos/commands/components/paginated-views/remove-song-listing-view";
 
 async function handleRemoveSongListing(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!musicService.canManagePlayback(interaction)) {
 		return;
 	}
 
 	if (!musicService.hasSession) {
 		const strings = constants.contexts.notPlayingMusicToManage({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 		return;
 	}
@@ -31,8 +23,8 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		listings: musicService.session.listings.queue.listings,
 	});
 
-	view.onInteraction(async (buttonPress) => {
-		const indexString = buttonPress.data?.values?.at(0) as string | undefined;
+	view.onRemove(async (buttonPress) => {
+		const indexString = buttonPress.data?.values?.at(0);
 		if (indexString === undefined) {
 			return;
 		}
@@ -45,34 +37,28 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 		const listing = musicService.session.listings.removeFromQueue({ index });
 		if (listing === undefined) {
 			const strings = constants.contexts.failedToRemoveSong({
-				localise: client.localise.bind(client),
+				localise: client.localise,
 				locale: interaction.locale,
 			});
-
-			await client.failed(buttonPress, {
-				title: strings.title,
-				description: strings.description,
-			});
+			client.failed(buttonPress, { title: strings.title, description: strings.description }).ignore();
 
 			return;
 		}
 
-		const strings = constants.contexts.removedSong({
-			localise: client.localise.bind(client),
-			locale: interaction.guildLocale,
-		});
-
-		await client.success(
-			buttonPress,
-			{
-				title: `${constants.emojis.music.removed} ${strings.title}`,
-				description: strings.description({
-					title: listing.queueable.title,
-					user_mention: mention(buttonPress.user.id, { type: "user" }),
-				}),
-			},
-			{ visible: true },
-		);
+		const strings = constants.contexts.removedSong({ localise: client.localise, locale: interaction.guildLocale });
+		client
+			.success(
+				buttonPress,
+				{
+					title: `${constants.emojis.music.removed} ${strings.title}`,
+					description: strings.description({
+						title: listing.queueable.title,
+						user_mention: mention(buttonPress.user.id, { type: "user" }),
+					}),
+				},
+				{ visible: true },
+			)
+			.ignore();
 	});
 
 	const refreshView = async () => view.refresh();

@@ -1,14 +1,13 @@
-import { mention, timestamp } from "logos:core/formatting";
+import { mention, timestamp } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import type { EntryRequest, VoteType } from "logos/models/entry-request";
 import type { Guild } from "logos/models/guild";
 import { Model } from "logos/models/model";
-import { Ticket } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
-type Configuration = NonNullable<Guild["verification"]>;
+type Configuration = NonNullable<Guild["features"]["verification"]>;
 type VoteInformation = {
 	[K in keyof NonNullable<Configuration["voting"]>["verdict"]]: {
 		required: number;
@@ -82,12 +81,12 @@ class VerificationPromptService extends PromptService<{
 				continue;
 			}
 
-			this.getUserDocument(entryRequestDocument).then((authorDocument) => {
+			this.getUserDocument(entryRequestDocument).then(async (authorDocument) => {
 				if (authorDocument === undefined) {
 					return;
 				}
 
-				this.#tryFinalise({ entryRequestDocument, voter: member });
+				await this.#tryFinalise({ entryRequestDocument, voter: member });
 			});
 
 			entryRequests.set(partialId, entryRequestDocument);
@@ -97,7 +96,7 @@ class VerificationPromptService extends PromptService<{
 	}
 
 	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
+		return User.getOrCreate(this.client, { userId: entryRequestDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, entryRequestDocument: EntryRequest): Discord.CreateMessageOptions | undefined {
@@ -119,7 +118,7 @@ class VerificationPromptService extends PromptService<{
 		);
 
 		const strings = constants.contexts.entryRequestPrompt({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
 		return {
@@ -181,7 +180,7 @@ class VerificationPromptService extends PromptService<{
 					],
 					footer: {
 						text: this.guild.name,
-						iconUrl: PromptService.encodePartialIdInGuildIcon({
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
 							guild: this.guild,
 							partialId: entryRequestDocument.partialId,
 						}),
@@ -242,12 +241,65 @@ class VerificationPromptService extends PromptService<{
 		};
 	}
 
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
+		const strings = constants.contexts.noEntryRequests({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
+				},
+			],
+		};
+	}
+
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isAccept: string]>,
 	): Promise<EntryRequest | null | undefined> {
 		const [guildId, authorId] = Model.getDataFromPartialId<EntryRequest>(interaction.metadata[1]);
 		if (guildId === undefined || authorId === undefined) {
 			return undefined;
+		}
+
+		const entryRequestDocument = this.client.documents.entryRequests.get(
+			Model.buildPartialId<EntryRequest>({ guildId, authorId }),
+		);
+		if (entryRequestDocument === undefined) {
+			const strings = constants.contexts.voteFailed({
+				localise: this.client.localise,
+				locale: interaction.locale,
+			});
+			this.client.failure(interaction, { title: strings.title, description: strings.description }).ignore();
+
+			return undefined;
+		}
+
+		if (entryRequestDocument.ticketChannelId !== undefined) {
+			const strings = constants.contexts.inquiryInProgress({
+				localise: this.client.localise.bind(this.client),
+				locale: interaction.locale,
+			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.warning,
+				})
+				.ignore();
+
+			return;
 		}
 
 		const newVote: VoteType = interaction.metadata[2] === "true" ? "for" : "against";
@@ -257,25 +309,14 @@ class VerificationPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const entryRequestDocument = this.client.documents.entryRequests.get(
-			Model.buildPartialId<EntryRequest>({ guildId, authorId }),
-		);
-		if (entryRequestDocument === undefined) {
-			await this.#displayVoteError(interaction);
-			return undefined;
-		}
-
 		const currentVote = entryRequestDocument.getUserVote({ userId: interaction.user.id.toString() });
 
-		const management = this.configuration.management;
-
-		const roleIds = management?.roles?.map((roleId) => BigInt(roleId));
-		const userIds = management?.users?.map((userId) => BigInt(userId));
+		const management = this.guildDocument.managers("verification");
 
 		if (currentVote === "for" && newVote === "for") {
 			const isAuthorised =
-				voter.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-				(userIds?.includes(interaction.user.id) ?? false);
+				voter.roles.some((roleId) => management?.roles?.includes(roleId.toString()) ?? false) ||
+				(management?.users?.includes(interaction.user.id.toString()) ?? false);
 
 			if (isAuthorised) {
 				const { promise, resolve } = Promise.withResolvers<null | undefined>();
@@ -290,7 +331,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				confirmButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					if (entryRequestDocument.isFinalised) {
 						resolve(undefined);
@@ -310,7 +351,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				cancelButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					resolve(undefined);
 				});
@@ -322,56 +363,60 @@ class VerificationPromptService extends PromptService<{
 				await this.client.registerInteractionCollector(cancelButton);
 
 				const strings = constants.contexts.sureToForceAccept({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
-				await this.client.pushback(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: confirmButton.customId,
-									label: strings.yes,
-									style: Discord.ButtonStyles.Success,
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: cancelButton.customId,
-									label: strings.no,
-									style: Discord.ButtonStyles.Danger,
-								},
-							],
-						},
-					],
-				});
+				this.client
+					.pushback(interaction, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+							},
+						],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: confirmButton.customId,
+										label: strings.yes,
+										style: Discord.ButtonStyles.Success,
+									},
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: cancelButton.customId,
+										label: strings.no,
+										style: Discord.ButtonStyles.Danger,
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return promise;
 			}
 
 			const strings = constants.contexts.alreadyVotedInFavour({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return undefined;
 		}
 
 		if (currentVote === "against" && newVote === "against") {
 			const isAuthorised =
-				voter.roles.some((roleId) => roleIds?.includes(roleId) ?? false) ||
-				(userIds?.includes(interaction.user.id) ?? false);
+				voter.roles.some((roleId) => management?.roles?.includes(roleId.toString()) ?? false) ||
+				(management?.users?.includes(interaction.user.id.toString()) ?? false);
 
 			if (isAuthorised) {
 				const { promise, resolve } = Promise.withResolvers<null | undefined>();
@@ -386,7 +431,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				confirmButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					if (entryRequestDocument.isFinalised) {
 						resolve(undefined);
@@ -406,7 +451,7 @@ class VerificationPromptService extends PromptService<{
 				});
 
 				cancelButton.onInteraction(async (_) => {
-					await this.client.deleteReply(interaction);
+					this.client.deleteReply(interaction).ignore();
 
 					resolve(undefined);
 				});
@@ -418,48 +463,47 @@ class VerificationPromptService extends PromptService<{
 				await this.client.registerInteractionCollector(cancelButton);
 
 				const strings = constants.contexts.sureToForceReject({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
-				await this.client.pushback(interaction, {
-					embeds: [
-						{
-							title: strings.title,
-							description: strings.description,
-						},
-					],
-					components: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: confirmButton.customId,
-									label: strings.yes,
-									style: Discord.ButtonStyles.Success,
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									customId: cancelButton.customId,
-									label: strings.no,
-									style: Discord.ButtonStyles.Danger,
-								},
-							],
-						},
-					],
-				});
+				this.client
+					.pushback(interaction, {
+						embeds: [
+							{
+								title: strings.title,
+								description: strings.description,
+							},
+						],
+						components: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: confirmButton.customId,
+										label: strings.yes,
+										style: Discord.ButtonStyles.Success,
+									},
+									{
+										type: Discord.MessageComponentTypes.Button,
+										customId: cancelButton.customId,
+										label: strings.no,
+										style: Discord.ButtonStyles.Danger,
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return promise;
 			}
 
 			const strings = constants.contexts.alreadyVotedAgainst({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
 			return undefined;
 		}
@@ -470,15 +514,17 @@ class VerificationPromptService extends PromptService<{
 
 		if (currentVote !== undefined) {
 			const strings = constants.contexts.stanceChanged({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.notice(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.notice(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 		} else {
-			await this.client.acknowledge(interaction);
+			this.client.acknowledge(interaction).ignore();
 		}
 
 		const isFinalised = await this.#tryFinalise({ entryRequestDocument, voter });
@@ -543,8 +589,9 @@ class VerificationPromptService extends PromptService<{
 					BigInt(entryRequestDocument.requestedRoleId),
 					"User-requested role addition.",
 				)
-				.catch(() =>
+				.catch((error) =>
 					this.log.warn(
+						error,
 						`Failed to add ${this.client.diagnostics.role(
 							entryRequestDocument.requestedRoleId,
 						)} to ${this.client.diagnostics.user(authorDocument.userId)} on ${this.client.diagnostics.guild(
@@ -553,7 +600,11 @@ class VerificationPromptService extends PromptService<{
 					),
 				);
 
-			await this.client.tryLog("entryRequestAccept", { guildId: guild.id, args: [author, voter] });
+			await this.client.tryLog("entryRequestAccept", {
+				guildId: guild.id,
+				journalling: this.guildDocument.isJournalled("verification"),
+				args: [author, voter],
+			});
 		} else if (verdict === "rejected") {
 			await authorDocument.update(this.client, () => {
 				authorDocument.setAuthorisationStatus({ guildId: this.guildIdString, status: "rejected" });
@@ -567,33 +618,20 @@ class VerificationPromptService extends PromptService<{
 
 			this.client.bot.helpers
 				.banMember(this.guildId, author.id, {}, "Voted to reject entry request.")
-				.catch(() =>
+				.catch((error) =>
 					this.log.warn(
+						error,
 						`Failed to ban ${this.client.diagnostics.user(
 							authorDocument.userId,
 						)} on ${this.client.diagnostics.guild(guild)}.`,
 					),
 				);
 
-			await this.client.tryLog("entryRequestReject", { guildId: guild.id, args: [author, voter] });
-		}
-
-		if (entryRequestDocument.ticketChannelId !== undefined) {
-			const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
-			if (ticketService !== undefined) {
-				const [ticketDocument] = await Ticket.getAll(this.client, {
-					where: { guildId: this.guildIdString, channelId: entryRequestDocument.ticketChannelId },
-				});
-				if (ticketDocument === undefined) {
-					throw new Error("Unable to find ticket document.");
-				}
-
-				await ticketService.handleDelete(ticketDocument);
-
-				await entryRequestDocument.update(this.client, () => {
-					entryRequestDocument.ticketChannelId = undefined;
-				});
-			}
+			await this.client.tryLog("entryRequestReject", {
+				guildId: guild.id,
+				journalling: this.guildDocument.isJournalled("verification"),
+				args: [author, voter],
+			});
 		}
 
 		return true;
@@ -601,11 +639,6 @@ class VerificationPromptService extends PromptService<{
 
 	async #handleOpenInquiry(interaction: Logos.Interaction, partialId: string): Promise<void> {
 		await this.client.postponeReply(interaction);
-
-		const ticketConfiguration = this.guildDocument.tickets;
-		if (ticketConfiguration === undefined) {
-			return;
-		}
 
 		const entryRequestDocument = this.client.documents.entryRequests.get(partialId);
 		if (entryRequestDocument === undefined) {
@@ -621,29 +654,22 @@ class VerificationPromptService extends PromptService<{
 			return;
 		}
 
-		const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
-		if (ticketService === undefined) {
-			return;
-		}
-
 		const strings = constants.contexts.inquiryChannel({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
-		const ticketDocument = await ticketService.openTicket({
+		const ticketDocument = await this.client.services.local("ticketPrompts", { guildId: this.guildId }).openTicket({
 			type: "inquiry",
 			formData: { topic: strings.inquiryChannel({ user: entryRequestAuthor.username }) },
 			user: entryRequestAuthor,
 		});
 		if (ticketDocument === undefined) {
 			const strings = constants.contexts.inquiryFailed({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.failed(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client.failed(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
@@ -658,17 +684,19 @@ class VerificationPromptService extends PromptService<{
 
 		await this.client.bot.helpers
 			.deleteMessage(prompt.channelId, prompt.id)
-			.catch(() => this.log.warn("Failed to delete prompt."));
+			.catch((error) => this.log.warn(error, "Failed to delete prompt."));
 
 		{
 			const strings = constants.contexts.inquiryOpened({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.succeeded(interaction, {
-				title: strings.title,
-				description: strings.description({ guild_name: this.guild.name }),
-			});
+			this.client
+				.succeeded(interaction, {
+					title: strings.title,
+					description: strings.description({ guild_name: this.guild.name }),
+				})
+				.ignore();
 		}
 	}
 
@@ -685,7 +713,7 @@ class VerificationPromptService extends PromptService<{
 
 		function getVoteInformation<VerdictType extends keyof VoteInformation>(
 			type: VerdictType,
-			configuration: Guild["verification"] & { enabled: true },
+			configuration: NonNullable<Guild["features"]["verification"]>,
 			votes: number,
 		): VoteInformation[VerdictType] {
 			const verdict = configuration.voting.verdict[type];
@@ -712,17 +740,6 @@ class VerificationPromptService extends PromptService<{
 		);
 
 		return { acceptance, rejection };
-	}
-
-	async #displayVoteError(interaction: Logos.Interaction): Promise<void> {
-		const strings = constants.contexts.voteFailed({
-			localise: this.client.localise.bind(this.client),
-			locale: interaction.locale,
-		});
-		await this.client.failure(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
 	}
 }
 

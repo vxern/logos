@@ -1,7 +1,8 @@
+import { isDefined } from "logos:core/utilities";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
 import type { Guild } from "logos/models/guild";
 import { AlertService } from "logos/services/alert";
+import { AntiFloodService } from "logos/services/anti-flood";
 import { DailyWordService } from "logos/services/daily-words.ts";
 import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channels";
 import { EntryService } from "logos/services/entry";
@@ -11,59 +12,59 @@ import { MusicService } from "logos/services/music";
 import { InformationNoticeService } from "logos/services/notices/information";
 import { ResourceNoticeService } from "logos/services/notices/resources";
 import { RoleNoticeService } from "logos/services/notices/roles";
-import type { NoticeService } from "logos/services/notices/service";
 import { WelcomeNoticeService } from "logos/services/notices/welcome";
 import { ReportPromptService } from "logos/services/prompts/reports";
 import { ResourcePromptService } from "logos/services/prompts/resources";
-import type { PromptService } from "logos/services/prompts/service";
 import { SuggestionPromptService } from "logos/services/prompts/suggestions";
 import { TicketPromptService } from "logos/services/prompts/tickets";
 import { VerificationPromptService } from "logos/services/prompts/verification";
-import { RealtimeUpdateService } from "logos/services/realtime-updates";
 import { RoleIndicatorService } from "logos/services/role-indicators";
-import type { Service } from "logos/services/service";
+import type { GlobalService, LocalService, Service } from "logos/services/service";
 import { StatusService } from "logos/services/status";
+import type pino from "pino";
+
+interface GlobalServices {
+	readonly lavalink?: LavalinkService;
+	readonly interactionRepetition: InteractionRepetitionService;
+	readonly status: StatusService;
+}
+
+interface LocalServices {
+	readonly alerts: AlertService;
+	readonly antiFlood: AntiFloodService;
+	readonly dailyWords: DailyWordService;
+	readonly dynamicVoiceChannels: DynamicVoiceChannelService;
+	readonly entry: EntryService;
+	readonly music: MusicService;
+	readonly informationNotices: InformationNoticeService;
+	readonly resourceNotices: ResourceNoticeService;
+	readonly roleNotices: RoleNoticeService;
+	readonly welcomeNotices: WelcomeNoticeService;
+	readonly reportPrompts: ReportPromptService;
+	readonly resourcePrompts: ResourcePromptService;
+	readonly suggestionPrompts: SuggestionPromptService;
+	readonly ticketPrompts: TicketPromptService;
+	readonly verificationPrompts: VerificationPromptService;
+	readonly roleIndicators: RoleIndicatorService;
+}
 
 class ServiceStore {
-	readonly log: Logger;
-	readonly global: {
-		readonly lavalink?: LavalinkService;
-		readonly interactionRepetition: InteractionRepetitionService;
-		readonly realtimeUpdates: RealtimeUpdateService;
-		readonly status: StatusService;
-	};
-	readonly local: {
-		readonly alerts: Map<bigint, AlertService>;
-		readonly dailyWords: Map<bigint, DailyWordService>;
-		readonly dynamicVoiceChannels: Map<bigint, DynamicVoiceChannelService>;
-		readonly entry: Map<bigint, EntryService>;
-		readonly music: Map<bigint, MusicService>;
-		readonly notices: {
-			readonly information: Map<bigint, InformationNoticeService>;
-			readonly resources: Map<bigint, ResourceNoticeService>;
-			readonly roles: Map<bigint, RoleNoticeService>;
-			readonly welcome: Map<bigint, WelcomeNoticeService>;
-		};
-		readonly prompts: {
-			readonly reports: Map<bigint, ReportPromptService>;
-			readonly resources: Map<bigint, ResourcePromptService>;
-			readonly suggestions: Map<bigint, SuggestionPromptService>;
-			readonly tickets: Map<bigint, TicketPromptService>;
-			readonly verification: Map<bigint, VerificationPromptService>;
-		};
-		readonly roleIndicators: Map<bigint, RoleIndicatorService>;
-	};
+	readonly log: pino.Logger;
 
-	readonly #collection: {
-		/** Singular services running across all guilds. */
-		readonly global: Service[];
+	readonly #client: Client;
+	readonly #global: GlobalServices;
+	readonly #local: { [K in keyof LocalServices]: Map<bigint, LocalServices[K]> };
 
-		/** Particular services running under specific guilds. */
-		readonly local: Map<bigint, Service[]>;
-	};
+	get #globalServices(): GlobalService[] {
+		return Object.values(this.#global).filter(isDefined);
+	}
+
+	get #localServices(): LocalService[] {
+		return Object.values(this.#local).flatMap((services) => [...services.values()]);
+	}
 
 	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "Client/ServiceStore", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "ServiceStore" });
 
 		const lavalinkService = LavalinkService.tryCreate(client);
 		if (lavalinkService === undefined) {
@@ -72,41 +73,43 @@ class ServiceStore {
 			);
 		}
 
-		this.global = {
+		this.#client = client;
+		this.#global = {
 			lavalink: lavalinkService,
 			interactionRepetition: new InteractionRepetitionService(client),
-			realtimeUpdates: new RealtimeUpdateService(client),
 			status: new StatusService(client),
 		};
-		this.local = {
+		this.#local = {
 			alerts: new Map(),
+			antiFlood: new Map(),
 			dailyWords: new Map(),
 			dynamicVoiceChannels: new Map(),
 			entry: new Map(),
 			music: new Map(),
-			notices: {
-				information: new Map(),
-				resources: new Map(),
-				roles: new Map(),
-				welcome: new Map(),
-			},
-			prompts: {
-				verification: new Map(),
-				reports: new Map(),
-				resources: new Map(),
-				suggestions: new Map(),
-				tickets: new Map(),
-			},
+			informationNotices: new Map(),
+			resourceNotices: new Map(),
+			roleNotices: new Map(),
+			welcomeNotices: new Map(),
+			reportPrompts: new Map(),
+			resourcePrompts: new Map(),
+			suggestionPrompts: new Map(),
+			ticketPrompts: new Map(),
+			verificationPrompts: new Map(),
 			roleIndicators: new Map(),
 		};
+	}
 
-		this.#collection = { global: [], local: new Map() };
+	#localServicesFor({ guildId }: { guildId: bigint }): LocalService[] {
+		return Object.values(this.#local)
+			.map((services) => services.get(guildId))
+			.filter(isDefined);
 	}
 
 	async setup(): Promise<void> {
 		this.log.info("Setting up service store...");
 
-		await this.#startGlobal();
+		await this.#startGlobalServices();
+		// Local services are started when Logos receives a guild.
 
 		this.log.info("Service store set up.");
 	}
@@ -114,283 +117,233 @@ class ServiceStore {
 	async teardown(): Promise<void> {
 		this.log.info("Tearing down service store...");
 
-		await this.#stopGlobal();
+		await this.#stopGlobalServices();
+		await this.#stopAllLocalServices();
 
 		this.log.info("Service store torn down.");
 	}
 
-	async #startGlobal(): Promise<void> {
-		const services = Object.values(this.global);
+	async #startGlobalServices(): Promise<void> {
+		const services = this.#globalServices;
+
 		this.log.info(`Starting global services... (${services.length} services to start)`);
 
-		const promises: (void | Promise<void>)[] = [];
+		const promises: Promise<void>[] = [];
 		for (const service of services) {
 			promises.push(service.start());
 		}
 		await Promise.all(promises);
-		this.log.info("Global services started.");
 
-		this.#collection.global.push(...services);
+		this.log.info("Global services started.");
 	}
 
-	async #stopGlobal(): Promise<void> {
-		this.log.info(`Stopping global services... (${this.#collection.local.size} services to stop)`);
+	async #stopGlobalServices(): Promise<void> {
+		const services = this.#globalServices;
 
-		const promises: Promise<void>[] = [];
-		for (const services of this.#collection.local.values()) {
-			promises.push(this.#stopServices(services));
-		}
-		await Promise.all(promises);
+		this.log.info(`Stopping global services... (${services.length} services to stop)`);
 
-		await this.#stopServices(this.#collection.global);
+		await this.#stopServices(services);
 
 		this.log.info("Global services stopped.");
 	}
 
-	async setupGuildServices(
-		client: Client,
-		{ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild },
-	): Promise<void> {
+	async startForGuild({ guildId, guildDocument }: { guildId: bigint; guildDocument: Guild }): Promise<void> {
 		const services: Service[] = [];
 
-		if (guildDocument.hasEnabled("informationFeatures")) {
-			if (guildDocument.hasEnabled("noticeFeatures")) {
-				if (guildDocument.hasEnabled("informationNotice")) {
-					const service = new InformationNoticeService(client, { guildId });
-					services.push(service);
+		if (guildDocument.hasEnabled("informationNotices")) {
+			const service = new InformationNoticeService(this.#client, { guildId });
+			services.push(service);
 
-					this.local.notices.information.set(guildId, service);
-				}
-
-				if (guildDocument.hasEnabled("resourceNotice")) {
-					const service = new ResourceNoticeService(client, { guildId });
-					services.push(service);
-
-					this.local.notices.resources.set(guildId, service);
-				}
-
-				if (guildDocument.hasEnabled("roleNotice")) {
-					const service = new RoleNoticeService(client, { guildId });
-					services.push(service);
-
-					this.local.notices.roles.set(guildId, service);
-				}
-
-				if (guildDocument.hasEnabled("welcomeNotice")) {
-					const service = new WelcomeNoticeService(client, { guildId });
-					services.push(service);
-
-					this.local.notices.welcome.set(guildId, service);
-				}
-			}
+			this.#local.informationNotices.set(guildId, service);
 		}
 
-		if (guildDocument.hasEnabled("languageFeatures")) {
-			if (guildDocument.hasEnabled("dailyWords")) {
-				const service = new DailyWordService(client, { guildId });
-				services.push(service);
+		if (guildDocument.hasEnabled("resourceNotices")) {
+			const service = new ResourceNoticeService(this.#client, { guildId });
+			services.push(service);
 
-				this.local.dailyWords.set(guildId, service);
-			}
+			this.#local.resourceNotices.set(guildId, service);
 		}
 
-		if (guildDocument.hasEnabled("moderationFeatures")) {
-			if (guildDocument.hasEnabled("alerts")) {
-				const service = new AlertService(client, { guildId });
-				services.push(service);
+		if (guildDocument.hasEnabled("roleNotices")) {
+			const service = new RoleNoticeService(this.#client, { guildId });
+			services.push(service);
 
-				this.local.alerts.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("reports")) {
-				const service = new ReportPromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.reports.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("verification")) {
-				const service = new VerificationPromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.verification.set(guildId, service);
-			}
+			this.#local.roleNotices.set(guildId, service);
 		}
 
-		if (guildDocument.hasEnabled("serverFeatures")) {
-			if (guildDocument.hasEnabled("dynamicVoiceChannels")) {
-				const service = new DynamicVoiceChannelService(client, { guildId });
-				services.push(service);
+		if (guildDocument.hasEnabled("welcomeNotices")) {
+			const service = new WelcomeNoticeService(this.#client, { guildId });
+			services.push(service);
 
-				this.local.dynamicVoiceChannels.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("entry")) {
-				const service = new EntryService(client, { guildId });
-				services.push(service);
-
-				this.local.entry.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("roleIndicators")) {
-				const service = new RoleIndicatorService(client, { guildId });
-				services.push(service);
-
-				this.local.roleIndicators.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("suggestions")) {
-				const service = new SuggestionPromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.suggestions.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("tickets")) {
-				const service = new TicketPromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.tickets.set(guildId, service);
-			}
-
-			if (guildDocument.hasEnabled("resourceSubmissions")) {
-				const service = new ResourcePromptService(client, { guildId });
-				services.push(service);
-
-				this.local.prompts.resources.set(guildId, service);
-			}
+			this.#local.welcomeNotices.set(guildId, service);
 		}
 
-		if (guildDocument.hasEnabled("socialFeatures")) {
-			if (guildDocument.hasEnabled("music") && this.global.lavalink !== undefined) {
-				const service = new MusicService(client, { guildId });
-				services.push(service);
+		if (guildDocument.hasEnabled("alerts")) {
+			const service = new AlertService(this.#client, { guildId });
+			services.push(service);
 
-				this.local.music.set(guildId, service);
-			}
+			this.#local.alerts.set(guildId, service);
 		}
 
-		await this.startLocal(client, { guildId, services });
+		if (guildDocument.hasEnabled("reports")) {
+			const service = new ReportPromptService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.reportPrompts.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("antiFlood")) {
+			const service = new AntiFloodService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.antiFlood.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("verification")) {
+			const service = new VerificationPromptService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.verificationPrompts.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("dailyWords")) {
+			const service = new DailyWordService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.dailyWords.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("dynamicVoiceChannels")) {
+			const service = new DynamicVoiceChannelService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.dynamicVoiceChannels.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("entry")) {
+			const service = new EntryService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.entry.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("roleIndicators")) {
+			const service = new RoleIndicatorService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.roleIndicators.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("suggestions")) {
+			const service = new SuggestionPromptService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.suggestionPrompts.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("tickets")) {
+			const service = new TicketPromptService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.ticketPrompts.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("resourceSubmissions")) {
+			const service = new ResourcePromptService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.resourcePrompts.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("music") && this.#global.lavalink !== undefined) {
+			const service = new MusicService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.music.set(guildId, service);
+		}
+
+		await this.#startLocalServices({ guildId, services });
 	}
 
-	async startLocal(client: Client, { guildId, services }: { guildId: bigint; services: Service[] }): Promise<void> {
+	async stopForGuild({ guildId }: { guildId: bigint }): Promise<void> {
+		await this.#stopLocalServices({ guildId });
+	}
+
+	async #startLocalServices({ guildId, services }: { guildId: bigint; services: Service[] }): Promise<void> {
 		if (services.length === 0) {
-			this.log.info(`There were no local services to start on ${client.diagnostics.guild(guildId)}.`);
+			this.log.info(`There were no local services to start on ${this.#client.diagnostics.guild(guildId)}.`);
 			return;
 		}
 
 		this.log.info(
-			`Starting local services on ${client.diagnostics.guild(guildId)}... (${services.length} services to start)`,
+			`Starting local services on ${this.#client.diagnostics.guild(guildId)}... (${services.length} services to start)`,
 		);
 
-		this.#collection.local.set(guildId, services);
+		await this.#startServices(services);
 
-		const promises: (void | Promise<void>)[] = [];
-		for (const service of services) {
-			promises.push(service.start());
-		}
-		await Promise.all(promises);
-
-		this.log.info(`Local services on ${client.diagnostics.guild(guildId)} started.`);
+		this.log.info(`Local services on ${this.#client.diagnostics.guild(guildId)} started.`);
 	}
 
-	async stopLocal(client: Client, { guildId }: { guildId: bigint }): Promise<void> {
-		if (!this.#collection.local.has(guildId)) {
-			this.log.info(`There were no local services to stop on ${client.diagnostics.guild(guildId)}.`);
+	async #stopLocalServices({ guildId }: { guildId: bigint }): Promise<void> {
+		const services = this.#localServicesFor({ guildId });
+		if (services.length === 0) {
+			this.log.info(`There were no local services to stop on ${this.#client.diagnostics.guild(guildId)}.`);
 			return;
 		}
 
-		const services = this.#collection.local.get(guildId)!;
-
 		this.log.info(
-			`Stopping services on ${client.diagnostics.guild(guildId)}... (${services.length} services to stop)`,
+			`Stopping services on ${this.#client.diagnostics.guild(guildId)}... (${services.length} services to stop)`,
 		);
-
-		this.#collection.local.delete(guildId);
 
 		await this.#stopServices(services);
 
-		this.log.info(`Local services on ${client.diagnostics.guild(guildId)} stopped.`);
+		this.log.info(`Local services on ${this.#client.diagnostics.guild(guildId)} stopped.`);
+	}
+
+	async #stopAllLocalServices(): Promise<void> {
+		const services = this.#localServices;
+
+		this.log.info(`Stopping all local services... (${services.length} services to stop)`);
+
+		await this.#stopServices(services);
+
+		this.log.info("All local services stopped.");
+	}
+
+	async #startServices(services: Service[]): Promise<void> {
+		await Promise.all(services.map((service) => service.start()));
 	}
 
 	async #stopServices(services: Service[]): Promise<void> {
-		const promises: Promise<void>[] = [];
-		for (const service of services) {
-			promises.push(Promise.resolve(service.stop()));
+		await Promise.all(services.map((service) => service.stop()));
+	}
+
+	hasGlobalService<K extends keyof GlobalServices>(service: K): boolean {
+		return this.#global[service] !== undefined;
+	}
+
+	/** ⚠️ If the service is not enabled, an error is raised. */
+	global<K extends keyof GlobalServices>(service: K): NonNullable<GlobalServices[K]> {
+		if (!this.hasGlobalService(service)) {
+			throw new Error(`Attempted to get global service '${service}' that is not enabled.`);
 		}
-		await Promise.all(promises);
+
+		return this.#global[service]!;
 	}
 
-	getAlertService(guildId: bigint): AlertService | undefined {
-		return this.local.alerts.get(guildId);
+	hasLocalService<K extends keyof LocalServices>(service: K, { guildId }: { guildId: bigint }): boolean {
+		return this.#local[service].has(guildId);
 	}
 
-	getDynamicVoiceChannelService(guildId: bigint): DynamicVoiceChannelService | undefined {
-		return this.local.dynamicVoiceChannels.get(guildId);
-	}
-
-	getEntryService(guildId: bigint): EntryService | undefined {
-		return this.local.entry.get(guildId);
-	}
-
-	getMusicService(guildId: bigint): MusicService | undefined {
-		return this.local.music.get(guildId);
-	}
-
-	getRoleIndicatorService(guildId: bigint): RoleIndicatorService | undefined {
-		return this.local.roleIndicators.get(guildId);
-	}
-
-	getNoticeService(guildId: bigint, { type }: { type: "information" }): InformationNoticeService | undefined;
-	getNoticeService(guildId: bigint, { type }: { type: "resources" }): ResourceNoticeService | undefined;
-	getNoticeService(guildId: bigint, { type }: { type: "roles" }): RoleNoticeService | undefined;
-	getNoticeService(guildId: bigint, { type }: { type: "welcome" }): WelcomeNoticeService | undefined;
-	getNoticeService(
-		guildId: bigint,
-		{ type }: { type: keyof ServiceStore["local"]["notices"] },
-	): NoticeService<{ type: typeof type }> | undefined {
-		switch (type) {
-			case "information": {
-				return this.local.notices.information.get(guildId);
-			}
-			case "resources": {
-				return this.local.notices.resources.get(guildId);
-			}
-			case "roles": {
-				return this.local.notices.roles.get(guildId);
-			}
-			case "welcome": {
-				return this.local.notices.welcome.get(guildId);
-			}
+	/** ⚠️ If the service is not enabled on the given guild, an error is raised. */
+	local<K extends keyof LocalServices>(service: K, { guildId }: { guildId: bigint }): LocalServices[K] {
+		if (!this.hasLocalService(service, { guildId })) {
+			throw new Error(
+				`Attempted to get local service '${service}' that was not enabled on guild with ID ${guildId}.`,
+			);
 		}
-	}
 
-	getPromptService(guildId: bigint, { type }: { type: "verification" }): VerificationPromptService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "reports" }): ReportPromptService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "resources" }): ResourcePromptService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "suggestions" }): SuggestionPromptService | undefined;
-	getPromptService(guildId: bigint, { type }: { type: "tickets" }): TicketPromptService | undefined;
-	getPromptService(
-		guildId: bigint,
-		{ type }: { type: keyof ServiceStore["local"]["prompts"] },
-	): PromptService | undefined {
-		switch (type) {
-			case "verification": {
-				return this.local.prompts.verification.get(guildId);
-			}
-			case "reports": {
-				return this.local.prompts.reports.get(guildId);
-			}
-			case "resources": {
-				return this.local.prompts.resources.get(guildId);
-			}
-			case "suggestions": {
-				return this.local.prompts.suggestions.get(guildId);
-			}
-			case "tickets": {
-				return this.local.prompts.tickets.get(guildId);
-			}
-		}
+		return this.#local[service].get(guildId)!;
 	}
 }
 

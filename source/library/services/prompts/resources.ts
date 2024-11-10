@@ -27,12 +27,12 @@ class ResourcePromptService extends PromptService<{
 	}
 
 	async getUserDocument(resourceDocument: Resource): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: resourceDocument.authorId });
+		return User.getOrCreate(this.client, { userId: resourceDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, resourceDocument: Resource): Discord.CreateMessageOptions | undefined {
 		const strings = constants.contexts.promptControls({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
 		return {
@@ -42,7 +42,7 @@ class ResourcePromptService extends PromptService<{
 					color: resourceDocument.isResolved ? constants.colours.green : constants.colours.gray,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({
+						iconUrl: PromptService.encodeMetadataInUserAvatar({
 							user,
 							partialId: resourceDocument.partialId,
 						}),
@@ -80,6 +80,30 @@ class ResourcePromptService extends PromptService<{
 		};
 	}
 
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
+		const strings = constants.contexts.noResources({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
+				},
+			],
+		};
+	}
+
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Resource | null | undefined> {
@@ -91,25 +115,31 @@ class ResourcePromptService extends PromptService<{
 		const isResolved = interaction.metadata[2] === "true";
 		if (isResolved && resourceDocument.isResolved) {
 			const strings = constants.contexts.alreadyMarkedResolved({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
+
 			return;
 		}
 
 		if (!(isResolved || resourceDocument.isResolved)) {
 			const strings = constants.contexts.alreadyMarkedUnresolved({
-				localise: this.client.localise.bind(this.client),
+				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
+
 			return;
 		}
 

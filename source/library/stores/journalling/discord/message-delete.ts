@@ -1,4 +1,5 @@
-import { codeMultiline, mention } from "logos:core/formatting";
+import { codeMultiline, mention } from "logos:constants/formatting";
+import { isDefined } from "logos:core/utilities";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocale }) => {
@@ -7,11 +8,7 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 		return undefined;
 	}
 
-	if (message.content === undefined) {
-		return undefined;
-	}
-
-	const strings = constants.contexts.messageDelete({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.messageDelete({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{
@@ -21,14 +18,20 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 					user: client.diagnostics.user(message.author),
 					channel: mention(message.channelId, { type: "channel" }),
 				}),
-				fields: [
-					{
-						name: strings.fields.content,
-						value: codeMultiline(message.content),
-					},
-				],
+				fields:
+					message.content !== undefined
+						? [
+								{
+									name: strings.fields.content,
+									value: codeMultiline(message.content),
+								},
+							]
+						: undefined,
 			},
 		],
+		files: message.attachments
+			?.map((attachment) => client.entities.attachments.get(attachment.id))
+			.filter(isDefined),
 	};
 };
 

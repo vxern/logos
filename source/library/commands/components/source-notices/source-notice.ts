@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors.ts";
+import { InteractionCollector } from "logos/collectors";
 
 abstract class SourceNotice {
 	readonly client: Client;
@@ -11,7 +11,7 @@ abstract class SourceNotice {
 
 	get button(): Discord.ButtonComponent {
 		const strings = constants.contexts.source({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.#interaction.displayLocale,
 		});
 
@@ -38,19 +38,15 @@ abstract class SourceNotice {
 	async #display(buttonPress: Logos.Interaction): Promise<void> {
 		const sourcesFormatted = this.#sources.join(constants.special.sigils.separator);
 
-		await this.client.reply(
-			buttonPress,
-			{
-				embeds: [
-					{
-						description: `${constants.emojis.link} ${sourcesFormatted}`,
-						color: constants.colours.blue,
-						footer: this.#notice !== undefined ? { text: this.#notice } : undefined,
-					},
-				],
-			},
-			{ visible: this.#interaction.parameters.show },
-		);
+		await this.client.reply(buttonPress, {
+			embeds: [
+				{
+					description: `${constants.emojis.link} ${sourcesFormatted}`,
+					color: constants.colours.blue,
+					footer: this.#notice !== undefined ? { text: this.#notice } : undefined,
+				},
+			],
+		});
 	}
 
 	async register(): Promise<void> {

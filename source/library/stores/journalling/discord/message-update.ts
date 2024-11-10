@@ -1,7 +1,7 @@
-import { codeMultiline, mention, trim } from "logos:core/formatting";
+import { codeMultiline, mention, trim } from "logos:constants/formatting";
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
-const logger: EventLogger<"messageUpdate"> = (client, [message, _], { guildLocale }) => {
+const logger: EventLogger<"messageUpdate"> = (client, [message], { guildLocale }) => {
 	const oldMessage = client.entities.messages.previous.get(message.id);
 	if (oldMessage === undefined) {
 		return undefined;
@@ -11,7 +11,7 @@ const logger: EventLogger<"messageUpdate"> = (client, [message, _], { guildLocal
 		return undefined;
 	}
 
-	const strings = constants.contexts.messageUpdate({ localise: client.localise.bind(client), locale: guildLocale });
+	const strings = constants.contexts.messageUpdate({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{
