@@ -154,7 +154,7 @@ class InteractionCollector<
 		super({
 			guildId,
 			isSingle,
-			removeAfter: isPermanent ? undefined : constants.INTERACTION_TOKEN_EXPIRY,
+			removeAfter: isPermanent ? undefined : constants.discord.INTERACTION_TOKEN_EXPIRY,
 			dependsOn,
 		});
 

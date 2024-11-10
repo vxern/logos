@@ -37,7 +37,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 	setTimeout(() => {
 		musicService.session.listings.off("history", refreshView);
 		musicService.session.off("end", closeView);
-	}, constants.INTERACTION_TOKEN_EXPIRY);
+	}, constants.discord.INTERACTION_TOKEN_EXPIRY);
 
 	await view.open();
 }
