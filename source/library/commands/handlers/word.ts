@@ -51,10 +51,11 @@ async function handleFindWord(
 
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
+	const identifiersFormatted = dictionaries.map((dictionary) => dictionary).join(", ");
 	client.log.info(
 		`Looking up the word '${interaction.parameters.word}' from ${
 			dictionaries.length
-		} dictionaries as requested by ${client.diagnostics.user(interaction.user)} on ${guild.name}...`,
+		} dictionaries (${identifiersFormatted}) as requested by ${client.diagnostics.user(interaction.user)} on ${guild.name}...`,
 	);
 
 	const unclassifiedEntries: DictionaryEntry[] = [];

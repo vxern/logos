@@ -35,6 +35,14 @@ const licences = Object.freeze({
 				badgeLink: "https://www.dicolink.com/imgs/dicolink_badge_a1.png",
 			},
 		},
+		pons: {
+			name: "pons.com",
+			link: "https://en.pons.com/p/agb-api",
+			notices: {
+				licence:
+					"4. PROPRIETARY RIGHTS; RESTRICTIONS. You acknowledge that PONS, and its licensors retain all right, title and interest in and to the POD-API and the Service. Without limiting the generality of the foregoing, you agree not to: (a) submit any automated or recorded queries to the Service unless otherwise approved in writing by PONS; (b) access the Service with software or means other than the POD-API; (c) copy, reproduce, distribute, or in any other manner duplicate the POD-API or the Service, in whole or in part; (d) sell, lease, license, sublicense, distribute, assign, transfer or otherwise grant any rights in the POD-API or the Service, in whole or in part; (e) modify, port, translate, or create derivative works of the Service; (f) decompile, disassemble, reverse engineer or otherwise attempt to derive, reconstruct, identify or discover any source code, underlying ideas, or algorithms, of the POD-API or Service by any means; (g) remove any proprietary notices, labels or marks from the POD_API or Service; (h) use the POD-API or the Service for purposes of comparison with or benchmarking against products or services made available by third parties; (i) knowingly take any action that would cause any part of thePOD-API or the Service to be placed in the public domain; (j) use the POD-API and/or the Service on websites or in applications morally damaging to juveniles or glorifying violence or on websites or in applications with political, obscene, pornographical or otherwise illegal contents; (k) promote or facilitate unlawful online gambling or disruptive commercial messages or advertisements. You may be held liable for any copyright infringement that results from such any unauthorized uses of the POD-API and the Service.",
+			},
+		},
 		tatoeba: {
 			name: "tatoeba.org",
 			link: "https://tatoeba.org/en/terms_of_use#section-6",
@@ -107,6 +115,7 @@ You must also include, in your app or site, wherever you provide attributions or
 	} satisfies Record<string, Licence>,
 	software: {
 		"@discordeno/bot": apache("Copyright 2021 - 2023 Discordeno"),
+		cheerio: mit("Copyright (c) 2022 The Cheerio contributors"),
 		cldpre: apache("Copyright (c) Authors of cldpre"),
 		"dexonline-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
 		dotenv: bsd("Copyright (c) 2015, Scott Motte"),
