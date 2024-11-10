@@ -1,4 +1,3 @@
-import type { ContextBuilder } from "logos:constants/contexts";
 import {
 	type Locale,
 	type LocalisationLanguage,
@@ -6,9 +5,7 @@ import {
 	getLogosLanguageByLocale,
 	isDiscordLanguage,
 } from "logos:constants/languages/localisation";
-import type { Environment } from "logos:core/loaders/environment";
-import { Logger } from "logos/logger";
-import type { ReplyVisibility } from "logos/stores/interactions";
+import type pino from "pino";
 
 type RawLocalisationBuilder = (data?: Record<string, unknown>) => string | undefined;
 type LocalisationBuilder = (data?: Record<string, unknown>) => string;
@@ -32,12 +29,15 @@ interface DescriptionLocalisations {
 	readonly descriptionLocalizations?: Partial<Record<Discord.Locales, string>>;
 }
 class LocalisationStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #localisations: Localisations;
 
-	constructor({ environment, localisations }: { environment: Environment; localisations: RawLocalisations }) {
-		this.log = Logger.create({ identifier: "Client/LocalisationStore", isDebug: environment.isDebug });
+	constructor({
+		log = constants.loggers.silent,
+		localisations,
+	}: { log?: pino.Logger; localisations: RawLocalisations }) {
+		this.log = log.child({ name: "LocalisationStore" });
 
 		this.#localisations = LocalisationStore.#buildLocalisations(localisations);
 	}
@@ -231,24 +231,10 @@ class LocalisationStore {
 		const pluralised = pluralise(`${quantity}`, { one, two, many });
 		if (pluralised === undefined) {
 			this.log.warn(`Could not pluralise string with key '${key}' in ${language}.`);
-			return key;
+			return constants.special.missingString;
 		}
 
 		return pluralised;
-	}
-
-	async withContext<T extends object, R>(
-		interaction: Logos.Interaction,
-		{ contexts, visibility }: { contexts: ContextBuilder<T>[]; visibility?: ReplyVisibility },
-		scope: (strings: T) => Promise<R>,
-	): Promise<R> {
-		const locale = visibility === "public" ? interaction.guildLocale : interaction.locale;
-
-		const strings = contexts
-			.map((builder) => builder({ localise: this.localise, locale }))
-			.reduce<T>((combined, context) => Object.assign(combined, context), {} as T);
-
-		return await scope(strings);
 	}
 }
 

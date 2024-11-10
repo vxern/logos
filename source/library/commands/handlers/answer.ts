@@ -14,30 +14,26 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 
 	if (message.author.toggles?.has("bot") || message.content.trim().length === 0) {
 		const strings = constants.contexts.cannotAnswer({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	if (message.author.id === interaction.user.id) {
 		const strings = constants.contexts.cannotAnswerOwn({ localise: client.localise, locale: interaction.locale });
-		await client.warning(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	const composer = new AnswerComposer(client, { interaction, question: message.content });
 
 	composer.onSubmit(async (submission, { formData }) => {
-		await client.acknowledge(submission);
+		client.acknowledge(submission).ignore();
 
 		const strings = constants.contexts.answer({ localise: client.localise, locale: submission.locale });
 
-		await client.bot.helpers
+		client.bot.helpers
 			.sendMessage(message.channelId, {
 				messageReference: {
 					messageId: message.id,
@@ -60,7 +56,10 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 					},
 				],
 			})
-			.catch(() => client.log.warn(`Failed to send answer to ${client.diagnostics.channel(message.channelId)}.`));
+			.catch((error) =>
+				client.log.warn(error, `Failed to send answer to ${client.diagnostics.channel(message.channelId)}.`),
+			)
+			.ignore();
 	});
 
 	await composer.open();

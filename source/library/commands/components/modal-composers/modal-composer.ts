@@ -1,9 +1,8 @@
-import type { WithRequired } from "logos:core/utilities.ts";
-import type { InputTextComponent } from "@discordeno/bot";
+import type { WithRequired } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
-type TypedInputTextComponent<CustomID> = WithRequired<InputTextComponent, "value"> & { customId: CustomID };
+type TypedInputTextComponent<CustomID> = WithRequired<Discord.InputTextComponent, "value"> & { customId: CustomID };
 interface ModalElement<FormData> {
 	type: Discord.MessageComponentTypes.ActionRow;
 	components: [TypedInputTextComponent<keyof FormData>];
@@ -73,12 +72,9 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		return content as FormData;
 	}
 
-	abstract buildModal(
-		interaction: Logos.Interaction,
-		{ formData }: { formData: FormData },
-	): Modal<FormData> | Promise<Modal<FormData>>;
+	abstract buildModal(interaction: Logos.Interaction, { formData }: { formData: FormData }): Modal<FormData>;
 
-	validate(_: { formData: FormData }): ValidationError | Promise<ValidationError | undefined> | undefined {
+	validate(_: { formData: FormData }): ValidationError | undefined {
 		return undefined;
 	}
 
@@ -87,7 +83,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 	}
 
 	async #display(): Promise<void> {
-		const modal = await this.buildModal(this.anchor, { formData: this.#formData });
+		const modal = this.buildModal(this.anchor, { formData: this.#formData });
 
 		await this.client.displayModal(this.anchor, {
 			title: modal.title,
@@ -116,20 +112,23 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		});
 
 		continueButton.onInteraction(async (buttonPress) => {
-			await this.client.deleteReply(submission);
+			this.client.deleteReply(submission).ignore();
+
 			resolve(buttonPress);
 		});
 
 		cancelButton.onInteraction(async (cancelButtonPress) => {
 			returnButton.onInteraction(async (returnButtonPress) => {
-				await this.client.deleteReply(submission);
-				await this.client.deleteReply(cancelButtonPress);
+				this.client.deleteReply(submission).ignore();
+				this.client.deleteReply(cancelButtonPress).ignore();
+
 				resolve(returnButtonPress);
 			});
 
 			leaveButton.onInteraction(async (_) => {
-				await this.client.deleteReply(submission);
-				await this.client.deleteReply(cancelButtonPress);
+				this.client.deleteReply(submission).ignore();
+				this.client.deleteReply(cancelButtonPress).ignore();
+
 				resolve(undefined);
 			});
 
@@ -137,33 +136,35 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 				localise: this.client.localise,
 				locale: submission.locale,
 			});
-			await this.client.warning(cancelButtonPress, {
-				embeds: [
-					{
-						title: strings.title,
-						description: strings.description,
-					},
-				],
-				components: [
-					{
-						type: Discord.MessageComponentTypes.ActionRow,
-						components: [
-							{
-								type: Discord.MessageComponentTypes.Button,
-								customId: returnButton.customId,
-								label: strings.stay,
-								style: Discord.ButtonStyles.Success,
-							},
-							{
-								type: Discord.MessageComponentTypes.Button,
-								customId: leaveButton.customId,
-								label: strings.leave,
-								style: Discord.ButtonStyles.Danger,
-							},
-						],
-					},
-				],
-			});
+			this.client
+				.warning(cancelButtonPress, {
+					embeds: [
+						{
+							title: strings.title,
+							description: strings.description,
+						},
+					],
+					components: [
+						{
+							type: Discord.MessageComponentTypes.ActionRow,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.Button,
+									customId: returnButton.customId,
+									label: strings.stay,
+									style: Discord.ButtonStyles.Success,
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									customId: leaveButton.customId,
+									label: strings.leave,
+									style: Discord.ButtonStyles.Danger,
+								},
+							],
+						},
+					],
+				})
+				.ignore();
 		});
 
 		continueButton.onDone(() => resolve(undefined));
@@ -179,33 +180,35 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 			locale: submission.locale,
 		});
 
-		await this.client.editReply(submission, {
-			embeds: [
-				this.getErrorMessage(submission, { error }) ?? {
-					title: strings.title,
-					description: strings.description,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: continueButton.customId,
-							label: strings.continue,
-							style: Discord.ButtonStyles.Success,
-						},
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: cancelButton.customId,
-							label: strings.cancel,
-							style: Discord.ButtonStyles.Danger,
-						},
-					],
-				},
-			],
-		});
+		this.client
+			.editReply(submission, {
+				embeds: [
+					this.getErrorMessage(submission, { error }) ?? {
+						title: strings.title,
+						description: strings.description,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: [
+							{
+								type: Discord.MessageComponentTypes.Button,
+								customId: continueButton.customId,
+								label: strings.continue,
+								style: Discord.ButtonStyles.Success,
+							},
+							{
+								type: Discord.MessageComponentTypes.Button,
+								customId: cancelButton.customId,
+								label: strings.cancel,
+								style: Discord.ButtonStyles.Danger,
+							},
+						],
+					},
+				],
+			})
+			.ignore();
 
 		return promise;
 	}
@@ -249,7 +252,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		await this.#display();
 	}
 
-	close(): void | Promise<void> {
+	async close(): Promise<void> {
 		this.#submissions.close();
 	}
 }

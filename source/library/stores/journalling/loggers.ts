@@ -1,16 +1,18 @@
-import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
+import type { FeatureLanguage } from "logos:constants/languages/feature";
 import type { Locale } from "logos:constants/languages/localisation";
-import type * as Discord from "@discordeno/bot";
+import type { PromiseOr } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import guildBanAdd from "logos/stores/journalling/discord/guild-ban-add";
 import guildBanRemove from "logos/stores/journalling/discord/guild-ban-remove";
 import guildMemberAdd from "logos/stores/journalling/discord/guild-member-add";
 import guildMemberRemove from "logos/stores/journalling/discord/guild-member-remove";
 import messageDelete from "logos/stores/journalling/discord/message-delete";
+import messageDeleteBulk from "logos/stores/journalling/discord/message-delete-bulk";
 import messageUpdate from "logos/stores/journalling/discord/message-update";
 import entryRequestAccept from "logos/stores/journalling/logos/entry-request-accept";
 import entryRequestReject from "logos/stores/journalling/logos/entry-request-reject";
 import entryRequestSubmit from "logos/stores/journalling/logos/entry-request-submit";
+import guildMemberKick from "logos/stores/journalling/logos/guild-member-kick";
 import inquiryOpen from "logos/stores/journalling/logos/inquiry-open";
 import memberTimeoutAdd from "logos/stores/journalling/logos/member-timeout-add";
 import memberTimeoutRemove from "logos/stores/journalling/logos/member-timeout-remove";
@@ -30,13 +32,15 @@ import ticketOpen from "logos/stores/journalling/logos/ticket-open";
 
 type Events = Logos.Events & Discord.Events;
 
-const loggers = Object.freeze({
+const loggers: EventLoggers = Object.freeze({
 	guildBanAdd,
 	guildBanRemove,
 	guildMemberAdd,
 	guildMemberRemove,
 	messageDelete,
+	messageDeleteBulk,
 	messageUpdate,
+	guildMemberKick,
 	entryRequestSubmit,
 	entryRequestAccept,
 	entryRequestReject,
@@ -56,14 +60,14 @@ const loggers = Object.freeze({
 	slowmodeDisable,
 	slowmodeUpgrade,
 	slowmodeDowngrade,
-} as const satisfies EventLoggers);
+} as const);
 
 type EventLoggers = { [Event in keyof Events]?: EventLogger<Event> };
 type EventLogger<Event extends keyof Events> = (
 	client: Client,
 	event: Events[Event],
 	{ guildLocale, featureLanguage }: { guildLocale: Locale; featureLanguage: FeatureLanguage },
-) => Discord.CreateMessageOptions | Promise<Discord.CreateMessageOptions | undefined> | undefined;
+) => PromiseOr<Discord.CreateMessageOptions | undefined>;
 
 export default loggers;
-export type { EventLogger };
+export type { EventLogger, EventLoggers };

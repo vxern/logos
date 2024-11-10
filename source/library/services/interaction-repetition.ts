@@ -39,7 +39,7 @@ class InteractionRepetitionService extends GlobalService {
 			return;
 		}
 
-		this.client.registerInteraction(interaction);
+		this.client.interactions.registerInteraction(interaction);
 	}
 
 	async #handleShowInChat(buttonPress: Logos.Interaction<[interactionId: string]>): Promise<void> {
@@ -57,24 +57,24 @@ class InteractionRepetitionService extends GlobalService {
 		});
 
 		confirmButton.onInteraction(async (confirmButtonPress) => {
-			await this.client.deleteReply(buttonPress);
+			this.client.deleteReply(buttonPress).ignore();
 
-			const originalInteraction = this.client.unregisterInteraction(BigInt(buttonPress.metadata[1]));
+			const originalInteraction = this.client.interactions.unregisterInteraction(BigInt(buttonPress.metadata[1]));
 			if (originalInteraction === undefined) {
 				return;
 			}
 
-			await this.client.deleteReply(originalInteraction);
+			this.client.deleteReply(originalInteraction).ignore();
 
 			const interactionSpoofed = InteractionStore.spoofInteraction(originalInteraction, {
 				using: confirmButtonPress,
 				parameters: { "@repeat": true, show: true },
 			});
 
-			await this.client.receiveInteraction(interactionSpoofed);
+			await this.client.interactions.handleInteraction(interactionSpoofed);
 		});
 
-		cancelButton.onInteraction(async (_) => this.client.deleteReply(buttonPress));
+		cancelButton.onInteraction((_) => this.client.deleteReply(buttonPress).ignore());
 
 		await this.client.registerInteractionCollector(confirmButton);
 		await this.client.registerInteractionCollector(cancelButton);
@@ -83,33 +83,35 @@ class InteractionRepetitionService extends GlobalService {
 			localise: this.client.localise,
 			locale: buttonPress.locale,
 		});
-		await this.client.pushedBack(buttonPress, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-				},
-			],
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: [
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: confirmButton.customId,
-							label: strings.yes,
-							style: Discord.ButtonStyles.Success,
-						},
-						{
-							type: Discord.MessageComponentTypes.Button,
-							customId: cancelButton.customId,
-							label: strings.no,
-							style: Discord.ButtonStyles.Danger,
-						},
-					],
-				},
-			],
-		});
+		this.client
+			.pushedBack(buttonPress, {
+				embeds: [
+					{
+						title: strings.title,
+						description: strings.description,
+					},
+				],
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: [
+							{
+								type: Discord.MessageComponentTypes.Button,
+								customId: confirmButton.customId,
+								label: strings.yes,
+								style: Discord.ButtonStyles.Success,
+							},
+							{
+								type: Discord.MessageComponentTypes.Button,
+								customId: cancelButton.customId,
+								label: strings.no,
+								style: Discord.ButtonStyles.Danger,
+							},
+						],
+					},
+				],
+			})
+			.ignore();
 	}
 
 	getShowButton(interaction: Logos.Interaction): Discord.ButtonComponent {

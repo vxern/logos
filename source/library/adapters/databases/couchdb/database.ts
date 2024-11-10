@@ -4,16 +4,18 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { CouchDBDocumentConventions } from "logos/adapters/databases/couchdb/conventions";
 import type { CouchDBDocumentMetadata } from "logos/adapters/databases/couchdb/document";
 import { CouchDBDocumentSession } from "logos/adapters/databases/couchdb/session";
-import type { Logger } from "logos/logger";
 import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import nano from "nano";
+import type pino from "pino";
 
 class CouchDBAdapter extends DatabaseAdapter {
-	readonly #documents: nano.DocumentScope<unknown>;
+	readonly #server: nano.ServerScope;
+	readonly #databaseName: string;
+	#documents!: nano.DocumentScope<unknown>;
 
 	constructor({
-		environment,
+		log,
 		username,
 		password,
 		protocol,
@@ -21,7 +23,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		port,
 		database,
 	}: {
-		environment: Environment;
+		log: pino.Logger;
 		username: string;
 		password: string;
 		protocol?: string;
@@ -29,9 +31,9 @@ class CouchDBAdapter extends DatabaseAdapter {
 		port: string;
 		database: string;
 	}) {
-		super({ identifier: "CouchDB", environment });
+		super({ identifier: "CouchDB", log });
 
-		protocol = "http";
+		protocol ||= "http";
 
 		let url: string;
 		if (username !== undefined) {
@@ -44,14 +46,14 @@ class CouchDBAdapter extends DatabaseAdapter {
 			url = `${protocol}://${host}:${port}`;
 		}
 
-		const server = nano({
+		this.#server = nano({
 			url,
-			requestDefaults: { agent: constants.USER_AGENT, headers: { "User-Agent": constants.USER_AGENT } },
+			requestDefaults: { headers: { "User-Agent": constants.USER_AGENT } },
 		});
-		this.#documents = server.db.use(database);
+		this.#databaseName = database;
 	}
 
-	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): CouchDBAdapter | undefined {
+	static tryCreate({ log, environment }: { log: pino.Logger; environment: Environment }): CouchDBAdapter | undefined {
 		if (
 			environment.couchdbUsername === undefined ||
 			environment.couchdbPassword === undefined ||
@@ -66,7 +68,7 @@ class CouchDBAdapter extends DatabaseAdapter {
 		}
 
 		return new CouchDBAdapter({
-			environment,
+			log,
 			username: environment.couchdbUsername,
 			password: environment.couchdbPassword,
 			host: environment.couchdbHost,
@@ -75,9 +77,34 @@ class CouchDBAdapter extends DatabaseAdapter {
 		});
 	}
 
-	async setup(): Promise<void> {}
+	async setup(): Promise<void> {
+		let databaseExists = true;
+		try {
+			await this.#server.db.get(this.#databaseName);
+		} catch (error: any) {
+			if (error.statusCode !== 404) {
+				this.log.error(error, `Failed to get information for database '${this.#databaseName}'.`);
+				throw error;
+			}
 
-	async teardown(): Promise<void> {}
+			databaseExists = false;
+		}
+
+		if (!databaseExists) {
+			this.log.info(`The database '${this.#databaseName}' does not exist. Creating...`);
+
+			try {
+				await this.#server.db.create(this.#databaseName);
+			} catch (error: any) {
+				this.log.error(error, `Could not create database '${this.#databaseName}'.`);
+				throw error;
+			}
+
+			this.log.info(`Created database '${this.#databaseName}'.`);
+		}
+
+		this.#documents = this.#server.db.use(this.#databaseName);
+	}
 
 	conventionsFor({
 		document,
@@ -91,11 +118,8 @@ class CouchDBAdapter extends DatabaseAdapter {
 		return new CouchDBDocumentConventions({ document, data, collection });
 	}
 
-	openSession({
-		environment,
-		database,
-	}: { environment: Environment; database: DatabaseStore }): CouchDBDocumentSession {
-		return new CouchDBDocumentSession({ environment, database, documents: this.#documents });
+	openSession({ database }: { database: DatabaseStore }): CouchDBDocumentSession {
+		return new CouchDBDocumentSession({ database, documents: this.#documents });
 	}
 }
 

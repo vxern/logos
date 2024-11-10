@@ -6,7 +6,11 @@
 
 ##### Examples - Pronunciation - Inflection - Etymologies - Relations - Expressions - Usage Notes
 
-![Licence](https://img.shields.io/github/license/vxern/logos.svg?style=for-the-badge) ![Release](https://img.shields.io/github/release/vxern/logos.svg?style=for-the-badge) ![Pull Requests](https://img.shields.io/github/issues-pr/vxern/logos.svg?style=for-the-badge) ![Issues](https://img.shields.io/github/issues/vxern/logos.svg?style=for-the-badge) ![Wakatime](https://wakatime.com/badge/github/vxern/logos.svg?style=for-the-badge)
+![Licence](https://img.shields.io/github/license/vxern/logos.svg?style=for-the-badge) ![Release](https://img.shields.io/github/release/vxern/logos.svg?style=for-the-badge) ![Pull Requests](https://img.shields.io/github/issues-pr/vxern/logos.svg?style=for-the-badge) ![Issues](https://img.shields.io/github/issues/vxern/logos.svg?style=for-the-badge)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=logos&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=logos) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=logos&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=logos) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=logos&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=logos) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=logos&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=logos) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=logos&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=logos) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=logos&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=logos)
+
+![Wakatime](https://wakatime.com/badge/github/vxern/logos.svg)
 
 ### Language Support
 
@@ -29,6 +33,96 @@
 - 💐 Social features including viewing user profiles and thanking users for their contributions.
 
 #### [Message @vxern for a demo](https://discord.com/users/217319536485990400) · [Join the Logos community](https://discord.gg/TWdAjkTfah) · [Contribute to the project](CONTRIBUTING.md) · [Set the bot up for yourself](CONTRIBUTING.md)
+
+<table>
+  <tbody>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/bot-information.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/word.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/cefr.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/translation.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/context.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/game.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/context-menu.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/recognition.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/resource-notice.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/music.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/profile.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/purge.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/logs.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/report.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/role-categories.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/correction.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/roles.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/rule.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/slowmode.png">
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/resource.png">
+      </td>
+      <td style="text-align: center">
+        <img src=".github/assets/screenshots/suggestion.png">
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### Contributors
 

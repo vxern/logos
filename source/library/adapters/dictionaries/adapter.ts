@@ -1,13 +1,12 @@
-import type { DictionarySection } from "logos:constants/dictionaries.ts";
+import type { DictionarySection } from "logos:constants/dictionaries";
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 abstract class DictionaryAdapter<DataType = unknown> {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly client: Client;
-	readonly identifier: string;
 	readonly provides: DictionarySection[];
 	readonly supports: LearningLanguage[];
 	readonly isFallback: boolean;
@@ -21,9 +20,8 @@ abstract class DictionaryAdapter<DataType = unknown> {
 			isFallback = false,
 		}: { identifier: string; provides: DictionarySection[]; supports: LearningLanguage[]; isFallback?: boolean },
 	) {
-		this.log = Logger.create({ identifier, isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: identifier });
 		this.client = client;
-		this.identifier = identifier;
 		this.provides = provides;
 		this.supports = supports;
 		this.isFallback = isFallback;
@@ -34,9 +32,8 @@ abstract class DictionaryAdapter<DataType = unknown> {
 		lemma: string,
 		learningLanguage: LearningLanguage,
 	): Promise<DictionaryEntry[] | undefined> {
-		const data = await this.fetch(lemma, learningLanguage).catch((reason) => {
-			this.log.error(`Failed to get results for lemma '${lemma}' in ${learningLanguage}.`);
-			this.log.error(reason);
+		const data = await this.fetch(lemma, learningLanguage).catch((error) => {
+			this.log.error(error, `Failed to get results for lemma '${lemma}' in ${learningLanguage}.`);
 			return undefined;
 		});
 		if (data === undefined) {
@@ -46,9 +43,8 @@ abstract class DictionaryAdapter<DataType = unknown> {
 		let entries: DictionaryEntry[];
 		try {
 			entries = this.parse(interaction, lemma, learningLanguage, data);
-		} catch (exception) {
-			this.log.error(`Failed to format results for lemma '${lemma}' in ${learningLanguage}.`);
-			this.log.error(exception);
+		} catch (error) {
+			this.log.error(error, `Failed to format results for lemma '${lemma}' in ${learningLanguage}.`);
 			return undefined;
 		}
 
@@ -70,4 +66,3 @@ abstract class DictionaryAdapter<DataType = unknown> {
 }
 
 export { DictionaryAdapter };
-export type { DictionaryEntry };

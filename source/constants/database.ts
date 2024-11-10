@@ -1,4 +1,5 @@
 const collections = Object.freeze([
+	"DatabaseMetadata",
 	"EntryRequests",
 	"Guilds",
 	"GuildStatistics",
@@ -17,11 +18,10 @@ function isValidCollection(collection: string): collection is Collection {
 }
 
 /**
- * @privateRemarks
- * ! These are ordered by their position in document IDs. Changing the order could cause severe breakage and possibly
- * ! even data loss.
+ * @remarks
+ * ⚠️ These are ordered by their position in document IDs. Changing the order could cause severe breakage and data loss.
  *
- * ! Do not change the order unless you know what you are doing and have a good reason to.
+ * Do not change the order unless you know what you are doing and have good reason to do so.
  */
 const identifierParts = Object.freeze([
 	"guildId",

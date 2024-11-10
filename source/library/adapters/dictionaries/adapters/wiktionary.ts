@@ -1,6 +1,7 @@
 import { type LearningLanguage, getWiktionaryLanguageName } from "logos:constants/languages/learning";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
-import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter";
+import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
+import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import * as Wiktionary from "wiktionary-scraper";
 
@@ -42,8 +43,8 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 				lemmaLanguage: targetLanguageWiktionary,
 				userAgent: constants.USER_AGENT,
 			});
-		} catch (exception) {
-			this.client.log.error(`The request for lemma "${lemma}" to ${this.identifier} failed:`, exception);
+		} catch (error) {
+			this.client.log.error(error, `The request for lemma "${lemma}" failed.`);
 			return undefined;
 		}
 

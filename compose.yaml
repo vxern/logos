@@ -1,0 +1,103 @@
+name: logos
+
+services:
+  mongodb:
+    container_name: logos_mongodb
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USERNAME:-}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-}
+    profiles:
+      - mongodb
+  ravendb:
+    container_name: logos_ravendb
+    image: ravendb/ravendb:ubuntu-latest
+    restart: unless-stopped
+    environment:
+      RAVEN_License_Eula_Accepted: true
+      RAVEN_Setup_Mode: None
+      RAVEN_Security_UnsecuredAccessAllowed: PublicNetwork
+      RAVEN_ARGS: --log-to-console
+      RAVEN_ServerUrl: http://0.0.0.0:${RAVENDB_PORT:-8080}
+      RAVEN_ServerUrl_Tcp: tcp://0.0.0.0:38888
+    ports:
+      - ${RAVENDB_PORT:-8080}
+    profiles:
+      - ravendb
+  couchdb:
+    container_name: logos_couchdb
+    image: couchdb:latest
+    restart: unless-stopped
+    environment:
+      COUCHDB_USER: ${COUCHDB_USERNAME:-admin}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:-password}
+    ports:
+      - "${COUCHDB_PORT:-5984}:5984"
+    profiles:
+      - couchdb
+  rethinkdb:
+    container_name: logos_rethinkdb
+    image: rethinkdb:2.4.4-bookworm-slim
+    restart: unless-stopped
+    ports:
+      - "8080"
+      - ${RETHINKDB_PORT:-28015}
+    profiles:
+      - rethinkdb
+  redis:
+    container_name: logos_redis
+    image: redis:alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PORT_NUMBER: ${REDIS_PORT:-6379}
+    ports:
+      - ${REDIS_PORT:-6379}
+    profiles:
+      - redis
+  lavalink:
+    container_name: logos_lavalink
+    image: ghcr.io/lavalink-devs/lavalink:4
+    restart: unless-stopped
+    environment:
+      SERVER_ADDRESS: ${LAVALINK_HOST:-127.0.0.1}
+      SERVER_PORT: ${LAVALINK_PORT:-2333}
+      SERVER_HTTP2_ENABLED: true
+      LAVALINK_SERVER_PASSWORD: ${LAVALINK_PASSWORD:-youshallnotpass}
+    ports:
+      - ${LAVALINK_PORT:-2333}
+    profiles:
+      - lavalink
+  logos:
+    container_name: logos
+    restart: unless-stopped
+    environment:
+      REDIS_HOST: redis
+      LAVALINK_HOST: lavalink
+      MONGODB_HOST: mongodb
+      RAVENDB_HOST: ravendb
+      COUCHDB_HOST: couchdb
+      RETHINKDB_HOST: rethinkdb
+    build:
+      context: .
+    volumes:
+      - .env:/usr/src/app/.env
+    depends_on:
+      mongodb:
+        condition: service_started
+        required: false
+      ravendb:
+        condition: service_healthy
+        required: false
+      couchdb:
+        condition: service_started
+        required: false
+      rethinkdb:
+        condition: service_started
+        required: false
+      lavalink:
+        condition: service_started
+        required: false
+      redis:
+        condition: service_started
+        required: false

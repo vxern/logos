@@ -4,31 +4,31 @@ import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databa
 import { MongoDBDocumentConventions } from "logos/adapters/databases/mongodb/conventions";
 import type { MongoDBDocumentMetadata } from "logos/adapters/databases/mongodb/document";
 import { MongoDBDocumentSession } from "logos/adapters/databases/mongodb/session";
-import type { Logger } from "logos/logger";
 import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 import mongodb from "mongodb";
+import type pino from "pino";
 
 class MongoDBAdapter extends DatabaseAdapter {
 	readonly #mongoClient: mongodb.MongoClient;
 	readonly #database: string;
 
 	constructor({
-		environment,
+		log,
 		username,
 		password,
 		host,
 		port,
 		database,
 	}: {
-		environment: Environment;
+		log: pino.Logger;
 		username?: string;
 		password?: string;
 		host: string;
 		port: string;
 		database: string;
 	}) {
-		super({ environment, identifier: "MongoDB" });
+		super({ identifier: "MongoDB", log });
 
 		this.#mongoClient = new mongodb.MongoClient(`mongodb://${host}:${port}`, {
 			auth: {
@@ -39,7 +39,7 @@ class MongoDBAdapter extends DatabaseAdapter {
 		this.#database = database;
 	}
 
-	static tryCreate({ environment, log }: { environment: Environment; log: Logger }): MongoDBAdapter | undefined {
+	static tryCreate({ log, environment }: { log: pino.Logger; environment: Environment }): MongoDBAdapter | undefined {
 		if (
 			environment.mongodbHost === undefined ||
 			environment.mongodbPort === undefined ||
@@ -52,7 +52,7 @@ class MongoDBAdapter extends DatabaseAdapter {
 		}
 
 		return new MongoDBAdapter({
-			environment,
+			log,
 			username: environment.mongodbUsername,
 			password: environment.mongodbPassword,
 			host: environment.mongodbHost,
@@ -81,12 +81,9 @@ class MongoDBAdapter extends DatabaseAdapter {
 		return new MongoDBDocumentConventions({ document, data, collection });
 	}
 
-	openSession({
-		environment,
-		database,
-	}: { environment: Environment; database: DatabaseStore }): MongoDBDocumentSession {
+	openSession({ database }: { database: DatabaseStore }): MongoDBDocumentSession {
 		const mongoDatabase = this.#mongoClient.db(this.#database);
-		return new MongoDBDocumentSession({ environment, database, mongoDatabase });
+		return new MongoDBDocumentSession({ database, mongoDatabase });
 	}
 }
 

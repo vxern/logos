@@ -1,4 +1,5 @@
 type WithRequired<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>> & Required<Pick<T, K>>;
+type PromiseOr<T> = T | Promise<T>;
 
 function* chunk<T>(array: T[], size: number): Generator<T[], void, void> {
 	if (array.length === 0) {
@@ -23,4 +24,4 @@ function isDefined<T>(element: T | undefined): element is T {
 }
 
 export { chunk, isDefined };
-export type { WithRequired };
+export type { WithRequired, PromiseOr };

@@ -1,4 +1,3 @@
-import * as Discord from "@discordeno/bot";
 import type { OptionTemplate } from "logos/commands/commands";
 
 export default Object.freeze({

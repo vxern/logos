@@ -1,14 +1,13 @@
 import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
-import type * as Discord from "@discordeno/bot";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
-import { Logger } from "logos/logger";
 import loggers from "logos/stores/journalling/loggers";
+import type pino from "pino";
 
 type Events = Logos.Events & Discord.Events;
 
 class JournallingStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #client: Client;
 	readonly #guildBanAddCollector: Collector<"guildBanAdd">;
@@ -16,10 +15,11 @@ class JournallingStore {
 	readonly #guildMemberAddCollector: Collector<"guildMemberAdd">;
 	readonly #guildMemberRemoveCollector: Collector<"guildMemberRemove">;
 	readonly #messageDeleteCollector: Collector<"messageDelete">;
+	readonly #messageDeleteBulkCollector: Collector<"messageDeleteBulk">;
 	readonly #messageUpdateCollector: Collector<"messageUpdate">;
 
 	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "JournallingStore", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "JournallingStore" });
 
 		this.#client = client;
 		this.#guildBanAddCollector = new Collector();
@@ -27,46 +27,27 @@ class JournallingStore {
 		this.#guildMemberAddCollector = new Collector();
 		this.#guildMemberRemoveCollector = new Collector();
 		this.#messageDeleteCollector = new Collector();
+		this.#messageDeleteBulkCollector = new Collector();
 		this.#messageUpdateCollector = new Collector();
 	}
 
 	async setup(): Promise<void> {
 		this.log.info("Setting up journalling store...");
 
-		this.#guildBanAddCollector.onCollect((user, guildId) =>
-			this.tryLog("guildBanAdd", { guildId, args: [user, guildId] }),
-		);
-		this.#guildBanRemoveCollector.onCollect((user, guildId) =>
-			this.tryLog("guildBanRemove", { guildId, args: [user, guildId] }),
-		);
-		this.#guildMemberAddCollector.onCollect((member, user) =>
-			this.tryLog("guildMemberAdd", { guildId: member.guildId, args: [member, user] }),
-		);
-		this.#guildMemberRemoveCollector.onCollect((user, guildId) =>
-			this.tryLog("guildMemberRemove", { guildId, args: [user, guildId] }),
-		);
-		this.#messageDeleteCollector.onCollect((payload, message) => {
-			const guildId = payload.guildId;
-			if (guildId === undefined) {
-				return;
-			}
-
-			this.tryLog("messageDelete", { guildId, args: [payload, message] });
-		});
-		this.#messageUpdateCollector.onCollect((message, oldMessage) => {
-			const guildId = message.guildId;
-			if (guildId === undefined) {
-				return;
-			}
-
-			this.tryLog("messageUpdate", { guildId, args: [message, oldMessage] });
-		});
+		this.#guildBanAddCollector.onCollect(this.#guildBanAdd.bind(this));
+		this.#guildBanRemoveCollector.onCollect(this.#guildBanRemove.bind(this));
+		this.#guildMemberAddCollector.onCollect(this.#guildMemberAdd.bind(this));
+		this.#guildMemberRemoveCollector.onCollect(this.#guildMemberRemove.bind(this));
+		this.#messageDeleteCollector.onCollect(this.#messageDelete.bind(this));
+		this.#messageDeleteBulkCollector.onCollect(this.#messageDeleteBulk.bind(this));
+		this.#messageUpdateCollector.onCollect(this.#messageUpdate.bind(this));
 
 		await this.#client.registerCollector("guildBanAdd", this.#guildBanAddCollector);
 		await this.#client.registerCollector("guildBanRemove", this.#guildBanRemoveCollector);
 		await this.#client.registerCollector("guildMemberAdd", this.#guildMemberAddCollector);
 		await this.#client.registerCollector("guildMemberRemove", this.#guildMemberRemoveCollector);
 		await this.#client.registerCollector("messageDelete", this.#messageDeleteCollector);
+		await this.#client.registerCollector("messageDeleteBulk", this.#messageDeleteBulkCollector);
 		await this.#client.registerCollector("messageUpdate", this.#messageUpdateCollector);
 
 		this.log.info("Journalling store set up.");
@@ -80,6 +61,7 @@ class JournallingStore {
 		this.#guildMemberAddCollector.close();
 		this.#guildMemberRemoveCollector.close();
 		this.#messageDeleteCollector.close();
+		this.#messageDeleteBulkCollector.close();
 		this.#messageUpdateCollector.close();
 
 		this.log.info("Journalling store torn down.");
@@ -87,14 +69,13 @@ class JournallingStore {
 
 	async tryLog<Event extends keyof Events>(
 		event: Event,
-		{ guildId, journalling, args }: { guildId: bigint; journalling?: boolean | undefined; args: Events[Event] },
+		{ guildId, journalling = true, args }: { guildId: bigint; journalling?: boolean; args: Events[Event] },
 	): Promise<void> {
-		// If explicitly defined as false, do not log.
-		if (journalling === false) {
-			this.#client.log.info(
+		if (!journalling) {
+			this.#client.log.debug(
 				`Event '${event}' happened on ${this.#client.diagnostics.guild(
 					guildId,
-				)}, but journalling for that feature is explicitly turned off. Ignoring...`,
+				)}, but journalling for that feature is turned off. Ignoring...`,
 			);
 			return;
 		}
@@ -104,40 +85,155 @@ class JournallingStore {
 			return;
 		}
 
-		const configuration = guildDocument.journalling;
-		if (configuration === undefined) {
+		if (!guildDocument.hasEnabled("journalling")) {
 			return;
 		}
 
-		const channelId = BigInt(configuration.channelId);
-		if (channelId === undefined) {
-			return;
-		}
+		const configuration = guildDocument.feature("journalling");
 
-		const generateMessage = loggers[event as keyof typeof loggers];
+		const generateMessage = loggers[event];
 		if (generateMessage === undefined) {
 			return;
 		}
 
-		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.localisationLanguage);
-		const message = await generateMessage(
-			this.#client,
-			// @ts-ignore: This is fine.
-			args,
-			{
-				guildLocale,
-				featureLanguage: guildDocument.featureLanguage,
-			},
-		);
+		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.languages.localisation);
+		const message = await generateMessage(this.#client, args, {
+			guildLocale,
+			featureLanguage: guildDocument.languages.feature,
+		});
 		if (message === undefined) {
 			return;
 		}
 
 		await this.#client.bot.helpers
-			.sendMessage(channelId, message)
-			.catch((reason) =>
-				this.log.warn(`Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}:`, reason),
+			.sendMessage(BigInt(configuration.channelId), message)
+			.catch((error) =>
+				this.log.warn(error, `Failed to log '${event}' event on ${this.#client.diagnostics.guild(guildId)}.`),
 			);
+	}
+
+	static generateMessageLog(client: Client, { messages }: { messages: Logos.Message[] }): string {
+		return messages.map((message) => JournallingStore.#messageLogEntry(client, message)).join("\n\n");
+	}
+
+	static #messageLogEntry(client: Client, message: Logos.Message): string {
+		const postingTime = new Date(Discord.snowflakeToTimestamp(message.id)).toLocaleString();
+		const username = client.diagnostics.user(message.author);
+
+		let content: string;
+		if (message.content !== undefined) {
+			content = message.content
+				.split("\n")
+				.map((line) => `    ${line}`)
+				.join("\n");
+		} else if (message.embeds !== undefined && message.embeds.length > 0) {
+			content = "[embeds]";
+		} else {
+			content = "[no message content]";
+		}
+
+		return `[${postingTime}] ${username}:\n\n${content}`;
+	}
+
+	async #guildBanAdd(user: Discord.User, guildId: bigint): Promise<void> {
+		await this.tryLog("guildBanAdd", { guildId, args: [user, guildId] });
+	}
+
+	async #guildBanRemove(user: Discord.User, guildId: bigint): Promise<void> {
+		await this.tryLog("guildBanRemove", { guildId, args: [user, guildId] });
+	}
+
+	async #guildMemberAdd(member: Discord.Member, user: Discord.User): Promise<void> {
+		await this.tryLog("guildMemberAdd", { guildId: member.guildId, args: [member, user] });
+	}
+
+	async #guildMemberRemove(user: Discord.User, guildId: bigint): Promise<void> {
+		const kickInformation = await this.#getKickInformation({ user, guildId });
+		if (kickInformation !== undefined) {
+			if (kickInformation.userId === null) {
+				return;
+			}
+
+			const authorMember = this.#client.entities.members.get(guildId)?.get(BigInt(kickInformation.userId));
+			if (authorMember === undefined) {
+				return;
+			}
+
+			await this.tryLog("guildMemberKick", { guildId, args: [user, authorMember] });
+			return;
+		}
+
+		await this.tryLog("guildMemberRemove", { guildId, args: [user, guildId] });
+	}
+
+	async #messageDelete(
+		payload: Discord.Events["messageDelete"][0],
+		message: Discord.Message | undefined,
+	): Promise<void> {
+		const guildId = payload.guildId;
+		if (guildId === undefined) {
+			return;
+		}
+
+		const resolvedMessage = this.#client.entities.messages.latest.get(payload.id);
+
+		if (resolvedMessage?.author.id === this.#client.bot.id) {
+			return;
+		}
+
+		await this.tryLog("messageDelete", { guildId, args: [payload, message] });
+	}
+
+	async #messageDeleteBulk(payload: Discord.Events["messageDeleteBulk"][0]): Promise<void> {
+		const guildId = payload.guildId;
+		if (guildId === undefined) {
+			return;
+		}
+
+		await this.tryLog("messageDeleteBulk", { guildId, args: [payload] });
+	}
+
+	async #messageUpdate(message: Discord.Message): Promise<void> {
+		const guildId = message.guildId;
+		if (guildId === undefined) {
+			return;
+		}
+
+		if (message.author.id === this.#client.bot.id) {
+			return;
+		}
+
+		await this.tryLog("messageUpdate", { guildId, args: [message] });
+	}
+
+	async #getKickInformation({
+		user,
+		guildId,
+	}: { user: Logos.User; guildId: bigint }): Promise<Discord.CamelizedDiscordAuditLogEntry | undefined> {
+		const now = Date.now();
+
+		const guildDocument = this.#client.documents.guilds.get(guildId.toString());
+		if (guildDocument === undefined) {
+			return undefined;
+		}
+
+		if (!guildDocument.hasEnabled("journalling")) {
+			return undefined;
+		}
+
+		const auditLog = await this.#client.bot.helpers
+			.getAuditLog(guildId, { actionType: Discord.AuditLogEvents.MemberKick })
+			.catch((error) => {
+				this.log.warn(error, `Could not get audit log for ${this.#client.diagnostics.guild(guildId)}.`);
+				return undefined;
+			});
+		if (auditLog === undefined) {
+			return undefined;
+		}
+
+		return auditLog.auditLogEntries
+			.filter((entry) => Discord.snowflakeToTimestamp(BigInt(entry.id)) >= now - constants.time.second * 5)
+			.find((entry) => entry.targetId === user.id.toString());
 	}
 }
 

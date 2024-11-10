@@ -1,4 +1,4 @@
-import { getCLDLanguageByLocale, isCLDLocale } from "logos:constants/languages/detection.ts";
+import { getCLDLanguageByLocale, isCLDLocale } from "logos:constants/languages/detection";
 import cld from "cldpre";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import type { Client } from "logos/client";
@@ -9,7 +9,8 @@ class CLDAdapter extends DetectorAdapter {
 	}
 
 	async detect({ text }: { text: string }): Promise<SingleDetectionResult | undefined> {
-		const result = await cld.detect(text).catch(() => undefined);
+		const result = await cld.detect(text).catch((_) => undefined);
+
 		const detectedLocale = result?.languages.at(0)?.code;
 		if (detectedLocale === undefined || !isCLDLocale(detectedLocale)) {
 			return undefined;

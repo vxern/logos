@@ -1,6 +1,6 @@
+import { mention } from "logos:constants/formatting";
 import { isValidRule } from "logos:constants/rules";
 import { timeStructToMilliseconds } from "logos:constants/time";
-import { mention } from "logos:core/formatting";
 import type { Client } from "logos/client";
 import { getRuleTitleFormatted } from "logos/commands/rules";
 import { Guild } from "logos/models/guild";
@@ -10,13 +10,6 @@ async function handleWarnUserAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
 ): Promise<void> {
-	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.warns;
-	if (configuration === undefined) {
-		return;
-	}
-
 	if (interaction.parameters.focused === undefined) {
 		return;
 	}
@@ -49,8 +42,8 @@ async function handleWarnUserAutocomplete(
 					.filter((choice) => choice.name.toLowerCase().includes(ruleLowercase)),
 				{ name: strings.option, value: constants.components.none },
 			];
+			client.respond(interaction, choices).ignore();
 
-			await client.respond(interaction, choices);
 			break;
 		}
 	}
@@ -61,18 +54,12 @@ async function handleWarnUser(
 	interaction: Logos.Interaction<any, { user: string; rule: string; reason: string }>,
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.warns;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("warns");
 
 	if (interaction.parameters.rule !== constants.components.none && !isValidRule(interaction.parameters.rule)) {
 		const strings = constants.contexts.invalidRule({ localise: client.localise, locale: interaction.locale });
-		await client.error(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -115,7 +102,7 @@ async function handleWarnUser(
 
 	await client.tryLog("memberWarnAdd", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("warns"),
 		args: [member, warningDocument, interaction.user],
 	});
 
@@ -126,21 +113,22 @@ async function handleWarnUser(
 	});
 
 	const strings = constants.contexts.userWarned({ localise: client.localise, locale: interaction.locale });
-	await client.success(interaction, {
-		title: strings.title,
-		description: strings.description({
-			user_mention: mention(member.id, { type: "user" }),
-			warnings: client.pluralise("warn.strings.warned.description.warnings", interaction.locale, {
-				quantity: warningDocumentsActive.length,
+	client
+		.success(interaction, {
+			title: strings.title,
+			description: strings.description({
+				user_mention: mention(member.id, { type: "user" }),
+				warnings: client.pluralise("warn.strings.warned.description.warnings", interaction.locale, {
+					quantity: warningDocumentsActive.length,
+				}),
 			}),
-		}),
-	});
+		})
+		.ignore();
 
 	const surpassedLimit = warningDocumentsActive.length > configuration.limit;
 	if (surpassedLimit) {
 		if (guildDocument.hasEnabled("alerts")) {
-			const alertService = client.getAlertService(guild.id);
-			if (configuration.autoTimeout?.enabled) {
+			if (configuration.autoTimeout !== undefined) {
 				const timeout = configuration.autoTimeout.duration ?? constants.defaults.WARN_TIMEOUT;
 				const timeoutMilliseconds = timeStructToMilliseconds(timeout);
 
@@ -148,15 +136,15 @@ async function handleWarnUser(
 					.editMember(guild.id, member.id, {
 						communicationDisabledUntil: new Date(Date.now() + timeoutMilliseconds).toISOString(),
 					})
-					.catch(() =>
-						client.log.warn(`Failed to edit timeout state of ${client.diagnostics.member(member)}.`),
+					.catch((error) =>
+						client.log.warn(error, `Failed to edit timeout state of ${client.diagnostics.member(member)}.`),
 					);
 
 				const strings = constants.contexts.warningLimitSurpassedAndTimedOut({
 					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
-				alertService?.alert({
+				await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 					embeds: [
 						{
 							title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
@@ -177,7 +165,7 @@ async function handleWarnUser(
 					localise: client.localise,
 					locale: interaction.guildLocale,
 				});
-				alertService?.alert({
+				await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 					embeds: [
 						{
 							title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
@@ -200,8 +188,7 @@ async function handleWarnUser(
 	if (reachedLimit) {
 		const strings = constants.contexts.limitReached({ localise: client.localise, locale: interaction.guildLocale });
 		if (guildDocument.hasEnabled("alerts")) {
-			const alertService = client.getAlertService(guild.id);
-			alertService?.alert({
+			await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 				embeds: [
 					{
 						title: `${constants.emojis.indicators.warning} ${strings.title}`,
@@ -214,8 +201,6 @@ async function handleWarnUser(
 				],
 			});
 		}
-
-		return;
 	}
 }
 

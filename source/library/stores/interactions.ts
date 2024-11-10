@@ -1,21 +1,25 @@
+import { timestamp, trim } from "logos:constants/formatting";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
-import { trim } from "logos:core/formatting";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
+import { InteractionCollector } from "logos/collectors";
+import type { CommandStore } from "logos/stores/commands";
+import type pino from "pino";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
 type EmbedOrCallbackData = Discord.CamelizedDiscordEmbed | InteractionCallbackData;
 interface ReplyData {
 	readonly ephemeral: boolean;
 }
-type ReplyVisibility = "public" | "private";
 class InteractionStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 
 	readonly #client: Client;
-	readonly #interactions: Map<bigint, Logos.Interaction>;
-	readonly #replies: Map<string, ReplyData>;
-	readonly #messages: Map<string, bigint>;
+	readonly #commands: CommandStore;
+	readonly #registeredInteractions: Map<bigint, Logos.Interaction>;
+	readonly #replies: Map</* token: */ string, ReplyData>;
+	readonly #messages: Map</* token: */ string, bigint>;
+
+	readonly #interactions: InteractionCollector;
 
 	/** ⬜ The action should have succeeded if not for the bot's limitations. */
 	get unsupported(): InteractionStore["reply"] {
@@ -36,12 +40,12 @@ class InteractionStore {
 	 * 🟩 The action intended to be performed with the interaction succeeded.
 	 *
 	 * @remarks
-	 * 🟦 Shows up as a notice if the reply is visible to.
+	 * 🟦 Shows up as a notice if the reply is public.
 	 */
 	get success(): InteractionStore["reply"] {
 		return async (interaction, embedOrData, flags) => {
 			if (flags?.visible) {
-				return await this.notice(interaction, embedOrData, flags);
+				return this.notice(interaction, embedOrData, flags);
 			}
 
 			return this.#buildColouredReplier({ colour: constants.colours.success })(interaction, embedOrData, flags);
@@ -53,7 +57,7 @@ class InteractionStore {
 		return async (interaction, embedOrData) => {
 			const replyData = this.#replies.get(interaction.token)!;
 			if (!replyData.ephemeral) {
-				return await this.noticed(interaction, embedOrData);
+				return this.noticed(interaction, embedOrData);
 			}
 
 			return this.#buildColouredReplyEditor({ colour: constants.colours.success })(interaction, embedOrData);
@@ -110,14 +114,19 @@ class InteractionStore {
 		return this.#buildColouredReplyEditor({ colour: constants.colours.death });
 	}
 
-	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "Interactions", isDebug: client.environment.isDebug });
+	constructor(client: Client, { commands }: { commands: CommandStore }) {
+		this.log = client.log.child({ name: "InteractionStore" });
 
 		this.#client = client;
-
-		this.#interactions = new Map();
+		this.#commands = commands;
+		this.#registeredInteractions = new Map();
 		this.#replies = new Map();
 		this.#messages = new Map();
+		this.#interactions = new InteractionCollector(client, {
+			anyType: true,
+			anyCustomId: true,
+			isPermanent: true,
+		});
 	}
 
 	static spoofInteraction<Interaction extends Logos.Interaction>(
@@ -133,26 +142,124 @@ class InteractionStore {
 		};
 	}
 
+	async setup(): Promise<void> {
+		this.#interactions.onInteraction(this.handleInteraction.bind(this));
+
+		await this.#client.registerInteractionCollector(this.#interactions);
+	}
+
+	async teardown(): Promise<void> {
+		this.#interactions.close();
+	}
+
+	async handleInteraction(interaction: Logos.Interaction): Promise<void> {
+		// If it's a "none" message interaction, just acknowledge and good to go.
+		if (
+			interaction.type === Discord.InteractionTypes.MessageComponent &&
+			interaction.metadata[0] === constants.components.none
+		) {
+			this.acknowledge(interaction).ignore();
+
+			this.log.info("Component interaction acknowledged.");
+
+			return;
+		}
+
+		if (
+			interaction.type !== Discord.InteractionTypes.ApplicationCommand &&
+			interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete
+		) {
+			return;
+		}
+
+		this.log.info(`Receiving ${this.#client.diagnostics.interaction(interaction)}...`);
+
+		const handle = this.#commands.getHandler(interaction);
+		if (handle === undefined) {
+			this.log.warn(
+				`Could not retrieve handler for ${this.#client.diagnostics.interaction(
+					interaction,
+				)}. Is the command registered?`,
+			);
+			return;
+		}
+
+		const executedAt = Date.now();
+
+		if (
+			interaction.type !== Discord.InteractionTypes.ApplicationCommandAutocomplete &&
+			this.#commands.hasRateLimit(interaction)
+		) {
+			const rateLimit = this.#commands.getRateLimit(interaction, { executedAt });
+			if (rateLimit !== undefined) {
+				const nextUsable = rateLimit.nextAllowedUsageTimestamp - executedAt;
+
+				this.log.warn(
+					`User rate-limited on ${this.#client.diagnostics.interaction(interaction)}. Next usable in ${Math.ceil(
+						nextUsable / 1000,
+					)} seconds.`,
+				);
+
+				const strings = constants.contexts.rateLimited({
+					localise: this.#client.localise.bind(this),
+					locale: interaction.locale,
+				});
+				this.warning(interaction, {
+					title: strings.title,
+					description: `${strings.description.tooManyUses({
+						times: constants.defaults.COMMAND_RATE_LIMIT.uses,
+					})}\n\n${strings.description.cannotUseUntil({
+						relative_timestamp: timestamp(rateLimit.nextAllowedUsageTimestamp, {
+							format: "relative",
+						}),
+					})}`,
+				}).ignore();
+
+				setTimeout(() => this.deleteReply(interaction).ignore(), nextUsable);
+
+				return;
+			}
+		}
+
+		this.log.info(`Handling ${this.#client.diagnostics.interaction(interaction)}...`);
+
+		const start = Date.now();
+		await handle(this.#client, interaction)
+			.then(() => {
+				const end = Date.now();
+				const timeTakenMilliseconds = end - start;
+
+				this.log.info(
+					`Handled ${this.#client.diagnostics.interaction(interaction)} in ${timeTakenMilliseconds}ms.`,
+				);
+			})
+			.catch((error) =>
+				this.log.error(error, `Failed to handle ${this.#client.diagnostics.interaction(interaction)}.`),
+			);
+	}
+
 	registerInteraction(interaction: Logos.Interaction): void {
-		this.#interactions.set(interaction.id, interaction);
+		this.#registeredInteractions.set(interaction.id, interaction);
 	}
 
 	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
-		const interaction = this.#interactions.get(interactionId);
+		const interaction = this.#registeredInteractions.get(interactionId);
 		if (interaction === undefined) {
 			return undefined;
 		}
 
-		this.#interactions.delete(interactionId);
+		this.#registeredInteractions.delete(interactionId);
 
 		return interaction;
 	}
 
-	registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: bigint }): void {
+	#registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: bigint }): void {
+		setTimeout(() => this.#unregisterMessage(interaction), constants.INTERACTION_TOKEN_EXPIRY);
+
 		this.#messages.set(interaction.token, messageId);
 	}
 
-	unregisterMessage(interaction: Logos.Interaction): void {
+	#unregisterMessage(interaction: Logos.Interaction): void {
 		this.#messages.delete(interaction.token);
 	}
 
@@ -167,9 +274,15 @@ class InteractionStore {
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.DeferredUpdateMessage,
 			})
-			.catch((reason) => this.log.error("Failed to acknowledge interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to acknowledge interaction."));
 	}
 
+	/**
+	 * @remarks
+	 *
+	 * ⚠️ Make sure you await postponed replies, otherwise you risk introducing race conditions where the bot attempts
+	 * to edit a reply before the postponing finishes.
+	 */
 	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
 		this.#replies.set(interaction.token, { ephemeral: !visible });
 
@@ -179,7 +292,7 @@ class InteractionStore {
 				locale: interaction.guildLocale,
 			});
 			const message = await this.#client.bot.helpers
-				.sendMessage(interaction.channelId!, {
+				.sendMessage(interaction.channelId, {
 					embeds: [
 						{
 							description: strings.thinking,
@@ -187,15 +300,15 @@ class InteractionStore {
 						},
 					],
 				})
-				.catch((reason) => {
-					this.log.error("Failed to postpone message reply to repeated interaction:", reason);
+				.catch((error) => {
+					this.log.error(error, "Failed to postpone message reply to repeated interaction.");
 					return undefined;
 				});
 			if (message === undefined) {
 				return;
 			}
 
-			this.registerMessage(interaction, { messageId: message.id });
+			this.#registerMessage(interaction, { messageId: message.id });
 			return;
 		}
 
@@ -204,13 +317,13 @@ class InteractionStore {
 				type: Discord.InteractionResponseTypes.DeferredChannelMessageWithSource,
 				data: visible ? {} : { flags: Discord.MessageFlags.Ephemeral },
 			})
-			.catch((reason) => this.log.error("Failed to postpone reply to interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to postpone reply to interaction."));
 	}
 
 	async reply(
 		interaction: Logos.Interaction,
 		embedOrData: EmbedOrCallbackData,
-		{ visible = false }: { visible?: boolean } = {},
+		{ visible = false, autoDelete = false }: { visible?: boolean; autoDelete?: boolean } = {},
 	): Promise<void> {
 		const data = getInteractionCallbackData(embedOrData);
 
@@ -221,15 +334,15 @@ class InteractionStore {
 		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
-			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId!, data).catch((reason) => {
-				this.log.error("Failed to make message reply to repeated interaction:", reason);
+			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId, data).catch((error) => {
+				this.log.error(error, "Failed to make message reply to repeated interaction.");
 				return undefined;
 			});
 			if (message === undefined) {
 				return;
 			}
 
-			this.registerMessage(interaction, { messageId: message.id });
+			this.#registerMessage(interaction, { messageId: message.id });
 			return;
 		}
 
@@ -238,17 +351,25 @@ class InteractionStore {
 				type: Discord.InteractionResponseTypes.ChannelMessageWithSource,
 				data,
 			})
-			.catch((reason) => this.log.error("Failed to reply to interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to reply to interaction."));
+
+		if (autoDelete) {
+			this.#autoDeleteReply(interaction);
+		}
 	}
 
-	async editReply(interaction: Logos.Interaction, embedOrData: EmbedOrCallbackData): Promise<void> {
+	async editReply(
+		interaction: Logos.Interaction,
+		embedOrData: EmbedOrCallbackData,
+		{ autoDelete = false }: { autoDelete?: boolean } = {},
+	): Promise<void> {
 		const data = getInteractionCallbackData(embedOrData);
 
 		if (interaction.parameters["@repeat"]) {
 			const messageId = this.#messages.get(interaction.token)!;
 
-			await this.#client.bot.helpers.editMessage(interaction.channelId!, messageId, data).catch((reason) => {
-				this.log.error("Failed to edit message reply made to repeated interaction:", reason);
+			await this.#client.bot.helpers.editMessage(interaction.channelId, messageId, data).catch((error) => {
+				this.log.error(error, "Failed to edit message reply made to repeated interaction.");
 				return undefined;
 			});
 
@@ -257,7 +378,11 @@ class InteractionStore {
 
 		await this.#client.bot.helpers
 			.editOriginalInteractionResponse(interaction.token, data)
-			.catch((reason) => this.log.error("Failed to edit reply to interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to edit reply to interaction."));
+
+		if (autoDelete) {
+			this.#autoDeleteReply(interaction);
+		}
 	}
 
 	async deleteReply(interaction: Logos.Interaction): Promise<void> {
@@ -266,8 +391,8 @@ class InteractionStore {
 
 			this.#messages.delete(interaction.token);
 
-			await this.#client.bot.helpers.deleteMessage(interaction.channelId!, messageId).catch((reason) => {
-				this.log.error("Failed to delete message reply made to repeated interaction:", reason);
+			await this.#client.bot.helpers.deleteMessage(interaction.channelId, messageId).catch((error) => {
+				this.log.error(error, "Failed to delete message reply made to repeated interaction.");
 				return undefined;
 			});
 
@@ -276,7 +401,7 @@ class InteractionStore {
 
 		await this.#client.bot.helpers
 			.deleteOriginalInteractionResponse(interaction.token)
-			.catch((reason) => this.log.error("Failed to delete reply to interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to delete reply to interaction."));
 	}
 
 	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
@@ -285,7 +410,7 @@ class InteractionStore {
 				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: { choices },
 			})
-			.catch((reason) => this.log.error("Failed to respond to autocomplete interaction:", reason));
+			.catch((error) => this.log.error(error, "Failed to respond to autocomplete interaction."));
 	}
 
 	async displayModal(
@@ -297,7 +422,7 @@ class InteractionStore {
 				type: Discord.InteractionResponseTypes.Modal,
 				data,
 			})
-			.catch((reason) => this.log.error("Failed to show modal:", reason));
+			.catch((error) => this.log.error(error, "Failed to show modal."));
 	}
 
 	#buildColouredReplier({ colour }: { colour: number }): InteractionStore["reply"] {
@@ -314,6 +439,10 @@ class InteractionStore {
 
 			await this.editReply(interaction, embedOrData);
 		};
+	}
+
+	#autoDeleteReply(interaction: Logos.Interaction): void {
+		setTimeout(() => this.#client.deleteReply(interaction).ignore(), constants.AUTO_DELETE_MESSAGE_TIMEOUT);
 	}
 
 	#resolveIdentifierToMembers({
@@ -416,11 +545,7 @@ class InteractionStore {
 				return true;
 			}
 
-			if (member.nick?.toLowerCase().includes(identifierLowercase)) {
-				return true;
-			}
-
-			return false;
+			return member.nick?.toLowerCase().includes(identifierLowercase);
 		});
 
 		return [matchedMembers, false];
@@ -464,7 +589,8 @@ class InteractionStore {
 				this.error(interaction, {
 					title: strings.title,
 					description: strings.description,
-				});
+				}).ignore();
+
 				return undefined;
 			}
 
@@ -551,9 +677,17 @@ function getInteractionCallbackData(embedOrData: EmbedOrCallbackData): Discord.I
 
 function setCallbackColour(embedOrData: EmbedOrCallbackData, { colour }: { colour: number }): EmbedOrCallbackData {
 	if (isEmbed(embedOrData)) {
+		if (embedOrData.color !== undefined) {
+			return embedOrData;
+		}
+
 		embedOrData.color = colour;
 	} else if (embedOrData.embeds !== undefined) {
 		for (const embed of embedOrData.embeds) {
+			if (embed.color !== undefined) {
+				continue;
+			}
+
 			embed.color = colour;
 		}
 	}
@@ -562,4 +696,3 @@ function setCallbackColour(embedOrData: EmbedOrCallbackData, { colour }: { colou
 }
 
 export { InteractionStore };
-export type { ReplyVisibility };

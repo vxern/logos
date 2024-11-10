@@ -1,4 +1,4 @@
-import { mention, timestamp } from "logos:core/formatting";
+import { mention, timestamp } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 
@@ -18,63 +18,83 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 
 	const strings = constants.contexts.guildInformation({ localise: client.localise, locale: interaction.locale });
 
-	await client.notice(interaction, {
-		author: {
-			iconUrl: Discord.guildIconUrl(guild.id, guild.icon, { size: 4096, format: "png" }),
-			name: strings.title({ server_name: guild.name }),
-		},
-		fields: [
+	client
+		.notice(
+			interaction,
 			{
-				name: `${constants.emojis.guild.description} ${strings.description.description.title}`,
-				value: guild.description ?? strings.description.description.noDescription,
-				inline: true,
-			},
-			{
-				name: `${constants.emojis.guild.members} ${strings.description.members}`,
-				value: guild.memberCount.toString(),
-				inline: true,
-			},
-			{
-				name: `${constants.emojis.guild.created} ${strings.description.created}`,
-				value: timestamp(Discord.snowflakeToTimestamp(guild.id), { format: "relative" }),
-				inline: true,
-			},
-			{
-				name: `${constants.emojis.guild.channels.channels} ${strings.description.channels}`,
-				value: getChannelInformationSection(client, interaction, guild),
-				inline: true,
-			},
-			{
-				name: `${constants.emojis.guild.languages.languages} ${strings.description.languages}`,
-				value: getLanguageInformationSection(client, interaction, guildDocument),
-				inline: true,
-			},
-			...(guildDocument.isNative
-				? [
-						{
-							name: `${constants.emojis.guild.moderators} ${strings.description.moderators.title}`,
-							value: strings.description.moderators.overseenByModerators,
-							inline: false,
+				embeds: [
+					{
+						author: {
+							iconUrl: Discord.guildIconUrl(guild.id, guild.icon, { size: 4096, format: "png" }),
+							name: strings.title({ server_name: guild.name }),
 						},
-						{
-							name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
-							value: formatDistribution(
-								client,
-								interaction,
-								getProficiencyRoleDistribution(client, guild),
-							),
-							inline: false,
-						},
-					]
-				: [
-						{
-							name: `${constants.emojis.guild.owner} ${strings.description.owner}`,
-							value: mention(owner.id, { type: "user" }),
-							inline: true,
-						},
-					]),
-		],
-	});
+						fields: [
+							{
+								name: `${constants.emojis.guild.description} ${strings.description.description.title}`,
+								value: guild.description ?? strings.description.description.noDescription,
+								inline: true,
+							},
+							{
+								name: `${constants.emojis.guild.members} ${strings.description.members}`,
+								value: guild.memberCount.toString(),
+								inline: true,
+							},
+							{
+								name: `${constants.emojis.guild.created} ${strings.description.created}`,
+								value: timestamp(Discord.snowflakeToTimestamp(guild.id), { format: "relative" }),
+								inline: true,
+							},
+							{
+								name: `${constants.emojis.guild.channels.channels} ${strings.description.channels}`,
+								value: getChannelInformationSection(client, interaction, guild),
+								inline: true,
+							},
+							{
+								name: `${constants.emojis.guild.languages.languages} ${strings.description.languages}`,
+								value: getLanguageInformationSection(client, interaction, guildDocument),
+								inline: true,
+							},
+							...(guildDocument.isNative
+								? [
+										{
+											name: `${constants.emojis.guild.moderators} ${strings.description.moderators.title}`,
+											value: strings.description.moderators.overseenByModerators,
+											inline: false,
+										},
+										{
+											name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
+											value: formatDistribution(
+												client,
+												interaction,
+												getProficiencyRoleDistribution(client, guild),
+											),
+											inline: false,
+										},
+									]
+								: [
+										{
+											name: `${constants.emojis.guild.owner} ${strings.description.owner}`,
+											value: mention(owner.id, { type: "user" }),
+											inline: true,
+										},
+									]),
+						],
+					},
+				],
+				components: interaction.parameters.show
+					? []
+					: [
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: [
+									client.services.global("interactionRepetition").getShowButton(interaction),
+								],
+							},
+						],
+			},
+			{ visible: interaction.parameters.show },
+		)
+		.ignore();
 }
 
 function getChannelInformationSection(client: Client, interaction: Logos.Interaction, guild: Logos.Guild): string {
@@ -98,9 +118,9 @@ function getLanguageInformationSection(client: Client, interaction: Logos.Intera
 	};
 
 	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.language(
-		guildDocument.localisationLanguage,
+		guildDocument.languages.localisation,
 	)}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${strings.language(
-		guildDocument.featureLanguage,
+		guildDocument.languages.feature,
 	)}`;
 }
 
@@ -132,7 +152,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		.sort((a, b) => a.position - b.position)
 		.map((role) => role.id);
 
-	const members = guild.members.array().filter((member) => !client.entities.users.get(member.id)?.bot ?? true);
+	const members = guild.members.array().filter((member) => !client.entities.users.get(member.id)?.bot);
 
 	let withoutProficiencyRole = 0;
 	const roleFrequencies: Record<`${bigint}`, number> = Object.fromEntries(
@@ -143,7 +163,7 @@ function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): Pro
 		const roleId = member.roles.filter((roleId) => proficiencyRoleIds.includes(roleId)).at(0);
 
 		if (roleId !== undefined) {
-			roleFrequencies[`${roleId}`] += 1;
+			roleFrequencies[`${roleId}`]! += 1;
 		} else {
 			withoutProficiencyRole += 1;
 		}

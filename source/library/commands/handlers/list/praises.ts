@@ -51,7 +51,7 @@ async function handleDisplayPraises(
 		where: { guildId: interaction.guildId.toString(), [propertyName]: member.id.toString() },
 	});
 
-	await client.notice(interaction, getPraisePage(client, interaction, praiseDocuments, isSelf, mode));
+	client.notice(interaction, getPraisePage(client, interaction, praiseDocuments, isSelf, mode)).ignore();
 }
 
 export { handleDisplayAuthorPraises, handleDisplayTargetPraises, handleDisplayPraisesAutocomplete };

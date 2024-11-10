@@ -1,4 +1,4 @@
-import { mention, timestamp, trim } from "logos:core/formatting";
+import { mention, timestamp, trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { parseTimeExpression } from "logos/commands/interactions";
 import { Guild } from "logos/models/guild";
@@ -17,6 +17,7 @@ async function handleSetTimeoutAutocomplete(
 				identifier: interaction.parameters.user,
 				options: { restrictToNonSelf: true, excludeModerators: true },
 			});
+
 			return;
 		}
 		case "duration": {
@@ -26,11 +27,12 @@ async function handleSetTimeoutAutocomplete(
 					localise: client.localise,
 					locale: interaction.locale,
 				});
-				await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
+				client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
+
 				return;
 			}
 
-			await client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]);
+			client.respond(interaction, [{ name: timestamp[0], value: timestamp[1].toString() }]).ignore();
 		}
 	}
 }
@@ -40,11 +42,6 @@ async function handleSetTimeout(
 	interaction: Logos.Interaction<any, { user: string; duration: string; reason: string }>,
 ): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.timeouts;
-	if (configuration === undefined) {
-		return;
-	}
 
 	const member = client.resolveInteractionToMember(interaction, {
 		identifier: interaction.parameters.user,
@@ -61,7 +58,12 @@ async function handleSetTimeout(
 	if (!Number.isSafeInteger(durationParsed)) {
 		const timestamp = parseTimeExpression(client, interaction, interaction.parameters.duration);
 		if (timestamp === undefined) {
-			await displayDurationInvalidError(client, interaction);
+			const strings = constants.contexts.timeoutDurationInvalid({
+				localise: client.localise,
+				locale: interaction.locale,
+			});
+			client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 			return;
 		}
 
@@ -69,12 +71,22 @@ async function handleSetTimeout(
 	}
 
 	if (durationParsed < constants.time.minute) {
-		await displayTooShortWarning(client, interaction);
+		const strings = constants.contexts.timeoutDurationTooShort({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	if (durationParsed > constants.time.week) {
-		await displayTooLongWarning(client, interaction);
+		const strings = constants.contexts.timeoutDurationTooLong({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -87,55 +99,24 @@ async function handleSetTimeout(
 
 	await client.bot.helpers
 		.editMember(interaction.guildId, member.id, { communicationDisabledUntil: new Date(until).toISOString() })
-		.catch((reason) => client.log.warn(`Failed to time ${client.diagnostics.member(member)} out:`, reason));
+		.catch((error) => client.log.warn(error, `Failed to time ${client.diagnostics.member(member)} out.`));
 
 	await client.tryLog("memberTimeoutAdd", {
 		guildId: guild.id,
-		journalling: configuration.journaling,
+		journalling: guildDocument.isJournalled("timeouts"),
 		args: [member, until, interaction.parameters.reason, interaction.user],
 	});
 
 	const strings = constants.contexts.timedOut({ localise: client.localise, locale: interaction.locale });
-	await client.notice(interaction, {
-		title: strings.title,
-		description: strings.description({
-			user_mention: mention(member.id, { type: "user" }),
-			relative_timestamp: timestamp(until, { format: "relative" }),
-		}),
-	});
-}
-
-async function displayDurationInvalidError(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.timeoutDurationInvalid({
-		localise: client.localise,
-		locale: interaction.locale,
-	});
-	await client.error(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
-}
-
-async function displayTooShortWarning(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.timeoutDurationTooShort({
-		localise: client.localise,
-		locale: interaction.locale,
-	});
-	await client.warning(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
-}
-
-async function displayTooLongWarning(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const strings = constants.contexts.timeoutDurationTooLong({
-		localise: client.localise,
-		locale: interaction.locale,
-	});
-	await client.warning(interaction, {
-		title: strings.title,
-		description: strings.description,
-	});
+	client
+		.notice(interaction, {
+			title: strings.title,
+			description: strings.description({
+				user_mention: mention(member.id, { type: "user" }),
+				relative_timestamp: timestamp(until, { format: "relative" }),
+			}),
+		})
+		.ignore();
 }
 
 export { handleSetTimeout, handleSetTimeoutAutocomplete };

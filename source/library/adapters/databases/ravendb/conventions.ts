@@ -33,7 +33,7 @@ class RavenDBDocumentConventions extends DocumentConventions<RavenDBDocumentMeta
 		}
 
 		const ModelClass = DatabaseStore.getModelClassByCollection({
-			collection: payload["@metadata"]["@collection"] as Collection,
+			collection: payload["@metadata"]["@collection"],
 		});
 
 		return new ModelClass(database, payload) as M;

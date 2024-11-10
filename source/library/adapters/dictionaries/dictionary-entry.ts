@@ -1,6 +1,6 @@
-import type { DictionarySection } from "logos:constants/dictionaries.ts";
-import type { Licence } from "logos:constants/licences.ts";
-import type { PartOfSpeech } from "logos:constants/parts-of-speech.ts";
+import type { DictionarySection } from "logos:constants/dictionaries";
+import type { Licence } from "logos:constants/licences";
+import type { PartOfSpeech } from "logos:constants/parts-of-speech";
 
 type LabelledField = {
 	labels?: string[];
@@ -101,12 +101,6 @@ interface DictionaryEntry extends Partial<Record<DictionarySection, unknown>> {
 	/** Additional notes on usage, prevalence, etc. */
 	notes?: NoteField;
 }
-
-// TODO(vxern): Include.
-// type DictionaryEntryField = keyof DictionaryEntry;
-//
-// const requiredDictionaryEntryFields = ["sources", "lemma"] satisfies DictionaryEntryField[];
-// type RequiredDictionaryEntryFields = (typeof requiredDictionaryEntryFields)[number];
 
 export type {
 	LemmaField,

@@ -4,11 +4,7 @@ import { Guild } from "logos/models/guild";
 /** Displays a message with information on where to find the resources for a given language. */
 async function handleDisplayResources(client: Client, interaction: Logos.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
-
-	const configuration = guildDocument.resources;
-	if (configuration === undefined) {
-		return;
-	}
+	const configuration = guildDocument.feature("resources");
 
 	const strings = {
 		...constants.contexts.redirect({
@@ -31,21 +27,23 @@ async function handleDisplayResources(client: Client, interaction: Logos.Interac
 	];
 
 	if (!interaction.parameters.show) {
-		buttons.push(client.interactionRepetitionService.getShowButton(interaction));
+		buttons.push(client.services.global("interactionRepetition").getShowButton(interaction));
 	}
 
-	await client.reply(
-		interaction,
-		{
-			components: [
-				{
-					type: Discord.MessageComponentTypes.ActionRow,
-					components: buttons as [Discord.ButtonComponent],
-				},
-			],
-		},
-		{ visible: interaction.parameters.show },
-	);
+	client
+		.reply(
+			interaction,
+			{
+				components: [
+					{
+						type: Discord.MessageComponentTypes.ActionRow,
+						components: buttons as [Discord.ButtonComponent],
+					},
+				],
+			},
+			{ visible: interaction.parameters.show },
+		)
+		.ignore();
 }
 
 export { handleDisplayResources };

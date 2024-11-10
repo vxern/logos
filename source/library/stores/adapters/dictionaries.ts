@@ -6,13 +6,13 @@ import { DexonlineAdapter } from "logos/adapters/dictionaries/adapters/dexonline
 import { DicolinkAdapter } from "logos/adapters/dictionaries/adapters/dicolink";
 import { PonsAdapter } from "logos/adapters/dictionaries/adapters/pons.ts";
 import { WiktionaryAdapter } from "logos/adapters/dictionaries/adapters/wiktionary";
-import { WordnikAdapter } from "logos/adapters/dictionaries/adapters/wordnik.ts";
+import { WordnikAdapter } from "logos/adapters/dictionaries/adapters/wordnik";
 import { WordsAPIAdapter } from "logos/adapters/dictionaries/adapters/words-api";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 class DictionaryStore {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly adapters: {
 		readonly dexonline: DexonlineAdapter;
 		readonly dicolink?: DicolinkAdapter;
@@ -23,7 +23,7 @@ class DictionaryStore {
 	} & Partial<Record<Dictionary, DictionaryAdapter>>;
 
 	constructor(client: Client) {
-		this.log = Logger.create({ identifier: "Client/DictionaryStore", isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: "DictionaryStore" });
 
 		const dicolinkAdapter = DicolinkAdapter.tryCreate(client);
 		if (dicolinkAdapter === undefined) {

@@ -1,5 +1,5 @@
 {
-    "interactions.continuedOnNextPage": "Continuare pe următoarea pagină...",
+    "interactions.continuedOnNextPage": "Continuat pe următoarea pagină...",
     "interactions.page": "Pagină",
     "interactions.invalidUser.title": "Utilizator invalid",
     "interactions.invalidUser.description": "Utilizatorul pe care l-ai specificat nu este valid.",
@@ -10,5 +10,6 @@
     "interactions.show.sureToShow.title": "Ești sigur(ă)?",
     "interactions.show.sureToShow.description": "Sigur dorești ca mesajul să fie afișat în canal?",
     "interactions.show.sureToShow.yes": "Da, afișează-l",
-    "interactions.show.sureToShow.no": "Nu, nu îl afișa"
+    "interactions.show.sureToShow.no": "Nu, nu îl afișa",
+    "interactions.thinking": "Logos se gândește..."
 }

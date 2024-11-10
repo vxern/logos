@@ -1,6 +1,7 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
-import { type LearningLanguage, getLocaleByLearningLanguage } from "logos:constants/languages/learning.ts";
-import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation.ts";
+import { type LearningLanguage, getLocaleByLearningLanguage } from "logos:constants/languages/learning";
+import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
+import type { PromiseOr } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 import { User } from "logos/models/user";
@@ -8,7 +9,7 @@ import { nanoid } from "nanoid";
 
 type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.EventHandlers> = (
 	...args: Parameters<Discord.EventHandlers[Event]>
-) => void | Promise<void>;
+) => PromiseOr<void>;
 type DoneEvent = () => void | Promise<void>;
 class Collector<Event extends keyof Discord.EventHandlers = any> {
 	readonly done: Promise<void>;
@@ -71,7 +72,6 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 
 		if (this.#isSingle) {
 			this.close();
-			return;
 		}
 	}
 
@@ -103,9 +103,11 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 	}
 }
 
+type DiscordParameterType = string | number | boolean | undefined;
+
 class InteractionCollector<
 	Metadata extends string[] = [],
-	Parameters extends Record<string, string | number | boolean | undefined> = Record<string, string>,
+	Parameters extends Record<string, DiscordParameterType> = Record<string, string>,
 > extends Collector<"interactionCreate"> {
 	static readonly noneId = constants.components.none;
 
@@ -239,7 +241,7 @@ class InteractionCollector<
 		throw new Error("Do not use `onCollect()` on interaction controllers. Use `onInteraction()` instead.");
 	}
 
-	onInteraction(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => void | Promise<void>): void {
+	onInteraction(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => PromiseOr<void>): void {
 		super.onCollect(async (interactionRaw) => {
 			const locales = await this.#getLocaleData(interactionRaw);
 			const metadata = this.#getMetadata(interactionRaw);
@@ -292,15 +294,15 @@ class InteractionCollector<
 			Guild.getOrCreate(this.#client, { guildId: interaction.guildId!.toString() }),
 		]);
 
-		const targetLanguage = guildDocument.targetLanguage;
+		const targetLanguage = guildDocument.languages.target;
 		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
 		const learningLocale = getLocaleByLearningLanguage(learningLanguage);
 
-		const guildLanguage = guildDocument.isTargetLanguageOnly(interaction.channelId!.toString())
+		const guildLanguage = guildDocument.isTargetLanguageOnlyChannel(interaction.channelId!.toString())
 			? targetLanguage
-			: guildDocument.localisationLanguage;
+			: guildDocument.languages.localisation;
 		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
-		const featureLanguage = guildDocument.featureLanguage;
+		const featureLanguage = guildDocument.languages.feature;
 
 		if (!isAutocomplete(interaction)) {
 			// If the user has configured a custom locale, use the user's preferred locale.
@@ -335,7 +337,7 @@ class InteractionCollector<
 		return InteractionCollector.decodeId(idEncoded);
 	}
 
-	#getParameters<Parameters extends Record<string, string | number | boolean | undefined>>(
+	#getParameters<Parameters extends Record<string, DiscordParameterType>>(
 		interaction: Discord.Interaction,
 	): Logos.InteractionParameters<Parameters> {
 		const options = interaction.data?.options;
@@ -343,16 +345,16 @@ class InteractionCollector<
 			return InteractionCollector.#defaultParameters as Logos.InteractionParameters<Parameters>;
 		}
 
-		return Object.assign(
-			{ ...InteractionCollector.#defaultParameters },
-			InteractionCollector.#parseParameters(options),
-		) as Logos.InteractionParameters<Parameters>;
+		return {
+			...InteractionCollector.#defaultParameters,
+			...InteractionCollector.#parseParameters(options),
+		} as Logos.InteractionParameters<Parameters>;
 	}
 
-	static #parseParameters<Parameters extends Record<string, string | number | boolean | undefined>>(
+	static #parseParameters<Parameters extends Record<string, DiscordParameterType>>(
 		options: Discord.InteractionDataOption[],
 	): Partial<Parameters> {
-		const result: Partial<Record<string, string | number | boolean | undefined>> = {};
+		const result: Partial<Record<string, DiscordParameterType>> = {};
 
 		for (const option of options) {
 			if (option.focused) {
@@ -375,14 +377,11 @@ class InteractionCollector<
 	}
 
 	#determineLearningLanguage(guildDocument: Guild, member: Logos.Member): LearningLanguage | undefined {
-		if (member === undefined) {
+		if (!guildDocument.hasEnabled("roleLanguages")) {
 			return undefined;
 		}
 
-		const roleLanguages = guildDocument.roleLanguages;
-		if (roleLanguages === undefined) {
-			return undefined;
-		}
+		const roleLanguages = guildDocument.feature("roleLanguages");
 
 		const userLearningLanguage = Object.entries(roleLanguages.ids).find(([key, _]) =>
 			member.roles.includes(BigInt(key)),

@@ -1,4 +1,4 @@
-import { code } from "logos:core/formatting";
+import { code } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/roles";

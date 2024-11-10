@@ -1,8 +1,8 @@
 import type { Languages } from "logos:constants/languages";
-import type { TranslationLanguage } from "logos:constants/languages/translation.ts";
-import type { Licence } from "logos:constants/licences.ts";
+import type { TranslationLanguage } from "logos:constants/languages/translation";
+import type { Licence } from "logos:constants/licences";
 import type { Client } from "logos/client";
-import { Logger } from "logos/logger";
+import type pino from "pino";
 
 interface TranslationResult {
 	/** The language detected from the text sent to be translated. */
@@ -16,11 +16,11 @@ interface TranslationResult {
 }
 
 abstract class TranslatorAdapter<Language extends string = TranslationLanguage> {
-	readonly log: Logger;
+	readonly log: pino.Logger;
 	readonly client: Client;
 
 	constructor(client: Client, { identifier }: { identifier: string }) {
-		this.log = Logger.create({ identifier, isDebug: client.environment.isDebug });
+		this.log = client.log.child({ name: identifier });
 		this.client = client;
 	}
 

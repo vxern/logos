@@ -1,6 +1,6 @@
-import { trim } from "logos:core/formatting";
+import { trim } from "logos:constants/formatting";
 import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { ResourceFormData } from "logos/models/resource";
+import type { ResourceFormData } from "logos/models/documents/resource/latest";
 
 class ResourceComposer extends ModalComposer<ResourceFormData, never> {
 	buildModal(submission: Logos.Interaction, { formData }: { formData: ResourceFormData }): Modal<ResourceFormData> {

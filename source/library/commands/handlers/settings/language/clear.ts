@@ -10,10 +10,8 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.warned(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
+		client.warned(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
@@ -21,16 +19,8 @@ async function handleClearLanguage(client: Client, interaction: Logos.Interactio
 		userDocument.preferredLanguage = undefined;
 	});
 
-	{
-		const strings = constants.contexts.settingsCleared({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		await client.succeeded(interaction, {
-			title: strings.title,
-			description: strings.description,
-		});
-	}
+	const strings = constants.contexts.settingsCleared({ localise: client.localise, locale: interaction.locale });
+	client.succeeded(interaction, { title: strings.title, description: strings.description }).ignore();
 }
 
 export { handleClearLanguage };

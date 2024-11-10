@@ -1,41 +1,17 @@
-import defaults from "logos:constants/defaults";
-import { isLocalisationLanguage } from "logos:constants/languages/localisation.ts";
+import { code, trim } from "logos:constants/formatting";
+import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
-import { code, trim } from "logos:core/formatting";
-import type { DictionaryEntry } from "logos/adapters/dictionaries/adapter";
-import type { DefinitionField, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry.ts";
+import type { DefinitionField, DictionaryEntry, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice.ts";
+import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
+import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
 
 async function handleFindWordAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
-	const guildId = interaction.guildId;
-	if (guildId === undefined) {
-		return;
-	}
-
-	const languageQueryTrimmed = interaction.parameters.language?.trim();
-	if (languageQueryTrimmed === undefined || languageQueryTrimmed.length === 0) {
-		const strings = constants.contexts.autocompleteLanguage({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		await client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]);
-		return;
-	}
-
-	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
-	const choices = constants.languages.languages.localisation
-		.map((language) => ({
-			name: client.localise(constants.localisations.languages[language], interaction.locale)(),
-			value: language,
-		}))
-		.filter((choice) => choice.name.toLowerCase().includes(languageQueryLowercase));
-
-	await client.respond(interaction, choices);
+	await handleAutocompleteLanguage(client, interaction);
 }
 
 /** Allows the user to look up a word and get information about it. */
@@ -45,20 +21,12 @@ async function handleFindWord(
 ): Promise<void> {
 	if (interaction.parameters.language !== undefined && !isLocalisationLanguage(interaction.parameters.language)) {
 		const strings = constants.contexts.invalidLanguage({ localise: client.localise, locale: interaction.locale });
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.red,
-				},
-			],
-		});
+		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
-	const learningLanguage =
-		interaction.parameters.language !== undefined ? interaction.parameters.language : interaction.learningLanguage;
+	const learningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {
@@ -76,21 +44,14 @@ async function handleFindWord(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-		await client.reply(interaction, {
-			embeds: [
-				{
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.dullYellow,
-				},
-			],
-		});
+		client.unsupported(interaction, { title: strings.title, description: strings.description }).ignore();
+
 		return;
 	}
 
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
-	const identifiersFormatted = dictionaries.map((dictionary) => dictionary.identifier).join(", ");
+	const identifiersFormatted = dictionaries.map((dictionary) => dictionary).join(", ");
 	client.log.info(
 		`Looking up the word '${interaction.parameters.word}' from ${
 			dictionaries.length
@@ -161,28 +122,21 @@ async function handleFindWord(
 			}
 		}
 
-		searchesCompleted++;
+		searchesCompleted += 1;
 	}
 
 	if (entriesByPartOfSpeech.size === 0) {
 		const strings = constants.contexts.noResults({ localise: client.localise, locale: interaction.displayLocale });
-		await client.editReply(interaction, {
-			embeds: [
+		client
+			.warned(
+				interaction,
 				{
 					title: strings.title,
 					description: strings.description({ word: interaction.parameters.word }),
-					color: constants.colours.dullYellow,
 				},
-			],
-		});
-
-		setTimeout(
-			() =>
-				client.deleteReply(interaction).catch(() => {
-					client.log.warn(`Failed to delete "no results for word" message.`);
-				}),
-			defaults.WARN_MESSAGE_DELETE_TIMEOUT,
-		);
+				{ autoDelete: true },
+			)
+			.ignore();
 
 		return;
 	}
@@ -191,7 +145,7 @@ async function handleFindWord(
 
 	const showButton = interaction.parameters.show
 		? undefined
-		: client.interactionRepetitionService.getShowButton(interaction);
+		: client.services.global("interactionRepetition").getShowButton(interaction);
 
 	await displayMenu(client, interaction, {
 		entries,
@@ -234,10 +188,12 @@ async function displayMenu(client: Client, interaction: Logos.Interaction, data:
 		return;
 	}
 
-	await client.editReply(interaction, {
-		embeds: generateEmbeds(client, interaction, data, entry),
-		components: await generateButtons(client, interaction, data, entry),
-	});
+	client
+		.editReply(interaction, {
+			embeds: generateEmbeds(client, interaction, data, entry),
+			components: await generateButtons(client, interaction, data, entry),
+		})
+		.ignore();
 }
 
 function generateEmbeds(
@@ -289,20 +245,20 @@ async function generateButtons(
 			});
 
 			previousPageButton.onInteraction(async (buttonPress) => {
-				await client.acknowledge(buttonPress);
+				client.acknowledge(buttonPress).ignore();
 
 				if (!isFirst) {
-					data.dictionaryEntryIndex--;
+					data.dictionaryEntryIndex -= 1;
 				}
 
 				await displayMenu(client, interaction, data);
 			});
 
 			nextPageButton.onInteraction(async (buttonPress) => {
-				await client.acknowledge(buttonPress);
+				client.acknowledge(buttonPress).ignore();
 
 				if (!isLast) {
-					data.dictionaryEntryIndex++;
+					data.dictionaryEntryIndex += 1;
 				}
 
 				await displayMenu(client, interaction, data);
@@ -352,7 +308,7 @@ async function generateButtons(
 			});
 
 			button.onInteraction(async (buttonPress) => {
-				await client.acknowledge(buttonPress);
+				client.acknowledge(buttonPress).ignore();
 
 				if (entry.inflection === undefined) {
 					await displayMenu(client, interaction, data);
@@ -407,7 +363,7 @@ async function generateButtons(
 	});
 
 	definitionsMenuButton.onInteraction(async (buttonPress) => {
-		await client.acknowledge(buttonPress);
+		client.acknowledge(buttonPress).ignore();
 
 		data.inflectionTableIndex = 0;
 		data.currentView = ContentTabs.Definitions;
@@ -416,7 +372,7 @@ async function generateButtons(
 	});
 
 	inflectionMenuButton.onInteraction(async (buttonPress) => {
-		await client.acknowledge(buttonPress);
+		client.acknowledge(buttonPress).ignore();
 
 		data.currentView = ContentTabs.Inflection;
 

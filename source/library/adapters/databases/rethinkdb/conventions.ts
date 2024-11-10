@@ -24,6 +24,17 @@ class RethinkDBDocumentConventions extends DocumentConventions<RethinkDBDocument
 		return new ModelClass(database, payload) as M;
 	}
 
+	/**
+	 * @remarks
+	 * This method is intentionally empty: The base implementation of this method applies an `id` getter on the managed
+	 * model by default, since in most cases the property stored on the model is not `id` verbatim, but rather something
+	 * like `_id` or `@id`. In the case of RethinkDB, however, the document ID property *is* `id`, so we ought to omit
+	 * this getter assignment.
+	 */
+	assignAccessorsToModel(): void {
+		// Do nothing.
+	}
+
 	hasMetadata(data: IdentifierDataOrMetadata<Model, RethinkDBDocumentMetadata>): boolean {
 		return "id" in data;
 	}
@@ -31,15 +42,6 @@ class RethinkDBDocumentConventions extends DocumentConventions<RethinkDBDocument
 	buildMetadata({ id, collection: _ }: { id: string; collection: Collection }): RethinkDBDocumentMetadata {
 		return { id };
 	}
-
-	/**
-	 * @privateRemarks
-	 * This method is intentionally empty: The base implementation of this method applies an `id` getter on the managed
-	 * model by default, since in most cases the property stored on the model is not `id` verbatim, but rather something
-	 * like `_id` or `@id`. In the case of RethinkDB, however, the document ID property *is* `id`, so we ought to omit this
-	 * getter assignment.
-	 */
-	assignAccessorsToModel(): void {}
 }
 
 export { RethinkDBDocumentConventions };

@@ -1,5 +1,4 @@
 import type { Collection } from "logos:constants/database";
-import type { Environment } from "logos:core/loaders/environment";
 import { DocumentSession } from "logos/adapters/databases/adapter";
 import { CouchDBDocumentConventions } from "logos/adapters/databases/couchdb/conventions";
 import type { CouchDBDocument } from "logos/adapters/databases/couchdb/document";
@@ -11,12 +10,8 @@ import type nano from "nano";
 class CouchDBDocumentSession extends DocumentSession {
 	readonly #documents: nano.DocumentScope<unknown>;
 
-	constructor({
-		environment,
-		database,
-		documents,
-	}: { environment: Environment; database: DatabaseStore; documents: nano.DocumentScope<unknown> }) {
-		super({ identifier: "CouchDB", environment, database });
+	constructor({ database, documents }: { database: DatabaseStore; documents: nano.DocumentScope<unknown> }) {
+		super({ identifier: "CouchDB", database });
 
 		this.#documents = documents;
 	}
@@ -24,7 +19,7 @@ class CouchDBDocumentSession extends DocumentSession {
 	async load<M extends Model>(id: string): Promise<M | undefined> {
 		const rawDocument = await this.#documents.get(id).catch((error) => {
 			if (error.statusCode !== 404) {
-				this.log.error(`Failed to get document ${id}: ${error}`);
+				this.log.error(error, `Failed to get document ${id}.`);
 			}
 
 			return undefined;
@@ -44,7 +39,7 @@ class CouchDBDocumentSession extends DocumentSession {
 		const response = await this.#documents
 			.fetch({ keys: ids }, { conflicts: false, include_docs: true })
 			.catch((error) => {
-				this.log.error(`Failed to get ${ids.length} documents: ${error}`);
+				this.log.error(error, `Failed to get ${ids.length} documents.`);
 				return undefined;
 			});
 		if (response === undefined) {
@@ -83,7 +78,7 @@ class CouchDBDocumentSession extends DocumentSession {
 					return undefined;
 				}
 
-				this.log.error(`Failed to store document ${document.id}: ${error}`);
+				this.log.error(error, `Failed to store document ${document.id}.`);
 				return undefined;
 			});
 		if (result === undefined) {
@@ -98,8 +93,6 @@ class CouchDBDocumentSession extends DocumentSession {
 	query<M extends Model>(_: { collection: Collection }): CouchDBDocumentQuery<M> {
 		return new CouchDBDocumentQuery<M>({ documents: this.#documents, session: this });
 	}
-
-	async dispose(): Promise<void> {}
 }
 
 export { CouchDBDocumentSession };

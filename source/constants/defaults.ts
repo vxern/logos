@@ -1,8 +1,9 @@
-import type { FeatureLanguage } from "logos:constants/languages/feature.ts";
-import type { LearningLanguage } from "logos:constants/languages/learning.ts";
-import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation.ts";
-import type { TranslationLanguage } from "logos:constants/languages/translation.ts";
-import type { RateLimit, TimeStruct } from "logos/models/guild";
+import type { FeatureLanguage } from "logos:constants/languages/feature";
+import type { LearningLanguage } from "logos:constants/languages/learning";
+import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
+import type { TranslationLanguage } from "logos:constants/languages/translation";
+import type { TimeStruct } from "logos:constants/time";
+import type { RateLimit } from "logos/models/guild";
 
 const FEATURE_LOCALE: Locale = "eng-GB";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";
@@ -23,12 +24,14 @@ const WARN_LIMIT = 3;
 const WARN_EXPIRY: TimeStruct = [2, "month"];
 const WARN_TIMEOUT: TimeStruct = [1, "day"];
 
+const FLOOD_INTERVAL: TimeStruct = [5, "second"];
+const FLOOD_MESSAGE_COUNT = 3;
+const FLOOD_TIMEOUT: TimeStruct = [1, "day"];
+
 const MUSIC_DISCONNECT_TIMEOUT: TimeStruct = [2, "minute"];
 
 const MINIMUM_VOICE_CHANNELS = 0;
 const MAXIMUM_VOICE_CHANNELS = 5;
-
-const WARN_MESSAGE_DELETE_TIMEOUT = 1000 * 10; // 10 seconds in milliseconds.
 
 export default Object.freeze({
 	LOCALISATION_LANGUAGE,
@@ -47,8 +50,10 @@ export default Object.freeze({
 	WARN_LIMIT,
 	WARN_EXPIRY,
 	WARN_TIMEOUT,
+	FLOOD_INTERVAL,
+	FLOOD_MESSAGE_COUNT,
+	FLOOD_TIMEOUT,
 	MUSIC_DISCONNECT_TIMEOUT,
 	MINIMUM_VOICE_CHANNELS,
 	MAXIMUM_VOICE_CHANNELS,
-	WARN_MESSAGE_DELETE_TIMEOUT,
 });

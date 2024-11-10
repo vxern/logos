@@ -1,0 +1,8 @@
+{
+    "entry.welcome.title": "歡迎進入",
+    "entry.welcome.description.acceptedRules": "我已閱讀規矩並同意遵守",
+    "entry.verification.verifyingAccount.tooNew.description": "",
+    "entry.verification.noneYet": "",
+    "entry.verification.vote.alreadyVoted.inFavour.description": "",
+    "entry.verification.inquiry.opened.title": ""
+}

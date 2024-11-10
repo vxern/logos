@@ -3,7 +3,7 @@ import type { LocalisationLanguage } from "logos:constants/languages/localisatio
 import type { Client } from "logos/client";
 
 async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
-	await client.notice(interaction, getTranslationView(client, interaction));
+	client.notice(interaction, getTranslationView(client, interaction)).ignore();
 }
 
 function getTranslationView(client: Client, interaction: Logos.Interaction): Discord.CamelizedDiscordEmbed {

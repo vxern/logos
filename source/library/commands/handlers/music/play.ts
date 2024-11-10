@@ -7,8 +7,6 @@ async function handleRequestStreamPlayback(
 	client: Client,
 	interaction: Logos.Interaction<any, { url: string }>,
 ): Promise<void> {
-	await client.acknowledge(interaction);
-
 	const strings = constants.contexts.stream({ localise: client.localise, locale: interaction.locale });
 	const listing: SongListing = new SongListing({
 		queueable: new AudioStream({ title: strings.stream, url: interaction.parameters.url }),
@@ -18,7 +16,10 @@ async function handleRequestStreamPlayback(
 	await handleRequestPlayback(client, interaction, listing);
 }
 
-async function handleRequestYouTubePlayback(client: Client, interaction: Logos.Interaction<any, { query: string }>) {
+async function handleRequestYouTubePlayback(
+	client: Client,
+	interaction: Logos.Interaction<any, { query: string }>,
+): Promise<void> {
 	await handleRequestQueryPlayback(client, interaction, resolvers.youtube);
 }
 
@@ -27,11 +28,7 @@ async function handleRequestQueryPlayback(
 	interaction: Logos.Interaction<any, { query: string }>,
 	resolveToSongListing: SongListingResolver,
 ): Promise<void> {
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!(musicService.canManagePlayback(interaction) && musicService.canRequestPlayback(interaction))) {
 		return;
 	}
@@ -42,14 +39,17 @@ async function handleRequestQueryPlayback(
 			localise: client.localise,
 			locale: interaction.locale,
 		});
-
-		await client.warning(interaction, {
-			title: strings.title,
-			description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
-		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.notFound}\n\n${strings.description.tryDifferentQuery}`,
+			})
+			.ignore();
 
 		return;
 	}
+
+	client.acknowledge(interaction).ignore();
 
 	await handleRequestPlayback(client, interaction, listing);
 }
@@ -64,11 +64,7 @@ async function handleRequestPlayback(
 		return;
 	}
 
-	const musicService = client.getMusicService(interaction.guildId);
-	if (musicService === undefined) {
-		return;
-	}
-
+	const musicService = client.services.local("music", { guildId: interaction.guildId });
 	if (!(musicService.canManagePlayback(interaction) && musicService.canRequestPlayback(interaction))) {
 		return;
 	}

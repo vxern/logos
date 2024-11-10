@@ -1,6 +1,9 @@
-import { mention, trim } from "logos:core/formatting";
+import { codeMultiline, mention, trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
-import { Ticket, type TicketFormData, type TicketType } from "logos/models/ticket";
+import type { TicketFormData, TicketType } from "logos/models/documents/ticket/latest";
+import type { EntryRequest } from "logos/models/entry-request";
+import { Model } from "logos/models/model";
+import { Ticket } from "logos/models/ticket";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
@@ -32,16 +35,10 @@ class TicketPromptService extends PromptService<{
 	}
 
 	async getUserDocument(ticketDocument: Ticket): Promise<User> {
-		return await User.getOrCreate(this.client, { userId: ticketDocument.authorId });
+		return User.getOrCreate(this.client, { userId: ticketDocument.authorId });
 	}
 
 	getPromptContent(user: Logos.User, ticketDocument: Ticket): Discord.CreateMessageOptions | undefined {
-		// Inquiry tickets are hidden, and are not meant to be interactable.
-		// For all intents and purposes, verification prompts are kind of like their controller.
-		if (ticketDocument.type === "inquiry") {
-			return undefined;
-		}
-
 		const strings = constants.contexts.promptControls({
 			localise: this.client.localise,
 			locale: this.guildLocale,
@@ -53,7 +50,7 @@ class TicketPromptService extends PromptService<{
 					color: ticketDocument.isResolved ? constants.colours.green : constants.colours.husky,
 					footer: {
 						text: this.client.diagnostics.user(user),
-						iconUrl: PromptService.encodePartialIdInUserAvatar({
+						iconUrl: PromptService.encodeMetadataInUserAvatar({
 							user,
 							partialId: ticketDocument.partialId,
 						}),
@@ -91,6 +88,30 @@ class TicketPromptService extends PromptService<{
 		};
 	}
 
+	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
+		const strings = constants.contexts.noTickets({
+			localise: this.client.localise.bind(this.client),
+			locale: this.guildLocale,
+		});
+
+		return {
+			embeds: [
+				{
+					title: strings.title,
+					description: strings.description,
+					color: constants.colours.success,
+					footer: {
+						text: this.guild.name,
+						iconUrl: PromptService.encodeMetadataInGuildIcon({
+							guild: this.guild,
+							partialId: constants.components.noPrompts,
+						}),
+					},
+				},
+			],
+		};
+	}
+
 	async handlePromptInteraction(
 		interaction: Logos.Interaction<[partialId: string, isResolve: string]>,
 	): Promise<Ticket | null | undefined> {
@@ -105,10 +126,12 @@ class TicketPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return;
 		}
@@ -118,10 +141,12 @@ class TicketPromptService extends PromptService<{
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			await this.client.warning(interaction, {
-				title: strings.title,
-				description: strings.description,
-			});
+			this.client
+				.warning(interaction, {
+					title: strings.title,
+					description: strings.description,
+				})
+				.ignore();
 
 			return;
 		}
@@ -136,8 +161,28 @@ class TicketPromptService extends PromptService<{
 	async handleDelete(ticketDocument: Ticket): Promise<void> {
 		await super.handleDelete(ticketDocument);
 
-		await this.client.bot.helpers.deleteChannel(ticketDocument.channelId).catch(() => {
-			this.log.warn("Failed to delete ticket channel.");
+		await this.client.bot.helpers
+			.deleteChannel(ticketDocument.channelId)
+			.catch((error) => this.log.warn(error, "Failed to delete ticket channel."));
+
+		if (ticketDocument.type === "inquiry") {
+			await this.#handleCloseInquiry(ticketDocument);
+		}
+	}
+
+	async #handleCloseInquiry(ticketDocument: Ticket): Promise<void> {
+		const entryRequestDocument = this.client.documents.entryRequests.get(
+			Model.buildPartialId<EntryRequest>({
+				guildId: ticketDocument.guildId,
+				authorId: ticketDocument.authorId,
+			}),
+		);
+		if (entryRequestDocument?.ticketChannelId === undefined) {
+			return;
+		}
+
+		await entryRequestDocument.update(this.client, () => {
+			entryRequestDocument.ticketChannelId = undefined;
 		});
 	}
 
@@ -160,11 +205,6 @@ class TicketPromptService extends PromptService<{
 			return undefined;
 		}
 
-		const ticketService = this.client.getPromptService(this.guildId, { type: "tickets" });
-		if (ticketService === undefined) {
-			return undefined;
-		}
-
 		const strings = constants.contexts.inquiry({
 			localise: this.client.localise,
 			locale: this.guildLocale,
@@ -184,8 +224,8 @@ class TicketPromptService extends PromptService<{
 				],
 				topic: formData.topic,
 			})
-			.catch(() => {
-				this.client.log.warn("Could not create a channel for ticket.");
+			.catch((error) => {
+				this.client.log.warn(error, "Could not create a channel for ticket.");
 				return undefined;
 			});
 		if (channel === undefined) {
@@ -194,12 +234,12 @@ class TicketPromptService extends PromptService<{
 
 		const memberMention = mention(user.id, { type: "user" });
 
-		this.client.bot.helpers.sendMessage(channel.id, { content: memberMention }).catch(() => {
-			this.client.log.warn("Failed to mention participants in ticket.");
+		this.client.bot.helpers.sendMessage(channel.id, { content: memberMention }).catch((error) => {
+			this.client.log.warn(error, "Failed to mention participants in ticket.");
 			return undefined;
 		});
 
-		this.client.bot.helpers
+		await this.client.bot.helpers
 			.sendMessage(channel.id, {
 				embeds: [
 					{
@@ -208,10 +248,52 @@ class TicketPromptService extends PromptService<{
 					},
 				],
 			})
-			.catch(() => {
-				this.client.log.warn("Failed to send a topic message in the ticket channel.");
+			.catch((error) => {
+				this.client.log.warn(error, "Failed to send a topic message in the ticket channel.");
 				return undefined;
 			});
+
+		if (type === "inquiry") {
+			const entryRequest = this.client.documents.entryRequests.get(
+				Model.buildPartialId<EntryRequest>({ guildId: this.guildIdString, authorId: user.id.toString() }),
+			);
+			if (entryRequest === undefined) {
+				throw new Error(`Could not get entry request of ${this.client.diagnostics.user(user.id)}.`);
+			}
+
+			const strings = {
+				...constants.contexts.verificationAnswers({
+					localise: this.client.localise.bind(this.client),
+					locale: this.guildLocale,
+				}),
+				...constants.contexts.verificationModal({
+					localise: this.client.localise.bind(this.client),
+					locale: this.guildLocale,
+				}),
+			};
+			await this.client.bot.helpers.sendMessage(channel.id, {
+				embeds: [
+					{
+						title: strings.verificationAnswers,
+						color: constants.colours.husky,
+						fields: [
+							{
+								name: strings.fields.reason({ language: this.guildDocument.languages.feature }),
+								value: codeMultiline(entryRequest.formData.reason),
+							},
+							{
+								name: strings.fields.aim,
+								value: codeMultiline(entryRequest.formData.aim),
+							},
+							{
+								name: strings.fields.whereFound,
+								value: codeMultiline(entryRequest.formData.whereFound),
+							},
+						],
+					},
+				],
+			});
+		}
 
 		const ticketDocument = await Ticket.create(this.client, {
 			guildId: this.guildIdString,
@@ -225,7 +307,7 @@ class TicketPromptService extends PromptService<{
 			case "standalone": {
 				await this.client.tryLog("ticketOpen", {
 					guildId: this.guildId,
-					journalling: this.configuration.journaling,
+					journalling: this.guildDocument.isJournalled("tickets"),
 					args: [member, ticketDocument],
 				});
 				break;
@@ -233,26 +315,19 @@ class TicketPromptService extends PromptService<{
 			case "inquiry": {
 				await this.client.tryLog("inquiryOpen", {
 					guildId: this.guildId,
-					journalling: this.configuration.journaling,
+					journalling: this.guildDocument.isJournalled("tickets"),
 					args: [member, ticketDocument],
 				});
 				break;
 			}
 		}
 
-		ticketService.registerDocument(ticketDocument);
-		ticketService.registerHandler(ticketDocument);
-
-		if (type === "inquiry") {
-			return ticketDocument;
-		}
-
-		const prompt = await ticketService.savePrompt(user, ticketDocument);
+		const prompt = await this.client.services
+			.local("ticketPrompts", { guildId: this.guildId })
+			.savePrompt(user, ticketDocument);
 		if (prompt === undefined) {
 			return undefined;
 		}
-
-		ticketService.registerPrompt(prompt, user.id, ticketDocument);
 
 		return ticketDocument;
 	}

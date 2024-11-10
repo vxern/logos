@@ -1,45 +1,44 @@
-import fs from "node:fs/promises";
+import fs from "node:fs";
 import type { Collection } from "logos:constants/database";
 import type { Environment } from "logos:core/loaders/environment";
 import { DatabaseAdapter, type DocumentConventions } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
 import type { RavenDBDocumentMetadataContainer } from "logos/adapters/databases/ravendb/document";
 import { RavenDBDocumentSession } from "logos/adapters/databases/ravendb/session";
-import type { Logger } from "logos/logger";
 import type { IdentifierDataOrMetadata, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
+import type pino from "pino";
 import * as ravendb from "ravendb";
 
 class RavenDBAdapter extends DatabaseAdapter {
-	readonly #database: ravendb.DocumentStore;
+	readonly #documents: ravendb.DocumentStore;
+	readonly #databaseName: string;
 
 	constructor({
-		environment,
+		log,
 		host,
 		port,
 		database,
 		certificate,
-	}: { environment: Environment; host: string; port: string; database: string; certificate?: Buffer }) {
-		super({ identifier: "RavenDB", environment });
+	}: { log: pino.Logger; host: string; port: string; database: string; certificate?: Buffer }) {
+		super({ identifier: "RavenDB", log });
 
 		const protocol = certificate !== undefined ? "https" : "http";
 
 		const url = `${protocol}://${host}:${port}`;
 		if (certificate !== undefined) {
-			this.#database = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
+			this.#documents = new ravendb.DocumentStore(url, database, { certificate, type: "pfx" });
 		} else {
-			this.#database = new ravendb.DocumentStore(url, database);
+			this.#documents = new ravendb.DocumentStore(url, database);
 		}
+		this.#databaseName = database;
 
 		// @ts-expect-error: We don't want RavenDB to be setting the `id` property on documents since we handle that
 		// ourselves.
-		this.#database.conventions.getIdentityProperty = () => undefined;
+		this.#documents.conventions.getIdentityProperty = () => undefined;
 	}
 
-	static async tryCreate({
-		environment,
-		log,
-	}: { environment: Environment; log: Logger }): Promise<RavenDBAdapter | undefined> {
+	static tryCreate({ environment, log }: { log: pino.Logger; environment: Environment }): RavenDBAdapter | undefined {
 		if (
 			environment.ravendbHost === undefined ||
 			environment.ravendbPort === undefined ||
@@ -51,11 +50,11 @@ class RavenDBAdapter extends DatabaseAdapter {
 
 		let certificate: Buffer | undefined;
 		if (environment.ravendbSecure) {
-			certificate = await fs.readFile(".cert.pfx");
+			certificate = fs.readFileSync(".cert.pfx");
 		}
 
 		return new RavenDBAdapter({
-			environment,
+			log,
 			host: environment.ravendbHost,
 			port: environment.ravendbPort,
 			database: environment.ravendbDatabase,
@@ -63,12 +62,31 @@ class RavenDBAdapter extends DatabaseAdapter {
 		});
 	}
 
-	setup(): void {
-		this.#database.initialize();
+	async setup(): Promise<void> {
+		this.#documents.initialize();
+
+		const databaseNames = await this.#documents.maintenance.server.send(
+			new ravendb.GetDatabaseNamesOperation(0, 10),
+		);
+		const databaseExists = databaseNames.includes(this.#databaseName);
+		if (!databaseExists) {
+			this.log.info(`The database '${this.#databaseName}' does not exist. Creating...`);
+
+			try {
+				await this.#documents.maintenance.server.send(
+					new ravendb.CreateDatabaseOperation({ databaseName: this.#databaseName }),
+				);
+			} catch (error: any) {
+				this.log.error(error, `Could not create database '${this.#databaseName}'.`);
+				throw error;
+			}
+
+			this.log.info(`Created database '${this.#databaseName}'.`);
+		}
 	}
 
-	teardown(): void {
-		this.#database.dispose();
+	async teardown(): Promise<void> {
+		this.#documents.dispose();
 	}
 
 	conventionsFor({
@@ -83,13 +101,10 @@ class RavenDBAdapter extends DatabaseAdapter {
 		return new RavenDBDocumentConventions({ document, data, collection });
 	}
 
-	openSession({
-		environment,
-		database,
-	}: { environment: Environment; database: DatabaseStore }): RavenDBDocumentSession {
-		const rawSession = this.#database.openSession();
+	openSession({ database }: { database: DatabaseStore }): RavenDBDocumentSession {
+		const rawSession = this.#documents.openSession();
 
-		return new RavenDBDocumentSession({ environment, database, session: rawSession });
+		return new RavenDBDocumentSession({ database, session: rawSession });
 	}
 }
 

@@ -1,6 +1,7 @@
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import { getPartOfSpeech } from "logos:constants/parts-of-speech";
-import { DictionaryAdapter, type DictionaryEntry } from "logos/adapters/dictionaries/adapter.ts";
+import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
+import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 
 interface DicolinkResult {
@@ -84,7 +85,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 			});
 
 			const lastEntry = entries.at(-1);
-			if (lastEntry !== undefined && lastEntry.partOfSpeech !== undefined) {
+			if (lastEntry?.partOfSpeech !== undefined) {
 				if (
 					lastEntry.partOfSpeech.detected === detection.detected ||
 					lastEntry.partOfSpeech.value === partOfSpeech
@@ -120,7 +121,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 			},
 			Object.fromEntries(sources.map((source) => [source, []])) as Record<string, DicolinkResult[]>,
 		);
-		return Object.values(resultsDistributed).reduce((a, b) => (a.length > b.length ? a : b));
+		return Object.values(resultsDistributed).reduce((a, b) => (a.length > b.length ? a : b), []);
 	}
 }
 

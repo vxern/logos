@@ -73,10 +73,6 @@ describe("Client", () => {
 		// TODO(vxern): Add tests. Check delegates or retrieves value.
 	});
 
-	describe("realtimeUpdateService()", () => {
-		// TODO(vxern): Add tests. Check delegates or retrieves value.
-	});
-
 	describe("statusService()", () => {
 		// TODO(vxern): Add tests. Check delegates or retrieves value.
 	});
