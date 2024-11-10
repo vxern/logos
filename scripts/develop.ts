@@ -125,6 +125,7 @@ await document.update(database, () => {
 		answers: true,
 		corrections: true,
 		cefr: true,
+		dailyWords: true,
 		game: true,
 		resources: true,
 		translate: true,

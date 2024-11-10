@@ -3,6 +3,7 @@ import type { Client } from "logos/client";
 import type { Guild } from "logos/models/guild";
 import { AlertService } from "logos/services/alert";
 import { AntiFloodService } from "logos/services/anti-flood";
+import { DailyWordService } from "logos/services/daily-words";
 import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channels";
 import { EntryService } from "logos/services/entry";
 import { InteractionRepetitionService } from "logos/services/interaction-repetition";
@@ -31,10 +32,11 @@ interface GlobalServices {
 interface LocalServices {
 	readonly alerts: AlertService;
 	readonly antiFlood: AntiFloodService;
+	readonly dailyWords: DailyWordService;
 	readonly dynamicVoiceChannels: DynamicVoiceChannelService;
 	readonly entry: EntryService;
 	readonly music: MusicService;
-	readonly informationNoticess: InformationNoticeService;
+	readonly informationNotices: InformationNoticeService;
 	readonly resourceNotices: ResourceNoticeService;
 	readonly roleNotices: RoleNoticeService;
 	readonly welcomeNotices: WelcomeNoticeService;
@@ -80,10 +82,11 @@ class ServiceStore {
 		this.#local = {
 			alerts: new Map(),
 			antiFlood: new Map(),
+			dailyWords: new Map(),
 			dynamicVoiceChannels: new Map(),
 			entry: new Map(),
 			music: new Map(),
-			informationNoticess: new Map(),
+			informationNotices: new Map(),
 			resourceNotices: new Map(),
 			roleNotices: new Map(),
 			welcomeNotices: new Map(),
@@ -151,7 +154,7 @@ class ServiceStore {
 			const service = new InformationNoticeService(this.#client, { guildId });
 			services.push(service);
 
-			this.#local.informationNoticess.set(guildId, service);
+			this.#local.informationNotices.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("resourceNotices")) {
@@ -201,6 +204,13 @@ class ServiceStore {
 			services.push(service);
 
 			this.#local.verificationPrompts.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("dailyWords")) {
+			const service = new DailyWordService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.dailyWords.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("dynamicVoiceChannels")) {

@@ -37,6 +37,7 @@ class Guild extends GuildModel {
 			answers: false,
 			corrections: false,
 			cefr: false,
+			dailyWords: false,
 			game: false,
 			resources: false,
 			translate: false,
