@@ -6,8 +6,8 @@ import { LocalService } from "logos/services/service.ts";
 class DailyWordService extends LocalService {
 	#postTimer?: globalThis.Timer;
 
-	get #configuration(): NonNullable<Guild["dailyWords"]> {
-		return this.guildDocument.dailyWords!;
+	get #configuration(): NonNullable<Guild["features"]["dailyWords"]> {
+		return this.guildDocument.features.dailyWords!;
 	}
 
 	get #postTime(): number {
@@ -27,7 +27,7 @@ class DailyWordService extends LocalService {
 		this.#postTimer = setTimeout(this.#postWord.bind(this), delay);
 	}
 
-	stop(): void {
+	async stop(): Promise<void> {
 		clearTimeout(this.#postTimer);
 	}
 

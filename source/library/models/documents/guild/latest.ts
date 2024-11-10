@@ -21,6 +21,7 @@ interface GuildDocument {
 		answers: boolean;
 		corrections: boolean;
 		cefr: boolean;
+		dailyWords: boolean;
 		game: boolean;
 		resources: boolean;
 		translate: boolean;
@@ -103,6 +104,10 @@ interface GuildDocument {
 				c1: string;
 				c2: string;
 			};
+		};
+		dailyWords?: {
+			channelId: string;
+			time: TimeStruct[];
 		};
 		resources?: {
 			url: string;
