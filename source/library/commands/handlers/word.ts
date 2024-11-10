@@ -1,5 +1,5 @@
 import { code, trim } from "logos:constants/formatting";
-import { isLocalisationLanguage } from "logos:constants/languages/localisation";
+import { isTranslationLanguage } from "logos:constants/languages/translation";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
 import type { DefinitionField, DictionaryEntry, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
@@ -11,7 +11,7 @@ async function handleFindWordAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
-	await handleAutocompleteLanguage(client, interaction);
+	await handleAutocompleteLanguage(client, interaction, { type: "translation" });
 }
 
 /** Allows the user to look up a word and get information about it. */
@@ -19,7 +19,7 @@ async function handleFindWord(
 	client: Client,
 	interaction: Logos.Interaction<any, { word: string; language: string | undefined; verbose: boolean | undefined }>,
 ): Promise<void> {
-	if (interaction.parameters.language !== undefined && !isLocalisationLanguage(interaction.parameters.language)) {
+	if (interaction.parameters.language !== undefined && !isTranslationLanguage(interaction.parameters.language)) {
 		const strings = constants.contexts.invalidLanguage({ localise: client.localise, locale: interaction.locale });
 		client.error(interaction, { title: strings.title, description: strings.description }).ignore();
 

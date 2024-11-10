@@ -9,7 +9,7 @@ async function handleFindInContextAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
-	await handleAutocompleteLanguage(client, interaction);
+	await handleAutocompleteLanguage(client, interaction, { type: "localisation" });
 }
 
 async function handleFindInContext(
