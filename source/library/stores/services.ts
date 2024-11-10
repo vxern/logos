@@ -3,7 +3,7 @@ import type { Client } from "logos/client";
 import type { Guild } from "logos/models/guild";
 import { AlertService } from "logos/services/alert";
 import { AntiFloodService } from "logos/services/anti-flood";
-import { DailyWordService } from "logos/services/daily-words.ts";
+import { DailyWordService } from "logos/services/daily-words";
 import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channels";
 import { EntryService } from "logos/services/entry";
 import { InteractionRepetitionService } from "logos/services/interaction-repetition";

@@ -1,7 +1,7 @@
-import { timeStructToMilliseconds } from "logos:constants/time.ts";
-import type { Client } from "logos/client.ts";
-import type { Guild } from "logos/models/guild.ts";
-import { LocalService } from "logos/services/service.ts";
+import { timeStructToMilliseconds } from "logos:constants/time";
+import type { Client } from "logos/client";
+import type { Guild } from "logos/models/guild";
+import { LocalService } from "logos/services/service";
 
 class DailyWordService extends LocalService {
 	#postTimer?: globalThis.Timer;
