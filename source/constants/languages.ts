@@ -13,14 +13,23 @@ import {
 	languages as translationLanguages,
 } from "logos:constants/languages/translation";
 
+function getLanguages<T extends Language>(languagesByPlatform: Record<string, T[]>): T[] {
+	const languages = Object.entries(languagesByPlatform)
+		.reduce<T[]>((result, [_, languages]) => {
+			result.push(...languages);
+
+			return result;
+		}, [])
+		.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));
+
+	return [...new Set<T>(languages)];
+}
+
 const languages = Object.freeze({
 	languages: {
-		localisation: [
-			...new Set<LocalisationLanguage>([...localisationLanguages.discord, ...localisationLanguages.logos]),
-		].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
-		translation: [
-			...new Set<TranslationLanguage>([...translationLanguages.deepl, ...translationLanguages.google]),
-		].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
+		all: [],
+		localisation: getLanguages(localisationLanguages as unknown as Record<string, LocalisationLanguage[]>),
+		translation: getLanguages(translationLanguages as unknown as Record<string, TranslationLanguage[]>),
 	},
 	locales: {
 		discord: Object.values(localisationLanguageToLocale.discord) as DiscordLocale[],
