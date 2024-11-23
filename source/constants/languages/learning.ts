@@ -5,7 +5,10 @@ import {
 	getLocalisationLocaleByLanguage,
 	isLocalisationLanguage,
 	isLocalisationLocale,
+	languages as localisationLanguages,
 } from "logos:constants/languages/localisation";
+
+const languages = localisationLanguages;
 
 type LearningLanguage = LocalisationLanguage;
 
@@ -33,5 +36,5 @@ function getWiktionaryLanguageName(language: LearningLanguage): string {
 	return (wiktionaryLanguageNames as Record<string, string>)[language] ?? language;
 }
 
-export { isLearningLanguage, isLearningLocale, getLocaleByLearningLanguage, getWiktionaryLanguageName };
+export { isLearningLanguage, isLearningLocale, getLocaleByLearningLanguage, getWiktionaryLanguageName, languages };
 export type { LearningLanguage };
