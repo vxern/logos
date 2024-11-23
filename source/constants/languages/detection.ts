@@ -980,6 +980,28 @@ const localeToLanguage = {
 	eld: Object.mirror(languageToLocale.eld),
 };
 
+function isCLDLanguage(language: string): language is CLDLanguage {
+	return language in languageToLocale.cld;
+}
+
+function isTinyLDLanguage(language: string): language is TinyLDLanguage {
+	return language in languageToLocale.tinyld;
+}
+
+function isFastTextLanguage(language: string): language is FastTextLanguage {
+	return language in languageToLocale.fasttext;
+}
+
+function isELDLanguage(language: string): language is ELDLanguage {
+	return language in languageToLocale.eld;
+}
+
+function isDetectionLanguage(language: string): language is DetectionLanguage {
+	return (
+		isCLDLanguage(language) || isTinyLDLanguage(language) || isFastTextLanguage(language) || isELDLanguage(language)
+	);
+}
+
 function isCLDLocale(locale: string): locale is CLDLocale {
 	return locale in localeToLanguage.cld;
 }
@@ -1013,6 +1035,7 @@ function getELDLanguageByLocale(locale: ELDLocale): ELDLanguage {
 }
 
 export {
+	isDetectionLanguage,
 	getTinyLDLanguageByLocale,
 	isTinyLDLocale,
 	isCLDLocale,
@@ -1021,6 +1044,7 @@ export {
 	getFastTextLanguageByLocale,
 	isELDLocale,
 	getELDLanguageByLocale,
+	languages,
 };
 export type {
 	Detector,
