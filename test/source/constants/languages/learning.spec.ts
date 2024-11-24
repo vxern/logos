@@ -1,9 +1,9 @@
 import { describe, it } from "bun:test";
-import { getWiktionaryLanguageName, isLearningLanguage, isLearningLocale } from "logos:constants/languages/learning";
+import { getWiktionaryLanguageName, isLearningLanguage } from "logos:constants/languages/learning";
 import { getLogosLocaleByLanguage } from "logos:constants/languages/localisation";
 import { expect } from "chai";
 
-describe("isLanguage()", () => {
+describe("isLearningLanguage()", () => {
 	it("returns true if the passed language is a supported learning language.", () => {
 		expect(isLearningLanguage("Polish")).to.be.true;
 		expect(isLearningLanguage("Russian")).to.be.true;
@@ -11,17 +11,6 @@ describe("isLanguage()", () => {
 
 	it("returns false if the passed language is not a supported learning language.", () => {
 		expect(isLearningLanguage("this-is-not-a-supported-learning-language")).to.be.false;
-	});
-});
-
-describe("isLocale()", () => {
-	it("returns true if the passed locale is a supported learning locale.", () => {
-		expect(isLearningLocale("pol")).to.be.true;
-		expect(isLearningLocale("rus")).to.be.true;
-	});
-
-	it("returns false if the passed locale is not a supported learning locale.", () => {
-		expect(isLearningLocale("this-is-not-a-supported-learning-locale")).to.be.false;
 	});
 });
 
