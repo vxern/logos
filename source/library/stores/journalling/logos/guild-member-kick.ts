@@ -1,10 +1,7 @@
 import type { EventLogger } from "logos/stores/journalling/loggers";
 
 const logger: EventLogger<"guildMemberKick"> = (client, [user, author], { guildLocale }) => {
-	const strings = constants.contexts.memberKick({
-		localise: client.localise.bind(client),
-		locale: guildLocale,
-	});
+	const strings = constants.contexts.memberKick({ localise: client.localise, locale: guildLocale });
 	return {
 		embeds: [
 			{

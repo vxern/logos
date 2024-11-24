@@ -8,10 +8,7 @@ async function handleAutocompleteLanguage(
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 	{ type }: { type: LanguageType },
 ): Promise<void> {
-	const strings = constants.contexts.autocompleteLanguage({
-		localise: client.localise.bind(client),
-		locale: interaction.locale,
-	});
+	const strings = constants.contexts.autocompleteLanguage({ localise: client.localise, locale: interaction.locale });
 
 	if (interaction.parameters.language === undefined) {
 		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
