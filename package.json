@@ -63,7 +63,7 @@
 		"rethinkdb-ts": "^2.6.1",
 		"shoukaku": "^4.1.1",
 		"tinyld": "^1.3.4",
-		"wiktionary-scraper": "^0.0.2-patch.1",
+		"wiktionary-scraper": "^0.0.3",
 		"youtube-sr": "^4.3.11"
 	},
 	"devDependencies": {
