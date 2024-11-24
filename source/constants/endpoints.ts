@@ -11,14 +11,15 @@ export default Object.freeze({
 		translate: "https://lingvanex-translate.p.rapidapi.com/translate",
 	},
 	wordnik: {
-		relatedWords: (lemma: string) => `https://api.wordnik.com/v4/word.json/${lemma}/relatedWords`,
+		relatedWords: (lemma: string) =>
+			`https://api.wordnik.com/v4/word.json/${encodeURIComponent(lemma)}/relatedWords`,
 	},
 	wordsApi: {
 		host: "wordsapiv1.p.rapidapi.com",
-		word: (lemma: string) => `https://wordsapiv1.p.rapidapi.com/words/${lemma}`,
+		word: (lemma: string) => `https://wordsapiv1.p.rapidapi.com/words/${encodeURIComponent(lemma)}`,
 	},
 	dicolink: {
 		host: "dicolink.p.rapidapi.com",
-		definitions: (lemma: string) => `https://dicolink.p.rapidapi.com/mot/${lemma}/definitions`,
+		definitions: (lemma: string) => `https://dicolink.p.rapidapi.com/mot/${encodeURIComponent(lemma)}/definitions`,
 	},
 } as const);

@@ -7,6 +7,7 @@ import database from "logos:constants/database";
 import defaults from "logos:constants/defaults";
 import dictionaries from "logos:constants/dictionaries";
 import directories from "logos:constants/directories";
+import discord from "logos:constants/discord";
 import emojis from "logos:constants/emojis";
 import endpoints from "logos:constants/endpoints";
 import gifs from "logos:constants/gifs";
@@ -39,16 +40,11 @@ const constants = Object.freeze({
 	MAXIMUM_DELETABLE_MESSAGES: 500,
 	MAXIMUM_INDEXABLE_MESSAGES: 1000,
 	MAXIMUM_CORRECTION_MESSAGE_LENGTH: 3072,
-	MAXIMUM_USERNAME_LENGTH: 32,
 	MAXIMUM_VOLUME: 100,
 	MAXIMUM_HISTORY_ENTRIES: 100,
 	MAXIMUM_QUEUE_ENTRIES: 100,
-	MAXIMUM_EMBED_FIELD_LENGTH: 1024,
-	MAXIMUM_EMBED_DESCRIPTION_LENGTH: 3072,
 	RESULTS_PER_PAGE: 10,
 	STATUS_CYCLE_PERIOD: 10 * time.second,
-	// The 10 seconds are to account for potential network lag.
-	INTERACTION_TOKEN_EXPIRY: 15 * time.minute - 10 * time.second,
 	SLOWMODE_COLLISION_TIMEOUT: 5 * time.second,
 	AUTO_DELETE_MESSAGE_TIMEOUT: 10 * time.second,
 	PICK_MISSING_WORD_CHOICES: 4,
@@ -67,6 +63,7 @@ export default Object.freeze({
 	defaults,
 	dictionaries,
 	directories,
+	discord,
 	emojis,
 	endpoints,
 	gifs,

@@ -609,8 +609,20 @@ const localeToLanguage = {
 	lingvanex: Object.mirror(languageToLocale.lingvanex),
 };
 
+function isDeepLLanguage(language: string): language is DeepLLanguage {
+	return language in languageToLocale.deepl;
+}
+
+function isGoogleTranslateLanguage(language: string): language is GoogleTranslateLanguage {
+	return language in languageToLocale.google;
+}
+
+function isLingvanexLanguage(language: string): language is LingvanexLanguage {
+	return language in languageToLocale.lingvanex;
+}
+
 function isTranslationLanguage(language: string): language is TranslationLanguage {
-	return language in languageToLocale.deepl || language in languageToLocale.google;
+	return isDeepLLanguage(language) || isGoogleTranslateLanguage(language) || isLingvanexLanguage(language);
 }
 
 function isDeepLLocale(locale: string): locale is DeepLLocale {

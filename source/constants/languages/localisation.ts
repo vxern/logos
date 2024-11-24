@@ -98,15 +98,15 @@ type LogosLocale = (typeof languageToLocale.logos)[keyof typeof languageToLocale
 type LocalisationLocale = LogosLocale;
 
 function isDiscordLanguage(language: string): language is DiscordLanguage {
-	return (languages.discord as readonly string[]).includes(language);
+	return language in languageToLocale.discord;
 }
 
 function isLogosLanguage(language: string): language is LogosLanguage {
-	return (languages.logos as readonly string[]).includes(language);
+	return language in languageToLocale.logos;
 }
 
 function isLocalisationLanguage(language: string): language is LocalisationLanguage {
-	return isLogosLanguage(language) ?? isDiscordLanguage(language);
+	return isLogosLanguage(language) || isDiscordLanguage(language);
 }
 
 function isDiscordLocale(locale: string): locale is DiscordLocale {
@@ -118,7 +118,7 @@ function isLogosLocale(locale: string): locale is LogosLocale {
 }
 
 function isLocalisationLocale(locale: string): locale is LocalisationLocale {
-	return isLogosLocale(locale) ?? isDiscordLocale(locale);
+	return isLogosLocale(locale) || isDiscordLocale(locale);
 }
 
 function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {

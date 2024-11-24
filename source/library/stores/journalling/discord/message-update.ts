@@ -24,11 +24,13 @@ const logger: EventLogger<"messageUpdate"> = (client, [message], { guildLocale }
 				fields: [
 					{
 						name: strings.fields.before,
-						value: codeMultiline(trim(oldMessage.content, constants.MAXIMUM_EMBED_FIELD_LENGTH - 6)),
+						value: codeMultiline(
+							trim(oldMessage.content, constants.discord.MAXIMUM_EMBED_FIELD_LENGTH - 6),
+						),
 					},
 					{
 						name: strings.fields.after,
-						value: codeMultiline(trim(message.content, constants.MAXIMUM_EMBED_FIELD_LENGTH - 6)),
+						value: codeMultiline(trim(message.content, constants.discord.MAXIMUM_EMBED_FIELD_LENGTH - 6)),
 					},
 				],
 			},

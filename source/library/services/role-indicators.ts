@@ -114,7 +114,7 @@ class RoleIndicatorService extends LocalService {
 function getNicknameWithRoleIndicators(username: string, indicators: string[]): string {
 	const indicatorsFormatted = indicators.join(constants.special.sigils.separator);
 	const modification = `${constants.special.sigils.divider}${indicatorsFormatted}`;
-	const usernameSlice = username.slice(0, constants.MAXIMUM_USERNAME_LENGTH - modification.length);
+	const usernameSlice = username.slice(0, constants.discord.MAXIMUM_USERNAME_LENGTH - modification.length);
 
 	return `${usernameSlice}${modification}`;
 }

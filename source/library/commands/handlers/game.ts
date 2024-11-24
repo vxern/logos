@@ -1,5 +1,5 @@
 import { capitalise } from "logos:constants/formatting";
-import type { Locale } from "logos:constants/languages/localisation";
+import type { LearningLocale } from "logos:constants/languages/learning";
 import * as levenshtein from "fastest-levenshtein";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
@@ -316,7 +316,7 @@ interface SentenceSelection {
 
 async function getSentenceSelection(
 	client: Client,
-	{ learningLocale }: { learningLocale: Locale },
+	{ learningLocale }: { learningLocale: LearningLocale },
 ): Promise<SentenceSelection> {
 	const sentencePairs = await client.volatile!.getRandomSentencePairs({
 		learningLocale,

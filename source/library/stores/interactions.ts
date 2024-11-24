@@ -254,12 +254,14 @@ class InteractionStore {
 	}
 
 	#registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: bigint }): void {
-		setTimeout(() => this.#unregisterMessage(interaction), constants.INTERACTION_TOKEN_EXPIRY);
+		setTimeout(() => this.#unregisterMessage(interaction), constants.discord.INTERACTION_TOKEN_EXPIRY);
 
 		this.#messages.set(interaction.token, messageId);
 	}
 
 	#unregisterMessage(interaction: Logos.Interaction): void {
+		// TODO(vxern): The timeout to unregister the message should be cleared immediately.
+
 		this.#messages.delete(interaction.token);
 	}
 

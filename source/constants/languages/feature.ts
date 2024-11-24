@@ -21,5 +21,5 @@ function isFeatureLanguage(language: string): language is FeatureLanguage {
 	return (languages as readonly string[]).includes(language);
 }
 
-export { isFeatureLanguage };
+export { isFeatureLanguage, languages };
 export type { FeatureLanguage };

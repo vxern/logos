@@ -1,6 +1,7 @@
-import type { DetectionLanguage } from "logos:constants/languages/detection";
-import type { FeatureLanguage } from "logos:constants/languages/feature";
-import type { LearningLanguage } from "logos:constants/languages/learning";
+import { type DetectionLanguage, languages as detectionLanguages } from "logos:constants/languages/detection";
+import { type FeatureLanguage, languages as featureLanguages } from "logos:constants/languages/feature";
+import { collectLanguages, sortLanguages } from "logos:constants/languages/languages";
+import { type LearningLanguage, languages as learningLanguages } from "logos:constants/languages/learning";
 import {
 	type DiscordLocale,
 	type LocalisationLanguage,
@@ -15,12 +16,11 @@ import {
 
 const languages = Object.freeze({
 	languages: {
-		localisation: [
-			...new Set<LocalisationLanguage>([...localisationLanguages.discord, ...localisationLanguages.logos]),
-		].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
-		translation: [
-			...new Set<TranslationLanguage>([...translationLanguages.deepl, ...translationLanguages.google]),
-		].sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
+		detection: sortLanguages(collectLanguages<DetectionLanguage>(detectionLanguages)),
+		feature: sortLanguages([...featureLanguages]),
+		learning: sortLanguages([...learningLanguages]),
+		localisation: sortLanguages(collectLanguages<LocalisationLanguage>(localisationLanguages)),
+		translation: sortLanguages(collectLanguages<TranslationLanguage>(translationLanguages)),
 	},
 	locales: {
 		discord: Object.values(localisationLanguageToLocale.discord) as DiscordLocale[],

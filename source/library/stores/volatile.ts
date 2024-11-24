@@ -1,3 +1,4 @@
+import type { LearningLocale } from "logos:constants/languages/learning";
 import type { Locale } from "logos:constants/languages/localisation";
 import Redis from "ioredis";
 import type { Client } from "logos/client";
@@ -92,7 +93,7 @@ class VolatileStore {
 	async getSentencePairs({
 		sentenceIds,
 		learningLocale,
-	}: { sentenceIds: string[]; learningLocale: Locale }): Promise<SentencePair[]> {
+	}: { sentenceIds: string[]; learningLocale: LearningLocale }): Promise<SentencePair[]> {
 		const encodedPairs: SentencePairEncoded[] = [];
 		for (const sentenceId of sentenceIds) {
 			const pairEncoded = await this.redis.get(
@@ -116,7 +117,7 @@ class VolatileStore {
 	async getRandomSentencePairs({
 		learningLocale,
 		count,
-	}: { learningLocale: Locale; count: number }): Promise<SentencePair[]> {
+	}: { learningLocale: LearningLocale; count: number }): Promise<SentencePair[]> {
 		const pipeline = this.redis.pipeline();
 		for (const _ of new Array(count).keys()) {
 			pipeline.srandmember(constants.keys.redis.sentencePairIndex({ locale: learningLocale }));
@@ -143,7 +144,7 @@ class VolatileStore {
 		lemmas,
 		learningLocale,
 		caseSensitive = false,
-	}: { lemmas: string[]; learningLocale: Locale; caseSensitive?: boolean }): Promise<LemmaUses> {
+	}: { lemmas: string[]; learningLocale: LearningLocale; caseSensitive?: boolean }): Promise<LemmaUses> {
 		if (caseSensitive) {
 			return this.#searchForLemmaUsesCaseSensitive({ lemmas, learningLocale });
 		}
@@ -154,7 +155,7 @@ class VolatileStore {
 	async #searchForLemmaUsesCaseSensitive({
 		lemmas,
 		learningLocale,
-	}: { lemmas: string[]; learningLocale: Locale }): Promise<LemmaUses> {
+	}: { lemmas: string[]; learningLocale: LearningLocale }): Promise<LemmaUses> {
 		const keys = lemmas.map((lemma) => constants.keys.redis.lemmaUseIndex({ locale: learningLocale, lemma }));
 
 		let sentenceIds: string[];
@@ -172,7 +173,7 @@ class VolatileStore {
 	async #searchForLemmaUsesCaseInsensitive({
 		lemmas,
 		learningLocale,
-	}: { lemmas: string[]; learningLocale: Locale }): Promise<LemmaUses> {
+	}: { lemmas: string[]; learningLocale: LearningLocale }): Promise<LemmaUses> {
 		const lemmaFormKeys = lemmas.map((lemma) =>
 			constants.keys.redis.lemmaFormIndex({ locale: learningLocale, lemma }),
 		);

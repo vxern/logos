@@ -37,7 +37,7 @@ async function handleDisplayPlaybackQueue(client: Client, interaction: Logos.Int
 	setTimeout(() => {
 		musicService.session.listings.off("queue", refreshView);
 		musicService.session.off("end", closeView);
-	}, constants.INTERACTION_TOKEN_EXPIRY);
+	}, constants.discord.INTERACTION_TOKEN_EXPIRY);
 
 	await view.open();
 }

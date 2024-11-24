@@ -43,6 +43,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 			results = await Wiktionary.get(lemma, {
 				lemmaLanguage: targetLanguageWiktionary,
 				userAgent: constants.USER_AGENT,
+				followRedirect: true,
 			});
 		} catch (error) {
 			this.client.log.error(error, `The request for lemma "${lemma}" failed.`);
