@@ -67,6 +67,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 
 			entries.push({
 				lemma: { value: result.lemma },
+				language: learningLanguage,
 				partOfSpeech: { value: partOfSpeech.detected, detected: partOfSpeech.detected },
 				definitions: result.definitions.map(DexonlineAdapter.#transformDefinition),
 				etymology: DexonlineAdapter.#transformEtymology(result.etymology),

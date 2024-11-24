@@ -81,6 +81,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 
 			entries.push({
 				lemma,
+				language: learningLanguage,
 				partOfSpeech: { value: partOfSpeech, detected: detection.detected },
 				definitions: definitions.flatMap(({ fields }) => fields.map((field) => ({ value: field.value }))),
 				etymology: etymologyContents !== undefined ? { value: etymologyContents } : undefined,

@@ -46,7 +46,12 @@ class WordnikAdapter extends DictionaryAdapter<WordnikResult[]> {
 		return (await response.json()) as WordnikResult[];
 	}
 
-	parse(_: Logos.Interaction, lemma: string, __: LearningLanguage, results: WordnikResult[]): DictionaryEntry[] {
+	parse(
+		_: Logos.Interaction,
+		lemma: string,
+		learningLanguage: LearningLanguage,
+		results: WordnikResult[],
+	): DictionaryEntry[] {
 		const synonyms: string[] = [];
 		const antonyms: string[] = [];
 		const rhymes: string[] = [];
@@ -94,6 +99,7 @@ class WordnikAdapter extends DictionaryAdapter<WordnikResult[]> {
 		return [
 			{
 				lemma: { value: lemma },
+				language: learningLanguage,
 				relations: relationField,
 				rhymes: rhymeField,
 				sources: [

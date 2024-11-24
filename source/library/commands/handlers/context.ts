@@ -43,7 +43,7 @@ async function handleFindInContext(
 	});
 	if (lemmaUses === undefined || lemmaUses.sentencePairs.length === 0) {
 		const strings = constants.contexts.noSentencesFound({
-			localise: client.localise.bind(client),
+			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
 		client
@@ -67,10 +67,10 @@ async function handleFindInContext(
 		constants.patterns.wholeWord(lemma, { caseSensitive: true }),
 	]);
 
-	const strings = constants.contexts.phraseInContext({
-		localise: client.localise.bind(client),
-		locale: interaction.displayLocale,
-	});
+	const strings = {
+		...constants.contexts.language({ localise: client.localise, locale: interaction.displayLocale }),
+		...constants.contexts.phraseInContext({ localise: client.localise, locale: interaction.displayLocale }),
+	};
 	client
 		.noticed(interaction, {
 			embeds: [
@@ -87,6 +87,7 @@ async function handleFindInContext(
 							value: `> ${sentencePair.translation}`,
 						};
 					}),
+					footer: { text: strings.language(learningLanguage) },
 				},
 			],
 			components: interaction.parameters.show

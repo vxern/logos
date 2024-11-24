@@ -1,4 +1,5 @@
 import type { DictionarySection } from "logos:constants/dictionaries";
+import type { LearningLanguage } from "logos:constants/languages/learning";
 import type { Licence } from "logos:constants/licences";
 import type { PartOfSpeech } from "logos:constants/parts-of-speech";
 
@@ -58,6 +59,9 @@ interface DictionaryEntry extends Partial<Record<DictionarySection, unknown>> {
 
 	/** Topic word of the dictionary entry. */
 	lemma: LemmaField;
+
+	/** The language of the word. */
+	language: LearningLanguage;
 
 	/** Part of speech of the lemma. */
 	partOfSpeech?: PartOfSpeechField;
