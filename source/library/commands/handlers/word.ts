@@ -11,7 +11,7 @@ async function handleFindWordAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
-	await handleAutocompleteLanguage(client, interaction, { type: "localisation" });
+	await handleAutocompleteLanguage(client, interaction, { type: "learning" });
 }
 
 /** Allows the user to look up a word and get information about it. */

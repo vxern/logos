@@ -1,5 +1,5 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
-import { type LearningLanguage, getLocaleByLearningLanguage } from "logos:constants/languages/learning";
+import { type LearningLanguage, getLearningLocaleByLanguage } from "logos:constants/languages/learning";
 import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import type { PromiseOr } from "logos:core/utilities";
 import type { Client } from "logos/client";
@@ -296,12 +296,12 @@ class InteractionCollector<
 
 		const targetLanguage = guildDocument.languages.target;
 		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
-		const learningLocale = getLocaleByLearningLanguage(learningLanguage);
+		const learningLocale = getLearningLocaleByLanguage(learningLanguage);
 
 		const guildLanguage = guildDocument.isTargetLanguageOnlyChannel(interaction.channelId!.toString())
 			? targetLanguage
 			: guildDocument.languages.localisation;
-		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
+		const guildLocale = getLearningLocaleByLanguage(guildLanguage);
 		const featureLanguage = guildDocument.languages.feature;
 
 		if (!isAutocomplete(interaction)) {

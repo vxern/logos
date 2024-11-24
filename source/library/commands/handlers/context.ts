@@ -1,4 +1,4 @@
-import { getLocaleByLearningLanguage } from "logos:constants/languages/learning";
+import { getLearningLocaleByLanguage } from "logos:constants/languages/learning";
 import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { shuffle } from "ioredis/built/utils";
 import type { Client } from "logos/client";
@@ -29,7 +29,7 @@ async function handleFindInContext(
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
 	const learningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
-	const learningLocale = getLocaleByLearningLanguage(learningLanguage);
+	const learningLocale = getLearningLocaleByLanguage(learningLanguage);
 
 	const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
 	const lemmas = Array.from(segmenter.segment(interaction.parameters.phrase))
@@ -37,7 +37,7 @@ async function handleFindInContext(
 		.map((data) => data.segment);
 	const lemmaUses = await client.volatile?.searchForLemmaUses({
 		lemmas,
-		learningLocale: learningLocale,
+		learningLocale,
 		caseSensitive: interaction.parameters["case-sensitive"],
 	});
 	if (lemmaUses === undefined || lemmaUses.sentencePairs.length === 0) {

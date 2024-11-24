@@ -1,6 +1,7 @@
-import { languages as detectionLanguages, type DetectionLanguage } from "logos:constants/languages/detection";
-import { languages as featureLanguages, type FeatureLanguage } from "logos:constants/languages/feature";
-import { languages as learningLanguages, type LearningLanguage } from "logos:constants/languages/learning";
+import { type DetectionLanguage, languages as detectionLanguages } from "logos:constants/languages/detection";
+import { type FeatureLanguage, languages as featureLanguages } from "logos:constants/languages/feature";
+import { collectLanguages, sortLanguages } from "logos:constants/languages/languages";
+import { type LearningLanguage, languages as learningLanguages } from "logos:constants/languages/learning";
 import {
 	type DiscordLocale,
 	type LocalisationLanguage,
@@ -12,7 +13,6 @@ import {
 	isTranslationLanguage,
 	languages as translationLanguages,
 } from "logos:constants/languages/translation";
-import { collectLanguages, sortLanguages } from "logos:constants/languages/languages";
 
 const languages = Object.freeze({
 	languages: {
