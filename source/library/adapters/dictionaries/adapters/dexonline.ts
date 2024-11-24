@@ -44,7 +44,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	}
 
 	fetch(lemma: string, _: LearningLanguage): Promise<Dexonline.Results | undefined> {
-		return Dexonline.get(lemma, { mode: "strict" });
+		return Dexonline.get(lemma, { mode: "lax" });
 	}
 
 	parse(
