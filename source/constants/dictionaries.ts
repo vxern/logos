@@ -260,7 +260,6 @@ const dictionariesByLanguage = Object.freeze({
 	"Sorbian/Lower": ["wiktionary"],
 	"Sorbian/Upper": ["wiktionary"],
 	Tuvinian: ["wiktionary"],
-	Uighur: ["wiktionary"],
 	Veps: ["wiktionary"],
 	Vlaams: ["wiktionary"],
 	Walloon: ["wiktionary"],

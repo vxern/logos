@@ -274,7 +274,6 @@ const localisations = Object.freeze({
 		Turkmen: "languages.turkmen",
 		Tuvinian: "languages.tuvinian",
 		Twi: "languages.twi",
-		Uighur: "languages.uighur",
 		Ukrainian: "languages.ukrainian",
 		Urdu: "languages.urdu",
 		Uyghur: "languages.uyghur",

@@ -266,7 +266,6 @@ const languageToLocale = Object.freeze({
 	"Sorbian/Lower": "dsb",
 	"Sorbian/Upper": "hsb",
 	Tuvinian: "tyv",
-	Uighur: "uig",
 	Veps: "vep",
 	Vlaams: "vls",
 	Walloon: "wln",
