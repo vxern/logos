@@ -15,8 +15,17 @@ async function resolveYouTubeSongListings(
 		return search(client, interaction, query);
 	}
 
-	if (query.includes("list=")) {
-		const playlist = await youtube.getPlaylist(query);
+	const result = await youtube.findOne(query);
+	if (result === undefined) {
+		return undefined;
+	}
+
+	if (result instanceof youtubei.VideoCompact) {
+		return getSongListingFromVideo(result, interaction.user.id);
+	}
+
+	if (result instanceof youtubei.PlaylistCompact) {
+		const playlist = await youtube.getPlaylist(result.id);
 		if (playlist === undefined) {
 			return undefined;
 		}
@@ -24,12 +33,7 @@ async function resolveYouTubeSongListings(
 		return getSongListingFromPlaylist(playlist, interaction.user.id);
 	}
 
-	const video = await youtube.getVideo(query);
-	if (video === undefined) {
-		return undefined;
-	}
-
-	return getSongListingFromVideo(video, interaction.user.id);
+	return undefined;
 }
 
 async function search(client: Client, interaction: Logos.Interaction, query: string): Promise<SongListing | undefined> {
@@ -145,11 +149,15 @@ function getSongListingFromPlaylist(
 
 	const songs: Song[] = [];
 	for (const video of videos) {
-		songs.push(new Song({ title: video.title, url: video.id }));
+		songs.push(new Song({ title: video.title, url: constants.links.youtubeVideo(video.id) }));
 	}
 
 	return new SongListing({
-		queueable: new SongCollection({ title: playlist.title, url: playlist.id, songs }),
+		queueable: new SongCollection({
+			title: playlist.title,
+			url: constants.links.youtubePlaylist(playlist.id),
+			songs,
+		}),
 		userId: requestedBy,
 	});
 }
@@ -158,7 +166,10 @@ function getSongListingFromVideo(
 	video: youtubei.VideoCompact | youtubei.Video | youtubei.LiveVideo,
 	requestedBy: bigint,
 ): SongListing | undefined {
-	return new SongListing({ queueable: new Song({ title: video.title, url: video.id }), userId: requestedBy });
+	return new SongListing({
+		queueable: new Song({ title: video.title, url: constants.links.youtubeVideo(video.id) }),
+		userId: requestedBy,
+	});
 }
 
 export { resolveYouTubeSongListings as resolveYouTubeListings };
