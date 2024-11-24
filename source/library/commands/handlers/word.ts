@@ -569,6 +569,8 @@ function entryToEmbeds(
 		}
 	}
 
+	const strings = constants.contexts.language({ localise: client.localise, locale: interaction.displayLocale });
+
 	if (!verbose) {
 		return [
 			{
@@ -576,8 +578,14 @@ function entryToEmbeds(
 				description: partOfSpeechFormatted,
 				fields,
 				color: constants.colours.husky,
+				footer: { text: strings.language(entry.language) },
 			},
 		];
+	}
+
+	const lastEmbed = embeds.at(-1);
+	if (lastEmbed !== undefined) {
+		lastEmbed.footer = { text: strings.language(entry.language) };
 	}
 
 	return embeds;

@@ -97,6 +97,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 
 			entries.push({
 				lemma: { value: lemma },
+				language: learningLanguage,
 				partOfSpeech: { value: partOfSpeech, detected: detection.detected },
 				definitions: [{ value: definition }],
 				sources: [
