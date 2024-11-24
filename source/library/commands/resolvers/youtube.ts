@@ -2,7 +2,9 @@ import { trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { Song, SongCollection, SongListing } from "logos/services/music";
-import * as YouTubeSearch from "youtube-sr";
+import * as youtubei from "youtubei";
+
+const youtube = new youtubei.Client();
 
 async function resolveYouTubeSongListings(
 	client: Client,
@@ -14,16 +16,16 @@ async function resolveYouTubeSongListings(
 	}
 
 	if (query.includes("list=")) {
-		const playlist = await YouTubeSearch.YouTube.getPlaylist(query);
-		if (playlist == null) {
+		const playlist = await youtube.getPlaylist(query);
+		if (playlist === undefined) {
 			return undefined;
 		}
 
 		return getSongListingFromPlaylist(playlist, interaction.user.id);
 	}
 
-	const video = await YouTubeSearch.YouTube.getVideo(query);
-	if (video === null) {
+	const video = await youtube.getVideo(query);
+	if (video === undefined) {
 		return undefined;
 	}
 
@@ -31,8 +33,8 @@ async function resolveYouTubeSongListings(
 }
 
 async function search(client: Client, interaction: Logos.Interaction, query: string): Promise<SongListing | undefined> {
-	const resultsAll = await YouTubeSearch.YouTube.search(query, { limit: 20, type: "all", safeSearch: false });
-	const results = resultsAll.filter((element) => isPlaylist(element) || isVideo(element));
+	const resultsAll = await youtube.search(query, { limit: 20, type: "all", safeSearch: false });
+	const results = resultsAll.items.filter((element) => isPlaylist(element) || isVideo(element));
 	if (results.length === 0) {
 		return undefined;
 	}
@@ -60,13 +62,8 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		}
 
 		if (isPlaylist(result)) {
-			const url = result.url;
-			if (url === undefined) {
-				return resolve(undefined);
-			}
-
-			const playlist = await YouTubeSearch.YouTube.getPlaylist(url);
-			if (playlist === null) {
+			const playlist = await youtube.getPlaylist(result.id);
+			if (playlist === undefined) {
 				return resolve(undefined);
 			}
 
@@ -81,7 +78,7 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	await client.registerInteractionCollector(selectMenuSelection);
 
 	const options: Discord.SelectOption[] = [];
-	for (const [result, index] of results.map<[YouTubeSearch.Playlist | YouTubeSearch.Video, number]>(
+	for (const [result, index] of results.map<[youtubei.PlaylistCompact | youtubei.VideoCompact, number]>(
 		(result, index) => [result, index],
 	)) {
 		const title = result.title;
@@ -125,48 +122,43 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 	return promise;
 }
 
-type Result = YouTubeSearch.Playlist | YouTubeSearch.Video | YouTubeSearch.Channel;
+type Result = youtubei.PlaylistCompact | youtubei.VideoCompact | youtubei.BaseChannel;
 
-function isPlaylist(result: Result): result is YouTubeSearch.Playlist {
-	return result.type === "playlist";
+function isPlaylist(result: Result): result is youtubei.PlaylistCompact {
+	return result instanceof youtubei.Playlist;
 }
 
-function isVideo(result: Result): result is YouTubeSearch.Video {
-	return result.type === "video";
+function isVideo(result: Result): result is youtubei.VideoCompact {
+	return result instanceof youtubei.VideoCompact;
 }
 
-function getSongListingFromPlaylist(playlist: YouTubeSearch.Playlist, requestedBy: bigint): SongListing | undefined {
-	if (playlist.id === undefined) {
-		return undefined;
-	}
-
-	const { title } = playlist;
-	if (title === undefined) {
-		return undefined;
+function getSongListingFromPlaylist(
+	playlist: youtubei.Playlist | youtubei.MixPlaylist,
+	requestedBy: bigint,
+): SongListing | undefined {
+	let videos: youtubei.VideoCompact[];
+	if (playlist instanceof youtubei.Playlist) {
+		videos = playlist.videos.items;
+	} else {
+		videos = playlist.videos;
 	}
 
 	const songs: Song[] = [];
-	for (const video of playlist.videos) {
-		const { title, url } = video;
-		if (title === undefined || url === undefined) {
-			continue;
-		}
-
-		songs.push(new Song({ title, url }));
+	for (const video of videos) {
+		songs.push(new Song({ title: video.title, url: video.id }));
 	}
 
 	return new SongListing({
-		queueable: new SongCollection({ title, url: playlist.url!, songs }),
+		queueable: new SongCollection({ title: playlist.title, url: playlist.id, songs }),
 		userId: requestedBy,
 	});
 }
 
-function getSongListingFromVideo(video: YouTubeSearch.Video, requestedBy: bigint): SongListing | undefined {
-	if (video.id === undefined) {
-		return undefined;
-	}
-
-	return new SongListing({ queueable: new Song({ title: video.title!, url: video.url }), userId: requestedBy });
+function getSongListingFromVideo(
+	video: youtubei.VideoCompact | youtubei.Video | youtubei.LiveVideo,
+	requestedBy: bigint,
+): SongListing | undefined {
+	return new SongListing({ queueable: new Song({ title: video.title, url: video.id }), userId: requestedBy });
 }
 
 export { resolveYouTubeSongListings as resolveYouTubeListings };

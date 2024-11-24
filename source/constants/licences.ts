@@ -126,7 +126,7 @@ You must also include, in your app or site, wherever you provide attributions or
 		shoukaku: mit("Copyright (c) 2023 Deivu (Saya)"),
 		tinyld: mit("Copyright (c) 2021 Komodo"),
 		"wiktionary-scraper": mit('Copyright (c) 2023 Dorian "vxern" Oszczęda'),
-		"youtube-sr": mit("Copyright (c) 2020 DevAndromeda"),
+		youtubei: mit("Copyright (c) 2020 Vincent Jonathan"),
 	},
 } as const);
 type LicensedDictionary = keyof (typeof licences)["dictionaries"];
