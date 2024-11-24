@@ -215,7 +215,6 @@ const localisations = Object.freeze({
 		Portuguese: "languages.portuguese",
 		"Portuguese/Brazilian": "languages.portuguese.brazilian",
 		"Portuguese/European": "languages.portuguese.european",
-		"Portuguese/Portuguese": "languages.portuguese.portuguese",
 		Punjabi: "languages.punjabi",
 		"Punjabi/Western": "languages.punjabi.western",
 		Quechua: "languages.quechua",

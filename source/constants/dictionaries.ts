@@ -281,7 +281,6 @@ const dictionariesByLanguage = Object.freeze({
 	"English/Australian": ["wiktionary"],
 	"French/Canadian": ["wiktionary"],
 	"French/French": ["wiktionary"],
-	"Portuguese/Portuguese": ["wiktionary"],
 	"Spanish/Mexican": ["wiktionary"],
 	"Spanish/Spanish": ["wiktionary"],
 	"Spanish/American": ["wiktionary"],
