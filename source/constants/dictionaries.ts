@@ -149,7 +149,6 @@ const dictionariesByLanguage = Object.freeze({
 	Punjabi: ["wiktionary"],
 	Quechua: ["wiktionary"],
 	Rajasthani: ["wiktionary"],
-	RhaetoRomance: ["wiktionary"],
 	"RwandaRundi/Kinyarwanda": ["wiktionary"],
 	"RwandaRundi/Kirundi": ["wiktionary"],
 	Samoan: ["wiktionary"],
