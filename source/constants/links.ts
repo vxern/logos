@@ -6,4 +6,6 @@ export default Object.freeze({
 	wordnikDefinitionLink: (lemma: string) => `https://wordnik.com/words/${lemma}`,
 	wordsAPIDefinition: () => "https://wordsapi.com",
 	dicolinkDefinition: (lemma: string) => `https://dicolink.com/mots/${encodeURIComponent(lemma)}`,
+	youtubeVideo: (id: string) => `https://www.youtube.com/watch?v=${id}`,
+	youtubePlaylist: (id: string) => `https://www.youtube.com/watch?list=${id}`,
 } as const satisfies Record<string, (...args: string[]) => string>);
