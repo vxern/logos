@@ -20,10 +20,10 @@ async function handleAutocompleteLanguage(
 		query: parameter,
 		elements: constants.languages.languages[type],
 		getOption: (language) => {
-			const flag = constants.emojis.flags[language];
+			const languageFlag = constants.emojis.flags[language];
 			const languageName = client.localise(constants.localisations.languages[language], interaction.locale)();
 
-			return { name: `${flag} ${languageName}`, value: language };
+			return { name: `${languageFlag} ${languageName}`, value: language };
 		},
 	});
 }

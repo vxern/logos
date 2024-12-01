@@ -1,4 +1,4 @@
-import { getLearningLocaleByLanguage } from "logos:constants/languages/learning";
+import { type LearningLanguage, getLearningLocaleByLanguage } from "logos:constants/languages/learning";
 import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { shuffle } from "ioredis/built/utils";
 import type { Client } from "logos/client";
@@ -33,7 +33,7 @@ async function handleFindInContext(
 
 	await client.postponeReply(interaction, { visible: interaction.parameters.show });
 
-	const learningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
+	const learningLanguage: LearningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
 	const learningLocale = getLearningLocaleByLanguage(learningLanguage);
 
 	const segmenter = new Intl.Segmenter(learningLocale, { granularity: "word" });
@@ -75,6 +75,10 @@ async function handleFindInContext(
 		...constants.contexts.language({ localise: client.localise, locale: interaction.displayLocale }),
 		...constants.contexts.phraseInContext({ localise: client.localise, locale: interaction.displayLocale }),
 	};
+
+	const languageFlag = constants.emojis.flags[learningLanguage];
+	const languageName = strings.language(learningLanguage);
+
 	client
 		.noticed(interaction, {
 			embeds: [
@@ -91,7 +95,7 @@ async function handleFindInContext(
 							value: `> ${sentencePair.translation}`,
 						};
 					}),
-					footer: { text: strings.language(learningLanguage) },
+					footer: { text: `${languageFlag} ${languageName}` },
 				},
 			],
 			components: interaction.parameters.show

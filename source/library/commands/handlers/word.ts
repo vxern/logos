@@ -576,6 +576,9 @@ function entryToEmbeds(
 
 	const strings = constants.contexts.language({ localise: client.localise, locale: interaction.displayLocale });
 
+	const languageFlag = constants.emojis.flags[entry.language];
+	const languageName = strings.language(entry.language);
+
 	if (!verbose) {
 		return [
 			{
@@ -583,14 +586,14 @@ function entryToEmbeds(
 				description: partOfSpeechFormatted,
 				fields,
 				color: constants.colours.husky,
-				footer: { text: strings.language(entry.language) },
+				footer: { text: `${languageFlag} ${languageName}` },
 			},
 		];
 	}
 
 	const lastEmbed = embeds.at(-1);
 	if (lastEmbed !== undefined) {
-		lastEmbed.footer = { text: strings.language(entry.language) };
+		lastEmbed.footer = { text: `${languageFlag} ${languageName}` };
 	}
 
 	return embeds;
