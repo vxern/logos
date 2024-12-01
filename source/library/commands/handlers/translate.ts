@@ -1,48 +1,20 @@
-import { trim } from "logos:constants/formatting";
-import languages, { type Languages, getTranslationLanguage } from "logos:constants/languages";
+import { type Languages, getTranslationLanguage } from "logos:constants/languages";
 import { type TranslationLanguage, isTranslationLanguage } from "logos:constants/languages/translation";
 import type { TranslationResult } from "logos/adapters/translators/adapter";
 import type { Client } from "logos/client";
 import { TranslationSourceNotice } from "logos/commands/components/source-notices/translation-source-notice";
+import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
 
 async function handleTranslateChatInputAutocomplete(
 	client: Client,
 	interaction: Logos.Interaction<any, { to: string; from: string }>,
 ): Promise<void> {
-	const guild = client.entities.guilds.get(interaction.guildId);
-	if (guild === undefined) {
-		return;
-	}
-
-	if (
-		interaction.parameters.focused === undefined ||
-		interaction.parameters[interaction.parameters.focused] === undefined
-	) {
-		return;
-	}
-
-	const languageQueryTrimmed = interaction.parameters[interaction.parameters.focused].trim();
-	if (languageQueryTrimmed.length === 0) {
-		const strings = constants.contexts.autocompleteLanguage({
-			localise: client.localise,
-			locale: interaction.locale,
-		});
-		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
-
-		return;
-	}
-
-	const languageQueryLowercase = languageQueryTrimmed.toLowerCase();
-	const choices = languages.languages.translation
-		.map((language) => {
-			const strings = constants.contexts.language({ localise: client.localise, locale: interaction.locale });
-			return { name: strings.language(language), value: language };
-		})
-		.filter((choice) => choice.name?.toLowerCase().includes(languageQueryLowercase))
-		.slice(0, 25)
-		.sort((previous, next) => previous.name.localeCompare(next.name));
-
-	client.respond(interaction, choices).ignore();
+	await handleAutocompleteLanguage(
+		client,
+		interaction,
+		{ type: "translation" },
+		{ parameter: interaction.parameters[interaction.parameters.focused ?? "from"] },
+	);
 }
 
 async function handleTranslateChatInput(

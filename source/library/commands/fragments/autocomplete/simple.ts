@@ -14,6 +14,7 @@ async function handleSimpleAutocomplete<T>(
 		.map((element) => getOption(element))
 		.filter((choice) => choice.name.toLowerCase().includes(queryLowercase))
 		.slice(0, constants.discord.MAXIMUM_AUTOCOMPLETE_CHOICES);
+
 	client.respond(interaction, choices).ignore();
 }
 
