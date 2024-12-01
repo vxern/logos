@@ -233,6 +233,15 @@ async function translateText(
 		...constants.contexts.translation({ localise: client.localise, locale: interaction.locale }),
 		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 	};
+
+	const sourceLanguageFlag = constants.emojis.flags[languages.source];
+	const sourceLanguageName = strings.language(languages.source);
+	const targetLanguageFlag = constants.emojis.flags[languages.target];
+	const targetLanguageName = strings.language(languages.target);
+	const footerText = `${sourceLanguageFlag} ${sourceLanguageName} ${
+		constants.emojis.indicators.arrowRight
+	} ${targetLanguageFlag} ${targetLanguageName}`;
+
 	let embeds: Discord.CamelizedDiscordEmbed[];
 	if (isLong) {
 		embeds = [
@@ -243,11 +252,7 @@ async function translateText(
 			{
 				title: strings.translation,
 				description: translatedText,
-				footer: {
-					text: `${strings.language(languages.source)} ${
-						constants.emojis.indicators.arrowRight
-					} ${strings.language(languages.target)}`,
-				},
+				footer: { text: footerText },
 			},
 		];
 	} else {
@@ -265,11 +270,7 @@ async function translateText(
 						inline: false,
 					},
 				],
-				footer: {
-					text: `${strings.language(languages.source)} ${
-						constants.emojis.indicators.arrowRight
-					} ${strings.language(languages.target)}`,
-				},
+				footer: { text: footerText },
 			},
 		];
 	}
