@@ -5,23 +5,26 @@ import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/
 type LanguageType = keyof typeof constants.languages.languages;
 async function handleAutocompleteLanguage(
 	client: Client,
-	interaction: Logos.Interaction<any, { language: string | undefined }>,
+	interaction: Logos.Interaction<any, any>,
 	{ type }: { type: LanguageType },
+	{ parameter }: { parameter: string | undefined },
 ): Promise<void> {
 	const strings = constants.contexts.autocompleteLanguage({ localise: client.localise, locale: interaction.locale });
 
-	if (interaction.parameters.language === undefined) {
+	if (parameter === undefined) {
 		client.respond(interaction, [{ name: trim(strings.autocomplete, 100), value: "" }]).ignore();
 		return;
 	}
 
 	await handleSimpleAutocomplete(client, interaction, {
-		query: interaction.parameters.language,
+		query: parameter,
 		elements: constants.languages.languages[type],
-		getOption: (language) => ({
-			name: client.localise(constants.localisations.languages[language], interaction.locale)(),
-			value: language,
-		}),
+		getOption: (language) => {
+			const flag = constants.emojis.flags[language];
+			const languageName = client.localise(constants.localisations.languages[language], interaction.locale)();
+
+			return { name: `${flag} ${languageName}`, value: language };
+		},
 	});
 }
 
