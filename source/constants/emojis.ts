@@ -1,5 +1,6 @@
-import roles from "logos:constants/emojis/roles";
 import events from "logos:constants/emojis/events";
+import flags from "logos:constants/emojis/flags";
+import roles from "logos:constants/emojis/roles";
 
 export default Object.freeze({
 	ruleBullet: "💠",
@@ -131,4 +132,5 @@ export default Object.freeze({
 		},
 	},
 	roles,
+	flags,
 } as const);
