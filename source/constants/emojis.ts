@@ -1,3 +1,6 @@
+import roles from "logos:constants/emojis/roles";
+import events from "logos:constants/emojis/events";
+
 export default Object.freeze({
 	ruleBullet: "💠",
 	understood: "✅",
@@ -14,45 +17,7 @@ export default Object.freeze({
 		white: "⬜",
 	},
 	link: "🔗",
-	events: {
-		user: {
-			banned: "⚔️",
-			unbanned: "😇",
-			joined: "😁",
-			left: "😔",
-			kicked: "🚪",
-		},
-		message: {
-			updated: "⬆️",
-			deleted: "❌",
-		},
-		entryRequest: {
-			submitted: "ℹ️",
-			accepted: "✅",
-			rejected: "❌",
-		},
-		warned: "⚠️",
-		pardoned: "😇",
-		slowmode: {
-			enabled: "🐌",
-			disabled: "🚀",
-			upgraded: "⏫",
-			downgraded: "⏬",
-		},
-		timeout: {
-			added: "⏳",
-			removed: "😇",
-		},
-		praised: "🙏",
-		report: "💢",
-		resource: "🎓",
-		suggestion: "🌿",
-		ticket: "🎫",
-		purging: {
-			begin: "⚔️",
-			end: "✅",
-		},
-	},
+	events,
 	word: {
 		word: "📜",
 		definitions: "📚",
@@ -157,68 +122,6 @@ export default Object.freeze({
 		possible: "🤔",
 	},
 	showInChat: "🗨️",
-	roles: {
-		folder: "📁",
-		noCategory: "💭",
-		unknownEmoji: "❓",
-		categories: {
-			language: {
-				category: "🎓",
-				proficiency: {
-					category: "🔰",
-					beginner: "🟩",
-					intermediate: "🟦",
-					advanced: "🟥",
-					native: "🟨",
-				},
-				cefr: {
-					category: "🔤",
-					a0: "☁️",
-					a1: "⚡",
-					a2: "✨",
-					b1: "⭐",
-					b2: "🌟",
-					c1: "💫",
-					c2: "🌠",
-				},
-			},
-			personalisation: {
-				category: "🌈",
-				orthography: {
-					category: "🖋️",
-					idinist: "Idini",
-				},
-				gender: {
-					category: "⚧",
-					male: "♂️",
-					female: "♀️",
-					transgender: "⚧",
-					nonbinary: "🧑",
-				},
-				abroad: {
-					category: "🌎",
-					diasporan: "🌎",
-				},
-			},
-			learning: {
-				category: "📖",
-				correctMe: "✍️",
-				doNotCorrectMe: "🙅",
-				classroomAttendee: "📖",
-				dailyPhrase: "🌞",
-				voicechatter: "🗣️",
-			},
-			ethnicity: {
-				category: "🗾",
-			},
-			dialects: {
-				category: "🏷️",
-			},
-			regions: {
-				category: "🤷‍♂️",
-			},
-		},
-	},
 	profile: {
 		roles: "💼",
 		statistics: {
@@ -227,4 +130,5 @@ export default Object.freeze({
 			warnings: "😖",
 		},
 	},
+	roles,
 } as const);
