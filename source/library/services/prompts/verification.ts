@@ -287,19 +287,26 @@ class VerificationPromptService extends PromptService<{
 		}
 
 		if (entryRequestDocument.ticketChannelId !== undefined) {
-			const strings = constants.contexts.inquiryInProgress({
-				localise: this.client.localise.bind(this.client),
-				locale: interaction.locale,
-			});
-			this.client
-				.warning(interaction, {
-					title: strings.title,
-					description: strings.description,
-					color: constants.colours.warning,
-				})
-				.ignore();
+			const ticketChannel = await this.client.bot.helpers.getChannel(entryRequestDocument.ticketChannelId);
+			if (ticketChannel !== undefined) {
+				const strings = constants.contexts.inquiryInProgress({
+					localise: this.client.localise.bind(this.client),
+					locale: interaction.locale,
+				});
+				this.client
+					.warning(interaction, {
+						title: strings.title,
+						description: strings.description,
+						color: constants.colours.warning,
+					})
+					.ignore();
 
-			return;
+				return;
+			}
+
+			await entryRequestDocument.update(this.client, () => {
+				entryRequestDocument.ticketChannelId = undefined;
+			});
 		}
 
 		const newVote: VoteType = interaction.metadata[2] === "true" ? "for" : "against";
