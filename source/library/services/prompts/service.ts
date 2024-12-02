@@ -235,13 +235,17 @@ abstract class PromptService<
 
 				const user = this.client.entities.users.get(userId);
 				if (user === undefined) {
-					this.log.info(`Could not find the author object of ${document.id}. Skipping...`);
+					this.log.warn(`Could not find the author object for ${document.id}. Invalidating submission...`);
+
+					await userDocument.delete(this.client);
+
 					continue;
 				}
 
 				const message = await this.savePrompt(user, document);
 				if (message === undefined) {
 					this.log.info(`Could not create prompt for ${document.id}. Skipping...`);
+
 					continue;
 				}
 
