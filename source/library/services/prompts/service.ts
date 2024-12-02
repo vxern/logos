@@ -237,7 +237,7 @@ abstract class PromptService<
 				if (user === undefined) {
 					this.log.warn(`Could not find the author object for ${document.id}. Invalidating submission...`);
 
-					await userDocument.delete(this.client);
+					await document.delete(this.client);
 
 					continue;
 				}
