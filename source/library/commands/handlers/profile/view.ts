@@ -66,9 +66,9 @@ async function handleDisplayProfile(
 						inline: false,
 					},
 					{
-						name: `${constants.emojis.commands.profile.statistics.statistics} ${strings.statistics}`,
-						value: `${constants.emojis.commands.profile.statistics.praises} ${strings.praises} • ${strings.received} – ${praiseDocumentsByTarget.length} • ${strings.sent} – ${praiseDocumentsByAuthor.length}
-  ${constants.emojis.commands.profile.statistics.warnings} ${strings.warnings} • ${strings.received} – ${warningDocuments.length}`,
+						name: `${constants.emojis.commands.profile.view.statistics} ${strings.statistics}`,
+						value: `${constants.emojis.commands.profile.view.praises} ${strings.praises} • ${strings.received} – ${praiseDocumentsByTarget.length} • ${strings.sent} – ${praiseDocumentsByAuthor.length}
+  ${constants.emojis.commands.profile.view.warnings} ${strings.warnings} • ${strings.received} – ${warningDocuments.length}`,
 						inline: false,
 					},
 				],

@@ -239,7 +239,7 @@ async function translateText(
 	const targetLanguageFlag = constants.emojis.flags[languages.target];
 	const targetLanguageName = strings.language(languages.target);
 	const footerText = `${sourceLanguageFlag} ${sourceLanguageName} ${
-		constants.emojis.indicators.arrowRight
+		constants.emojis.commands.translate.direction
 	} ${targetLanguageFlag} ${targetLanguageName}`;
 
 	let embeds: Discord.CamelizedDiscordEmbed[];

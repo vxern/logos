@@ -43,8 +43,11 @@ export default Object.freeze({
 		notes: "📝",
 	},
 	profile: {
-		roles: "💼",
-		statistics: {
+		roles: {
+			directory: "➜",
+		},
+		view: {
+			roles: "💼",
 			statistics: "🧮",
 			praises: "🙏",
 			warnings: "😖",
@@ -82,5 +85,10 @@ export default Object.freeze({
 		likely: "💯",
 		possible: "🤔",
 	},
-	warn: "😖",
+	praise: {
+		madeBy: "➜",
+	},
+	translate: {
+		direction: "➜",
+	},
 } as const);

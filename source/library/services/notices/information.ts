@@ -13,7 +13,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 				...constants.contexts.rule({ localise: this.client.localise, locale: this.guildLocale }),
 			};
 			return {
-				name: `${constants.emojis.ruleBullet}  #${index + 1} ~ **${strings.title(rule).toUpperCase()}**  ~  ${
+				name: `${constants.emojis.services.notices.information.ruleBullet}  #${index + 1} ~ **${strings.title(rule).toUpperCase()}**  ~  ${
 					strings.tldr
 				}: *${strings.summary(rule)}*`,
 				value: strings.content(rule),
@@ -32,7 +32,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 					color: constants.colours.gray,
 					fields: [
 						{
-							name: `${constants.emojis.information.inviteLink}  ${strings.invite}`,
+							name: `${constants.emojis.link}  ${strings.invite}`,
 							value: `**${this.configuration.inviteLink}**`,
 						},
 					],
