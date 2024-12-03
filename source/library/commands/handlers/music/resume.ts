@@ -33,7 +33,7 @@ async function handleResumePlayback(client: Client, interaction: Logos.Interacti
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.resumed} ${strings.title}`,
+				title: `${constants.emojis.commands.music.resumed} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },

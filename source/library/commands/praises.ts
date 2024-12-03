@@ -69,7 +69,7 @@ function getPraisePage(
 				const commentFormatted =
 					praise.comment !== undefined ? `– ${praise.comment}` : `*${strings.noComment}*`;
 				const userFormatted =
-					type === "author" ? `${constants.emojis.indicators.arrowRight} ${userDisplay}` : userDisplay;
+					type === "author" ? `${constants.emojis.commands.praise.madeBy} ${userDisplay}` : userDisplay;
 
 				return `${commentFormatted}\n${userFormatted}`;
 			})

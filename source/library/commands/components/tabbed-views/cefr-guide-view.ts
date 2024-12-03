@@ -197,7 +197,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 				label: strings.brackets.a,
 				customId: this.buttonPresses.encodeId(["bracket", "a"]),
 				disabled: bracket === "a",
-				emoji: { name: constants.emojis.cefr.a },
+				emoji: { name: constants.emojis.commands.cefr.a },
 				style: Discord.ButtonStyles.Secondary,
 			},
 			{
@@ -205,7 +205,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 				label: strings.brackets.b,
 				customId: this.buttonPresses.encodeId(["bracket", "b"]),
 				disabled: bracket === "b",
-				emoji: { name: constants.emojis.cefr.b },
+				emoji: { name: constants.emojis.commands.cefr.b },
 				style: Discord.ButtonStyles.Secondary,
 			},
 			{
@@ -213,7 +213,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 				label: strings.brackets.c,
 				customId: this.buttonPresses.encodeId(["bracket", "c"]),
 				disabled: bracket === "c",
-				emoji: { name: constants.emojis.cefr.c },
+				emoji: { name: constants.emojis.commands.cefr.c },
 				style: Discord.ButtonStyles.Secondary,
 			},
 		] as const satisfies Discord.ButtonComponent[];

@@ -100,7 +100,7 @@ async function handleMakeCorrection(
 						description: formData.corrected,
 						color: constants.colours.success,
 						footer: {
-							text: `${constants.emojis.correction} ${strings.suggestedBy({
+							text: `${constants.emojis.commands.correction} ${strings.suggestedBy({
 								username: client.diagnostics.user(interaction.user),
 							})}`,
 							iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {

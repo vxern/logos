@@ -50,7 +50,7 @@ async function handleLoopPlayback(
 				.success(
 					interaction,
 					{
-						title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
+						title: `${constants.emojis.commands.music.loopDisabled} ${strings.title}`,
 						description: strings.description,
 					},
 					{ visible: true },
@@ -68,7 +68,7 @@ async function handleLoopPlayback(
 			.success(
 				interaction,
 				{
-					title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
+					title: `${constants.emojis.commands.music.loopEnabled} ${strings.title}`,
 					description: strings.description,
 				},
 				{ visible: true },
@@ -87,7 +87,7 @@ async function handleLoopPlayback(
 			.success(
 				interaction,
 				{
-					title: `${constants.emojis.music.loopDisabled} ${strings.title}`,
+					title: `${constants.emojis.commands.music.loopDisabled} ${strings.title}`,
 					description: strings.description,
 				},
 				{ visible: true },
@@ -105,7 +105,7 @@ async function handleLoopPlayback(
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.loopEnabled} ${strings.title}`,
+				title: `${constants.emojis.commands.music.loopEnabled} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },

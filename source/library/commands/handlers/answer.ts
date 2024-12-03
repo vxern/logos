@@ -46,7 +46,7 @@ async function handleAnswer(client: Client, interaction: Logos.Interaction): Pro
 						description: `– *${formData.answer}*`,
 						color: constants.colours.success,
 						footer: {
-							text: `${constants.emojis.answer} ${strings.submittedBy({
+							text: `${constants.emojis.commands.answer} ${strings.submittedBy({
 								username: client.diagnostics.user(interaction.user),
 							})}`,
 							iconUrl: Discord.avatarUrl(interaction.user.id, interaction.user.discriminator, {

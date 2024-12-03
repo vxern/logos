@@ -104,7 +104,7 @@ async function handleRecogniseLanguage(
 				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
 			fields.push({
-				name: `${constants.emojis.detect.likely} ${strings.title}`,
+				name: `${constants.emojis.commands.recognise.likely} ${strings.title}`,
 				value: strings.description({ language: `**${strings.language(language)}` }),
 				inline: false,
 			});
@@ -117,7 +117,7 @@ async function handleRecogniseLanguage(
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			fields.push({
-				name: `${constants.emojis.detect.likely} ${strings.title}`,
+				name: `${constants.emojis.commands.recognise.likely} ${strings.title}`,
 				value: `${strings.description}\n${languageNamesFormatted}`,
 				inline: false,
 			});
@@ -134,7 +134,7 @@ async function handleRecogniseLanguage(
 				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
 			fields.push({
-				name: `${constants.emojis.detect.possible} ${strings.title}`,
+				name: `${constants.emojis.commands.recognise.possible} ${strings.title}`,
 				value: strings.description({ language: `**${strings.language(language)}**` }),
 				inline: false,
 			});
@@ -147,7 +147,7 @@ async function handleRecogniseLanguage(
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			fields.push({
-				name: `${constants.emojis.detect.possible} ${strings.title}`,
+				name: `${constants.emojis.commands.recognise.possible} ${strings.title}`,
 				value: `${strings.description}\n${languageNamesFormatted}`,
 				inline: false,
 			});

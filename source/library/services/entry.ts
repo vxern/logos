@@ -161,7 +161,7 @@ class EntryService extends LocalService {
 										style: Discord.ButtonStyles.Secondary,
 										label: strings.description.understood,
 										customId: requestVerificationButton.encodeId([buttonPress.metadata[1]]),
-										emoji: { name: constants.emojis.understood },
+										emoji: { name: constants.emojis.services.notices.welcome.understood },
 									},
 								],
 							},
@@ -180,7 +180,7 @@ class EntryService extends LocalService {
 		this.client
 			.success(buttonPress, {
 				title: strings.title,
-				description: `${constants.emojis.responses.celebration} ${strings.description.nowMember({
+				description: `${strings.description.nowMember({
 					server_name: this.guild.name,
 				})}\n\n${strings.description.toStart}`,
 				image: { url: constants.gifs.welcome },

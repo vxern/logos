@@ -128,7 +128,7 @@ class MusicService extends LocalService {
 			.sendMessage(this.session.channelId, {
 				embeds: [
 					{
-						title: `${constants.emojis.music.stopped} ${strings.title}`,
+						title: `${constants.emojis.commands.music.stopped} ${strings.title}`,
 						description: strings.description,
 						color: constants.colours.notice,
 					},
@@ -549,7 +549,7 @@ class MusicSession extends EventEmitter {
 				.sendMessage(this.channelId, {
 					embeds: [
 						{
-							title: `${constants.emojis.music.queued} ${strings.title}`,
+							title: `${constants.emojis.commands.music.queued} ${strings.title}`,
 							description: strings.description({
 								title: listing.queueable.title,
 								user_mention: mention(listing.userId, { type: "user" }),
@@ -923,14 +923,14 @@ abstract class Playable extends Queueable {
 /** Represents a musical piece, playable singly by the music controller. */
 class Song extends Playable {
 	constructor({ title, url }: { title: string; url: string }) {
-		super({ title, url, emoji: constants.emojis.music.song });
+		super({ title, url, emoji: constants.emojis.commands.music.song });
 	}
 }
 
 /** Represents a musical piece in stream format. */
 class AudioStream extends Playable {
 	constructor({ title, url }: { title: string; url: string }) {
-		super({ title, url, emoji: constants.emojis.music.stream });
+		super({ title, url, emoji: constants.emojis.commands.music.stream });
 	}
 }
 
@@ -977,7 +977,7 @@ class SongCollection extends Queueable {
 	}
 
 	constructor({ title, url, songs }: { title: string; url: string; songs: Song[] }) {
-		super({ title, url, emoji: constants.emojis.music.collection });
+		super({ title, url, emoji: constants.emojis.commands.music.collection });
 
 		this.songs = songs;
 		this.index = 0;

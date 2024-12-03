@@ -147,7 +147,7 @@ async function handleWarnUser(
 				await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 					embeds: [
 						{
-							title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
+							title: strings.title,
 							description: strings.description({
 								user_mention: mention(user.id, { type: "user" }),
 								limit: configuration.limit,
@@ -168,7 +168,7 @@ async function handleWarnUser(
 				await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 					embeds: [
 						{
-							title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
+							title: strings.title,
 							description: strings.description({
 								user_mention: mention(user.id, { type: "user" }),
 								limit: configuration.limit,
@@ -191,7 +191,7 @@ async function handleWarnUser(
 			await client.services.local("alerts", { guildId: interaction.guildId }).alert({
 				embeds: [
 					{
-						title: `${constants.emojis.indicators.warning} ${strings.title}`,
+						title: strings.title,
 						description: strings.description({
 							user_mention: mention(user.id, { type: "user" }),
 							limit: constants.defaults.WARN_LIMIT,

@@ -482,7 +482,7 @@ function entryToEmbeds(
 				locale: interaction.displayLocale,
 			});
 			embeds.push({
-				title: `${constants.emojis.word.definitions} ${strings.nativeDefinitionsForWord({ word })}`,
+				title: `${constants.emojis.commands.word.definitions} ${strings.nativeDefinitionsForWord({ word })}`,
 				description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
 				color: constants.colours.husky,
 			});
@@ -492,7 +492,7 @@ function entryToEmbeds(
 				locale: interaction.displayLocale,
 			});
 			fields.push({
-				name: `${constants.emojis.word.definitions} ${strings.nativeDefinitions}`,
+				name: `${constants.emojis.commands.word.definitions} ${strings.nativeDefinitions}`,
 				value: definitionsFitted,
 			});
 		}
@@ -508,7 +508,7 @@ function entryToEmbeds(
 				locale: interaction.displayLocale,
 			});
 			embeds.push({
-				title: `${constants.emojis.word.definitions} ${strings.definitionsForWord({ word })}`,
+				title: `${constants.emojis.commands.word.definitions} ${strings.definitionsForWord({ word })}`,
 				description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
 				color: constants.colours.husky,
 			});
@@ -518,7 +518,7 @@ function entryToEmbeds(
 				locale: interaction.displayLocale,
 			});
 			fields.push({
-				name: `${constants.emojis.word.definitions} ${strings.definitions}`,
+				name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
 				value: definitionsFitted,
 			});
 		}
@@ -534,13 +534,13 @@ function entryToEmbeds(
 		});
 		if (verbose) {
 			embeds.push({
-				title: `${constants.emojis.word.expressions} ${strings.expressions}`,
+				title: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
 				description: expressionsFitted,
 				color: constants.colours.husky,
 			});
 		} else {
 			fields.push({
-				name: `${constants.emojis.word.expressions} ${strings.expressions}`,
+				name: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
 				value: trim(expressionsFitted, 1024),
 			});
 		}
@@ -562,13 +562,13 @@ function entryToEmbeds(
 		});
 		if (verbose) {
 			embeds.push({
-				title: `${constants.emojis.word.etymology} ${strings.etymology}`,
+				title: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
 				description: etymology,
 				color: constants.colours.husky,
 			});
 		} else {
 			fields.push({
-				name: `${constants.emojis.word.etymology} ${strings.etymology}`,
+				name: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
 				value: trim(etymology, 1024),
 			});
 		}
@@ -582,7 +582,7 @@ function entryToEmbeds(
 	if (!verbose) {
 		return [
 			{
-				title: `${constants.emojis.word.word} ${word}`,
+				title: `${constants.emojis.commands.word.word} ${word}`,
 				description: partOfSpeechFormatted,
 				fields,
 				color: constants.colours.husky,

@@ -111,7 +111,7 @@ async function handleUnskipAction(
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.unskipped} ${strings.title}`,
+				title: `${constants.emojis.commands.music.unskipped} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },

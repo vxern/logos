@@ -48,7 +48,7 @@ async function handleSkipToTimestamp(
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.skippedTo} ${strings.title}`,
+				title: `${constants.emojis.commands.music.skippedTo} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },

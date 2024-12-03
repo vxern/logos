@@ -191,7 +191,7 @@ class AntiFloodService extends LocalService {
 		await alertService.alert({
 			embeds: [
 				{
-					title: `${constants.emojis.indicators.exclamation} ${strings.title}`,
+					title: strings.title,
 					description: strings.description({
 						user_mention: mention(userId, { type: "user" }),
 						messages: this.client.pluralise(

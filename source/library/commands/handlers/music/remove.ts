@@ -50,7 +50,7 @@ async function handleRemoveSongListing(client: Client, interaction: Logos.Intera
 			.success(
 				buttonPress,
 				{
-					title: `${constants.emojis.music.removed} ${strings.title}`,
+					title: `${constants.emojis.commands.music.removed} ${strings.title}`,
 					description: strings.description({
 						title: listing.queueable.title,
 						user_mention: mention(buttonPress.user.id, { type: "user" }),

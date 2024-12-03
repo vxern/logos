@@ -24,7 +24,7 @@ async function handleDisplayPlaybackHistory(client: Client, interaction: Logos.I
 
 	const view = new SongListingView(client, {
 		interaction,
-		title: `${constants.emojis.music.list} ${strings.title}`,
+		title: `${constants.emojis.commands.music.list} ${strings.title}`,
 		listings: musicService.session.listings.history.listings.toReversed(),
 	});
 

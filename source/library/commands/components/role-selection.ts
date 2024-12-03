@@ -373,7 +373,7 @@ async function displaySelectMenu(
 	};
 	const title = (categories.length > 1 ? categories.slice(1) : categories)
 		.map((category) => `${category.emoji}  ${strings.name({ id: category.id })}`)
-		.join(` ${constants.emojis.indicators.arrowRight}  `);
+		.join(` ${constants.emojis.commands.profile.roles.directory}  `);
 
 	return {
 		embeds: [

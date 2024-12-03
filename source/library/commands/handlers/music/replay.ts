@@ -42,7 +42,7 @@ async function handleReplayAction(
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.replaying} ${strings.title}`,
+				title: `${constants.emojis.commands.music.replaying} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },
