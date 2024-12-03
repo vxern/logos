@@ -48,7 +48,7 @@ async function handleFastForward(
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.fastForwarded} ${strings.title}`,
+				title: `${constants.emojis.commands.music.fastForwarded} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },

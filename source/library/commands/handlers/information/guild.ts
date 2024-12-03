@@ -30,39 +30,39 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 						},
 						fields: [
 							{
-								name: `${constants.emojis.guild.description} ${strings.description.description.title}`,
+								name: `${constants.emojis.commands.information.guild.description} ${strings.description.description.title}`,
 								value: guild.description ?? strings.description.description.noDescription,
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.guild.members} ${strings.description.members}`,
+								name: `${constants.emojis.commands.information.guild.members} ${strings.description.members}`,
 								value: guild.memberCount.toString(),
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.guild.created} ${strings.description.created}`,
+								name: `${constants.emojis.commands.information.guild.created} ${strings.description.created}`,
 								value: timestamp(Discord.snowflakeToTimestamp(guild.id), { format: "relative" }),
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.guild.channels.channels} ${strings.description.channels}`,
+								name: `${constants.emojis.commands.information.guild.channels.channels} ${strings.description.channels}`,
 								value: getChannelInformationSection(client, interaction, guild),
 								inline: true,
 							},
 							{
-								name: `${constants.emojis.guild.languages.languages} ${strings.description.languages}`,
+								name: `${constants.emojis.commands.information.guild.languages.languages} ${strings.description.languages}`,
 								value: getLanguageInformationSection(client, interaction, guildDocument),
 								inline: true,
 							},
 							...(guildDocument.isNative
 								? [
 										{
-											name: `${constants.emojis.guild.moderators} ${strings.description.moderators.title}`,
+											name: `${constants.emojis.commands.information.guild.moderators} ${strings.description.moderators.title}`,
 											value: strings.description.moderators.overseenByModerators,
 											inline: false,
 										},
 										{
-											name: `${constants.emojis.guild.proficiencyDistribution} ${strings.description.distribution}`,
+											name: `${constants.emojis.commands.information.guild.proficiencyDistribution} ${strings.description.distribution}`,
 											value: formatDistribution(
 												client,
 												interaction,
@@ -73,7 +73,7 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 									]
 								: [
 										{
-											name: `${constants.emojis.guild.owner} ${strings.description.owner}`,
+											name: `${constants.emojis.commands.information.guild.owner} ${strings.description.owner}`,
 											value: mention(owner.id, { type: "user" }),
 											inline: true,
 										},
@@ -108,7 +108,7 @@ function getChannelInformationSection(client: Client, interaction: Logos.Interac
 
 	const strings = constants.contexts.channelTypes({ localise: client.localise, locale: interaction.locale });
 
-	return `${constants.emojis.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.emojis.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
+	return `${constants.emojis.commands.information.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.emojis.commands.information.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
 function getLanguageInformationSection(client: Client, interaction: Logos.Interaction, guildDocument: Guild): string {
@@ -117,9 +117,9 @@ function getLanguageInformationSection(client: Client, interaction: Logos.Intera
 		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 	};
 
-	return `${constants.emojis.guild.languages.localisation} ${strings.home} – ${strings.language(
+	return `${constants.emojis.commands.information.guild.languages.localisation} ${strings.home} – ${strings.language(
 		guildDocument.languages.localisation,
-	)}\n${constants.emojis.guild.languages.feature} ${strings.target} – ${strings.language(
+	)}\n${constants.emojis.commands.information.guild.languages.feature} ${strings.target} – ${strings.language(
 		guildDocument.languages.feature,
 	)}`;
 }

@@ -36,7 +36,7 @@ async function handleDisplayVolume(client: Client, interaction: Logos.Interactio
 			{
 				embeds: [
 					{
-						title: `${constants.emojis.music.volume} ${strings.title}`,
+						title: `${constants.emojis.commands.music.volume} ${strings.title}`,
 						description: strings.description({ volume: musicService.session.player.volume }),
 					},
 				],

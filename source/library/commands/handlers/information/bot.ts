@@ -10,11 +10,11 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 	const strings = constants.contexts.botInformation({ localise: client.localise, locale: interaction.displayLocale });
 
 	const featuresFormatted = list([
-		`${constants.emojis.bot.features.definitions} ${strings.function.features.definitions}`,
-		`${constants.emojis.bot.features.translations} ${strings.function.features.translations}`,
-		`${constants.emojis.bot.features.games} ${strings.function.features.games}`,
-		`${constants.emojis.bot.features.messages} ${strings.function.features.messages}`,
-		`${constants.emojis.bot.features.guides} ${strings.function.features.guides}`,
+		`${constants.emojis.commands.information.bot.features.definitions} ${strings.function.features.definitions}`,
+		`${constants.emojis.commands.information.bot.features.translations} ${strings.function.features.translations}`,
+		`${constants.emojis.commands.information.bot.features.games} ${strings.function.features.games}`,
+		`${constants.emojis.commands.information.bot.features.messages} ${strings.function.features.messages}`,
+		`${constants.emojis.commands.information.bot.features.guides} ${strings.function.features.guides}`,
 	]);
 
 	client
@@ -32,15 +32,15 @@ async function handleDisplayBotInformation(client: Client, interaction: Logos.In
 						},
 						fields: [
 							{
-								name: `${constants.emojis.information.bot} ${strings.concept.title}`,
+								name: `${constants.emojis.commands.information.bot.features.bot} ${strings.concept.title}`,
 								value: strings.concept.description,
 							},
 							{
-								name: `${constants.emojis.information.function} ${strings.function.title}`,
+								name: `${constants.emojis.commands.information.bot.features.function} ${strings.function.title}`,
 								value: `${strings.function.description}\n${featuresFormatted}`,
 							},
 							{
-								name: `${constants.emojis.information.languages} ${strings.languages.title}`,
+								name: `${constants.emojis.commands.information.bot.features.languages} ${strings.languages.title}`,
 								value: strings.languages.description,
 							},
 						],

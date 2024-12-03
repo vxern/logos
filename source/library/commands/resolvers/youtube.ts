@@ -91,7 +91,11 @@ async function search(client: Client, interaction: Logos.Interaction, query: str
 		}
 
 		options.push({
-			emoji: { name: isVideo(result) ? constants.emojis.music.song : constants.emojis.music.collection },
+			emoji: {
+				name: isVideo(result)
+					? constants.emojis.commands.music.song
+					: constants.emojis.commands.music.collection,
+			},
 			label: trim(title, 100),
 			value: index.toString(),
 		});

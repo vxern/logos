@@ -39,7 +39,7 @@ async function handleRewind(client: Client, interaction: Logos.Interaction<any, 
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.rewound} ${strings.title}`,
+				title: `${constants.emojis.commands.music.rewound} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },

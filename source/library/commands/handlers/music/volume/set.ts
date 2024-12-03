@@ -45,7 +45,7 @@ async function handleSetVolume(client: Client, interaction: Logos.Interaction<an
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.volume} ${strings.title}`,
+				title: `${constants.emojis.commands.music.volume} ${strings.title}`,
 				description: strings.description({ volume: interaction.parameters.volume }),
 			},
 			{ visible: true },

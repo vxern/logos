@@ -26,7 +26,7 @@ async function handleStopPlayback(client: Client, interaction: Logos.Interaction
 		.success(
 			interaction,
 			{
-				title: `${constants.emojis.music.stopped} ${strings.title}`,
+				title: `${constants.emojis.commands.music.stopped} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },

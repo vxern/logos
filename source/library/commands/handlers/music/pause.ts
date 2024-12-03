@@ -33,7 +33,7 @@ async function handlePausePlayback(client: Client, interaction: Logos.Interactio
 		.notice(
 			interaction,
 			{
-				title: `${constants.emojis.music.paused} ${strings.title}`,
+				title: `${constants.emojis.commands.music.paused} ${strings.title}`,
 				description: strings.description,
 			},
 			{ visible: true },

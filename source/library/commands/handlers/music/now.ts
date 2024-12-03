@@ -45,7 +45,7 @@ async function handleDisplayCurrentlyPlaying(
 
 		const view = new SongCollectionView(client, {
 			interaction,
-			title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
+			title: `${constants.emojis.commands.music.nowPlaying} ${strings.nowPlaying}`,
 			collection: musicService.session.queueable,
 		});
 
@@ -63,7 +63,7 @@ async function handleDisplayCurrentlyPlaying(
 		.notice(
 			interaction,
 			{
-				title: `${constants.emojis.music.nowPlaying} ${strings.nowPlaying}`,
+				title: `${constants.emojis.commands.music.nowPlaying} ${strings.nowPlaying}`,
 				fields: [
 					{
 						name: strings.title,
