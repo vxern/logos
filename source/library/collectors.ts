@@ -8,6 +8,8 @@ import { Guild } from "logos/models/guild";
 import { User } from "logos/models/user";
 import { nanoid } from "nanoid";
 
+type Interaction = Discord.SetupDesiredProps<Discord.Interaction, DesiredProperties, DesiredPropertiesBehaviour>;
+
 type CollectEvent<
 	Event extends keyof Discord.EventHandlers<
 		DesiredProperties,
@@ -17,7 +19,12 @@ type CollectEvent<
 	...args: Parameters<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[Event]>
 ) => PromiseOr<void>;
 type DoneEvent = () => void | Promise<void>;
-class Collector<Event extends keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour> = any> {
+class Collector<
+	Event extends keyof Discord.EventHandlers<
+		DesiredProperties,
+		DesiredPropertiesBehaviour
+	> = keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>,
+> {
 	readonly done: Promise<void>;
 	readonly guildId?: bigint;
 
@@ -178,7 +185,7 @@ class InteractionCollector<
 		this.#acceptAnyUser = this.only.values.length === 0;
 	}
 
-	static getCommandName(interaction: Discord.Interaction): string {
+	static getCommandName(interaction: Interaction): string {
 		const commandName = interaction.data?.name;
 		if (commandName === undefined) {
 			throw new Error("Command did not have a name.");
@@ -211,7 +218,7 @@ class InteractionCollector<
 		return parts.join(constants.special.interaction.divider);
 	}
 
-	filter(interaction: Discord.Interaction): boolean {
+	filter(interaction: Interaction): boolean {
 		if (!this.anyType) {
 			if (interaction.type !== this.type) {
 				return false;
@@ -282,7 +289,7 @@ class InteractionCollector<
 	}
 
 	async #getLocaleData(
-		interaction: Discord.Interaction,
+		interaction: Interaction,
 	): Promise<Omit<Logos.InteractionLocaleData, "displayLocale" | "displayLanguage">> {
 		const member = this.#client.entities.members.get(interaction.guildId!)?.get(interaction.user.id);
 		if (member === undefined) {
@@ -336,7 +343,7 @@ class InteractionCollector<
 		return { locale, language, guildLocale, guildLanguage, learningLocale, learningLanguage, featureLanguage };
 	}
 
-	#getMetadata(interaction: Discord.Interaction): Logos.Interaction<Metadata>["metadata"] {
+	#getMetadata(interaction: Interaction): Logos.Interaction<Metadata>["metadata"] {
 		const idEncoded = interaction.data?.customId;
 		if (idEncoded === undefined) {
 			return [constants.components.none] as unknown as Logos.Interaction<Metadata>["metadata"];
@@ -346,7 +353,7 @@ class InteractionCollector<
 	}
 
 	#getParameters<Parameters extends Record<string, DiscordParameterType>>(
-		interaction: Discord.Interaction,
+		interaction: Interaction,
 	): Logos.InteractionParameters<Parameters> {
 		const options = interaction.data?.options;
 		if (options === undefined) {

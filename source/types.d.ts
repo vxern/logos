@@ -1,9 +1,9 @@
 import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
 import type {
+	SelectedDesiredProperties,
 	DesiredProperties,
 	DesiredPropertiesBehaviour,
-	SelectedDesiredProperties,
 } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
 import type { PromiseOr, WithRequired } from "logos:core/utilities";
@@ -50,14 +50,14 @@ declare global {
 declare global {
 	// biome-ignore lint/style/noNamespace: We use Logos types to make a distinction from Discordeno types.
 	namespace Logos {
-		type Guild = Pick<
+		type Guild = Discord.SetupDesiredProps<
 			Omit<Discord.Guild, "roles" | "members" | "channels" | "voiceStates"> & {
 				roles: Discord.Collection<bigint, Role>;
 				members: Discord.Collection<bigint, Member>;
 				channels: Discord.Collection<bigint, Channel>;
 				voiceStates: Discord.Collection<bigint, VoiceState>;
 			},
-			keyof DesiredProperties["guild"]
+			SelectedDesiredProperties
 		>;
 
 		type RawInteraction = Discord.SetupDesiredProps<Discord.Interaction, SelectedDesiredProperties>;

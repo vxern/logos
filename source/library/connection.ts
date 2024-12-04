@@ -47,12 +47,6 @@ class DiscordConnection {
 		this.bot.logger = constants.loggers.discordeno.child({ name: "Bot" });
 
 		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Logos (https://github.com/vxern/logos)" });
-		// REMINDER(vxern): Remove this once the weird 5 second delay is removed from Discordeno's `shutdown()` call.
-		this.bot.gateway.shutdown = async (code, reason) => {
-			for (const shard of this.bot.gateway.shards.values()) {
-				shard.close(code, reason);
-			}
-		};
 	}
 
 	async open(): Promise<void> {

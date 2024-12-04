@@ -471,7 +471,7 @@ const properties = {
 	},
 } as const satisfies Discord.TransformersDesiredProperties;
 type SelectedDesiredProperties = typeof properties;
-type DesiredProperties = Discord.CompleteDesiredProperties<{}, true>;
+type DesiredProperties = Discord.CompleteDesiredProperties<Record<string, unknown>, true>;
 type DesiredPropertiesBehaviour = Discord.DesiredPropertiesBehavior.RemoveKey;
 
 export default Object.freeze(properties);
