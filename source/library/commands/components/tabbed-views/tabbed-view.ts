@@ -3,7 +3,7 @@ import { InteractionCollector } from "logos/collectors";
 
 interface View {
 	embed: Discord.Camelize<Discord.DiscordEmbed>;
-	components?: Discord.MessageComponents;
+	components?: Discord.ActionRow[];
 }
 
 abstract class TabbedView<Generic extends { groups: Record<string, string> }> {

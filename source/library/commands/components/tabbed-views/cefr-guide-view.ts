@@ -191,7 +191,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	getButtons(
 		interaction: Logos.Interaction,
 		{ bracket, mode }: { bracket: Bracket; mode: Mode },
-	): Discord.MessageComponents {
+	): Discord.ActionRow[] {
 		const strings = constants.contexts.cefrButtons({
 			localise: this.client.localise,
 			locale: interaction.locale,
