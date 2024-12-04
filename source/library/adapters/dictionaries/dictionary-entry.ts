@@ -40,7 +40,7 @@ type ExpressionField = LabelledField &
 type ExampleField = LabelledField & Partial<{ expressions: ExpressionField[] }>;
 type FrequencyField = { value: number };
 type InflectionField = {
-	tabs: Discord.DiscordEmbed[];
+	tabs: Discord.CamelizedDiscordEmbed[];
 };
 type EtymologyField = LabelledField;
 type NoteField = LabelledField;

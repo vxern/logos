@@ -6,7 +6,7 @@ import type { CommandStore } from "logos/stores/commands";
 import type pino from "pino";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
-type EmbedOrCallbackData = Discord.DiscordEmbed | InteractionCallbackData;
+type EmbedOrCallbackData = Discord.CamelizedDiscordEmbed | InteractionCallbackData;
 interface ReplyData {
 	readonly ephemeral: boolean;
 }
@@ -665,7 +665,7 @@ interface MemberNarrowingOptions {
 	readonly excludeModerators: boolean;
 }
 
-function isEmbed(embedOrData: EmbedOrCallbackData): embedOrData is Discord.DiscordEmbed {
+function isEmbed(embedOrData: EmbedOrCallbackData): embedOrData is Discord.CamelizedDiscordEmbed {
 	return "title" in embedOrData || "description" in embedOrData || "fields" in embedOrData;
 }
 

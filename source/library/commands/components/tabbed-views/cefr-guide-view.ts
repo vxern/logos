@@ -33,7 +33,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		return { embed, components: buttons };
 	}
 
-	getEmbed(interaction: Logos.Interaction, { bracket, mode }: TabGroups): Discord.DiscordEmbed {
+	getEmbed(interaction: Logos.Interaction, { bracket, mode }: TabGroups): Discord.CamelizedDiscordEmbed {
 		switch (mode) {
 			case "guide": {
 				return this.getGuideEmbed(interaction, { bracket });
@@ -44,7 +44,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		}
 	}
 
-	getGuideEmbed(interaction: Logos.Interaction, { bracket }: { bracket: Bracket }): Discord.DiscordEmbed {
+	getGuideEmbed(interaction: Logos.Interaction, { bracket }: { bracket: Bracket }): Discord.CamelizedDiscordEmbed {
 		switch (bracket) {
 			case "a": {
 				const strings = constants.contexts.cefrGuideBracketA({
@@ -112,7 +112,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		}
 	}
 
-	getExampleEmbed(interaction: Logos.Interaction, { bracket }: { bracket: Bracket }): Discord.DiscordEmbed {
+	getExampleEmbed(interaction: Logos.Interaction, { bracket }: { bracket: Bracket }): Discord.CamelizedDiscordEmbed {
 		const examples = this.#configuration.examples;
 
 		switch (bracket) {

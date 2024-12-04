@@ -6,8 +6,8 @@ async function handleDisplayCredits(client: Client, interaction: Logos.Interacti
 	client.notice(interaction, getTranslationView(client, interaction)).ignore();
 }
 
-function getTranslationView(client: Client, interaction: Logos.Interaction): Discord.DiscordEmbed {
-	const fields: Discord.DiscordEmbedField[] = [];
+function getTranslationView(client: Client, interaction: Logos.Interaction): Discord.CamelizedDiscordEmbed {
+	const fields: Discord.CamelizedDiscordEmbedField[] = [];
 
 	const strings = {
 		...constants.contexts.credits({ localise: client.localise, locale: interaction.locale }),

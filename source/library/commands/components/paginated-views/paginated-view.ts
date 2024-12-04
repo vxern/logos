@@ -2,7 +2,7 @@ import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
 interface View {
-	embed: Discord.DiscordEmbed;
+	embed: Discord.CamelizedDiscordEmbed;
 	components?: Discord.MessageComponents;
 }
 type PageAction = "previous" | "next";

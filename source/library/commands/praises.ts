@@ -7,7 +7,7 @@ function getPraisePage(
 	praises: Praise[],
 	isSelf: boolean,
 	type: "author" | "target",
-): Discord.DiscordEmbed {
+): Discord.CamelizedDiscordEmbed {
 	if (praises.length === 0) {
 		if (isSelf) {
 			let strings: { title: string; description: string };

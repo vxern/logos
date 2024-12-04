@@ -78,7 +78,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 		return undefined;
 	}
 
-	getErrorMessage(_: Logos.Interaction, __: { error: ValidationError }): Discord.DiscordEmbed | undefined {
+	getErrorMessage(_: Logos.Interaction, __: { error: ValidationError }): Discord.CamelizedDiscordEmbed | undefined {
 		return undefined;
 	}
 
