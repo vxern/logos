@@ -1,17 +1,23 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
 import { type LearningLanguage, getLearningLocaleByLanguage } from "logos:constants/languages/learning";
 import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
 import type { PromiseOr } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 import { User } from "logos/models/user";
 import { nanoid } from "nanoid";
 
-type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.EventHandlers> = (
-	...args: Parameters<Discord.EventHandlers[Event]>
+type CollectEvent<
+	Event extends keyof Discord.EventHandlers<
+		DesiredProperties,
+		DesiredPropertiesBehaviour
+	> = keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>,
+> = (
+	...args: Parameters<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[Event]>
 ) => PromiseOr<void>;
 type DoneEvent = () => void | Promise<void>;
-class Collector<Event extends keyof Discord.EventHandlers = any> {
+class Collector<Event extends keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour> = any> {
 	readonly done: Promise<void>;
 	readonly guildId?: bigint;
 
@@ -59,11 +65,13 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 		}
 	}
 
-	filter(..._: Parameters<Discord.EventHandlers[Event]>): boolean {
+	filter(..._: Parameters<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[Event]>): boolean {
 		return true;
 	}
 
-	async dispatchCollect(...args: Parameters<Discord.EventHandlers[Event]>): Promise<void> {
+	async dispatchCollect(
+		...args: Parameters<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[Event]>
+	): Promise<void> {
 		if (this.#isClosed) {
 			return;
 		}

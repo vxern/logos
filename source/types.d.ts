@@ -1,6 +1,6 @@
 import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
-import type { DesiredProperties } from "logos:constants/properties";
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
 import type { PromiseOr, WithRequired } from "logos:core/utilities";
 import type { EntryRequest } from "logos/models/entry-request";
@@ -189,11 +189,15 @@ declare global {
 
 declare module "@discordeno/bot" {
 	type Locale = `${Discord.Locales}`;
-	type VoiceServerUpdate = Parameters<Discord.EventHandlers["voiceServerUpdate"]>[0];
+	type VoiceServerUpdate = Parameters<
+		Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>["voiceServerUpdate"]
+	>[0];
 	type DeletedMessage = Discord.Events["messageDelete"][0];
 
 	type Events = {
-		[T in keyof Discord.EventHandlers]: Parameters<Discord.EventHandlers[T]>;
+		[T in keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>]: Parameters<
+			Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[T]
+		>;
 	};
 
 	interface Message {
