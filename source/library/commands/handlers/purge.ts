@@ -120,7 +120,7 @@ async function handlePurgeMessages(
 
 	let messages: Discord.Message[] = [];
 
-	const getMessageFields = (): Discord.CamelizedDiscordEmbedField[] => {
+	const getMessageFields = (): Discord.Camelize<Discord.DiscordEmbedField>[] => {
 		const strings = constants.contexts.purge({ localise: client.localise, locale: interaction.locale });
 		return [
 			{
