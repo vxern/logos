@@ -1,9 +1,11 @@
+import type { DesiredProperties } from "logos:constants/properties";
 import type { Environment } from "logos:core/loaders/environment";
+import type { DesiredPropertiesBehavior } from "@discordeno/bot";
 import type pino from "pino";
 
 class DiscordConnection {
 	readonly log: pino.Logger;
-	readonly bot: Discord.Bot;
+	readonly bot: Discord.Bot<DesiredProperties, DesiredPropertiesBehavior>;
 
 	constructor({
 		log = constants.loggers.silent,
@@ -20,8 +22,8 @@ class DiscordConnection {
 		log?: pino.Logger;
 		environment: Environment;
 		intents?: Discord.GatewayIntents;
-		eventHandlers?: Partial<Discord.EventHandlers>;
-		cacheHandlers?: Partial<Discord.Transformers["customizers"]>;
+		eventHandlers?: Partial<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehavior>>;
+		cacheHandlers?: Partial<Discord.Transformers<DesiredProperties, DesiredPropertiesBehavior>["customizers"]>;
 	}) {
 		this.log = log.child({ name: "DiscordConnection" });
 		this.bot = Discord.createBot({
