@@ -28,42 +28,9 @@ class DiscordConnection {
 			token: environment.discordSecret,
 			intents,
 			events: eventHandlers,
-			// REMINDER(vxern): Remove this once the bot is updated to a newer Discordeno release.
-			//
-			// The code will then be something like:
-			//
-			//    transformers: {
-			//      ...
-			// 	    desiredProperties: constants.properties as unknown as Discord.Transformers["desiredProperties"],
-			//    },
-			defaultDesiredPropertiesValue: true,
-			// REMINDER(vxern): Remove this once the bot is updated to a newer Discordeno release, since it should
-			// no longer be required. Make sure members are still being fetched, though.
-			gateway: {
-				token: environment.discordSecret,
-				events: {},
-				cache: { requestMembers: { enabled: true, pending: new Discord.Collection() } },
-			},
+			transformers: { customizers: cacheHandlers },
+			desiredProperties: constants.properties,
 		});
-		// REMINDER(vxern): Move this to the `Discord.createBot()` call once the bot is updated to a newer Discordeno
-		// release.
-		//
-		//    transformers: {
-		// 	    customizers: cacheHandlers,
-		// 	    ...
-		//    },
-		for (const [customiser, handler] of Object.entries(cacheHandlers)) {
-			// @ts-ignore: This will be removed once the bot is updated to a new Discordeno release.
-			this.bot.transformers.customizers[customiser] = handler;
-		}
-		// REMINDER(vxern): Remove this once the issue with Discordeno filtering out '0' as a shard ID is fixed.
-		this.bot.transformers.guild = (bot, payload) => {
-			const result = Discord.transformGuild(bot, payload);
-
-			result.shardId = payload.shardId;
-
-			return result;
-		};
 		this.bot.handlers = Discord.createBotGatewayHandlers({
 			// REMINDER(vxern): Remove this once Discordeno is able to filter out embeds being resolved in a message.
 			MESSAGE_UPDATE: async (bot, data) => {
