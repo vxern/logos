@@ -407,7 +407,7 @@ class InteractionStore {
 	}
 
 	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
-		return this.#client.bot.helpers
+		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: { choices },
@@ -419,7 +419,7 @@ class InteractionStore {
 		interaction: Logos.Interaction,
 		data: Omit<Discord.InteractionCallbackData, "flags">,
 	): Promise<void> {
-		return this.#client.bot.helpers
+		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.Modal,
 				data,
