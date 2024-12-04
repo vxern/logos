@@ -325,7 +325,7 @@ class CommandStore {
 		descriptionLocalisations: DescriptionLocalisations;
 		options?: Option[];
 	}): Command {
-		if (template.type === Discord.ApplicationCommandTypes.ChatInput) {
+		if (template.type !== Discord.ApplicationCommandTypes.Message) {
 			return {
 				...nameLocalisations,
 				...descriptionLocalisations,
