@@ -1,6 +1,6 @@
 import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
-import type { Properties } from "logos:constants/properties";
+import type { DesiredProperties } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
 import type { PromiseOr, WithRequired } from "logos:core/utilities";
 import type { EntryRequest } from "logos/models/entry-request";
@@ -53,24 +53,26 @@ declare global {
 				channels: Discord.Collection<bigint, Channel>;
 				voiceStates: Discord.Collection<bigint, VoiceState>;
 			},
-			keyof Properties["guild"]
+			keyof DesiredProperties["guild"]
 		>;
 
-		type RawInteraction = Pick<Discord.Interaction, keyof Properties["interaction"]>;
+		type Test = Pick<Discord.Guild, keyof DesiredProperties["guild"]>;
 
-		type Channel = Pick<Discord.Channel, keyof Properties["channel"]>;
+		type RawInteraction = Pick<Discord.Interaction, keyof DesiredProperties["interaction"]>;
 
-		type User = Pick<Discord.User, keyof Properties["user"]>;
+		type Channel = Pick<Discord.Channel, keyof DesiredProperties["channel"]>;
 
-		type Member = Pick<Discord.Member, keyof Properties["member"]> & { user?: User };
+		type User = Pick<Discord.User, keyof DesiredProperties["user"]>;
 
-		type Message = Pick<Discord.Message, keyof Properties["message"]>;
+		type Member = Pick<Discord.Member, keyof DesiredProperties["member"]> & { user?: User };
 
-		type Attachment = Pick<Discord.Attachment, keyof Properties["attachment"]> & Discord.FileContent;
+		type Message = Pick<Discord.Message, keyof DesiredProperties["message"]>;
 
-		type Role = Pick<Discord.Role, keyof Properties["role"]>;
+		type Attachment = Pick<Discord.Attachment, keyof DesiredProperties["attachment"]> & Discord.FileContent;
 
-		type VoiceState = Pick<Discord.VoiceState, keyof Properties["voiceState"]>;
+		type Role = Pick<Discord.Role, keyof DesiredProperties["role"]>;
+
+		type VoiceState = Pick<Discord.VoiceState, keyof DesiredProperties["voiceState"]>;
 
 		interface InteractionLocaleData {
 			// Localisation

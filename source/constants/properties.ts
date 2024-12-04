@@ -121,7 +121,8 @@ const properties = {
 	pollAnswerCount: {},
 	pollMedia: {},
 } as const satisfies Discord.DesiredProperties;
-type Properties = typeof properties;
+type DesiredProperties = typeof properties;
+type DesiredPropertiesBehaviour = Discord.DesiredPropertiesBehavior.RemoveKey;
 
 export default Object.freeze(properties);
-export type { Properties };
+export type { DesiredProperties, DesiredPropertiesBehaviour };
