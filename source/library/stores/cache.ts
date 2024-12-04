@@ -1,7 +1,6 @@
 import type { Collection } from "logos:constants/database";
-import type { DesiredProperties } from "logos:constants/properties";
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
 import type { PromiseOr } from "logos:core/utilities";
-import type { DesiredPropertiesBehavior } from "@discordeno/bot";
 import type { EntryRequest } from "logos/models/entry-request";
 import type { Guild } from "logos/models/guild";
 import type { GuildStatistics } from "logos/models/guild-statistics";
@@ -76,7 +75,7 @@ class CacheStore {
 		this.#fetchRequests = new Set();
 	}
 
-	buildCacheHandlers(): Partial<Discord.Transformers<DesiredProperties, DesiredPropertiesBehavior>["customizers"]> {
+	buildCacheHandlers(): Partial<Discord.Transformers<DesiredProperties, DesiredPropertiesBehaviour>["customizers"]> {
 		return {
 			guild: this.#cacheEntity(this.#cacheGuild.bind(this)),
 			channel: this.#cacheEntity(this.#cacheChannel.bind(this)),
@@ -89,7 +88,9 @@ class CacheStore {
 		};
 	}
 
-	#cacheEntity<T>(callback: (entity: T) => PromiseOr<void>): (bot: Discord.Bot, payload: unknown, entity: T) => T {
+	#cacheEntity<T>(
+		callback: (entity: T) => PromiseOr<void>,
+	): (bot: Discord.Bot<DesiredProperties, DesiredPropertiesBehaviour>, payload: unknown, entity: T) => T {
 		return (_, __, entity) => {
 			callback(entity);
 			return entity;

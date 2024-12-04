@@ -1,6 +1,10 @@
 import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
-import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
+import type {
+	DesiredProperties,
+	DesiredPropertiesBehaviour,
+	SelectedDesiredProperties,
+} from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
 import type { PromiseOr, WithRequired } from "logos:core/utilities";
 import type { EntryRequest } from "logos/models/entry-request";
@@ -56,23 +60,22 @@ declare global {
 			keyof DesiredProperties["guild"]
 		>;
 
-		type Test = Pick<Discord.Guild, keyof DesiredProperties["guild"]>;
+		type RawInteraction = Discord.SetupDesiredProps<Discord.Interaction, SelectedDesiredProperties>;
 
-		type RawInteraction = Pick<Discord.Interaction, keyof DesiredProperties["interaction"]>;
+		type Channel = Discord.SetupDesiredProps<Discord.Channel, SelectedDesiredProperties>;
 
-		type Channel = Pick<Discord.Channel, keyof DesiredProperties["channel"]>;
+		type User = Discord.SetupDesiredProps<Discord.User, SelectedDesiredProperties>;
 
-		type User = Pick<Discord.User, keyof DesiredProperties["user"]>;
+		type Member = Discord.SetupDesiredProps<Discord.Member, SelectedDesiredProperties> & { user?: User };
 
-		type Member = Pick<Discord.Member, keyof DesiredProperties["member"]> & { user?: User };
+		type Message = Discord.SetupDesiredProps<Discord.Message, SelectedDesiredProperties>;
 
-		type Message = Pick<Discord.Message, keyof DesiredProperties["message"]>;
+		type Attachment = Discord.SetupDesiredProps<Discord.Attachment, SelectedDesiredProperties> &
+			Discord.FileContent;
 
-		type Attachment = Pick<Discord.Attachment, keyof DesiredProperties["attachment"]> & Discord.FileContent;
+		type Role = Discord.SetupDesiredProps<Discord.Role, SelectedDesiredProperties>;
 
-		type Role = Pick<Discord.Role, keyof DesiredProperties["role"]>;
-
-		type VoiceState = Pick<Discord.VoiceState, keyof DesiredProperties["voiceState"]>;
+		type VoiceState = Discord.SetupDesiredProps<Discord.VoiceState, SelectedDesiredProperties>;
 
 		interface InteractionLocaleData {
 			// Localisation
@@ -202,6 +205,6 @@ declare module "@discordeno/bot" {
 
 	interface Message {
 		// REMINDER(vxern): Monkey-patch for Discordeno messages.
-		content?: string;
+		content: string | undefined;
 	}
 }

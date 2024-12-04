@@ -1,11 +1,10 @@
-import type { DesiredProperties } from "logos:constants/properties";
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
 import type { Environment } from "logos:core/loaders/environment";
-import type { DesiredPropertiesBehavior } from "@discordeno/bot";
 import type pino from "pino";
 
 class DiscordConnection {
 	readonly log: pino.Logger;
-	readonly bot: Discord.Bot<DesiredProperties, DesiredPropertiesBehavior>;
+	readonly bot: Discord.Bot<DesiredProperties, DesiredPropertiesBehaviour>;
 
 	constructor({
 		log = constants.loggers.silent,
@@ -22,26 +21,27 @@ class DiscordConnection {
 		log?: pino.Logger;
 		environment: Environment;
 		intents?: Discord.GatewayIntents;
-		eventHandlers?: Partial<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehavior>>;
-		cacheHandlers?: Partial<Discord.Transformers<DesiredProperties, DesiredPropertiesBehavior>["customizers"]>;
+		eventHandlers?: Partial<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>>;
+		cacheHandlers?: Partial<Discord.Transformers<DesiredProperties, DesiredPropertiesBehaviour>["customizers"]>;
 	}) {
 		this.log = log.child({ name: "DiscordConnection" });
-		this.bot = Discord.createBot({
+		this.bot = Discord.createBot<DesiredProperties, DesiredPropertiesBehaviour>({
 			token: environment.discordSecret,
 			intents,
 			events: eventHandlers,
 			transformers: { customizers: cacheHandlers },
-			desiredProperties: constants.properties,
+			desiredProperties: constants.properties as unknown as DesiredProperties,
 		});
 		this.bot.handlers = Discord.createBotGatewayHandlers({
 			// REMINDER(vxern): Remove this once Discordeno is able to filter out embeds being resolved in a message.
 			MESSAGE_UPDATE: async (bot, data) => {
-				const payload = data.d as Discord.DiscordMessage;
-				if (!payload.author) {
+				const message = data.d as Discord.DiscordMessage;
+				if (!message.author) {
 					return;
 				}
 
-				bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
+				// The `shardId` is not necessary here.
+				bot.events.messageUpdate?.(bot.transformers.message(bot, { message, shardId: 0 }));
 			},
 		});
 		this.bot.logger = constants.loggers.discordeno.child({ name: "Bot" });

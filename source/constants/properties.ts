@@ -19,7 +19,7 @@ const properties = {
 		url: true,
 		proxyUrl: true,
 		title: false,
-		size: false,
+		size: true,
 		description: false,
 		height: false,
 		width: false,
@@ -470,8 +470,9 @@ const properties = {
 		text: false,
 	},
 } as const satisfies Discord.TransformersDesiredProperties;
-type DesiredProperties = typeof properties;
+type SelectedDesiredProperties = typeof properties;
+type DesiredProperties = Discord.CompleteDesiredProperties<{}, true>;
 type DesiredPropertiesBehaviour = Discord.DesiredPropertiesBehavior.RemoveKey;
 
 export default Object.freeze(properties);
-export type { DesiredProperties, DesiredPropertiesBehaviour };
+export type { SelectedDesiredProperties, DesiredProperties, DesiredPropertiesBehaviour };
