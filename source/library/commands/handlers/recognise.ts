@@ -91,7 +91,7 @@ async function handleRecogniseLanguage(
 	}
 
 	{
-		const fields: Discord.CamelizedDiscordEmbedField[] = [];
+		const fields: Discord.DiscordEmbedField[] = [];
 
 		if (detectedLanguages.likely.length === 1) {
 			const language = detectedLanguages.likely.at(0);

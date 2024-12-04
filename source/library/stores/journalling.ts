@@ -209,7 +209,7 @@ class JournallingStore {
 	async #getKickInformation({
 		user,
 		guildId,
-	}: { user: Logos.User; guildId: bigint }): Promise<Discord.CamelizedDiscordAuditLogEntry | undefined> {
+	}: { user: Logos.User; guildId: bigint }): Promise<Discord.DiscordAuditLogEntry | undefined> {
 		const now = Date.now();
 
 		const guildDocument = this.#client.documents.guilds.get(guildId.toString());

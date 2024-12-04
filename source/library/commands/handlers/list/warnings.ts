@@ -63,7 +63,7 @@ function getWarningPage(
 	interaction: Logos.Interaction,
 	warnings: Warning[],
 	isSelf: boolean,
-): Discord.CamelizedDiscordEmbed {
+): Discord.DiscordEmbed {
 	if (warnings.length === 0) {
 		if (isSelf) {
 			const strings = constants.contexts.noWarningsForSelf({

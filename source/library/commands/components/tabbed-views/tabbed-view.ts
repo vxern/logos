@@ -2,7 +2,7 @@ import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
 interface View {
-	embed: Discord.CamelizedDiscordEmbed;
+	embed: Discord.DiscordEmbed;
 	components?: Discord.MessageComponents;
 }
 
