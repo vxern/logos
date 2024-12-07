@@ -65,7 +65,7 @@ describe("getDeepLLocaleByLanguage()", () => {
 describe("getGoogleTranslateLocaleByLanguage()", () => {
 	it("returns the locale corresponding to the passed Google Translate language.", () => {
 		expect(getGoogleTranslateLocaleByLanguage("Turkish")).to.equal("tr");
-		expect(getGoogleTranslateLocaleByLanguage("Portuguese/Brazilian")).to.equal("pt");
+		expect(getGoogleTranslateLocaleByLanguage("Portuguese/Brazilian")).to.equal("pt-BR");
 	});
 });
 

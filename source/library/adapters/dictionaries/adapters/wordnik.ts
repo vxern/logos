@@ -15,7 +15,6 @@ class WordnikAdapter extends DictionaryAdapter<WordnikResult[]> {
 		super(client, {
 			identifier: "Wordnik",
 			provides: ["rhymes", "relations"],
-			supports: ["English/American", "English/British"],
 			isFallback: true,
 		});
 

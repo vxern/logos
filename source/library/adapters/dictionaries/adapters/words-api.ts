@@ -29,7 +29,6 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 		super(client, {
 			identifier: "WordsAPI",
 			provides: ["partOfSpeech", "definitions", "relations", "syllables", "pronunciation", "frequency"],
-			supports: ["English/American", "English/British"],
 			isFallback: true,
 		});
 

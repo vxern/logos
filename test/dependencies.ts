@@ -12,7 +12,7 @@ function createProvider<T>({
 }: {
 	create: () => Promise<T> | T;
 	destroy?: (object: T) => Promise<void> | void;
-}): () => DependencyProvider<T> {
+}): DependencyProvider<T> {
 	let object: T;
 
 	beforeEach(async () => (object = await create()));
@@ -21,7 +21,7 @@ function createProvider<T>({
 		afterEach(() => destroy(object));
 	}
 
-	return () => () => object;
+	return () => object;
 }
 
 function createEnvironment(): Environment {
@@ -51,24 +51,30 @@ function createDiscordConnection(): DiscordConnection {
 	return connection;
 }
 
-const useEnvironment = createProvider({ create: () => createEnvironment() });
-const useDatabaseStore = createProvider({
-	create: async () => {
-		const database = createDatabaseStore();
-		await database.setup();
+function useEnvironment(): DependencyProvider<Environment> {
+	return createProvider({ create: () => createEnvironment() });
+}
+function useDatabaseStore(): DependencyProvider<DatabaseStore> {
+	return createProvider({
+		create: async () => {
+			const database = createDatabaseStore();
+			await database.setup();
 
-		return database;
-	},
-	destroy: (database) => database.teardown(),
-});
-const useDiscordConnection = createProvider({
-	create: async () => {
-		const connection = createDiscordConnection();
-		await connection.open();
+			return database;
+		},
+		destroy: (database) => database.teardown(),
+	});
+}
+function useDiscordConnection(): DependencyProvider<DiscordConnection> {
+	return createProvider({
+		create: async () => {
+			const connection = createDiscordConnection();
+			await connection.open();
 
-		return connection;
-	},
-	destroy: (connection) => connection.close(),
-});
+			return connection;
+		},
+		destroy: (connection) => connection.close(),
+	});
+}
 
 export { useEnvironment, useDatabaseStore, useDiscordConnection };
