@@ -30,7 +30,7 @@ const languages = new Set([
 	...collectLanguages<TranslationLanguage>(translationLanguages),
 ] satisfies LearningLanguage[]);
 
-const languageToLocale = Object.freeze({
+const languageToLocale: Record<LearningLanguage, string> = Object.freeze({
 	Abkhazian: "abk",
 	Afar: "aar",
 	Afrikaans: "afr",
@@ -293,7 +293,79 @@ const languageToLocale = Object.freeze({
 	"Spanish/Mexican": "spa",
 	"Spanish/Spanish": "spa",
 	"Spanish/American": "spa",
-} as const satisfies Record<LearningLanguage, string>);
+	Abkhaz: "abk",
+	Acehnese: "ace",
+	Acholi: "ach",
+	Alur: "alz",
+	Awadhi: "awa",
+	Balinese: "ban",
+	Baluchi: "bal",
+	Baoule: "bci",
+	"Batak/Karo": "btx",
+	"Batak/Simalungun": "bts",
+	"Batak/Toba": "bbc",
+	Bemba: "bem",
+	"Berber/Tifinagh": "ber",
+	Betawi: "bew",
+	Buryat: "bua",
+	Cantonese: "yue",
+	Chamorro: "cha",
+	Chuukese: "chk",
+	Dari: "prs",
+	Dinka: "din",
+	Dombe: "dov",
+	Dyula: "dyu",
+	"Filipino/Bikol": "bik",
+	"Filipino/Pangasinan": "pag",
+	Friulian: "fur",
+	Fulani: "ful",
+	HakhaChin: "cnh",
+	Hiligaynon: "hil",
+	Hunsrik: "hrx",
+	Iban: "iba",
+	JamaicanPatois: "jam",
+	Jingpo: "kac",
+	Kanuri: "kau",
+	Kiga: "cgg",
+	Kikongo: "kon",
+	Kituba: "ktu",
+	Kokborok: "trp",
+	Latgalian: "ltg",
+	Ligurian: "lij",
+	Madurese: "mad",
+	Makassar: "mak",
+	"Malay/Jawi": "msa",
+	Mam: "mam",
+	Mari: "chm",
+	Marshallese: "mah",
+	Marwadi: "mwr",
+	Minang: "min",
+	Ndau: "ndc",
+	"Ndebele/South": "nbl",
+	Nko: "nqo",
+	Nuer: "nus",
+	Papiamento: "pap",
+	Qeqchi: "kek",
+	Romani: "rom",
+	"Sami/Northern": "sme",
+	Santali: "sat",
+	Shan: "shn",
+	Susu: "sus",
+	Swati: "ssw",
+	Tahitian: "tah",
+	"Tatar/Crimean": "crh",
+	Tetum: "tet",
+	Tiv: "tiv",
+	TokPisin: "tpi",
+	Tongan: "ton",
+	Tulu: "tcy",
+	Tuvan: "tyv",
+	Udmurt: "udm",
+	Venetian: "vec",
+	"Mayan/Yucatecan": "yua",
+	Zapotec: "zap",
+	Fon: "fon",
+} as const);
 
 type LearningLocale = (typeof languageToLocale)[keyof typeof languageToLocale];
 
@@ -310,7 +382,7 @@ function getLearningLocaleByLanguage(language: LearningLanguage): LearningLocale
 	return languageToLocale[language];
 }
 
-const wiktionaryLanguageNames = Object.freeze({
+const wiktionaryLanguageNames: Record<WithBaseLanguage<LearningLanguage>, string> = Object.freeze({
 	"English/American": "English",
 	"English/British": "English",
 	"Norwegian/Bokmal": "Norwegian Bokmål",
@@ -371,7 +443,18 @@ const wiktionaryLanguageNames = Object.freeze({
 	"Spanish/Mexican": "Spanish",
 	"Spanish/Spanish": "Spanish",
 	"Spanish/American": "Spanish",
-} satisfies Record<WithBaseLanguage<LearningLanguage>, string>);
+	"Batak/Karo": "Karo Batak",
+	"Batak/Simalungun": "Simalungun Batak",
+	"Batak/Toba": "Toba Batak",
+	"Berber/Tifinagh": "Central Atlas Tamazight",
+	"Filipino/Pangasinan": "Pangasinan",
+	"Filipino/Bikol": "Bikol",
+	"Malay/Jawi": "Malay",
+	"Ndebele/South": "Southern Ndebele",
+	"Sami/Northern": "Northern Sami",
+	"Tatar/Crimean": "Crimean Tatar",
+	"Mayan/Yucatecan": "Yucatec Maya",
+} as const);
 
 function getWiktionaryLanguageName(language: LearningLanguage): string {
 	return (wiktionaryLanguageNames as Record<string, string>)[language] ?? language;
