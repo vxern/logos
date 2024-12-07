@@ -311,6 +311,7 @@ const languageToLocale: Record<LearningLanguage, string> = Object.freeze({
 	Cantonese: "yue",
 	Chamorro: "cha",
 	Chuukese: "chk",
+	CrimeanTatar: "crh",
 	Dari: "prs",
 	Dinka: "din",
 	Dombe: "dov",
@@ -351,9 +352,7 @@ const languageToLocale: Record<LearningLanguage, string> = Object.freeze({
 	Santali: "sat",
 	Shan: "shn",
 	Susu: "sus",
-	Swati: "ssw",
 	Tahitian: "tah",
-	"Tatar/Crimean": "crh",
 	Tetum: "tet",
 	Tiv: "tiv",
 	TokPisin: "tpi",
@@ -452,7 +451,6 @@ const wiktionaryLanguageNames: Record<WithBaseLanguage<LearningLanguage>, string
 	"Malay/Jawi": "Malay",
 	"Ndebele/South": "Southern Ndebele",
 	"Sami/Northern": "Northern Sami",
-	"Tatar/Crimean": "Crimean Tatar",
 	"Mayan/Yucatecan": "Yucatec Maya",
 } as const);
 
