@@ -342,7 +342,7 @@ const languageToLocale: Record<LearningLanguage, string> = Object.freeze({
 	Marwadi: "mwr",
 	Minang: "min",
 	Ndau: "ndc",
-	"Ndebele/South": "nbl",
+	"Ndebele/Southern": "nbl",
 	Nko: "nqo",
 	Nuer: "nus",
 	Papiamento: "pap",
@@ -449,7 +449,7 @@ const wiktionaryLanguageNames: Record<WithBaseLanguage<LearningLanguage>, string
 	"Filipino/Pangasinan": "Pangasinan",
 	"Filipino/Bikol": "Bikol",
 	"Malay/Jawi": "Malay",
-	"Ndebele/South": "Southern Ndebele",
+	"Ndebele/Southern": "Southern Ndebele",
 	"Sami/Northern": "Northern Sami",
 	"Mayan/Yucatecan": "Yucatec Maya",
 } as const);

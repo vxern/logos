@@ -313,7 +313,7 @@ export default Object.freeze({
 	Marwadi: "🇮🇳",
 	Minang: "🇮🇩",
 	Ndau: "🇿🇼",
-	"Ndebele/South": "🇿🇦",
+	"Ndebele/Southern": "🇿🇦",
 	Nko: "🇬🇳",
 	Nuer: "🇸🇸",
 	Papiamento: "🇺🇳",

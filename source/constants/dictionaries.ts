@@ -334,7 +334,7 @@ const dictionariesByLanguage: Record<LearningLanguage, Dictionary[]> = Object.fr
 	Marwadi: ["wiktionary"],
 	Minang: ["wiktionary"],
 	Ndau: ["wiktionary"],
-	"Ndebele/South": ["wiktionary"],
+	"Ndebele/Southern": ["wiktionary"],
 	Nko: ["wiktionary"],
 	Nuer: ["wiktionary"],
 	Papiamento: ["wiktionary"],
