@@ -49,7 +49,7 @@ describe("codeMultiline()", () => {
 	});
 
 	it("returns a code block containing a newline when an empty string is inputted.", () => {
-		expect(() => code("")).to.equal("```\n```");
+		expect(code("")).to.equal("```\n```");
 	});
 });
 
