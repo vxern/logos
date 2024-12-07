@@ -8,12 +8,12 @@ function isId<T>(object: IndexOr<T>): object is bigint | string {
 	return typeof object === "bigint" || typeof object === "string";
 }
 
-type UserLike = Logos.User | Discord.User | Discord.CamelizedDiscordUser;
-type MemberLike = Logos.Member | Discord.Member | Discord.CamelizedDiscordMember;
-type RoleLike = Logos.Role | Discord.Role | Discord.CamelizedDiscordRole;
-type GuildLike = Logos.Guild | Discord.Guild | Discord.CamelizedDiscordGuild;
-type MessageLike = Logos.Message | Discord.Message | Discord.CamelizedDiscordMessage;
-type ChannelLike = Logos.Channel | Discord.Channel | Discord.CamelizedDiscordChannel;
+type UserLike = Logos.User | Discord.User | Discord.Camelize<Discord.DiscordUser>;
+type MemberLike = Logos.Member | Discord.Member | Discord.Camelize<Discord.DiscordMember>;
+type RoleLike = Logos.Role | Discord.Role | Discord.Camelize<Discord.DiscordRole>;
+type GuildLike = Logos.Guild | Discord.Guild | Discord.Camelize<Discord.DiscordGuild>;
+type MessageLike = Logos.Message | Discord.Message | Discord.Camelize<Discord.DiscordMessage>;
+type ChannelLike = Logos.Channel | Discord.Channel | Discord.Camelize<Discord.DiscordChannel>;
 type InteractionLike = Logos.Interaction | Discord.Interaction;
 
 class Diagnostics {

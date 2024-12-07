@@ -1,7 +1,8 @@
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
 import type { Collector } from "logos/collectors";
 import type pino from "pino";
 
-type Event = keyof Discord.EventHandlers;
+type Event = keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>;
 class EventStore {
 	readonly log: pino.Logger;
 
@@ -13,7 +14,7 @@ class EventStore {
 		this.#collectors = new Map();
 	}
 
-	buildEventHandlers(): Partial<Discord.EventHandlers> {
+	buildEventHandlers(): Partial<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>> {
 		return {
 			// We do not collect events from Discordeno's `raw()` sink; Use the sink for the specific event you want to
 			// handle.
@@ -53,10 +54,10 @@ class EventStore {
 		};
 	}
 
-	collectEvent<Event extends keyof Discord.EventHandlers>(
+	collectEvent<Event extends keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>>(
 		guildId: bigint | undefined,
 		event: Event,
-		{ args }: { args: Parameters<Discord.EventHandlers[Event]> },
+		{ args }: { args: Parameters<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[Event]> },
 	): void {
 		const collectors = this.#collectors.get(event);
 		if (collectors !== undefined) {
@@ -74,7 +75,7 @@ class EventStore {
 		}
 	}
 
-	async registerCollector<Event extends keyof Discord.EventHandlers>(
+	async registerCollector<Event extends keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>>(
 		event: Event,
 		collector: Collector<Event>,
 	): Promise<void> {

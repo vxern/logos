@@ -242,7 +242,7 @@ async function translateText(
 		constants.emojis.commands.translate.direction
 	} ${targetLanguageFlag} ${targetLanguageName}`;
 
-	let embeds: Discord.CamelizedDiscordEmbed[];
+	let embeds: Discord.Camelize<Discord.DiscordEmbed>[];
 	if (isLong) {
 		embeds = [
 			{

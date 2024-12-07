@@ -205,7 +205,7 @@ function generateEmbeds(
 	interaction: Logos.Interaction,
 	data: WordViewData,
 	entry: DictionaryEntry,
-): Discord.CamelizedDiscordEmbed[] {
+): Discord.Camelize<Discord.DiscordEmbed>[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
 			return entryToEmbeds(client, interaction, entry, data.verbose);
@@ -442,7 +442,7 @@ function entryToEmbeds(
 	interaction: Logos.Interaction,
 	entry: DictionaryEntry,
 	verbose: boolean,
-): Discord.CamelizedDiscordEmbed[] {
+): Discord.Camelize<Discord.DiscordEmbed>[] {
 	let partOfSpeechDisplayed: string;
 	if (entry.partOfSpeech === undefined) {
 		const strings = constants.contexts.partOfSpeechUnknown({
@@ -469,8 +469,8 @@ function entryToEmbeds(
 
 	const word = entry.lemma.value;
 
-	const embeds: Discord.CamelizedDiscordEmbed[] = [];
-	const fields: Discord.CamelizedDiscordEmbedField[] = [];
+	const embeds: Discord.Camelize<Discord.DiscordEmbed>[] = [];
+	const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
 	if (entry.definitions !== undefined && entry.definitions.length > 0) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.definitions, "definitions");

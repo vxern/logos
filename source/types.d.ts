@@ -1,6 +1,10 @@
 import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
-import type { Properties } from "logos:constants/properties";
+import type {
+	DesiredProperties,
+	DesiredPropertiesBehaviour,
+	SelectedDesiredProperties,
+} from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
 import type { PromiseOr, WithRequired } from "logos:core/utilities";
 import type { EntryRequest } from "logos/models/entry-request";
@@ -46,31 +50,32 @@ declare global {
 declare global {
 	// biome-ignore lint/style/noNamespace: We use Logos types to make a distinction from Discordeno types.
 	namespace Logos {
-		type Guild = Pick<
+		type Guild = Discord.SetupDesiredProps<
 			Omit<Discord.Guild, "roles" | "members" | "channels" | "voiceStates"> & {
 				roles: Discord.Collection<bigint, Role>;
 				members: Discord.Collection<bigint, Member>;
 				channels: Discord.Collection<bigint, Channel>;
 				voiceStates: Discord.Collection<bigint, VoiceState>;
 			},
-			keyof Properties["guild"]
+			SelectedDesiredProperties
 		>;
 
-		type RawInteraction = Pick<Discord.Interaction, keyof Properties["interaction"]>;
+		type RawInteraction = Discord.SetupDesiredProps<Discord.Interaction, SelectedDesiredProperties>;
 
-		type Channel = Pick<Discord.Channel, keyof Properties["channel"]>;
+		type Channel = Discord.SetupDesiredProps<Discord.Channel, SelectedDesiredProperties>;
 
-		type User = Pick<Discord.User, keyof Properties["user"]>;
+		type User = Discord.SetupDesiredProps<Discord.User, SelectedDesiredProperties>;
 
-		type Member = Pick<Discord.Member, keyof Properties["member"]> & { user?: User };
+		type Member = Discord.SetupDesiredProps<Discord.Member, SelectedDesiredProperties> & { user?: User };
 
-		type Message = Pick<Discord.Message, keyof Properties["message"]>;
+		type Message = Discord.SetupDesiredProps<Discord.Message, SelectedDesiredProperties>;
 
-		type Attachment = Pick<Discord.Attachment, keyof Properties["attachment"]> & Discord.FileContent;
+		type Attachment = Discord.SetupDesiredProps<Discord.Attachment, SelectedDesiredProperties> &
+			Discord.FileContent;
 
-		type Role = Pick<Discord.Role, keyof Properties["role"]>;
+		type Role = Discord.SetupDesiredProps<Discord.Role, SelectedDesiredProperties>;
 
-		type VoiceState = Pick<Discord.VoiceState, keyof Properties["voiceState"]>;
+		type VoiceState = Discord.SetupDesiredProps<Discord.VoiceState, SelectedDesiredProperties>;
 
 		interface InteractionLocaleData {
 			// Localisation
@@ -185,20 +190,21 @@ declare global {
 	export * as Discord from "@discordeno/bot";
 }
 
-type DeepPartial<T> = T extends object ? { [P in keyof T]?: DeepPartial<T[P]> } : T;
-
 declare module "@discordeno/bot" {
 	type Locale = `${Discord.Locales}`;
-	type VoiceServerUpdate = Parameters<Discord.EventHandlers["voiceServerUpdate"]>[0];
-	type DesiredProperties = DeepPartial<Discord.Transformers["desiredProperties"]>;
+	type VoiceServerUpdate = Parameters<
+		Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>["voiceServerUpdate"]
+	>[0];
 	type DeletedMessage = Discord.Events["messageDelete"][0];
 
 	type Events = {
-		[T in keyof Discord.EventHandlers]: Parameters<Discord.EventHandlers[T]>;
+		[T in keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>]: Parameters<
+			Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[T]
+		>;
 	};
 
 	interface Message {
 		// REMINDER(vxern): Monkey-patch for Discordeno messages.
-		content?: string;
+		content: string | undefined;
 	}
 }

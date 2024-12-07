@@ -1,17 +1,30 @@
 import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
 import { type LearningLanguage, getLearningLocaleByLanguage } from "logos:constants/languages/learning";
 import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
 import type { PromiseOr } from "logos:core/utilities";
 import type { Client } from "logos/client";
 import { Guild } from "logos/models/guild";
 import { User } from "logos/models/user";
 import { nanoid } from "nanoid";
 
-type CollectEvent<Event extends keyof Discord.EventHandlers = keyof Discord.EventHandlers> = (
-	...args: Parameters<Discord.EventHandlers[Event]>
+type Interaction = Discord.SetupDesiredProps<Discord.Interaction, DesiredProperties, DesiredPropertiesBehaviour>;
+
+type CollectEvent<
+	Event extends keyof Discord.EventHandlers<
+		DesiredProperties,
+		DesiredPropertiesBehaviour
+	> = keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>,
+> = (
+	...args: Parameters<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[Event]>
 ) => PromiseOr<void>;
 type DoneEvent = () => void | Promise<void>;
-class Collector<Event extends keyof Discord.EventHandlers = any> {
+class Collector<
+	Event extends keyof Discord.EventHandlers<
+		DesiredProperties,
+		DesiredPropertiesBehaviour
+	> = keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>,
+> {
 	readonly done: Promise<void>;
 	readonly guildId?: bigint;
 
@@ -59,11 +72,13 @@ class Collector<Event extends keyof Discord.EventHandlers = any> {
 		}
 	}
 
-	filter(..._: Parameters<Discord.EventHandlers[Event]>): boolean {
+	filter(..._: Parameters<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[Event]>): boolean {
 		return true;
 	}
 
-	async dispatchCollect(...args: Parameters<Discord.EventHandlers[Event]>): Promise<void> {
+	async dispatchCollect(
+		...args: Parameters<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[Event]>
+	): Promise<void> {
 		if (this.#isClosed) {
 			return;
 		}
@@ -170,7 +185,7 @@ class InteractionCollector<
 		this.#acceptAnyUser = this.only.values.length === 0;
 	}
 
-	static getCommandName(interaction: Discord.Interaction): string {
+	static getCommandName(interaction: Interaction): string {
 		const commandName = interaction.data?.name;
 		if (commandName === undefined) {
 			throw new Error("Command did not have a name.");
@@ -203,7 +218,7 @@ class InteractionCollector<
 		return parts.join(constants.special.interaction.divider);
 	}
 
-	filter(interaction: Discord.Interaction): boolean {
+	filter(interaction: Interaction): boolean {
 		if (!this.anyType) {
 			if (interaction.type !== this.type) {
 				return false;
@@ -274,7 +289,7 @@ class InteractionCollector<
 	}
 
 	async #getLocaleData(
-		interaction: Discord.Interaction,
+		interaction: Interaction,
 	): Promise<Omit<Logos.InteractionLocaleData, "displayLocale" | "displayLanguage">> {
 		const member = this.#client.entities.members.get(interaction.guildId!)?.get(interaction.user.id);
 		if (member === undefined) {
@@ -328,7 +343,7 @@ class InteractionCollector<
 		return { locale, language, guildLocale, guildLanguage, learningLocale, learningLanguage, featureLanguage };
 	}
 
-	#getMetadata(interaction: Discord.Interaction): Logos.Interaction<Metadata>["metadata"] {
+	#getMetadata(interaction: Interaction): Logos.Interaction<Metadata>["metadata"] {
 		const idEncoded = interaction.data?.customId;
 		if (idEncoded === undefined) {
 			return [constants.components.none] as unknown as Logos.Interaction<Metadata>["metadata"];
@@ -338,7 +353,7 @@ class InteractionCollector<
 	}
 
 	#getParameters<Parameters extends Record<string, DiscordParameterType>>(
-		interaction: Discord.Interaction,
+		interaction: Interaction,
 	): Logos.InteractionParameters<Parameters> {
 		const options = interaction.data?.options;
 		if (options === undefined) {

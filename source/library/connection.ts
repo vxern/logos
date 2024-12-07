@@ -1,9 +1,10 @@
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
 import type { Environment } from "logos:core/loaders/environment";
 import type pino from "pino";
 
 class DiscordConnection {
 	readonly log: pino.Logger;
-	readonly bot: Discord.Bot;
+	readonly bot: Discord.Bot<DesiredProperties, DesiredPropertiesBehaviour>;
 
 	constructor({
 		log = constants.loggers.silent,
@@ -20,70 +21,33 @@ class DiscordConnection {
 		log?: pino.Logger;
 		environment: Environment;
 		intents?: Discord.GatewayIntents;
-		eventHandlers?: Partial<Discord.EventHandlers>;
-		cacheHandlers?: Partial<Discord.Transformers["customizers"]>;
+		eventHandlers?: Partial<Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>>;
+		cacheHandlers?: Partial<Discord.Transformers<DesiredProperties, DesiredPropertiesBehaviour>["customizers"]>;
 	}) {
 		this.log = log.child({ name: "DiscordConnection" });
-		this.bot = Discord.createBot({
+		this.bot = Discord.createBot<DesiredProperties, DesiredPropertiesBehaviour>({
 			token: environment.discordSecret,
 			intents,
 			events: eventHandlers,
-			// REMINDER(vxern): Remove this once the bot is updated to a newer Discordeno release.
-			//
-			// The code will then be something like:
-			//
-			//    transformers: {
-			//      ...
-			// 	    desiredProperties: constants.properties as unknown as Discord.Transformers["desiredProperties"],
-			//    },
-			defaultDesiredPropertiesValue: true,
-			// REMINDER(vxern): Remove this once the bot is updated to a newer Discordeno release, since it should
-			// no longer be required. Make sure members are still being fetched, though.
-			gateway: {
-				token: environment.discordSecret,
-				events: {},
-				cache: { requestMembers: { enabled: true, pending: new Discord.Collection() } },
-			},
+			transformers: { customizers: cacheHandlers },
+			desiredProperties: constants.properties as unknown as DesiredProperties,
+			loggerFactory: (name) =>
+				constants.loggers.discordeno.child({ name: name.toLowerCase() }, { level: "debug" }),
 		});
-		// REMINDER(vxern): Move this to the `Discord.createBot()` call once the bot is updated to a newer Discordeno
-		// release.
-		//
-		//    transformers: {
-		// 	    customizers: cacheHandlers,
-		// 	    ...
-		//    },
-		for (const [customiser, handler] of Object.entries(cacheHandlers)) {
-			// @ts-ignore: This will be removed once the bot is updated to a new Discordeno release.
-			this.bot.transformers.customizers[customiser] = handler;
-		}
-		// REMINDER(vxern): Remove this once the issue with Discordeno filtering out '0' as a shard ID is fixed.
-		this.bot.transformers.guild = (bot, payload) => {
-			const result = Discord.transformGuild(bot, payload);
-
-			result.shardId = payload.shardId;
-
-			return result;
-		};
 		this.bot.handlers = Discord.createBotGatewayHandlers({
 			// REMINDER(vxern): Remove this once Discordeno is able to filter out embeds being resolved in a message.
 			MESSAGE_UPDATE: async (bot, data) => {
-				const payload = data.d as Discord.DiscordMessage;
-				if (!payload.author) {
+				const message = data.d as Discord.DiscordMessage;
+				if (!message.author) {
 					return;
 				}
 
-				bot.events.messageUpdate?.(bot.transformers.message(bot, payload));
+				// The `shardId` is not necessary here.
+				bot.events.messageUpdate?.(bot.transformers.message(bot, { message, shardId: 0 }));
 			},
 		});
-		this.bot.logger = constants.loggers.discordeno.child({ name: "Bot" });
 
 		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Logos (https://github.com/vxern/logos)" });
-		// REMINDER(vxern): Remove this once the weird 5 second delay is removed from Discordeno's `shutdown()` call.
-		this.bot.gateway.shutdown = async (code, reason) => {
-			for (const shard of this.bot.gateway.shards.values()) {
-				shard.close(code, reason);
-			}
-		};
 	}
 
 	async open(): Promise<void> {

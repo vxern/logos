@@ -2,8 +2,8 @@ import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 
 interface View {
-	embed: Discord.CamelizedDiscordEmbed;
-	components?: Discord.MessageComponents;
+	embed: Discord.Camelize<Discord.DiscordEmbed>;
+	components?: Discord.ActionRow[];
 }
 
 abstract class TabbedView<Generic extends { groups: Record<string, string> }> {

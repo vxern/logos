@@ -6,7 +6,7 @@ import type { CommandStore } from "logos/stores/commands";
 import type pino from "pino";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
-type EmbedOrCallbackData = Discord.CamelizedDiscordEmbed | InteractionCallbackData;
+type EmbedOrCallbackData = Discord.Camelize<Discord.DiscordEmbed> | InteractionCallbackData;
 interface ReplyData {
 	readonly ephemeral: boolean;
 }
@@ -407,7 +407,7 @@ class InteractionStore {
 	}
 
 	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
-		return this.#client.bot.helpers
+		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
 				data: { choices },
@@ -419,7 +419,7 @@ class InteractionStore {
 		interaction: Logos.Interaction,
 		data: Omit<Discord.InteractionCallbackData, "flags">,
 	): Promise<void> {
-		return this.#client.bot.helpers
+		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.Modal,
 				data,
@@ -665,7 +665,7 @@ interface MemberNarrowingOptions {
 	readonly excludeModerators: boolean;
 }
 
-function isEmbed(embedOrData: EmbedOrCallbackData): embedOrData is Discord.CamelizedDiscordEmbed {
+function isEmbed(embedOrData: EmbedOrCallbackData): embedOrData is Discord.Camelize<Discord.DiscordEmbed> {
 	return "title" in embedOrData || "description" in embedOrData || "fields" in embedOrData;
 }
 
