@@ -35,7 +35,6 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 				"inflection",
 				"etymology",
 			],
-			supports: ["Romanian"],
 		});
 	}
 

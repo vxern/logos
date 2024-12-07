@@ -8,7 +8,6 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	readonly log: pino.Logger;
 	readonly client: Client;
 	readonly provides: DictionarySection[];
-	readonly supports: LearningLanguage[];
 	readonly isFallback: boolean;
 
 	constructor(
@@ -16,14 +15,12 @@ abstract class DictionaryAdapter<DataType = unknown> {
 		{
 			identifier,
 			provides,
-			supports,
 			isFallback = false,
-		}: { identifier: string; provides: DictionarySection[]; supports: LearningLanguage[]; isFallback?: boolean },
+		}: { identifier: string; provides: DictionarySection[]; isFallback?: boolean },
 	) {
 		this.log = client.log.child({ name: identifier });
 		this.client = client;
 		this.provides = provides;
-		this.supports = supports;
 		this.isFallback = isFallback;
 	}
 

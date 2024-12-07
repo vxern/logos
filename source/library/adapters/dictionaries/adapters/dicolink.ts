@@ -24,7 +24,6 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 		super(client, {
 			identifier: "Dicolink",
 			provides: ["partOfSpeech", "definitions"],
-			supports: ["French"],
 		});
 
 		this.token = token;

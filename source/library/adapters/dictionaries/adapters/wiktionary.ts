@@ -11,27 +11,6 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 		super(client, {
 			identifier: "Wiktionary",
 			provides: ["partOfSpeech", "definitions", "translations", "etymology"],
-			supports: [
-				"Armenian/Eastern",
-				"Armenian/Western",
-				"Danish",
-				"Dutch",
-				"English/American",
-				"English/British",
-				"Finnish",
-				"French",
-				"German",
-				"Greek",
-				"Hungarian",
-				"Norwegian/Bokmal",
-				"Polish",
-				"Romanian",
-				"Russian",
-				"Silesian",
-				"Spanish",
-				"Swedish",
-				"Turkish",
-			],
 		});
 	}
 
