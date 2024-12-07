@@ -31,6 +31,8 @@ class DiscordConnection {
 			events: eventHandlers,
 			transformers: { customizers: cacheHandlers },
 			desiredProperties: constants.properties as unknown as DesiredProperties,
+			loggerFactory: (name) =>
+				constants.loggers.discordeno.child({ name: name.toLowerCase() }, { level: "debug" }),
 		});
 		this.bot.handlers = Discord.createBotGatewayHandlers({
 			// REMINDER(vxern): Remove this once Discordeno is able to filter out embeds being resolved in a message.
@@ -44,7 +46,6 @@ class DiscordConnection {
 				bot.events.messageUpdate?.(bot.transformers.message(bot, { message, shardId: 0 }));
 			},
 		});
-		this.bot.logger = constants.loggers.discordeno.child({ name: "Bot" });
 
 		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Logos (https://github.com/vxern/logos)" });
 	}
