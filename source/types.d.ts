@@ -1,9 +1,9 @@
 import type constants_ from "logos:constants/constants";
 import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "logos:constants/languages";
 import type {
-	SelectedDesiredProperties,
 	DesiredProperties,
 	DesiredPropertiesBehaviour,
+	SelectedDesiredProperties,
 } from "logos:constants/properties";
 import type { SlowmodeLevel } from "logos:constants/slowmode";
 import type { PromiseOr, WithRequired } from "logos:core/utilities";
