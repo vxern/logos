@@ -28,23 +28,24 @@ class DiscordConnection {
 		this.bot = Discord.createBot<DesiredProperties, DesiredPropertiesBehaviour>({
 			token: environment.discordSecret,
 			intents,
+			gateway: { cache: { requestMembers: { enabled: true } } },
 			events: eventHandlers,
 			transformers: { customizers: cacheHandlers },
+			handlers: {
+				// REMINDER(vxern): Remove this once Discordeno is able to filter out embeds being resolved in a message.
+				MESSAGE_UPDATE: async (bot, data) => {
+					const message = data.d as Discord.DiscordMessage;
+					if (!message.author) {
+						return;
+					}
+
+					// The `shardId` is not necessary here.
+					bot.events.messageUpdate?.(bot.transformers.message(bot, { message, shardId: 0 }));
+				},
+			},
 			desiredProperties: constants.properties as unknown as DesiredProperties,
 			loggerFactory: (name) =>
 				constants.loggers.discordeno.child({ name: name.toLowerCase() }, { level: "debug" }),
-		});
-		this.bot.handlers = Discord.createBotGatewayHandlers({
-			// REMINDER(vxern): Remove this once Discordeno is able to filter out embeds being resolved in a message.
-			MESSAGE_UPDATE: async (bot, data) => {
-				const message = data.d as Discord.DiscordMessage;
-				if (!message.author) {
-					return;
-				}
-
-				// The `shardId` is not necessary here.
-				bot.events.messageUpdate?.(bot.transformers.message(bot, { message, shardId: 0 }));
-			},
 		});
 
 		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Logos (https://github.com/vxern/logos)" });
