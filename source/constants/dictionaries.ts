@@ -316,7 +316,6 @@ const dictionariesByLanguage: Record<LearningLanguage, Dictionary[]> = Object.fr
 	Iban: ["wiktionary"],
 	JamaicanPatois: ["wiktionary"],
 	Jingpo: ["wiktionary"],
-	Kalaallisut: ["wiktionary"],
 	Kanuri: ["wiktionary"],
 	Kiga: ["wiktionary"],
 	Kikongo: ["wiktionary"],
