@@ -19,7 +19,7 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 					channel: mention(message.channelId, { type: "channel" }),
 				}),
 				fields:
-					message.content !== undefined
+					message.content.length > 0
 						? [
 								{
 									name: strings.fields.content,

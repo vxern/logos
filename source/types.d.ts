@@ -202,9 +202,4 @@ declare module "@discordeno/bot" {
 			Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>[T]
 		>;
 	};
-
-	interface Message {
-		// REMINDER(vxern): Monkey-patch for Discordeno messages.
-		content: string | undefined;
-	}
 }
