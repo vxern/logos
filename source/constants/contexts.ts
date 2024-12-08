@@ -856,13 +856,18 @@ export default Object.freeze({
 		allTime: localise("game.strings.allTime", locale),
 		next: localise("game.strings.next", locale)(),
 	}),
-	sentencesSourcedFrom: ({ localise, locale }) => ({
+	gameSentencesSourcedFrom: ({ localise, locale }) => ({
 		sentence: localise("game.strings.sentence", locale)(),
 		translation: localise("game.strings.translation", locale)(),
 		sourcedFrom: localise("game.strings.sourcedFrom", locale),
 	}),
 	translationsSourcedFrom: ({ localise, locale }) => ({
 		sourcedFrom: localise("translate.strings.sourcedFrom", locale),
+	}),
+	contextSentencesSourcedFrom: ({ localise, locale }) => ({
+		sentence: localise("context.strings.sentence", locale),
+		translation: localise("context.strings.translation", locale),
+		sourcedFrom: localise("context.strings.sourcedFrom", locale),
 	}),
 	recognitionsMadeBy: ({ localise, locale }) => ({
 		recognitionsMadeBy: localise("recognise.strings.recognitionsMadeBy", locale)(),

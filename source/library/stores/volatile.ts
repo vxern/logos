@@ -4,10 +4,12 @@ import Redis from "ioredis";
 import type { Client } from "logos/client";
 import type pino from "pino";
 
-interface SentencePair {
+interface SentenceIdPair {
 	readonly sentenceId: number;
-	readonly sentence: string;
 	readonly translationId: number;
+}
+interface SentencePair extends SentenceIdPair {
+	readonly sentence: string;
 	readonly translation: string;
 }
 type SentencePairEncoded = [sentenceId: number, sentence: string, translationId: number, translation: string];
@@ -230,4 +232,4 @@ class VolatileStore {
 }
 
 export { VolatileStore };
-export type { SentencePair };
+export type { SentenceIdPair, SentencePair };

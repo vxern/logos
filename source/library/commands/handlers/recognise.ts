@@ -1,6 +1,6 @@
 import { list } from "logos:constants/formatting";
 import type { Client } from "logos/client";
-import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-notice";
+import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-source-notice";
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,
