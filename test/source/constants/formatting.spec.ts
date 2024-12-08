@@ -48,8 +48,8 @@ describe("codeMultiline()", () => {
 		);
 	});
 
-	it("returns a formatted placeholder when an empty string is inputted.", () => {
-		expect(() => code("")).to.throw("The string cannot be empty.");
+	it("returns a code block containing a newline when an empty string is inputted.", () => {
+		expect(code("")).to.equal("```\n```");
 	});
 });
 

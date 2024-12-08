@@ -49,11 +49,7 @@ function code(string: string): string {
  * @param string - String of text to format.
  */
 function codeMultiline(string: string): string {
-	if (string.length === 0) {
-		throw new Error("The string cannot be empty.");
-	}
-
-	return `\`\`\`${string}\`\`\``;
+	return `\`\`\`${string.length > 0 ? string : "\n"}\`\`\``;
 }
 
 /**
