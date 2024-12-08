@@ -13,7 +13,7 @@ class TatoebaSourceNotice extends SourceNotice {
 		const sentenceLink = constants.links.tatoebaSentence(sentenceId.toString());
 		const translationLink = constants.links.tatoebaSentence(translationId.toString());
 
-		const strings = constants.contexts.sentencesSourcedFrom({
+		const strings = constants.contexts.gameSentencesSourcedFrom({
 			localise: client.localise,
 			locale: interaction.displayLocale,
 		});

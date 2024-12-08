@@ -3,11 +3,11 @@ import { InteractionCollector } from "logos/collectors";
 
 abstract class SourceNotice {
 	readonly client: Client;
+	readonly sources: string[];
+	readonly notice?: string;
 
 	readonly #buttonPresses: InteractionCollector;
 	readonly #interaction: Logos.Interaction;
-	readonly #sources: string[];
-	readonly #notice?: string;
 
 	get button(): Discord.ButtonComponent {
 		const strings = constants.contexts.source({
@@ -28,29 +28,29 @@ abstract class SourceNotice {
 		{ interaction, sources, notice }: { interaction: Logos.Interaction; sources: string[]; notice?: string },
 	) {
 		this.client = client;
+		this.sources = sources;
+		this.notice = notice;
 
 		this.#buttonPresses = new InteractionCollector(client, { only: [interaction.user.id] });
 		this.#interaction = interaction;
-		this.#sources = sources;
-		this.#notice = notice;
 	}
 
-	async #display(buttonPress: Logos.Interaction): Promise<void> {
-		const sourcesFormatted = this.#sources.join(constants.special.sigils.separator);
+	async display(buttonPress: Logos.Interaction): Promise<void> {
+		const sourcesFormatted = this.sources.join(constants.special.sigils.separator);
 
 		await this.client.reply(buttonPress, {
 			embeds: [
 				{
 					description: `${constants.emojis.link} ${sourcesFormatted}`,
 					color: constants.colours.blue,
-					footer: this.#notice !== undefined ? { text: this.#notice } : undefined,
+					footer: this.notice !== undefined ? { text: this.notice } : undefined,
 				},
 			],
 		});
 	}
 
 	async register(): Promise<void> {
-		this.#buttonPresses.onInteraction(async (buttonPress) => this.#display(buttonPress));
+		this.#buttonPresses.onInteraction(async (buttonPress) => this.display(buttonPress));
 
 		await this.client.registerInteractionCollector(this.#buttonPresses);
 	}

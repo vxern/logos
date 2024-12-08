@@ -2,6 +2,7 @@ import { type LearningLanguage, getLearningLocaleByLanguage } from "logos:consta
 import { isLocalisationLanguage } from "logos:constants/languages/localisation";
 import { shuffle } from "ioredis/built/utils";
 import type { Client } from "logos/client";
+import { ContextSourceNotice } from "logos/commands/components/source-notices/context-source-notice";
 import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
 import type { SentencePair } from "logos/stores/volatile";
 
@@ -76,6 +77,16 @@ async function handleFindInContext(
 		...constants.contexts.phraseInContext({ localise: client.localise, locale: interaction.displayLocale }),
 	};
 
+	const sourceNotice = new ContextSourceNotice(client, {
+		interaction,
+		ids: sentencePairSelection.map((sentencePair) => ({
+			sentenceId: sentencePair.sentenceId,
+			translationId: sentencePair.translationId,
+		})),
+	});
+
+	await sourceNotice.register();
+
 	const languageFlag = constants.emojis.flags[learningLanguage];
 	const languageName = strings.language(learningLanguage);
 
@@ -98,14 +109,17 @@ async function handleFindInContext(
 					footer: { text: `${languageFlag} ${languageName}` },
 				},
 			],
-			components: interaction.parameters.show
-				? undefined
-				: [
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [client.services.global("interactionRepetition").getShowButton(interaction)],
-						},
-					],
+			components: [
+				{
+					type: Discord.MessageComponentTypes.ActionRow,
+					components: [
+						...(interaction.parameters.show
+							? []
+							: [client.services.global("interactionRepetition").getShowButton(interaction)]),
+						sourceNotice.button,
+					] as [Discord.ButtonComponent],
+				},
+			],
 		})
 		.ignore();
 }
