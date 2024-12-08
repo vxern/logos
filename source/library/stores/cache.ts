@@ -100,7 +100,7 @@ class CacheStore {
 	#cacheGuild(guild: Discord.Guild): void {
 		this.entities.guilds.set(guild.id, guild as unknown as Logos.Guild);
 
-		for (const channel of guild.channels.array()) {
+		for (const channel of guild.channels?.array() ?? []) {
 			this.#cacheChannel(channel);
 		}
 	}
