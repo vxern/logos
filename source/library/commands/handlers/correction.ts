@@ -1,3 +1,4 @@
+import { diffWordsWithSpace } from "diff";
 import type { Client } from "logos/client";
 import { CorrectionComposer } from "logos/commands/components/modal-composers/correction-composer";
 
@@ -86,6 +87,21 @@ async function handleMakeCorrection(
 	composer.onSubmit(async (submission, { formData }) => {
 		client.acknowledge(submission).ignore();
 
+		const differences = diffWordsWithSpace(formData.original, formData.corrected, {
+			intlSegmenter: new Intl.Segmenter(interaction.learningLocale, { granularity: "word" }),
+		});
+		const content = differences.reduce((content, part) => {
+			if (part.added) {
+				return `${content}__${part.value}__`;
+			}
+
+			if (part.removed) {
+				return content;
+			}
+
+			return `${content}${part.value}`;
+		}, "");
+
 		const strings = constants.contexts.correction({ localise: client.localise, locale: interaction.locale });
 		client.bot.helpers
 			.sendMessage(message.channelId, {
@@ -97,7 +113,7 @@ async function handleMakeCorrection(
 				},
 				embeds: [
 					{
-						description: formData.corrected,
+						description: content,
 						color: constants.colours.success,
 						footer: {
 							text: `${constants.emojis.commands.correction} ${strings.suggestedBy({
