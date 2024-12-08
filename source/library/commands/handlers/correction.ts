@@ -34,13 +34,12 @@ async function handleMakeCorrection(
 		return;
 	}
 
-	// TODO(vxern): Uncomment.
-	// if (message.author.id === interaction.user.id) {
-	// 	const strings = constants.contexts.cannotCorrectOwn({ localise: client.localise, locale: interaction.locale });
-	// 	client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+	if (message.author.id === interaction.user.id) {
+		const strings = constants.contexts.cannotCorrectOwn({ localise: client.localise, locale: interaction.locale });
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
-	// 	return;
-	// }
+		return;
+	}
 
 	const correctedMember = client.entities.members.get(interaction.guildId)?.get(message.author.id);
 	if (correctedMember === undefined) {
