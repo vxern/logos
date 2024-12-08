@@ -191,11 +191,6 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		// If somebody was already connected to the channel, do not process.
-		if (channel.voiceStates.length !== 1) {
-			return;
-		}
-
 		const vacantChannels = [parent, ...children].filter((channel) => channel.voiceStates.length === 0);
 		if (vacantChannels.length === (configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS) + 1) {
 			return;
@@ -211,7 +206,7 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		this.client.bot.helpers
+		await this.client.bot.helpers
 			.createChannel(this.guildId, {
 				name: parent.channel.name,
 				type: Discord.ChannelTypes.GuildVoice,
