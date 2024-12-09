@@ -63,6 +63,10 @@ abstract class DictionaryAdapter<DataType = unknown> {
 			const baseSections: [string, unknown][] = [];
 			const sections: [string, unknown][] = [];
 			for (const rawSection of rawSections) {
+				if (rawSection[1] === undefined) {
+					continue;
+				}
+
 				if (dictionaries.baseSections.includes(rawSection[0])) {
 					baseSections.push(rawSection);
 					continue;
