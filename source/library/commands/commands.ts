@@ -1,3 +1,4 @@
+import type { WordSearchMode } from "logos:constants/word";
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
 import { handleAnswer } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
@@ -73,7 +74,6 @@ import {
 } from "logos/commands/handlers/translate";
 import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
 import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
-import type { WordSearchMode } from "logos:constants/word";
 
 /**
  * @remarks
@@ -228,7 +228,7 @@ const commands = Object.freeze({
 		flags: { isShowable: true },
 	},
 	...(Object.fromEntries(
-		constants.word.searchModes.map((searchMode): [WordSearchMode, CommandTemplate] => [
+		constants.dictionaries.searchModes.map((searchMode): [WordSearchMode, CommandTemplate] => [
 			searchMode,
 			{
 				identifier: searchMode,

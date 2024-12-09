@@ -72,7 +72,9 @@ async function handleFindWord(
 			continue;
 		}
 
-		const entries = await dictionary.getEntries(interaction, interaction.parameters.word, learningLanguage);
+		const entries = await dictionary.getEntries(interaction, interaction.parameters.word, learningLanguage, {
+			searchMode,
+		});
 		if (entries === undefined) {
 			continue;
 		}

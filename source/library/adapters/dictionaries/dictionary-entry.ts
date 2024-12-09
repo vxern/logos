@@ -1,4 +1,4 @@
-import type { DictionarySection } from "logos:constants/dictionaries";
+import type { DictionarySection, RequiredDictionarySection } from "logos:constants/dictionaries";
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import type { Licence } from "logos:constants/licences";
 import type { PartOfSpeech } from "logos:constants/parts-of-speech";
@@ -53,7 +53,7 @@ interface DictionaryEntrySource {
 	licence: Licence;
 }
 
-interface DictionaryEntry extends Partial<Record<DictionarySection, unknown>> {
+interface BaseDictionaryEntry extends Record<RequiredDictionarySection, unknown> {
 	/** Sources of information about the lemma. */
 	sources: DictionaryEntrySource[];
 
@@ -65,7 +65,9 @@ interface DictionaryEntry extends Partial<Record<DictionarySection, unknown>> {
 
 	/** Part of speech of the lemma. */
 	partOfSpeech?: PartOfSpeechField;
+}
 
+interface DictionaryEntry extends BaseDictionaryEntry, Partial<Record<DictionarySection, unknown>> {
 	/** Definitions belonging to the lemma. */
 	definitions?: DefinitionField[];
 

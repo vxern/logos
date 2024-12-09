@@ -23,7 +23,7 @@ class DicolinkAdapter extends DictionaryAdapter<DicolinkResult[]> {
 	constructor(client: Client, { token }: { token: string }) {
 		super(client, {
 			identifier: "Dicolink",
-			provides: ["partOfSpeech", "definitions"],
+			provides: ["definitions"],
 		});
 
 		this.token = token;

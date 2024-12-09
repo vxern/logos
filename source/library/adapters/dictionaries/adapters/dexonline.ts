@@ -26,15 +26,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	constructor(client: Client) {
 		super(client, {
 			identifier: "Dexonline",
-			provides: [
-				"partOfSpeech",
-				"definitions",
-				"relations",
-				"expressions",
-				"examples",
-				"inflection",
-				"etymology",
-			],
+			provides: ["definitions", "relations", "expressions", "examples", "inflection", "etymology"],
 		});
 	}
 

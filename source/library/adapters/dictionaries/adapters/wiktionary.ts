@@ -10,7 +10,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 	constructor(client: Client) {
 		super(client, {
 			identifier: "Wiktionary",
-			provides: ["partOfSpeech", "definitions", "translations", "etymology"],
+			provides: ["definitions", "translations", "etymology"],
 		});
 	}
 
