@@ -238,17 +238,17 @@ const commands = Object.freeze({
 				handleAutocomplete: handleFindWordAutocomplete,
 				options: {
 					word: {
-						identifier: "word",
+						identifier: "parameters.word",
 						type: Discord.ApplicationCommandOptionTypes.String,
 						required: true,
 					},
 					language: {
-						identifier: "language",
+						identifier: "parameters.language",
 						type: Discord.ApplicationCommandOptionTypes.String,
 						autocomplete: true,
 					},
 					verbose: {
-						identifier: "verbose",
+						identifier: "parameters.verbose",
 						type: Discord.ApplicationCommandOptionTypes.Boolean,
 					},
 					show: constants.parameters.show,
