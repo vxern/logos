@@ -13,7 +13,7 @@ class SoftwareLicenceView extends PaginatedView<string> {
 		this.#title = title;
 	}
 
-	build(_interaction: Logos.Interaction, page: string[], _: number): View {
+	build(_: Logos.Interaction, page: string[], __: number): View {
 		return { embed: { title: this.#title, description: `*${page.at(0)}*` } };
 	}
 }

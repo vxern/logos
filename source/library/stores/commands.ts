@@ -423,6 +423,10 @@ class CommandStore {
 
 		if (guildDocument.hasEnabled("word")) {
 			commands.push(this.commands.word);
+			commands.push(this.commands.meaning);
+			commands.push(this.commands.expressions);
+			commands.push(this.commands.inflection);
+			commands.push(this.commands.etymology);
 		}
 
 		if (guildDocument.hasEnabled("context")) {

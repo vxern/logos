@@ -1,3 +1,4 @@
+import type { WordSearchMode } from "logos:constants/word";
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
 import { handleAnswer } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
@@ -226,31 +227,36 @@ const commands = Object.freeze({
 		handle: handleTranslateMessage,
 		flags: { isShowable: true },
 	},
-	word: {
-		identifier: "word",
-		type: Discord.ApplicationCommandTypes.ChatInput,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleFindWord,
-		handleAutocomplete: handleFindWordAutocomplete,
-		options: {
-			word: {
-				identifier: "word",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				required: true,
+	...(Object.fromEntries(
+		constants.dictionaries.searchModes.map((searchMode): [WordSearchMode, CommandTemplate] => [
+			searchMode,
+			{
+				identifier: searchMode,
+				type: Discord.ApplicationCommandTypes.ChatInput,
+				defaultMemberPermissions: ["VIEW_CHANNEL"],
+				handle: (client, interaction) => handleFindWord(client, interaction, { searchMode }),
+				handleAutocomplete: handleFindWordAutocomplete,
+				options: {
+					word: {
+						identifier: "parameters.word",
+						type: Discord.ApplicationCommandOptionTypes.String,
+						required: true,
+					},
+					language: {
+						identifier: "parameters.language",
+						type: Discord.ApplicationCommandOptionTypes.String,
+						autocomplete: true,
+					},
+					verbose: {
+						identifier: "parameters.verbose",
+						type: Discord.ApplicationCommandOptionTypes.Boolean,
+					},
+					show: constants.parameters.show,
+				},
+				flags: { hasRateLimit: true, isShowable: true },
 			},
-			language: {
-				identifier: "language",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				autocomplete: true,
-			},
-			verbose: {
-				identifier: "verbose",
-				type: Discord.ApplicationCommandOptionTypes.Boolean,
-			},
-			show: constants.parameters.show,
-		},
-		flags: { hasRateLimit: true, isShowable: true },
-	},
+		]),
+	) as Record<WordSearchMode, CommandTemplate>),
 	context: {
 		identifier: "context",
 		type: Discord.ApplicationCommandTypes.ChatInput,

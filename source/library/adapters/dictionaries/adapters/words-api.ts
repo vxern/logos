@@ -28,7 +28,7 @@ class WordsAPIAdapter extends DictionaryAdapter<SearchResult> {
 	constructor(client: Client, { token }: { token: string }) {
 		super(client, {
 			identifier: "WordsAPI",
-			provides: ["partOfSpeech", "definitions", "relations", "syllables", "pronunciation", "frequency"],
+			provides: ["definitions", "relations", "syllables", "pronunciation", "frequency"],
 			isFallback: true,
 		});
 

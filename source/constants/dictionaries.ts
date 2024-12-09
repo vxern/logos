@@ -1,7 +1,9 @@
 import type { LearningLanguage } from "logos:constants/languages/learning";
 
+const baseSections = ["sources", "lemma", "language", "partOfSpeech"];
+type RequiredDictionarySection = (typeof baseSections)[number];
+
 const sections = [
-	"partOfSpeech",
 	"definitions",
 	"translations",
 	"relations",
@@ -17,6 +19,21 @@ const sections = [
 	"notes",
 ] as const;
 type DictionarySection = (typeof sections)[number];
+
+const searchModes = ["word", "meaning", "expressions", "inflection", "etymology"] as const;
+type DictionarySearchMode = (typeof searchModes)[number];
+
+const allowedSectionsBySearchMode: Record<DictionarySearchMode, DictionarySection[]> = Object.freeze({
+	word: [...sections],
+	meaning: ["definitions", "translations"],
+	expressions: ["expressions"],
+	inflection: ["inflection"],
+	etymology: ["etymology"],
+});
+
+function getAllowedDictionarySections(sections: DictionarySearchMode): DictionarySection[] {
+	return allowedSectionsBySearchMode[sections];
+}
 
 type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "wordnik" | "words-api";
 
@@ -357,5 +374,6 @@ const dictionariesByLanguage: Record<LearningLanguage, Dictionary[]> = Object.fr
 	Zapotec: ["wiktionary"],
 } as const);
 
-export default Object.freeze({ languages: dictionariesByLanguage });
-export type { Dictionary, DictionarySection };
+export default Object.freeze({ baseSections, sections, languages: dictionariesByLanguage, searchModes });
+export { getAllowedDictionarySections };
+export type { RequiredDictionarySection, Dictionary, DictionarySection, DictionarySearchMode };

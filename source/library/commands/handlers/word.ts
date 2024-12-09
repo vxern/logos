@@ -1,6 +1,7 @@
 import { code, trim } from "logos:constants/formatting";
 import { isLearningLanguage } from "logos:constants/languages/learning";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
+import type { WordSearchMode } from "logos:constants/word";
 import type { DefinitionField, DictionaryEntry, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
@@ -23,6 +24,7 @@ async function handleFindWordAutocomplete(
 async function handleFindWord(
 	client: Client,
 	interaction: Logos.Interaction<any, { word: string; language: string | undefined; verbose: boolean | undefined }>,
+	{ searchMode }: { searchMode: WordSearchMode },
 ): Promise<void> {
 	if (interaction.parameters.language !== undefined && !isLearningLanguage(interaction.parameters.language)) {
 		const strings = constants.contexts.invalidLanguage({ localise: client.localise, locale: interaction.locale });
@@ -70,7 +72,9 @@ async function handleFindWord(
 			continue;
 		}
 
-		const entries = await dictionary.getEntries(interaction, interaction.parameters.word, learningLanguage);
+		const entries = await dictionary.getEntries(interaction, interaction.parameters.word, learningLanguage, {
+			searchMode,
+		});
 		if (entries === undefined) {
 			continue;
 		}
@@ -130,7 +134,10 @@ async function handleFindWord(
 	}
 
 	if (entriesByPartOfSpeech.size === 0) {
-		const strings = constants.contexts.noResults({ localise: client.localise, locale: interaction.displayLocale });
+		const strings = constants.contexts.noInformation({
+			localise: client.localise,
+			locale: interaction.displayLocale,
+		});
 		client
 			.warned(
 				interaction,
@@ -151,9 +158,16 @@ async function handleFindWord(
 		? undefined
 		: client.services.global("interactionRepetition").getShowButton(interaction);
 
+	let currentView: ContentTabs;
+	if (searchMode === "inflection") {
+		currentView = ContentTabs.Inflection;
+	} else {
+		currentView = ContentTabs.Definitions;
+	}
+
 	await displayMenu(client, interaction, {
 		entries,
-		currentView: ContentTabs.Definitions,
+		currentView,
 		dictionaryEntryIndex: 0,
 		inflectionTableIndex: 0,
 		showButton,
@@ -208,7 +222,7 @@ function generateEmbeds(
 ): Discord.Camelize<Discord.DiscordEmbed>[] {
 	switch (data.currentView) {
 		case ContentTabs.Definitions: {
-			return entryToEmbeds(client, interaction, entry, data.verbose);
+			return entryToEmbeds(client, interaction, data, entry);
 		}
 		case ContentTabs.Inflection: {
 			const inflectionTable = entry.inflection?.tabs?.at(data.inflectionTableIndex);
@@ -358,35 +372,22 @@ async function generateButtons(
 
 	const row: Discord.ButtonComponent[] = [];
 
-	const definitionsMenuButton = new InteractionCollector(client, {
-		only: interaction.parameters.show ? [interaction.user.id] : undefined,
-	});
-
-	const inflectionMenuButton = new InteractionCollector(client, {
-		only: interaction.parameters.show ? [interaction.user.id] : undefined,
-	});
-
-	definitionsMenuButton.onInteraction(async (buttonPress) => {
-		client.acknowledge(buttonPress).ignore();
-
-		data.inflectionTableIndex = 0;
-		data.currentView = ContentTabs.Definitions;
-
-		await displayMenu(client, interaction, data);
-	});
-
-	inflectionMenuButton.onInteraction(async (buttonPress) => {
-		client.acknowledge(buttonPress).ignore();
-
-		data.currentView = ContentTabs.Inflection;
-
-		await displayMenu(client, interaction, data);
-	});
-
-	await client.registerInteractionCollector(definitionsMenuButton);
-	await client.registerInteractionCollector(inflectionMenuButton);
-
 	if (entry.definitions !== undefined) {
+		const definitionsMenuButton = new InteractionCollector(client, {
+			only: interaction.parameters.show ? [interaction.user.id] : undefined,
+		});
+
+		definitionsMenuButton.onInteraction(async (buttonPress) => {
+			client.acknowledge(buttonPress).ignore();
+
+			data.inflectionTableIndex = 0;
+			data.currentView = ContentTabs.Definitions;
+
+			await displayMenu(client, interaction, data);
+		});
+
+		await client.registerInteractionCollector(definitionsMenuButton);
+
 		const strings = constants.contexts.definitionsView({
 			localise: client.localise,
 			locale: interaction.displayLocale,
@@ -401,6 +402,20 @@ async function generateButtons(
 	}
 
 	if (entry.inflection !== undefined) {
+		const inflectionMenuButton = new InteractionCollector(client, {
+			only: interaction.parameters.show ? [interaction.user.id] : undefined,
+		});
+
+		inflectionMenuButton.onInteraction(async (buttonPress) => {
+			client.acknowledge(buttonPress).ignore();
+
+			data.currentView = ContentTabs.Inflection;
+
+			await displayMenu(client, interaction, data);
+		});
+
+		await client.registerInteractionCollector(inflectionMenuButton);
+
 		const strings = constants.contexts.inflectionView({
 			localise: client.localise,
 			locale: interaction.displayLocale,
@@ -412,6 +427,10 @@ async function generateButtons(
 			customId: inflectionMenuButton.customId,
 			style: Discord.ButtonStyles.Primary,
 		});
+	}
+
+	if (row.length === 1) {
+		row.pop();
 	}
 
 	if (data.showButton !== undefined) {
@@ -440,8 +459,8 @@ async function generateButtons(
 function entryToEmbeds(
 	client: Client,
 	interaction: Logos.Interaction,
+	data: WordViewData,
 	entry: DictionaryEntry,
-	verbose: boolean,
 ): Discord.Camelize<Discord.DiscordEmbed>[] {
 	let partOfSpeechDisplayed: string;
 	if (entry.partOfSpeech === undefined) {
@@ -474,9 +493,9 @@ function entryToEmbeds(
 
 	if (entry.definitions !== undefined && entry.definitions.length > 0) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.definitions, "definitions");
-		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, verbose);
+		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, data.verbose);
 
-		if (verbose) {
+		if (data.verbose) {
 			const strings = constants.contexts.nativeDefinitionsForWord({
 				localise: client.localise,
 				locale: interaction.displayLocale,
@@ -500,9 +519,9 @@ function entryToEmbeds(
 
 	if (entry.translations !== undefined && entry.translations.length > 0) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.translations, "definitions");
-		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, verbose);
+		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, data.verbose);
 
-		if (verbose) {
+		if (data.verbose) {
 			const strings = constants.contexts.definitionsForWord({
 				localise: client.localise,
 				locale: interaction.displayLocale,
@@ -526,13 +545,13 @@ function entryToEmbeds(
 
 	if (entry.expressions !== undefined && entry.expressions.length > 0) {
 		const expressionsStringified = stringifyEntries(client, interaction, entry.expressions, "expressions");
-		const expressionsFitted = fitTextToFieldSize(client, interaction, expressionsStringified, verbose);
+		const expressionsFitted = fitTextToFieldSize(client, interaction, expressionsStringified, data.verbose);
 
 		const strings = constants.contexts.expressions({
 			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
-		if (verbose) {
+		if (data.verbose) {
 			embeds.push({
 				title: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
 				description: expressionsFitted,
@@ -560,7 +579,7 @@ function entryToEmbeds(
 			localise: client.localise,
 			locale: interaction.displayLocale,
 		});
-		if (verbose) {
+		if (data.verbose) {
 			embeds.push({
 				title: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
 				description: etymology,
@@ -579,7 +598,7 @@ function entryToEmbeds(
 	const languageFlag = constants.emojis.flags[entry.language];
 	const languageName = strings.language(entry.language);
 
-	if (!verbose) {
+	if (!data.verbose) {
 		return [
 			{
 				title: `${constants.emojis.commands.word.word} ${word}`,

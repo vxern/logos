@@ -1523,9 +1523,9 @@ export default Object.freeze({
 		title: localise("word.strings.noDictionaryAdapters.title", locale)(),
 		description: localise("word.strings.noDictionaryAdapters.description", locale)(),
 	}),
-	noResults: ({ localise, locale }) => ({
-		title: localise("word.strings.noResults.title", locale)(),
-		description: localise("word.strings.noResults.description", locale),
+	noInformation: ({ localise, locale }) => ({
+		title: localise("word.strings.noInformation.title", locale)(),
+		description: localise("word.strings.noInformation.description", locale),
 	}),
 	wordPage: ({ localise, locale }) => ({
 		page: localise("word.strings.page", locale)(),
