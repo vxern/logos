@@ -27,6 +27,7 @@ import slowmode from "logos:constants/slowmode";
 import special from "logos:constants/special";
 import statuses from "logos:constants/statuses";
 import time from "logos:constants/time";
+import word from "logos:constants/word";
 
 const constants = Object.freeze({
 	PROJECT_NAME: "Logos",
@@ -83,4 +84,5 @@ export default Object.freeze({
 	special,
 	statuses,
 	time,
+	word,
 });
