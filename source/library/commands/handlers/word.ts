@@ -132,7 +132,10 @@ async function handleFindWord(
 	}
 
 	if (entriesByPartOfSpeech.size === 0) {
-		const strings = constants.contexts.noResults({ localise: client.localise, locale: interaction.displayLocale });
+		const strings = constants.contexts.noInformation({
+			localise: client.localise,
+			locale: interaction.displayLocale,
+		});
 		client
 			.warned(
 				interaction,
