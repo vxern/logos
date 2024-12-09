@@ -1,5 +1,5 @@
 const searchModes = [
-	"all",
+	"word",
 	"meaning",
 	"relations",
 	"pronunciation",

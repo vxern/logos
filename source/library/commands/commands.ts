@@ -226,31 +226,36 @@ const commands = Object.freeze({
 		handle: handleTranslateMessage,
 		flags: { isShowable: true },
 	},
-	word: {
-		identifier: "word",
-		type: Discord.ApplicationCommandTypes.ChatInput,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleFindWord,
-		handleAutocomplete: handleFindWordAutocomplete,
-		options: {
-			word: {
-				identifier: "word",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				required: true,
+	...Object.fromEntries(
+		constants.word.searchModes.map((searchMode) => [
+			searchMode,
+			{
+				identifier: searchMode,
+				type: Discord.ApplicationCommandTypes.ChatInput,
+				defaultMemberPermissions: ["VIEW_CHANNEL"],
+				handle: (client, interaction) => handleFindWord(client, interaction, { searchMode }),
+				handleAutocomplete: handleFindWordAutocomplete,
+				options: {
+					word: {
+						identifier: "word",
+						type: Discord.ApplicationCommandOptionTypes.String,
+						required: true,
+					},
+					language: {
+						identifier: "language",
+						type: Discord.ApplicationCommandOptionTypes.String,
+						autocomplete: true,
+					},
+					verbose: {
+						identifier: "verbose",
+						type: Discord.ApplicationCommandOptionTypes.Boolean,
+					},
+					show: constants.parameters.show,
+				},
+				flags: { hasRateLimit: true, isShowable: true },
 			},
-			language: {
-				identifier: "language",
-				type: Discord.ApplicationCommandOptionTypes.String,
-				autocomplete: true,
-			},
-			verbose: {
-				identifier: "verbose",
-				type: Discord.ApplicationCommandOptionTypes.Boolean,
-			},
-			show: constants.parameters.show,
-		},
-		flags: { hasRateLimit: true, isShowable: true },
-	},
+		]),
+	),
 	context: {
 		identifier: "context",
 		type: Discord.ApplicationCommandTypes.ChatInput,
