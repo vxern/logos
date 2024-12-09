@@ -73,6 +73,7 @@ import {
 } from "logos/commands/handlers/translate";
 import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
 import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
+import type { WordSearchMode } from "logos:constants/word";
 
 /**
  * @remarks
@@ -226,8 +227,8 @@ const commands = Object.freeze({
 		handle: handleTranslateMessage,
 		flags: { isShowable: true },
 	},
-	...Object.fromEntries(
-		constants.word.searchModes.map((searchMode) => [
+	...(Object.fromEntries(
+		constants.word.searchModes.map((searchMode): [WordSearchMode, CommandTemplate] => [
 			searchMode,
 			{
 				identifier: searchMode,
@@ -255,7 +256,7 @@ const commands = Object.freeze({
 				flags: { hasRateLimit: true, isShowable: true },
 			},
 		]),
-	),
+	) as Record<WordSearchMode, CommandTemplate>),
 	context: {
 		identifier: "context",
 		type: Discord.ApplicationCommandTypes.ChatInput,
