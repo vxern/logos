@@ -1,12 +1,12 @@
 import { code, trim } from "logos:constants/formatting";
 import { isLearningLanguage } from "logos:constants/languages/learning";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
+import type { WordSearchMode } from "logos:constants/word";
 import type { DefinitionField, DictionaryEntry, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
 import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
-import type { WordSearchMode } from "logos:constants/word";
 
 async function handleFindWordAutocomplete(
 	client: Client,
@@ -153,9 +153,16 @@ async function handleFindWord(
 		? undefined
 		: client.services.global("interactionRepetition").getShowButton(interaction);
 
+	let currentView: ContentTabs;
+	if (searchMode === "inflection") {
+		currentView = ContentTabs.Inflection;
+	} else {
+		currentView = ContentTabs.Definitions;
+	}
+
 	await displayMenu(client, interaction, {
 		entries,
-		currentView: ContentTabs.Definitions,
+		currentView,
 		dictionaryEntryIndex: 0,
 		inflectionTableIndex: 0,
 		showButton,
@@ -362,35 +369,22 @@ async function generateButtons(
 
 	const row: Discord.ButtonComponent[] = [];
 
-	const definitionsMenuButton = new InteractionCollector(client, {
-		only: interaction.parameters.show ? [interaction.user.id] : undefined,
-	});
+	if (data.searchMode !== "inflection" && entry.definitions !== undefined) {
+		const definitionsMenuButton = new InteractionCollector(client, {
+			only: interaction.parameters.show ? [interaction.user.id] : undefined,
+		});
 
-	const inflectionMenuButton = new InteractionCollector(client, {
-		only: interaction.parameters.show ? [interaction.user.id] : undefined,
-	});
+		definitionsMenuButton.onInteraction(async (buttonPress) => {
+			client.acknowledge(buttonPress).ignore();
 
-	definitionsMenuButton.onInteraction(async (buttonPress) => {
-		client.acknowledge(buttonPress).ignore();
+			data.inflectionTableIndex = 0;
+			data.currentView = ContentTabs.Definitions;
 
-		data.inflectionTableIndex = 0;
-		data.currentView = ContentTabs.Definitions;
+			await displayMenu(client, interaction, data);
+		});
 
-		await displayMenu(client, interaction, data);
-	});
+		await client.registerInteractionCollector(definitionsMenuButton);
 
-	inflectionMenuButton.onInteraction(async (buttonPress) => {
-		client.acknowledge(buttonPress).ignore();
-
-		data.currentView = ContentTabs.Inflection;
-
-		await displayMenu(client, interaction, data);
-	});
-
-	await client.registerInteractionCollector(definitionsMenuButton);
-	await client.registerInteractionCollector(inflectionMenuButton);
-
-	if (entry.definitions !== undefined) {
 		const strings = constants.contexts.definitionsView({
 			localise: client.localise,
 			locale: interaction.displayLocale,
@@ -404,7 +398,21 @@ async function generateButtons(
 		});
 	}
 
-	if (entry.inflection !== undefined) {
+	if (isSectionIncluded(data.searchMode, "inflection") && entry.inflection !== undefined) {
+		const inflectionMenuButton = new InteractionCollector(client, {
+			only: interaction.parameters.show ? [interaction.user.id] : undefined,
+		});
+
+		inflectionMenuButton.onInteraction(async (buttonPress) => {
+			client.acknowledge(buttonPress).ignore();
+
+			data.currentView = ContentTabs.Inflection;
+
+			await displayMenu(client, interaction, data);
+		});
+
+		await client.registerInteractionCollector(inflectionMenuButton);
+
 		const strings = constants.contexts.inflectionView({
 			localise: client.localise,
 			locale: interaction.displayLocale,
@@ -476,7 +484,11 @@ function entryToEmbeds(
 	const embeds: Discord.Camelize<Discord.DiscordEmbed>[] = [];
 	const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
-	if (entry.definitions !== undefined && entry.definitions.length > 0) {
+	if (
+		isSectionIncluded(data.searchMode, "meaning") &&
+		entry.definitions !== undefined &&
+		entry.definitions.length > 0
+	) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.definitions, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, data.verbose);
 
@@ -502,7 +514,11 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.translations !== undefined && entry.translations.length > 0) {
+	if (
+		isSectionIncluded(data.searchMode, "meaning") &&
+		entry.translations !== undefined &&
+		entry.translations.length > 0
+	) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.translations, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, data.verbose);
 
@@ -528,7 +544,11 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.expressions !== undefined && entry.expressions.length > 0) {
+	if (
+		isSectionIncluded(data.searchMode, "expressions") &&
+		entry.expressions !== undefined &&
+		entry.expressions.length > 0
+	) {
 		const expressionsStringified = stringifyEntries(client, interaction, entry.expressions, "expressions");
 		const expressionsFitted = fitTextToFieldSize(client, interaction, expressionsStringified, data.verbose);
 
@@ -550,7 +570,7 @@ function entryToEmbeds(
 		}
 	}
 
-	if (entry.etymology !== undefined) {
+	if (isSectionIncluded(data.searchMode, "etymology") && entry.etymology !== undefined) {
 		let etymology: string;
 		if (entry.etymology.labels === undefined) {
 			etymology = entry.etymology.value;
@@ -601,6 +621,10 @@ function entryToEmbeds(
 	}
 
 	return embeds;
+}
+
+function isSectionIncluded(searchMode: WordSearchMode, section: WordSearchMode): boolean {
+	return searchMode === "word" || searchMode === section;
 }
 
 function tagsToString(tags: string[]): string {
