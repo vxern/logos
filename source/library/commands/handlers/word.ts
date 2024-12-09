@@ -169,7 +169,6 @@ async function handleFindWord(
 		dictionaryEntryIndex: 0,
 		inflectionTableIndex: 0,
 		showButton,
-		searchMode: searchMode,
 		verbose: interaction.parameters.verbose ?? false,
 	});
 }
@@ -196,7 +195,6 @@ interface WordViewData {
 	currentView: ContentTabs;
 	dictionaryEntryIndex: number;
 	inflectionTableIndex: number;
-	searchMode: WordSearchMode;
 	verbose: boolean;
 }
 
@@ -372,7 +370,7 @@ async function generateButtons(
 
 	const row: Discord.ButtonComponent[] = [];
 
-	if (data.searchMode !== "inflection" && entry.definitions !== undefined) {
+	if (entry.definitions !== undefined) {
 		const definitionsMenuButton = new InteractionCollector(client, {
 			only: interaction.parameters.show ? [interaction.user.id] : undefined,
 		});
@@ -401,7 +399,7 @@ async function generateButtons(
 		});
 	}
 
-	if (isSectionIncluded(data.searchMode, "inflection") && entry.inflection !== undefined) {
+	if (entry.inflection !== undefined) {
 		const inflectionMenuButton = new InteractionCollector(client, {
 			only: interaction.parameters.show ? [interaction.user.id] : undefined,
 		});
@@ -491,11 +489,7 @@ function entryToEmbeds(
 	const embeds: Discord.Camelize<Discord.DiscordEmbed>[] = [];
 	const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
-	if (
-		isSectionIncluded(data.searchMode, "meaning") &&
-		entry.definitions !== undefined &&
-		entry.definitions.length > 0
-	) {
+	if (entry.definitions !== undefined && entry.definitions.length > 0) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.definitions, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, data.verbose);
 
@@ -521,11 +515,7 @@ function entryToEmbeds(
 		}
 	}
 
-	if (
-		isSectionIncluded(data.searchMode, "meaning") &&
-		entry.translations !== undefined &&
-		entry.translations.length > 0
-	) {
+	if (entry.translations !== undefined && entry.translations.length > 0) {
 		const definitionsStringified = stringifyEntries(client, interaction, entry.translations, "definitions");
 		const definitionsFitted = fitTextToFieldSize(client, interaction, definitionsStringified, data.verbose);
 
@@ -551,11 +541,7 @@ function entryToEmbeds(
 		}
 	}
 
-	if (
-		isSectionIncluded(data.searchMode, "expressions") &&
-		entry.expressions !== undefined &&
-		entry.expressions.length > 0
-	) {
+	if (entry.expressions !== undefined && entry.expressions.length > 0) {
 		const expressionsStringified = stringifyEntries(client, interaction, entry.expressions, "expressions");
 		const expressionsFitted = fitTextToFieldSize(client, interaction, expressionsStringified, data.verbose);
 
@@ -577,7 +563,7 @@ function entryToEmbeds(
 		}
 	}
 
-	if (isSectionIncluded(data.searchMode, "etymology") && entry.etymology !== undefined) {
+	if (entry.etymology !== undefined) {
 		let etymology: string;
 		if (entry.etymology.labels === undefined) {
 			etymology = entry.etymology.value;
@@ -628,10 +614,6 @@ function entryToEmbeds(
 	}
 
 	return embeds;
-}
-
-function isSectionIncluded(searchMode: WordSearchMode, section: WordSearchMode): boolean {
-	return searchMode === "word" || searchMode === section;
 }
 
 function tagsToString(tags: string[]): string {
