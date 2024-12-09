@@ -426,6 +426,10 @@ async function generateButtons(
 		});
 	}
 
+	if (row.length === 1) {
+		row.pop();
+	}
+
 	if (data.showButton !== undefined) {
 		row.push(data.showButton);
 	}
