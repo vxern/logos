@@ -54,7 +54,7 @@ class DiscordConnection {
 	async open(): Promise<void> {
 		this.log.info("Establishing connection with the Discord gateway...");
 
-		await this.bot.start();
+		this.bot.start();
 
 		this.log.info("A connection with the Discord gateway has been established.");
 	}
@@ -62,7 +62,7 @@ class DiscordConnection {
 	async close(): Promise<void> {
 		this.log.info("Closing Discord gateway connection...");
 
-		await this.bot.shutdown();
+		this.bot.shutdown();
 
 		this.log.info("The connection with the Discord gateway has been closed.");
 	}
