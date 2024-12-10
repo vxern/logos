@@ -1,12 +1,12 @@
 import { code, trim } from "logos:constants/formatting";
 import { isLearningLanguage } from "logos:constants/languages/learning";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
-import type { WordSearchMode } from "logos:constants/word";
 import type { DefinitionField, DictionaryEntry, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
 import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
+import type { DictionarySearchMode } from "logos:constants/dictionaries";
 
 async function handleFindWordAutocomplete(
 	client: Client,
@@ -24,7 +24,7 @@ async function handleFindWordAutocomplete(
 async function handleFindWord(
 	client: Client,
 	interaction: Logos.Interaction<any, { word: string; language: string | undefined; verbose: boolean | undefined }>,
-	{ searchMode }: { searchMode: WordSearchMode },
+	{ searchMode }: { searchMode: DictionarySearchMode },
 ): Promise<void> {
 	if (interaction.parameters.language !== undefined && !isLearningLanguage(interaction.parameters.language)) {
 		const strings = constants.contexts.invalidLanguage({ localise: client.localise, locale: interaction.locale });
