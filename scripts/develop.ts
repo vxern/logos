@@ -129,6 +129,7 @@ await document.update(database, () => {
 		resources: true,
 		translate: true,
 		word: true,
+		wordSigils: true,
 		context: true,
 		targetOnly: true,
 		roleLanguages: true,
