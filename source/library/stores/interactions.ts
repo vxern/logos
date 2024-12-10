@@ -4,6 +4,15 @@ import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import type { CommandStore } from "logos/stores/commands";
 import type pino from "pino";
+import { Model } from "logos/models/model";
+import type { Guild } from "logos/models/guild";
+import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
+import {
+	getLearningLocaleByLanguage,
+	type LearningLanguage,
+	type LearningLocale,
+} from "logos:constants/languages/learning";
+import { nanoid } from "nanoid";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
 type EmbedOrCallbackData = Discord.Camelize<Discord.DiscordEmbed> | InteractionCallbackData;
@@ -129,6 +138,11 @@ class InteractionStore {
 		});
 	}
 
+	/**
+	 * Given an interaction that was originally processed through a command handler and another
+	 * interaction, for example a button press, spoofs the original interaction, replacing its token,
+	 * ID and parameters.
+	 */
 	static spoofInteraction<Interaction extends Logos.Interaction>(
 		interaction: Interaction,
 		{ using, parameters }: { using: Logos.Interaction; parameters?: Interaction["parameters"] },
@@ -139,6 +153,73 @@ class InteractionStore {
 			type: Discord.InteractionTypes.ApplicationCommand,
 			token: using.token,
 			id: using.id,
+		};
+	}
+
+	/**
+	 * Given a message, constructs an interaction that can then be passed into some handler expecting
+	 * to receive an interaction.
+	 */
+	buildDummyInteraction(
+		message: Discord.Message,
+		{ parameters }: { parameters?: Logos.Interaction["parameters"] },
+	): Logos.Interaction | undefined {
+		const guildId = message.guildId;
+		if (guildId === undefined) {
+			return undefined;
+		}
+
+		const guildDocument = this.#client.documents.guilds.get(
+			Model.buildPartialId<Guild>({ guildId: guildId.toString() }),
+		);
+		if (guildDocument === undefined) {
+			return undefined;
+		}
+
+		const learningLanguage = guildDocument.languages.target;
+		const learningLocale = getLearningLocaleByLanguage(learningLanguage);
+
+		const language = guildDocument.languages.localisation;
+		const locale = getLocalisationLocaleByLanguage(language);
+
+		let displayLocale: LearningLocale;
+		let displayLanguage: LearningLanguage;
+		if (guildDocument.isTargetLanguageOnlyChannel(message.channelId.toString())) {
+			displayLocale = learningLocale;
+			displayLanguage = learningLanguage;
+		} else {
+			displayLocale = locale;
+			displayLanguage = language;
+		}
+
+		return {
+			acknowledged: false,
+			id: message.id,
+			applicationId: this.#client.bot.applicationId,
+			type: Discord.InteractionTypes.ApplicationCommand,
+			guildId: guildId,
+			channelId: message.channelId,
+			member: message.member,
+			user: message.author,
+			token: nanoid(),
+			data: { name: constants.components.none },
+			bot: this.#client.bot as unknown as Logos.Interaction["bot"],
+			locale,
+			language,
+			guildLocale: locale,
+			guildLanguage: language,
+			learningLocale,
+			learningLanguage,
+			featureLanguage: guildDocument.languages.feature,
+			displayLocale,
+			displayLanguage,
+			commandName: constants.components.none,
+			metadata: [constants.components.none],
+			parameters: {
+				"@repeat": true,
+				show: true,
+				...parameters,
+			},
 		};
 	}
 
