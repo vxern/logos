@@ -91,7 +91,7 @@ class CouchDBDocumentSession extends DocumentSession {
 	}
 
 	query<M extends Model>({ collection }: { collection: Collection }): CouchDBDocumentQuery<M> {
-		return new CouchDBDocumentQuery<M>({ collection, documents: this.#documents, session: this });
+		return new CouchDBDocumentQuery<M>({ documents: this.#documents, session: this, collection });
 	}
 }
 
