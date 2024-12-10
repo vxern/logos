@@ -66,15 +66,10 @@ class WordInformationComponent {
 	#generateEmbeds(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
 		switch (this.#tab) {
 			case "definitions": {
-				return this.#entryToEmbeds(entry);
+				return this.#formatDefinitions(entry);
 			}
 			case "inflection": {
-				const inflectionTable = entry.inflection?.tabs?.at(this.#inflectionTableIndex);
-				if (inflectionTable === undefined) {
-					return [];
-				}
-
-				return [inflectionTable];
+				return this.#formatInflection(entry);
 			}
 		}
 	}
@@ -293,7 +288,7 @@ class WordInformationComponent {
 		}));
 	}
 
-	#entryToEmbeds(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
+	#formatDefinitions(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
 		let partOfSpeechDisplayed: string;
 		if (entry.partOfSpeech === undefined) {
 			const strings = constants.contexts.partOfSpeechUnknown({
@@ -481,6 +476,15 @@ class WordInformationComponent {
 		}
 
 		return embeds;
+	}
+
+	#formatInflection(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
+		const inflectionTable = entry.inflection?.tabs?.at(this.#inflectionTableIndex);
+		if (inflectionTable === undefined) {
+			return [];
+		}
+
+		return [inflectionTable];
 	}
 
 	tagsToString(tags: string[]): string {
