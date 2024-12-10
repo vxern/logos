@@ -6,6 +6,8 @@ import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
 
+type InformationTab = "definitions" | "inflection";
+
 async function displayWordInformation(
 	client: Client,
 	interaction: Logos.Interaction,
@@ -16,11 +18,11 @@ async function displayWordInformation(
 		? undefined
 		: client.services.global("interactionRepetition").getShowButton(interaction);
 
-	let currentView: ContentTabs;
+	let currentView: InformationTab;
 	if (searchMode === "inflection") {
-		currentView = ContentTabs.Inflection;
+		currentView = "inflection";
 	} else {
-		currentView = ContentTabs.Definitions;
+		currentView = "definitions";
 	}
 
 	await displayMenu(client, interaction, {
@@ -33,15 +35,10 @@ async function displayWordInformation(
 	});
 }
 
-enum ContentTabs {
-	Definitions = 0,
-	Inflection = 1,
-}
-
 interface WordViewData {
 	readonly entries: DictionaryEntry[];
 	showButton: Discord.ButtonComponent | undefined;
-	currentView: ContentTabs;
+	currentView: InformationTab;
 	dictionaryEntryIndex: number;
 	inflectionTableIndex: number;
 	verbose: boolean;
@@ -68,10 +65,10 @@ function generateEmbeds(
 	entry: DictionaryEntry,
 ): Discord.Camelize<Discord.DiscordEmbed>[] {
 	switch (data.currentView) {
-		case ContentTabs.Definitions: {
+		case "definitions": {
 			return entryToEmbeds(client, interaction, data, entry);
 		}
-		case ContentTabs.Inflection: {
+		case "inflection": {
 			const inflectionTable = entry.inflection?.tabs?.at(data.inflectionTableIndex);
 			if (inflectionTable === undefined) {
 				return [];
@@ -93,7 +90,7 @@ async function generateButtons(
 	const paginationControls: Discord.ButtonComponent[][] = [];
 
 	switch (data.currentView) {
-		case ContentTabs.Definitions: {
+		case "definitions": {
 			const isFirst = data.dictionaryEntryIndex === 0;
 			const isLast = data.dictionaryEntryIndex === data.entries.length - 1;
 
@@ -161,7 +158,7 @@ async function generateButtons(
 
 			break;
 		}
-		case ContentTabs.Inflection: {
+		case "inflection": {
 			if (entry.inflection === undefined) {
 				return [];
 			}
@@ -228,7 +225,7 @@ async function generateButtons(
 			client.acknowledge(buttonPress).ignore();
 
 			data.inflectionTableIndex = 0;
-			data.currentView = ContentTabs.Definitions;
+			data.currentView = "definitions";
 
 			await displayMenu(client, interaction, data);
 		});
@@ -242,7 +239,7 @@ async function generateButtons(
 		row.push({
 			type: Discord.MessageComponentTypes.Button,
 			label: strings.definitions,
-			disabled: data.currentView === ContentTabs.Definitions,
+			disabled: data.currentView === "definitions",
 			customId: definitionsMenuButton.customId,
 			style: Discord.ButtonStyles.Primary,
 		});
@@ -256,7 +253,7 @@ async function generateButtons(
 		inflectionMenuButton.onInteraction(async (buttonPress) => {
 			client.acknowledge(buttonPress).ignore();
 
-			data.currentView = ContentTabs.Inflection;
+			data.currentView = "inflection";
 
 			await displayMenu(client, interaction, data);
 		});
@@ -270,7 +267,7 @@ async function generateButtons(
 		row.push({
 			type: Discord.MessageComponentTypes.Button,
 			label: strings.inflection,
-			disabled: data.currentView === ContentTabs.Inflection,
+			disabled: data.currentView === "inflection",
 			customId: inflectionMenuButton.customId,
 			style: Discord.ButtonStyles.Primary,
 		});
