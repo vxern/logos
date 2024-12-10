@@ -39,7 +39,7 @@ const searchModeSigils: Record<DictionarySearchMode, string[]> = {
 	word: ["w", "word"],
 	meaning: ["m", "me", "mean", "meaning", "define"],
 	inflection: ["i", "in", "inf", "inflect", "inflection"],
-	expressions: ["ex", "exp", "expr", "express", "expression", "expressions"],
+	expressions: ["x", "ex", "exp", "expr", "express", "expression", "expressions"],
 	etymology: ["e", "et", "ety", "etym", "etymology"],
 };
 
