@@ -41,6 +41,7 @@ class Guild extends GuildModel {
 			resources: false,
 			translate: false,
 			word: false,
+			wordSigils: false,
 			context: false,
 			targetOnly: false,
 			roleLanguages: false,

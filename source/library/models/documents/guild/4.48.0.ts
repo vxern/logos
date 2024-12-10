@@ -25,7 +25,6 @@ interface GuildDocument {
 		resources: boolean;
 		translate: boolean;
 		word: boolean;
-		wordSigils: boolean;
 		context: boolean;
 		targetOnly: boolean;
 		roleLanguages: boolean;

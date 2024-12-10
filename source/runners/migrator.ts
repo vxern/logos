@@ -27,7 +27,7 @@ async function migrate({
 
 	for (const [migration, filename] of migrationsToExecute) {
 		const module: { up(database: DatabaseStore): Promise<void> } = await import(
-			`../../../${constants.directories.migrations}/${filename}`
+			`../../${constants.directories.migrations}/${filename}`
 		);
 
 		log.info(`Executing ${filename}...`);
@@ -86,7 +86,7 @@ async function rollback({
 
 	for (const [_, filename] of migrations) {
 		const module: { down(database: DatabaseStore): Promise<void> } = await import(
-			`../../../${constants.directories.migrations}/${filename}`
+			`../../${constants.directories.migrations}/${filename}`
 		);
 
 		log.info(`Rolling back ${filename}...`);

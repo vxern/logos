@@ -101,7 +101,10 @@ declare global {
 		type Interaction<
 			Metadata extends string[] = any,
 			Parameters extends Record<string, string | number | boolean | undefined> = any,
-		> = WithRequired<Omit<RawInteraction, "locale" | "guildLocale">, "guildId" | "channelId"> &
+		> = WithRequired<
+			Omit<RawInteraction, "locale" | "guildLocale" | "respond" | "edit" | "deferEdit" | "defer" | "delete">,
+			"guildId" | "channelId"
+		> &
 			InteractionLocaleData & {
 				commandName: string;
 				metadata: [customId: string, ...data: Metadata];

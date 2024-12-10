@@ -1,8 +1,17 @@
 import { timestamp, trim } from "logos:constants/formatting";
+import {
+	type LearningLanguage,
+	type LearningLocale,
+	getLearningLocaleByLanguage,
+} from "logos:constants/languages/learning";
+import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
+import type { Guild } from "logos/models/guild";
+import { Model } from "logos/models/model";
 import type { CommandStore } from "logos/stores/commands";
+import { nanoid } from "nanoid";
 import type pino from "pino";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
@@ -129,6 +138,11 @@ class InteractionStore {
 		});
 	}
 
+	/**
+	 * Given an interaction that was originally processed through a command handler and another
+	 * interaction, for example a button press, spoofs the original interaction, replacing its token,
+	 * ID and parameters.
+	 */
 	static spoofInteraction<Interaction extends Logos.Interaction>(
 		interaction: Interaction,
 		{ using, parameters }: { using: Logos.Interaction; parameters?: Interaction["parameters"] },
@@ -139,6 +153,73 @@ class InteractionStore {
 			type: Discord.InteractionTypes.ApplicationCommand,
 			token: using.token,
 			id: using.id,
+		};
+	}
+
+	/**
+	 * Given a message, constructs an interaction that can then be passed into some handler expecting
+	 * to receive an interaction.
+	 */
+	buildMessageInteraction(
+		message: Discord.Message,
+		{ parameters }: { parameters?: Logos.Interaction["parameters"] },
+	): Logos.Interaction | undefined {
+		const guildId = message.guildId;
+		if (guildId === undefined) {
+			return undefined;
+		}
+
+		const guildDocument = this.#client.documents.guilds.get(
+			Model.buildPartialId<Guild>({ guildId: guildId.toString() }),
+		);
+		if (guildDocument === undefined) {
+			return undefined;
+		}
+
+		const learningLanguage = guildDocument.languages.target;
+		const learningLocale = getLearningLocaleByLanguage(learningLanguage);
+
+		const language = guildDocument.languages.localisation;
+		const locale = getLocalisationLocaleByLanguage(language);
+
+		let displayLocale: LearningLocale;
+		let displayLanguage: LearningLanguage;
+		if (guildDocument.isTargetLanguageOnlyChannel(message.channelId.toString())) {
+			displayLocale = learningLocale;
+			displayLanguage = learningLanguage;
+		} else {
+			displayLocale = locale;
+			displayLanguage = language;
+		}
+
+		return {
+			acknowledged: false,
+			id: message.id,
+			applicationId: this.#client.bot.applicationId,
+			type: Discord.InteractionTypes.ApplicationCommand,
+			guildId: guildId,
+			channelId: message.channelId,
+			member: message.member,
+			user: message.author,
+			token: nanoid(),
+			data: { name: constants.components.none },
+			bot: this.#client.bot as unknown as Logos.Interaction["bot"],
+			locale,
+			language,
+			guildLocale: locale,
+			guildLanguage: language,
+			learningLocale,
+			learningLanguage,
+			featureLanguage: guildDocument.languages.feature,
+			displayLocale,
+			displayLanguage,
+			commandName: constants.components.none,
+			metadata: [constants.components.none],
+			parameters: {
+				"@repeat": true,
+				show: true,
+				...parameters,
+			},
 		};
 	}
 
@@ -295,6 +376,12 @@ class InteractionStore {
 			});
 			const message = await this.#client.bot.helpers
 				.sendMessage(interaction.channelId, {
+					messageReference: {
+						messageId: interaction.id,
+						channelId: interaction.channelId,
+						guildId: interaction.guildId,
+						failIfNotExists: false,
+					},
 					embeds: [
 						{
 							description: strings.thinking,
@@ -336,10 +423,20 @@ class InteractionStore {
 		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
-			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId, data).catch((error) => {
-				this.log.error(error, "Failed to make message reply to repeated interaction.");
-				return undefined;
-			});
+			const message = await this.#client.bot.helpers
+				.sendMessage(interaction.channelId, {
+					messageReference: {
+						messageId: interaction.id,
+						channelId: interaction.channelId,
+						guildId: interaction.guildId,
+						failIfNotExists: false,
+					},
+					...data,
+				})
+				.catch((error) => {
+					this.log.error(error, "Failed to make message reply to repeated interaction.");
+					return undefined;
+				});
 			if (message === undefined) {
 				return;
 			}

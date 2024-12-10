@@ -1,4 +1,4 @@
-import type { WordSearchMode } from "logos:constants/word";
+import type { DictionarySearchMode } from "logos:constants/dictionaries";
 import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
 import { handleAnswer } from "logos/commands/handlers/answer";
 import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
@@ -228,7 +228,7 @@ const commands = Object.freeze({
 		flags: { isShowable: true },
 	},
 	...(Object.fromEntries(
-		constants.dictionaries.searchModes.map((searchMode): [WordSearchMode, CommandTemplate] => [
+		constants.dictionaries.searchModes.map((searchMode): [DictionarySearchMode, CommandTemplate] => [
 			searchMode,
 			{
 				identifier: searchMode,
@@ -256,7 +256,7 @@ const commands = Object.freeze({
 				flags: { hasRateLimit: true, isShowable: true },
 			},
 		]),
-	) as Record<WordSearchMode, CommandTemplate>),
+	) as Record<DictionarySearchMode, CommandTemplate>),
 	context: {
 		identifier: "context",
 		type: Discord.ApplicationCommandTypes.ChatInput,

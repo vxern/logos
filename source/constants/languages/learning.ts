@@ -30,7 +30,7 @@ const languages = new Set([
 	...collectLanguages<TranslationLanguage>(translationLanguages),
 ] satisfies LearningLanguage[]);
 
-const languageToLocale: Record<LearningLanguage, string> = Object.freeze({
+const languageToLocale = Object.freeze({
 	Abkhazian: "abk",
 	Afar: "aar",
 	Afrikaans: "afr",
@@ -364,7 +364,7 @@ const languageToLocale: Record<LearningLanguage, string> = Object.freeze({
 	"Mayan/Yucatecan": "yua",
 	Zapotec: "zap",
 	Fon: "fon",
-} as const);
+} as const satisfies Record<LearningLanguage, string>);
 
 type LearningLocale = (typeof languageToLocale)[keyof typeof languageToLocale];
 

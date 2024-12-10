@@ -20,6 +20,7 @@ import { VerificationPromptService } from "logos/services/prompts/verification";
 import { RoleIndicatorService } from "logos/services/role-indicators";
 import type { GlobalService, LocalService, Service } from "logos/services/service";
 import { StatusService } from "logos/services/status";
+import { WordSigilService } from "logos/services/word-sigils";
 import type pino from "pino";
 
 interface GlobalServices {
@@ -44,6 +45,7 @@ interface LocalServices {
 	readonly ticketPrompts: TicketPromptService;
 	readonly verificationPrompts: VerificationPromptService;
 	readonly roleIndicators: RoleIndicatorService;
+	readonly wordSigils: WordSigilService;
 }
 
 class ServiceStore {
@@ -93,6 +95,7 @@ class ServiceStore {
 			ticketPrompts: new Map(),
 			verificationPrompts: new Map(),
 			roleIndicators: new Map(),
+			wordSigils: new Map(),
 		};
 	}
 
@@ -222,6 +225,13 @@ class ServiceStore {
 			services.push(service);
 
 			this.#local.roleIndicators.set(guildId, service);
+		}
+
+		if (guildDocument.hasEnabled("wordSigils")) {
+			const service = new WordSigilService(this.#client, { guildId });
+			services.push(service);
+
+			this.#local.wordSigils.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("suggestions")) {
