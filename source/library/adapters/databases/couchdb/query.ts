@@ -1,6 +1,7 @@
+import type { Collection } from "logos:constants/database";
 import { DocumentQuery } from "logos/adapters/databases/adapter";
 import type { CouchDBDocumentSession } from "logos/adapters/databases/couchdb/session";
-import type { Model } from "logos/models/model";
+import { Model } from "logos/models/model";
 import type nano from "nano";
 
 class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
@@ -8,24 +9,34 @@ class CouchDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	readonly #session: CouchDBDocumentSession;
 	readonly #query: nano.MangoQuery;
 
-	constructor({ documents, session }: { documents: nano.DocumentScope<unknown>; session: CouchDBDocumentSession }) {
+	constructor({
+		documents,
+		session,
+		collection,
+	}: { documents: nano.DocumentScope<unknown>; session: CouchDBDocumentSession; collection: Collection }) {
 		super();
 
 		this.#documents = documents;
 		this.#session = session;
-		this.#query = { selector: {} };
+		this.#query = { selector: { _id: { $regex: Model.composeId(".+", { collection }) } } };
 	}
 
 	whereRegex(property: string, pattern: RegExp): this {
-		Object.assign(this.#query.selector, {
-			[property === "id" ? "_id" : property]: { $regex: pattern.source },
-		});
+		this.#mergeSelectors(property === "id" ? "_id" : property, { $regex: pattern.source });
+
 		return this;
 	}
 
 	whereEquals(property: string, value: unknown): this {
-		Object.assign(this.#query.selector, { [property === "id" ? "_id" : property]: { $eq: value } });
+		this.#mergeSelectors(property === "id" ? "_id" : property, { $eq: value as nano.MangoValue });
+
 		return this;
+	}
+
+	#mergeSelectors(property: string, selector: nano.MangoSelector): void {
+		Object.assign(this.#query.selector, {
+			[property]: Object.assign(this.#query.selector[property] ?? {}, selector),
+		});
 	}
 
 	async execute(): Promise<M[]> {

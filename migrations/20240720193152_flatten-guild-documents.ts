@@ -252,8 +252,8 @@ async function up(database: DatabaseStore): Promise<void> {
 }
 
 // This block is executed when the migration is rolled back.
-function down(_: DatabaseStore): void {
-	// Irreversible.
+async function down(_: DatabaseStore): Promise<void> {
+	// No changes to make when rolling back.
 }
 
 export { up, down };
