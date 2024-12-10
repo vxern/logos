@@ -1,3 +1,4 @@
+import type { Collection } from "logos:constants/database";
 import { DocumentQuery } from "logos/adapters/databases/adapter";
 import { RavenDBDocumentConventions } from "logos/adapters/databases/ravendb/conventions";
 import type { RavenDBDocument } from "logos/adapters/databases/ravendb/document";
@@ -10,12 +11,16 @@ class RavenDBDocumentQuery<M extends Model> extends DocumentQuery<M> {
 	readonly #session: ravendb.IDocumentSession;
 	#query: ravendb.IDocumentQuery<RavenDBDocument>;
 
-	constructor({ database, session }: { database: DatabaseStore; session: ravendb.IDocumentSession }) {
+	constructor({
+		database,
+		session,
+		collection,
+	}: { database: DatabaseStore; session: ravendb.IDocumentSession; collection: Collection }) {
 		super();
 
 		this.#database = database;
 		this.#session = session;
-		this.#query = this.#session.query({});
+		this.#query = this.#session.query({ collection });
 	}
 
 	whereRegex(property: string, pattern: RegExp): this {

@@ -51,8 +51,8 @@ class RavenDBDocumentSession extends DocumentSession {
 		await this.#session.saveChanges();
 	}
 
-	query<M extends Model>(_: { collection: Collection }): RavenDBDocumentQuery<M> {
-		return new RavenDBDocumentQuery<M>({ database: this.database, session: this.#session });
+	query<M extends Model>({ collection }: { collection: Collection }): RavenDBDocumentQuery<M> {
+		return new RavenDBDocumentQuery<M>({ database: this.database, session: this.#session, collection });
 	}
 
 	async dispose(): Promise<void> {
