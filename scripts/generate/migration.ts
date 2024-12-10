@@ -51,10 +51,14 @@ await Bun.write(
 import type { DatabaseStore } from "logos/stores/database";
 
 // This block is executed when the migration is enacted.
-function up(_: DatabaseStore): void {}
+async function up(_: DatabaseStore): Promise<void> {
+	// No changes to make when migrating.
+}
 
 // This block is executed when the migration is rolled back.
-function down(_: DatabaseStore): void {}
+async function down(_: DatabaseStore): Promise<void> {
+	// No changes to make when rolling back.
+}
 
 export { up, down };
 `.trim(),
