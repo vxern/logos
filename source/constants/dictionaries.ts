@@ -35,6 +35,24 @@ function getAllowedDictionarySections(sections: DictionarySearchMode): Dictionar
 	return allowedSectionsBySearchMode[sections];
 }
 
+const searchModeSigils: Record<DictionarySearchMode, string[]> = {
+	word: ["w", "word"],
+	meaning: ["m", "me", "mean", "meaning", "define"],
+	inflection: ["i", "in", "inf", "inflect", "inflection"],
+	expressions: ["ex", "exp", "expr", "express", "expression", "expressions"],
+	etymology: ["e", "et", "ety", "etym", "etymology"],
+};
+
+const searchModeBySigil: Record<string, DictionarySearchMode> = Object.fromEntries(
+	Object.entries(searchModeSigils).flatMap(([mode, sigils]) =>
+		sigils.map((sigil) => [sigil, mode as DictionarySearchMode]),
+	),
+);
+
+function getSearchModeBySigil(sigil: string): DictionarySearchMode | undefined {
+	return searchModeBySigil[sigil];
+}
+
 type Dictionary = "dexonline" | "dicolink" | "wiktionary" | "wordnik" | "words-api";
 
 const dictionariesByLanguage: Record<LearningLanguage, Dictionary[]> = Object.freeze({
@@ -375,5 +393,5 @@ const dictionariesByLanguage: Record<LearningLanguage, Dictionary[]> = Object.fr
 } as const);
 
 export default Object.freeze({ baseSections, sections, languages: dictionariesByLanguage, searchModes });
-export { getAllowedDictionarySections };
+export { getAllowedDictionarySections, getSearchModeBySigil };
 export type { RequiredDictionarySection, Dictionary, DictionarySection, DictionarySearchMode };
