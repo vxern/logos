@@ -11,8 +11,8 @@ COPY bun.lockb .
 COPY bunfig.toml .
 COPY tsconfig.json .
 
-RUN bun install
-RUN chown -R bun:bun .
+RUN bun install \
+&& chown -R bun:bun .
 
 USER bun
 
