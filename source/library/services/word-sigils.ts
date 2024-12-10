@@ -25,7 +25,7 @@ class WordSigilService extends LocalService {
 			return;
 		}
 
-		const [sigil, word] = [match.at(1), match.at(2) || match.at(3)];
+		const [sigil, word] = [match.at(1), match.at(2) ?? match.at(3)];
 		if (word === undefined) {
 			return;
 		}
