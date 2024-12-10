@@ -20,8 +20,8 @@ import { VerificationPromptService } from "logos/services/prompts/verification";
 import { RoleIndicatorService } from "logos/services/role-indicators";
 import type { GlobalService, LocalService, Service } from "logos/services/service";
 import { StatusService } from "logos/services/status";
-import type pino from "pino";
 import { WordSigilService } from "logos/services/word-sigils";
+import type pino from "pino";
 
 interface GlobalServices {
 	readonly lavalink?: LavalinkService;

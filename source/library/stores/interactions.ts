@@ -1,18 +1,18 @@
 import { timestamp, trim } from "logos:constants/formatting";
+import {
+	type LearningLanguage,
+	type LearningLocale,
+	getLearningLocaleByLanguage,
+} from "logos:constants/languages/learning";
+import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
 import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import type { CommandStore } from "logos/stores/commands";
-import type pino from "pino";
-import { Model } from "logos/models/model";
 import type { Guild } from "logos/models/guild";
-import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
-import {
-	getLearningLocaleByLanguage,
-	type LearningLanguage,
-	type LearningLocale,
-} from "logos:constants/languages/learning";
+import { Model } from "logos/models/model";
+import type { CommandStore } from "logos/stores/commands";
 import { nanoid } from "nanoid";
+import type pino from "pino";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
 type EmbedOrCallbackData = Discord.Camelize<Discord.DiscordEmbed> | InteractionCallbackData;

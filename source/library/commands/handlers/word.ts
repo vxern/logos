@@ -1,3 +1,4 @@
+import type { DictionarySearchMode } from "logos:constants/dictionaries";
 import { code, trim } from "logos:constants/formatting";
 import { isLearningLanguage } from "logos:constants/languages/learning";
 import { type PartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
@@ -6,7 +7,6 @@ import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
 import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
-import type { DictionarySearchMode } from "logos:constants/dictionaries";
 
 async function handleFindWordAutocomplete(
 	client: Client,

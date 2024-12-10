@@ -1,8 +1,8 @@
+import { getSearchModeBySigil } from "logos:constants/dictionaries";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { handleFindWord } from "logos/commands/handlers/word";
 import { LocalService } from "logos/services/service";
-import { getSearchModeBySigil } from "logos:constants/dictionaries";
 
 class WordSigilService extends LocalService {
 	readonly #messageCreates: Collector<"messageCreate">;
