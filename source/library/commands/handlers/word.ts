@@ -3,8 +3,8 @@ import { isLearningLanguage } from "logos:constants/languages/learning";
 import type { PartOfSpeech } from "logos:constants/parts-of-speech";
 import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
-import { displayWordInformation } from "logos/commands/components/word-information";
 import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
+import { WordInformationComponent } from "logos/commands/components/word-information";
 
 async function handleFindWordAutocomplete(
 	client: Client,
@@ -152,7 +152,9 @@ async function handleFindWord(
 
 	const entries = sanitiseEntries([...Array.from(entriesByPartOfSpeech.values()).flat(), ...unclassifiedEntries]);
 
-	await displayWordInformation(client, interaction, entries, { searchMode });
+	const component = new WordInformationComponent(client, { interaction, entries, searchMode });
+
+	await component.display();
 }
 
 function sanitiseEntries(entries: DictionaryEntry[]): DictionaryEntry[] {
