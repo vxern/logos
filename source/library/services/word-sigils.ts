@@ -35,12 +35,12 @@ class WordSigilService extends LocalService {
 			return;
 		}
 
-		const dummyInteraction = this.client.interactions.buildDummyInteraction(message, { parameters: { word } });
-		if (dummyInteraction === undefined) {
+		const messageInteraction = this.client.interactions.buildMessageInteraction(message, { parameters: { word } });
+		if (messageInteraction === undefined) {
 			return;
 		}
 
-		await handleFindWord(this.client, dummyInteraction, { searchMode });
+		await handleFindWord(this.client, messageInteraction, { searchMode });
 	}
 }
 

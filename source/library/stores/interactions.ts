@@ -160,7 +160,7 @@ class InteractionStore {
 	 * Given a message, constructs an interaction that can then be passed into some handler expecting
 	 * to receive an interaction.
 	 */
-	buildDummyInteraction(
+	buildMessageInteraction(
 		message: Discord.Message,
 		{ parameters }: { parameters?: Logos.Interaction["parameters"] },
 	): Logos.Interaction | undefined {
@@ -376,6 +376,12 @@ class InteractionStore {
 			});
 			const message = await this.#client.bot.helpers
 				.sendMessage(interaction.channelId, {
+					messageReference: {
+						messageId: interaction.id,
+						channelId: interaction.channelId,
+						guildId: interaction.guildId,
+						failIfNotExists: false,
+					},
 					embeds: [
 						{
 							description: strings.thinking,
@@ -417,10 +423,20 @@ class InteractionStore {
 		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
-			const message = await this.#client.bot.helpers.sendMessage(interaction.channelId, data).catch((error) => {
-				this.log.error(error, "Failed to make message reply to repeated interaction.");
-				return undefined;
-			});
+			const message = await this.#client.bot.helpers
+				.sendMessage(interaction.channelId, {
+					messageReference: {
+						messageId: interaction.id,
+						channelId: interaction.channelId,
+						guildId: interaction.guildId,
+						failIfNotExists: false,
+					},
+					...data,
+				})
+				.catch((error) => {
+					this.log.error(error, "Failed to make message reply to repeated interaction.");
+					return undefined;
+				});
 			if (message === undefined) {
 				return;
 			}
