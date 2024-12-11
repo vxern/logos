@@ -18,6 +18,7 @@ export default Object.freeze({
 		channelSeparator: "︲",
 	},
 	divider: "—",
+	dividerShort: "-",
 	bullet: "-",
 	strings: {
 		trail: "...",

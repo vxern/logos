@@ -50,6 +50,8 @@ const constants = Object.freeze({
 	PICK_MISSING_WORD_CHOICES: 4,
 	SHORT_TEXT_LENGTH: 60,
 	SENTENCE_PAIRS_TO_SHOW: 5,
+	ROW_INDENTATION: 2,
+	INCLUDE_EXPRESSION_RELATIONS: false,
 } as const);
 
 export default Object.freeze({
