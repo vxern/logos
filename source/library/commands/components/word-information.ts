@@ -386,7 +386,7 @@ class WordInformationComponent {
 			} else {
 				fields.push({
 					name: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
-					value: trim(expressionsFitted, 1024),
+					value: expressionsFitted,
 				});
 			}
 		}
@@ -407,7 +407,7 @@ class WordInformationComponent {
 			} else {
 				fields.push({
 					name: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
-					value: trim(escapeFormatting(etymology), 1024),
+					value: trim(escapeFormatting(etymology), constants.lengths.embedField),
 				});
 			}
 		}

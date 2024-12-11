@@ -13,6 +13,7 @@ import endpoints from "logos:constants/endpoints";
 import gifs from "logos:constants/gifs";
 import keys from "logos:constants/keys";
 import languages from "logos:constants/languages";
+import lengths from "logos:constants/lengths";
 import licences from "logos:constants/licences";
 import links from "logos:constants/links";
 import localisations from "logos:constants/localisations";
@@ -71,6 +72,7 @@ export default Object.freeze({
 	gifs,
 	keys,
 	languages,
+	lengths,
 	licences,
 	links,
 	localisations,
