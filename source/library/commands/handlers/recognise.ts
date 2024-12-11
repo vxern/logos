@@ -44,8 +44,8 @@ async function handleRecogniseLanguage(
 
 	await client.postponeReply(interaction);
 
-	const detectedLanguages = await client.adapters.detectors.detectLanguages({ text });
-	if (detectedLanguages.likely.length === 0 && detectedLanguages.possible.length === 0) {
+	const detections = await client.adapters.detectors.detectLanguages({ text });
+	if (detections.likely.length === 0 && detections.possible.length === 0) {
 		const strings = constants.contexts.unknownLanguage({ localise: client.localise, locale: interaction.locale });
 		client
 			.unsupported(interaction, {
@@ -57,12 +57,12 @@ async function handleRecogniseLanguage(
 		return;
 	}
 
-	const sourceNotice = new RecognitionSourceNotice(client, { interaction, sources: detectedLanguages.sources });
+	const sourceNotice = new RecognitionSourceNotice(client, { interaction, sources: detections.sources });
 
 	await sourceNotice.register();
 
-	if (detectedLanguages.likely.length === 1 && detectedLanguages.possible.length === 0) {
-		const language = detectedLanguages.likely.at(0);
+	if (detections.likely.length === 1 && detections.possible.length === 0) {
+		const language = detections.likely.at(0);
 		if (language === undefined) {
 			throw new Error("Detected language unexpectedly undefined.");
 		}
@@ -93,8 +93,8 @@ async function handleRecogniseLanguage(
 	{
 		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
-		if (detectedLanguages.likely.length === 1) {
-			const language = detectedLanguages.likely.at(0);
+		if (detections.likely.length === 1) {
+			const language = detections.likely.at(0);
 			if (language === undefined) {
 				throw new Error("Likely detected language unexpectedly undefined.");
 			}
@@ -108,12 +108,12 @@ async function handleRecogniseLanguage(
 				value: strings.description({ language: `**${strings.language(language)}` }),
 				inline: false,
 			});
-		} else if (detectedLanguages.likely.length > 0) {
+		} else if (detections.likely.length > 0) {
 			const strings = {
 				...constants.contexts.likelyMatches({ localise: client.localise, locale: interaction.locale }),
 				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
-			const languageNamesLocalised = detectedLanguages.likely.map((language) => strings.language(language));
+			const languageNamesLocalised = detections.likely.map((language) => strings.language(language));
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			fields.push({
@@ -123,8 +123,8 @@ async function handleRecogniseLanguage(
 			});
 		}
 
-		if (detectedLanguages.possible.length === 1) {
-			const language = detectedLanguages.possible.at(0);
+		if (detections.possible.length === 1) {
+			const language = detections.possible.at(0);
 			if (language === undefined) {
 				throw new Error("Possible detected language unexpectedly undefined.");
 			}
@@ -138,12 +138,12 @@ async function handleRecogniseLanguage(
 				value: strings.description({ language: `**${strings.language(language)}**` }),
 				inline: false,
 			});
-		} else if (detectedLanguages.possible.length > 0) {
+		} else if (detections.possible.length > 0) {
 			const strings = {
 				...constants.contexts.possibleMatches({ localise: client.localise, locale: interaction.locale }),
 				...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
 			};
-			const languageNamesLocalised = detectedLanguages.possible.map((language) => strings.language(language));
+			const languageNamesLocalised = detections.possible.map((language) => strings.language(language));
 			const languageNamesFormatted = list(languageNamesLocalised.map((languageName) => `***${languageName}***`));
 
 			fields.push({
