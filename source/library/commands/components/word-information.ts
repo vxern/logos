@@ -412,6 +412,12 @@ class WordInformationComponent {
 			}
 		}
 
+		// TODO(vxern): Display relations.
+		// TODO(vxern): Display pronunciation information.
+		// TODO(vxern): Display examples.
+		// TODO(vxern): Display frequency.
+		// TODO(vxern): Display notes.
+
 		const strings = constants.contexts.language({
 			localise: this.#client.localise,
 			locale: this.#anchor.displayLocale,
