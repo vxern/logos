@@ -1,5 +1,5 @@
 import type { DictionarySearchMode } from "logos:constants/dictionaries";
-import { code, trim } from "logos:constants/formatting";
+import { code, escapeFormatting, trim } from "logos:constants/formatting";
 import type {
 	DictionaryEntry,
 	EtymologyField,
@@ -407,7 +407,7 @@ class WordInformationComponent {
 			} else {
 				fields.push({
 					name: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
-					value: trim(etymology, 1024),
+					value: trim(escapeFormatting(etymology), 1024),
 				});
 			}
 		}
