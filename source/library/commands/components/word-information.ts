@@ -337,22 +337,22 @@ class WordInformationComponent {
 			);
 
 			if (this.#verbose) {
-				const strings = constants.contexts.translationsForWord({
+				const strings = constants.contexts.definitionsForWord({
 					localise: this.#client.localise,
 					locale: this.#anchor.displayLocale,
 				});
 				embeds.push({
-					title: `${constants.emojis.commands.word.definitions} ${strings.translationsForWord({ word })}`,
+					title: `${constants.emojis.commands.word.definitions} ${strings.definitionsForWord({ word })}`,
 					description: `${partOfSpeechFormatted}\n\n${translations}`,
 					color: constants.colours.husky,
 				});
 			} else {
-				const strings = constants.contexts.translations({
+				const strings = constants.contexts.definitions({
 					localise: this.#client.localise,
 					locale: this.#anchor.displayLocale,
 				});
 				fields.push({
-					name: `${constants.emojis.commands.word.definitions} ${strings.translations}`,
+					name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
 					value: translations,
 				});
 			}
