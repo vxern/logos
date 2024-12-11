@@ -42,10 +42,6 @@ const partsOfSpeechByLanguage = Object.freeze({
 	Romanian: romanian,
 } satisfies Partial<Record<LocalisationLanguage, Record<string, PartOfSpeech>>>);
 
-function isUnknownPartOfSpeech(partOfSpeech: PartOfSpeech): partOfSpeech is "unknown" {
-	return partOfSpeech === "unknown";
-}
-
 interface PartOfSpeechDetection {
 	readonly detected: PartOfSpeech;
 	readonly original: string;
@@ -77,5 +73,5 @@ function getPartOfSpeech({
 	return { detected: "unknown", original: terms.exact };
 }
 
-export { getPartOfSpeech, isUnknownPartOfSpeech };
+export { getPartOfSpeech };
 export type { PartOfSpeech };

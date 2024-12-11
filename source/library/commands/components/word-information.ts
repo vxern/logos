@@ -1,7 +1,11 @@
 import type { DictionarySearchMode } from "logos:constants/dictionaries";
 import { code, trim } from "logos:constants/formatting";
-import { isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
-import type { DefinitionField, DictionaryEntry, ExpressionField } from "logos/adapters/dictionaries/dictionary-entry";
+import type {
+	DefinitionField,
+	DictionaryEntry,
+	ExpressionField,
+	PartOfSpeechField,
+} from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
@@ -289,29 +293,7 @@ class WordInformationComponent {
 	}
 
 	#formatDefinitions(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
-		let partOfSpeechDisplayed: string;
-		if (entry.partOfSpeech === undefined) {
-			const strings = constants.contexts.partOfSpeechUnknown({
-				localise: this.#client.localise,
-				locale: this.#anchor.displayLocale,
-			});
-			partOfSpeechDisplayed = strings.unknown;
-		} else {
-			const partOfSpeech = entry.partOfSpeech.detected;
-			if (partOfSpeech === "unknown") {
-				partOfSpeechDisplayed = partOfSpeech;
-			} else {
-				const strings = constants.contexts.partOfSpeech({
-					localise: this.#client.localise,
-					locale: this.#anchor.displayLocale,
-				});
-				partOfSpeechDisplayed = strings.partOfSpeech(partOfSpeech);
-				if (isUnknownPartOfSpeech(partOfSpeech)) {
-					partOfSpeechDisplayed += ` — '${partOfSpeech}'`;
-				}
-			}
-		}
-		const partOfSpeechFormatted = `***${partOfSpeechDisplayed}***`;
+		const partOfSpeechFormatted = this.#formatPartOfSpeech(entry.partOfSpeech);
 
 		const word = entry.lemma.value;
 
@@ -462,7 +444,7 @@ class WordInformationComponent {
 			return [
 				{
 					title: `${constants.emojis.commands.word.word} ${word}`,
-					description: partOfSpeechFormatted,
+					description: `***${partOfSpeechFormatted}***`,
 					fields,
 					color: constants.colours.husky,
 					footer: { text: `${languageFlag} ${languageName}` },
@@ -485,6 +467,22 @@ class WordInformationComponent {
 		}
 
 		return [inflectionTable];
+	}
+
+	#formatPartOfSpeech(partOfSpeech: PartOfSpeechField | undefined): string {
+		if (partOfSpeech === undefined || partOfSpeech.detected === "unknown") {
+			const strings = constants.contexts.partOfSpeechUnknown({
+				localise: this.#client.localise,
+				locale: this.#anchor.displayLocale,
+			});
+			return strings.unknown;
+		}
+
+		const strings = constants.contexts.partOfSpeech({
+			localise: this.#client.localise,
+			locale: this.#anchor.displayLocale,
+		});
+		return strings.partOfSpeech(partOfSpeech.detected);
 	}
 
 	tagsToString(tags: string[]): string {
