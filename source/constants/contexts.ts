@@ -1543,17 +1543,17 @@ export default Object.freeze({
 	partOfSpeechUnknown: ({ localise, locale }) => ({
 		unknown: localise("words.unknown", locale)(),
 	}),
-	nativeDefinitionsForWord: ({ localise, locale }) => ({
-		nativeDefinitionsForWord: localise("word.strings.nativeDefinitionsForWord", locale),
-	}),
-	nativeDefinitions: ({ localise, locale }) => ({
-		nativeDefinitions: localise("word.strings.fields.nativeDefinitions", locale)(),
-	}),
 	definitionsForWord: ({ localise, locale }) => ({
 		definitionsForWord: localise("word.strings.definitionsForWord", locale),
 	}),
+	translationsForWord: ({ localise, locale }) => ({
+		translationsForWord: localise("word.strings.translationsForWord", locale),
+	}),
 	definitions: ({ localise, locale }) => ({
 		definitions: localise("word.strings.fields.definitions", locale)(),
+	}),
+	translations: ({ localise, locale }) => ({
+		translations: localise("word.strings.fields.translations", locale)(),
 	}),
 	expressions: ({ localise, locale }) => ({
 		expressions: localise("word.strings.fields.expressions", locale)(),

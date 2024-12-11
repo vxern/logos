@@ -309,22 +309,22 @@ class WordInformationComponent {
 			);
 
 			if (this.#verbose) {
-				const strings = constants.contexts.nativeDefinitionsForWord({
+				const strings = constants.contexts.definitionsForWord({
 					localise: this.#client.localise,
 					locale: this.#anchor.displayLocale,
 				});
 				embeds.push({
-					title: `${constants.emojis.commands.word.definitions} ${strings.nativeDefinitionsForWord({ word })}`,
+					title: `${constants.emojis.commands.word.definitions} ${strings.definitionsForWord({ word })}`,
 					description: `${partOfSpeechFormatted}\n\n${definitions}`,
 					color: constants.colours.husky,
 				});
 			} else {
-				const strings = constants.contexts.nativeDefinitions({
+				const strings = constants.contexts.definitions({
 					localise: this.#client.localise,
 					locale: this.#anchor.displayLocale,
 				});
 				fields.push({
-					name: `${constants.emojis.commands.word.definitions} ${strings.nativeDefinitions}`,
+					name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
 					value: definitions,
 				});
 			}
@@ -337,22 +337,22 @@ class WordInformationComponent {
 			);
 
 			if (this.#verbose) {
-				const strings = constants.contexts.definitionsForWord({
+				const strings = constants.contexts.translationsForWord({
 					localise: this.#client.localise,
 					locale: this.#anchor.displayLocale,
 				});
 				embeds.push({
-					title: `${constants.emojis.commands.word.definitions} ${strings.definitionsForWord({ word })}`,
+					title: `${constants.emojis.commands.word.definitions} ${strings.translationsForWord({ word })}`,
 					description: `${partOfSpeechFormatted}\n\n${translations}`,
 					color: constants.colours.husky,
 				});
 			} else {
-				const strings = constants.contexts.definitions({
+				const strings = constants.contexts.translations({
 					localise: this.#client.localise,
 					locale: this.#anchor.displayLocale,
 				});
 				fields.push({
-					name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
+					name: `${constants.emojis.commands.word.definitions} ${strings.translations}`,
 					value: translations,
 				});
 			}
