@@ -302,7 +302,7 @@ class WordInformationComponent {
 		const embeds: Discord.Camelize<Discord.DiscordEmbed>[] = [];
 		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
-		if (entry.definitions !== undefined && entry.definitions.length > 0) {
+		if (entry.definitions !== undefined && !this.areFieldsEmpty(entry.definitions)) {
 			const definitionsStringified = this.formatMeaningFields(entry.definitions);
 			const definitionsFitted = this.fitTextToFieldSize(
 				this.#client,
@@ -333,7 +333,7 @@ class WordInformationComponent {
 			}
 		}
 
-		if (entry.translations !== undefined && entry.translations.length > 0) {
+		if (entry.translations !== undefined && !this.areFieldsEmpty(entry.translations)) {
 			const definitionsStringified = this.formatMeaningFields(entry.translations);
 			const definitionsFitted = this.fitTextToFieldSize(
 				this.#client,
@@ -364,7 +364,7 @@ class WordInformationComponent {
 			}
 		}
 
-		if (entry.expressions !== undefined && entry.expressions.length > 0) {
+		if (entry.expressions !== undefined && !this.areFieldsEmpty(entry.expressions)) {
 			const expressionsStringified = this.formatExpressionFields(entry.expressions);
 			const expressionsFitted = this.fitTextToFieldSize(
 				this.#client,
@@ -391,7 +391,7 @@ class WordInformationComponent {
 			}
 		}
 
-		if (entry.etymology !== undefined) {
+		if (entry.etymology !== undefined && !this.isFieldEmpty(entry.etymology)) {
 			const etymology = this.formatEtymologyField(entry.etymology);
 
 			const strings = constants.contexts.etymology({
