@@ -645,13 +645,10 @@ class WordInformationComponent {
 	formatRelationField(field: RelationField): string[] | undefined {
 		const rows: string[] = [];
 
-		// TODO(vxern): Move this into a context file.
-		const strings = {
-			synonyms: this.#client.localise("word.strings.relations.synonyms", this.#anchor.displayLocale)(),
-			antonyms: this.#client.localise("word.strings.relations.antonyms", this.#anchor.displayLocale)(),
-			diminutives: this.#client.localise("word.strings.relations.diminutives", this.#anchor.displayLocale)(),
-			augmentatives: this.#client.localise("word.strings.relations.augmentatives", this.#anchor.displayLocale)(),
-		};
+		const strings = constants.contexts.wordRelations({
+			localise: this.#client.localise,
+			locale: this.#anchor.displayLocale,
+		});
 
 		const synonyms = field.synonyms ?? [];
 		if (synonyms.length > 0) {
