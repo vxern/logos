@@ -1530,10 +1530,10 @@ export default Object.freeze({
 	wordPage: ({ localise, locale }) => ({
 		page: localise("word.strings.page", locale)(),
 	}),
-	definitionsView: ({ localise, locale }) => ({
-		definitions: localise("word.strings.definitions", locale)(),
+	overviewTab: ({ localise, locale }) => ({
+		definitions: localise("word.strings.overview", locale)(),
 	}),
-	inflectionView: ({ localise, locale }) => ({
+	inflectionTab: ({ localise, locale }) => ({
 		inflection: localise("word.strings.inflection", locale)(),
 	}),
 	partOfSpeech: ({ localise, locale }) => ({

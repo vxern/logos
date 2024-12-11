@@ -3,14 +3,21 @@ import { code, trim } from "logos:constants/formatting";
 import type {
 	DefinitionField,
 	DictionaryEntry,
+	EtymologyField,
+	ExampleField,
 	ExpressionField,
+	LabelledField,
+	LemmaField,
+	MeaningField,
+	NoteField,
 	PartOfSpeechField,
+	RelationField,
 } from "logos/adapters/dictionaries/dictionary-entry";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
 
-type InformationTab = "definitions" | "inflection";
+type MenuTab = "overview" | "inflection";
 
 type EntryType = "definitions" | "expressions";
 
@@ -24,7 +31,7 @@ class WordInformationComponent {
 	readonly #showButton?: Discord.ButtonComponent;
 	readonly #verbose: boolean;
 	#anchor: Logos.Interaction;
-	#tab: InformationTab;
+	#tab: MenuTab;
 	#dictionaryEntryIndex: number;
 	#inflectionTableIndex: number;
 
@@ -47,7 +54,7 @@ class WordInformationComponent {
 		if (searchMode === "inflection") {
 			this.#tab = "inflection";
 		} else {
-			this.#tab = "definitions";
+			this.#tab = "overview";
 		}
 		this.#dictionaryEntryIndex = 0;
 		this.#inflectionTableIndex = 0;
@@ -69,8 +76,8 @@ class WordInformationComponent {
 
 	#generateEmbeds(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
 		switch (this.#tab) {
-			case "definitions": {
-				return this.#formatDefinitions(entry);
+			case "overview": {
+				return this.#formatOverview(entry);
 			}
 			case "inflection": {
 				return this.#formatInflection(entry);
@@ -82,7 +89,7 @@ class WordInformationComponent {
 		const paginationControls: Discord.ButtonComponent[][] = [];
 
 		switch (this.#tab) {
-			case "definitions": {
+			case "overview": {
 				const isFirst = this.#dictionaryEntryIndex === 0;
 				const isLast = this.#dictionaryEntryIndex === this.#entries.length - 1;
 
@@ -217,21 +224,21 @@ class WordInformationComponent {
 				this.#client.acknowledge(buttonPress).ignore();
 
 				this.#inflectionTableIndex = 0;
-				this.#tab = "definitions";
+				this.#tab = "overview";
 
 				await this.display();
 			});
 
 			await this.#client.registerInteractionCollector(definitionsMenuButton);
 
-			const strings = constants.contexts.definitionsView({
+			const strings = constants.contexts.overviewTab({
 				localise: this.#client.localise,
 				locale: this.#anchor.displayLocale,
 			});
 			row.push({
 				type: Discord.MessageComponentTypes.Button,
 				label: strings.definitions,
-				disabled: this.#tab === "definitions",
+				disabled: this.#tab === "overview",
 				customId: definitionsMenuButton.customId,
 				style: Discord.ButtonStyles.Primary,
 			});
@@ -252,7 +259,7 @@ class WordInformationComponent {
 
 			await this.#client.registerInteractionCollector(inflectionMenuButton);
 
-			const strings = constants.contexts.inflectionView({
+			const strings = constants.contexts.inflectionTab({
 				localise: this.#client.localise,
 				locale: this.#anchor.displayLocale,
 			});
@@ -292,7 +299,7 @@ class WordInformationComponent {
 		}));
 	}
 
-	#formatDefinitions(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
+	#formatOverview(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
 		const partOfSpeechFormatted = this.#formatPartOfSpeech(entry.partOfSpeech);
 
 		const word = entry.lemma.value;
@@ -654,6 +661,218 @@ class WordInformationComponent {
 		}
 
 		return fittedString;
+	}
+
+	isFieldEmpty(field: LabelledField): boolean {
+		return (field.labels === undefined || field.labels.length === 0) && field.value.length === 0;
+	}
+
+	areFieldsEmpty(fields: LabelledField[]): boolean {
+		return fields.length === 0 || fields.some((field) => this.isFieldEmpty(field));
+	}
+
+	formatLabelledField(field: LabelledField): string {
+		if (field.labels === undefined || field.labels.length === 0) {
+			return field.value;
+		}
+
+		const labels = field.labels.map((label) => code(label)).join(" ");
+		if (field.value.length === 0) {
+			return labels;
+		}
+
+		return `${labels} ${field.value}`;
+	}
+
+	formatLemmaField(field: LemmaField): string {
+		if (field.labels === undefined) {
+			return field.value;
+		}
+
+		const labels = field.labels.join(", ");
+
+		return `${field.value} (${labels})`;
+	}
+
+	formatPartOfSpeechField(field: PartOfSpeechField): string {
+		if (field.detected !== undefined) {
+			return this.formatLabelledField({ value: field.detected, labels: field.labels });
+		}
+
+		return this.formatLabelledField(field);
+	}
+
+	formatMeaningFields(fields: MeaningField[], { depth = 0 }: { depth?: number }): string[] {
+		return fields
+			.map((field) => this.formatMeaningField(field, { depth }))
+			.map((entry, index) => `${index + 1}. ${entry}`)
+			.map((entry) => {
+				const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
+				return `${whitespace}${entry}`;
+			});
+	}
+
+	formatMeaningField(field: MeaningField, { depth = 0 }: { depth?: number }): string {
+		let root = this.formatLabelledField(field);
+
+		if (depth === 0 && !this.#verbose) {
+			return root;
+		}
+
+		if (field.relations !== undefined) {
+			const relations = this.formatRelationFields(field.relations, { depth: depth + 2 });
+			if (relations !== undefined) {
+				root = `${root}\n${relations.join("\n")}`;
+			}
+		}
+
+		if (field.definitions !== undefined && field.definitions.length > 0) {
+			const branch = this.formatMeaningFields(field.definitions, { depth: depth + 1 });
+
+			root = `${root}\n${branch.join("\n")}`;
+		}
+
+		if (field.expressions !== undefined && field.expressions.length > 0) {
+			const branch = this.formatExpressionFields(field.expressions, { depth: depth + 1 });
+
+			root = `${root}\n${branch.join("\n")}`;
+		}
+
+		if (field.examples !== undefined && field.examples.length > 0) {
+			const branch = this.formatExampleFields(field.examples, { depth: depth + 1 });
+
+			root = `${root}\n${branch.join("\n")}`;
+		}
+
+		return root;
+	}
+
+	formatExpressionFields(fields: ExpressionField[], { depth = 0 }: { depth?: number }): string[] {
+		return fields
+			.map((field) => this.formatExpressionField(field, { depth }))
+			.map((entry) => {
+				const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
+				return `${whitespace}${constants.special.bullet} ${entry}`;
+			});
+	}
+
+	formatExpressionField(field: ExpressionField, { depth = 0 }: { depth?: number }): string {
+		let root = this.formatLabelledField({ value: `*${field.value}*`, labels: field.labels });
+
+		if (constants.INCLUDE_EXPRESSION_RELATIONS) {
+			if (field.relations !== undefined) {
+				const relations = this.formatRelationFields(field.relations, { depth: depth + 1 });
+				if (relations !== undefined) {
+					root = `${root}\n${relations.join("\n")}`;
+				}
+			}
+		}
+
+		if (field.expressions !== undefined && field.expressions.length > 0) {
+			const branch = this.formatExpressionFields(field.expressions, { depth: depth + 1 });
+
+			root = `${root}\n${branch.join("\n")}`;
+		}
+
+		return root;
+	}
+
+	formatRelationFields(field: RelationField, { depth = 0 }: { depth?: number }): string[] | undefined {
+		return this.formatRelationField(field)?.map((entry) => {
+			const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
+			return `${whitespace}${constants.special.divider} ${entry}`;
+		});
+	}
+
+	formatRelationField(field: RelationField): string[] | undefined {
+		const rows: string[] = [];
+
+		// TODO(vxern): Move this into a context file.
+		const strings = {
+			synonyms: this.#client.localise("word.strings.relations.synonyms", this.#anchor.displayLocale)(),
+			antonyms: this.#client.localise("word.strings.relations.antonyms", this.#anchor.displayLocale)(),
+			diminutives: this.#client.localise("word.strings.relations.diminutives", this.#anchor.displayLocale)(),
+			augmentatives: this.#client.localise("word.strings.relations.augmentatives", this.#anchor.displayLocale)(),
+		};
+
+		const synonyms = field.synonyms ?? [];
+		if (synonyms.length > 0) {
+			rows.push(`**${strings.synonyms}**: ${synonyms.join(", ")}`);
+		}
+
+		const antonyms = field.antonyms ?? [];
+		if (antonyms.length > 0) {
+			rows.push(`**${strings.antonyms}**: ${antonyms.join(", ")}`);
+		}
+
+		const diminutives = field.diminutives ?? [];
+		if (diminutives.length > 0) {
+			rows.push(`**${strings.diminutives}**: ${diminutives.join(", ")}`);
+		}
+
+		const augmentatives = field.augmentatives ?? [];
+		if (augmentatives.length > 0) {
+			rows.push(`**${strings.augmentatives}**: ${augmentatives.join(", ")}`);
+		}
+
+		if (rows.length === 0) {
+			return undefined;
+		}
+
+		return rows;
+	}
+
+	formatPhoneticFields(entry: DictionaryEntry): string {
+		const rows: string[] = [];
+
+		const pronunciationRow: string[] = [];
+		if (entry.syllables !== undefined) {
+			pronunciationRow.push(this.formatLabelledField(entry.syllables));
+		}
+
+		if (entry.pronunciation !== undefined) {
+			pronunciationRow.push(this.formatLabelledField(entry.pronunciation));
+		}
+
+		if (pronunciationRow.length > 0) {
+			rows.push(pronunciationRow.join(` ${constants.special.divider} `));
+		}
+
+		if (entry.audio !== undefined && entry.audio.length > 0) {
+			const strings = {
+				audio: this.#client.localise("word.strings.fields.audio", this.#anchor.displayLocale)(),
+			};
+
+			const audio = entry.audio
+				.map((audioField) =>
+					this.formatLabelledField({
+						value: `[${strings.audio}](${audioField.value})`,
+						labels: audioField.labels,
+					}),
+				)
+				.join(` ${constants.special.dividerShort} `);
+
+			rows.push(audio);
+		}
+
+		return rows.map((row) => `${constants.special.bullet} ${row}`).join("\n");
+	}
+
+	formatExampleFields(fields: ExampleField[], { depth = 0 }: { depth?: number }): string[] {
+		return fields
+			.map((field) => `> - ${this.formatLabelledField(field)}`)
+			.map((entry) => {
+				const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
+				return `${whitespace}${entry}`;
+			});
+	}
+
+	formatEtymologyField(field: EtymologyField): string {
+		return this.formatLabelledField(field);
+	}
+
+	formatNoteField(field: NoteField): string {
+		return this.formatLabelledField(field);
 	}
 }
 

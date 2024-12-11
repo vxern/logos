@@ -179,7 +179,7 @@
 	"word.strings.definitionsOmitted.definitions.two": "{two} definitions",
 	"word.strings.definitionsOmitted.definitions.many": "{many} definitions",
 	"word.strings.page": "Page",
-	"word.strings.definitions": "Definitions",
+	"word.strings.overview": "Overview",
 	"word.strings.nativeDefinitionsForWord": "Native definitions for '{word}'",
 	"word.strings.definitionsForWord": "Definitions for '{word}'",
 	"word.strings.inflection": "Inflection",
