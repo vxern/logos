@@ -1,7 +1,6 @@
 import type { DictionarySearchMode } from "logos:constants/dictionaries";
 import { code, trim } from "logos:constants/formatting";
 import type {
-	DefinitionField,
 	DictionaryEntry,
 	EtymologyField,
 	ExampleField,
@@ -19,11 +18,7 @@ import { WordSourceNotice } from "logos/commands/components/source-notices/word-
 
 type MenuTab = "overview" | "inflection";
 
-type EntryType = "definitions" | "expressions";
-
 type MenuButtonID = [index: string];
-
-const parenthesesExpression = /\((.+?)\)/g;
 
 class WordInformationComponent {
 	readonly #client: Client;
@@ -308,12 +303,7 @@ class WordInformationComponent {
 		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
 		if (entry.definitions !== undefined && entry.definitions.length > 0) {
-			const definitionsStringified = this.stringifyEntries(
-				this.#client,
-				this.#anchor,
-				entry.definitions,
-				"definitions",
-			);
+			const definitionsStringified = this.formatMeaningFields(entry.definitions);
 			const definitionsFitted = this.fitTextToFieldSize(
 				this.#client,
 				this.#anchor,
@@ -344,12 +334,7 @@ class WordInformationComponent {
 		}
 
 		if (entry.translations !== undefined && entry.translations.length > 0) {
-			const definitionsStringified = this.stringifyEntries(
-				this.#client,
-				this.#anchor,
-				entry.translations,
-				"definitions",
-			);
+			const definitionsStringified = this.formatMeaningFields(entry.translations);
 			const definitionsFitted = this.fitTextToFieldSize(
 				this.#client,
 				this.#anchor,
@@ -380,12 +365,7 @@ class WordInformationComponent {
 		}
 
 		if (entry.expressions !== undefined && entry.expressions.length > 0) {
-			const expressionsStringified = this.stringifyEntries(
-				this.#client,
-				this.#anchor,
-				entry.expressions,
-				"expressions",
-			);
+			const expressionsStringified = this.formatExpressionFields(entry.expressions);
 			const expressionsFitted = this.fitTextToFieldSize(
 				this.#client,
 				this.#anchor,
@@ -412,14 +392,7 @@ class WordInformationComponent {
 		}
 
 		if (entry.etymology !== undefined) {
-			let etymology: string;
-			if (entry.etymology.labels === undefined) {
-				etymology = entry.etymology.value;
-			} else if (entry.etymology.value === undefined || entry.etymology.value.length === 0) {
-				etymology = this.tagsToString(entry.etymology.labels);
-			} else {
-				etymology = `${this.tagsToString(entry.etymology.labels)} ${entry.etymology.value}`;
-			}
+			const etymology = this.formatEtymologyField(entry.etymology);
 
 			const strings = constants.contexts.etymology({
 				localise: this.#client.localise,
@@ -490,127 +463,6 @@ class WordInformationComponent {
 			locale: this.#anchor.displayLocale,
 		});
 		return strings.partOfSpeech(partOfSpeech.detected);
-	}
-
-	tagsToString(tags: string[]): string {
-		return tags.map((tag) => code(tag)).join(" ");
-	}
-
-	isDefinition(_entry: DefinitionField | ExpressionField, entryType: EntryType): _entry is DefinitionField {
-		return entryType === "definitions";
-	}
-
-	stringifyEntries<
-		T extends EntryType,
-		E extends DefinitionField[] | ExpressionField[] = T extends "definitions"
-			? DefinitionField[]
-			: ExpressionField[],
-	>(
-		client: Client,
-		interaction: Logos.Interaction,
-		entries: E,
-		entryType: T,
-		options?: { root: string; depth: number },
-	): string[] {
-		const entriesStringified = entries.map((entry, indexZeroBased) => {
-			const parenthesesContents: string[] = [];
-			for (const [match, contents] of entry.value.matchAll(parenthesesExpression)) {
-				if (contents === undefined) {
-					throw new Error(
-						`'${match}' was matched to the parentheses regular expression, but the contents were \`undefined\`.`,
-					);
-				}
-
-				if (parenthesesContents.includes(contents)) {
-					continue;
-				}
-
-				parenthesesContents.push(contents);
-			}
-
-			const value = parenthesesContents.reduce(
-				(string, match) => string.replace(`(${match})`, `(*${match}*)`),
-				entry.value,
-			);
-
-			let anchor = entry.labels === undefined ? value : `${this.tagsToString(entry.labels)} ${value}`;
-			if (this.isDefinition(entry, entryType)) {
-				if (entry.relations !== undefined) {
-					const strings = constants.contexts.wordRelations({
-						localise: client.localise,
-						locale: interaction.displayLocale,
-					});
-
-					const synonyms = entry.relations.synonyms ?? [];
-					const antonyms = entry.relations.antonyms ?? [];
-					const diminutives = entry.relations.diminutives ?? [];
-					const augmentatives = entry.relations.augmentatives ?? [];
-
-					if (synonyms.length > 0 || antonyms.length > 0) {
-						anchor += "\n  - ";
-						const columns: string[] = [];
-
-						if (synonyms.length > 0) {
-							columns.push(`**${strings.synonyms}**: ${synonyms.join(", ")}`);
-						}
-
-						if (antonyms.length > 0) {
-							columns.push(`**${strings.antonyms}**: ${antonyms.join(", ")}`);
-						}
-
-						anchor += columns.join(` ${constants.special.divider} `);
-					}
-
-					if (diminutives.length > 0 || augmentatives.length > 0) {
-						anchor += "\n  - ";
-						const columns: string[] = [];
-
-						if (diminutives.length > 0) {
-							columns.push(`**${strings.diminutives}**: ${diminutives.join(", ")}`);
-						}
-
-						if (augmentatives.length > 0) {
-							columns.push(`**${strings.augmentatives}**: ${augmentatives.join(", ")}`);
-						}
-
-						anchor += columns.join(` ${constants.special.divider} `);
-					}
-				}
-
-				if (value.endsWith(":")) {
-					const definitions = entry.definitions ?? [];
-					if (definitions.length === 0) {
-						return anchor;
-					}
-
-					const index = indexZeroBased + 1;
-					const newRoot = options === undefined ? `${index}` : `${options.root}.${index}`;
-					const entriesStringified = this.stringifyEntries(client, interaction, definitions, "definitions", {
-						root: newRoot,
-						depth: (options?.depth ?? 0) + 1,
-					}).join("\n");
-					return `${anchor}\n${entriesStringified}`;
-				}
-			}
-
-			return anchor;
-		});
-
-		const entriesEnlisted = entriesStringified
-			.map((entry, indexZeroBased) => {
-				const index = indexZeroBased + 1;
-
-				if (options === undefined) {
-					return `${index}. ${entry}`;
-				}
-
-				return `${options.root}.${index}. ${entry}`;
-			})
-			.join("\n");
-
-		return entriesEnlisted
-			.split("\n")
-			.map((entry) => `${constants.special.meta.whitespace.repeat((options?.depth ?? 0) * 2)}${entry}`);
 	}
 
 	fitTextToFieldSize(client: Client, interaction: Logos.Interaction, textParts: string[], verbose: boolean): string {
@@ -702,7 +554,7 @@ class WordInformationComponent {
 		return this.formatLabelledField(field);
 	}
 
-	formatMeaningFields(fields: MeaningField[], { depth = 0 }: { depth?: number }): string[] {
+	formatMeaningFields(fields: MeaningField[], { depth = 0 }: { depth?: number } = {}): string[] {
 		return fields
 			.map((field) => this.formatMeaningField(field, { depth }))
 			.map((entry, index) => `${index + 1}. ${entry}`)
@@ -712,7 +564,7 @@ class WordInformationComponent {
 			});
 	}
 
-	formatMeaningField(field: MeaningField, { depth = 0 }: { depth?: number }): string {
+	formatMeaningField(field: MeaningField, { depth = 0 }: { depth?: number } = {}): string {
 		let root = this.formatLabelledField(field);
 
 		if (depth === 0 && !this.#verbose) {
@@ -747,7 +599,7 @@ class WordInformationComponent {
 		return root;
 	}
 
-	formatExpressionFields(fields: ExpressionField[], { depth = 0 }: { depth?: number }): string[] {
+	formatExpressionFields(fields: ExpressionField[], { depth = 0 }: { depth?: number } = {}): string[] {
 		return fields
 			.map((field) => this.formatExpressionField(field, { depth }))
 			.map((entry) => {
@@ -756,7 +608,7 @@ class WordInformationComponent {
 			});
 	}
 
-	formatExpressionField(field: ExpressionField, { depth = 0 }: { depth?: number }): string {
+	formatExpressionField(field: ExpressionField, { depth = 0 }: { depth?: number } = {}): string {
 		let root = this.formatLabelledField({ value: `*${field.value}*`, labels: field.labels });
 
 		if (constants.INCLUDE_EXPRESSION_RELATIONS) {
@@ -777,7 +629,7 @@ class WordInformationComponent {
 		return root;
 	}
 
-	formatRelationFields(field: RelationField, { depth = 0 }: { depth?: number }): string[] | undefined {
+	formatRelationFields(field: RelationField, { depth = 0 }: { depth?: number } = {}): string[] | undefined {
 		return this.formatRelationField(field)?.map((entry) => {
 			const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
 			return `${whitespace}${constants.special.divider} ${entry}`;
@@ -858,7 +710,7 @@ class WordInformationComponent {
 		return rows.map((row) => `${constants.special.bullet} ${row}`).join("\n");
 	}
 
-	formatExampleFields(fields: ExampleField[], { depth = 0 }: { depth?: number }): string[] {
+	formatExampleFields(fields: ExampleField[], { depth = 0 }: { depth?: number } = {}): string[] {
 		return fields
 			.map((field) => `> - ${this.formatLabelledField(field)}`)
 			.map((entry) => {
