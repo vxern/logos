@@ -303,12 +303,9 @@ class WordInformationComponent {
 		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
 		if (entry.definitions !== undefined && !this.areFieldsEmpty(entry.definitions)) {
-			const definitionsStringified = this.formatMeaningFields(entry.definitions);
-			const definitionsFitted = this.fitTextToFieldSize(
-				this.#client,
-				this.#anchor,
-				definitionsStringified,
-				this.#verbose,
+			const definitions = this.limitEntries(
+				this.formatMeaningFields(entry.definitions),
+				this.#verbose ? constants.DEFINITIONS_PER_VERBOSE_VIEW : constants.DEFINITIONS_PER_VIEW,
 			);
 
 			if (this.#verbose) {
@@ -318,7 +315,7 @@ class WordInformationComponent {
 				});
 				embeds.push({
 					title: `${constants.emojis.commands.word.definitions} ${strings.nativeDefinitionsForWord({ word })}`,
-					description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
+					description: `${partOfSpeechFormatted}\n\n${definitions}`,
 					color: constants.colours.husky,
 				});
 			} else {
@@ -328,18 +325,15 @@ class WordInformationComponent {
 				});
 				fields.push({
 					name: `${constants.emojis.commands.word.definitions} ${strings.nativeDefinitions}`,
-					value: definitionsFitted,
+					value: definitions,
 				});
 			}
 		}
 
 		if (entry.translations !== undefined && !this.areFieldsEmpty(entry.translations)) {
-			const definitionsStringified = this.formatMeaningFields(entry.translations);
-			const definitionsFitted = this.fitTextToFieldSize(
-				this.#client,
-				this.#anchor,
-				definitionsStringified,
-				this.#verbose,
+			const translations = this.limitEntries(
+				this.formatMeaningFields(entry.translations),
+				this.#verbose ? constants.TRANSLATIONS_PER_VERBOSE_VIEW : constants.TRANSLATIONS_PER_VIEW,
 			);
 
 			if (this.#verbose) {
@@ -349,7 +343,7 @@ class WordInformationComponent {
 				});
 				embeds.push({
 					title: `${constants.emojis.commands.word.definitions} ${strings.definitionsForWord({ word })}`,
-					description: `${partOfSpeechFormatted}\n\n${definitionsFitted}`,
+					description: `${partOfSpeechFormatted}\n\n${translations}`,
 					color: constants.colours.husky,
 				});
 			} else {
@@ -359,18 +353,15 @@ class WordInformationComponent {
 				});
 				fields.push({
 					name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
-					value: definitionsFitted,
+					value: translations,
 				});
 			}
 		}
 
 		if (entry.expressions !== undefined && !this.areFieldsEmpty(entry.expressions)) {
-			const expressionsStringified = this.formatExpressionFields(entry.expressions);
-			const expressionsFitted = this.fitTextToFieldSize(
-				this.#client,
-				this.#anchor,
-				expressionsStringified,
-				this.#verbose,
+			const expressions = this.limitEntries(
+				this.formatExpressionFields(entry.expressions),
+				this.#verbose ? constants.EXPRESSIONS_PER_VERBOSE_VIEW : constants.EXPRESSIONS_PER_VIEW,
 			);
 
 			const strings = constants.contexts.expressions({
@@ -380,13 +371,13 @@ class WordInformationComponent {
 			if (this.#verbose) {
 				embeds.push({
 					title: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
-					description: expressionsFitted,
+					description: expressions,
 					color: constants.colours.husky,
 				});
 			} else {
 				fields.push({
 					name: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
-					value: expressionsFitted,
+					value: expressions,
 				});
 			}
 		}
@@ -471,54 +462,38 @@ class WordInformationComponent {
 		return strings.partOfSpeech(partOfSpeech.detected);
 	}
 
-	fitTextToFieldSize(client: Client, interaction: Logos.Interaction, textParts: string[], verbose: boolean): string {
-		const strings = constants.contexts.definitionsOmitted({
-			localise: client.localise,
-			locale: interaction.displayLocale,
-		});
-		const characterOverhead =
-			strings.definitionsOmitted({
-				definitions: client.pluralise(
-					"word.strings.definitionsOmitted.definitions",
-					interaction.displayLocale,
-					{
-						quantity: textParts.length,
-					},
-				),
-				flag: "verbose",
-			}).length + 20;
-
-		const maxCharacterCount = verbose ? 2048 : 512;
+	limitEntries(entries: string[], limit: number): string {
+		const fields: string[][] = [];
 
 		let characterCount = 0;
-		const stringsToDisplay: string[] = [];
-		for (const [string, index] of textParts.map<[string, number]>((s, i) => [s, i])) {
-			characterCount += string.length;
+		let field: string[] = [];
+		for (const entry of entries) {
+			const rows: string[] = [];
+			for (const row of entry.split("\n")) {
+				if (characterCount + row.length >= constants.lengths.embedField) {
+					break;
+				}
 
-			if (characterCount + (index + 1 === textParts.length ? 0 : characterOverhead) >= maxCharacterCount) {
-				break;
+				rows.push(row);
+
+				characterCount += row.length;
 			}
 
-			stringsToDisplay.push(string);
+			field.push(rows.join("\n"));
+
+			if (field.length === limit) {
+				fields.push(field);
+
+				characterCount = 0;
+				field = [];
+			}
 		}
 
-		const stringsOmitted = textParts.length - stringsToDisplay.length;
-
-		let fittedString = stringsToDisplay.join("\n");
-		if (stringsOmitted !== 0) {
-			fittedString += `\n*${strings.definitionsOmitted({
-				definitions: client.pluralise(
-					"word.strings.definitionsOmitted.definitions",
-					interaction.displayLocale,
-					{
-						quantity: stringsOmitted,
-					},
-				),
-				flag: "verbose",
-			})}*`;
+		if (field.length > 0) {
+			fields.push(field);
 		}
 
-		return fittedString;
+		return fields.map((field) => field.join("\n")).join("\n");
 	}
 
 	isFieldEmpty(field: LabelledField): boolean {
