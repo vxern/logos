@@ -296,19 +296,20 @@ class WordInformationComponent {
 	}
 
 	#formatOverview(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
-		const partOfSpeechFormatted = this.#formatPartOfSpeechField(entry.partOfSpeech);
+		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
+
+		const lemma = this.#formatLemmaField(entry.lemma);
+		const partOfSpeech = this.#formatPartOfSpeechField(entry.partOfSpeech);
 
 		const strings = constants.contexts.language({
 			localise: this.#client.localise,
 			locale: this.#anchor.displayLocale,
 		});
-
 		const languageFlag = constants.emojis.flags[entry.language];
 		const languageName = strings.language(entry.language);
 
-		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 		const embed: Discord.DiscordEmbed = {
-			description: `__**${entry.lemma.value}**__${constants.special.sigils.separator}*${partOfSpeechFormatted}*`,
+			description: `__**${lemma}**__${constants.special.sigils.separator}*${partOfSpeech}*`,
 			fields,
 			color: constants.colours.husky,
 			footer: { text: `${languageFlag} ${languageName}` },
