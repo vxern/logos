@@ -20,83 +20,62 @@ class GameViewComponent {
 
 	readonly #client: Client;
 	readonly #interaction: Logos.Interaction;
-	readonly #guessButton: InteractionCollector<[index: string]>;
-	readonly #skipButton: InteractionCollector;
+	readonly #guesses: InteractionCollector<[index: string]>;
+	readonly #skips: InteractionCollector;
 	sentenceSelection!: SentenceSelection;
+	guildStatisticsDocument!: GuildStatistics;
+	userDocument!: User;
 	embedColour: number;
 	sessionScore: number;
 
 	constructor(client: Client, { interaction }: { interaction: Logos.Interaction }) {
 		this.#client = client;
 		this.#interaction = interaction;
-		this.#guessButton = new InteractionCollector<[index: string]>(this.#client, {
+		this.#guesses = new InteractionCollector<[index: string]>(this.#client, {
 			only: [this.#interaction.user.id],
 		});
-		this.#skipButton = new InteractionCollector(this.#client, { only: [this.#interaction.user.id] });
+		this.#skips = new InteractionCollector(this.#client, { only: [this.#interaction.user.id] });
 		this.embedColour = constants.colours.blue;
 		this.sessionScore = 0;
 	}
 
-	async display(): Promise<void> {
-		await this.#client.postponeReply(this.#interaction);
+	async #setup(): Promise<void> {
+		this.sentenceSelection = await this.getSentenceSelection({ learningLocale: this.#interaction.learningLocale });
+		[this.guildStatisticsDocument, this.userDocument] = await Promise.all([
+			GuildStatistics.getOrCreate(this.#client, {
+				guildId: this.#interaction.guildId.toString(),
+			}),
+			User.getOrCreate(this.#client, { userId: this.#interaction.user.id.toString() }),
+		]);
 
-		const guildStatisticsDocument = await GuildStatistics.getOrCreate(this.#client, {
-			guildId: this.#interaction.guildId.toString(),
-		});
-		const userDocument = await User.getOrCreate(this.#client, { userId: this.#interaction.user.id.toString() });
-
-		await guildStatisticsDocument.update(this.#client, () => {
-			guildStatisticsDocument.registerSession({
+		await this.guildStatisticsDocument.update(this.#client, () => {
+			this.guildStatisticsDocument.registerSession({
 				game: "pickMissingWord",
 				learningLocale: this.#interaction.learningLocale,
 				isUnique:
-					userDocument.getGameScores({
+					this.userDocument.getGameScores({
 						game: "pickMissingWord",
 						learningLocale: this.#interaction.learningLocale,
 					}) === undefined,
 			});
 		});
 
-		await userDocument.update(this.#client, () => {
-			userDocument.registerSession({ game: "pickMissingWord", learningLocale: this.#interaction.learningLocale });
-		});
-
-		this.#guessButton.onInteraction(async (buttonPress) => {
-			this.#client.acknowledge(buttonPress).ignore();
-
-			const pick = this.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
-			const isCorrect = pick === this.sentenceSelection.correctPick;
-
-			await guildStatisticsDocument.update(this.#client, () => {
-				guildStatisticsDocument.incrementScore({
-					game: "pickMissingWord",
-					learningLocale: this.#interaction.learningLocale,
-				});
+		await this.userDocument.update(this.#client, () => {
+			this.userDocument.registerSession({
+				game: "pickMissingWord",
+				learningLocale: this.#interaction.learningLocale,
 			});
-
-			await userDocument.update(this.#client, () => {
-				userDocument.incrementScore({
-					game: "pickMissingWord",
-					learningLocale: this.#interaction.learningLocale,
-				});
-			});
-
-			if (isCorrect) {
-				this.sentenceSelection = await this.getSentenceSelection({
-					learningLocale: this.#interaction.learningLocale,
-				});
-				this.sessionScore += 1;
-				this.embedColour = constants.colours.lightGreen;
-
-				this.#client.editReply(this.#interaction, await this.getGameView(userDocument, "hide")).ignore();
-			} else {
-				this.embedColour = constants.colours.red;
-
-				this.#client.editReply(this.#interaction, await this.getGameView(userDocument, "reveal")).ignore();
-			}
 		});
+	}
 
-		this.#skipButton.onInteraction(async (buttonPress) => {
+	async display(): Promise<void> {
+		await this.#client.postponeReply(this.#interaction);
+
+		await this.#setup();
+
+		this.#guesses.onInteraction(this.#handleGuess.bind(this));
+
+		this.#skips.onInteraction(async (buttonPress) => {
 			this.#client.acknowledge(buttonPress).ignore();
 
 			this.sentenceSelection = await this.getSentenceSelection({
@@ -104,21 +83,21 @@ class GameViewComponent {
 			});
 			this.embedColour = constants.colours.blue;
 
-			this.#client.editReply(this.#interaction, await this.getGameView(userDocument, "hide")).ignore();
+			this.#client.editReply(this.#interaction, await this.getGameView("hide")).ignore();
 		});
 
-		await this.#client.registerInteractionCollector(this.#guessButton);
-		await this.#client.registerInteractionCollector(this.#skipButton);
+		await this.#client.registerInteractionCollector(this.#guesses);
+		await this.#client.registerInteractionCollector(this.#skips);
 
-		this.sentenceSelection = await this.getSentenceSelection({ learningLocale: this.#interaction.learningLocale });
-
-		this.#client.editReply(this.#interaction, await this.getGameView(userDocument, "hide")).ignore();
+		this.#client.editReply(this.#interaction, await this.getGameView("hide")).ignore();
 	}
 
-	async getGameView(userDocument: User, mode: "hide" | "reveal"): Promise<Discord.InteractionCallbackData> {
+	async getGameView(mode: "hide" | "reveal"): Promise<Discord.InteractionCallbackData> {
 		const totalScore =
-			userDocument.getGameScores({ game: "pickMissingWord", learningLocale: this.#interaction.learningLocale })
-				?.totalScore ?? 0;
+			this.userDocument.getGameScores({
+				game: "pickMissingWord",
+				learningLocale: this.#interaction.learningLocale,
+			})?.totalScore ?? 0;
 
 		const sourceNotice = new TatoebaSourceNotice(this.#client, {
 			interaction: this.#interaction,
@@ -171,7 +150,7 @@ class GameViewComponent {
 
 						let customId: string;
 						if (mode === "hide") {
-							customId = this.#guessButton.encodeId([pick[0].toString()]);
+							customId = this.#guesses.encodeId([pick[0].toString()]);
 						} else {
 							customId = InteractionCollector.encodeCustomId([
 								InteractionCollector.noneId,
@@ -196,19 +175,54 @@ class GameViewComponent {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: `${constants.emojis.interactions.menu.controls.forward} ${strings.next}`,
-									customId: this.#skipButton.encodeId([]),
+									customId: this.#skips.encodeId([]),
 								}
 							: {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Secondary,
 									label: `${constants.emojis.interactions.menu.controls.forward} ${strings.skip}`,
-									customId: this.#skipButton.encodeId([]),
+									customId: this.#skips.encodeId([]),
 								},
 						sourceNotice.button,
 					] as [Discord.ButtonComponent, Discord.ButtonComponent],
 				},
 			],
 		};
+	}
+
+	async #handleGuess(buttonPress: Logos.Interaction): Promise<void> {
+		this.#client.acknowledge(buttonPress).ignore();
+
+		const pick = this.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
+		const isCorrect = pick === this.sentenceSelection.correctPick;
+
+		await this.guildStatisticsDocument.update(this.#client, () => {
+			this.guildStatisticsDocument.incrementScore({
+				game: "pickMissingWord",
+				learningLocale: this.#interaction.learningLocale,
+			});
+		});
+
+		await this.userDocument.update(this.#client, () => {
+			this.userDocument.incrementScore({
+				game: "pickMissingWord",
+				learningLocale: this.#interaction.learningLocale,
+			});
+		});
+
+		if (isCorrect) {
+			this.sentenceSelection = await this.getSentenceSelection({
+				learningLocale: this.#interaction.learningLocale,
+			});
+			this.sessionScore += 1;
+			this.embedColour = constants.colours.lightGreen;
+
+			this.#client.editReply(this.#interaction, await this.getGameView("hide")).ignore();
+		} else {
+			this.embedColour = constants.colours.red;
+
+			this.#client.editReply(this.#interaction, await this.getGameView("reveal")).ignore();
+		}
 	}
 
 	getWords(...sentences: string[]): string[] {
