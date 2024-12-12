@@ -314,9 +314,9 @@ class WordInformationComponent {
 			footer: { text: `${languageFlag} ${languageName}` },
 		};
 
-		if (entry.definitions !== undefined && !this.areFieldsEmpty(entry.definitions)) {
-			const definitions = this.limitEntries(
-				this.formatMeaningFields(entry.definitions),
+		if (entry.definitions !== undefined && !this.#areFieldsEmpty(entry.definitions)) {
+			const definitions = this.#limitEntries(
+				this.#formatMeaningFields(entry.definitions),
 				this.#verbose ? constants.DEFINITIONS_PER_VERBOSE_VIEW : constants.DEFINITIONS_PER_VIEW,
 			);
 
@@ -330,9 +330,9 @@ class WordInformationComponent {
 			});
 		}
 
-		if (entry.translations !== undefined && !this.areFieldsEmpty(entry.translations)) {
-			const translations = this.limitEntries(
-				this.formatMeaningFields(entry.translations),
+		if (entry.translations !== undefined && !this.#areFieldsEmpty(entry.translations)) {
+			const translations = this.#limitEntries(
+				this.#formatMeaningFields(entry.translations),
 				this.#verbose ? constants.TRANSLATIONS_PER_VERBOSE_VIEW : constants.TRANSLATIONS_PER_VIEW,
 			);
 
@@ -346,9 +346,9 @@ class WordInformationComponent {
 			});
 		}
 
-		if (entry.expressions !== undefined && !this.areFieldsEmpty(entry.expressions)) {
-			const expressions = this.limitEntries(
-				this.formatExpressionFields(entry.expressions),
+		if (entry.expressions !== undefined && !this.#areFieldsEmpty(entry.expressions)) {
+			const expressions = this.#limitEntries(
+				this.#formatExpressionFields(entry.expressions),
 				this.#verbose ? constants.EXPRESSIONS_PER_VERBOSE_VIEW : constants.EXPRESSIONS_PER_VIEW,
 			);
 
@@ -362,8 +362,8 @@ class WordInformationComponent {
 			});
 		}
 
-		if (entry.etymology !== undefined && !this.isFieldEmpty(entry.etymology)) {
-			const etymology = this.formatEtymologyField(entry.etymology);
+		if (entry.etymology !== undefined && !this.#isFieldEmpty(entry.etymology)) {
+			const etymology = this.#formatEtymologyField(entry.etymology);
 
 			const strings = constants.contexts.etymology({
 				localise: this.#client.localise,
@@ -376,7 +376,7 @@ class WordInformationComponent {
 		}
 
 		if (entry.relations !== undefined) {
-			const relations = this.formatRelationFields(entry.relations);
+			const relations = this.#formatRelationFields(entry.relations);
 			if (relations !== undefined) {
 				const strings = constants.contexts.relations({
 					localise: this.#client.localise,
@@ -392,9 +392,9 @@ class WordInformationComponent {
 		if (
 			entry.syllables !== undefined ||
 			entry.pronunciation !== undefined ||
-			(entry.audio !== undefined && !this.areFieldsEmpty(entry.audio))
+			(entry.audio !== undefined && !this.#areFieldsEmpty(entry.audio))
 		) {
-			const text = this.formatPhoneticFields(entry);
+			const text = this.#formatPhoneticFields(entry);
 
 			const strings = constants.contexts.pronunciation({
 				localise: this.#client.localise,
@@ -406,9 +406,9 @@ class WordInformationComponent {
 			});
 		}
 
-		if (entry.examples !== undefined && !this.areFieldsEmpty(entry.examples)) {
-			const examples = this.limitEntries(
-				this.formatExampleFields(entry.examples),
+		if (entry.examples !== undefined && !this.#areFieldsEmpty(entry.examples)) {
+			const examples = this.#limitEntries(
+				this.#formatExampleFields(entry.examples),
 				this.#verbose ? constants.EXAMPLES_PER_VERBOSE_VIEW : constants.EXAMPLES_PER_VIEW,
 			);
 
@@ -423,7 +423,7 @@ class WordInformationComponent {
 		}
 
 		if (entry.frequency !== undefined) {
-			const frequency = this.formatFrequencyField(entry.frequency);
+			const frequency = this.#formatFrequencyField(entry.frequency);
 
 			const strings = constants.contexts.frequency({
 				localise: this.#client.localise,
@@ -437,8 +437,8 @@ class WordInformationComponent {
 			}
 		}
 
-		if (entry.notes !== undefined && !this.isFieldEmpty(entry.notes)) {
-			const notes = this.formatNoteField(entry.notes);
+		if (entry.notes !== undefined && !this.#isFieldEmpty(entry.notes)) {
+			const notes = this.#formatNoteField(entry.notes);
 
 			const strings = constants.contexts.notes({
 				localise: this.#client.localise,
@@ -478,7 +478,7 @@ class WordInformationComponent {
 		return strings.partOfSpeech(partOfSpeech.detected);
 	}
 
-	limitEntries(entries: string[], limit: number): string {
+	#limitEntries(entries: string[], limit: number): string {
 		const fields: string[][] = [];
 
 		let characterCount = 0;
@@ -512,15 +512,15 @@ class WordInformationComponent {
 		return fields.map((field) => field.join("\n")).join("\n");
 	}
 
-	isFieldEmpty(field: LabelledField): boolean {
+	#isFieldEmpty(field: LabelledField): boolean {
 		return (field.labels === undefined || field.labels.length === 0) && field.value.length === 0;
 	}
 
-	areFieldsEmpty(fields: LabelledField[]): boolean {
-		return fields.length === 0 || fields.some((field) => this.isFieldEmpty(field));
+	#areFieldsEmpty(fields: LabelledField[]): boolean {
+		return fields.length === 0 || fields.some((field) => this.#isFieldEmpty(field));
 	}
 
-	formatLabelledField(field: LabelledField): string {
+	#formatLabelledField(field: LabelledField): string {
 		if (field.labels === undefined || field.labels.length === 0) {
 			return field.value;
 		}
@@ -533,7 +533,7 @@ class WordInformationComponent {
 		return `${labels} ${field.value}`;
 	}
 
-	formatLemmaField(field: LemmaField): string {
+	#formatLemmaField(field: LemmaField): string {
 		if (field.labels === undefined) {
 			return field.value;
 		}
@@ -543,17 +543,17 @@ class WordInformationComponent {
 		return `${field.value} (${labels})`;
 	}
 
-	formatPartOfSpeechField(field: PartOfSpeechField): string {
+	#formatPartOfSpeechField(field: PartOfSpeechField): string {
 		if (field.detected !== undefined) {
-			return this.formatLabelledField({ value: field.detected, labels: field.labels });
+			return this.#formatLabelledField({ value: field.detected, labels: field.labels });
 		}
 
-		return this.formatLabelledField(field);
+		return this.#formatLabelledField(field);
 	}
 
-	formatMeaningFields(fields: MeaningField[], { depth = 0 }: { depth?: number } = {}): string[] {
+	#formatMeaningFields(fields: MeaningField[], { depth = 0 }: { depth?: number } = {}): string[] {
 		return fields
-			.map((field) => this.formatMeaningField(field, { depth }))
+			.map((field) => this.#formatMeaningField(field, { depth }))
 			.map((entry, index) => `${index + 1}. ${entry}`)
 			.map((entry) => {
 				const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
@@ -561,34 +561,34 @@ class WordInformationComponent {
 			});
 	}
 
-	formatMeaningField(field: MeaningField, { depth = 0 }: { depth?: number } = {}): string {
-		let root = this.formatLabelledField(field);
+	#formatMeaningField(field: MeaningField, { depth = 0 }: { depth?: number } = {}): string {
+		let root = this.#formatLabelledField(field);
 
 		if (depth === 0 && !this.#verbose) {
 			return root;
 		}
 
 		if (field.relations !== undefined) {
-			const relations = this.formatRelationFields(field.relations, { depth: depth + 1 });
+			const relations = this.#formatRelationFields(field.relations, { depth: depth + 1 });
 			if (relations !== undefined) {
 				root = `${root}\n${relations.join("\n")}`;
 			}
 		}
 
 		if (field.definitions !== undefined && field.definitions.length > 0) {
-			const branch = this.formatMeaningFields(field.definitions, { depth: depth + 1 });
+			const branch = this.#formatMeaningFields(field.definitions, { depth: depth + 1 });
 
 			root = `${root}\n${branch.join("\n")}`;
 		}
 
 		if (field.expressions !== undefined && field.expressions.length > 0) {
-			const branch = this.formatExpressionFields(field.expressions, { depth: depth + 1 });
+			const branch = this.#formatExpressionFields(field.expressions, { depth: depth + 1 });
 
 			root = `${root}\n${branch.join("\n")}`;
 		}
 
 		if (field.examples !== undefined && field.examples.length > 0) {
-			const branch = this.formatExampleFields(field.examples, { depth: depth + 1 });
+			const branch = this.#formatExampleFields(field.examples, { depth: depth + 1 });
 
 			root = `${root}\n${branch.join("\n")}`;
 		}
@@ -596,21 +596,21 @@ class WordInformationComponent {
 		return root;
 	}
 
-	formatExpressionFields(fields: ExpressionField[], { depth = 0 }: { depth?: number } = {}): string[] {
+	#formatExpressionFields(fields: ExpressionField[], { depth = 0 }: { depth?: number } = {}): string[] {
 		return fields
-			.map((field) => this.formatExpressionField(field, { depth }))
+			.map((field) => this.#formatExpressionField(field, { depth }))
 			.map((entry) => {
 				const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
 				return `${whitespace}${constants.special.bullet} ${entry}`;
 			});
 	}
 
-	formatExpressionField(field: ExpressionField, { depth = 0 }: { depth?: number } = {}): string {
-		let root = this.formatLabelledField({ value: `*${field.value}*`, labels: field.labels });
+	#formatExpressionField(field: ExpressionField, { depth = 0 }: { depth?: number } = {}): string {
+		let root = this.#formatLabelledField({ value: `*${field.value}*`, labels: field.labels });
 
 		if (constants.INCLUDE_EXPRESSION_RELATIONS) {
 			if (field.relations !== undefined) {
-				const relations = this.formatRelationFields(field.relations, { depth: depth + 1 });
+				const relations = this.#formatRelationFields(field.relations, { depth: depth + 1 });
 				if (relations !== undefined) {
 					root = `${root}\n${relations.join("\n")}`;
 				}
@@ -618,7 +618,7 @@ class WordInformationComponent {
 		}
 
 		if (field.expressions !== undefined && field.expressions.length > 0) {
-			const branch = this.formatExpressionFields(field.expressions, { depth: depth + 1 });
+			const branch = this.#formatExpressionFields(field.expressions, { depth: depth + 1 });
 
 			root = `${root}\n${branch.join("\n")}`;
 		}
@@ -626,14 +626,14 @@ class WordInformationComponent {
 		return root;
 	}
 
-	formatRelationFields(field: RelationField, { depth = 0 }: { depth?: number } = {}): string[] | undefined {
-		return this.formatRelationField(field)?.map((entry) => {
+	#formatRelationFields(field: RelationField, { depth = 0 }: { depth?: number } = {}): string[] | undefined {
+		return this.#formatRelationField(field)?.map((entry) => {
 			const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
 			return `${whitespace}${constants.special.divider} ${entry}`;
 		});
 	}
 
-	formatRelationField(field: RelationField): string[] | undefined {
+	#formatRelationField(field: RelationField): string[] | undefined {
 		const rows: string[] = [];
 
 		const strings = constants.contexts.wordRelations({
@@ -668,16 +668,16 @@ class WordInformationComponent {
 		return rows;
 	}
 
-	formatPhoneticFields(entry: DictionaryEntry): string {
+	#formatPhoneticFields(entry: DictionaryEntry): string {
 		const rows: string[] = [];
 
 		const pronunciationRow: string[] = [];
 		if (entry.syllables !== undefined) {
-			pronunciationRow.push(this.formatLabelledField(entry.syllables));
+			pronunciationRow.push(this.#formatLabelledField(entry.syllables));
 		}
 
 		if (entry.pronunciation !== undefined) {
-			pronunciationRow.push(this.formatLabelledField(entry.pronunciation));
+			pronunciationRow.push(this.#formatLabelledField(entry.pronunciation));
 		}
 
 		if (pronunciationRow.length > 0) {
@@ -691,7 +691,7 @@ class WordInformationComponent {
 
 			const audio = entry.audio
 				.map((audioField) =>
-					this.formatLabelledField({
+					this.#formatLabelledField({
 						value: `[${strings.audio}](${audioField.value})`,
 						labels: audioField.labels,
 					}),
@@ -704,25 +704,25 @@ class WordInformationComponent {
 		return rows.map((row) => `${constants.special.bullet} ${row}`).join("\n");
 	}
 
-	formatExampleFields(fields: ExampleField[], { depth = 0 }: { depth?: number } = {}): string[] {
+	#formatExampleFields(fields: ExampleField[], { depth = 0 }: { depth?: number } = {}): string[] {
 		return fields
-			.map((field) => `> ${this.formatLabelledField(field)}`)
+			.map((field) => `> ${this.#formatLabelledField(field)}`)
 			.map((entry) => {
 				const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
 				return `${whitespace}${entry}`;
 			});
 	}
 
-	formatFrequencyField(field: FrequencyField): string {
+	#formatFrequencyField(field: FrequencyField): string {
 		return `${(field.value * 100).toFixed(1)}%`;
 	}
 
-	formatEtymologyField(field: EtymologyField): string {
-		return this.formatLabelledField(field);
+	#formatEtymologyField(field: EtymologyField): string {
+		return this.#formatLabelledField(field);
 	}
 
-	formatNoteField(field: NoteField): string {
-		return this.formatLabelledField(field);
+	#formatNoteField(field: NoteField): string {
+		return this.#formatLabelledField(field);
 	}
 }
 
