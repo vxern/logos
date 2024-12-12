@@ -15,23 +15,26 @@ interface SentenceSelection {
 	sentencePair: SentencePair;
 }
 
-interface GameData {
-	readonly guessButton: InteractionCollector<[index: string]>;
-	readonly skipButton: InteractionCollector;
-	sentenceSelection: SentenceSelection;
-	embedColour: number;
-	sessionScore: number;
-}
-
 class GameViewComponent {
 	static wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
 	readonly #client: Client;
 	readonly #interaction: Logos.Interaction;
+	readonly #guessButton: InteractionCollector<[index: string]>;
+	readonly #skipButton: InteractionCollector;
+	sentenceSelection!: SentenceSelection;
+	embedColour: number;
+	sessionScore: number;
 
 	constructor(client: Client, { interaction }: { interaction: Logos.Interaction }) {
 		this.#client = client;
 		this.#interaction = interaction;
+		this.#guessButton = new InteractionCollector<[index: string]>(this.#client, {
+			only: [this.#interaction.user.id],
+		});
+		this.#skipButton = new InteractionCollector(this.#client, { only: [this.#interaction.user.id] });
+		this.embedColour = constants.colours.blue;
+		this.sessionScore = 0;
 	}
 
 	async display(): Promise<void> {
@@ -58,16 +61,11 @@ class GameViewComponent {
 			userDocument.registerSession({ game: "pickMissingWord", learningLocale: this.#interaction.learningLocale });
 		});
 
-		const guessButton = new InteractionCollector<[index: string]>(this.#client, {
-			only: [this.#interaction.user.id],
-		});
-		const skipButton = new InteractionCollector(this.#client, { only: [this.#interaction.user.id] });
-
-		guessButton.onInteraction(async (buttonPress) => {
+		this.#guessButton.onInteraction(async (buttonPress) => {
 			this.#client.acknowledge(buttonPress).ignore();
 
-			const pick = data.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
-			const isCorrect = pick === data.sentenceSelection.correctPick;
+			const pick = this.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
+			const isCorrect = pick === this.sentenceSelection.correctPick;
 
 			await guildStatisticsDocument.update(this.#client, () => {
 				guildStatisticsDocument.incrementScore({
@@ -84,68 +82,56 @@ class GameViewComponent {
 			});
 
 			if (isCorrect) {
-				data.sessionScore += 1;
-				data.embedColour = constants.colours.lightGreen;
-				data.sentenceSelection = await this.getSentenceSelection({
+				this.sentenceSelection = await this.getSentenceSelection({
 					learningLocale: this.#interaction.learningLocale,
 				});
+				this.sessionScore += 1;
+				this.embedColour = constants.colours.lightGreen;
 
-				this.#client.editReply(this.#interaction, await this.getGameView(data, userDocument, "hide")).ignore();
+				this.#client.editReply(this.#interaction, await this.getGameView(userDocument, "hide")).ignore();
 			} else {
-				data.embedColour = constants.colours.red;
+				this.embedColour = constants.colours.red;
 
-				this.#client
-					.editReply(this.#interaction, await this.getGameView(data, userDocument, "reveal"))
-					.ignore();
+				this.#client.editReply(this.#interaction, await this.getGameView(userDocument, "reveal")).ignore();
 			}
 		});
 
-		skipButton.onInteraction(async (buttonPress) => {
+		this.#skipButton.onInteraction(async (buttonPress) => {
 			this.#client.acknowledge(buttonPress).ignore();
 
-			data.embedColour = constants.colours.blue;
-			data.sentenceSelection = await this.getSentenceSelection({
+			this.sentenceSelection = await this.getSentenceSelection({
 				learningLocale: this.#interaction.learningLocale,
 			});
+			this.embedColour = constants.colours.blue;
 
-			this.#client.editReply(this.#interaction, await this.getGameView(data, userDocument, "hide")).ignore();
+			this.#client.editReply(this.#interaction, await this.getGameView(userDocument, "hide")).ignore();
 		});
 
-		await this.#client.registerInteractionCollector(guessButton);
-		await this.#client.registerInteractionCollector(skipButton);
+		await this.#client.registerInteractionCollector(this.#guessButton);
+		await this.#client.registerInteractionCollector(this.#skipButton);
 
-		const data: GameData = {
-			guessButton,
-			skipButton,
-			sentenceSelection: await this.getSentenceSelection({ learningLocale: this.#interaction.learningLocale }),
-			embedColour: constants.colours.blue,
-			sessionScore: 0,
-		};
+		this.sentenceSelection = await this.getSentenceSelection({ learningLocale: this.#interaction.learningLocale });
 
-		this.#client.editReply(this.#interaction, await this.getGameView(data, userDocument, "hide")).ignore();
+		this.#client.editReply(this.#interaction, await this.getGameView(userDocument, "hide")).ignore();
 	}
 
-	async getGameView(
-		data: GameData,
-		userDocument: User,
-		mode: "hide" | "reveal",
-	): Promise<Discord.InteractionCallbackData> {
+	async getGameView(userDocument: User, mode: "hide" | "reveal"): Promise<Discord.InteractionCallbackData> {
 		const totalScore =
 			userDocument.getGameScores({ game: "pickMissingWord", learningLocale: this.#interaction.learningLocale })
 				?.totalScore ?? 0;
 
 		const sourceNotice = new TatoebaSourceNotice(this.#client, {
 			interaction: this.#interaction,
-			sentenceId: data.sentenceSelection.sentencePair.sentenceId,
-			translationId: data.sentenceSelection.sentencePair.translationId,
+			sentenceId: this.sentenceSelection.sentencePair.sentenceId,
+			translationId: this.sentenceSelection.sentencePair.translationId,
 		});
 
 		await sourceNotice.register();
 
-		const wholeWordPattern = constants.patterns.wholeWord(data.sentenceSelection.correctPick[1], {
+		const wholeWordPattern = constants.patterns.wholeWord(this.sentenceSelection.correctPick[1], {
 			caseSensitive: false,
 		});
-		const mask = constants.special.game.mask.repeat(data.sentenceSelection.correctPick[1].length);
+		const mask = constants.special.game.mask.repeat(this.sentenceSelection.correctPick[1].length);
 
 		const strings = constants.contexts.game({ localise: this.#client.localise, locale: this.#interaction.locale });
 		return {
@@ -153,15 +139,15 @@ class GameViewComponent {
 				{
 					title:
 						mode === "reveal"
-							? data.sentenceSelection.sentencePair.sentence.replaceAll(
+							? this.sentenceSelection.sentencePair.sentence.replaceAll(
 									wholeWordPattern,
-									`__${data.sentenceSelection.correctPick[1]}__`,
+									`__${this.sentenceSelection.correctPick[1]}__`,
 								)
-							: data.sentenceSelection.sentencePair.sentence.replaceAll(wholeWordPattern, mask),
-					description: data.sentenceSelection.sentencePair.translation,
-					color: data.embedColour,
+							: this.sentenceSelection.sentencePair.sentence.replaceAll(wholeWordPattern, mask),
+					description: this.sentenceSelection.sentencePair.translation,
+					color: this.embedColour,
 					footer: {
-						text: `${strings.correctGuesses({ number: data.sessionScore })} · ${strings.allTime({
+						text: `${strings.correctGuesses({ number: this.sessionScore })} · ${strings.allTime({
 							number: totalScore,
 						})}`,
 					},
@@ -170,12 +156,12 @@ class GameViewComponent {
 			components: [
 				{
 					type: Discord.MessageComponentTypes.ActionRow,
-					components: data.sentenceSelection.allPicks.map((pick) => {
+					components: this.sentenceSelection.allPicks.map((pick) => {
 						let style: Discord.ButtonStyles;
 						if (mode === "hide") {
 							style = Discord.ButtonStyles.Primary;
 						} else {
-							const isCorrect = pick[0] === data.sentenceSelection.correctPick[0];
+							const isCorrect = pick[0] === this.sentenceSelection.correctPick[0];
 							if (isCorrect) {
 								style = Discord.ButtonStyles.Success;
 							} else {
@@ -185,7 +171,7 @@ class GameViewComponent {
 
 						let customId: string;
 						if (mode === "hide") {
-							customId = data.guessButton.encodeId([pick[0].toString()]);
+							customId = this.#guessButton.encodeId([pick[0].toString()]);
 						} else {
 							customId = InteractionCollector.encodeCustomId([
 								InteractionCollector.noneId,
@@ -210,13 +196,13 @@ class GameViewComponent {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Primary,
 									label: `${constants.emojis.interactions.menu.controls.forward} ${strings.next}`,
-									customId: data.skipButton.encodeId([]),
+									customId: this.#skipButton.encodeId([]),
 								}
 							: {
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Secondary,
 									label: `${constants.emojis.interactions.menu.controls.forward} ${strings.skip}`,
-									customId: data.skipButton.encodeId([]),
+									customId: this.#skipButton.encodeId([]),
 								},
 						sourceNotice.button,
 					] as [Discord.ButtonComponent, Discord.ButtonComponent],
