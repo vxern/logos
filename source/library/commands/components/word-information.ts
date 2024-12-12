@@ -409,7 +409,7 @@ class WordInformationComponent {
 
 		if (entry.examples !== undefined && !this.areFieldsEmpty(entry.examples)) {
 			const examples = this.limitEntries(
-				this.formatExpressionFields(entry.examples),
+				this.formatExampleFields(entry.examples),
 				this.#verbose ? constants.EXAMPLES_PER_VERBOSE_VIEW : constants.EXAMPLES_PER_VIEW,
 			);
 
