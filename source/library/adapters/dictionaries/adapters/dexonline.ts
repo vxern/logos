@@ -1,4 +1,3 @@
-import { code } from "logos:constants/formatting";
 import type { LearningLanguage } from "logos:constants/languages/learning";
 import { type PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
 import * as Dexonline from "dexonline-scraper";
@@ -152,15 +151,13 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		};
 	}
 
-	static #transformEtymology(etymology: Dexonline.Synthesis.Etymology[]): EtymologyField {
-		return {
-			value: etymology
-				.map((etymology) => {
-					const labels = etymology.tags.map((tag) => code(tag)).join(" ");
-					return `${labels} ${etymology.value}`;
-				})
-				.join("\n"),
-		};
+	static #transformEtymology(etymology: Dexonline.Synthesis.Etymology[]): EtymologyField | undefined {
+		const first = etymology.at(0);
+		if (first === undefined) {
+			return first;
+		}
+
+		return { value: first.value, labels: first.tags };
 	}
 
 	#transformInflection(
