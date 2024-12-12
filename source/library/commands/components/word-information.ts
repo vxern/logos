@@ -327,7 +327,7 @@ class WordInformationComponent {
 			});
 			fields.push({
 				name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
-				value: definitions,
+				value: trim(definitions, constants.lengths.embedField),
 			});
 		}
 
@@ -343,7 +343,7 @@ class WordInformationComponent {
 			});
 			fields.push({
 				name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
-				value: translations,
+				value: trim(translations, constants.lengths.embedField),
 			});
 		}
 
@@ -359,7 +359,7 @@ class WordInformationComponent {
 			});
 			fields.push({
 				name: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
-				value: expressions,
+				value: trim(expressions, constants.lengths.embedField),
 			});
 		}
 
@@ -419,7 +419,7 @@ class WordInformationComponent {
 			});
 			fields.push({
 				name: `${constants.emojis.commands.word.examples} ${strings.examples}`,
-				value: examples,
+				value: trim(examples, constants.lengths.embedField),
 			});
 		}
 
@@ -570,7 +570,7 @@ class WordInformationComponent {
 		}
 
 		if (field.relations !== undefined) {
-			const relations = this.formatRelationFields(field.relations, { depth: depth + 2 });
+			const relations = this.formatRelationFields(field.relations, { depth: depth + 1 });
 			if (relations !== undefined) {
 				root = `${root}\n${relations.join("\n")}`;
 			}
