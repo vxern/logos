@@ -5,6 +5,7 @@ import type {
 	EtymologyField,
 	ExampleField,
 	ExpressionField,
+	FrequencyField,
 	LabelledField,
 	LemmaField,
 	MeaningField,
@@ -297,9 +298,22 @@ class WordInformationComponent {
 	#formatOverview(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
 		const partOfSpeechFormatted = this.#formatPartOfSpeech(entry.partOfSpeech);
 
-		const word = entry.lemma.value;
+		const strings = constants.contexts.language({
+			localise: this.#client.localise,
+			locale: this.#anchor.displayLocale,
+		});
+
+		const languageFlag = constants.emojis.flags[entry.language];
+		const languageName = strings.language(entry.language);
 
 		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
+		const embed: Discord.DiscordEmbed = {
+			title: `${constants.emojis.commands.word.word} ${entry.lemma.value}`,
+			description: `***${partOfSpeechFormatted}***`,
+			fields,
+			color: constants.colours.husky,
+			footer: { text: `${languageFlag} ${languageName}` },
+		};
 
 		if (entry.definitions !== undefined && !this.areFieldsEmpty(entry.definitions)) {
 			const definitions = this.limitEntries(
@@ -362,29 +376,82 @@ class WordInformationComponent {
 			});
 		}
 
-		// TODO(vxern): Display relations.
-		// TODO(vxern): Display pronunciation information.
-		// TODO(vxern): Display examples.
-		// TODO(vxern): Display frequency.
-		// TODO(vxern): Display notes.
+		if (entry.relations !== undefined) {
+			const relations = this.formatRelationFields(entry.relations);
+			if (relations !== undefined) {
+				const strings = constants.contexts.relations({
+					localise: this.#client.localise,
+					locale: this.#anchor.displayLocale,
+				});
+				fields.push({
+					name: `${constants.emojis.commands.word.relations} ${strings.relations}`,
+					value: trim(relations.join("\n"), constants.lengths.embedField),
+				});
+			}
+		}
 
-		const strings = constants.contexts.language({
-			localise: this.#client.localise,
-			locale: this.#anchor.displayLocale,
-		});
+		if (
+			entry.syllables !== undefined ||
+			entry.pronunciation !== undefined ||
+			(entry.audio !== undefined && !this.areFieldsEmpty(entry.audio))
+		) {
+			const text = this.formatPhoneticFields(entry);
 
-		const languageFlag = constants.emojis.flags[entry.language];
-		const languageName = strings.language(entry.language);
+			const strings = constants.contexts.pronunciation({
+				localise: this.#client.localise,
+				locale: this.#anchor.displayLocale,
+			});
+			fields.push({
+				name: `${constants.emojis.commands.word.pronunciation} ${strings.pronunciation}`,
+				value: trim(text, constants.lengths.embedField),
+			});
+		}
 
-		return [
-			{
-				title: `${constants.emojis.commands.word.word} ${word}`,
-				description: `***${partOfSpeechFormatted}***`,
-				fields,
-				color: constants.colours.husky,
-				footer: { text: `${languageFlag} ${languageName}` },
-			},
-		];
+		if (entry.examples !== undefined && !this.areFieldsEmpty(entry.examples)) {
+			const examples = this.limitEntries(
+				this.formatExpressionFields(entry.examples),
+				this.#verbose ? constants.EXAMPLES_PER_VERBOSE_VIEW : constants.EXAMPLES_PER_VIEW,
+			);
+
+			const strings = constants.contexts.examples({
+				localise: this.#client.localise,
+				locale: this.#anchor.displayLocale,
+			});
+			fields.push({
+				name: `${constants.emojis.commands.word.examples} ${strings.examples}`,
+				value: examples,
+			});
+		}
+
+		if (entry.frequency !== undefined) {
+			const frequency = this.formatFrequencyField(entry.frequency);
+
+			const strings = constants.contexts.frequency({
+				localise: this.#client.localise,
+				locale: this.#anchor.displayLocale,
+			});
+			const text = trim(`${strings.frequency} ${escapeFormatting(frequency)}`, constants.lengths.embedFooter);
+			if (embed.footer !== undefined) {
+				embed.footer = { text: `${embed.footer.text} ${constants.special.divider} ${text}` };
+			} else {
+				embed.footer = { text };
+			}
+		}
+
+		if (entry.notes !== undefined && !this.isFieldEmpty(entry.notes)) {
+			const notes = this.formatNoteField(entry.notes);
+
+			const strings = constants.contexts.notes({
+				localise: this.#client.localise,
+				locale: this.#anchor.displayLocale,
+			});
+			fields.push({
+				name: `${constants.emojis.commands.word.notes} ${strings.notes}`,
+				value: trim(escapeFormatting(notes), constants.lengths.embedField),
+			});
+		}
+
+		return [embed];
 	}
 
 	#formatInflection(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
@@ -645,6 +712,10 @@ class WordInformationComponent {
 				const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
 				return `${whitespace}${entry}`;
 			});
+	}
+
+	formatFrequencyField(field: FrequencyField): string {
+		return `${(field.value * 100).toFixed(1)}%`;
 	}
 
 	formatEtymologyField(field: EtymologyField): string {

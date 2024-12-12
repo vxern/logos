@@ -1576,6 +1576,9 @@ export default Object.freeze({
 	etymology: ({ localise, locale }) => ({
 		etymology: localise("word.strings.fields.etymology", locale)(),
 	}),
+	notes: ({ localise, locale }) => ({
+		notes: localise("word.strings.fields.notes", locale)(),
+	}),
 	sourcedFromDictionaries: ({ localise, locale }) => ({
 		sourcedResponsibly: localise("word.strings.sourcedResponsibly", locale),
 	}),
