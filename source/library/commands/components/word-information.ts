@@ -26,7 +26,7 @@ class WordInformationComponent {
 	readonly #entries: DictionaryEntry[];
 	readonly #showButton?: Discord.ButtonComponent;
 	readonly #verbose: boolean;
-	#anchor: Logos.Interaction;
+	readonly #anchor: Logos.Interaction;
 	#tab: MenuTab;
 	#dictionaryEntryIndex: number;
 	#inflectionTableIndex: number;
