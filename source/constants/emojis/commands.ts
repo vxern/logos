@@ -32,7 +32,6 @@ export default Object.freeze({
 		},
 	},
 	word: {
-		word: "📜",
 		definitions: "📚",
 		translations: "🌐",
 		relations: "🌳",

@@ -1530,10 +1530,10 @@ export default Object.freeze({
 	wordPage: ({ localise, locale }) => ({
 		page: localise("word.strings.page", locale)(),
 	}),
-	definitionsView: ({ localise, locale }) => ({
-		definitions: localise("word.strings.definitions", locale)(),
+	overviewTab: ({ localise, locale }) => ({
+		definitions: localise("word.strings.overview", locale)(),
 	}),
-	inflectionView: ({ localise, locale }) => ({
+	inflectionTab: ({ localise, locale }) => ({
 		inflection: localise("word.strings.inflection", locale)(),
 	}),
 	partOfSpeech: ({ localise, locale }) => ({
@@ -1543,23 +1543,41 @@ export default Object.freeze({
 	partOfSpeechUnknown: ({ localise, locale }) => ({
 		unknown: localise("words.unknown", locale)(),
 	}),
-	nativeDefinitionsForWord: ({ localise, locale }) => ({
-		nativeDefinitionsForWord: localise("word.strings.nativeDefinitionsForWord", locale),
-	}),
-	nativeDefinitions: ({ localise, locale }) => ({
-		nativeDefinitions: localise("word.strings.fields.nativeDefinitions", locale)(),
-	}),
 	definitionsForWord: ({ localise, locale }) => ({
 		definitionsForWord: localise("word.strings.definitionsForWord", locale),
+	}),
+	translationsForWord: ({ localise, locale }) => ({
+		translationsForWord: localise("word.strings.translationsForWord", locale),
 	}),
 	definitions: ({ localise, locale }) => ({
 		definitions: localise("word.strings.fields.definitions", locale)(),
 	}),
+	translations: ({ localise, locale }) => ({
+		translations: localise("word.strings.fields.translations", locale)(),
+	}),
 	expressions: ({ localise, locale }) => ({
 		expressions: localise("word.strings.fields.expressions", locale)(),
 	}),
+	relations: ({ localise, locale }) => ({
+		relations: localise("word.strings.fields.relations", locale)(),
+	}),
+	pronunciation: ({ localise, locale }) => ({
+		pronunciation: localise("word.strings.fields.pronunciation", locale)(),
+	}),
+	audio: ({ localise, locale }) => ({
+		audio: localise("word.strings.fields.audio", locale)(),
+	}),
+	examples: ({ localise, locale }) => ({
+		examples: localise("word.strings.fields.examples", locale)(),
+	}),
+	frequency: ({ localise, locale }) => ({
+		frequency: localise("word.strings.fields.frequency", locale)(),
+	}),
 	etymology: ({ localise, locale }) => ({
 		etymology: localise("word.strings.fields.etymology", locale)(),
+	}),
+	notes: ({ localise, locale }) => ({
+		notes: localise("word.strings.fields.notes", locale)(),
 	}),
 	sourcedFromDictionaries: ({ localise, locale }) => ({
 		sourcedResponsibly: localise("word.strings.sourcedResponsibly", locale),

@@ -19,10 +19,8 @@ export default Object.freeze({
 	interactions: {
 		menu: {
 			controls: {
-				back: "⬅️",
-				forward: "➡️",
-				down: "⬇️",
-				up: "⬆️",
+				back: "←",
+				forward: "→",
 			},
 		},
 	},

@@ -1,16 +1,6 @@
 import { describe, it } from "bun:test";
-import { type PartOfSpeech, getPartOfSpeech, isUnknownPartOfSpeech } from "logos:constants/parts-of-speech";
+import { type PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
 import { expect } from "chai";
-
-describe("isUnknownPartOfSpeech()", () => {
-	it("returns true when the part of speech is 'unknown'.", () => {
-		expect(isUnknownPartOfSpeech("unknown")).to.be.true;
-	});
-
-	it("returns false when the part of speech is not 'unknown'.", () => {
-		expect(isUnknownPartOfSpeech("proper-noun")).to.be.false;
-	});
-});
 
 describe("getPartOfSpeech()", () => {
 	it("returns the part of speech if the passed exact term is a resolvable part of speech.", () => {
