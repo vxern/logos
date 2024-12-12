@@ -299,7 +299,6 @@ class WordInformationComponent {
 
 		const word = entry.lemma.value;
 
-		const embeds: Discord.Camelize<Discord.DiscordEmbed>[] = [];
 		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
 		if (entry.definitions !== undefined && !this.areFieldsEmpty(entry.definitions)) {
@@ -308,26 +307,14 @@ class WordInformationComponent {
 				this.#verbose ? constants.DEFINITIONS_PER_VERBOSE_VIEW : constants.DEFINITIONS_PER_VIEW,
 			);
 
-			if (this.#verbose) {
-				const strings = constants.contexts.definitionsForWord({
-					localise: this.#client.localise,
-					locale: this.#anchor.displayLocale,
-				});
-				embeds.push({
-					title: `${constants.emojis.commands.word.definitions} ${strings.definitionsForWord({ word })}`,
-					description: `${partOfSpeechFormatted}\n\n${definitions}`,
-					color: constants.colours.husky,
-				});
-			} else {
-				const strings = constants.contexts.definitions({
-					localise: this.#client.localise,
-					locale: this.#anchor.displayLocale,
-				});
-				fields.push({
-					name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
-					value: definitions,
-				});
-			}
+			const strings = constants.contexts.definitions({
+				localise: this.#client.localise,
+				locale: this.#anchor.displayLocale,
+			});
+			fields.push({
+				name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
+				value: definitions,
+			});
 		}
 
 		if (entry.translations !== undefined && !this.areFieldsEmpty(entry.translations)) {
@@ -336,26 +323,14 @@ class WordInformationComponent {
 				this.#verbose ? constants.TRANSLATIONS_PER_VERBOSE_VIEW : constants.TRANSLATIONS_PER_VIEW,
 			);
 
-			if (this.#verbose) {
-				const strings = constants.contexts.definitionsForWord({
-					localise: this.#client.localise,
-					locale: this.#anchor.displayLocale,
-				});
-				embeds.push({
-					title: `${constants.emojis.commands.word.definitions} ${strings.definitionsForWord({ word })}`,
-					description: `${partOfSpeechFormatted}\n\n${translations}`,
-					color: constants.colours.husky,
-				});
-			} else {
-				const strings = constants.contexts.definitions({
-					localise: this.#client.localise,
-					locale: this.#anchor.displayLocale,
-				});
-				fields.push({
-					name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
-					value: translations,
-				});
-			}
+			const strings = constants.contexts.definitions({
+				localise: this.#client.localise,
+				locale: this.#anchor.displayLocale,
+			});
+			fields.push({
+				name: `${constants.emojis.commands.word.definitions} ${strings.definitions}`,
+				value: translations,
+			});
 		}
 
 		if (entry.expressions !== undefined && !this.areFieldsEmpty(entry.expressions)) {
@@ -368,18 +343,10 @@ class WordInformationComponent {
 				localise: this.#client.localise,
 				locale: this.#anchor.displayLocale,
 			});
-			if (this.#verbose) {
-				embeds.push({
-					title: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
-					description: expressions,
-					color: constants.colours.husky,
-				});
-			} else {
-				fields.push({
-					name: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
-					value: expressions,
-				});
-			}
+			fields.push({
+				name: `${constants.emojis.commands.word.expressions} ${strings.expressions}`,
+				value: expressions,
+			});
 		}
 
 		if (entry.etymology !== undefined && !this.isFieldEmpty(entry.etymology)) {
@@ -389,18 +356,10 @@ class WordInformationComponent {
 				localise: this.#client.localise,
 				locale: this.#anchor.displayLocale,
 			});
-			if (this.#verbose) {
-				embeds.push({
-					title: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
-					description: etymology,
-					color: constants.colours.husky,
-				});
-			} else {
-				fields.push({
-					name: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
-					value: trim(escapeFormatting(etymology), constants.lengths.embedField),
-				});
-			}
+			fields.push({
+				name: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
+				value: trim(escapeFormatting(etymology), constants.lengths.embedField),
+			});
 		}
 
 		// TODO(vxern): Display relations.
@@ -417,24 +376,15 @@ class WordInformationComponent {
 		const languageFlag = constants.emojis.flags[entry.language];
 		const languageName = strings.language(entry.language);
 
-		if (!this.#verbose) {
-			return [
-				{
-					title: `${constants.emojis.commands.word.word} ${word}`,
-					description: `***${partOfSpeechFormatted}***`,
-					fields,
-					color: constants.colours.husky,
-					footer: { text: `${languageFlag} ${languageName}` },
-				},
-			];
-		}
-
-		const lastEmbed = embeds.at(-1);
-		if (lastEmbed !== undefined) {
-			lastEmbed.footer = { text: `${languageFlag} ${languageName}` };
-		}
-
-		return embeds;
+		return [
+			{
+				title: `${constants.emojis.commands.word.word} ${word}`,
+				description: `***${partOfSpeechFormatted}***`,
+				fields,
+				color: constants.colours.husky,
+				footer: { text: `${languageFlag} ${languageName}` },
+			},
+		];
 	}
 
 	#formatInflection(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {

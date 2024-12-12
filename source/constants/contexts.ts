@@ -1558,6 +1558,21 @@ export default Object.freeze({
 	expressions: ({ localise, locale }) => ({
 		expressions: localise("word.strings.fields.expressions", locale)(),
 	}),
+	relations: ({ localise, locale }) => ({
+		relations: localise("word.strings.fields.relations", locale)(),
+	}),
+	pronunciation: ({ localise, locale }) => ({
+		pronunciation: localise("word.strings.fields.pronunciation", locale)(),
+	}),
+	audio: ({ localise, locale }) => ({
+		audio: localise("word.strings.fields.audio", locale)(),
+	}),
+	examples: ({ localise, locale }) => ({
+		examples: localise("word.strings.fields.examples", locale)(),
+	}),
+	frequency: ({ localise, locale }) => ({
+		frequency: localise("word.strings.fields.frequency", locale)(),
+	}),
 	etymology: ({ localise, locale }) => ({
 		etymology: localise("word.strings.fields.etymology", locale)(),
 	}),
