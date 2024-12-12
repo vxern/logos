@@ -1,4 +1,8 @@
-## 4.48.2 (WIP)
+## 4.48.3
+
+- Moved the bulk of the logic of the `/word` command into its own component.
+
+## 4.48.2
 
 - Made various conventional and stylistic changes to the code.
 

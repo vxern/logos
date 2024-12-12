@@ -154,5 +154,9 @@ function trim(string: string, length: number): string {
 	return `${trimmed} ${constants.special.strings.continued}`;
 }
 
-export { capitalise, decapitalise, code, codeMultiline, list, mention, timestamp, trim };
+function escapeFormatting(string: string): string {
+	return string.replaceAll("*", "\\*").replaceAll("_", "\\_").replaceAll("~", "\\~");
+}
+
+export { capitalise, decapitalise, code, codeMultiline, list, mention, timestamp, trim, escapeFormatting };
 export type { TimestampFormat, MentionType };
