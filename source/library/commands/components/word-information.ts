@@ -707,7 +707,7 @@ class WordInformationComponent {
 
 	formatExampleFields(fields: ExampleField[], { depth = 0 }: { depth?: number } = {}): string[] {
 		return fields
-			.map((field) => `> - ${this.formatLabelledField(field)}`)
+			.map((field) => `> ${this.formatLabelledField(field)}`)
 			.map((entry) => {
 				const whitespace = constants.special.meta.whitespace.repeat(depth * constants.ROW_INDENTATION);
 				return `${whitespace}${entry}`;
