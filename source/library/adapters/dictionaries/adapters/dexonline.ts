@@ -214,7 +214,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 					title: strings.title,
 					fields: [
 						{
-							name: constants.special.meta.whitespace,
+							name: constants.special.meta.forcedWhitespace,
 							value: `**${strings.singular}**\n**${strings.plural}**`,
 							inline: true,
 						},
@@ -259,7 +259,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 			locale: interaction.locale,
 		});
 		const numberColumn = {
-			name: constants.special.meta.whitespace,
+			name: constants.special.meta.forcedWhitespace,
 			value: `**${strings.singular}**\n**${strings.plural}**`,
 			inline: true,
 		};
@@ -539,7 +539,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 					title: strings.title,
 					fields: [
 						{
-							name: constants.special.meta.whitespace,
+							name: constants.special.meta.forcedWhitespace,
 							value: `**${strings.singular}**\n**${strings.plural}**`,
 							inline: true,
 						},

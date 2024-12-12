@@ -225,7 +225,8 @@ async function translateText(
 	}
 
 	// Ensures that an empty translation string does not result in embed failure.
-	const translatedText = translation.text.trim().length > 0 ? translation.text : constants.special.meta.whitespace;
+	const translatedText =
+		translation.text.trim().length > 0 ? translation.text : constants.special.meta.forcedWhitespace;
 
 	const isLong = text.length > 896; // 7/8 of 1024. Leaves room for text overhead.
 
