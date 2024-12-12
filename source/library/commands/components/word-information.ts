@@ -296,7 +296,7 @@ class WordInformationComponent {
 	}
 
 	#formatOverview(entry: DictionaryEntry): Discord.Camelize<Discord.DiscordEmbed>[] {
-		const partOfSpeechFormatted = this.#formatPartOfSpeech(entry.partOfSpeech);
+		const partOfSpeechFormatted = this.#formatPartOfSpeechField(entry.partOfSpeech);
 
 		const strings = constants.contexts.language({
 			localise: this.#client.localise,
@@ -462,22 +462,6 @@ class WordInformationComponent {
 		return [inflectionTable];
 	}
 
-	#formatPartOfSpeech(partOfSpeech: PartOfSpeechField | undefined): string {
-		if (partOfSpeech === undefined || partOfSpeech.detected === "unknown") {
-			const strings = constants.contexts.partOfSpeechUnknown({
-				localise: this.#client.localise,
-				locale: this.#anchor.displayLocale,
-			});
-			return strings.unknown;
-		}
-
-		const strings = constants.contexts.partOfSpeech({
-			localise: this.#client.localise,
-			locale: this.#anchor.displayLocale,
-		});
-		return strings.partOfSpeech(partOfSpeech.detected);
-	}
-
 	#limitEntries(entries: string[], limit: number): string {
 		const fields: string[][] = [];
 
@@ -543,12 +527,26 @@ class WordInformationComponent {
 		return `${field.value} (${labels})`;
 	}
 
-	#formatPartOfSpeechField(field: PartOfSpeechField): string {
-		if (field.detected !== undefined) {
-			return this.#formatLabelledField({ value: field.detected, labels: field.labels });
+	#formatPartOfSpeechField(field: PartOfSpeechField | undefined): string {
+		const partOfSpeech = this.#formatPartOfSpeech(field);
+
+		return this.#formatLabelledField({ value: partOfSpeech, labels: field?.labels });
+	}
+
+	#formatPartOfSpeech(partOfSpeech: PartOfSpeechField | undefined): string {
+		if (partOfSpeech === undefined || partOfSpeech.detected === "unknown") {
+			const strings = constants.contexts.partOfSpeechUnknown({
+				localise: this.#client.localise,
+				locale: this.#anchor.displayLocale,
+			});
+			return strings.unknown;
 		}
 
-		return this.#formatLabelledField(field);
+		const strings = constants.contexts.partOfSpeech({
+			localise: this.#client.localise,
+			locale: this.#anchor.displayLocale,
+		});
+		return strings.partOfSpeech(partOfSpeech.detected);
 	}
 
 	#formatMeaningFields(fields: MeaningField[], { depth = 0 }: { depth?: number } = {}): string[] {
