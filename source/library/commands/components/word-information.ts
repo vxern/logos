@@ -308,8 +308,7 @@ class WordInformationComponent {
 
 		const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 		const embed: Discord.DiscordEmbed = {
-			title: `${constants.emojis.commands.word.word} ${entry.lemma.value}`,
-			description: `***${partOfSpeechFormatted}***`,
+			description: `__**${entry.lemma.value}**__${constants.special.sigils.separator}*${partOfSpeechFormatted}*`,
 			fields,
 			color: constants.colours.husky,
 			footer: { text: `${languageFlag} ${languageName}` },
