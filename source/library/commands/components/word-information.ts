@@ -372,7 +372,7 @@ class WordInformationComponent {
 			});
 			fields.push({
 				name: `${constants.emojis.commands.word.etymology} ${strings.etymology}`,
-				value: trim(escapeFormatting(etymology), constants.lengths.embedField),
+				value: trim(etymology, Math.floor(constants.lengths.embedField / 4)),
 			});
 		}
 
@@ -447,7 +447,7 @@ class WordInformationComponent {
 			});
 			fields.push({
 				name: `${constants.emojis.commands.word.notes} ${strings.notes}`,
-				value: trim(escapeFormatting(notes), constants.lengths.embedField),
+				value: trim(notes, constants.lengths.embedField),
 			});
 		}
 
