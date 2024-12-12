@@ -74,17 +74,7 @@ class GameViewComponent {
 		await this.#setup();
 
 		this.#guesses.onInteraction(this.#handleGuess.bind(this));
-
-		this.#skips.onInteraction(async (buttonPress) => {
-			this.#client.acknowledge(buttonPress).ignore();
-
-			this.sentenceSelection = await this.getSentenceSelection({
-				learningLocale: this.#interaction.learningLocale,
-			});
-			this.embedColour = constants.colours.blue;
-
-			this.#client.editReply(this.#interaction, await this.getGameView("hide")).ignore();
-		});
+		this.#skips.onInteraction(this.#handleSkip.bind(this));
 
 		await this.#client.registerInteractionCollector(this.#guesses);
 		await this.#client.registerInteractionCollector(this.#skips);
@@ -223,6 +213,17 @@ class GameViewComponent {
 
 			this.#client.editReply(this.#interaction, await this.getGameView("reveal")).ignore();
 		}
+	}
+
+	async #handleSkip(buttonPress: Logos.Interaction): Promise<void> {
+		this.#client.acknowledge(buttonPress).ignore();
+
+		this.sentenceSelection = await this.getSentenceSelection({
+			learningLocale: this.#interaction.learningLocale,
+		});
+		this.embedColour = constants.colours.blue;
+
+		this.#client.editReply(this.#interaction, await this.getGameView("hide")).ignore();
 	}
 
 	getWords(...sentences: string[]): string[] {
