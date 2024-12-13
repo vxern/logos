@@ -1,27 +1,16 @@
 import { getRoleCategories } from "logos:constants/roles";
 import type { Client } from "logos/client";
-import { createRoleSelectionMenu } from "logos/commands/components/role-selection";
+import { RoleSelectionComponent } from "logos/commands/components/role-selection";
 
 /**
  * Displays a role selection menu to the user and allows them to assign or unassign roles
  * from within it.
  */
 async function handleOpenRoleSelectionMenu(client: Client, interaction: Logos.Interaction): Promise<void> {
-	const rootCategories = getRoleCategories(constants.roles, interaction.guildId);
+	const categories = getRoleCategories(constants.roles, interaction.guildId);
+	const roleSelection = new RoleSelectionComponent(client, { interaction, categories });
 
-	await createRoleSelectionMenu(client, interaction, {
-		navigationData: {
-			root: {
-				type: "group",
-				id: "roles.noCategory",
-				color: constants.colours.invisible,
-				emoji: constants.emojis.roles.noCategory,
-				categories: rootCategories,
-			},
-			identifiersAccessed: [],
-		},
-		guildId: interaction.guildId,
-	});
+	await roleSelection.display();
 }
 
 export { handleOpenRoleSelectionMenu };
