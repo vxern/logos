@@ -17,10 +17,10 @@ import { InteractionCollector } from "logos/collectors";
 
 class RoleSelectionComponent {
 	readonly #client: Client;
+	readonly #selections: InteractionCollector;
 	#anchor: Logos.Interaction;
 	root: RoleCategoryGroup;
 	identifiersAccessed: string[];
-	customId!: string;
 	roleData!: {
 		emojiIdsByName: Map<string, bigint>;
 		rolesById: Map<bigint, Logos.Role>;
@@ -38,6 +38,7 @@ class RoleSelectionComponent {
 		{ interaction, categories }: { interaction: Logos.Interaction; categories: Record<string, RoleCategory> },
 	) {
 		this.#client = client;
+		this.#selections = new InteractionCollector(this.#client, { only: [interaction.user.id] });
 		this.#anchor = interaction;
 		this.root = {
 			type: "group",
@@ -72,137 +73,136 @@ class RoleSelectionComponent {
 
 		const rolesById = new Map(guild.roles.array().map((role) => [role.id, role]));
 
-		const selectionMenuSelection = new InteractionCollector(this.#client, { only: [this.#anchor.user.id] });
+		this.#selections.onInteraction(this.#handleSelection.bind(this));
 
-		selectionMenuSelection.onInteraction(async (selection) => {
-			this.#client.acknowledge(selection).ignore();
-
-			const identifier = selection.data?.values?.at(0);
-			if (identifier === undefined) {
-				return;
-			}
-
-			if (identifier === constants.special.roles.back) {
-				this.identifiersAccessed.pop();
-				await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
-				return;
-			}
-
-			const viewData = this.viewData;
-			if (viewData === undefined) {
-				return;
-			}
-
-			if (isGroup(viewData.category)) {
-				this.identifiersAccessed.push(identifier);
-				await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
-				return;
-			}
-
-			const role = viewData.menuRolesResolved[identifier];
-			if (role === undefined) {
-				return;
-			}
-
-			const alreadyHasRole = viewData.memberRolesIncludedInMenu.includes(role.id);
-
-			if (alreadyHasRole) {
-				if (
-					viewData.category.minimum !== undefined &&
-					viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
-				) {
-					await this.#traverseRoleTreeAndDisplay(this.#anchor, {
-						editResponse: true,
-					});
-					return;
-				}
-
-				this.#client.bot.helpers
-					.removeRole(guild.id, member.id, role.id, "User-requested role removal.")
-					.catch((error) =>
-						this.#client.log.warn(
-							error,
-							`Failed to remove ${this.#client.diagnostics.role(role)} from ${this.#client.diagnostics.member(
-								member,
-							)} on ${this.#client.diagnostics.guild(guild)}.`,
-						),
-					);
-
-				const roleIndex = this.roleData.memberRoleIds.findIndex((roleId) => roleId === role.id);
-				const roleInMenuIndex = viewData.memberRolesIncludedInMenu.findIndex((roleId) => roleId === role.id);
-				if (roleIndex !== undefined && roleInMenuIndex !== undefined) {
-					this.roleData.memberRoleIds.splice(roleIndex, 1);
-					viewData.memberRolesIncludedInMenu.splice(roleInMenuIndex, 1);
-				}
-			} else {
-				if (
-					viewData.category.maximum !== undefined &&
-					viewData.category.maximum !== 1 &&
-					viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
-				) {
-					const strings = constants.contexts.roleLimitReached({
-						localise: this.#client.localise,
-						locale: this.#anchor.locale,
-					});
-					this.#client
-						.notice(this.#anchor, {
-							title: strings.title,
-							description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
-						})
-						.ignore();
-
-					await this.#traverseRoleTreeAndDisplay(this.#anchor, {
-						editResponse: true,
-					});
-
-					return;
-				}
-
-				await this.#client.bot.helpers
-					.addRole(guild.id, member.id, role.id, "User-requested role addition.")
-					.catch((error) =>
-						this.#client.log.warn(
-							error,
-							`Failed to add ${this.#client.diagnostics.role(role)} to ${this.#client.diagnostics.member(
-								member,
-							)} on ${this.#client.diagnostics.guild(guild)}.`,
-						),
-					);
-
-				if (viewData.category.maximum === 1) {
-					for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
-						this.#client.bot.helpers
-							.removeRole(guild.id, member.id, memberRoleId)
-							.catch((error) =>
-								this.#client.log.warn(
-									error,
-									`Failed to remove ${this.#client.diagnostics.role(role)} from ${this.#client.diagnostics.member(
-										member,
-									)} on ${this.#client.diagnostics.guild(guild)}.`,
-								),
-							);
-
-						const roleId = this.roleData.memberRoleIds.findIndex((roleId) => roleId === memberRoleId);
-
-						this.roleData.memberRoleIds.splice(roleId, 1);
-					}
-					viewData.memberRolesIncludedInMenu = [];
-				}
-
-				this.roleData.memberRoleIds.push(role.id);
-				this.viewData?.memberRolesIncludedInMenu.push(role.id);
-			}
-
-			await this.#traverseRoleTreeAndDisplay(this.#anchor, { editResponse: true });
-		});
-
-		await this.#client.registerInteractionCollector(selectionMenuSelection);
+		await this.#client.registerInteractionCollector(this.#selections);
 
 		// TODO(vxern): Is this required?
-		this.customId = selectionMenuSelection.customId;
 		this.roleData = { emojiIdsByName, rolesById, memberRoleIds: [...member.roles] };
 
 		await this.#traverseRoleTreeAndDisplay(this.#anchor, { editResponse: false });
+	}
+
+	async #handleSelection(selection: Logos.Interaction): Promise<void> {
+		this.#client.acknowledge(selection).ignore();
+
+		const identifier = selection.data?.values?.at(0);
+		if (identifier === undefined) {
+			return;
+		}
+
+		if (identifier === constants.special.roles.back) {
+			this.identifiersAccessed.pop();
+			await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
+			return;
+		}
+
+		const viewData = this.viewData;
+		if (viewData === undefined) {
+			return;
+		}
+
+		if (isGroup(viewData.category)) {
+			this.identifiersAccessed.push(identifier);
+			await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
+			return;
+		}
+
+		const role = viewData.menuRolesResolved[identifier];
+		if (role === undefined) {
+			return;
+		}
+
+		const alreadyHasRole = viewData.memberRolesIncludedInMenu.includes(role.id);
+
+		if (alreadyHasRole) {
+			if (
+				viewData.category.minimum !== undefined &&
+				viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
+			) {
+				await this.#traverseRoleTreeAndDisplay(this.#anchor, {
+					editResponse: true,
+				});
+				return;
+			}
+
+			this.#client.bot.helpers
+				.removeRole(selection.guildId, selection.user.id, role.id, "User-requested role removal.")
+				.catch((error) =>
+					this.#client.log.warn(
+						error,
+						`Failed to remove ${this.#client.diagnostics.role(role)} from ${this.#client.diagnostics.user(
+							selection.user,
+						)} on ${this.#client.diagnostics.guild(selection.guildId)}.`,
+					),
+				);
+
+			const roleIndex = this.roleData.memberRoleIds.findIndex((roleId) => roleId === role.id);
+			const roleInMenuIndex = viewData.memberRolesIncludedInMenu.findIndex((roleId) => roleId === role.id);
+			if (roleIndex !== undefined && roleInMenuIndex !== undefined) {
+				this.roleData.memberRoleIds.splice(roleIndex, 1);
+				viewData.memberRolesIncludedInMenu.splice(roleInMenuIndex, 1);
+			}
+		} else {
+			if (
+				viewData.category.maximum !== undefined &&
+				viewData.category.maximum !== 1 &&
+				viewData.memberRolesIncludedInMenu.length >= viewData.category.maximum
+			) {
+				const strings = constants.contexts.roleLimitReached({
+					localise: this.#client.localise,
+					locale: this.#anchor.locale,
+				});
+				this.#client
+					.notice(this.#anchor, {
+						title: strings.title,
+						description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
+					})
+					.ignore();
+
+				await this.#traverseRoleTreeAndDisplay(this.#anchor, {
+					editResponse: true,
+				});
+
+				return;
+			}
+
+			await this.#client.bot.helpers
+				.addRole(selection.guildId, selection.user.id, role.id, "User-requested role addition.")
+				.catch((error) =>
+					this.#client.log.warn(
+						error,
+						`Failed to add ${this.#client.diagnostics.role(role)} to ${this.#client.diagnostics.user(
+							selection.user,
+						)} on ${this.#client.diagnostics.guild(selection.guildId)}.`,
+					),
+				);
+
+			if (viewData.category.maximum === 1) {
+				for (const memberRoleId of viewData.memberRolesIncludedInMenu) {
+					this.#client.bot.helpers
+						.removeRole(selection.guildId, selection.user.id, memberRoleId)
+						.catch((error) =>
+							this.#client.log.warn(
+								error,
+								`Failed to remove ${this.#client.diagnostics.role(role)} from ${this.#client.diagnostics.user(
+									selection.user,
+								)} on ${this.#client.diagnostics.guild(selection.guildId)}.`,
+							),
+						);
+
+					const roleId = this.roleData.memberRoleIds.findIndex((roleId) => roleId === memberRoleId);
+
+					this.roleData.memberRoleIds.splice(roleId, 1);
+				}
+				viewData.memberRolesIncludedInMenu = [];
+			}
+
+			this.roleData.memberRoleIds.push(role.id);
+			this.viewData?.memberRolesIncludedInMenu.push(role.id);
+		}
+
+		await this.#traverseRoleTreeAndDisplay(this.#anchor, { editResponse: true });
 	}
 
 	/**
@@ -343,7 +343,7 @@ class RoleSelectionComponent {
 					components: [
 						{
 							type: Discord.MessageComponentTypes.SelectMenu,
-							customId: this.customId,
+							customId: this.#selections.customId,
 							options: selectOptions,
 							placeholder: isGroup(category) ? strings.chooseCategory : strings.chooseRole,
 						},
