@@ -16,7 +16,7 @@ interface SentenceSelection {
 }
 
 class GameViewComponent {
-	static wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
+	static #wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
 	readonly #client: Client;
 	readonly #interaction: Logos.Interaction;
@@ -230,7 +230,7 @@ class GameViewComponent {
 		const wordsAll: string[] = [];
 
 		for (const sentence of sentences) {
-			const segmentsRaw = Array.from(GameViewComponent.wordSegmenter.segment(sentence));
+			const segmentsRaw = Array.from(GameViewComponent.#wordSegmenter.segment(sentence));
 
 			const segmentsProcessedSeparate: Intl.SegmentData[][] = [];
 			let isCompound = false;
