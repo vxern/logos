@@ -1,6 +1,10 @@
+## 4.49.2
+
+- Compiled independent functions in `role-selection.ts` into `RoleSelectionComponent`.
+
 ## 4.49.1
 
-- Moved the bulk of the logic of the `/word` command into `GameViewComponent`.
+- Moved the bulk of the logic of the `/game` command into `GameViewComponent`.
 - Refactored the implementation of `GameViewComponent`.
 
 ## 4.49.0
