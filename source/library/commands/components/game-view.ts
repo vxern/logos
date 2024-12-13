@@ -16,7 +16,7 @@ interface SentenceSelection {
 }
 
 class GameViewComponent {
-	static #wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
+	static readonly #wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
 	readonly #client: Client;
 	readonly #interaction: Logos.Interaction;
