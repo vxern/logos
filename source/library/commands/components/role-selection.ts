@@ -87,6 +87,7 @@ class RoleSelectionComponent {
 			if (name === undefined || id === undefined) {
 				continue;
 			}
+
 			emojiIdsByName.set(name, id);
 		}
 
@@ -253,10 +254,10 @@ class RoleSelectionComponent {
 				}
 
 				return (Object.entries(menuRoles) as [string, RoleImplicit][]).map(([name, role]) => {
-					const snowflake = role.snowflakes[interaction.guildId.toString()];
+					const snowflake = role.snowflakes[this.#anchor.guildId.toString()];
 					if (snowflake === undefined) {
 						throw new Error(
-							`Could not get the snowflake for a role on ${this.#client.diagnostics.guild(interaction.guildId)}.`,
+							`Could not get the snowflake for a role on ${this.#client.diagnostics.guild(this.#anchor.guildId)}.`,
 						);
 					}
 
@@ -276,18 +277,18 @@ class RoleSelectionComponent {
 
 			this.viewData = { category, menuRoles, menuRolesResolved, memberRolesIncludedInMenu };
 
-			selectOptions = this.createSelectOptionsFromCollection(interaction);
+			selectOptions = this.createSelectOptionsFromCollection();
 		} else {
 			if (this.viewData === undefined) {
 				this.viewData = { category, menuRoles: {}, menuRolesResolved: {}, memberRolesIncludedInMenu: [] };
 			}
 
-			selectOptions = this.createSelectOptionsFromCategories(interaction, category.categories);
+			selectOptions = this.createSelectOptionsFromCategories(category.categories);
 		}
 
 		this.viewData.category = category;
 
-		const menu = await this.displaySelectMenu(interaction, categories, selectOptions);
+		const menu = await this.displaySelectMenu(categories, selectOptions);
 
 		if (editResponse) {
 			await this.#client.editReply(interaction, menu);
@@ -298,7 +299,6 @@ class RoleSelectionComponent {
 	}
 
 	async displaySelectMenu(
-		interaction: Logos.Interaction,
 		categories: [RoleCategory, ...RoleCategory[]],
 		selectOptions: Discord.SelectOption[],
 	): Promise<Discord.InteractionCallbackData> {
@@ -306,7 +306,7 @@ class RoleSelectionComponent {
 		if (!isInRootCategory) {
 			const strings = constants.contexts.previousRoleCategory({
 				localise: this.#client.localise,
-				locale: interaction.locale,
+				locale: this.#anchor.displayLocale,
 			});
 
 			selectOptions.push({ label: trim(strings.back, 25), value: constants.special.roles.back });
@@ -318,11 +318,11 @@ class RoleSelectionComponent {
 		}
 
 		const strings = {
-			...constants.contexts.roleMenu({ localise: this.#client.localise, locale: interaction.locale }),
+			...constants.contexts.roleMenu({ localise: this.#client.localise, locale: this.#anchor.displayLocale }),
 			...constants.contexts.role({
 				localise: this.#client.localise,
 				localiseRaw: this.#client.localiseRaw,
-				locale: interaction.locale,
+				locale: this.#anchor.displayLocale,
 			}),
 		};
 		const title = (categories.length > 1 ? categories.slice(1) : categories)
@@ -353,17 +353,14 @@ class RoleSelectionComponent {
 		};
 	}
 
-	createSelectOptionsFromCategories(
-		interaction: Logos.Interaction,
-		categories: Record<string, RoleCategory>,
-	): Discord.SelectOption[] {
+	createSelectOptionsFromCategories(categories: Record<string, RoleCategory>): Discord.SelectOption[] {
 		const categorySelections = getRoleCategories(categories, this.#anchor.guildId);
 
 		const selections: Discord.SelectOption[] = [];
 		for (const [name, category] of Object.entries(categorySelections)) {
 			const strings = constants.contexts.roleCategory({
 				localise: this.#client.localise,
-				locale: interaction.locale,
+				locale: this.#anchor.displayLocale,
 			});
 			selections.push({
 				label: trim(`${category.emoji} ${strings.name({ id: category.id })}`, 25),
@@ -376,7 +373,7 @@ class RoleSelectionComponent {
 		return selections;
 	}
 
-	createSelectOptionsFromCollection(interaction: Logos.Interaction): Discord.SelectOption[] {
+	createSelectOptionsFromCollection(): Discord.SelectOption[] {
 		const selectOptions: Discord.SelectOption[] = [];
 
 		const viewData = this.viewData;
@@ -393,11 +390,11 @@ class RoleSelectionComponent {
 			const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
 			const strings = {
-				...constants.contexts.assignedRoles({ localise: this.#client.localise, locale: interaction.locale }),
+				...constants.contexts.assignedRoles({ localise: this.#client.localise, locale: this.#anchor.locale }),
 				...constants.contexts.role({
 					localise: this.#client.localise,
 					localiseRaw: this.#client.localiseRaw,
-					locale: interaction.locale,
+					locale: this.#anchor.locale,
 				}),
 			};
 			selectOptions.push({
