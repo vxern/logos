@@ -18,15 +18,15 @@ import { InteractionCollector } from "logos/collectors";
 class RoleSelectionComponent {
 	readonly #client: Client;
 	readonly #selections: InteractionCollector;
-	#anchor: Logos.Interaction;
-	root: RoleCategoryGroup;
-	identifiersAccessed: string[];
+	readonly #root: RoleCategoryGroup;
+	readonly #history: string[];
+	#interaction: Logos.Interaction;
 	roleData!: {
 		emojiIdsByName: Map<string, bigint>;
 		rolesById: Map<bigint, Logos.Role>;
 		memberRoleIds: bigint[];
 	};
-	viewData?: {
+	viewData!: {
 		category: RoleCategory;
 		menuRoles: Record<string, Role>;
 		menuRolesResolved: Record<string, Logos.Role | undefined>;
@@ -39,19 +39,19 @@ class RoleSelectionComponent {
 	) {
 		this.#client = client;
 		this.#selections = new InteractionCollector(this.#client, { only: [interaction.user.id] });
-		this.#anchor = interaction;
-		this.root = {
+		this.#root = {
 			type: "group",
 			id: "roles.noCategory",
 			color: constants.colours.invisible,
 			emoji: constants.emojis.roles.noCategory,
 			categories,
 		};
-		this.identifiersAccessed = [];
+		this.#history = [];
+		this.#interaction = interaction;
 	}
 
-	async display(): Promise<void> {
-		const guild = this.#client.entities.guilds.get(this.#anchor.guildId);
+	#setup(): void {
+		const guild = this.#client.entities.guilds.get(this.#interaction.guildId);
 		if (guild === undefined) {
 			return;
 		}
@@ -66,21 +66,24 @@ class RoleSelectionComponent {
 			emojiIdsByName.set(name, id);
 		}
 
-		const member = this.#client.entities.members.get(guild.id)?.get(this.#anchor.user.id);
+		const member = this.#client.entities.members.get(guild.id)?.get(this.#interaction.user.id);
 		if (member === undefined) {
 			return;
 		}
 
 		const rolesById = new Map(guild.roles.array().map((role) => [role.id, role]));
 
+		this.roleData = { emojiIdsByName, rolesById, memberRoleIds: [...member.roles] };
+	}
+
+	async display(): Promise<void> {
+		this.#setup();
+
 		this.#selections.onInteraction(this.#handleSelection.bind(this));
 
 		await this.#client.registerInteractionCollector(this.#selections);
 
-		// TODO(vxern): Is this required?
-		this.roleData = { emojiIdsByName, rolesById, memberRoleIds: [...member.roles] };
-
-		await this.#traverseRoleTreeAndDisplay(this.#anchor, { editResponse: false });
+		await this.#traverseRoleTreeAndDisplay(this.#interaction, { editResponse: false });
 	}
 
 	async #handleSelection(selection: Logos.Interaction): Promise<void> {
@@ -92,7 +95,7 @@ class RoleSelectionComponent {
 		}
 
 		if (identifier === constants.special.roles.back) {
-			this.identifiersAccessed.pop();
+			this.#history.pop();
 			await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
 			return;
 		}
@@ -103,7 +106,7 @@ class RoleSelectionComponent {
 		}
 
 		if (isGroup(viewData.category)) {
-			this.identifiersAccessed.push(identifier);
+			this.#history.push(identifier);
 			await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
 			return;
 		}
@@ -120,7 +123,7 @@ class RoleSelectionComponent {
 				viewData.category.minimum !== undefined &&
 				viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
 			) {
-				await this.#traverseRoleTreeAndDisplay(this.#anchor, {
+				await this.#traverseRoleTreeAndDisplay(selection, {
 					editResponse: true,
 				});
 				return;
@@ -151,16 +154,16 @@ class RoleSelectionComponent {
 			) {
 				const strings = constants.contexts.roleLimitReached({
 					localise: this.#client.localise,
-					locale: this.#anchor.locale,
+					locale: selection.displayLocale,
 				});
 				this.#client
-					.notice(this.#anchor, {
+					.notice(selection, {
 						title: strings.title,
 						description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
 					})
 					.ignore();
 
-				await this.#traverseRoleTreeAndDisplay(this.#anchor, {
+				await this.#traverseRoleTreeAndDisplay(selection, {
 					editResponse: true,
 				});
 
@@ -202,7 +205,7 @@ class RoleSelectionComponent {
 			this.viewData?.memberRolesIncludedInMenu.push(role.id);
 		}
 
-		await this.#traverseRoleTreeAndDisplay(this.#anchor, { editResponse: true });
+		await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
 	}
 
 	/**
@@ -213,8 +216,8 @@ class RoleSelectionComponent {
 	 * @returns The category the user is now viewing.
 	 */
 	#traverseRoleSelectionTree(): [RoleCategory, ...RoleCategory[]] {
-		const categories: [RoleCategory, ...RoleCategory[]] = [this.root];
-		for (const next of this.identifiersAccessed) {
+		const categories: [RoleCategory, ...RoleCategory[]] = [this.#root];
+		for (const next of this.#history) {
 			const lastCategoryGroup = categories.at(-1) as RoleCategoryGroup | undefined;
 			if (lastCategoryGroup === undefined) {
 				throw new Error("Could not get the last role category group when traversing the role selection tree.");
@@ -243,7 +246,7 @@ class RoleSelectionComponent {
 
 		let selectOptions: Discord.SelectOption[];
 		if (isSingle(category)) {
-			const menuRoles = getRoles(category.collection, this.#anchor.guildId);
+			const menuRoles = getRoles(category.collection, interaction.guildId);
 			const snowflakes = ((): [string, bigint][] => {
 				const collection = category.collection;
 				if (isCustom(collection)) {
@@ -254,10 +257,10 @@ class RoleSelectionComponent {
 				}
 
 				return (Object.entries(menuRoles) as [string, RoleImplicit][]).map(([name, role]) => {
-					const snowflake = role.snowflakes[this.#anchor.guildId.toString()];
+					const snowflake = role.snowflakes[interaction.guildId.toString()];
 					if (snowflake === undefined) {
 						throw new Error(
-							`Could not get the snowflake for a role on ${this.#client.diagnostics.guild(this.#anchor.guildId)}.`,
+							`Could not get the snowflake for a role on ${this.#client.diagnostics.guild(interaction.guildId)}.`,
 						);
 					}
 
@@ -277,18 +280,18 @@ class RoleSelectionComponent {
 
 			this.viewData = { category, menuRoles, menuRolesResolved, memberRolesIncludedInMenu };
 
-			selectOptions = this.#createSelectOptionsFromCollection();
+			selectOptions = this.#createSelectOptionsFromCollection(interaction);
 		} else {
 			if (this.viewData === undefined) {
 				this.viewData = { category, menuRoles: {}, menuRolesResolved: {}, memberRolesIncludedInMenu: [] };
 			}
 
-			selectOptions = this.#createSelectOptionsFromCategories(category.categories);
+			selectOptions = this.#createSelectOptionsFromCategories(interaction, category.categories);
 		}
 
 		this.viewData.category = category;
 
-		const menu = await this.#displaySelectMenu(categories, selectOptions);
+		const menu = await this.#displaySelectMenu(interaction, categories, selectOptions);
 
 		if (editResponse) {
 			await this.#client.editReply(interaction, menu);
@@ -299,14 +302,15 @@ class RoleSelectionComponent {
 	}
 
 	async #displaySelectMenu(
+		interaction: Logos.Interaction,
 		categories: [RoleCategory, ...RoleCategory[]],
 		selectOptions: Discord.SelectOption[],
 	): Promise<Discord.InteractionCallbackData> {
-		const isInRootCategory = this.identifiersAccessed.length === 0;
+		const isInRootCategory = this.#history.length === 0;
 		if (!isInRootCategory) {
 			const strings = constants.contexts.previousRoleCategory({
 				localise: this.#client.localise,
-				locale: this.#anchor.displayLocale,
+				locale: interaction.displayLocale,
 			});
 
 			selectOptions.push({ label: trim(strings.back, 25), value: constants.special.roles.back });
@@ -318,11 +322,11 @@ class RoleSelectionComponent {
 		}
 
 		const strings = {
-			...constants.contexts.roleMenu({ localise: this.#client.localise, locale: this.#anchor.displayLocale }),
+			...constants.contexts.roleMenu({ localise: this.#client.localise, locale: interaction.displayLocale }),
 			...constants.contexts.role({
 				localise: this.#client.localise,
 				localiseRaw: this.#client.localiseRaw,
-				locale: this.#anchor.displayLocale,
+				locale: interaction.displayLocale,
 			}),
 		};
 		const title = (categories.length > 1 ? categories.slice(1) : categories)
@@ -353,14 +357,17 @@ class RoleSelectionComponent {
 		};
 	}
 
-	#createSelectOptionsFromCategories(categories: Record<string, RoleCategory>): Discord.SelectOption[] {
-		const categorySelections = getRoleCategories(categories, this.#anchor.guildId);
+	#createSelectOptionsFromCategories(
+		interaction: Logos.Interaction,
+		categories: Record<string, RoleCategory>,
+	): Discord.SelectOption[] {
+		const categorySelections = getRoleCategories(categories, interaction.guildId);
 
 		const selections: Discord.SelectOption[] = [];
 		for (const [name, category] of Object.entries(categorySelections)) {
 			const strings = constants.contexts.roleCategory({
 				localise: this.#client.localise,
-				locale: this.#anchor.displayLocale,
+				locale: interaction.displayLocale,
 			});
 			selections.push({
 				label: trim(`${category.emoji} ${strings.name({ id: category.id })}`, 25),
@@ -373,7 +380,7 @@ class RoleSelectionComponent {
 		return selections;
 	}
 
-	#createSelectOptionsFromCollection(): Discord.SelectOption[] {
+	#createSelectOptionsFromCollection(interaction: Logos.Interaction): Discord.SelectOption[] {
 		const selectOptions: Discord.SelectOption[] = [];
 
 		const viewData = this.viewData;
@@ -390,11 +397,14 @@ class RoleSelectionComponent {
 			const memberHasRole = viewData.memberRolesIncludedInMenu.includes(roleResolved.id);
 
 			const strings = {
-				...constants.contexts.assignedRoles({ localise: this.#client.localise, locale: this.#anchor.locale }),
+				...constants.contexts.assignedRoles({
+					localise: this.#client.localise,
+					locale: interaction.displayLocale,
+				}),
 				...constants.contexts.role({
 					localise: this.#client.localise,
 					localiseRaw: this.#client.localiseRaw,
-					locale: this.#anchor.locale,
+					locale: interaction.displayLocale,
 				}),
 			};
 			selectOptions.push({
