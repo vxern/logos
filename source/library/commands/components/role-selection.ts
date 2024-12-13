@@ -20,7 +20,7 @@ class RoleSelectionComponent {
 	readonly #selections: InteractionCollector;
 	readonly #root: RoleCategoryGroup;
 	readonly #history: string[];
-	#interaction: Logos.Interaction;
+	readonly #interaction: Logos.Interaction;
 	roleData!: {
 		emojiIdsByName: Map<string, bigint>;
 		rolesById: Map<bigint, Logos.Role>;
