@@ -1,3 +1,8 @@
+## 4.49.1
+
+- Moved the bulk of the logic of the `/word` command into `GameViewComponent`.
+- Refactored the implementation of `GameViewComponent`.
+
 ## 4.49.0
 
 - Moved the bulk of the logic of the `/word` command into `WordInformationComponent`.
