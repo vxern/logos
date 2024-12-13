@@ -49,32 +49,6 @@ class RoleSelectionComponent {
 		this.identifiersAccessed = [];
 	}
 
-	/**
-	 * Traverses the role category tree and returns the role category the user is
-	 * viewing currently.
-	 *
-	 * @param data - Navigation data for the selection menu.
-	 * @returns The category the user is now viewing.
-	 */
-	traverseRoleSelectionTree(): [RoleCategory, ...RoleCategory[]] {
-		const categories: [RoleCategory, ...RoleCategory[]] = [this.root];
-		for (const next of this.identifiersAccessed) {
-			const lastCategoryGroup = categories.at(-1) as RoleCategoryGroup | undefined;
-			if (lastCategoryGroup === undefined) {
-				throw new Error("Could not get the last role category group when traversing the role selection tree.");
-			}
-
-			const lastCategory = lastCategoryGroup.categories[next];
-			if (lastCategory === undefined) {
-				throw new Error("Could not get the last role category when traversing the role selection tree.");
-			}
-
-			categories.push(lastCategory);
-		}
-
-		return categories;
-	}
-
 	async display(): Promise<void> {
 		const guild = this.#client.entities.guilds.get(this.#anchor.guildId);
 		if (guild === undefined) {
@@ -110,7 +84,7 @@ class RoleSelectionComponent {
 
 			if (identifier === constants.special.roles.back) {
 				this.identifiersAccessed.pop();
-				await this.traverseRoleTreeAndDisplay(selection, { editResponse: true });
+				await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
 				return;
 			}
 
@@ -121,7 +95,7 @@ class RoleSelectionComponent {
 
 			if (isGroup(viewData.category)) {
 				this.identifiersAccessed.push(identifier);
-				await this.traverseRoleTreeAndDisplay(selection, { editResponse: true });
+				await this.#traverseRoleTreeAndDisplay(selection, { editResponse: true });
 				return;
 			}
 
@@ -137,7 +111,7 @@ class RoleSelectionComponent {
 					viewData.category.minimum !== undefined &&
 					viewData.memberRolesIncludedInMenu.length <= viewData.category.minimum
 				) {
-					await this.traverseRoleTreeAndDisplay(this.#anchor, {
+					await this.#traverseRoleTreeAndDisplay(this.#anchor, {
 						editResponse: true,
 					});
 					return;
@@ -177,7 +151,7 @@ class RoleSelectionComponent {
 						})
 						.ignore();
 
-					await this.traverseRoleTreeAndDisplay(this.#anchor, {
+					await this.#traverseRoleTreeAndDisplay(this.#anchor, {
 						editResponse: true,
 					});
 
@@ -219,7 +193,7 @@ class RoleSelectionComponent {
 				this.viewData?.memberRolesIncludedInMenu.push(role.id);
 			}
 
-			await this.traverseRoleTreeAndDisplay(this.#anchor, { editResponse: true });
+			await this.#traverseRoleTreeAndDisplay(this.#anchor, { editResponse: true });
 		});
 
 		await this.#client.registerInteractionCollector(selectionMenuSelection);
@@ -228,14 +202,40 @@ class RoleSelectionComponent {
 		this.customId = selectionMenuSelection.customId;
 		this.roleData = { emojiIdsByName, rolesById, memberRoleIds: [...member.roles] };
 
-		await this.traverseRoleTreeAndDisplay(this.#anchor, { editResponse: false });
+		await this.#traverseRoleTreeAndDisplay(this.#anchor, { editResponse: false });
 	}
 
-	async traverseRoleTreeAndDisplay(
+	/**
+	 * Traverses the role category tree and returns the role category the user is
+	 * viewing currently.
+	 *
+	 * @param data - Navigation data for the selection menu.
+	 * @returns The category the user is now viewing.
+	 */
+	#traverseRoleSelectionTree(): [RoleCategory, ...RoleCategory[]] {
+		const categories: [RoleCategory, ...RoleCategory[]] = [this.root];
+		for (const next of this.identifiersAccessed) {
+			const lastCategoryGroup = categories.at(-1) as RoleCategoryGroup | undefined;
+			if (lastCategoryGroup === undefined) {
+				throw new Error("Could not get the last role category group when traversing the role selection tree.");
+			}
+
+			const lastCategory = lastCategoryGroup.categories[next];
+			if (lastCategory === undefined) {
+				throw new Error("Could not get the last role category when traversing the role selection tree.");
+			}
+
+			categories.push(lastCategory);
+		}
+
+		return categories;
+	}
+
+	async #traverseRoleTreeAndDisplay(
 		interaction: Logos.Interaction,
 		{ editResponse }: { editResponse: boolean },
 	): Promise<void> {
-		const categories = this.traverseRoleSelectionTree();
+		const categories = this.#traverseRoleSelectionTree();
 		const category = categories.at(-1);
 		if (category === undefined) {
 			throw new Error("Could not get the last role category.");
@@ -277,18 +277,18 @@ class RoleSelectionComponent {
 
 			this.viewData = { category, menuRoles, menuRolesResolved, memberRolesIncludedInMenu };
 
-			selectOptions = this.createSelectOptionsFromCollection();
+			selectOptions = this.#createSelectOptionsFromCollection();
 		} else {
 			if (this.viewData === undefined) {
 				this.viewData = { category, menuRoles: {}, menuRolesResolved: {}, memberRolesIncludedInMenu: [] };
 			}
 
-			selectOptions = this.createSelectOptionsFromCategories(category.categories);
+			selectOptions = this.#createSelectOptionsFromCategories(category.categories);
 		}
 
 		this.viewData.category = category;
 
-		const menu = await this.displaySelectMenu(categories, selectOptions);
+		const menu = await this.#displaySelectMenu(categories, selectOptions);
 
 		if (editResponse) {
 			await this.#client.editReply(interaction, menu);
@@ -298,7 +298,7 @@ class RoleSelectionComponent {
 		this.#client.reply(interaction, menu).ignore();
 	}
 
-	async displaySelectMenu(
+	async #displaySelectMenu(
 		categories: [RoleCategory, ...RoleCategory[]],
 		selectOptions: Discord.SelectOption[],
 	): Promise<Discord.InteractionCallbackData> {
@@ -353,7 +353,7 @@ class RoleSelectionComponent {
 		};
 	}
 
-	createSelectOptionsFromCategories(categories: Record<string, RoleCategory>): Discord.SelectOption[] {
+	#createSelectOptionsFromCategories(categories: Record<string, RoleCategory>): Discord.SelectOption[] {
 		const categorySelections = getRoleCategories(categories, this.#anchor.guildId);
 
 		const selections: Discord.SelectOption[] = [];
@@ -373,7 +373,7 @@ class RoleSelectionComponent {
 		return selections;
 	}
 
-	createSelectOptionsFromCollection(): Discord.SelectOption[] {
+	#createSelectOptionsFromCollection(): Discord.SelectOption[] {
 		const selectOptions: Discord.SelectOption[] = [];
 
 		const viewData = this.viewData;
