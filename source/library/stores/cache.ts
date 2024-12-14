@@ -254,11 +254,11 @@ class CacheStore {
 				break;
 			}
 			case "Guilds": {
-				this.documents.guildStatistics.delete(document.partialId);
+				this.documents.guilds.delete(document.partialId);
 				break;
 			}
 			case "GuildStatistics": {
-				this.documents.guilds.delete(document.partialId);
+				this.documents.guildStatistics.delete(document.partialId);
 				break;
 			}
 			case "Praises": {
