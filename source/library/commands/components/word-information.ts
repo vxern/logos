@@ -41,7 +41,7 @@ class WordInformationComponent {
 	) {
 		this.#client = client;
 		this.#entries = entries;
-		if (interaction.parameters.show) {
+		if (!interaction.parameters.show) {
 			this.#showButton = client.services.global("interactionRepetition").getShowButton(interaction);
 		}
 		this.#verbose = interaction.parameters.verbose ?? false;
