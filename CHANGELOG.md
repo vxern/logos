@@ -1,3 +1,10 @@
+## 4.50.0
+
+- Added new commands:
+  - `/pronunciation`
+  - `/relations`
+  - `/examples`
+
 ## 4.49.4
 
 - Fixed the source button sometimes not showing in the `/word` command.

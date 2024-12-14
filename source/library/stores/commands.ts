@@ -427,6 +427,9 @@ class CommandStore {
 			commands.push(this.commands.expressions);
 			commands.push(this.commands.inflection);
 			commands.push(this.commands.etymology);
+			commands.push(this.commands.pronunciation);
+			commands.push(this.commands.relations);
+			commands.push(this.commands.examples);
 		}
 
 		if (guildDocument.hasEnabled("context")) {
