@@ -1,6 +1,5 @@
 ## 4.49.3
 
-- Fixed `DexonlineAdapter` applying its own formatting to the etymology section.
 - Fixed `CacheStore` deleting `Guild`s instead of `GuildStatistics` and vice-versa.
 - Fixed word sigils not picking up non-Latin characters.
 
@@ -12,6 +11,7 @@
 
 - Moved the bulk of the logic of the `/game` command into `GameViewComponent`.
 - Refactored the implementation of `GameViewComponent`.
+- Fixed `DexonlineAdapter` applying its own formatting to the etymology section.
 
 ## 4.49.0
 
