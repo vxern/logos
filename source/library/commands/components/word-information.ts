@@ -82,7 +82,7 @@ class WordInformationComponent {
 	}
 
 	async #generateButtons(entry: DictionaryEntry): Promise<Discord.MessageComponents> {
-		const paginationControls: Discord.ButtonComponent[][] = [];
+		const rows: Discord.ButtonComponent[][] = [];
 
 		switch (this.#tab) {
 			case "overview": {
@@ -128,7 +128,7 @@ class WordInformationComponent {
 					localise: this.#client.localise,
 					locale: this.#anchor.displayLocale,
 				});
-				paginationControls.push([
+				rows.push([
 					{
 						type: Discord.MessageComponentTypes.Button,
 						label: constants.emojis.interactions.menu.controls.back,
@@ -158,7 +158,7 @@ class WordInformationComponent {
 					return [];
 				}
 
-				const rows = entry.inflection.tabs.toChunked(5).reverse();
+				const tabs = entry.inflection.tabs.toChunked(5).reverse();
 
 				const button = new InteractionCollector<MenuButtonID>(this.#client, {
 					only: this.#anchor.parameters.show ? [this.#anchor.user.id] : undefined,
@@ -189,7 +189,7 @@ class WordInformationComponent {
 
 				await this.#client.registerInteractionCollector(button);
 
-				for (const [row, rowIndex] of rows.map<[typeof entry.inflection.tabs, number]>((r, i) => [r, i])) {
+				for (const [row, rowIndex] of tabs.map<[typeof entry.inflection.tabs, number]>((r, i) => [r, i])) {
 					const buttons = row.map<Discord.ButtonComponent>((table, index) => {
 						const index_ = rowIndex * 5 + index;
 
@@ -203,7 +203,7 @@ class WordInformationComponent {
 					});
 
 					if (buttons.length > 1) {
-						paginationControls.unshift(buttons);
+						rows.unshift(buttons);
 					}
 				}
 			}
@@ -285,11 +285,14 @@ class WordInformationComponent {
 
 		row.push(sourceNotice.button);
 
-		if (row.length > 1) {
-			paginationControls.push(row);
+		const firstRow = rows.at(0);
+		if (row.length === 1 && firstRow !== undefined && firstRow.length < 5) {
+			firstRow.push(row.at(0)!);
+		} else {
+			rows.push(row);
 		}
 
-		return paginationControls.map((row) => ({
+		return rows.map((row) => ({
 			type: Discord.MessageComponentTypes.ActionRow,
 			components: row as [Discord.ButtonComponent],
 		}));
