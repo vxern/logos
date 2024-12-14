@@ -1,3 +1,8 @@
+## 4.49.4
+
+- Fixed the source button sometimes not showing in the `/word` command.
+- Fixed the "Show message in chat" button showing even if the message is public.
+
 ## 4.49.3
 
 - Fixed `CacheStore` deleting `Guild`s instead of `GuildStatistics` and vice-versa.
