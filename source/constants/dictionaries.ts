@@ -54,8 +54,8 @@ const searchModeSigils: Record<DictionarySearchMode, string[]> = {
 	expressions: ["x", "ex", "exp", "expr", "express", "expression", "expressions"],
 	etymology: ["e", "et", "ety", "etym", "etymology"],
 	pronunciation: ["p", "pr", "pro", "pronounce"],
-	relations: ["r", "re", "relate", "relation"],
-	examples: ["s", "sa", "sample"],
+	relations: ["r", "re", "rel", "relate", "relation"],
+	examples: ["s", "sa", "sam", "sample"],
 };
 
 const searchModeBySigil: Record<string, DictionarySearchMode> = Object.fromEntries(
