@@ -20,7 +20,16 @@ const sections = [
 ] as const;
 type DictionarySection = (typeof sections)[number];
 
-const searchModes = ["word", "meaning", "expressions", "inflection", "etymology"] as const;
+const searchModes = [
+	"word",
+	"meaning",
+	"expressions",
+	"inflection",
+	"etymology",
+	"pronunciation",
+	"relations",
+	"examples",
+] as const;
 type DictionarySearchMode = (typeof searchModes)[number];
 
 const allowedSectionsBySearchMode: Record<DictionarySearchMode, DictionarySection[]> = Object.freeze({
@@ -29,6 +38,9 @@ const allowedSectionsBySearchMode: Record<DictionarySearchMode, DictionarySectio
 	expressions: ["expressions"],
 	inflection: ["inflection"],
 	etymology: ["etymology"],
+	pronunciation: ["syllables", "pronunciation", "rhymes", "audio"],
+	relations: ["relations"],
+	examples: ["examples"],
 });
 
 function getAllowedDictionarySections(sections: DictionarySearchMode): DictionarySection[] {
@@ -37,10 +49,13 @@ function getAllowedDictionarySections(sections: DictionarySearchMode): Dictionar
 
 const searchModeSigils: Record<DictionarySearchMode, string[]> = {
 	word: ["w", "word"],
-	meaning: ["m", "me", "mean", "meaning", "define"],
+	meaning: ["m", "me", "mean", "meaning"],
 	inflection: ["i", "in", "inf", "inflect", "inflection"],
 	expressions: ["x", "ex", "exp", "expr", "express", "expression", "expressions"],
 	etymology: ["e", "et", "ety", "etym", "etymology"],
+	pronunciation: ["p", "pr", "pro", "pronounce"],
+	relations: ["r", "re", "relate", "relation"],
+	examples: ["s", "sa", "sample"],
 };
 
 const searchModeBySigil: Record<string, DictionarySearchMode> = Object.fromEntries(
