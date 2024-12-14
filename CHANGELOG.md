@@ -1,3 +1,9 @@
+## 4.49.3
+
+- Fixed `DexonlineAdapter` applying its own formatting to the etymology section.
+- Fixed `CacheStore` deleting `Guild`s instead of `GuildStatistics` and vice-versa.
+- Fixed word sigils not picking up non-Latin characters.
+
 ## 4.49.2
 
 - Compiled independent functions in `role-selection.ts` into `RoleSelectionComponent`.
