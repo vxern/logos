@@ -184,6 +184,16 @@ Check out some of the communities already using Logos to help their users learn 
         <br />
       </td>
       <td style="text-align: center">
+        <a href="https://discord.gg/xwgAysRrZU">
+          <img src=".github/assets/guild-avatars/learn-armenian.webp" width="300px;" alt="Learn Armenian"/>
+          <br />
+          <sub>
+           <b>Learn Armenian</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
         <a href="https://discord.gg/JWzrNvEQK5">
           <img src=".github/assets/guild-avatars/learn-danish-society-server.webp" width="300px;" alt="Learn Danish Society Server"/>
           <br />
@@ -203,6 +213,8 @@ Check out some of the communities already using Logos to help their users learn 
         </a>
         <br />
       </td>
+    </tr>
+    <tr>
       <td style="text-align: center">
         <a href="https://discord.gg/da2x7pUXfz">
           <img src=".github/assets/guild-avatars/silcord-silesian-discord.webp" width="300px;" alt="Silcord - Silesian discord"/>
@@ -213,8 +225,6 @@ Check out some of the communities already using Logos to help their users learn 
         </a>
         <br />
       </td>
-    </tr>
-    <tr>
       <td style="text-align: center">
         <a href="https://discord.gg/98kx9wCzxr">
           <img src=".github/assets/guild-avatars/learn-slovak-czech.webp" width="300px;" alt="Learn Slovak & Czech"/>
