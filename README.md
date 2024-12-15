@@ -124,6 +124,131 @@
   </tbody>
 </table>
 
+### Communities
+
+Check out some of the communities already using Logos to help their users learn languages!
+
+<table>
+  <tbody>
+    <tr>
+      <td style="text-align: center">
+        <a href="https://discord.gg/h5qqty7">
+          <img src=".github/assets/guild-avatars/learn-finnish.webp" width="300px;" alt="Learn Finnish"/>
+          <br />
+          <sub>
+           <b>Learn Finnish</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
+        <a href="https://discord.gg/4U7Akj6">
+          <img src=".github/assets/guild-avatars/learn-polish.webp" width="300px;" alt="Learn Polish"/>
+          <br />
+          <sub>
+           <b>Learn Polish</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
+        <a href="https://discord.gg/yAfQUpMMZ8">
+          <img src=".github/assets/guild-avatars/svenska-learn-swedish.webp" width="300px;" alt="Svenska - Learn Swedish"/>
+          <br />
+          <sub>
+           <b>Svenska - Learn Swedish</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
+        <a href="https://discord.gg/kBj3a7n">
+          <img src=".github/assets/guild-avatars/learn-romanian.webp" width="300px;" alt="Learn Romanian"/>
+          <br />
+          <sub>
+           <b>Learn Romanian</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <a href="https://discord.gg/VsqppQ6">
+          <img src=".github/assets/guild-avatars/learn-hungarian-danuvia.webp" width="300px;" alt="Learn Hungarian ≈ Danuvia 🇭🇺"/>
+          <br />
+          <sub>
+           <b>Learn Hungarian ≈ Danuvia 🇭🇺</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
+        <a href="https://discord.gg/JWzrNvEQK5">
+          <img src=".github/assets/guild-avatars/learn-danish-society-server.webp" width="300px;" alt="Learn Danish Society Server"/>
+          <br />
+          <sub>
+           <b>Learn Danish Society Server</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
+        <a href="https://discord.gg/tA5HUGzM7E">
+          <img src=".github/assets/guild-avatars/learn-albanian-language-server.webp" width="300px;" alt="Learn Albanian - Language Server"/>
+          <br />
+          <sub>
+           <b>Learn Albanian - Language Server</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
+        <a href="https://discord.gg/da2x7pUXfz">
+          <img src=".github/assets/guild-avatars/silcord-silesian-discord.webp" width="300px;" alt="Silcord - Silesian discord"/>
+          <br />
+          <sub>
+           <b>Silcord - Silesian discord</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+    </tr>
+    <tr>
+      <td style="text-align: center">
+        <a href="https://discord.gg/98kx9wCzxr">
+          <img src=".github/assets/guild-avatars/learn-slovak-czech.webp" width="300px;" alt="Learn Slovak & Czech"/>
+          <br />
+          <sub>
+           <b>Learn Slovak & Czech</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
+        <a href="https://discord.com/invite/J53v628">
+          <img src=".github/assets/guild-avatars/bengal.webp" width="300px;" alt="বাংলা (Bengal)"/>
+          <br />
+          <sub>
+           <b>বাংলা (Bengal)</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+      <td style="text-align: center">
+        <a href="https://discord.gg/mk6XDDFv">
+          <img src=".github/assets/guild-avatars/odisha.webp" width="300px;" alt="ଓଡ଼ିଶା (Odisha)"/>
+          <br />
+          <sub>
+           <b>ଓଡ଼ିଶା (Odisha)</b>
+          </sub>
+        </a>
+        <br />
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 ### Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
