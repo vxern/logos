@@ -110,11 +110,8 @@
     "translate.strings.sourceText": "Källtext",
     "translate.strings.translation": "Översättning",
     "word.name": "ord",
-    "word.options.word.name": "ord",
     "word.options.language.name": "språk",
-    "word.options.word.description": "Ordet som ska kollas upp.",
     "word.options.language.description": "Språket ordet tillhör.",
-    "word.options.verbose.name": "detaljerat",
     "word.options.verbose.description": "Om vald som sann visas mer (möjligen onödig) information.",
     "word.strings.invalid.language.title": "Ogiltigt språk"
 }
