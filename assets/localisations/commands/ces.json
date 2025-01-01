@@ -1,13 +1,7 @@
 {
-    "cefr.strings.levels.c2.description": "",
     "translate.options.to.description": "",
-    "word.strings.verbs.moods.indicative": "",
     "list.description": "",
-    "purge.strings.indexed.description.tooMany": "",
     "slowmode.description": "",
-    "warn.strings.limitSurpassedTimedOut.description": "",
     "music.options.play.strings.failedToPlay.description": "",
-    "music.options.skip.strings.noSong.description": "",
-    "suggestion.strings.sureToCancel.description": "",
-    "settings.options.view.name": ""
+    "suggestion.strings.sureToCancel.description": ""
 }
