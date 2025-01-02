@@ -4,10 +4,12 @@ import type { Guild } from "logos/models/guild";
 import type pino from "pino";
 
 abstract class Service {
+	readonly identifier: string;
 	readonly log: pino.Logger;
 	readonly client: Client;
 
 	constructor(client: Client, { identifier }: { identifier: string }) {
+		this.identifier = identifier;
 		this.log = client.log.child({ name: identifier });
 		this.client = client;
 	}
