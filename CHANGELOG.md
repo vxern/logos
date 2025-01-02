@@ -1,3 +1,7 @@
+## 4.51.0
+
+- Added the ability to load 'plugins' at start-up to extend Logos by custom code.
+
 ## 4.50.0
 
 - Added new commands:
