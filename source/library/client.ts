@@ -15,6 +15,7 @@ import { LocalisationStore, type RawLocalisations } from "logos/stores/localisat
 import { ServiceStore } from "logos/stores/services";
 import { VolatileStore } from "logos/stores/volatile";
 import type pino from "pino";
+import { PluginStore } from "logos/stores/plugins";
 
 class Client {
 	readonly log: pino.Logger;
@@ -32,6 +33,7 @@ class Client {
 	readonly #journalling: JournallingStore;
 	readonly #guilds: GuildStore;
 	readonly adapters: AdapterStore;
+	readonly #plugins: PluginStore;
 	readonly #connection: DiscordConnection;
 
 	readonly #channelDeletes: Collector<"channelDelete">;
@@ -208,6 +210,7 @@ class Client {
 		this.#journalling = new JournallingStore(this);
 		this.#guilds = new GuildStore(this, { services: this.services, commands: this.#commands });
 		this.adapters = new AdapterStore(this);
+		this.#plugins = new PluginStore(this);
 		this.#connection = new DiscordConnection({
 			log,
 			environment,
@@ -255,6 +258,7 @@ class Client {
 		await this.interactions.setup();
 		await this.#setupCollectors();
 		await this.#connection.open();
+		await this.#plugins.setup();
 
 		this.log.info("Client started.");
 	}
@@ -281,6 +285,7 @@ class Client {
 		await this.#guilds.teardown();
 		await this.interactions.teardown();
 		this.#teardownCollectors();
+		await this.#plugins.teardown();
 		await this.#connection.close();
 
 		this.#isStopping = false;
