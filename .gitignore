@@ -4,5 +4,7 @@
 logs/
 node_modules/
 dist/
+plugins/*
+!plugins/.keep
 .cert.pfx
 .env
