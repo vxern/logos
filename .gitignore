@@ -1,10 +1,14 @@
 .idea/
 !.idea/modules.xml
 !.idea/vcs.xml
-logs/
+
 node_modules/
 dist/
+
+logs/*
+!logs/.keep
 plugins/*
 !plugins/.keep
+
 .cert.pfx
 .env
