@@ -35,7 +35,7 @@ interface LocalServices {
 	readonly dynamicVoiceChannels: DynamicVoiceChannelService;
 	readonly entry: EntryService;
 	readonly music: MusicService;
-	readonly informationNoticess: InformationNoticeService;
+	readonly informationNotices: InformationNoticeService;
 	readonly resourceNotices: ResourceNoticeService;
 	readonly roleNotices: RoleNoticeService;
 	readonly welcomeNotices: WelcomeNoticeService;
@@ -48,19 +48,27 @@ interface LocalServices {
 	readonly wordSigils: WordSigilService;
 }
 
+interface CustomServices {
+	readonly global: GlobalService[];
+	readonly local: Map<bigint, Set<LocalService>>;
+}
+
 class ServiceStore {
 	readonly log: pino.Logger;
 
 	readonly #client: Client;
 	readonly #global: GlobalServices;
 	readonly #local: { [K in keyof LocalServices]: Map<bigint, LocalServices[K]> };
+	readonly #custom: CustomServices;
 
 	get #globalServices(): GlobalService[] {
-		return Object.values(this.#global).filter(isDefined);
+		return [...Object.values(this.#global).filter(isDefined), ...this.#custom.global];
 	}
 
 	get #localServices(): LocalService[] {
-		return Object.values(this.#local).flatMap((services) => [...services.values()]);
+		return [...Object.values(this.#local), ...Object.values(this.#custom.local)].flatMap((services) => [
+			...services.values(),
+		]);
 	}
 
 	constructor(client: Client) {
@@ -85,7 +93,7 @@ class ServiceStore {
 			dynamicVoiceChannels: new Map(),
 			entry: new Map(),
 			music: new Map(),
-			informationNoticess: new Map(),
+			informationNotices: new Map(),
 			resourceNotices: new Map(),
 			roleNotices: new Map(),
 			welcomeNotices: new Map(),
@@ -97,12 +105,19 @@ class ServiceStore {
 			roleIndicators: new Map(),
 			wordSigils: new Map(),
 		};
+		this.#custom = {
+			global: [],
+			local: new Map(),
+		};
 	}
 
 	#localServicesFor({ guildId }: { guildId: bigint }): LocalService[] {
-		return Object.values(this.#local)
-			.map((services) => services.get(guildId))
-			.filter(isDefined);
+		return [
+			...Object.values(this.#local)
+				.map((services) => services.get(guildId))
+				.filter(isDefined),
+			...(this.#custom.local.get(guildId)?.values() ?? []),
+		];
 	}
 
 	async setup(): Promise<void> {
@@ -128,11 +143,7 @@ class ServiceStore {
 
 		this.log.info(`Starting global services... (${services.length} services to start)`);
 
-		const promises: Promise<void>[] = [];
-		for (const service of services) {
-			promises.push(service.start());
-		}
-		await Promise.all(promises);
+		await this.#startServices(services);
 
 		this.log.info("Global services started.");
 	}
@@ -154,7 +165,7 @@ class ServiceStore {
 			const service = new InformationNoticeService(this.#client, { guildId });
 			services.push(service);
 
-			this.#local.informationNoticess.set(guildId, service);
+			this.#local.informationNotices.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("resourceNotices")) {
@@ -316,6 +327,46 @@ class ServiceStore {
 
 	async #stopServices(services: Service[]): Promise<void> {
 		await Promise.all(services.map((service) => service.stop()));
+	}
+
+	/**
+	 * Registers and starts a service at runtime.
+	 *
+	 * @remarks
+	 * This should only be used for loading services inside of plugins.
+	 */
+	async loadLocalService(service: LocalService): Promise<void> {
+		this.log.info(`Loading local service ${service.identifier}...`);
+
+		if (this.#custom.local.has(service.guildId)) {
+			this.#custom.local.get(service.guildId)!.add(service);
+		} else {
+			this.#custom.local.set(service.guildId, new Set([service]));
+		}
+
+		await service.start();
+
+		this.log.info(`Local service ${service.identifier} has been loaded.`);
+	}
+
+	/**
+	 * Unregisters and stops a service at runtime.
+	 *
+	 * @remarks
+	 * This should only be used for unloading services inside of plugins.
+	 */
+	async unloadLocalService(service: LocalService, { guildId }: { guildId: bigint }): Promise<void> {
+		this.log.info(`Unloading custom local service ${service.identifier}...`);
+
+		const isRemoved = this.#custom.local.get(guildId)?.delete(service) ?? false;
+		if (isRemoved === undefined) {
+			this.log.warn(`Could not unload local service ${service.identifier}: It wasn't loaded previously.`);
+			return;
+		}
+
+		await service.stop();
+
+		this.log.info(`Local service ${service.identifier} has been unloaded.`);
 	}
 
 	hasGlobalService<K extends keyof GlobalServices>(service: K): boolean {

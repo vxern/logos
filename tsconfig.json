@@ -43,5 +43,5 @@
 	},
 	"compileOnSave": true,
 	"exclude": ["node_modules/"],
-	"include": ["migrations/", "scripts/", "source/", "test/"]
+	"include": ["migrations/", "plugins/", "scripts/", "source/", "test/"]
 }

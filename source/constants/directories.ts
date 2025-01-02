@@ -5,6 +5,7 @@ const directories = Object.freeze({
 	},
 	logs: "./logs",
 	migrations: "./migrations",
+	plugins: "./plugins",
 } as const);
 
 export default directories;
