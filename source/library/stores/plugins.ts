@@ -29,7 +29,7 @@ class PluginStore {
 			return;
 		}
 
-		this.log.info(`Found ${filenames.length} plugins. Loading...`);
+		this.log.info(`Found ${filenames.length} plugin(s). Loading...`);
 
 		await Promise.all(filenames.map((filename) => this.#loadPlugin(filename)));
 
