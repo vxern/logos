@@ -56,38 +56,51 @@ class GuildStore {
 		{ isReload = false }: { isReload?: boolean } = {},
 	): Promise<void> {
 		if (!isReload) {
-			// This check prevents the same guild being set up multiple times. This can happen when a shard managing a
-			// given guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event
-			// again for a guild that Logos would already have been managing.
-			if (this.#client.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
-				return;
-			}
-
-			this.log.info(`Setting Logos up on ${this.#client.diagnostics.guild(guild)}...`);
-
-			this.log.info(`Fetching ~${guild.memberCount} members of ${this.#client.diagnostics.guild(guild)}...`);
-
-			const members = await this.#client.bot.gateway
-				.requestMembers(guild.id, { limit: 0, query: "", nonce: Date.now().toString() })
-				.catch((error) => {
-					this.log.warn(error, `Failed to fetch members of ${this.#client.diagnostics.guild(guild)}.`);
-					return [];
-				});
-			for (const member of members) {
-				this.#client.bot.transformers.member(
-					this.#client.bot,
-					member as unknown as Discord.DiscordMember,
-					guild.id,
-					member.user.id,
-				);
-			}
-
-			this.log.info(`Fetched ~${guild.memberCount} members of ${this.#client.diagnostics.guild(guild)}.`);
+			await this.#setupGuildForFirstTime(guild);
 		}
 
 		const guildDocument = await Guild.getOrCreate(this.#client, { guildId: guild.id.toString() });
 		await this.#services.startForGuild({ guildId: guild.id, guildDocument });
 		await this.#commands.registerGuildCommands({ guildId: guild.id, guildDocument });
+	}
+
+	async #setupGuildForFirstTime(guild: Discord.Guild | Logos.Guild): Promise<void> {
+		// This check prevents the same guild being set up multiple times. This can happen when a shard managing a
+		// given guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event
+		// again for a guild that Logos would already have been managing.
+		if (this.#client.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
+			return;
+		}
+
+		this.log.info(`Setting Logos up on ${this.#client.diagnostics.guild(guild)}...`);
+
+		const guildDocument = await Guild.getOrCreate(this.#client, { guildId: guild.id.toString() });
+		if (guildDocument.isNative) {
+			await this.#prefetchMembers(guild);
+		}
+
+		this.log.info(`Logos has been set up on ${this.#client.diagnostics.guild(guild)}.`);
+	}
+
+	async #prefetchMembers(guild: Discord.Guild | Logos.Guild): Promise<void> {
+		this.log.info(`Fetching ~${guild.memberCount} members of ${this.#client.diagnostics.guild(guild)}...`);
+
+		const members = await this.#client.bot.gateway
+			.requestMembers(guild.id, { limit: 0, query: "", nonce: Date.now().toString() })
+			.catch((error) => {
+				this.log.warn(error, `Failed to fetch members of ${this.#client.diagnostics.guild(guild)}.`);
+				return [];
+			});
+		for (const member of members) {
+			this.#client.bot.transformers.member(
+				this.#client.bot,
+				member as unknown as Discord.DiscordMember,
+				guild.id,
+				member.user.id,
+			);
+		}
+
+		this.log.info(`Fetched ~${guild.memberCount} members of ${this.#client.diagnostics.guild(guild)}.`);
 	}
 
 	async #teardownGuild({ guildId }: { guildId: bigint }): Promise<void> {
