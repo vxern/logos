@@ -85,6 +85,7 @@ const localisations = Object.freeze({
 		"Creole/Seychellois": "languages.creole.seychellois",
 		"CzechoSlovak/Czech": "languages.czechoSlovak.czech",
 		"CzechoSlovak/Slovak": "languages.czechoSlovak.slovak",
+		CzechoSlovak: "languages.czechoSlovak",
 		Danish: "languages.danish",
 		Dholuo: "languages.dholuo",
 		Dogri: "languages.dogri",
