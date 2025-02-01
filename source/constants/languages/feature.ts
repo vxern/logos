@@ -1,5 +1,6 @@
 const languages = Object.freeze([
 	"Armenian",
+	"CzechoSlovak",
 	"Danish",
 	"Dutch",
 	"English",
