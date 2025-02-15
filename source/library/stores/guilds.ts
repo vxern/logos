@@ -55,6 +55,13 @@ class GuildStore {
 		guild: Discord.Guild | Logos.Guild,
 		{ isReload = false }: { isReload?: boolean } = {},
 	): Promise<void> {
+		// This check prevents the same guild being set up multiple times. This can happen when a shard managing a
+		// given guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event
+		// again for a guild that Logos would already have been managing.
+		if (this.#client.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
+			return;
+		}
+
 		if (!isReload) {
 			await this.#setupGuildForFirstTime(guild);
 		}
@@ -65,13 +72,6 @@ class GuildStore {
 	}
 
 	async #setupGuildForFirstTime(guild: Discord.Guild | Logos.Guild): Promise<void> {
-		// This check prevents the same guild being set up multiple times. This can happen when a shard managing a
-		// given guild is closed and another shard is spun up, causing Discord to dispatch the `GUILD_CREATE` event
-		// again for a guild that Logos would already have been managing.
-		if (this.#client.documents.guilds.has(Model.buildPartialId<Guild>({ guildId: guild.id.toString() }))) {
-			return;
-		}
-
 		this.log.info(`Setting Logos up on ${this.#client.diagnostics.guild(guild)}...`);
 
 		const guildDocument = await Guild.getOrCreate(this.#client, { guildId: guild.id.toString() });

@@ -1,3 +1,12 @@
+## 4.52.2
+
+- Fixed Logos setting the same guilds up multiple times, causing serious issues when
+  the bot is left running for longer periods of time.
+
+## 4.51.1
+
+- Fixed Logos running out of memory.
+
 ## 4.51.0
 
 - Added the ability to load 'plugins' at start-up to extend Logos by custom code.
