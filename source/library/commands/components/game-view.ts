@@ -1,12 +1,12 @@
+import { capitalise } from "logos:constants/formatting";
+import type { LearningLocale } from "logos:constants/languages/learning";
+import * as levenshtein from "fastest-levenshtein";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
+import { TatoebaSourceNotice } from "logos/commands/components/source-notices/tatoeba-source-notice";
+import { GuildStatistics } from "logos/models/guild-statistics";
 import { User } from "logos/models/user";
 import type { SentencePair } from "logos/stores/volatile";
-import type { LearningLocale } from "logos:constants/languages/learning";
-import { TatoebaSourceNotice } from "logos/commands/components/source-notices/tatoeba-source-notice";
-import { capitalise } from "logos:constants/formatting";
-import * as levenshtein from "fastest-levenshtein";
-import { GuildStatistics } from "logos/models/guild-statistics";
 
 type Selection = [id: number, word: string];
 interface SentenceSelection {

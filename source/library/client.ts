@@ -12,10 +12,10 @@ import { GuildStore } from "logos/stores/guilds";
 import { InteractionStore } from "logos/stores/interactions";
 import { JournallingStore } from "logos/stores/journalling";
 import { LocalisationStore, type RawLocalisations } from "logos/stores/localisations";
+import { PluginStore } from "logos/stores/plugins";
 import { ServiceStore } from "logos/stores/services";
 import { VolatileStore } from "logos/stores/volatile";
 import type pino from "pino";
-import { PluginStore } from "logos/stores/plugins";
 
 class Client {
 	readonly log: pino.Logger;
