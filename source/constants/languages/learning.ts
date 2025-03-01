@@ -61,6 +61,7 @@ const languageToLocale = Object.freeze({
 	"Creole/Mauritian": "mfe",
 	"Creole/SierraLeone": "kri",
 	"Creole/Seychellois": "crs",
+	CzechoSlovak: "ces",
 	"CzechoSlovak/Czech": "ces",
 	"CzechoSlovak/Slovak": "slk",
 	Danish: "dan",

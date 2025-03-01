@@ -119,6 +119,7 @@ const dictionariesByLanguage: Record<LearningLanguage, Dictionary[]> = Object.fr
 	"Creole/Mauritian": ["wiktionary"],
 	"Creole/SierraLeone": ["wiktionary"],
 	"Creole/Seychellois": ["wiktionary"],
+	CzechoSlovak: ["wiktionary"],
 	"CzechoSlovak/Czech": ["wiktionary"],
 	"CzechoSlovak/Slovak": ["wiktionary"],
 	Dholuo: ["wiktionary"],
