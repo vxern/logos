@@ -1,3 +1,7 @@
+## 4.52.1
+
+- Fixed issue with inquiry tickets being deleted.
+
 ## 4.52.0
 
 - Added missing entry for `CzechoSlovak`.
