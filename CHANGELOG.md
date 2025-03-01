@@ -1,3 +1,7 @@
+## 4.52.2
+
+- Bumped version of `dexonline-scraper` to `0.2.2`.
+
 ## 4.52.1
 
 - Fixed issue with inquiry tickets being deleted.
