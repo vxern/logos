@@ -1,4 +1,9 @@
-## 4.52.2
+## 4.52.0
+
+- Added missing entry for `CzechoSlovak`.
+- Bumped version of Discordeno from `^20.0.0` to `^21.0.0`.
+
+## 4.51.2
 
 - Fixed Logos setting the same guilds up multiple times, causing serious issues when
   the bot is left running for longer periods of time.
