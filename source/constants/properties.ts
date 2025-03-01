@@ -181,6 +181,7 @@ const properties = {
 		currentPeriodEnd: false,
 		canceledAt: false,
 		country: false,
+		renewalSkuIds: false,
 	},
 	soundboardSound: {
 		user: false,
