@@ -114,7 +114,7 @@ class LavalinkService extends GlobalService {
 
 	async start(): Promise<void> {
 		this.manager.on("error", (_, error) => {
-			if (error.message.includes("ECONNREFUSED")) {
+			if (error?.message?.includes("ECONNREFUSED")) {
 				return;
 			}
 
