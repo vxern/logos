@@ -20,10 +20,6 @@ class TicketPromptService extends PromptService<{
 		const tickets = new Map<string, Ticket>();
 
 		for (const [partialId, ticketDocument] of this.client.documents.tickets) {
-			if (ticketDocument.type !== "standalone") {
-				continue;
-			}
-
 			if (ticketDocument.guildId !== this.guildIdString) {
 				continue;
 			}
