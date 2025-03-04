@@ -22,7 +22,7 @@ async function handleFindWordAutocomplete(
 async function handleFindWord(
 	client: Client,
 	interaction: Logos.Interaction<any, { word: string; language: string | undefined; verbose: boolean | undefined }>,
-	{ searchMode }: { searchMode: DictionarySearchMode },
+	{ searchMode }: { searchMode?: DictionarySearchMode },
 ): Promise<void> {
 	if (interaction.parameters.language !== undefined && !isLearningLanguage(interaction.parameters.language)) {
 		const strings = constants.contexts.invalidLanguage({ localise: client.localise, locale: interaction.locale });
@@ -32,6 +32,7 @@ async function handleFindWord(
 	}
 
 	const learningLanguage = interaction.parameters.language ?? interaction.learningLanguage;
+	searchMode = searchMode ?? constants.SEARCH_MODE;
 
 	const guildId = interaction.guildId;
 	if (guildId === undefined) {

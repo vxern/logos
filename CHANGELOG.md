@@ -1,3 +1,8 @@
+## 4.54.0
+
+- The source language can now be specified in the sigil feature.
+- Multiple-word entries in the sigil feature can now also be found using `()`, `{}`, and `<>`.
+
 ## 4.53.0
 
 - Labels are now shown on entries from Wiktionary.

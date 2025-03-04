@@ -61,6 +61,7 @@ const constants = Object.freeze({
 	EXPRESSIONS_PER_VERBOSE_VIEW: 1,
 	EXAMPLES_PER_VERBOSE_VIEW: 1,
 	INCLUDE_EXPRESSION_RELATIONS: false,
+	SEARCH_MODE: "word",
 } as const);
 
 export default Object.freeze({

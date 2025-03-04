@@ -1,25 +1,9 @@
 import type { WithBaseLanguage } from "logos:constants/languages";
-import {
-	type DetectionLanguage,
-	languages as detectionLanguages,
-	isDetectionLanguage,
-} from "logos:constants/languages/detection";
-import {
-	type FeatureLanguage,
-	languages as featureLanguages,
-	isFeatureLanguage,
-} from "logos:constants/languages/feature";
+import { type DetectionLanguage, languages as detectionLanguages } from "logos:constants/languages/detection";
+import { type FeatureLanguage, languages as featureLanguages } from "logos:constants/languages/feature";
 import { collectLanguages } from "logos:constants/languages/languages";
-import {
-	type LocalisationLanguage,
-	isLocalisationLanguage,
-	languages as localisationLanguages,
-} from "logos:constants/languages/localisation";
-import {
-	type TranslationLanguage,
-	isTranslationLanguage,
-	languages as translationLanguages,
-} from "logos:constants/languages/translation";
+import { type LocalisationLanguage, languages as localisationLanguages } from "logos:constants/languages/localisation";
+import { type TranslationLanguage, languages as translationLanguages } from "logos:constants/languages/translation";
 
 type LearningLanguage = DetectionLanguage | FeatureLanguage | LocalisationLanguage | TranslationLanguage;
 
@@ -367,19 +351,24 @@ const languageToLocale = Object.freeze({
 	Fon: "fon",
 } as const satisfies Record<LearningLanguage, string>);
 
+const localeToLanguage = Object.freeze(Object.mirror(languageToLocale));
+
 type LearningLocale = (typeof languageToLocale)[keyof typeof languageToLocale];
 
 function isLearningLanguage(language: string): language is LearningLanguage {
-	return (
-		isDetectionLanguage(language) ||
-		isFeatureLanguage(language) ||
-		isLocalisationLanguage(language) ||
-		isTranslationLanguage(language)
-	);
+	return language in languageToLocale;
+}
+
+function isLearningLocale(locale: string): locale is LearningLocale {
+	return locale in localeToLanguage;
 }
 
 function getLearningLocaleByLanguage(language: LearningLanguage): LearningLocale {
 	return languageToLocale[language];
+}
+
+function getLearningLanguageByLocale(locale: LearningLocale): LearningLanguage {
+	return localeToLanguage[locale];
 }
 
 const wiktionaryLanguageNames: Record<WithBaseLanguage<LearningLanguage>, string> = Object.freeze({
@@ -459,5 +448,12 @@ function getWiktionaryLanguageName(language: LearningLanguage): string {
 	return (wiktionaryLanguageNames as Record<string, string>)[language] ?? language;
 }
 
-export { isLearningLanguage, getWiktionaryLanguageName, languages, getLearningLocaleByLanguage };
+export {
+	isLearningLanguage,
+	isLearningLocale,
+	getWiktionaryLanguageName,
+	languages,
+	getLearningLocaleByLanguage,
+	getLearningLanguageByLocale,
+};
 export type { LearningLanguage, LearningLocale };
