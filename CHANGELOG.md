@@ -1,3 +1,7 @@
+## 4.53.0
+
+- Labels are now shown on entries from Wiktionary.
+
 ## 4.52.2
 
 - Bumped version of `dexonline-scraper` to `0.2.2`.
