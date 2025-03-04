@@ -36,8 +36,8 @@ const patterns = Object.freeze({
 	digit: /\d/,
 	/** Used for matching against description localisations. */
 	localisationDescription: /\.description$/,
-	/** Used for matching sigil queries. e.g. $word, i$word, i$[multiple words] */
-	wordSigil: /(\w+)?\$(?:(\p{L}+)|\[(.+)\])/u,
+	/** Used for matching sigil queries. e.g. $word, i$word, i$word#English, i$[multiple words], i$(multiple words), i${multiple words}, i$<multiple words> */
+	wordSigil: /(\w+)?\$(?:(\p{L}+)|\[(.+)\]|\((.+)\)|\{(.+)\}|<(.+)>)(?:#(\p{L}+))?/u,
 } as const);
 
 function isValidSnowflake(snowflake: string): boolean {

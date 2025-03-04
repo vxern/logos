@@ -1,4 +1,10 @@
-import { getSearchModeBySigil } from "logos:constants/dictionaries";
+import { type DictionarySearchMode, getSearchModeBySigil } from "logos:constants/dictionaries";
+import {
+	type LearningLanguage,
+	getLearningLanguageByLocale,
+	isLearningLanguage,
+	isLearningLocale,
+} from "logos:constants/languages/learning";
 import type { Client } from "logos/client";
 import { Collector } from "logos/collectors";
 import { handleFindWord } from "logos/commands/handlers/word";
@@ -25,17 +31,28 @@ class WordSigilService extends LocalService {
 			return;
 		}
 
-		const [sigil, word] = [match.at(1), match.at(2) ?? match.at(3)];
+		const [sigil, word, rawLanguage] = [match.at(1), match.slice(2, 7).find((word) => word), match.at(7)];
 		if (word === undefined) {
 			return;
 		}
 
-		const searchMode = sigil !== undefined ? getSearchModeBySigil(sigil) : "word";
-		if (searchMode === undefined) {
-			return;
+		let searchMode: DictionarySearchMode | undefined;
+		if (sigil !== undefined) {
+			searchMode = getSearchModeBySigil(sigil);
 		}
 
-		const messageInteraction = this.client.interactions.buildMessageInteraction(message, { parameters: { word } });
+		let language: LearningLanguage | undefined;
+		if (rawLanguage === undefined) {
+			language = undefined;
+		} else if (isLearningLanguage(rawLanguage)) {
+			language = rawLanguage;
+		} else if (isLearningLocale(rawLanguage)) {
+			language = getLearningLanguageByLocale(rawLanguage);
+		}
+
+		const messageInteraction = this.client.interactions.buildMessageInteraction(message, {
+			parameters: { word, language },
+		});
 		if (messageInteraction === undefined) {
 			return;
 		}
