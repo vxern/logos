@@ -132,7 +132,8 @@ async function handleFindWord(
 		searchesCompleted += 1;
 	}
 
-	if (entriesByPartOfSpeech.size === 0) {
+	const entries = sanitiseEntries([...Array.from(entriesByPartOfSpeech.values()).flat(), ...unclassifiedEntries]);
+	if (entries.length === 0) {
 		const strings = constants.contexts.noInformation({
 			localise: client.localise,
 			locale: interaction.displayLocale,
@@ -150,8 +151,6 @@ async function handleFindWord(
 
 		return;
 	}
-
-	const entries = sanitiseEntries([...Array.from(entriesByPartOfSpeech.values()).flat(), ...unclassifiedEntries]);
 
 	const wordInformation = new WordInformationComponent(client, { interaction, entries, searchMode });
 
