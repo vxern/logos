@@ -74,6 +74,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 				],
 			});
 		}
+
 		return entries;
 	}
 }

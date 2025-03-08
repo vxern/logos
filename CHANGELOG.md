@@ -1,3 +1,37 @@
+## 4.55.0
+
+- Fixed Logos showing the 'no information' message in response to `/word` when it only has
+  entries of an `unknown` part of speech.
+- Logos now recognises 27 new parts of speech:
+	- Number
+	- Ambiposition
+	- Circumposition
+	- Preposition
+	- Postposition
+	- Circumfix
+	- Classifier
+	- Proverb
+	- Punctuation mark
+	- Infix
+	- Prefix
+	- Root
+	- Interfix
+	- Suffix
+	- Combining form
+	- Diacritical mark
+	- Prepositional phrase
+	- Han character
+	- Hanzi
+	- Kanji
+	- Hanja
+	- Romanization
+	- Logogram
+	- Determinative
+	- Contraction
+	- Counter
+	- Ideophone
+	- Participle
+
 ## 4.54.0
 
 - The source language can now be specified in the sigil feature.

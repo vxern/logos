@@ -1,81 +1,83 @@
 {
-	"$schema": "https://json.schemastore.org/package",
-	"name": "logos",
-	"description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
-	"license": "Apache-2.0",
-	"version": "4.54.0",
-	"type": "module",
-	"keywords": [
-		"discord",
-		"bot",
-		"definitions",
-		"translation",
-		"language-recognition",
-		"games",
-		"guides",
-		"language",
-		"linguistics",
-		"dictionaries",
-		"translators",
-		"detectors",
-		"localised"
-	],
-	"homepage": "https://logos.wordcollector.co.uk",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/vxern/logos"
-	},
-	"bugs": {
-		"url": "https://github.com/vxern/logos",
-		"email": "vxern@wordcollector.co.uk"
-	},
-	"contributors": [
-		{
-			"name": "Dorian \"vxern\" Oszczęda",
-			"email": "vxern@wordcollector.co.uk",
-			"url": "https://github.com/vxern"
-		}
-	],
-	"scripts": {
-		"check": "biome check --write --unsafe ./scripts/ ./source/ ./test/ && tsc",
-		"database:migrate": "bun run ./scripts/database/migrate.ts",
-		"generate:migration": "bun run ./scripts/generate/migration.ts",
-		"load:sentence_pairs": "bun run ./scripts/load/sentence-pairs.ts",
-		"develop": "bun run ./scripts/develop.ts",
-		"start": "bun run ./scripts/run.ts",
-		"setup": "bun load:sentence_pairs"
-	},
-	"dependencies": {
-		"@discordeno/bot": "^21.0.0",
-		"cldpre": "^2.9.0",
-		"dexonline-scraper": "^0.2.2",
-		"diff": "^7.0.0",
-		"dotenv": "^16.4.5",
-		"eld": "github:vxern/efficient-language-detector-js#b8f7a21413bef94fc71207241748f4a1d0089cd3",
-		"fastest-levenshtein": "^1.0.16",
-		"fasttext.wasm.js": "^1.0.0",
-		"ioredis": "^5.4.1",
-		"mongodb": "^6.8.0",
-		"nano": "^10.1.4",
-		"nanoid": "^5.0.7",
-		"object-hash": "^3.0.0",
-		"pino": "^9.4.0",
-		"ravendb": "^5.4.3",
-		"rethinkdb-ts": "^2.6.1",
-		"shoukaku": "^4.1.1",
-		"tinyld": "^1.3.4",
-		"wiktionary-scraper": "^0.0.4",
-		"youtubei": "^1.6.7"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "1.8.3",
-		"@types/bun": "^1.1.7",
-		"@types/chai": "^4.3.17",
-		"@types/diff": "^6.0.0",
-		"@types/object-hash": "^3.0.6",
-		"chai": "^5.1.1",
-		"pino-pretty": "^11.2.2",
-		"typescript": "^5.5.4"
-	},
-	"trustedDependencies": ["@biomejs/biome"]
+  "$schema": "https://json.schemastore.org/package",
+  "name": "logos",
+  "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
+  "license": "Apache-2.0",
+  "version": "4.55.0",
+  "type": "module",
+  "keywords": [
+    "discord",
+    "bot",
+    "definitions",
+    "translation",
+    "language-recognition",
+    "games",
+    "guides",
+    "language",
+    "linguistics",
+    "dictionaries",
+    "translators",
+    "detectors",
+    "localised"
+  ],
+  "homepage": "https://logos.wordcollector.co.uk",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vxern/logos"
+  },
+  "bugs": {
+    "url": "https://github.com/vxern/logos",
+    "email": "vxern@wordcollector.co.uk"
+  },
+  "contributors": [
+    {
+      "name": "Dorian \"vxern\" Oszczęda",
+      "email": "vxern@wordcollector.co.uk",
+      "url": "https://github.com/vxern"
+    }
+  ],
+  "scripts": {
+    "check": "biome check --write --unsafe ./scripts/ ./source/ ./test/ && tsc",
+    "database:migrate": "bun run ./scripts/database/migrate.ts",
+    "generate:migration": "bun run ./scripts/generate/migration.ts",
+    "load:sentence_pairs": "bun run ./scripts/load/sentence-pairs.ts",
+    "develop": "bun run ./scripts/develop.ts",
+    "start": "bun run ./scripts/run.ts",
+    "setup": "bun load:sentence_pairs"
+  },
+  "dependencies": {
+    "@discordeno/bot": "^21.0.0",
+    "cldpre": "^2.9.0",
+    "dexonline-scraper": "^0.2.2",
+    "diff": "^7.0.0",
+    "dotenv": "^16.4.5",
+    "eld": "github:vxern/efficient-language-detector-js#b8f7a21413bef94fc71207241748f4a1d0089cd3",
+    "fastest-levenshtein": "^1.0.16",
+    "fasttext.wasm.js": "^1.0.0",
+    "ioredis": "^5.4.1",
+    "mongodb": "^6.8.0",
+    "nano": "^10.1.4",
+    "nanoid": "^5.0.7",
+    "object-hash": "^3.0.0",
+    "pino": "^9.4.0",
+    "ravendb": "^5.4.3",
+    "rethinkdb-ts": "^2.6.1",
+    "shoukaku": "^4.1.1",
+    "tinyld": "^1.3.4",
+    "wiktionary-scraper": "^0.0.4",
+    "youtubei": "^1.6.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.8.3",
+    "@types/bun": "^1.1.7",
+    "@types/chai": "^4.3.17",
+    "@types/diff": "^6.0.0",
+    "@types/object-hash": "^3.0.6",
+    "chai": "^5.1.1",
+    "pino-pretty": "^11.2.2",
+    "typescript": "^5.5.4"
+  },
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }
