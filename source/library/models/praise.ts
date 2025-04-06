@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { PraiseDocument } from "logos/models/documents/praise/latest";
+import type { PraiseDocument } from "logos/models/documents/praise";
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,

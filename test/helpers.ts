@@ -21,7 +21,7 @@ function entryRequest(database: DatabaseStore, options?: Partial<CreateEntryRequ
 			aim: "I would like to use the community to talk with people in VC.",
 			whereFound: "I found the server on Disboard.",
 		},
-		isFinalised: false,
+		isResolved: false,
 		forcedVerdict: undefined,
 		ticketChannelId: undefined,
 		votes: {},

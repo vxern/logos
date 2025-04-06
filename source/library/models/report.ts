@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { ReportDocument } from "logos/models/documents/report/latest";
+import type { ReportDocument } from "logos/models/documents/report";
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,

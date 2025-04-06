@@ -68,7 +68,7 @@ async function rollback({
 		return;
 	}
 
-	log.info(`Found ${migrationsToRollback.length} migration(s) to roll back.`);
+	log.info(`Rolling back ${step} migration(s)...`);
 
 	const migrations = migrationsToRollback
 		.map<Migration>((migration) => {
@@ -109,7 +109,7 @@ async function rollback({
 
 type AvailableMigrations = Record<string, string>;
 async function getAvailableMigrations(): Promise<AvailableMigrations> {
-	const migrationFilenames = await Array.fromAsync(new Bun.Glob("*.ts").scan(constants.directories.migrations)).then(
+	const migrationFilenames = await Array.fromAsync(new Bun.Glob("*.js").scan(constants.directories.migrations)).then(
 		(filenames) => filenames.toSorted((a, b) => a.localeCompare(b, "en", { sensitivity: "base" })),
 	);
 

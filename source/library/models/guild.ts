@@ -1,6 +1,6 @@
 import type { Client } from "logos/client";
 // biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
-import type { FeatureManagement, GuildDocument, RateLimit } from "logos/models/documents/guild/latest";
+import type { FeatureManagement, GuildDocument, RateLimit } from "logos/models/documents/guild";
 import { GuildStatistics } from "logos/models/guild-statistics";
 import { type CreateModelOptions, GuildModel, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";

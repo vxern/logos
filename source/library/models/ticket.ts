@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { TicketDocument } from "logos/models/documents/ticket/latest";
+import type { TicketDocument } from "logos/models/documents/ticket";
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,

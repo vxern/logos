@@ -64,7 +64,7 @@ class VerificationPromptService extends PromptService<{
 				continue;
 			}
 
-			if (entryRequestDocument.isFinalised) {
+			if (entryRequestDocument.isResolved) {
 				continue;
 			}
 
@@ -340,7 +340,7 @@ class VerificationPromptService extends PromptService<{
 				confirmButton.onInteraction(async (_) => {
 					this.client.deleteReply(interaction).ignore();
 
-					if (entryRequestDocument.isFinalised) {
+					if (entryRequestDocument.isResolved) {
 						resolve(undefined);
 						return;
 					}
@@ -440,7 +440,7 @@ class VerificationPromptService extends PromptService<{
 				confirmButton.onInteraction(async (_) => {
 					this.client.deleteReply(interaction).ignore();
 
-					if (entryRequestDocument.isFinalised) {
+					if (entryRequestDocument.isResolved) {
 						resolve(undefined);
 						return;
 					}
@@ -534,8 +534,8 @@ class VerificationPromptService extends PromptService<{
 			this.client.acknowledge(interaction).ignore();
 		}
 
-		const isFinalised = await this.#tryFinalise({ entryRequestDocument, voter });
-		if (isFinalised) {
+		const isResolved = await this.#tryFinalise({ entryRequestDocument, voter });
+		if (isResolved) {
 			return null;
 		}
 
@@ -575,7 +575,7 @@ class VerificationPromptService extends PromptService<{
 		}
 
 		await entryRequestDocument.update(this.client, () => {
-			entryRequestDocument.isFinalised = true;
+			entryRequestDocument.isResolved = true;
 		});
 
 		if (verdict === "accepted") {

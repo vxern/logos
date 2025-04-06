@@ -33,6 +33,7 @@
 			"discordeno": ["@discordeno/bot"],
 			"logos/*": ["./source/library/*"],
 			"logos:constants/*": ["./source/constants/*"],
+			"logos:database/*": ["./database/*"],
 			"logos:core/*": ["./source/*"],
 			"logos:test/*": ["./test/*"],
 			"logos:core/constants/*": ["./?"],
@@ -43,5 +44,5 @@
 	},
 	"compileOnSave": true,
 	"exclude": ["node_modules/"],
-	"include": ["migrations/", "plugins/", "scripts/", "source/", "test/"]
+	"include": ["database/migrations", "plugins/", "scripts/", "source/", "test/", "database/helpers.js"]
 }
