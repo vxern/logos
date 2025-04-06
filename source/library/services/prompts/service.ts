@@ -1,6 +1,6 @@
 import type { Client } from "logos/client";
 import { Collector, InteractionCollector } from "logos/collectors";
-import type { FeatureManagement } from "logos/models/documents/guild/latest";
+import type { FeatureManagement } from "logos/models/documents/guild";
 import type { Guild } from "logos/models/guild";
 import type { Model } from "logos/models/model";
 import type { User } from "logos/models/user";
@@ -127,8 +127,9 @@ abstract class PromptService<
 		this.#restoreDocuments();
 
 		const existingPrompts = await this.#getExistingPrompts();
-		const expiredPrompts = await this.#restoreValidPrompts(existingPrompts.valid);
+		const expiredPrompts = await this.#restoreStateForValidPrompts(existingPrompts.valid);
 		await this.#deleteInvalidPrompts([...existingPrompts.invalid, ...expiredPrompts.values()]);
+		await this.#restoreDeletedPrompts();
 
 		if (existingPrompts.noPromptsMessage !== undefined) {
 			this.#registerNoPromptsMessage(existingPrompts.noPromptsMessage);
@@ -211,7 +212,7 @@ abstract class PromptService<
 		return { valid, invalid, noPromptsMessage };
 	}
 
-	async #restoreValidPrompts(
+	async #restoreStateForValidPrompts(
 		prompts: [partialId: string, prompt: Discord.Message][],
 	): Promise<Map<string, Discord.Message>> {
 		if (prompts.length === 0) {
@@ -276,6 +277,10 @@ abstract class PromptService<
 				.deleteMessage(prompt.channelId, prompt.id)
 				.catch((error) => this.log.warn(error, "Failed to delete invalid or expired prompt."));
 		}
+	}
+
+	async #restoreDeletedPrompts(): Promise<void> {
+		// TODO(vxern): Implement.
 	}
 
 	// Anti-tampering feature; detects prompts being changed from the outside (embeds being deleted).

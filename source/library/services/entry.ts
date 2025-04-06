@@ -300,7 +300,7 @@ class EntryService extends LocalService {
 			EntryRequest.get(this.client, { guildId: this.guildIdString, authorId: interaction.user.id.toString() }),
 		]);
 
-		if (entryRequestDocument !== undefined && !entryRequestDocument.isFinalised) {
+		if (entryRequestDocument !== undefined && !entryRequestDocument.isResolved) {
 			const strings = constants.contexts.alreadyAnswered({
 				localise: this.client.localise,
 				locale: interaction.locale,

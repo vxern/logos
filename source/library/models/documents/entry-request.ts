@@ -10,7 +10,7 @@ interface EntryRequestDocument {
 	createdAt: number;
 	requestedRoleId: string;
 	formData: EntryRequestFormData;
-	isFinalised: boolean;
+	isResolved: boolean;
 	forcedVerdict?: {
 		userId: string;
 		verdict: VoteVerdict;
