@@ -1,6 +1,6 @@
 import { trim } from "logos:constants/formatting";
 import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { TicketFormData } from "logos/models/documents/ticket/latest";
+import type { TicketFormData } from "logos/models/documents/ticket";
 
 class TicketComposer extends ModalComposer<TicketFormData, never> {
 	buildModal(submission: Logos.Interaction, { formData }: { formData: TicketFormData }): Modal<TicketFormData> {

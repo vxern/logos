@@ -1,6 +1,6 @@
 import { codeMultiline, mention, trim } from "logos:constants/formatting";
 import type { Client } from "logos/client";
-import type { TicketFormData, TicketType } from "logos/models/documents/ticket/latest";
+import type { TicketFormData, TicketType } from "logos/models/documents/ticket";
 import type { EntryRequest } from "logos/models/entry-request";
 import { Model } from "logos/models/model";
 import { Ticket } from "logos/models/ticket";
