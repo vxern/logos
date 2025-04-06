@@ -4,7 +4,7 @@ const directories = Object.freeze({
 		sentences: "./assets/sentences",
 	},
 	logs: "./logs",
-	migrations: "./migrations",
+	migrations: "./database/migrations",
 	plugins: "./plugins",
 } as const);
 
