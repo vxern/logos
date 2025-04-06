@@ -36,7 +36,7 @@ const timestamp = [
 	date.getUTCMinutes(),
 	date.getUTCSeconds(),
 ].join("");
-const filename = `${timestamp}_${message}.ts`;
+const filename = `${timestamp}_${message}.js`;
 const file = Bun.file(`${constants.directories.migrations}/${filename}`);
 
 if (await file.exists()) {
@@ -48,15 +48,13 @@ if (await file.exists()) {
 await Bun.write(
 	file,
 	`
-import type { DatabaseStore } from "logos/stores/database";
-
 // This block is executed when the migration is enacted.
-async function up(_: DatabaseStore): Promise<void> {
+async function up(database) {
 	// No changes to make when migrating.
 }
 
 // This block is executed when the migration is rolled back.
-async function down(_: DatabaseStore): Promise<void> {
+async function down(database) {
 	// No changes to make when rolling back.
 }
 
