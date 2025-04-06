@@ -68,7 +68,7 @@ async function rollback({
 		return;
 	}
 
-	log.info(`Found ${migrationsToRollback.length} migration(s) to roll back.`);
+	log.info(`Rolling back ${step} migration(s)...`);
 
 	const migrations = migrationsToRollback
 		.map<Migration>((migration) => {
