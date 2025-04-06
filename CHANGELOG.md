@@ -1,3 +1,12 @@
+## 4.56.0
+
+- Added aliases for scripts:
+  - `db:migrate` for `database:migrate`
+  - `g:migration` for `generate:migration`
+  - `l:sentences` for `load:sentences`
+- Migrations are now written in JavaScript to prevent having to do type gymnastics.
+- The codebase no longer tracks a history of document types.
+
 ## 4.55.0
 
 - Fixed Logos showing the 'no information' message in response to `/word` when it only has
