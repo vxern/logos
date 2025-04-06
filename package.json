@@ -3,7 +3,7 @@
   "name": "logos",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
   "license": "Apache-2.0",
-  "version": "4.55.0",
+  "version": "4.56.0",
   "type": "module",
   "keywords": [
     "discord",
@@ -45,12 +45,13 @@
     "### DATABASE ########################################################": "",
     "database:migrate": "bun run ./scripts/database/migrate.ts",
     "### LOADERS #########################################################": "",
-    "load:sentence_pairs": "bun run ./scripts/load/sentence-pairs.ts",
+    "load:sentences": "bun run ./scripts/load/sentence-pairs.ts",
     "### GENERATORS ######################################################": "",
     "generate:migration": "bun run ./scripts/generate/migration.ts",
     "### ALIASES #########################################################": "",
     "g:migration": "bun run generate:migration",
-    "db:migrate": "bun run database:migrate"
+    "db:migrate": "bun run database:migrate",
+    "l:sentences": "bun run load:sentences"
   },
   "dependencies": {
     "@discordeno/bot": "^21.0.0",
