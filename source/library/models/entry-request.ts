@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { EntryRequestDocument, VoteVerdict } from "logos/models/documents/entry-request/latest";
+import type { EntryRequestDocument, VoteVerdict } from "logos/models/documents/entry-request";
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,
@@ -39,7 +39,7 @@ class EntryRequest extends EntryRequestModel {
 			createdAt,
 			requestedRoleId,
 			formData,
-			isFinalised,
+			isResolved,
 			forcedVerdict,
 			ticketChannelId,
 			votes,
@@ -51,7 +51,7 @@ class EntryRequest extends EntryRequestModel {
 		this.createdAt = createdAt ?? Date.now();
 		this.requestedRoleId = requestedRoleId;
 		this.formData = formData;
-		this.isFinalised = isFinalised ?? false;
+		this.isResolved = isResolved ?? false;
 		this.forcedVerdict = forcedVerdict;
 		this.ticketChannelId = ticketChannelId;
 		this.votes = votes;

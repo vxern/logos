@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { ResourceDocument } from "logos/models/documents/resource/latest";
+import type { ResourceDocument } from "logos/models/documents/resource";
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,

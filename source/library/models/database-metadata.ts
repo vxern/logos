@@ -1,4 +1,4 @@
-import type { DatabaseMetadataDocument } from "logos/models/documents/database-metadata/latest";
+import type { DatabaseMetadataDocument } from "logos/models/documents/database-metadata";
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,

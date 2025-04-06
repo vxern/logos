@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { SuggestionDocument } from "logos/models/documents/suggestion/latest";
+import type { SuggestionDocument } from "logos/models/documents/suggestion";
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,

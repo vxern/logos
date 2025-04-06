@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { WarningDocument } from "logos/models/documents/warning/latest";
+import type { WarningDocument } from "logos/models/documents/warning";
 import {
 	type ClientOrDatabaseStore,
 	type CreateModelOptions,

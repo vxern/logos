@@ -1,7 +1,7 @@
 import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
-import type { GameType } from "logos/models/documents/guild-statistics/latest";
-import type { GameScores, UserDocument } from "logos/models/documents/user/latest";
+import type { GameType } from "logos/models/documents/guild-statistics";
+import type { GameScores, UserDocument } from "logos/models/documents/user";
 import { type CreateModelOptions, Model, UserModel } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
