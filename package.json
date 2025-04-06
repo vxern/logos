@@ -37,13 +37,20 @@
     }
   ],
   "scripts": {
+    "### CORE ############################################################": "",
     "check": "biome check --write --unsafe ./scripts/ ./source/ ./test/ && tsc",
-    "database:migrate": "bun run ./scripts/database/migrate.ts",
-    "generate:migration": "bun run ./scripts/generate/migration.ts",
-    "load:sentence_pairs": "bun run ./scripts/load/sentence-pairs.ts",
     "develop": "bun run ./scripts/develop.ts",
     "start": "bun run ./scripts/run.ts",
-    "setup": "bun load:sentence_pairs"
+    "setup": "bun load:sentence_pairs",
+    "### DATABASE ########################################################": "",
+    "database:migrate": "bun run ./scripts/database/migrate.ts",
+    "### LOADERS #########################################################": "",
+    "load:sentence_pairs": "bun run ./scripts/load/sentence-pairs.ts",
+    "### GENERATORS ######################################################": "",
+    "generate:migration": "bun run ./scripts/generate/migration.ts",
+    "### ALIASES #########################################################": "",
+    "g:migration": "bun run generate:migration",
+    "db:migrate": "bun run database:migrate"
   },
   "dependencies": {
     "@discordeno/bot": "^21.0.0",
