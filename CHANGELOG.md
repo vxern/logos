@@ -1,3 +1,7 @@
+## 4.56.2
+
+- Fixed the bot not reinstating prompts for documents that were never finalised.
+
 ## 4.56.1
 
 - Fixed `examples` being a required property in the configuration of the CEFR feature.

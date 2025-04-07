@@ -127,13 +127,15 @@ abstract class PromptService<
 		this.#restoreDocuments();
 
 		const existingPrompts = await this.#getExistingPrompts();
-		const expiredPrompts = await this.#restoreStateForValidPrompts(existingPrompts.valid);
-		await this.#deleteInvalidPrompts([...existingPrompts.invalid, ...expiredPrompts.values()]);
-		await this.#restoreDeletedPrompts();
 
 		if (existingPrompts.noPromptsMessage !== undefined) {
 			this.#registerNoPromptsMessage(existingPrompts.noPromptsMessage);
-		} else {
+		}
+
+		const expiredPrompts = await this.#restoreStateForValidPrompts(existingPrompts.valid);
+		await this.#deleteInvalidPrompts([...existingPrompts.invalid, ...expiredPrompts.values()]);
+
+		if (existingPrompts.noPromptsMessage === undefined) {
 			await this.#tryPostNoPromptsMessage();
 		}
 
@@ -215,11 +217,9 @@ abstract class PromptService<
 	async #restoreStateForValidPrompts(
 		prompts: [partialId: string, prompt: Discord.Message][],
 	): Promise<Map<string, Discord.Message>> {
-		if (prompts.length === 0) {
-			return new Map();
+		if (prompts.length > 0) {
+			this.log.info(`Restoring state for ${prompts.length} ${this.#type} documents...`);
 		}
-
-		this.log.info(`Restoring state for ${prompts.length} ${this.#type} documents...`);
 
 		const remainingPrompts = new Map(prompts);
 		for (const [_, document] of this.documents) {
@@ -277,10 +277,6 @@ abstract class PromptService<
 				.deleteMessage(prompt.channelId, prompt.id)
 				.catch((error) => this.log.warn(error, "Failed to delete invalid or expired prompt."));
 		}
-	}
-
-	async #restoreDeletedPrompts(): Promise<void> {
-		// TODO(vxern): Implement.
 	}
 
 	// Anti-tampering feature; detects prompts being changed from the outside (embeds being deleted).
