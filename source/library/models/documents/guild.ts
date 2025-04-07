@@ -96,7 +96,7 @@ interface GuildDocument {
 			ruleChannelId: string;
 		};
 		cefr?: {
-			examples: {
+			examples?: {
 				a1: string;
 				a2: string;
 				b1: string;

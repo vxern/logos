@@ -17,6 +17,10 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		return this.#guildDocument.feature("cefr");
 	}
 
+	get #examplesEnabled(): boolean {
+		return this.#configuration.examples !== undefined;
+	}
+
 	constructor(
 		client: Client,
 		{ interaction, guildDocument }: { interaction: Logos.Interaction; guildDocument: Guild },
@@ -119,7 +123,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 		interaction: Logos.Interaction,
 		{ bracket }: { bracket: Bracket },
 	): Discord.Camelize<Discord.DiscordEmbed> {
-		const examples = this.#configuration.examples;
+		const examples = this.#configuration.examples!;
 
 		switch (bracket) {
 			case "a": {
@@ -197,53 +201,59 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 			locale: interaction.locale,
 		});
 
-		const bracketButtonComponents = [
-			{
-				type: Discord.MessageComponentTypes.Button,
-				label: strings.brackets.a,
-				customId: this.buttonPresses.encodeId(["bracket", "a"]),
-				disabled: bracket === "a",
-				emoji: { name: constants.emojis.commands.cefr.a },
-				style: Discord.ButtonStyles.Secondary,
-			},
-			{
-				type: Discord.MessageComponentTypes.Button,
-				label: strings.brackets.b,
-				customId: this.buttonPresses.encodeId(["bracket", "b"]),
-				disabled: bracket === "b",
-				emoji: { name: constants.emojis.commands.cefr.b },
-				style: Discord.ButtonStyles.Secondary,
-			},
-			{
-				type: Discord.MessageComponentTypes.Button,
-				label: strings.brackets.c,
-				customId: this.buttonPresses.encodeId(["bracket", "c"]),
-				disabled: bracket === "c",
-				emoji: { name: constants.emojis.commands.cefr.c },
-				style: Discord.ButtonStyles.Secondary,
-			},
-		] as const satisfies Discord.ButtonComponent[];
-
-		const tabButtonComponents = [
-			{
-				type: Discord.MessageComponentTypes.Button,
-				label: strings.tabs.guide,
-				customId: this.buttonPresses.encodeId(["mode", "guide"]),
-				disabled: mode === "guide",
-				style: Discord.ButtonStyles.Primary,
-			},
-			{
-				type: Discord.MessageComponentTypes.Button,
-				label: strings.tabs.examples,
-				customId: this.buttonPresses.encodeId(["mode", "examples"]),
-				disabled: mode === "examples",
-				style: Discord.ButtonStyles.Primary,
-			},
-		] as const satisfies Discord.ButtonComponent[];
-
 		return [
-			{ type: Discord.MessageComponentTypes.ActionRow, components: bracketButtonComponents },
-			{ type: Discord.MessageComponentTypes.ActionRow, components: tabButtonComponents },
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: strings.brackets.a,
+						customId: this.buttonPresses.encodeId(["bracket", "a"]),
+						disabled: bracket === "a",
+						emoji: { name: constants.emojis.commands.cefr.a },
+						style: Discord.ButtonStyles.Secondary,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: strings.brackets.b,
+						customId: this.buttonPresses.encodeId(["bracket", "b"]),
+						disabled: bracket === "b",
+						emoji: { name: constants.emojis.commands.cefr.b },
+						style: Discord.ButtonStyles.Secondary,
+					},
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: strings.brackets.c,
+						customId: this.buttonPresses.encodeId(["bracket", "c"]),
+						disabled: bracket === "c",
+						emoji: { name: constants.emojis.commands.cefr.c },
+						style: Discord.ButtonStyles.Secondary,
+					},
+				],
+			},
+			{
+				type: Discord.MessageComponentTypes.ActionRow,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Button,
+						label: strings.tabs.guide,
+						customId: this.buttonPresses.encodeId(["mode", "guide"]),
+						disabled: mode === "guide",
+						style: Discord.ButtonStyles.Primary,
+					},
+					...((this.#examplesEnabled
+						? [
+								{
+									type: Discord.MessageComponentTypes.Button,
+									label: strings.tabs.examples,
+									customId: this.buttonPresses.encodeId(["mode", "examples"]),
+									disabled: mode === "examples",
+									style: Discord.ButtonStyles.Primary,
+								},
+							]
+						: []) as [Discord.ButtonComponent]),
+				],
+			},
 		];
 	}
 }

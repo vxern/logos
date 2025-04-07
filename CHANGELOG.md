@@ -1,3 +1,7 @@
+## 4.56.1
+
+- Fixed `examples` being a required property in the configuration of the CEFR feature.
+
 ## 4.56.0
 
 - Added aliases for scripts:
