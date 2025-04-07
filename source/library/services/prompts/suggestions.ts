@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { Suggestion } from "logos/models/suggestion";
+import { Suggestion } from "logos/models/suggestion";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
@@ -16,18 +16,15 @@ class SuggestionPromptService extends PromptService<{
 		);
 	}
 
-	getAllDocuments(): Map<string, Suggestion> {
-		const suggestions = new Map<string, Suggestion>();
-
-		for (const [partialId, suggestionDocument] of this.client.documents.suggestions) {
-			if (suggestionDocument.guildId !== this.guildIdString) {
-				continue;
-			}
-
-			suggestions.set(partialId, suggestionDocument);
+	async getAllDocuments(): Promise<Map<string, Suggestion>> {
+		const documents = new Map<string, Suggestion>();
+		for (const suggestionDocument of await Suggestion.getAll(this.client, {
+			where: { guildId: this.guildIdString },
+		})) {
+			documents.set(suggestionDocument.partialId, suggestionDocument);
 		}
 
-		return suggestions;
+		return documents;
 	}
 
 	async getUserDocument(suggestionDocument: Suggestion): Promise<User> {

@@ -1,7 +1,7 @@
 import { mention, timestamp } from "logos:constants/formatting";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
-import type { EntryRequest, VoteType } from "logos/models/entry-request";
+import { EntryRequest, type VoteType } from "logos/models/entry-request";
 import type { Guild } from "logos/models/guild";
 import { Model } from "logos/models/model";
 import { User } from "logos/models/user";
@@ -52,18 +52,16 @@ class VerificationPromptService extends PromptService<{
 		await super.stop();
 	}
 
-	getAllDocuments(): Map<string, EntryRequest> {
+	async getAllDocuments(): Promise<Map<string, EntryRequest>> {
 		const member = this.client.entities.members.get(this.guildId)?.get(this.client.bot.id);
 		if (member === undefined) {
 			return new Map();
 		}
 
-		const entryRequests: Map<string, EntryRequest> = new Map();
-		for (const [partialId, entryRequestDocument] of this.client.documents.entryRequests) {
-			if (entryRequestDocument.guildId !== this.guildIdString) {
-				continue;
-			}
-
+		const documents: Map<string, EntryRequest> = new Map();
+		for (const entryRequestDocument of await EntryRequest.getAll(this.client, {
+			where: { guildId: this.guildIdString },
+		})) {
 			if (entryRequestDocument.isResolved) {
 				continue;
 			}
@@ -89,10 +87,10 @@ class VerificationPromptService extends PromptService<{
 				await this.#tryFinalise({ entryRequestDocument, voter: member });
 			});
 
-			entryRequests.set(partialId, entryRequestDocument);
+			documents.set(entryRequestDocument.partialId, entryRequestDocument);
 		}
 
-		return entryRequests;
+		return documents;
 	}
 
 	async getUserDocument(entryRequestDocument: EntryRequest): Promise<User> {

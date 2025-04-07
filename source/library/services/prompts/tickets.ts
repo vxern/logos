@@ -16,18 +16,15 @@ class TicketPromptService extends PromptService<{
 		super(client, { identifier: "TicketPromptService", guildId }, { type: "tickets", deleteMode: "close" });
 	}
 
-	getAllDocuments(): Map<string, Ticket> {
-		const tickets = new Map<string, Ticket>();
-
-		for (const [partialId, ticketDocument] of this.client.documents.tickets) {
-			if (ticketDocument.guildId !== this.guildIdString) {
-				continue;
-			}
-
-			tickets.set(partialId, ticketDocument);
+	async getAllDocuments(): Promise<Map<string, Ticket>> {
+		const documents = new Map<string, Ticket>();
+		for (const ticketDocument of await Ticket.getAll(this.client, {
+			where: { guildId: this.guildIdString },
+		})) {
+			documents.set(ticketDocument.partialId, ticketDocument);
 		}
 
-		return tickets;
+		return documents;
 	}
 
 	async getUserDocument(ticketDocument: Ticket): Promise<User> {

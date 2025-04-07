@@ -162,8 +162,8 @@ abstract class PromptService<
 		this.#userIdByPromptId.clear();
 	}
 
-	#restoreDocuments(): void {
-		const documents = this.getAllDocuments();
+	async #restoreDocuments(): Promise<void> {
+		const documents = await this.getAllDocuments();
 
 		this.log.info(
 			`Found ${documents.size} ${this.#type} documents on ${this.client.diagnostics.guild(this.guild)}.`,
@@ -452,7 +452,7 @@ abstract class PromptService<
 		await this.handleDelete(promptDocument);
 	}
 
-	abstract getAllDocuments(): Map<string, Generic["model"]>;
+	abstract getAllDocuments(): Promise<Map<string, Generic["model"]>>;
 	abstract getUserDocument(promptDocument: Generic["model"]): Promise<User>;
 	abstract getPromptContent(
 		user: Logos.User,

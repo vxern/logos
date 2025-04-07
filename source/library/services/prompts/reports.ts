@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { Report } from "logos/models/report";
+import { Report } from "logos/models/report";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
@@ -12,18 +12,15 @@ class ReportPromptService extends PromptService<{
 		super(client, { identifier: "ReportPromptService", guildId }, { type: "reports", deleteMode: "delete" });
 	}
 
-	getAllDocuments(): Map<string, Report> {
-		const reports = new Map<string, Report>();
-
-		for (const [partialId, reportDocument] of this.client.documents.reports) {
-			if (reportDocument.guildId !== this.guildIdString) {
-				continue;
-			}
-
-			reports.set(partialId, reportDocument);
+	async getAllDocuments(): Promise<Map<string, Report>> {
+		const documents = new Map<string, Report>();
+		for (const reportDocument of await Report.getAll(this.client, {
+			where: { guildId: this.guildIdString },
+		})) {
+			documents.set(reportDocument.partialId, reportDocument);
 		}
 
-		return reports;
+		return documents;
 	}
 
 	async getUserDocument(reportDocument: Report): Promise<User> {

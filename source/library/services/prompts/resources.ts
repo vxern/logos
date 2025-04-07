@@ -1,5 +1,5 @@
 import type { Client } from "logos/client";
-import type { Resource } from "logos/models/resource";
+import { Resource } from "logos/models/resource";
 import { User } from "logos/models/user";
 import { PromptService } from "logos/services/prompts/service";
 
@@ -12,18 +12,15 @@ class ResourcePromptService extends PromptService<{
 		super(client, { identifier: "ResourcePromptService", guildId }, { type: "resources", deleteMode: "delete" });
 	}
 
-	getAllDocuments(): Map<string, Resource> {
-		const resources = new Map<string, Resource>();
-
-		for (const [partialId, resourceDocument] of this.client.documents.resources) {
-			if (resourceDocument.guildId !== this.guildIdString) {
-				continue;
-			}
-
-			resources.set(partialId, resourceDocument);
+	async getAllDocuments(): Promise<Map<string, Resource>> {
+		const documents = new Map<string, Resource>();
+		for (const resourceDocument of await Resource.getAll(this.client, {
+			where: { guildId: this.guildIdString },
+		})) {
+			documents.set(resourceDocument.partialId, resourceDocument);
 		}
 
-		return resources;
+		return documents;
 	}
 
 	async getUserDocument(resourceDocument: Resource): Promise<User> {
