@@ -37,7 +37,7 @@ const database = DatabaseStore.create({
 	environment,
 	cache: new CacheStore({ log: constants.loggers.silent }),
 });
-await database.setup({ prefetchDocuments: false });
+await database.setup();
 
 const availableMigrations = await getAvailableMigrations();
 const metadata = await DatabaseMetadata.getOrCreate(database, { migrations: Object.keys(availableMigrations) });

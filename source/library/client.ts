@@ -251,7 +251,7 @@ class Client {
 		this.log.info("Starting client...");
 
 		await this.volatile?.setup();
-		await this.database.setup({ prefetchDocuments: true });
+		await this.database.setup();
 		await this.services.setup();
 		await this.#journalling.setup();
 		await this.#guilds.setup();
