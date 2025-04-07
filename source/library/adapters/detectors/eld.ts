@@ -1,5 +1,5 @@
 import { getELDLanguageByLocale, isELDLocale } from "logos:constants/languages/detection";
-import { eld } from "eld";
+import { eld } from "@vxern/eld";
 import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
 import type { Client } from "logos/client";
 

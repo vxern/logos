@@ -1,3 +1,7 @@
+## 4.56.3
+
+- Pegged the ELD package to an NPM release rather than using a GitHub commit.
+
 ## 4.56.2
 
 - Fixed the bot not reinstating prompts for documents that were never finalised.
