@@ -3,7 +3,7 @@
   "name": "logos",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
   "license": "Apache-2.0",
-  "version": "4.56.2",
+  "version": "4.56.3",
   "type": "module",
   "keywords": [
     "discord",
@@ -55,11 +55,11 @@
   },
   "dependencies": {
     "@discordeno/bot": "^21.0.0",
+    "@vxern/eld": "^1.1.0",
     "cldpre": "^2.9.0",
     "dexonline-scraper": "^0.2.2",
     "diff": "^7.0.0",
     "dotenv": "^16.4.5",
-    "eld": "github:vxern/efficient-language-detector-js#b8f7a21413bef94fc71207241748f4a1d0089cd3",
     "fastest-levenshtein": "^1.0.16",
     "fasttext.wasm.js": "^1.0.0",
     "ioredis": "^5.4.1",
