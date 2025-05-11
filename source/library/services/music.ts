@@ -509,7 +509,7 @@ class MusicSession extends EventEmitter {
 	async #handleTrackException(event: shoukaku.TrackExceptionEvent): Promise<void> {
 		this.playable.isLooping = false;
 
-		this.log.warn(`Failed to play track: ${event.exception}`);
+		this.log.warn(event.exception, "Failed to play track.");
 
 		const strings = constants.contexts.failedToPlay({
 			localise: this.client.localise,
