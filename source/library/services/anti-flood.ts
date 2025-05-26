@@ -148,11 +148,13 @@ class AntiFloodService extends LocalService {
 		for (const [messageOne, messageTwo] of messages.flatMap((a, index) =>
 			messages.slice(index + 1).map((b) => [a, b] as const),
 		)) {
-			if (messageOne.content !== undefined && messageTwo.content !== undefined) {
-				if (messageOne.content === messageTwo.content) {
-					addDuplicates(messageOne, messageTwo);
-					continue;
-				}
+			if (
+				messageOne.content !== undefined &&
+				messageTwo.content !== undefined &&
+				messageOne.content === messageTwo.content
+			) {
+				addDuplicates(messageOne, messageTwo);
+				continue;
 			}
 
 			const attachmentsOne = messageOne.attachments;

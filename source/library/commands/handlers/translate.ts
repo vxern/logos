@@ -132,23 +132,19 @@ async function handleTranslate(
 		sourceLanguage = detectedLanguage;
 	}
 
-	if (to !== undefined) {
-		if (to !== sourceLanguage) {
-			await translateText(client, interaction, { text, languages: { source: sourceLanguage, target: to } });
-			return;
-		}
+	if (to !== undefined && to !== sourceLanguage) {
+		await translateText(client, interaction, { text, languages: { source: sourceLanguage, target: to } });
+		return;
 	}
 
 	const learningTranslationLanguage = getTranslationLanguage(interaction.learningLanguage);
-	if (learningTranslationLanguage !== undefined) {
-		if (learningTranslationLanguage !== sourceLanguage) {
-			await translateText(client, interaction, {
-				text,
-				languages: { source: sourceLanguage, target: learningTranslationLanguage },
-			});
+	if (learningTranslationLanguage !== undefined && learningTranslationLanguage !== sourceLanguage) {
+		await translateText(client, interaction, {
+			text,
+			languages: { source: sourceLanguage, target: learningTranslationLanguage },
+		});
 
-			return;
-		}
+		return;
 	}
 
 	const translationLanguage = getTranslationLanguage(language);

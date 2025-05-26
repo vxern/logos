@@ -563,10 +563,8 @@ function getRoleCategories(categories: Record<string, RoleCategory>, guildId: bi
 			continue;
 		}
 
-		if (isCustom(category.collection)) {
-			if (!(guildIdString in category.collection.lists)) {
-				continue;
-			}
+		if (isCustom(category.collection) && !(guildIdString in category.collection.lists)) {
+			continue;
 		}
 
 		selectedRoleCategories[name] = category;

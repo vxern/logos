@@ -156,7 +156,6 @@ function patchShoukakuWebSockets(): void {
 			throw new Error("Don't connect a node when the library is not yet ready");
 		}
 
-		// @ts-expect-error: Private symbol.
 		if (this.destroyed) {
 			throw new Error(
 				"You can't re-use the same instance of a node once disconnected, please re-add the node again",
@@ -176,9 +175,7 @@ function patchShoukakuWebSockets(): void {
 		if (this.sessionId) {
 			headers["Session-Id"] = this.sessionId;
 		}
-		// @ts-expect-error: Private symbol.
 		if (!this.initialized) {
-			// @ts-expect-error: Private symbol.
 			this.initialized = true;
 		}
 
@@ -191,21 +188,30 @@ function patchShoukakuWebSockets(): void {
 		// @ts-expect-error: This is fine.
 		const onMessage = (event) => this.message(event.data).catch((error) => this.error(error as Error));
 
+		// @ts-expect-error: Private symbol.
 		this.ws = new WebSocket(
 			// @ts-expect-error: Private symbol.
 			this.url,
 			{ headers },
 		);
+		// @ts-expect-error: Private symbol.
 		this.ws.addEventListener("open", onOpen, { once: true });
+		// @ts-expect-error: Private symbol.
 		this.ws.addEventListener("close", onClose, { once: true });
+		// @ts-expect-error: Private symbol.
 		this.ws.addEventListener("error", onError);
+		// @ts-expect-error: Private symbol.
 		this.ws.addEventListener("message", onMessage);
 
 		// @ts-expect-error: This is fine.
 		this.ws.removeAllListeners = function (_) {
+			// @ts-expect-error: Private symbol.
 			this.removeEventListener("open", onOpen);
+			// @ts-expect-error: Private symbol.
 			this.removeEventListener("close", onClose);
+			// @ts-expect-error: Private symbol.
 			this.removeEventListener("error", onError);
+			// @ts-expect-error: Private symbol.
 			this.removeEventListener("message", onMessage);
 		};
 	};

@@ -5,8 +5,9 @@
       "all": true,
       "nursery": {
         "all": true,
-        "useDefaultSwitchClause": "off",
-        "noUndeclaredDependencies": "off",
+        "noSecrets": "off",
+        "useExplicitType": "off",
+        "noProcessEnv": "off",
         "useImportRestrictions": "off"
       },
       "style": {
@@ -14,7 +15,8 @@
         "noNamespaceImport": "off",
         "noDefaultExport": "off",
         "useNamingConvention": "off",
-        "noNonNullAssertion": "off"
+        "noNonNullAssertion": "off",
+        "useDefaultSwitchClause": "off"
       },
       "suspicious": {
         "all": true,
@@ -28,7 +30,8 @@
         "noExcessiveCognitiveComplexity": "off"
       },
       "correctness": {
-        "noNodejsModules": "off"
+        "noNodejsModules": "off",
+        "noUndeclaredDependencies": "off"
       }
     }
   },

@@ -610,12 +610,10 @@ class WordInformationComponent {
 	#formatExpressionField(field: ExpressionField, { depth = 0 }: { depth?: number } = {}): string {
 		let root = this.#formatLabelledField({ value: `*${field.value}*`, labels: field.labels });
 
-		if (constants.INCLUDE_EXPRESSION_RELATIONS) {
-			if (field.relations !== undefined) {
-				const relations = this.#formatRelationFields(field.relations, { depth: depth + 1 });
-				if (relations !== undefined) {
-					root = `${root}\n${relations.join("\n")}`;
-				}
+		if (constants.INCLUDE_EXPRESSION_RELATIONS && field.relations !== undefined) {
+			const relations = this.#formatRelationFields(field.relations, { depth: depth + 1 });
+			if (relations !== undefined) {
+				root = `${root}\n${relations.join("\n")}`;
 			}
 		}
 

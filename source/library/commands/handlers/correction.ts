@@ -49,16 +49,17 @@ async function handleMakeCorrection(
 	const doNotCorrectMeRoleId = (
 		constants.roles.learning.collection.list.doNotCorrectMe.snowflakes as Record<string, string>
 	)[interaction.guildId.toString()];
-	if (doNotCorrectMeRoleId !== undefined) {
-		if (correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)) {
-			const strings = constants.contexts.userDoesNotWantCorrections({
-				localise: client.localise,
-				locale: interaction.locale,
-			});
-			client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
+	if (
+		doNotCorrectMeRoleId !== undefined &&
+		correctedMember.roles.some((roleId) => roleId.toString() === doNotCorrectMeRoleId)
+	) {
+		const strings = constants.contexts.userDoesNotWantCorrections({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
+		client.warning(interaction, { title: strings.title, description: strings.description }).ignore();
 
-			return;
-		}
+		return;
 	}
 
 	if (message.content.length > constants.MAXIMUM_CORRECTION_MESSAGE_LENGTH) {

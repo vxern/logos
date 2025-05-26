@@ -17,21 +17,19 @@ async function handleLoopPlayback(
 		return;
 	}
 
-	if (interaction.parameters.collection) {
-		if (!(musicService.session.queueable instanceof SongCollection)) {
-			const strings = constants.contexts.noSongCollectionToLoop({
-				localise: client.localise,
-				locale: interaction.locale,
-			});
-			client
-				.warning(interaction, {
-					title: strings.title,
-					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-				})
-				.ignore();
+	if (interaction.parameters.collection && !(musicService.session.queueable instanceof SongCollection)) {
+		const strings = constants.contexts.noSongCollectionToLoop({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+			})
+			.ignore();
 
-			return;
-		}
+		return;
 	}
 
 	if (interaction.parameters.collection) {

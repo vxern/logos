@@ -608,11 +608,17 @@ async function displaySnowflakesInvalidError(
 	client
 		.warned(
 			interaction,
-			areBothInvalid
-				? { title: strings.both.title, description: strings.both.description }
-				: isStartInvalid
-					? { title: strings.start.title, description: strings.start.description }
-					: { title: strings.end.title, description: strings.end.description },
+			(() => {
+				if (areBothInvalid) {
+					return { title: strings.both.title, description: strings.both.description };
+				}
+
+				if (isStartInvalid) {
+					return { title: strings.start.title, description: strings.start.description };
+				}
+
+				return { title: strings.end.title, description: strings.end.description };
+			})(),
 		)
 		.ignore();
 }

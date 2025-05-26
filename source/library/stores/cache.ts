@@ -147,7 +147,8 @@ class CacheStore {
 
 		this.entities.attachments.set(
 			attachment.id,
-			Object.assign(attachment, { name: attachment.filename, blob: blob as Blob }),
+			// @ts-ignore: Discordeno expects the Node `Blob`, while we can only provide a bun `Blob`.
+			Object.assign(attachment, { name: attachment.filename, blob }),
 		);
 
 		this.#fetchRequests.delete(attachment.id);

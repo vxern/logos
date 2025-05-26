@@ -219,10 +219,8 @@ class InteractionCollector<
 	}
 
 	filter(interaction: Interaction): boolean {
-		if (!this.anyType) {
-			if (interaction.type !== this.type) {
-				return false;
-			}
+		if (!this.anyType && interaction.type !== this.type) {
+			return false;
 		}
 
 		if (!(this.only.has(interaction.user.id) || this.#acceptAnyUser)) {
@@ -319,21 +317,19 @@ class InteractionCollector<
 		const guildLocale = getLearningLocaleByLanguage(guildLanguage);
 		const featureLanguage = guildDocument.languages.feature;
 
-		if (!isAutocomplete(interaction)) {
-			// If the user has configured a custom locale, use the user's preferred locale.
-			if (userDocument.preferredLanguage !== undefined) {
-				const language = userDocument.preferredLanguage;
-				const locale = getLocalisationLocaleByLanguage(language);
-				return {
-					locale,
-					language,
-					guildLocale,
-					guildLanguage,
-					learningLocale,
-					learningLanguage,
-					featureLanguage,
-				};
-			}
+		// If the user has configured a custom locale, use the user's preferred locale.
+		if (!isAutocomplete(interaction) && userDocument.preferredLanguage !== undefined) {
+			const language = userDocument.preferredLanguage;
+			const locale = getLocalisationLocaleByLanguage(language);
+			return {
+				locale,
+				language,
+				guildLocale,
+				guildLanguage,
+				learningLocale,
+				learningLanguage,
+				featureLanguage,
+			};
 		}
 
 		// Otherwise default to the user's app language.

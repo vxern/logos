@@ -30,18 +30,15 @@ describe("getPartOfSpeech()", () => {
 		expect(original).to.equal("substantiv");
 	});
 
-	it(
-		"returns the part of speech matched to the approximate term in the given language if the exact term has no" +
-			" match.",
-		() => {
-			const { detected, original } = getPartOfSpeech({
-				terms: { exact: "this.will.not.match", approximate: "proper noun" },
-				learningLanguage: "English/British",
-			});
-			expect(detected).to.equal("proper-noun" satisfies PartOfSpeech);
-			expect(original).to.equal("proper noun");
-		},
-	);
+	it("returns the part of speech matched to the approximate term in the given language if the exact term has no" +
+		" match.", () => {
+		const { detected, original } = getPartOfSpeech({
+			terms: { exact: "this.will.not.match", approximate: "proper noun" },
+			learningLanguage: "English/British",
+		});
+		expect(detected).to.equal("proper-noun" satisfies PartOfSpeech);
+		expect(original).to.equal("proper noun");
+	});
 
 	it("returns 'unknown' if there is no match", () => {
 		const { detected, original } = getPartOfSpeech({

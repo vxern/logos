@@ -17,21 +17,19 @@ async function handleReplayAction(
 		return;
 	}
 
-	if (interaction.parameters.collection) {
-		if (!(musicService.session.queueable instanceof SongCollection)) {
-			const strings = constants.contexts.noSongCollectionToReplay({
-				localise: client.localise,
-				locale: interaction.locale,
-			});
-			client
-				.warning(interaction, {
-					title: strings.title,
-					description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
-				})
-				.ignore();
+	if (interaction.parameters.collection && !(musicService.session.queueable instanceof SongCollection)) {
+		const strings = constants.contexts.noSongCollectionToReplay({
+			localise: client.localise,
+			locale: interaction.locale,
+		});
+		client
+			.warning(interaction, {
+				title: strings.title,
+				description: `${strings.description.noSongCollection}\n\n${strings.description.trySongInstead}`,
+			})
+			.ignore();
 
-			return;
-		}
+		return;
 	}
 
 	const strings = constants.contexts.replaying({
@@ -50,7 +48,7 @@ async function handleReplayAction(
 		.ignore();
 
 	await musicService.session.replay({
-		mode: interaction.parameters.collection ?? false ? "song-collection" : "playable",
+		mode: (interaction.parameters.collection ?? false) ? "song-collection" : "playable",
 	});
 }
 
