@@ -1,3 +1,25 @@
+## 4.57.0
+
+- Bumped dependencies:
+  - Standard:
+    - `diff`: `^7.0.0` -> `^8.0.2`
+    - `dotenv`: `^16.4.5` -> `^16.5.0`
+    - `ioredis`: `^5.4.1` -> `^5.6.1`
+    - `mongodb`: `^6.8.0` -> `^6.16.0`
+    - `nanoid`: `^5.0.7` -> `^5.1.5`
+    - `pino`: `^9.4.0` -> `^9.7.0`
+    - `ravendb`: `^5.4.3` -> `^7.0.0`
+    - `rethinkdb-ts`: `^2.6.1` -> `^2.7.0`
+  - Developer:
+    - `@biomejs/biome`: `1.8.3` -> `1.9.4`
+    - `@types/bun`: `^1.1.7` -> `^1.2.14`
+    - `@types/chai`: `^4.3.17` -> `^5.2.2`
+    - `chai`: `^5.1.1` -> `^5.2.0`
+    - `pino-pretty`: `^11.2.2` -> `^13.0.0`
+    - `typescript`: `^5.5.4` -> `^5.8.`
+- Removed dependencies:
+  - `@types/diff`
+
 ## 4.56.3
 
 - Pegged the ELD package to an NPM release rather than using a GitHub commit.
