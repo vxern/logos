@@ -10,6 +10,9 @@
         "noProcessEnv": "off",
         "useImportRestrictions": "off"
       },
+      "performance": {
+        "noDelete": "off"
+      },
       "style": {
         "all": true,
         "noNamespaceImport": "off",
