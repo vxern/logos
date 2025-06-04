@@ -48,15 +48,9 @@ if (await file.exists()) {
 await Bun.write(
 	file,
 	`
-// This block is executed when the migration is enacted.
-async function up(database) {
-	// No changes to make when migrating.
-}
+async function up(database) {}
 
-// This block is executed when the migration is rolled back.
-async function down(database) {
-	// No changes to make when rolling back.
-}
+async function down(database) {}
 
 export { up, down };
 `.trim(),

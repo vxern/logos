@@ -4,7 +4,8 @@ async function up(database) {
 	await migrateDocuments(database, {
 		collection: "Guilds",
 		migrate: async (document) => {
-			document.enabledFeatures.wordSigils = document.enabledFeatures.word;
+			delete document.enabledFeatures.music;
+			delete document.features.music;
 		},
 	});
 }
