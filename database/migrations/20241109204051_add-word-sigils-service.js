@@ -1,4 +1,4 @@
-import { migrateDocuments } from "database";
+import { migrateDocuments } from "../helpers.js";
 
 async function up(database) {
 	await migrateDocuments(database, {
