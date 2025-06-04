@@ -89,10 +89,6 @@ describe("Client", () => {
 		// TODO(vxern): Add tests. Check delegates or retrieves value.
 	});
 
-	describe("getMusicService()", () => {
-		// TODO(vxern): Add tests. Check delegates or retrieves value.
-	});
-
 	describe("getRoleIndicatorService()", () => {
 		// TODO(vxern): Add tests. Check delegates or retrieves value.
 	});

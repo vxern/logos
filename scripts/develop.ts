@@ -149,7 +149,6 @@ await document.update(database, () => {
 		suggestions: true,
 		resourceSubmissions: true,
 		tickets: true,
-		music: true,
 		praises: true,
 		profile: true,
 	};
@@ -282,9 +281,6 @@ await document.update(database, () => {
 		tickets: {
 			categoryId: idByName(channels, "Tickets"),
 			channelId: idByName(channels, "tickets"),
-		},
-		music: {
-			implicitVolume: 100,
 		},
 	};
 });
