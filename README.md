@@ -73,11 +73,6 @@
         <img src=".github/assets/screenshots/resource-notice.png">
       </td>
       <td style="text-align: center">
-        <img src=".github/assets/screenshots/music.png">
-      </td>
-    </tr>
-    <tr>
-      <td style="text-align: center">
         <img src=".github/assets/screenshots/profile.png">
       </td>
     </tr>

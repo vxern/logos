@@ -477,16 +477,6 @@ class CommandStore {
 			commands.push(this.commands.resource);
 		}
 
-		if (guildDocument.hasEnabled("music")) {
-			if (this.#client.services.hasGlobalService("lavalink")) {
-				commands.push(this.commands.music);
-			} else {
-				this.log.warn(
-					`The music service is enabled on ${this.#client.diagnostics.guild(guildDocument.guildId)}, but the bot does not have a Lavalink connection. Skipping...`,
-				);
-			}
-		}
-
 		if (guildDocument.hasEnabled("praises")) {
 			commands.push(this.commands.praise);
 		}

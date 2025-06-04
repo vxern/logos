@@ -1,3 +1,7 @@
+## 4.58.0
+
+- Removed the music module and all related code.
+
 ## 4.57.0
 
 - Bumped dependencies:

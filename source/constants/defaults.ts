@@ -28,8 +28,6 @@ const FLOOD_INTERVAL: TimeStruct = [5, "second"];
 const FLOOD_MESSAGE_COUNT = 3;
 const FLOOD_TIMEOUT: TimeStruct = [1, "day"];
 
-const MUSIC_DISCONNECT_TIMEOUT: TimeStruct = [2, "minute"];
-
 const MINIMUM_VOICE_CHANNELS = 0;
 const MAXIMUM_VOICE_CHANNELS = 5;
 
@@ -53,7 +51,6 @@ export default Object.freeze({
 	FLOOD_INTERVAL,
 	FLOOD_MESSAGE_COUNT,
 	FLOOD_TIMEOUT,
-	MUSIC_DISCONNECT_TIMEOUT,
 	MINIMUM_VOICE_CHANNELS,
 	MAXIMUM_VOICE_CHANNELS,
 });

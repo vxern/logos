@@ -61,7 +61,6 @@ class Guild extends GuildModel {
 			suggestions: false,
 			resourceSubmissions: false,
 			tickets: false,
-			music: false,
 			praises: false,
 			profile: false,
 		};

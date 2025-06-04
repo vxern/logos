@@ -65,10 +65,6 @@ describe("Client", () => {
 		// TODO(vxern): Add tests. Check delegates or retrieves value.
 	});
 
-	describe("lavalinkService()", () => {
-		// TODO(vxern): Add tests. Check delegates or retrieves value.
-	});
-
 	describe("interactionRepetitionService()", () => {
 		// TODO(vxern): Add tests. Check delegates or retrieves value.
 	});
@@ -86,10 +82,6 @@ describe("Client", () => {
 	});
 
 	describe("getEntryService()", () => {
-		// TODO(vxern): Add tests. Check delegates or retrieves value.
-	});
-
-	describe("getMusicService()", () => {
 		// TODO(vxern): Add tests. Check delegates or retrieves value.
 	});
 

@@ -130,26 +130,7 @@ REDIS_PORT=6379      # Port your database instance is operating at. (Redis uses 
 # REDIS_PASSWORD=    # (optional for unsecured instances) Password for authorisation.
 ```
 
-### Step 4: Configuring the audio node
-
-> The music service needs a Lavalink node to operate.
->
-> If you'd like Logos to play music, you will need to add credentials of a Lavalink node to connect to.
->
-> [*If not, feel free to skip to the next section.*](#step-5-configuring-language-integrations)
-
-You do not necessarily need to set up a Lavalink node yourself; there are public nodes out there that you can connect to
-and use. However, if you are looking for high reliability, it would usually be a good idea to host a node yourself.
-
-The credentials to add to `.env` for Lavalink are as follows:
-
-```
-LAVALINK_HOST=127.0.0.1           # Address of your Lavalink instance.
-LAVALINK_PORT=2333                # Port your Lavalink instance operates at.
-LAVALINK_PASSWORD=youshallnotpass # Password for authorisation.
-```
-
-### Step 5: Configuring language integrations
+### Step 4: Configuring language integrations
 
 > Logos relies on third-party integrations to serve much of its language content, whether that's translations,
 > definitions, or otherwise.
@@ -159,7 +140,7 @@ LAVALINK_PASSWORD=youshallnotpass # Password for authorisation.
 >
 > [*If not, then that's it! You're all set.*](#thats-all)
 
-### Step 5.1: RapidAPI
+### Step 4.1: RapidAPI
 
 > RapidAPI is a collection of APIs that are each queryable using the same API token. Logos uses a number of integrations
 > via RapidAPI.
@@ -181,7 +162,7 @@ LAVALINK_PASSWORD=youshallnotpass # Password for authorisation.
 SECRET_RAPID_API=<token goes here>
 ```
 
-### Step 5.2: DeepL
+### Step 4.2: DeepL
 
 > Logos uses DeepL for providing its translation services. The free plan comes with a limit of 500,000 characters per
 > month.
@@ -196,7 +177,7 @@ To get a DeepL token, you will need to have a DeepL account.
 SECRET_DEEPL=<token goes here>
 ```
 
-### Step 5.3: Wordnik
+### Step 4.3: Wordnik
 
 > Logos uses Wordnik to provide information about words in English. The free plan comes with a limit of 100 calls per
 > hour.
@@ -217,7 +198,7 @@ in the main branch yet. I'll be leaving its setup entry out here for when it're 
 --->
 
 <!--
-### Step 5.4: PONS
+### Step 4.4: PONS
 
 > Logos uses PONS for its word services in several languages. The free plan comes with a limit of 1000 reference queries per month.
 

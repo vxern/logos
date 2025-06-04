@@ -41,10 +41,6 @@ describe("ServiceStore", () => {
 		// TODO(vxern): Add tests.
 	});
 
-	describe("getMusicService()", () => {
-		// TODO(vxern): Add tests.
-	});
-
 	describe("getRoleIndicatorService()", () => {
 		// TODO(vxern): Add tests.
 	});

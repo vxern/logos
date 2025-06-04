@@ -55,25 +55,11 @@ services:
       - ${REDIS_PORT:-6379}
     profiles:
       - redis
-  lavalink:
-    container_name: logos_lavalink
-    image: ghcr.io/lavalink-devs/lavalink:4
-    restart: unless-stopped
-    environment:
-      SERVER_ADDRESS: ${LAVALINK_HOST:-127.0.0.1}
-      SERVER_PORT: ${LAVALINK_PORT:-2333}
-      SERVER_HTTP2_ENABLED: true
-      LAVALINK_SERVER_PASSWORD: ${LAVALINK_PASSWORD:-youshallnotpass}
-    ports:
-      - ${LAVALINK_PORT:-2333}
-    profiles:
-      - lavalink
   logos:
     container_name: logos
     restart: unless-stopped
     environment:
       REDIS_HOST: redis
-      LAVALINK_HOST: lavalink
       MONGODB_HOST: mongodb
       RAVENDB_HOST: ravendb
       COUCHDB_HOST: couchdb
@@ -93,9 +79,6 @@ services:
         condition: service_started
         required: false
       rethinkdb:
-        condition: service_started
-        required: false
-      lavalink:
         condition: service_started
         required: false
       redis:

@@ -45,7 +45,6 @@ interface GuildDocument {
 		suggestions: boolean;
 		resourceSubmissions: boolean;
 		tickets: boolean;
-		music: boolean;
 		praises: boolean;
 		profile: boolean;
 	};
@@ -165,9 +164,6 @@ interface GuildDocument {
 			channelId: string;
 			categoryId: string;
 			limit?: number;
-		};
-		music?: {
-			implicitVolume: number;
 		};
 	};
 }

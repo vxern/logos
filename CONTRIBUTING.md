@@ -63,7 +63,7 @@ we wanted it to do.
 
 #### #2: Keep your changes coherent and on-point
 
-When updating a music command handler, don't get carried away and end up refactoring a dictionary adapter.
+When updating a command handler, don't get carried away and end up refactoring a dictionary adapter.
 
 If something else does need changing, note it down and do it afterwards.
 
