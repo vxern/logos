@@ -30,9 +30,6 @@ interface Environment {
 	readonly redisHost?: string;
 	readonly redisPort?: string;
 	readonly redisPassword?: string;
-	readonly lavalinkHost?: string;
-	readonly lavalinkPort?: string;
-	readonly lavalinkPassword?: string;
 }
 
 function loadEnvironment({ log }: { log: pino.Logger }): Environment {
@@ -77,9 +74,6 @@ function loadEnvironment({ log }: { log: pino.Logger }): Environment {
 		redisHost: process.env.REDIS_HOST,
 		redisPort: process.env.REDIS_PORT,
 		redisPassword: process.env.REDIS_PASSWORD,
-		lavalinkHost: process.env.LAVALINK_HOST,
-		lavalinkPort: process.env.LAVALINK_PORT,
-		lavalinkPassword: process.env.LAVALINK_PASSWORD,
 	};
 
 	log.info("Environment loaded.");

@@ -6,7 +6,6 @@ import { AntiFloodService } from "logos/services/anti-flood";
 import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channels";
 import { EntryService } from "logos/services/entry";
 import { InteractionRepetitionService } from "logos/services/interaction-repetition";
-import { LavalinkService } from "logos/services/lavalink";
 import { InformationNoticeService } from "logos/services/notices/information";
 import { ResourceNoticeService } from "logos/services/notices/resources";
 import { RoleNoticeService } from "logos/services/notices/roles";
@@ -23,7 +22,6 @@ import { WordSigilService } from "logos/services/word-sigils";
 import type pino from "pino";
 
 interface GlobalServices {
-	readonly lavalink?: LavalinkService;
 	readonly interactionRepetition: InteractionRepetitionService;
 	readonly status: StatusService;
 }
@@ -72,16 +70,8 @@ class ServiceStore {
 	constructor(client: Client) {
 		this.log = client.log.child({ name: "ServiceStore" });
 
-		const lavalinkService = LavalinkService.tryCreate(client);
-		if (lavalinkService === undefined) {
-			this.log.warn(
-				"One or more of `LAVALINK_HOST`, `LAVALINK_PORT` or `LAVALINK_PASSWORD` have not been provided. Logos will not serve audio sessions.",
-			);
-		}
-
 		this.#client = client;
 		this.#global = {
-			lavalink: lavalinkService,
 			interactionRepetition: new InteractionRepetitionService(client),
 			status: new StatusService(client),
 		};
