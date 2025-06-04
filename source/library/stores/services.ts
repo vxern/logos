@@ -7,7 +7,6 @@ import { DynamicVoiceChannelService } from "logos/services/dynamic-voice-channel
 import { EntryService } from "logos/services/entry";
 import { InteractionRepetitionService } from "logos/services/interaction-repetition";
 import { LavalinkService } from "logos/services/lavalink";
-import { MusicService } from "logos/services/music";
 import { InformationNoticeService } from "logos/services/notices/information";
 import { ResourceNoticeService } from "logos/services/notices/resources";
 import { RoleNoticeService } from "logos/services/notices/roles";
@@ -34,7 +33,6 @@ interface LocalServices {
 	readonly antiFlood: AntiFloodService;
 	readonly dynamicVoiceChannels: DynamicVoiceChannelService;
 	readonly entry: EntryService;
-	readonly music: MusicService;
 	readonly informationNotices: InformationNoticeService;
 	readonly resourceNotices: ResourceNoticeService;
 	readonly roleNotices: RoleNoticeService;
@@ -92,7 +90,6 @@ class ServiceStore {
 			antiFlood: new Map(),
 			dynamicVoiceChannels: new Map(),
 			entry: new Map(),
-			music: new Map(),
 			informationNotices: new Map(),
 			resourceNotices: new Map(),
 			roleNotices: new Map(),
@@ -264,13 +261,6 @@ class ServiceStore {
 			services.push(service);
 
 			this.#local.resourcePrompts.set(guildId, service);
-		}
-
-		if (guildDocument.hasEnabled("music") && this.#global.lavalink !== undefined) {
-			const service = new MusicService(this.#client, { guildId });
-			services.push(service);
-
-			this.#local.music.set(guildId, service);
 		}
 
 		await this.#startLocalServices({ guildId, services });
