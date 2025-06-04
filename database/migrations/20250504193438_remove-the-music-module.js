@@ -4,8 +4,8 @@ async function up(database) {
 	await migrateDocuments(database, {
 		collection: "Guilds",
 		migrate: async (document) => {
-			delete document.enabledFeatures.music;
-			delete document.features.music;
+			delete document.enabledFeatures?.music;
+			delete document.features?.music;
 		},
 	});
 }
