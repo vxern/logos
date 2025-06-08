@@ -1,6 +1,5 @@
 import { type CreateEntryRequestOptions, EntryRequest } from "logos/models/entry-request";
 import { type CreateGuildOptions, Guild } from "logos/models/guild";
-import { type CreateGuildStatisticsOptions, GuildStatistics } from "logos/models/guild-statistics";
 import { type CreatePraiseOptions, Praise } from "logos/models/praise";
 import { type CreateReportOptions, Report } from "logos/models/report";
 import { type CreateResourceOptions, Resource } from "logos/models/resource";
@@ -39,15 +38,6 @@ function guild(database: DatabaseStore, options?: Partial<CreateGuildOptions>): 
 			target: "English/American",
 		},
 		isNative: false,
-		...options,
-	});
-}
-
-function guildStatistics(database: DatabaseStore, options?: Partial<CreateGuildStatisticsOptions>): GuildStatistics {
-	return new GuildStatistics(database, {
-		guildId: `${123}`,
-		createdAt: Date.now(),
-		statistics: {},
 		...options,
 	});
 }
@@ -135,4 +125,4 @@ function warning(database: DatabaseStore, options?: Partial<CreateWarningOptions
 	});
 }
 
-export { entryRequest, guild, guildStatistics, praise, report, resource, suggestion, ticket, user, warning };
+export { entryRequest, guild, praise, report, resource, suggestion, ticket, user, warning };

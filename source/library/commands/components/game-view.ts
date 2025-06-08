@@ -4,7 +4,7 @@ import * as levenshtein from "fastest-levenshtein";
 import type { Client } from "logos/client";
 import { InteractionCollector } from "logos/collectors";
 import { TatoebaSourceNotice } from "logos/commands/components/source-notices/tatoeba-source-notice";
-import { GuildStatistics } from "logos/models/guild-statistics";
+import { Guild } from "logos/models/guild";
 import { User } from "logos/models/user";
 import type { SentencePair } from "logos/stores/volatile";
 
@@ -23,7 +23,7 @@ class GameViewComponent {
 	readonly #guesses: InteractionCollector<[index: string]>;
 	readonly #skips: InteractionCollector;
 	sentenceSelection!: SentenceSelection;
-	guildStatisticsDocument!: GuildStatistics;
+	guildDocument!: Guild;
 	userDocument!: User;
 	embedColour: number;
 	sessionScore: number;
@@ -41,15 +41,15 @@ class GameViewComponent {
 
 	async #setup(): Promise<void> {
 		this.sentenceSelection = await this.getSentenceSelection({ learningLocale: this.#interaction.learningLocale });
-		[this.guildStatisticsDocument, this.userDocument] = await Promise.all([
-			GuildStatistics.getOrCreate(this.#client, {
+		[this.guildDocument, this.userDocument] = await Promise.all([
+			Guild.getOrCreate(this.#client, {
 				guildId: this.#interaction.guildId.toString(),
 			}),
 			User.getOrCreate(this.#client, { userId: this.#interaction.user.id.toString() }),
 		]);
 
-		await this.guildStatisticsDocument.update(this.#client, () => {
-			this.guildStatisticsDocument.registerSession({
+		await this.guildDocument.update(this.#client, () => {
+			this.guildDocument.registerSession({
 				game: "pickMissingWord",
 				learningLocale: this.#interaction.learningLocale,
 				isUnique:
@@ -186,8 +186,8 @@ class GameViewComponent {
 		const pick = this.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
 		const isCorrect = pick === this.sentenceSelection.correctPick;
 
-		await this.guildStatisticsDocument.update(this.#client, () => {
-			this.guildStatisticsDocument.incrementScore({
+		await this.guildDocument.update(this.#client, () => {
+			this.guildDocument.incrementScore({
 				game: "pickMissingWord",
 				learningLocale: this.#interaction.learningLocale,
 			});

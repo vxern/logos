@@ -1,7 +1,15 @@
 import type { FeatureLanguage } from "logos:constants/languages/feature";
 import type { LearningLanguage } from "logos:constants/languages/learning";
-import type { LocalisationLanguage } from "logos:constants/languages/localisation";
+import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
 import type { TimeStruct } from "logos:constants/time";
+
+type GameType = "pickMissingWord";
+
+interface GameStatistics {
+	totalSessions: number;
+	totalScore: number;
+	uniquePlayers: number;
+}
 
 interface GuildDocument {
 	createdAt: number;
@@ -170,6 +178,7 @@ interface GuildDocument {
 			implicitVolume: number;
 		};
 	};
+	statistics: Partial<Record<Locale, Partial<Record<GameType, GameStatistics>>>>;
 }
 
 interface RateLimit {
@@ -193,4 +202,12 @@ interface RoleWithIndicator {
 	indicator: string;
 }
 
-export type { GuildDocument, DynamicVoiceChannel, RoleWithIndicator, RateLimit, FeatureManagement };
+export type {
+	GuildDocument,
+	DynamicVoiceChannel,
+	RoleWithIndicator,
+	RateLimit,
+	FeatureManagement,
+	GameStatistics,
+	GameType,
+};

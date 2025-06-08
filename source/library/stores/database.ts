@@ -10,7 +10,6 @@ import { RethinkDBAdapter } from "logos/adapters/databases/rethinkdb/database";
 import { DatabaseMetadata } from "logos/models/database-metadata";
 import { EntryRequest } from "logos/models/entry-request";
 import { Guild } from "logos/models/guild";
-import { GuildStatistics } from "logos/models/guild-statistics";
 import type { Model, ModelConstructor } from "logos/models/model";
 import { Praise } from "logos/models/praise";
 import { Report } from "logos/models/report";
@@ -26,7 +25,6 @@ class DatabaseStore {
 	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({
 		DatabaseMetadata: DatabaseMetadata,
 		EntryRequests: EntryRequest,
-		GuildStatistics: GuildStatistics,
 		Guilds: Guild,
 		Praises: Praise,
 		Reports: Report,

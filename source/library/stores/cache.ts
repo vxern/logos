@@ -3,7 +3,6 @@ import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:consta
 import type { PromiseOr } from "logos:core/utilities";
 import type { EntryRequest } from "logos/models/entry-request";
 import type { Guild } from "logos/models/guild";
-import type { GuildStatistics } from "logos/models/guild-statistics";
 import type { Model } from "logos/models/model";
 import type { Praise } from "logos/models/praise";
 import type { Report } from "logos/models/report";
@@ -30,7 +29,6 @@ class CacheStore {
 	};
 	readonly documents: {
 		readonly entryRequests: Map<string, EntryRequest>;
-		readonly guildStatistics: Map<string, GuildStatistics>;
 		readonly guilds: Map<string, Guild>;
 		readonly praisesByAuthor: Map<string, Map<string, Praise>>;
 		readonly praisesByTarget: Map<string, Map<string, Praise>>;
@@ -60,7 +58,6 @@ class CacheStore {
 		};
 		this.documents = {
 			entryRequests: new Map(),
-			guildStatistics: new Map(),
 			guilds: new Map(),
 			praisesByAuthor: new Map(),
 			praisesByTarget: new Map(),
@@ -189,10 +186,6 @@ class CacheStore {
 				this.documents.entryRequests.set(document.partialId, document);
 				break;
 			}
-			case "GuildStatistics": {
-				this.documents.guildStatistics.set(document.partialId, document);
-				break;
-			}
 			case "Guilds": {
 				this.documents.guilds.set(document.partialId, document);
 				break;
@@ -255,10 +248,6 @@ class CacheStore {
 			}
 			case "Guilds": {
 				this.documents.guilds.delete(document.partialId);
-				break;
-			}
-			case "GuildStatistics": {
-				this.documents.guildStatistics.delete(document.partialId);
 				break;
 			}
 			case "Praises": {

@@ -1,7 +1,13 @@
+import type { Locale } from "logos:constants/languages/localisation";
 import type { Client } from "logos/client";
-// biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
-import type { FeatureManagement, GuildDocument, RateLimit } from "logos/models/documents/guild";
-import { GuildStatistics } from "logos/models/guild-statistics";
+import type {
+	FeatureManagement,
+	GameStatistics,
+	GameType,
+	GuildDocument,
+	// biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
+	RateLimit,
+} from "logos/models/documents/guild";
 import { type CreateModelOptions, GuildModel, type IdentifierData, Model } from "logos/models/model";
 import type { DatabaseStore } from "logos/stores/database";
 
@@ -9,6 +15,12 @@ type CreateGuildOptions = CreateModelOptions<Guild, GuildDocument>;
 
 interface Guild extends GuildDocument {}
 class Guild extends GuildModel {
+	static readonly #initialStatistics: GameStatistics = {
+		totalSessions: 1,
+		totalScore: 0,
+		uniquePlayers: 1,
+	};
+
 	readonly createdAt: number;
 
 	get guildId(): string {
@@ -94,13 +106,9 @@ class Guild extends GuildModel {
 	}
 
 	static async create(client: Client, data: CreateGuildOptions): Promise<Guild> {
-		const guildDocument = await client.database.withSession((session) => {
+		return client.database.withSession((session) => {
 			return session.set(new Guild(client.database, data));
 		});
-
-		await GuildStatistics.getOrCreate(client, { guildId: guildDocument.id.toString() });
-
-		return guildDocument;
 	}
 
 	static async getOrCreate(client: Client, data: CreateGuildOptions): Promise<Guild> {
@@ -151,6 +159,46 @@ class Guild extends GuildModel {
 		}
 
 		return this.feature("targetOnly").channelIds.includes(channelId) ?? false;
+	}
+
+	registerSession({
+		game,
+		learningLocale,
+		isUnique,
+	}: { game: GameType; learningLocale: Locale; isUnique: boolean }): void {
+		if (this.statistics === undefined) {
+			this.statistics = { [learningLocale]: { [game]: { ...Guild.#initialStatistics } } };
+			return;
+		}
+
+		const statisticsForLocale = this.statistics[learningLocale];
+		if (statisticsForLocale === undefined) {
+			this.statistics[learningLocale] = { [game]: { ...Guild.#initialStatistics } };
+			return;
+		}
+
+		const statisticsForGame = statisticsForLocale[game];
+		if (statisticsForGame === undefined) {
+			statisticsForLocale[game] = { ...Guild.#initialStatistics };
+			return;
+		}
+
+		statisticsForGame.totalSessions += 1;
+
+		if (isUnique) {
+			statisticsForGame.uniquePlayers += 1;
+		}
+	}
+
+	incrementScore({ game, learningLocale }: { game: GameType; learningLocale: Locale }): void {
+		// We don't care about incrementing the score if the statistics could not be found, since at that point, we
+		// have a bigger problem on our hands: the statistics gone *poof*.
+		const statisticsForGame = this.statistics?.[learningLocale]?.[game];
+		if (statisticsForGame === undefined) {
+			return;
+		}
+
+		statisticsForGame.totalScore += 1;
 	}
 }
 
