@@ -5,6 +5,7 @@ const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest],
 	const strings = {
 		...constants.contexts.verificationModal({ localise: client.localise, locale: guildLocale }),
 		...constants.contexts.entryRequestSubmit({ localise: client.localise, locale: guildLocale }),
+		...constants.contexts.language({ localise: client.localise, locale: guildLocale }),
 	};
 	return {
 		embeds: [
@@ -14,7 +15,7 @@ const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest],
 				description: strings.description({ user: client.diagnostics.user(user) }),
 				fields: [
 					{
-						name: strings.fields.reason({ language: featureLanguage }),
+						name: strings.fields.reason({ language: strings.language(featureLanguage) }),
 						value: codeMultiline(entryRequest.formData.reason),
 					},
 					{

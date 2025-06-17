@@ -1,3 +1,7 @@
+## 4.57.1
+
+- Fixed some strings not having the language localised.
+
 ## 4.57.0
 
 - Bumped dependencies:

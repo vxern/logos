@@ -259,11 +259,15 @@ class TicketPromptService extends PromptService<{
 
 			const strings = {
 				...constants.contexts.verificationAnswers({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: this.guildLocale,
 				}),
 				...constants.contexts.verificationModal({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
+					locale: this.guildLocale,
+				}),
+				...constants.contexts.language({
+					localise: this.client.localise,
 					locale: this.guildLocale,
 				}),
 			};
@@ -274,7 +278,9 @@ class TicketPromptService extends PromptService<{
 						color: constants.colours.husky,
 						fields: [
 							{
-								name: strings.fields.reason({ language: this.guildDocument.languages.feature }),
+								name: strings.fields.reason({
+									language: strings.language(this.guildDocument.languages.feature),
+								}),
 								value: codeMultiline(entryRequest.formData.reason),
 							},
 							{

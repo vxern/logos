@@ -105,7 +105,7 @@ async function handleRecogniseLanguage(
 			};
 			fields.push({
 				name: `${constants.emojis.commands.recognise.likely} ${strings.title}`,
-				value: strings.description({ language: `**${strings.language(language)}` }),
+				value: strings.description({ language: `**${strings.language(language)}**` }),
 				inline: false,
 			});
 		} else if (detections.likely.length > 0) {
