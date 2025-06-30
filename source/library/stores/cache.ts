@@ -98,6 +98,15 @@ class CacheStore {
 	}
 
 	#cacheGuild(guild: Discord.Guild): void {
+    // TODO(vxern): At some points, for whatever reason, these properties are undefined.
+    //  For now, we simply default them to an empty collection so that the bot doesn't break.
+    guild.roles ??= new Discord.Collection();
+    guild.emojis ??= new Discord.Collection();
+    guild.voiceStates ??= new Discord.Collection();
+    guild.members ??= new Discord.Collection();
+    guild.channels ??= new Discord.Collection();
+    guild.threads ??= new Discord.Collection();
+
 		this.entities.guilds.set(guild.id, guild as unknown as Logos.Guild);
 
 		for (const channel of guild.channels?.array() ?? []) {
