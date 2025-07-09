@@ -97,17 +97,18 @@ class CacheStore {
 		};
 	}
 
-	#cacheGuild(guild: Discord.Guild): void {
-    // TODO(vxern): At some points, for whatever reason, these properties are undefined.
-    //  For now, we simply default them to an empty collection so that the bot doesn't break.
-    guild.roles ??= new Discord.Collection();
-    guild.emojis ??= new Discord.Collection();
-    guild.voiceStates ??= new Discord.Collection();
-    guild.members ??= new Discord.Collection();
-    guild.channels ??= new Discord.Collection();
-    guild.threads ??= new Discord.Collection();
+	#cacheGuild(guild_: Discord.Guild): void {
+		const guild = guild_ as unknown as Logos.Guild;
 
-		this.entities.guilds.set(guild.id, guild as unknown as Logos.Guild);
+		const oldGuild = this.entities.guilds.get(guild_.id);
+		guild.roles = oldGuild?.roles ?? new Discord.Collection();
+		guild.emojis = oldGuild?.emojis ?? new Discord.Collection();
+		guild.voiceStates = oldGuild?.voiceStates ?? new Discord.Collection();
+		guild.members = oldGuild?.members ?? new Discord.Collection();
+		guild.channels = oldGuild?.channels ?? new Discord.Collection();
+		guild.threads = oldGuild?.threads ?? new Discord.Collection();
+
+		this.entities.guilds.set(guild.id, guild);
 
 		for (const channel of guild.channels?.array() ?? []) {
 			this.#cacheChannel(channel);
