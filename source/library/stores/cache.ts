@@ -101,12 +101,12 @@ class CacheStore {
 		const oldGuild = this.entities.guilds.get(guild_.id);
 		const guild = {
 			...(guild_ as unknown as Logos.Guild),
-			roles: oldGuild?.roles ?? new Discord.Collection(),
-			emojis: oldGuild?.emojis ?? new Discord.Collection(),
-			voiceStates: oldGuild?.voiceStates ?? new Discord.Collection(),
-			members: oldGuild?.members ?? new Discord.Collection(),
-			channels: oldGuild?.channels ?? new Discord.Collection(),
-			threads: oldGuild?.threads ?? new Discord.Collection(),
+			roles: new Discord.Collection([...(oldGuild?.roles ?? []), ...(guild_.roles ?? [])]),
+			emojis: new Discord.Collection([...(oldGuild?.emojis ?? []), ...(guild_.emojis ?? [])]),
+			voiceStates: new Discord.Collection([...(oldGuild?.voiceStates ?? []), ...(guild_.voiceStates ?? [])]),
+			members: new Discord.Collection([...(oldGuild?.members ?? []), ...(guild_.members ?? [])]),
+			channels: new Discord.Collection([...(oldGuild?.channels ?? []), ...(guild_.channels ?? [])]),
+			threads: new Discord.Collection([...(oldGuild?.threads ?? []), ...(guild_.threads ?? [])]),
 		};
 
 		this.entities.guilds.set(guild.id, guild);
