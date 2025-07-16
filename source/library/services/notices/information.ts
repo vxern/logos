@@ -1,5 +1,6 @@
 import type { Client } from "logos/client";
 import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
+import { fromHex } from "logos:constants/colours";
 
 class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -7,35 +8,21 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const informationFields = constants.rules.map((rule, index) => {
-			const strings = {
-				...constants.contexts.tldr({ localise: this.client.localise, locale: this.guildLocale }),
-				...constants.contexts.rule({ localise: this.client.localise, locale: this.guildLocale }),
-			};
-			return {
-				name: `${constants.emojis.services.notices.information.ruleBullet}  #${index + 1} ~ **${strings.title(rule).toUpperCase()}**  ~  ${
-					strings.tldr
-				}: *${strings.summary(rule)}*`,
-				value: strings.content(rule),
-				inline: false,
-			};
-		});
-
-		const strings = constants.contexts.invite({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
+				...constants.rules.map((rule, index) => {
+					const strings = constants.contexts.rule({
+						localise: this.client.localise,
+						locale: this.guildLocale,
+					});
+					return {
+						color: constants.colours.blue - fromHex("#090909") * index,
+						title: `${index + 1} ・ ${strings.title(rule).toUpperCase()}: ${strings.summary(rule)}`,
+						description: `> ${strings.content(rule)}`,
+					};
+				}),
 				{
-					color: constants.colours.blue,
-					fields: informationFields,
-				},
-				{
-					color: constants.colours.gray,
-					fields: [
-						{
-							name: `${constants.emojis.link}  ${strings.invite}`,
-							value: `**${this.configuration.inviteLink}**`,
-						},
-					],
+					color: constants.colours.blue - fromHex("#090909") * constants.rules.length,
 				},
 			],
 		};
