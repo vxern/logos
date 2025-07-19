@@ -17,7 +17,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 					});
 					return {
 						color: constants.colours.blue - fromHex("#090909") * index,
-						title: `${index + 1} ・ ${strings.title(rule).toUpperCase()}: ${strings.summary(rule)}`,
+						title: `${index + 1} ・ ${strings.title(rule).toUpperCase()} ・ ${strings.summary(rule)}`,
 						footer: { text: strings.content(rule) },
 					};
 				}),
