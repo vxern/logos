@@ -1,6 +1,5 @@
 import type { Client } from "logos/client";
 import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
-import { fromHex } from "logos:constants/colours";
 
 class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -10,19 +9,18 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	generateNotice(): HashableMessageContents | undefined {
 		return {
 			embeds: [
-				...constants.rules.map((rule, index) => {
-					const strings = constants.contexts.rule({
-						localise: this.client.localise,
-						locale: this.guildLocale,
-					});
-					return {
-						color: constants.colours.blue - fromHex("#090909") * index,
-						title: `${index + 1} ・ ${strings.title(rule).toUpperCase()} ・ ${strings.summary(rule)}`,
-						footer: { text: strings.content(rule) },
-					};
-				}),
 				{
-					color: constants.colours.blue - fromHex("#090909") * constants.rules.length,
+					color: constants.colours.blue,
+					fields: constants.rules.map((rule, index) => {
+						const strings = constants.contexts.rule({
+							localise: this.client.localise,
+							locale: this.guildLocale,
+						});
+						return {
+							name: `${index + 1} ・ ${strings.title(rule).toUpperCase()} ・ ${strings.summary(rule)}`,
+							value: strings.content(rule),
+						};
+					}),
 				},
 			],
 		};
