@@ -1409,6 +1409,9 @@ export default Object.freeze({
 	rules: ({ localise, locale }) => ({
 		title: localise("rules.title", locale)(),
 	}),
+	tldr: ({ localise, locale }) => ({
+		tldr: localise("rules.tldr", locale)(),
+	}),
 	rule: ({ localise, locale }) => ({
 		title: (rule: RuleOrOther) => localise(`rules.${rule}.title`, locale)(),
 		summary: (rule: RuleOrOther) => localise(`rules.${rule}.summary`, locale)(),
