@@ -1,3 +1,7 @@
+## 4.58.0
+
+- Improved the UI of notices.
+
 ## 4.57.2
 
 - Bumped dependencies.

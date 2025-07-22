@@ -17,7 +17,7 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 						information_channel_mention: mention(this.configuration.ruleChannelId, { type: "channel" }),
 					}),
 					image: { url: constants.gifs.followRules },
-					color: constants.colours.orange,
+					color: constants.colours.blue,
 				},
 			],
 			components: [

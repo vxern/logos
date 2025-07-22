@@ -1406,6 +1406,9 @@ export default Object.freeze({
 	redirect: ({ localise, locale }) => ({
 		redirect: localise("resources.strings.redirect", locale),
 	}),
+	rules: ({ localise, locale }) => ({
+		title: localise("rules.title", locale)(),
+	}),
 	tldr: ({ localise, locale }) => ({
 		tldr: localise("rules.tldr", locale)(),
 	}),

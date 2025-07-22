@@ -1,31 +1,24 @@
 {
-	"rules.tldr": "TL;DR",
-	"rules.rule": "Rule",
-
-	"rules.behaviour.title": "Behaviour",
-	"rules.behaviour.summary": "Try to be nice.",
-	"rules.behaviour.content": "It is expected of members to treat each other with respect, consideration and understanding. Malicious behaviour in the form of verbal abuse, discrimination, harassment and other forms of hurtful or toxic behaviour will not be tolerated.",
-
-	"rules.quality.title": "Quality",
-	"rules.quality.summary": "Do not be obnoxious.",
-	"rules.quality.content": "It is expected of contributions made to the server to be of decent quality. Trolling, spamming, flooding, shitposting (outside of the channel for memes) and other forms of annoying behaviour are sorely discouraged.",
-
-	"rules.relevance.title": "Relevance",
-	"rules.relevance.summary": "Post relevant content.",
-	"rules.relevance.content": "It is expected of contributions made to the server to be placed in their relevant channel and category. Contributions made in inappropriate channels for their subject will be asked to be moved to their relevant channel.",
-
-	"rules.suitability.title": "Suitability",
-	"rules.suitability.summary": "Post content appropriate for younger members.",
-	"rules.suitability.content": "It is expected of contributions made to the server to be appropriate for viewing by minors. Age-restricted (NSFW) and NSFL content is strictly prohibited. If you wouldn't show it to a minor, you shouldn't post it.",
-
-	"rules.exclusivity.title": "Exclusivity",
-	"rules.exclusivity.summary": "Do not advertise.",
-	"rules.exclusivity.content": "It is expected of members to not use this space for advertising, and active attempts at it (including unsolicited DMs) are prohibited.",
-
-	"rules.adherence.title": "Adherence",
-	"rules.adherence.summary": "Respect the rules.",
-	"rules.adherence.content": "For members who show no regard for the server rules, and are not interested in making useful contributions, a permanent ban may be issued.",
-
+  "rules.rule": "Rule",
+  "rules.title": "Rules",
+  "rules.behaviour.title": "Behaviour",
+  "rules.behaviour.summary": "Be nice.",
+  "rules.behaviour.content": "We won't tolerate verbal abuse, discrimination, harassment, manipulation, defamation or any other forms of toxic behaviour.",
+  "rules.quality.title": "Quality",
+  "rules.quality.summary": "Don't be annoying.",
+  "rules.quality.content": "Take pride in what you share. Trolling, spamming, flooding and posting over-the-top nonsense isn't okay.",
+  "rules.relevance.title": "Relevance",
+  "rules.relevance.summary": "Write relevant messages.",
+  "rules.relevance.content": "Place messages in their relevant channel. Messages made in inappropriate places for their content will be asked to move.",
+  "rules.suitability.title": "Suitability",
+  "rules.suitability.summary": "Don't be inappropriate.",
+  "rules.suitability.content": "Age-restricted (NSFW) and NSFL content is strictly prohibited. If you wouldn't show it to a child, you shouldn't post it.",
+  "rules.exclusivity.title": "Exclusivity",
+  "rules.exclusivity.summary": "Don't advertise.",
+  "rules.exclusivity.content": "You cannot advertise your own stuff here without permission; all forms of advertising (including unsolicited DMs) are prohibited.",
+  "rules.adherence.title": "Adherence",
+  "rules.adherence.summary": "Respect the community.",
+  "rules.adherence.content": "This is our common space to hang out and we like our peace — do not disturb the atmosphere on the community.",
   "rules.other.title": "Other",
   "rules.other.summary": "Justified in the reason."
 }

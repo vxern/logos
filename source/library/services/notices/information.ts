@@ -7,35 +7,22 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const informationFields = constants.rules.map((rule, index) => {
-			const strings = {
-				...constants.contexts.tldr({ localise: this.client.localise, locale: this.guildLocale }),
-				...constants.contexts.rule({ localise: this.client.localise, locale: this.guildLocale }),
-			};
-			return {
-				name: `${constants.emojis.services.notices.information.ruleBullet}  #${index + 1} ~ **${strings.title(rule).toUpperCase()}**  ~  ${
-					strings.tldr
-				}: *${strings.summary(rule)}*`,
-				value: strings.content(rule),
-				inline: false,
-			};
-		});
-
-		const strings = constants.contexts.invite({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.rules({ localise: this.client.localise, locale: this.guildLocale });
 		return {
 			embeds: [
 				{
+					title: strings.title,
 					color: constants.colours.blue,
-					fields: informationFields,
-				},
-				{
-					color: constants.colours.gray,
-					fields: [
-						{
-							name: `${constants.emojis.link}  ${strings.invite}`,
-							value: `**${this.configuration.inviteLink}**`,
-						},
-					],
+					fields: constants.rules.map((rule, index) => {
+						const strings = constants.contexts.rule({
+							localise: this.client.localise,
+							locale: this.guildLocale,
+						});
+						return {
+							name: `${index + 1} ・ ${strings.title(rule).toUpperCase()} ・ ${strings.summary(rule)}`,
+							value: strings.content(rule),
+						};
+					}),
 				},
 			],
 		};

@@ -30,7 +30,7 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 						})}\n` +
 						`2. ${strings.description.contributable.openingIssue}\n` +
 						`3. ${strings.description.contributable.pullRequest}\n`,
-					color: constants.colours.gray,
+					color: constants.colours.blue,
 				},
 			],
 			components: [

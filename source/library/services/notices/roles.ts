@@ -45,7 +45,7 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 					description: `${strings.description.usingCommand({
 						command: code(this.client.localiseCommand("profile.options.roles", this.guildLocale)),
 					})} ${strings.description.runAnywhere}\n\n${strings.description.pressButton}`,
-					color: constants.colours.murrey,
+					color: constants.colours.blue,
 				},
 			],
 			components: [
