@@ -31,7 +31,7 @@ import time from "rost:constants/time";
 
 const constants = Object.freeze({
 	PROJECT_NAME: "Rost",
-	USER_AGENT: "Rost (https://github.com/vxern/rost)",
+	USER_AGENT: "Rost (https://github.com/LearnRomanian/rost)",
 	TEST_GUILD_TEMPLATE_CODE: "EaEy336gYh3C",
 	TEST_GUILD_NAME: "Rost Test Environment",
 	TEST_GUILD_ICON_URL: Discord.guildIconUrl(1175841125546856608n, "24adda5d3f30a46aef193b621e3952b4", {

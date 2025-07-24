@@ -48,7 +48,7 @@ class DiscordConnection {
 				constants.loggers.discordeno.child({ name: name.toLowerCase() }, { level: "debug" }),
 		});
 
-		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": "Rost (https://github.com/vxern/rost)" });
+		this.bot.rest.createBaseHeaders = () => ({ "User-Agent": constants.USER_AGENT });
 	}
 
 	async open(): Promise<void> {

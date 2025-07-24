@@ -21,7 +21,6 @@ import { VerificationPromptService } from "rost/services/prompts/verification";
 import { RoleIndicatorService } from "rost/services/role-indicators";
 import type { GlobalService, LocalService, Service } from "rost/services/service";
 import { StatusService } from "rost/services/status";
-import { WordSigilService } from "rost/services/word-sigils";
 
 interface GlobalServices {
 	readonly lavalink?: LavalinkService;
@@ -45,7 +44,6 @@ interface LocalServices {
 	readonly ticketPrompts: TicketPromptService;
 	readonly verificationPrompts: VerificationPromptService;
 	readonly roleIndicators: RoleIndicatorService;
-	readonly wordSigils: WordSigilService;
 }
 
 interface CustomServices {
@@ -103,7 +101,6 @@ class ServiceStore {
 			ticketPrompts: new Map(),
 			verificationPrompts: new Map(),
 			roleIndicators: new Map(),
-			wordSigils: new Map(),
 		};
 		this.#custom = {
 			global: [],
@@ -236,13 +233,6 @@ class ServiceStore {
 			services.push(service);
 
 			this.#local.roleIndicators.set(guildId, service);
-		}
-
-		if (guildDocument.hasEnabled("wordSigils")) {
-			const service = new WordSigilService(this.#client, { guildId });
-			services.push(service);
-
-			this.#local.wordSigils.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("suggestions")) {

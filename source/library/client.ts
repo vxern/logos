@@ -4,7 +4,6 @@ import { Collector, type InteractionCollector } from "rost/collectors";
 import commands from "rost/commands/commands";
 import { DiscordConnection } from "rost/connection";
 import { Diagnostics } from "rost/diagnostics";
-import { AdapterStore } from "rost/stores/adapters";
 import { CacheStore } from "rost/stores/cache";
 import { CommandStore } from "rost/stores/commands";
 import { DatabaseStore } from "rost/stores/database";
@@ -15,7 +14,6 @@ import { JournallingStore } from "rost/stores/journalling";
 import { LocalisationStore, type RawLocalisations } from "rost/stores/localisations";
 import { PluginStore } from "rost/stores/plugins";
 import { ServiceStore } from "rost/stores/services";
-import { VolatileStore } from "rost/stores/volatile";
 
 class Client {
 	readonly log: pino.Logger;
@@ -27,12 +25,10 @@ class Client {
 	readonly interactions: InteractionStore;
 	readonly #cache: CacheStore;
 	readonly database: DatabaseStore;
-	readonly volatile?: VolatileStore;
 	readonly services: ServiceStore;
 	readonly #events: EventStore;
 	readonly #journalling: JournallingStore;
 	readonly #guilds: GuildStore;
-	readonly adapters: AdapterStore;
 	readonly #plugins: PluginStore;
 	readonly #connection: DiscordConnection;
 
@@ -204,12 +200,10 @@ class Client {
 		this.interactions = new InteractionStore(this, { commands: this.#commands });
 		this.#cache = new CacheStore({ log });
 		this.database = DatabaseStore.create({ log, environment, cache: this.#cache });
-		this.volatile = VolatileStore.tryCreate(this);
 		this.services = new ServiceStore(this);
 		this.#events = new EventStore(this);
 		this.#journalling = new JournallingStore(this);
 		this.#guilds = new GuildStore(this, { services: this.services, commands: this.#commands });
-		this.adapters = new AdapterStore(this);
 		this.#plugins = new PluginStore(this);
 		this.#connection = new DiscordConnection({
 			log,
@@ -250,7 +244,6 @@ class Client {
 
 		this.log.info("Starting client...");
 
-		await this.volatile?.setup();
 		await this.database.setup({ prefetchDocuments: true });
 		await this.services.setup();
 		await this.#journalling.setup();
@@ -278,7 +271,6 @@ class Client {
 		this.#isStopping = true;
 		this.#stopSignal = signal;
 
-		this.volatile?.teardown();
 		await this.database.teardown();
 		await this.services.teardown();
 		this.#journalling.teardown();

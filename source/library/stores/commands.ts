@@ -74,10 +74,6 @@ class CommandStore {
 			this.commands.information,
 			this.commands.acknowledgements,
 			this.commands.credits,
-			this.commands.licence,
-			this.commands.settings,
-			this.commands.recognise,
-			this.commands.recogniseMessage,
 		].filter(isDefined);
 	}
 
@@ -397,43 +393,8 @@ class CommandStore {
 	getEnabledCommands(guildDocument: Guild): Command[] {
 		const commands: CommandBuilder[] = [];
 
-		if (guildDocument.hasEnabled("answers")) {
-			commands.push(this.commands.answerMessage);
-		}
-
-		if (guildDocument.hasEnabled("corrections")) {
-			commands.push(this.commands.correctionFullMessage, this.commands.correctionPartialMessage);
-		}
-
-		if (guildDocument.hasEnabled("cefr")) {
-			commands.push(this.commands.cefr);
-		}
-
-		if (guildDocument.hasEnabled("game") && this.#client.volatile) {
-			commands.push(this.commands.game);
-		}
-
 		if (guildDocument.hasEnabled("resources")) {
 			commands.push(this.commands.resources);
-		}
-
-		if (guildDocument.hasEnabled("translate")) {
-			commands.push(this.commands.translate, this.commands.translateMessage);
-		}
-
-		if (guildDocument.hasEnabled("word")) {
-			commands.push(this.commands.word);
-			commands.push(this.commands.meaning);
-			commands.push(this.commands.expressions);
-			commands.push(this.commands.inflection);
-			commands.push(this.commands.etymology);
-			commands.push(this.commands.pronunciation);
-			commands.push(this.commands.relations);
-			commands.push(this.commands.examples);
-		}
-
-		if (guildDocument.hasEnabled("context")) {
-			commands.push(this.commands.context);
 		}
 
 		if (guildDocument.hasEnabled("policy")) {
