@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import pluralise from "logos:constants/transformers/pluralisers/invariant";
+import pluralise from "rost:constants/transformers/pluralisers/invariant";
 import { expect } from "chai";
 
 const FORMS = { one: "ember" };

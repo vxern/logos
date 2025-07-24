@@ -1,14 +1,14 @@
-import type { Dictionary } from "logos:constants/dictionaries";
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import { isDefined } from "logos:core/utilities";
-import type { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
-import { DexonlineAdapter } from "logos/adapters/dictionaries/adapters/dexonline";
-import { DicolinkAdapter } from "logos/adapters/dictionaries/adapters/dicolink";
-import { WiktionaryAdapter } from "logos/adapters/dictionaries/adapters/wiktionary";
-import { WordnikAdapter } from "logos/adapters/dictionaries/adapters/wordnik";
-import { WordsAPIAdapter } from "logos/adapters/dictionaries/adapters/words-api";
-import type { Client } from "logos/client";
+import type { Dictionary } from "rost:constants/dictionaries";
+import type { LearningLanguage } from "rost:constants/languages/learning";
+import { isDefined } from "rost:core/utilities";
 import type pino from "pino";
+import type { DictionaryAdapter } from "rost/adapters/dictionaries/adapter";
+import { DexonlineAdapter } from "rost/adapters/dictionaries/adapters/dexonline";
+import { DicolinkAdapter } from "rost/adapters/dictionaries/adapters/dicolink";
+import { WiktionaryAdapter } from "rost/adapters/dictionaries/adapters/wiktionary";
+import { WordnikAdapter } from "rost/adapters/dictionaries/adapters/wordnik";
+import { WordsAPIAdapter } from "rost/adapters/dictionaries/adapters/words-api";
+import type { Client } from "rost/client";
 
 class DictionaryStore {
 	readonly log: pino.Logger;
@@ -25,17 +25,17 @@ class DictionaryStore {
 
 		const dicolinkAdapter = DicolinkAdapter.tryCreate(client);
 		if (dicolinkAdapter === undefined) {
-			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a Dicolink integration.");
+			this.log.warn("`SECRET_RAPID_API` has not been provided. Rost will run without a Dicolink integration.");
 		}
 
 		const wordnikAdapter = WordnikAdapter.tryCreate(client);
 		if (wordnikAdapter === undefined) {
-			this.log.warn("`SECRET_WORDNIK` has not been provided. Logos will run without a Wordnik integration.");
+			this.log.warn("`SECRET_WORDNIK` has not been provided. Rost will run without a Wordnik integration.");
 		}
 
 		const wordsApiAdapter = WordsAPIAdapter.tryCreate(client);
 		if (wordsApiAdapter === undefined) {
-			this.log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a WordsAPI integration.");
+			this.log.warn("`SECRET_RAPID_API` has not been provided. Rost will run without a WordsAPI integration.");
 		}
 
 		this.adapters = {

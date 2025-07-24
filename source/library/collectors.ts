@@ -1,12 +1,12 @@
-import { isAutocomplete, isSubcommand, isSubcommandGroup } from "logos:constants/interactions";
-import { type LearningLanguage, getLearningLocaleByLanguage } from "logos:constants/languages/learning";
-import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
-import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
-import type { PromiseOr } from "logos:core/utilities";
-import type { Client } from "logos/client";
-import { Guild } from "logos/models/guild";
-import { User } from "logos/models/user";
+import { isAutocomplete, isSubcommand, isSubcommandGroup } from "rost:constants/interactions";
+import { type LearningLanguage, getLearningLocaleByLanguage } from "rost:constants/languages/learning";
+import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "rost:constants/languages/localisation";
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "rost:constants/properties";
+import type { PromiseOr } from "rost:core/utilities";
 import { nanoid } from "nanoid";
+import type { Client } from "rost/client";
+import { Guild } from "rost/models/guild";
+import { User } from "rost/models/user";
 
 type Interaction = Discord.SetupDesiredProps<Discord.Interaction, DesiredProperties, DesiredPropertiesBehaviour>;
 
@@ -126,7 +126,7 @@ class InteractionCollector<
 > extends Collector<"interactionCreate"> {
 	static readonly noneId = constants.components.none;
 
-	static readonly #defaultParameters: Logos.InteractionParameters<Record<string, unknown>> = Object.freeze({
+	static readonly #defaultParameters: Rost.InteractionParameters<Record<string, unknown>> = Object.freeze({
 		"@repeat": false,
 		show: false,
 	});
@@ -247,14 +247,14 @@ class InteractionCollector<
 
 	/**
 	 * @deprecated
-	 * Do not use as this receives raw Discord interaction events, rather than Logos ones.
+	 * Do not use as this receives raw Discord interaction events, rather than Rost ones.
 	 * Use {@link onInteraction()} instead.
 	 */
 	onCollect(_: CollectEvent<"interactionCreate">) {
 		throw new Error("Do not use `onCollect()` on interaction controllers. Use `onInteraction()` instead.");
 	}
 
-	onInteraction(callback: (interaction: Logos.Interaction<Metadata, Parameters>) => PromiseOr<void>): void {
+	onInteraction(callback: (interaction: Rost.Interaction<Metadata, Parameters>) => PromiseOr<void>): void {
 		super.onCollect(async (interactionRaw) => {
 			const locales = await this.#getLocaleData(interactionRaw);
 			const metadata = this.#getMetadata(interactionRaw);
@@ -270,8 +270,8 @@ class InteractionCollector<
 				name = constants.components.none;
 			}
 
-			const interaction: Logos.Interaction<Metadata, Parameters> = {
-				...(interactionRaw as unknown as Logos.Interaction),
+			const interaction: Rost.Interaction<Metadata, Parameters> = {
+				...(interactionRaw as unknown as Rost.Interaction),
 				...locales,
 				...{
 					displayLocale: parameters.show ? locales.guildLocale : locales.locale,
@@ -288,7 +288,7 @@ class InteractionCollector<
 
 	async #getLocaleData(
 		interaction: Interaction,
-	): Promise<Omit<Logos.InteractionLocaleData, "displayLocale" | "displayLanguage">> {
+	): Promise<Omit<Rost.InteractionLocaleData, "displayLocale" | "displayLanguage">> {
 		const member = this.#client.entities.members.get(interaction.guildId!)?.get(interaction.user.id);
 		if (member === undefined) {
 			return {
@@ -339,10 +339,10 @@ class InteractionCollector<
 		return { locale, language, guildLocale, guildLanguage, learningLocale, learningLanguage, featureLanguage };
 	}
 
-	#getMetadata(interaction: Interaction): Logos.Interaction<Metadata>["metadata"] {
+	#getMetadata(interaction: Interaction): Rost.Interaction<Metadata>["metadata"] {
 		const idEncoded = interaction.data?.customId;
 		if (idEncoded === undefined) {
-			return [constants.components.none] as unknown as Logos.Interaction<Metadata>["metadata"];
+			return [constants.components.none] as unknown as Rost.Interaction<Metadata>["metadata"];
 		}
 
 		return InteractionCollector.decodeId(idEncoded);
@@ -350,16 +350,16 @@ class InteractionCollector<
 
 	#getParameters<Parameters extends Record<string, DiscordParameterType>>(
 		interaction: Interaction,
-	): Logos.InteractionParameters<Parameters> {
+	): Rost.InteractionParameters<Parameters> {
 		const options = interaction.data?.options;
 		if (options === undefined) {
-			return InteractionCollector.#defaultParameters as Logos.InteractionParameters<Parameters>;
+			return InteractionCollector.#defaultParameters as Rost.InteractionParameters<Parameters>;
 		}
 
 		return {
 			...InteractionCollector.#defaultParameters,
 			...InteractionCollector.#parseParameters(options),
-		} as Logos.InteractionParameters<Parameters>;
+		} as Rost.InteractionParameters<Parameters>;
 	}
 
 	static #parseParameters<Parameters extends Record<string, DiscordParameterType>>(
@@ -387,7 +387,7 @@ class InteractionCollector<
 		return result as unknown as Partial<Parameters>;
 	}
 
-	#determineLearningLanguage(guildDocument: Guild, member: Logos.Member): LearningLanguage | undefined {
+	#determineLearningLanguage(guildDocument: Guild, member: Rost.Member): LearningLanguage | undefined {
 		if (!guildDocument.hasEnabled("roleLanguages")) {
 			return undefined;
 		}

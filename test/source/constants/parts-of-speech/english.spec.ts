@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import english from "logos:constants/parts-of-speech/english";
+import english from "rost:constants/parts-of-speech/english";
 import { expect } from "chai";
 
 describe("The english object", () => {

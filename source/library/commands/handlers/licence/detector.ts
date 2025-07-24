@@ -1,11 +1,11 @@
-import { getDetectorLicence, isValidLicensedDetector } from "logos:constants/licences";
-import type { Client } from "logos/client";
-import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
-import { handleDisplayLicence } from "logos/commands/fragments/licence";
+import { getDetectorLicence, isValidLicensedDetector } from "rost:constants/licences";
+import type { Client } from "rost/client";
+import { handleSimpleAutocomplete } from "rost/commands/fragments/autocomplete/simple";
+import { handleDisplayLicence } from "rost/commands/fragments/licence";
 
 async function handleDisplayDetectorLicenceAutocomplete(
 	client: Client,
-	interaction: Logos.Interaction<any, { detector: string }>,
+	interaction: Rost.Interaction<any, { detector: string }>,
 ): Promise<void> {
 	await handleSimpleAutocomplete(client, interaction, {
 		query: interaction.parameters.detector,
@@ -16,7 +16,7 @@ async function handleDisplayDetectorLicenceAutocomplete(
 
 async function handleDisplayDetectorLicence(
 	client: Client,
-	interaction: Logos.Interaction<any, { detector: string }>,
+	interaction: Rost.Interaction<any, { detector: string }>,
 ): Promise<void> {
 	await handleDisplayLicence(client, interaction, {
 		identifier: interaction.parameters.detector,

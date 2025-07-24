@@ -1,7 +1,7 @@
 import { describe, it } from "bun:test";
-import constants from "logos:constants/constants";
+import constants from "rost:constants/constants";
 import { expect } from "chai";
-import { type DescriptionLocalisations, LocalisationStore, type NameLocalisations } from "logos/stores/localisations";
+import { type DescriptionLocalisations, LocalisationStore, type NameLocalisations } from "rost/stores/localisations";
 
 describe("LocalisationStore", () => {
 	describe("getOptionName()", () => {

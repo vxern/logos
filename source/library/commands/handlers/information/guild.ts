@@ -1,9 +1,9 @@
-import { mention, timestamp } from "logos:constants/formatting";
-import type { Client } from "logos/client";
-import { Guild } from "logos/models/guild";
+import { mention, timestamp } from "rost:constants/formatting";
+import type { Client } from "rost/client";
+import { Guild } from "rost/models/guild";
 
 /** Displays information about the guild that this command was executed in. */
-async function handleDisplayGuildInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplayGuildInformation(client: Client, interaction: Rost.Interaction): Promise<void> {
 	const guild = client.entities.guilds.get(interaction.guildId);
 	if (guild === undefined) {
 		return;
@@ -97,8 +97,8 @@ async function handleDisplayGuildInformation(client: Client, interaction: Logos.
 		.ignore();
 }
 
-function getChannelInformationSection(client: Client, interaction: Logos.Interaction, guild: Logos.Guild): string {
-	function getChannelCountByType(channels: Logos.Channel[], type: Discord.ChannelTypes): number {
+function getChannelInformationSection(client: Client, interaction: Rost.Interaction, guild: Rost.Guild): string {
+	function getChannelCountByType(channels: Rost.Channel[], type: Discord.ChannelTypes): number {
 		return channels.filter((channel) => channel.type === type).length;
 	}
 
@@ -111,7 +111,7 @@ function getChannelInformationSection(client: Client, interaction: Logos.Interac
 	return `${constants.emojis.commands.information.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.emojis.commands.information.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
 }
 
-function getLanguageInformationSection(client: Client, interaction: Logos.Interaction, guildDocument: Guild): string {
+function getLanguageInformationSection(client: Client, interaction: Rost.Interaction, guildDocument: Guild): string {
 	const strings = {
 		...constants.contexts.languageTypes({ localise: client.localise, locale: interaction.locale }),
 		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
@@ -127,7 +127,7 @@ function getLanguageInformationSection(client: Client, interaction: Logos.Intera
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];
 
 /** Gets the distribution of proficiency roles of a guild's members. */
-function getProficiencyRoleDistribution(client: Client, guild: Logos.Guild): ProficiencyRoleDistribution {
+function getProficiencyRoleDistribution(client: Client, guild: Rost.Guild): ProficiencyRoleDistribution {
 	const guildIdString = guild.id.toString();
 
 	const proficiencyRoleIdsUnsorted = Object.values(
@@ -185,7 +185,7 @@ function formatFrequency(frequency: number, percentage: string, roleMention: str
 
 function formatDistribution(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Rost.Interaction,
 	distribution: ProficiencyRoleDistribution,
 ): string {
 	const [roleFrequencies, withoutRole] = distribution;

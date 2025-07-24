@@ -1,7 +1,7 @@
-import type { Client } from "logos/client";
-import { User } from "logos/models/user";
+import type { Client } from "rost/client";
+import { User } from "rost/models/user";
 
-async function handleDisplaySettings(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplaySettings(client: Client, interaction: Rost.Interaction): Promise<void> {
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });
 
 	const strings = {

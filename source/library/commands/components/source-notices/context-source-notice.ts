@@ -1,9 +1,9 @@
-import type { Client } from "logos/client";
-import { SourceNotice } from "logos/commands/components/source-notices/source-notice";
-import type { SentenceIdPair } from "logos/stores/volatile";
+import type { Client } from "rost/client";
+import { SourceNotice } from "rost/commands/components/source-notices/source-notice";
+import type { SentenceIdPair } from "rost/stores/volatile";
 
 class ContextSourceNotice extends SourceNotice {
-	constructor(client: Client, { interaction, ids }: { interaction: Logos.Interaction; ids: SentenceIdPair[] }) {
+	constructor(client: Client, { interaction, ids }: { interaction: Rost.Interaction; ids: SentenceIdPair[] }) {
 		const links = ids.map((ids) => ({
 			sentence: constants.links.tatoebaSentence(ids.sentenceId.toString()),
 			translation: constants.links.tatoebaSentence(ids.translationId.toString()),
@@ -25,7 +25,7 @@ class ContextSourceNotice extends SourceNotice {
 		});
 	}
 
-	async display(buttonPress: Logos.Interaction): Promise<void> {
+	async display(buttonPress: Rost.Interaction): Promise<void> {
 		await this.client.reply(buttonPress, {
 			embeds: [
 				{

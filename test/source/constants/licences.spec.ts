@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import licences from "logos:constants/licences";
+import licences from "rost:constants/licences";
 import { expect } from "chai";
 
 describe("The licences object", () => {

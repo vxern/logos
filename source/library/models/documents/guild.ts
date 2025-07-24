@@ -1,7 +1,7 @@
-import type { FeatureLanguage } from "logos:constants/languages/feature";
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import type { LocalisationLanguage } from "logos:constants/languages/localisation";
-import type { TimeStruct } from "logos:constants/time";
+import type { FeatureLanguage } from "rost:constants/languages/feature";
+import type { LearningLanguage } from "rost:constants/languages/learning";
+import type { LocalisationLanguage } from "rost:constants/languages/localisation";
+import type { TimeStruct } from "rost:constants/time";
 
 interface GuildDocument {
 	createdAt: number;

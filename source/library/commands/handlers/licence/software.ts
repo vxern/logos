@@ -1,12 +1,12 @@
-import { code } from "logos:constants/formatting";
-import { isValidLicensedSoftware } from "logos:constants/licences";
-import type { Client } from "logos/client";
-import { SoftwareLicenceView } from "logos/commands/components/paginated-views/software-licence-view";
-import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
+import { code } from "rost:constants/formatting";
+import { isValidLicensedSoftware } from "rost:constants/licences";
+import type { Client } from "rost/client";
+import { SoftwareLicenceView } from "rost/commands/components/paginated-views/software-licence-view";
+import { handleSimpleAutocomplete } from "rost/commands/fragments/autocomplete/simple";
 
 async function handleDisplaySoftwareLicenceAutocomplete(
 	client: Client,
-	interaction: Logos.Interaction<any, { package: string }>,
+	interaction: Rost.Interaction<any, { package: string }>,
 ): Promise<void> {
 	await handleSimpleAutocomplete(client, interaction, {
 		query: interaction.parameters.package,
@@ -17,7 +17,7 @@ async function handleDisplaySoftwareLicenceAutocomplete(
 
 async function handleDisplaySoftwareLicence(
 	client: Client,
-	interaction: Logos.Interaction<any, { package: string }>,
+	interaction: Rost.Interaction<any, { package: string }>,
 ): Promise<void> {
 	if (!isValidLicensedSoftware(interaction.parameters.package)) {
 		const strings = constants.contexts.invalidLicence({ localise: client.localise, locale: interaction.locale });

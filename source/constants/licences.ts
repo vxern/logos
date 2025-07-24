@@ -1,6 +1,6 @@
-import apache from "logos:constants/licences/apache";
-import bsd from "logos:constants/licences/bsd";
-import mit from "logos:constants/licences/mit";
+import apache from "rost:constants/licences/apache";
+import bsd from "rost:constants/licences/bsd";
+import mit from "rost:constants/licences/mit";
 
 interface Licence {
 	readonly name: string;
@@ -30,7 +30,7 @@ const licences = Object.freeze({
 			faviconLink: "https://www.dicolink.com/imgs/dicolink_128.png",
 			notices: {
 				licence:
-					"En contrepartie de vous permettre d'accéder à l'API Dicolink et aux données Dicolink, vous acceptez de respecter les exigences d'attribution énoncées à l'annexe A ci-après (exigences d'attribution) et ses modifications ultérieures. Vous acceptez que toutes les modifications apportées aux conditions d'attribution entreront en vigueur à la première date à laquelle Dicolink vous en informera par écrit par e-mail ou 30 jours après leur publication. Sous réserve des termes et conditions de cet accord, Dicolink vous accorde par la présente, une licence non exclusive, révocable, non sous-licenciable et non transférable pour utiliser les marques et logos désignés de Dicolink («Marques Dicolink»), uniquement dans la mesure nécessaire pour exécuter le les exigences d'attribution autorisées aux présentes pendant la durée du présent Contrat. Tous les droits non expressément concédés aux présentes sont réservés par Dicolink, et toute utilisation par Vous des Marques de Dicolink, (y compris toute la bonne volonté qui y est associée), sera au nom de Dicolink et en bénéficiera. À la résiliation de cet accord, Vous devez cesser immédiatement d'utiliser toutes les marques Dicolink.",
+					"En contrepartie de vous permettre d'accéder à l'API Dicolink et aux données Dicolink, vous acceptez de respecter les exigences d'attribution énoncées à l'annexe A ci-après (exigences d'attribution) et ses modifications ultérieures. Vous acceptez que toutes les modifications apportées aux conditions d'attribution entreront en vigueur à la première date à laquelle Dicolink vous en informera par écrit par e-mail ou 30 jours après leur publication. Sous réserve des termes et conditions de cet accord, Dicolink vous accorde par la présente, une licence non exclusive, révocable, non sous-licenciable et non transférable pour utiliser les marques et rost désignés de Dicolink («Marques Dicolink»), uniquement dans la mesure nécessaire pour exécuter le les exigences d'attribution autorisées aux présentes pendant la durée du présent Contrat. Tous les droits non expressément concédés aux présentes sont réservés par Dicolink, et toute utilisation par Vous des Marques de Dicolink, (y compris toute la bonne volonté qui y est associée), sera au nom de Dicolink et en bénéficiera. À la résiliation de cet accord, Vous devez cesser immédiatement d'utiliser toutes les marques Dicolink.",
 				copyright: "© 2019-2022 Dicolink",
 				badgeLink: "https://www.dicolink.com/imgs/dicolink_badge_a1.png",
 			},
@@ -60,7 +60,7 @@ const licences = Object.freeze({
 			faviconLink: "https://wordnik.com/img/favicon.png",
 			notices: {
 				licence: `If Wordnik Data is served from Your Site pursuant to this Agreement, You shall accompany all Wordnik Data with a link directly to https://www.wordnik.com/words/\\[specific word\\].
-You must also include, in your app or site, wherever you provide attributions or acknowledgments, a "Powered by Wordnik" logo that links to Wordnik.com. Any of the "Powered by Wordnik" logos found at this link: https://www.wordnik.com/media-kit are acceptable. The logo may be used as the anchor for the link. Logos cannot be resized or edited in any fashion without permission. If Wordnik Data is used in alternative media formats, equivalent attribution must be given to Wordnik. Prior written consent from Wordnik is required to use Wordnik Data without attribution.`,
+You must also include, in your app or site, wherever you provide attributions or acknowledgments, a "Powered by Wordnik" logo that links to Wordnik.com. Any of the "Powered by Wordnik" rost found at this link: https://www.wordnik.com/media-kit are acceptable. The logo may be used as the anchor for the link. Rost cannot be resized or edited in any fashion without permission. If Wordnik Data is used in alternative media formats, equivalent attribution must be given to Wordnik. Prior written consent from Wordnik is required to use Wordnik Data without attribution.`,
 				badgeLink: "https://www.wordnik.com/img/wordnik_badge_a1.png",
 			},
 		},

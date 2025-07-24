@@ -1,18 +1,18 @@
-import { type DetectionLanguage, languages as detectionLanguages } from "logos:constants/languages/detection";
-import { type FeatureLanguage, languages as featureLanguages } from "logos:constants/languages/feature";
-import { collectLanguages, sortLanguages } from "logos:constants/languages/languages";
-import { type LearningLanguage, languages as learningLanguages } from "logos:constants/languages/learning";
+import { type DetectionLanguage, languages as detectionLanguages } from "rost:constants/languages/detection";
+import { type FeatureLanguage, languages as featureLanguages } from "rost:constants/languages/feature";
+import { collectLanguages, sortLanguages } from "rost:constants/languages/languages";
+import { type LearningLanguage, languages as learningLanguages } from "rost:constants/languages/learning";
 import {
 	type DiscordLocale,
 	type LocalisationLanguage,
 	languageToLocale as localisationLanguageToLocale,
 	languages as localisationLanguages,
-} from "logos:constants/languages/localisation";
+} from "rost:constants/languages/localisation";
 import {
 	type TranslationLanguage,
 	isTranslationLanguage,
 	languages as translationLanguages,
-} from "logos:constants/languages/translation";
+} from "rost:constants/languages/translation";
 
 const languages = Object.freeze({
 	languages: {

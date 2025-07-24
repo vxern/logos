@@ -1,7 +1,7 @@
-import { getELDLanguageByLocale, isELDLocale } from "logos:constants/languages/detection";
+import { getELDLanguageByLocale, isELDLocale } from "rost:constants/languages/detection";
 import { eld } from "@vxern/eld";
-import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
-import type { Client } from "logos/client";
+import { DetectorAdapter, type SingleDetectionResult } from "rost/adapters/detectors/adapter";
+import type { Client } from "rost/client";
 
 class ELDAdapter extends DetectorAdapter {
 	constructor(client: Client) {

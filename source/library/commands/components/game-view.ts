@@ -1,12 +1,12 @@
-import { capitalise } from "logos:constants/formatting";
-import type { LearningLocale } from "logos:constants/languages/learning";
+import { capitalise } from "rost:constants/formatting";
+import type { LearningLocale } from "rost:constants/languages/learning";
 import * as levenshtein from "fastest-levenshtein";
-import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors";
-import { TatoebaSourceNotice } from "logos/commands/components/source-notices/tatoeba-source-notice";
-import { GuildStatistics } from "logos/models/guild-statistics";
-import { User } from "logos/models/user";
-import type { SentencePair } from "logos/stores/volatile";
+import type { Client } from "rost/client";
+import { InteractionCollector } from "rost/collectors";
+import { TatoebaSourceNotice } from "rost/commands/components/source-notices/tatoeba-source-notice";
+import { GuildStatistics } from "rost/models/guild-statistics";
+import { User } from "rost/models/user";
+import type { SentencePair } from "rost/stores/volatile";
 
 type Selection = [id: number, word: string];
 interface SentenceSelection {
@@ -19,7 +19,7 @@ class GameViewComponent {
 	static readonly #wordSegmenter = new Intl.Segmenter(undefined, { granularity: "word" });
 
 	readonly #client: Client;
-	readonly #interaction: Logos.Interaction;
+	readonly #interaction: Rost.Interaction;
 	readonly #guesses: InteractionCollector<[index: string]>;
 	readonly #skips: InteractionCollector;
 	sentenceSelection!: SentenceSelection;
@@ -28,7 +28,7 @@ class GameViewComponent {
 	embedColour: number;
 	sessionScore: number;
 
-	constructor(client: Client, { interaction }: { interaction: Logos.Interaction }) {
+	constructor(client: Client, { interaction }: { interaction: Rost.Interaction }) {
 		this.#client = client;
 		this.#interaction = interaction;
 		this.#guesses = new InteractionCollector<[index: string]>(this.#client, {
@@ -180,7 +180,7 @@ class GameViewComponent {
 		};
 	}
 
-	async #handleGuess(buttonPress: Logos.Interaction): Promise<void> {
+	async #handleGuess(buttonPress: Rost.Interaction): Promise<void> {
 		this.#client.acknowledge(buttonPress).ignore();
 
 		const pick = this.sentenceSelection.allPicks.find((pick) => pick[0].toString() === buttonPress.metadata[1]);
@@ -215,7 +215,7 @@ class GameViewComponent {
 		}
 	}
 
-	async #handleSkip(buttonPress: Logos.Interaction): Promise<void> {
+	async #handleSkip(buttonPress: Rost.Interaction): Promise<void> {
 		this.#client.acknowledge(buttonPress).ignore();
 
 		this.sentenceSelection = await this.getSentenceSelection({

@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import discord from "logos:constants/discord";
+import discord from "rost:constants/discord";
 import { expect } from "chai";
 
 describe("The discord object", () => {

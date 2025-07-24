@@ -1,6 +1,6 @@
-import { getTinyLDLanguageByLocale, isTinyLDLocale } from "logos:constants/languages/detection";
-import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
-import type { Client } from "logos/client";
+import { getTinyLDLanguageByLocale, isTinyLDLocale } from "rost:constants/languages/detection";
+import { DetectorAdapter, type SingleDetectionResult } from "rost/adapters/detectors/adapter";
+import type { Client } from "rost/client";
 import * as tinyld from "tinyld/heavy";
 
 class TinyLDAdapter extends DetectorAdapter {

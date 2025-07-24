@@ -1,9 +1,9 @@
-import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
-import type { Client } from "logos/client";
-import type { GameType } from "logos/models/documents/guild-statistics";
-import type { GameScores, UserDocument } from "logos/models/documents/user";
-import { type CreateModelOptions, Model, UserModel } from "logos/models/model";
-import type { DatabaseStore } from "logos/stores/database";
+import type { Locale, LocalisationLanguage } from "rost:constants/languages/localisation";
+import type { Client } from "rost/client";
+import type { GameType } from "rost/models/documents/guild-statistics";
+import type { GameScores, UserDocument } from "rost/models/documents/user";
+import { type CreateModelOptions, Model, UserModel } from "rost/models/model";
+import type { DatabaseStore } from "rost/stores/database";
 
 type AuthorisationStatus = "authorised" | "rejected";
 

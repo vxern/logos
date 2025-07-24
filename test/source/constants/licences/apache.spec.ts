@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import apache from "logos:constants/licences/apache";
+import apache from "rost:constants/licences/apache";
 import { expect } from "chai";
 
 const NOTICE = "this-is-a-sample-passed-copyright-notice";

@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import statuses from "logos:constants/statuses";
+import statuses from "rost:constants/statuses";
 import { expect } from "chai";
 
 const DISCORD_COMMAND_PATTERN = /^\/[-_a-zA-Z]{1,32}$/;

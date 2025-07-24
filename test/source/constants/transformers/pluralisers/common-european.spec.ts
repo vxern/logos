@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import pluralise from "logos:constants/transformers/pluralisers/common-european";
+import pluralise from "rost:constants/transformers/pluralisers/common-european";
 import { expect } from "chai";
 
 const FORMS = { one: "thing", two: "things" };

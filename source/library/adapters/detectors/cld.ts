@@ -1,7 +1,7 @@
-import { getCLDLanguageByLocale, isCLDLocale } from "logos:constants/languages/detection";
+import { getCLDLanguageByLocale, isCLDLocale } from "rost:constants/languages/detection";
 import cld from "cldpre";
-import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
-import type { Client } from "logos/client";
+import { DetectorAdapter, type SingleDetectionResult } from "rost/adapters/detectors/adapter";
+import type { Client } from "rost/client";
 
 class CLDAdapter extends DetectorAdapter {
 	constructor(client: Client) {

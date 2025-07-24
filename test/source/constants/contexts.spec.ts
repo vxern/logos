@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import contexts from "logos:constants/contexts";
+import contexts from "rost:constants/contexts";
 import { expect } from "chai";
 
 describe("The contexts object", () => {

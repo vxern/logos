@@ -1,5 +1,5 @@
-import type { Client } from "logos/client";
-import { GlobalService } from "logos/services/service";
+import type { Client } from "rost/client";
+import { GlobalService } from "rost/services/service";
 
 class StatusService extends GlobalService {
 	#currentIndex: number;

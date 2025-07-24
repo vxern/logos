@@ -1,4 +1,4 @@
-import { type Contributor, contributors } from "logos:constants/contributions";
+import { type Contributor, contributors } from "rost:constants/contributions";
 
 interface Acknowledgement {
 	readonly users: Contributor[];
@@ -8,7 +8,7 @@ interface Acknowledgement {
 export default Object.freeze([
 	{
 		users: [contributors.nemokosch, contributors["16wardm"], contributors.victor, contributors.mymy],
-		reason: "Thank you for testing the bot and its features, flagging up issues, making suggestions, listening to an awful lot of complaining about various pieces of software that Logos uses as well as Discord itself at times.",
+		reason: "Thank you for testing the bot and its features, flagging up issues, making suggestions, listening to an awful lot of complaining about various pieces of software that Rost uses as well as Discord itself at times.",
 	},
 	{
 		users: [contributors.nemokosch],
@@ -16,7 +16,7 @@ export default Object.freeze([
 	},
 	{
 		users: [contributors.pascu],
-		reason: "Thank you for suggesting the name 'Logos'. Your suggestion ended a long cycle of thinking and rethinking different names, beginning with 'Teacher', going through 'Luna', 'Myna', 'Mollie', the notorious 'Talon', even 'Cards' and 'Tarots' and finally landing on 'Logos', which has now been the name for almost the past two years.",
+		reason: "Thank you for suggesting the name 'Rost'. Your suggestion ended a long cycle of thinking and rethinking different names, beginning with 'Teacher', going through 'Luna', 'Myna', 'Mollie', the notorious 'Talon', even 'Cards' and 'Tarots' and finally landing on 'Rost', which has now been the name for almost the past two years.",
 	},
 	{
 		users: [{ username: "The moderation teams on LR + LA", id: "0" }],

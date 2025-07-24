@@ -1,20 +1,20 @@
 import { diffWordsWithSpace } from "diff";
-import type { Client } from "logos/client";
-import { CorrectionComposer } from "logos/commands/components/modal-composers/correction-composer";
+import type { Client } from "rost/client";
+import { CorrectionComposer } from "rost/commands/components/modal-composers/correction-composer";
 
 type CorrectionMode = "partial" | "full";
 
-async function handleMakePartialCorrection(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleMakePartialCorrection(client: Client, interaction: Rost.Interaction): Promise<void> {
 	await handleMakeCorrection(client, interaction, { mode: "partial" });
 }
 
-async function handleMakeFullCorrection(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleMakeFullCorrection(client: Client, interaction: Rost.Interaction): Promise<void> {
 	await handleMakeCorrection(client, interaction, { mode: "full" });
 }
 
 async function handleMakeCorrection(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Rost.Interaction,
 	{ mode }: { mode: CorrectionMode },
 ): Promise<void> {
 	const member = client.entities.members.get(interaction.guildId)?.get(interaction.user.id);

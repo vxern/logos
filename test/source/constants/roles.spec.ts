@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import roles from "logos:constants/roles";
+import roles from "rost:constants/roles";
 import { expect } from "chai";
 
 describe("The roles object", () => {

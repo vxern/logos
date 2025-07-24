@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import special from "logos:constants/special";
+import special from "rost:constants/special";
 import { expect } from "chai";
 
 describe("The special object", () => {

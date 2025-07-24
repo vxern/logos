@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import bsd from "logos:constants/licences/bsd";
+import bsd from "rost:constants/licences/bsd";
 import { expect } from "chai";
 
 const NOTICE = "this-is-a-sample-passed-copyright-notice";

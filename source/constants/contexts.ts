@@ -1,10 +1,10 @@
-import type { Language } from "logos:constants/languages";
-import type { Locale } from "logos:constants/languages/localisation";
-import type { PartOfSpeech } from "logos:constants/parts-of-speech";
-import type { RuleOrOther } from "logos:constants/rules";
-import type { SlowmodeLevel } from "logos:constants/slowmode";
-import type { TimeUnit } from "logos:constants/time";
-import type { Client } from "logos/client";
+import type { Language } from "rost:constants/languages";
+import type { Locale } from "rost:constants/languages/localisation";
+import type { PartOfSpeech } from "rost:constants/parts-of-speech";
+import type { RuleOrOther } from "rost:constants/rules";
+import type { SlowmodeLevel } from "rost:constants/slowmode";
+import type { TimeUnit } from "rost:constants/time";
+import type { Client } from "rost/client";
 
 type ContextBuilder<T extends object> = ({
 	localise,

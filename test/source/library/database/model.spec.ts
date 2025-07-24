@@ -1,13 +1,13 @@
 import { describe, it } from "bun:test";
-import { useDatabaseStore } from "logos:test/dependencies";
-import { praise, warning } from "logos:test/helpers";
+import { useDatabaseStore } from "rost:test/dependencies";
+import { praise, warning } from "rost:test/helpers";
 import { expect } from "chai";
-import { type IdentifierData, Model } from "logos/models/model";
-import type { Praise } from "logos/models/praise";
-import type { Report } from "logos/models/report";
-import type { Resource } from "logos/models/resource";
-import type { Suggestion } from "logos/models/suggestion";
-import type { Warning } from "logos/models/warning";
+import { type IdentifierData, Model } from "rost/models/model";
+import type { Praise } from "rost/models/praise";
+import type { Report } from "rost/models/report";
+import type { Resource } from "rost/models/resource";
+import type { Suggestion } from "rost/models/suggestion";
+import type { Warning } from "rost/models/warning";
 
 describe("Model", () => {
 	const database = useDatabaseStore();

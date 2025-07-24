@@ -1,21 +1,21 @@
-import type { Environment } from "logos:core/loaders/environment";
-import { Collector, type InteractionCollector } from "logos/collectors";
-import commands from "logos/commands/commands";
-import { DiscordConnection } from "logos/connection";
-import { Diagnostics } from "logos/diagnostics";
-import { AdapterStore } from "logos/stores/adapters";
-import { CacheStore } from "logos/stores/cache";
-import { CommandStore } from "logos/stores/commands";
-import { DatabaseStore } from "logos/stores/database";
-import { EventStore } from "logos/stores/events";
-import { GuildStore } from "logos/stores/guilds";
-import { InteractionStore } from "logos/stores/interactions";
-import { JournallingStore } from "logos/stores/journalling";
-import { LocalisationStore, type RawLocalisations } from "logos/stores/localisations";
-import { PluginStore } from "logos/stores/plugins";
-import { ServiceStore } from "logos/stores/services";
-import { VolatileStore } from "logos/stores/volatile";
+import type { Environment } from "rost:core/loaders/environment";
 import type pino from "pino";
+import { Collector, type InteractionCollector } from "rost/collectors";
+import commands from "rost/commands/commands";
+import { DiscordConnection } from "rost/connection";
+import { Diagnostics } from "rost/diagnostics";
+import { AdapterStore } from "rost/stores/adapters";
+import { CacheStore } from "rost/stores/cache";
+import { CommandStore } from "rost/stores/commands";
+import { DatabaseStore } from "rost/stores/database";
+import { EventStore } from "rost/stores/events";
+import { GuildStore } from "rost/stores/guilds";
+import { InteractionStore } from "rost/stores/interactions";
+import { JournallingStore } from "rost/stores/journalling";
+import { LocalisationStore, type RawLocalisations } from "rost/stores/localisations";
+import { PluginStore } from "rost/stores/plugins";
+import { ServiceStore } from "rost/stores/services";
+import { VolatileStore } from "rost/stores/volatile";
 
 class Client {
 	readonly log: pino.Logger;

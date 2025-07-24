@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import loggers from "logos:constants/loggers";
+import loggers from "rost:constants/loggers";
 import { expect } from "chai";
 
 describe("The loggers object", () => {

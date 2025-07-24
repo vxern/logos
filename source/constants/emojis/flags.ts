@@ -1,4 +1,4 @@
-import type { Language } from "logos:constants/languages";
+import type { Language } from "rost:constants/languages";
 
 export default Object.freeze({
 	Abkhazian: "🇬🇪",

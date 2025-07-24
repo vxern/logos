@@ -1,6 +1,6 @@
-import { trim } from "logos:constants/formatting";
-import type { Client } from "logos/client";
-import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import { trim } from "rost:constants/formatting";
+import type { Client } from "rost/client";
+import { type Modal, ModalComposer } from "rost/commands/components/modal-composers/modal-composer";
 
 interface CorrectionFormData {
 	readonly original: string;
@@ -14,7 +14,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 			interaction,
 			text,
 			prefillCorrectedField,
-		}: { interaction: Logos.Interaction; text: string; prefillCorrectedField: boolean },
+		}: { interaction: Rost.Interaction; text: string; prefillCorrectedField: boolean },
 	) {
 		super(client, {
 			interaction,
@@ -23,7 +23,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 	}
 
 	buildModal(
-		submission: Logos.Interaction,
+		submission: Rost.Interaction,
 		{ formData }: { formData: CorrectionFormData },
 	): Modal<CorrectionFormData> {
 		const strings = constants.contexts.correctionModal({
@@ -73,7 +73,7 @@ class CorrectionComposer extends ModalComposer<CorrectionFormData, ValidationErr
 	}
 
 	getErrorMessage(
-		submission: Logos.Interaction,
+		submission: Rost.Interaction,
 		_: { error: ValidationError },
 	): Discord.Camelize<Discord.DiscordEmbed> | undefined {
 		const strings = constants.contexts.correctionTextsNotDifferent({

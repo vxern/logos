@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import { chunk, isDefined } from "logos:core/utilities";
+import { chunk, isDefined } from "rost:core/utilities";
 import { expect } from "chai";
 
 describe("chunk()", () => {

@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import time from "logos:constants/time";
+import time from "rost:constants/time";
 import { expect } from "chai";
 
 describe("The time object", () => {

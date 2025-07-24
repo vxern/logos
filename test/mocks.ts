@@ -1,4 +1,4 @@
-import type { Environment } from "logos:core/loaders/environment";
+import type { Environment } from "rost:core/loaders/environment";
 
 const mockEnvironment: Environment = {
 	discordSecret: "discord.secret",

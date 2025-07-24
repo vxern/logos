@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import dictionaries from "logos:constants/dictionaries";
+import dictionaries from "rost:constants/dictionaries";
 import { expect } from "chai";
 
 describe("The dictionaries object", () => {

@@ -9,7 +9,7 @@ import {
 	isGoogleTranslateLocale,
 	isLingvanexLocale,
 	isTranslationLanguage,
-} from "logos:constants/languages/translation";
+} from "rost:constants/languages/translation";
 import { expect } from "chai";
 
 describe("isLanguage()", () => {

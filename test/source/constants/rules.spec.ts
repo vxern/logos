@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import rules, { isValidRule } from "logos:constants/rules";
+import rules, { isValidRule } from "rost:constants/rules";
 import { expect } from "chai";
 
 describe("The rules object", () => {

@@ -8,7 +8,7 @@ import {
 	isELDLocale,
 	isFastTextLocale,
 	isTinyLDLocale,
-} from "logos:constants/languages/detection";
+} from "rost:constants/languages/detection";
 import { expect } from "chai";
 
 describe("isCLDLocale()", () => {

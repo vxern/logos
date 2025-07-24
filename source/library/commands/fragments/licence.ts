@@ -1,9 +1,9 @@
-import type { Licence } from "logos:constants/licences";
-import type { Client } from "logos/client";
+import type { Licence } from "rost:constants/licences";
+import type { Client } from "rost/client";
 
 async function handleDisplayLicence(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Rost.Interaction,
 	{ identifier, getLicence }: { identifier: string; getLicence: (identifier: string) => Licence | undefined },
 ) {
 	const licence = getLicence(identifier);

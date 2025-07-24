@@ -1,8 +1,8 @@
-import type { Languages } from "logos:constants/languages";
-import type { TranslationLanguage } from "logos:constants/languages/translation";
-import type { Licence } from "logos:constants/licences";
-import type { Client } from "logos/client";
+import type { Languages } from "rost:constants/languages";
+import type { TranslationLanguage } from "rost:constants/languages/translation";
+import type { Licence } from "rost:constants/licences";
 import type pino from "pino";
+import type { Client } from "rost/client";
 
 interface TranslationResult {
 	/** The language detected from the text sent to be translated. */

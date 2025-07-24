@@ -1,7 +1,7 @@
-import type { DictionarySection, RequiredDictionarySection } from "logos:constants/dictionaries";
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import type { Licence } from "logos:constants/licences";
-import type { PartOfSpeech } from "logos:constants/parts-of-speech";
+import type { DictionarySection, RequiredDictionarySection } from "rost:constants/dictionaries";
+import type { LearningLanguage } from "rost:constants/languages/learning";
+import type { Licence } from "rost:constants/licences";
+import type { PartOfSpeech } from "rost:constants/parts-of-speech";
 
 type LabelledField = {
 	labels?: string[];

@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import pluralise from "logos:constants/transformers/pluralisers/common-slavic";
+import pluralise from "rost:constants/transformers/pluralisers/common-slavic";
 import { expect } from "chai";
 
 const FORMS = { one: "dom", two: "domy", many: "domów" };

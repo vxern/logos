@@ -1,4 +1,4 @@
-import type { LearningLanguage } from "logos:constants/languages/learning";
+import type { LearningLanguage } from "rost:constants/languages/learning";
 
 const baseSections = ["sources", "lemma", "language", "partOfSpeech"];
 type RequiredDictionarySection = (typeof baseSections)[number];

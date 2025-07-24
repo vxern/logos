@@ -8,7 +8,7 @@ import {
 	mention,
 	timestamp,
 	trim,
-} from "logos:constants/formatting";
+} from "rost:constants/formatting";
 import { expect } from "chai";
 
 describe("capitalise()", () => {

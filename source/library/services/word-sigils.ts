@@ -1,14 +1,14 @@
-import { type DictionarySearchMode, getSearchModeBySigil } from "logos:constants/dictionaries";
+import { type DictionarySearchMode, getSearchModeBySigil } from "rost:constants/dictionaries";
 import {
 	type LearningLanguage,
 	getLearningLanguageByLocale,
 	isLearningLanguage,
 	isLearningLocale,
-} from "logos:constants/languages/learning";
-import type { Client } from "logos/client";
-import { Collector } from "logos/collectors";
-import { handleFindWord } from "logos/commands/handlers/word";
-import { LocalService } from "logos/services/service";
+} from "rost:constants/languages/learning";
+import type { Client } from "rost/client";
+import { Collector } from "rost/collectors";
+import { handleFindWord } from "rost/commands/handlers/word";
+import { LocalService } from "rost/services/service";
 
 class WordSigilService extends LocalService {
 	readonly #messageCreates: Collector<"messageCreate">;

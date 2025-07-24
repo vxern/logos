@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import database from "logos:constants/database";
+import database from "rost:constants/database";
 import { expect } from "chai";
 
 describe("The database object", () => {

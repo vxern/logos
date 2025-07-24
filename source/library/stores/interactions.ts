@@ -1,18 +1,18 @@
-import { timestamp, trim } from "logos:constants/formatting";
+import { timestamp, trim } from "rost:constants/formatting";
 import {
 	type LearningLanguage,
 	type LearningLocale,
 	getLearningLocaleByLanguage,
-} from "logos:constants/languages/learning";
-import { getLocalisationLocaleByLanguage } from "logos:constants/languages/localisation";
-import { getSnowflakeFromIdentifier } from "logos:constants/patterns";
-import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors";
-import type { Guild } from "logos/models/guild";
-import { Model } from "logos/models/model";
-import type { CommandStore } from "logos/stores/commands";
+} from "rost:constants/languages/learning";
+import { getLocalisationLocaleByLanguage } from "rost:constants/languages/localisation";
+import { getSnowflakeFromIdentifier } from "rost:constants/patterns";
 import { nanoid } from "nanoid";
 import type pino from "pino";
+import type { Client } from "rost/client";
+import { InteractionCollector } from "rost/collectors";
+import type { Guild } from "rost/models/guild";
+import { Model } from "rost/models/model";
+import type { CommandStore } from "rost/stores/commands";
 
 type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
 type EmbedOrCallbackData = Discord.Camelize<Discord.DiscordEmbed> | InteractionCallbackData;
@@ -24,7 +24,7 @@ class InteractionStore {
 
 	readonly #client: Client;
 	readonly #commands: CommandStore;
-	readonly #registeredInteractions: Map<bigint, Logos.Interaction>;
+	readonly #registeredInteractions: Map<bigint, Rost.Interaction>;
 	readonly #replies: Map</* token: */ string, ReplyData>;
 	readonly #messages: Map</* token: */ string, bigint>;
 
@@ -143,9 +143,9 @@ class InteractionStore {
 	 * interaction, for example a button press, spoofs the original interaction, replacing its token,
 	 * ID and parameters.
 	 */
-	static spoofInteraction<Interaction extends Logos.Interaction>(
+	static spoofInteraction<Interaction extends Rost.Interaction>(
 		interaction: Interaction,
-		{ using, parameters }: { using: Logos.Interaction; parameters?: Interaction["parameters"] },
+		{ using, parameters }: { using: Rost.Interaction; parameters?: Interaction["parameters"] },
 	): Interaction {
 		return {
 			...interaction,
@@ -162,8 +162,8 @@ class InteractionStore {
 	 */
 	buildMessageInteraction(
 		message: Discord.Message,
-		{ parameters }: { parameters?: Logos.Interaction["parameters"] },
-	): Logos.Interaction | undefined {
+		{ parameters }: { parameters?: Rost.Interaction["parameters"] },
+	): Rost.Interaction | undefined {
 		const guildId = message.guildId;
 		if (guildId === undefined) {
 			return undefined;
@@ -203,7 +203,7 @@ class InteractionStore {
 			user: message.author,
 			token: nanoid(),
 			data: { name: constants.components.none },
-			bot: this.#client.bot as unknown as Logos.Interaction["bot"],
+			bot: this.#client.bot as unknown as Rost.Interaction["bot"],
 			locale,
 			language,
 			guildLocale: locale,
@@ -233,7 +233,7 @@ class InteractionStore {
 		this.#interactions.close();
 	}
 
-	async handleInteraction(interaction: Logos.Interaction): Promise<void> {
+	async handleInteraction(interaction: Rost.Interaction): Promise<void> {
 		// If it's a "none" message interaction, just acknowledge and good to go.
 		if (
 			interaction.type === Discord.InteractionTypes.MessageComponent &&
@@ -319,11 +319,11 @@ class InteractionStore {
 			);
 	}
 
-	registerInteraction(interaction: Logos.Interaction): void {
+	registerInteraction(interaction: Rost.Interaction): void {
 		this.#registeredInteractions.set(interaction.id, interaction);
 	}
 
-	unregisterInteraction(interactionId: bigint): Logos.Interaction | undefined {
+	unregisterInteraction(interactionId: bigint): Rost.Interaction | undefined {
 		const interaction = this.#registeredInteractions.get(interactionId);
 		if (interaction === undefined) {
 			return undefined;
@@ -334,19 +334,19 @@ class InteractionStore {
 		return interaction;
 	}
 
-	#registerMessage(interaction: Logos.Interaction, { messageId }: { messageId: bigint }): void {
+	#registerMessage(interaction: Rost.Interaction, { messageId }: { messageId: bigint }): void {
 		setTimeout(() => this.#unregisterMessage(interaction), constants.discord.INTERACTION_TOKEN_EXPIRY);
 
 		this.#messages.set(interaction.token, messageId);
 	}
 
-	#unregisterMessage(interaction: Logos.Interaction): void {
+	#unregisterMessage(interaction: Rost.Interaction): void {
 		// TODO(vxern): The timeout to unregister the message should be cleared immediately.
 
 		this.#messages.delete(interaction.token);
 	}
 
-	async acknowledge(interaction: Logos.Interaction): Promise<void> {
+	async acknowledge(interaction: Rost.Interaction): Promise<void> {
 		if (interaction.type === Discord.InteractionTypes.ApplicationCommand) {
 			await this.postponeReply(interaction);
 			await this.deleteReply(interaction);
@@ -366,7 +366,7 @@ class InteractionStore {
 	 * ⚠️ Make sure you await postponed replies, otherwise you risk introducing race conditions where the bot attempts
 	 * to edit a reply before the postponing finishes.
 	 */
-	async postponeReply(interaction: Logos.Interaction, { visible = false } = {}): Promise<void> {
+	async postponeReply(interaction: Rost.Interaction, { visible = false } = {}): Promise<void> {
 		this.#replies.set(interaction.token, { ephemeral: !visible });
 
 		if (interaction.parameters["@repeat"]) {
@@ -410,7 +410,7 @@ class InteractionStore {
 	}
 
 	async reply(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		embedOrData: EmbedOrCallbackData,
 		{ visible = false, autoDelete = false }: { visible?: boolean; autoDelete?: boolean } = {},
 	): Promise<void> {
@@ -458,7 +458,7 @@ class InteractionStore {
 	}
 
 	async editReply(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		embedOrData: EmbedOrCallbackData,
 		{ autoDelete = false }: { autoDelete?: boolean } = {},
 	): Promise<void> {
@@ -484,7 +484,7 @@ class InteractionStore {
 		}
 	}
 
-	async deleteReply(interaction: Logos.Interaction): Promise<void> {
+	async deleteReply(interaction: Rost.Interaction): Promise<void> {
 		if (interaction.parameters["@repeat"]) {
 			const messageId = this.#messages.get(interaction.token)!;
 
@@ -503,7 +503,7 @@ class InteractionStore {
 			.catch((error) => this.log.error(error, "Failed to delete reply to interaction."));
 	}
 
-	async respond(interaction: Logos.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
+	async respond(interaction: Rost.Interaction, choices: Discord.ApplicationCommandOptionChoice[]): Promise<void> {
 		await this.#client.bot.helpers
 			.sendInteractionResponse(interaction.id, interaction.token, {
 				type: Discord.InteractionResponseTypes.ApplicationCommandAutocompleteResult,
@@ -513,7 +513,7 @@ class InteractionStore {
 	}
 
 	async displayModal(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		data: Omit<Discord.InteractionCallbackData, "flags">,
 	): Promise<void> {
 		await this.#client.bot.helpers
@@ -540,7 +540,7 @@ class InteractionStore {
 		};
 	}
 
-	#autoDeleteReply(interaction: Logos.Interaction): void {
+	#autoDeleteReply(interaction: Rost.Interaction): void {
 		setTimeout(() => this.#client.deleteReply(interaction).ignore(), constants.AUTO_DELETE_MESSAGE_TIMEOUT);
 	}
 
@@ -554,7 +554,7 @@ class InteractionStore {
 		seekerUserId: bigint;
 		identifier: string;
 		options?: Partial<MemberNarrowingOptions>;
-	}): [members: Logos.Member[], isResolved: boolean] | undefined {
+	}): [members: Rost.Member[], isResolved: boolean] | undefined {
 		if (identifier.trim().length === 0) {
 			return [[], false];
 		}
@@ -651,7 +651,7 @@ class InteractionStore {
 	}
 
 	resolveInteractionToMember(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		{
 			identifier,
 			options,
@@ -659,7 +659,7 @@ class InteractionStore {
 			identifier: string;
 			options?: Partial<MemberNarrowingOptions>;
 		},
-	): Logos.Member | undefined {
+	): Rost.Member | undefined {
 		const result = this.#resolveIdentifierToMembers({
 			guildId: interaction.guildId,
 			seekerUserId: interaction.user.id,
@@ -700,7 +700,7 @@ class InteractionStore {
 	}
 
 	async autocompleteMembers(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		{
 			identifier,
 			options,
@@ -731,7 +731,7 @@ class InteractionStore {
 
 		const [matchedMembers, _] = result;
 
-		const users: Logos.User[] = [];
+		const users: Rost.User[] = [];
 		for (const member of matchedMembers) {
 			if (users.length === 20) {
 				break;

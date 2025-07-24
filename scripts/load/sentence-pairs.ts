@@ -1,4 +1,4 @@
-import constants from "logos:constants/constants";
+import constants from "rost:constants/constants";
 import Redis from "ioredis";
 
 const log = constants.loggers.feedback;

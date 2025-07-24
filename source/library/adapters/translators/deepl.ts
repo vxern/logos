@@ -1,12 +1,12 @@
-import type { Languages } from "logos:constants/languages";
+import type { Languages } from "rost:constants/languages";
 import {
 	type DeepLLanguage,
 	getDeepLLanguageByLocale,
 	getDeepLLocaleByLanguage,
 	isDeepLLocale,
-} from "logos:constants/languages/translation";
-import { type TranslationResult, TranslatorAdapter } from "logos/adapters/translators/adapter";
-import type { Client } from "logos/client";
+} from "rost:constants/languages/translation";
+import { type TranslationResult, TranslatorAdapter } from "rost/adapters/translators/adapter";
+import type { Client } from "rost/client";
 
 class DeepLAdapter extends TranslatorAdapter<DeepLLanguage> {
 	readonly token: string;

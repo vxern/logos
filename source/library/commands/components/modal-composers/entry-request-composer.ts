@@ -1,10 +1,10 @@
-import { trim } from "logos:constants/formatting";
-import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { EntryRequestFormData } from "logos/models/documents/entry-request";
+import { trim } from "rost:constants/formatting";
+import { type Modal, ModalComposer } from "rost/commands/components/modal-composers/modal-composer";
+import type { EntryRequestFormData } from "rost/models/documents/entry-request";
 
 class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 	buildModal(
-		submission: Logos.Interaction,
+		submission: Rost.Interaction,
 		{ formData }: { formData: EntryRequestFormData },
 	): Modal<EntryRequestFormData> {
 		const strings = {

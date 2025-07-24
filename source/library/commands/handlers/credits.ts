@@ -1,12 +1,12 @@
-import type { Translation } from "logos:constants/contributions";
-import type { LocalisationLanguage } from "logos:constants/languages/localisation";
-import type { Client } from "logos/client";
+import type { Translation } from "rost:constants/contributions";
+import type { LocalisationLanguage } from "rost:constants/languages/localisation";
+import type { Client } from "rost/client";
 
-async function handleDisplayCredits(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplayCredits(client: Client, interaction: Rost.Interaction): Promise<void> {
 	client.notice(interaction, getTranslationView(client, interaction)).ignore();
 }
 
-function getTranslationView(client: Client, interaction: Logos.Interaction): Discord.Camelize<Discord.DiscordEmbed> {
+function getTranslationView(client: Client, interaction: Rost.Interaction): Discord.Camelize<Discord.DiscordEmbed> {
 	const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
 	const strings = {

@@ -1,7 +1,7 @@
-import { getFastTextLanguageByLocale, isFastTextLocale } from "logos:constants/languages/detection";
+import { getFastTextLanguageByLocale, isFastTextLocale } from "rost:constants/languages/detection";
 import { getLanguageIdentificationModel } from "fasttext.wasm.js";
-import { DetectorAdapter, type SingleDetectionResult } from "logos/adapters/detectors/adapter";
-import type { Client } from "logos/client";
+import { DetectorAdapter, type SingleDetectionResult } from "rost/adapters/detectors/adapter";
+import type { Client } from "rost/client";
 
 const model = await getLanguageIdentificationModel();
 await model.load();

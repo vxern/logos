@@ -1,8 +1,8 @@
 import { describe, it } from "bun:test";
-import { type TimeUnit, timeStructToMilliseconds } from "logos:constants/time";
-import { useDatabaseStore } from "logos:test/dependencies";
+import { type TimeUnit, timeStructToMilliseconds } from "rost:constants/time";
+import { useDatabaseStore } from "rost:test/dependencies";
 import { expect } from "chai";
-import { Guild } from "logos/models/guild";
+import { Guild } from "rost/models/guild";
 
 describe("Guild", () => {
 	const database = useDatabaseStore();

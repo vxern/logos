@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import parameters from "logos:constants/parameters";
+import parameters from "rost:constants/parameters";
 import { expect } from "chai";
 
 describe("The parameters object", () => {

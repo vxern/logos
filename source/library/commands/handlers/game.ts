@@ -1,8 +1,8 @@
-import type { Client } from "logos/client";
-import { GameViewComponent } from "logos/commands/components/game-view";
+import type { Client } from "rost/client";
+import { GameViewComponent } from "rost/commands/components/game-view";
 
 /** Starts a simple game of 'choose the correct word to fit in the blank'. */
-async function handleStartGame(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleStartGame(client: Client, interaction: Rost.Interaction): Promise<void> {
 	const sentencePairCount = await client.volatile?.getSentencePairCount({
 		learningLocale: interaction.learningLocale,
 	});

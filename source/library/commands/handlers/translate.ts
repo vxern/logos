@@ -1,13 +1,13 @@
-import { type Languages, getTranslationLanguage } from "logos:constants/languages";
-import { type TranslationLanguage, isTranslationLanguage } from "logos:constants/languages/translation";
-import type { TranslationResult } from "logos/adapters/translators/adapter";
-import type { Client } from "logos/client";
-import { TranslationSourceNotice } from "logos/commands/components/source-notices/translation-source-notice";
-import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
+import { type Languages, getTranslationLanguage } from "rost:constants/languages";
+import { type TranslationLanguage, isTranslationLanguage } from "rost:constants/languages/translation";
+import type { TranslationResult } from "rost/adapters/translators/adapter";
+import type { Client } from "rost/client";
+import { TranslationSourceNotice } from "rost/commands/components/source-notices/translation-source-notice";
+import { handleAutocompleteLanguage } from "rost/commands/fragments/autocomplete/language";
 
 async function handleTranslateChatInputAutocomplete(
 	client: Client,
-	interaction: Logos.Interaction<any, { to: string; from: string }>,
+	interaction: Rost.Interaction<any, { to: string; from: string }>,
 ): Promise<void> {
 	await handleAutocompleteLanguage(
 		client,
@@ -19,12 +19,12 @@ async function handleTranslateChatInputAutocomplete(
 
 async function handleTranslateChatInput(
 	client: Client,
-	interaction: Logos.Interaction<any, { text: string; from: string | undefined; to: string | undefined }>,
+	interaction: Rost.Interaction<any, { text: string; from: string | undefined; to: string | undefined }>,
 ): Promise<void> {
 	await handleTranslate(client, interaction, interaction.parameters);
 }
 
-async function handleTranslateMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleTranslateMessage(client: Client, interaction: Rost.Interaction): Promise<void> {
 	const message = interaction.data?.resolved?.messages?.array()?.at(0);
 	if (message === undefined) {
 		return;
@@ -46,7 +46,7 @@ async function handleTranslateMessage(client: Client, interaction: Logos.Interac
 
 async function handleTranslate(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Rost.Interaction,
 	{ text, from, to }: { text: string; from?: string; to?: string },
 ): Promise<void> {
 	const language = interaction.parameters.show ? interaction.guildLanguage : interaction.language;
@@ -186,7 +186,7 @@ async function handleTranslate(
 
 async function translateText(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Rost.Interaction,
 	{ text, languages }: { text: string; languages: Languages<TranslationLanguage> },
 ): Promise<void> {
 	const adapters = client.adapters.translators.getTranslators({ languages });
@@ -293,7 +293,7 @@ async function translateText(
 
 async function detectLanguage(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Rost.Interaction,
 	{ text }: { text: string },
 ): Promise<TranslationLanguage | undefined> {
 	const detectedLanguages = await client.adapters.detectors.detectLanguages({ text });

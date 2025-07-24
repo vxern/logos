@@ -1,6 +1,6 @@
-import { code } from "logos:constants/formatting";
-import type { Client } from "logos/client";
-import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
+import { code } from "rost:constants/formatting";
+import type { Client } from "rost/client";
+import { type HashableMessageContents, NoticeService } from "rost/services/notices/service";
 
 class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {

@@ -1,8 +1,8 @@
-import type { LearningLocale } from "logos:constants/languages/learning";
-import type { Locale } from "logos:constants/languages/localisation";
+import type { LearningLocale } from "rost:constants/languages/learning";
+import type { Locale } from "rost:constants/languages/localisation";
 import Redis from "ioredis";
-import type { Client } from "logos/client";
 import type pino from "pino";
+import type { Client } from "rost/client";
 
 interface SentenceIdPair {
 	readonly sentenceId: number;
@@ -43,7 +43,7 @@ class VolatileStore {
 
 		if (client.environment.redisHost === undefined || client.environment.redisPort === undefined) {
 			log.warn(
-				"One of `REDIS_HOST` or `REDIS_PORT` has not been provided. Logos will run without a Redis integration.",
+				"One of `REDIS_HOST` or `REDIS_PORT` has not been provided. Rost will run without a Redis integration.",
 			);
 			return undefined;
 		}

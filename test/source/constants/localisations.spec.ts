@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import localisations from "logos:constants/localisations";
+import localisations from "rost:constants/localisations";
 import { expect } from "chai";
 
 describe("The localisations object", () => {

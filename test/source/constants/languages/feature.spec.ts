@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import { isFeatureLanguage } from "logos:constants/languages/feature";
+import { isFeatureLanguage } from "rost:constants/languages/feature";
 import { expect } from "chai";
 
 describe("isLanguage()", () => {

@@ -1,14 +1,14 @@
-import type { DictionarySearchMode } from "logos:constants/dictionaries";
-import { isLearningLanguage } from "logos:constants/languages/learning";
-import type { PartOfSpeech } from "logos:constants/parts-of-speech";
-import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
-import type { Client } from "logos/client";
-import { WordInformationComponent } from "logos/commands/components/word-information";
-import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
+import type { DictionarySearchMode } from "rost:constants/dictionaries";
+import { isLearningLanguage } from "rost:constants/languages/learning";
+import type { PartOfSpeech } from "rost:constants/parts-of-speech";
+import type { DictionaryEntry } from "rost/adapters/dictionaries/dictionary-entry";
+import type { Client } from "rost/client";
+import { WordInformationComponent } from "rost/commands/components/word-information";
+import { handleAutocompleteLanguage } from "rost/commands/fragments/autocomplete/language";
 
 async function handleFindWordAutocomplete(
 	client: Client,
-	interaction: Logos.Interaction<any, { language: string | undefined }>,
+	interaction: Rost.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
 	await handleAutocompleteLanguage(
 		client,
@@ -21,7 +21,7 @@ async function handleFindWordAutocomplete(
 /** Allows the user to look up a word and get information about it. */
 async function handleFindWord(
 	client: Client,
-	interaction: Logos.Interaction<any, { word: string; language: string | undefined; verbose: boolean | undefined }>,
+	interaction: Rost.Interaction<any, { word: string; language: string | undefined; verbose: boolean | undefined }>,
 	{ searchMode }: { searchMode?: DictionarySearchMode },
 ): Promise<void> {
 	if (interaction.parameters.language !== undefined && !isLearningLanguage(interaction.parameters.language)) {

@@ -1,4 +1,4 @@
-import type { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "rost/stores/journalling/loggers";
 
 const logger: EventLogger<"reportSubmit"> = (client, [author, report], { guildLocale }) => {
 	const strings = constants.contexts.reportSubmit({ localise: client.localise, locale: guildLocale });

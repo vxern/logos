@@ -1,6 +1,6 @@
-import type { Client } from "logos/client";
-import { TabbedView, type View } from "logos/commands/components/tabbed-views/tabbed-view";
-import type { Guild } from "logos/models/guild";
+import type { Client } from "rost/client";
+import { TabbedView, type View } from "rost/commands/components/tabbed-views/tabbed-view";
+import type { Guild } from "rost/models/guild";
 
 type Bracket = "a" | "b" | "c";
 type Mode = "guide" | "examples";
@@ -23,21 +23,21 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 
 	constructor(
 		client: Client,
-		{ interaction, guildDocument }: { interaction: Logos.Interaction; guildDocument: Guild },
+		{ interaction, guildDocument }: { interaction: Rost.Interaction; guildDocument: Guild },
 	) {
 		super(client, { interaction, tabs: { bracket: "a", mode: "guide" }, showable: true });
 
 		this.#guildDocument = guildDocument;
 	}
 
-	build(interaction: Logos.Interaction, { tabs }: { tabs: TabGroups }): View {
+	build(interaction: Rost.Interaction, { tabs }: { tabs: TabGroups }): View {
 		const embed = this.getEmbed(interaction, tabs);
 		const buttons = this.getButtons(interaction, tabs);
 
 		return { embed, components: buttons };
 	}
 
-	getEmbed(interaction: Logos.Interaction, { bracket, mode }: TabGroups): Discord.Camelize<Discord.DiscordEmbed> {
+	getEmbed(interaction: Rost.Interaction, { bracket, mode }: TabGroups): Discord.Camelize<Discord.DiscordEmbed> {
 		switch (mode) {
 			case "guide": {
 				return this.getGuideEmbed(interaction, { bracket });
@@ -49,7 +49,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	}
 
 	getGuideEmbed(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		{ bracket }: { bracket: Bracket },
 	): Discord.Camelize<Discord.DiscordEmbed> {
 		switch (bracket) {
@@ -120,7 +120,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	}
 
 	getExampleEmbed(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		{ bracket }: { bracket: Bracket },
 	): Discord.Camelize<Discord.DiscordEmbed> {
 		const examples = this.#configuration.examples!;
@@ -193,7 +193,7 @@ class CefrGuideView extends TabbedView<{ groups: TabGroups }> {
 	}
 
 	getButtons(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		{ bracket, mode }: { bracket: Bracket; mode: Mode },
 	): Discord.ActionRow[] {
 		const strings = constants.contexts.cefrButtons({

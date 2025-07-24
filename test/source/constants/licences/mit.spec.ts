@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import mit from "logos:constants/licences/mit";
+import mit from "rost:constants/licences/mit";
 import { expect } from "chai";
 
 const NOTICE = "this-is-a-sample-passed-copyright-notice";

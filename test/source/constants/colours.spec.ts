@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import colours, { fromHex } from "logos:constants/colours";
+import colours, { fromHex } from "rost:constants/colours";
 import { expect } from "chai";
 
 describe("fromHex()", () => {

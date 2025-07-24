@@ -2,11 +2,11 @@ import dictionaries, {
 	type DictionarySection,
 	type DictionarySearchMode,
 	getAllowedDictionarySections,
-} from "logos:constants/dictionaries";
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
-import type { Client } from "logos/client";
+} from "rost:constants/dictionaries";
+import type { LearningLanguage } from "rost:constants/languages/learning";
 import type pino from "pino";
+import type { DictionaryEntry } from "rost/adapters/dictionaries/dictionary-entry";
+import type { Client } from "rost/client";
 
 abstract class DictionaryAdapter<DataType = unknown> {
 	readonly log: pino.Logger;
@@ -29,7 +29,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	}
 
 	async getEntries(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		lemma: string,
 		learningLanguage: LearningLanguage,
 		{ searchMode }: { searchMode: DictionarySearchMode },
@@ -96,7 +96,7 @@ abstract class DictionaryAdapter<DataType = unknown> {
 	abstract fetch(lemma: string, learningLanguage: LearningLanguage): Promise<DataType | undefined>;
 
 	abstract parse(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		lemma: string,
 		learningLanguage: LearningLanguage,
 		data: DataType,

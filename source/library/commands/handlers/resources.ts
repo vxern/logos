@@ -1,8 +1,8 @@
-import type { Client } from "logos/client";
-import { Guild } from "logos/models/guild";
+import type { Client } from "rost/client";
+import { Guild } from "rost/models/guild";
 
 /** Displays a message with information on where to find the resources for a given language. */
-async function handleDisplayResources(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplayResources(client: Client, interaction: Rost.Interaction): Promise<void> {
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 	const configuration = guildDocument.feature("resources");
 

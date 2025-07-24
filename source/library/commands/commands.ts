@@ -1,79 +1,79 @@
-import type { DictionarySearchMode } from "logos:constants/dictionaries";
-import { handleDisplayAcknowledgements } from "logos/commands/handlers/acknowledgements";
-import { handleAnswer } from "logos/commands/handlers/answer";
-import { handleDisplayCefrGuide } from "logos/commands/handlers/cefr";
-import { handleFindInContext, handleFindInContextAutocomplete } from "logos/commands/handlers/context";
-import { handleMakeFullCorrection, handleMakePartialCorrection } from "logos/commands/handlers/correction";
-import { handleDisplayCredits } from "logos/commands/handlers/credits";
-import { handleStartGame } from "logos/commands/handlers/game";
-import type { InteractionHandler } from "logos/commands/handlers/handler";
-import { handleDisplayBotInformation } from "logos/commands/handlers/information/bot";
-import { handleDisplayGuildInformation } from "logos/commands/handlers/information/guild";
+import type { DictionarySearchMode } from "rost:constants/dictionaries";
+import { handleDisplayAcknowledgements } from "rost/commands/handlers/acknowledgements";
+import { handleAnswer } from "rost/commands/handlers/answer";
+import { handleDisplayCefrGuide } from "rost/commands/handlers/cefr";
+import { handleFindInContext, handleFindInContextAutocomplete } from "rost/commands/handlers/context";
+import { handleMakeFullCorrection, handleMakePartialCorrection } from "rost/commands/handlers/correction";
+import { handleDisplayCredits } from "rost/commands/handlers/credits";
+import { handleStartGame } from "rost/commands/handlers/game";
+import type { InteractionHandler } from "rost/commands/handlers/handler";
+import { handleDisplayBotInformation } from "rost/commands/handlers/information/bot";
+import { handleDisplayGuildInformation } from "rost/commands/handlers/information/guild";
 import {
 	handleDisplayDetectorLicence,
 	handleDisplayDetectorLicenceAutocomplete,
-} from "logos/commands/handlers/licence/detector";
+} from "rost/commands/handlers/licence/detector";
 import {
 	handleDisplayDictionaryLicence,
 	handleDisplayDictionaryLicenceAutocomplete,
-} from "logos/commands/handlers/licence/dictionary";
+} from "rost/commands/handlers/licence/dictionary";
 import {
 	handleDisplaySoftwareLicence,
 	handleDisplaySoftwareLicenceAutocomplete,
-} from "logos/commands/handlers/licence/software";
+} from "rost/commands/handlers/licence/software";
 import {
 	handleDisplayTranslatorLicence,
 	handleDisplayTranslatorLicenceAutocomplete,
-} from "logos/commands/handlers/licence/translator";
+} from "rost/commands/handlers/licence/translator";
 import {
 	handleDisplayAuthorPraises,
 	handleDisplayPraisesAutocomplete,
 	handleDisplayTargetPraises,
-} from "logos/commands/handlers/list/praises";
-import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "logos/commands/handlers/list/warnings";
-import { handleFastForward, handleFastForwardAutocomplete } from "logos/commands/handlers/music/fast-forward";
-import { handleDisplayPlaybackHistory } from "logos/commands/handlers/music/history";
-import { handleLoopPlayback } from "logos/commands/handlers/music/loop";
-import { handleDisplayCurrentlyPlaying } from "logos/commands/handlers/music/now";
-import { handlePausePlayback } from "logos/commands/handlers/music/pause";
-import { handleRequestStreamPlayback, handleRequestYouTubePlayback } from "logos/commands/handlers/music/play";
-import { handleDisplayPlaybackQueue } from "logos/commands/handlers/music/queue";
-import { handleRemoveSongListing } from "logos/commands/handlers/music/remove";
-import { handleReplayAction } from "logos/commands/handlers/music/replay";
-import { handleResumePlayback } from "logos/commands/handlers/music/resume";
-import { handleRewind, handleRewindAutocomplete } from "logos/commands/handlers/music/rewind";
-import { handleSkipAction } from "logos/commands/handlers/music/skip";
-import { handleSkipToTimestamp, handleSkipToTimestampAutocomplete } from "logos/commands/handlers/music/skip-to";
-import { handleStopPlayback } from "logos/commands/handlers/music/stop";
-import { handleUnskipAction } from "logos/commands/handlers/music/unskip";
-import { handleDisplayVolume } from "logos/commands/handlers/music/volume/display";
-import { handleSetVolume } from "logos/commands/handlers/music/volume/set";
-import { handlePardonUser, handlePardonUserAutocomplete } from "logos/commands/handlers/pardon";
-import { handleDisplayModerationPolicy } from "logos/commands/handlers/policy";
-import { handlePraiseUser, handlePraiseUserAutocomplete } from "logos/commands/handlers/praise";
-import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/roles";
-import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "logos/commands/handlers/profile/view";
-import { handlePurgeMessages, handlePurgeMessagesAutocomplete } from "logos/commands/handlers/purge";
-import { handleRecogniseLanguageChatInput, handleRecogniseLanguageMessage } from "logos/commands/handlers/recognise";
-import { handleMakeReport } from "logos/commands/handlers/report";
-import { handleSubmitResource } from "logos/commands/handlers/resource";
-import { handleDisplayResources } from "logos/commands/handlers/resources";
-import { handleCiteRule, handleCiteRuleAutocomplete } from "logos/commands/handlers/rule";
-import { handleClearLanguage } from "logos/commands/handlers/settings/language/clear";
-import { handleSetLanguage, handleSetLanguageAutocomplete } from "logos/commands/handlers/settings/language/set";
-import { handleDisplaySettings } from "logos/commands/handlers/settings/view";
-import { handleToggleSlowmode, handleToggleSlowmodeAutocomplete } from "logos/commands/handlers/slowmode";
-import { handleMakeSuggestion } from "logos/commands/handlers/suggestion";
-import { handleOpenTicket } from "logos/commands/handlers/ticket/open";
-import { handleClearTimeout, handleClearTimeoutAutocomplete } from "logos/commands/handlers/timeout/clear";
-import { handleSetTimeout, handleSetTimeoutAutocomplete } from "logos/commands/handlers/timeout/set";
+} from "rost/commands/handlers/list/praises";
+import { handleDisplayWarnings, handleDisplayWarningsAutocomplete } from "rost/commands/handlers/list/warnings";
+import { handleFastForward, handleFastForwardAutocomplete } from "rost/commands/handlers/music/fast-forward";
+import { handleDisplayPlaybackHistory } from "rost/commands/handlers/music/history";
+import { handleLoopPlayback } from "rost/commands/handlers/music/loop";
+import { handleDisplayCurrentlyPlaying } from "rost/commands/handlers/music/now";
+import { handlePausePlayback } from "rost/commands/handlers/music/pause";
+import { handleRequestStreamPlayback, handleRequestYouTubePlayback } from "rost/commands/handlers/music/play";
+import { handleDisplayPlaybackQueue } from "rost/commands/handlers/music/queue";
+import { handleRemoveSongListing } from "rost/commands/handlers/music/remove";
+import { handleReplayAction } from "rost/commands/handlers/music/replay";
+import { handleResumePlayback } from "rost/commands/handlers/music/resume";
+import { handleRewind, handleRewindAutocomplete } from "rost/commands/handlers/music/rewind";
+import { handleSkipAction } from "rost/commands/handlers/music/skip";
+import { handleSkipToTimestamp, handleSkipToTimestampAutocomplete } from "rost/commands/handlers/music/skip-to";
+import { handleStopPlayback } from "rost/commands/handlers/music/stop";
+import { handleUnskipAction } from "rost/commands/handlers/music/unskip";
+import { handleDisplayVolume } from "rost/commands/handlers/music/volume/display";
+import { handleSetVolume } from "rost/commands/handlers/music/volume/set";
+import { handlePardonUser, handlePardonUserAutocomplete } from "rost/commands/handlers/pardon";
+import { handleDisplayModerationPolicy } from "rost/commands/handlers/policy";
+import { handlePraiseUser, handlePraiseUserAutocomplete } from "rost/commands/handlers/praise";
+import { handleOpenRoleSelectionMenu } from "rost/commands/handlers/profile/roles";
+import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "rost/commands/handlers/profile/view";
+import { handlePurgeMessages, handlePurgeMessagesAutocomplete } from "rost/commands/handlers/purge";
+import { handleRecogniseLanguageChatInput, handleRecogniseLanguageMessage } from "rost/commands/handlers/recognise";
+import { handleMakeReport } from "rost/commands/handlers/report";
+import { handleSubmitResource } from "rost/commands/handlers/resource";
+import { handleDisplayResources } from "rost/commands/handlers/resources";
+import { handleCiteRule, handleCiteRuleAutocomplete } from "rost/commands/handlers/rule";
+import { handleClearLanguage } from "rost/commands/handlers/settings/language/clear";
+import { handleSetLanguage, handleSetLanguageAutocomplete } from "rost/commands/handlers/settings/language/set";
+import { handleDisplaySettings } from "rost/commands/handlers/settings/view";
+import { handleToggleSlowmode, handleToggleSlowmodeAutocomplete } from "rost/commands/handlers/slowmode";
+import { handleMakeSuggestion } from "rost/commands/handlers/suggestion";
+import { handleOpenTicket } from "rost/commands/handlers/ticket/open";
+import { handleClearTimeout, handleClearTimeoutAutocomplete } from "rost/commands/handlers/timeout/clear";
+import { handleSetTimeout, handleSetTimeoutAutocomplete } from "rost/commands/handlers/timeout/set";
 import {
 	handleTranslateChatInput,
 	handleTranslateChatInputAutocomplete,
 	handleTranslateMessage,
-} from "logos/commands/handlers/translate";
-import { handleWarnUser, handleWarnUserAutocomplete } from "logos/commands/handlers/warn";
-import { handleFindWord, handleFindWordAutocomplete } from "logos/commands/handlers/word";
+} from "rost/commands/handlers/translate";
+import { handleWarnUser, handleWarnUserAutocomplete } from "rost/commands/handlers/warn";
+import { handleFindWord, handleFindWordAutocomplete } from "rost/commands/handlers/word";
 
 /**
  * @remarks

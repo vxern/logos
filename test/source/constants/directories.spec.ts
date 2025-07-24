@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import directories from "logos:constants/directories";
+import directories from "rost:constants/directories";
 import { expect } from "chai";
 
 describe("The directories object", () => {

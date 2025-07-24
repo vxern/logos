@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import links from "logos:constants/links";
+import links from "rost:constants/links";
 import { expect } from "chai";
 
 const STRING_UNENCODED = "1 2 3";

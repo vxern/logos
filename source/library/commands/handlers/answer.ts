@@ -1,7 +1,7 @@
-import type { Client } from "logos/client";
-import { AnswerComposer } from "logos/commands/components/modal-composers/answer-composer";
+import type { Client } from "rost/client";
+import { AnswerComposer } from "rost/commands/components/modal-composers/answer-composer";
 
-async function handleAnswer(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleAnswer(client: Client, interaction: Rost.Interaction): Promise<void> {
 	const member = client.entities.members.get(interaction.guildId)?.get(interaction.user.id);
 	if (member === undefined) {
 		return;

@@ -1,7 +1,7 @@
-import { list } from "logos:constants/formatting";
-import type { Client } from "logos/client";
+import { list } from "rost:constants/formatting";
+import type { Client } from "rost/client";
 
-async function handleDisplayBotInformation(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleDisplayBotInformation(client: Client, interaction: Rost.Interaction): Promise<void> {
 	const botUser = client.entities.users.get(client.bot.id);
 	if (botUser === undefined) {
 		return;

@@ -1,7 +1,7 @@
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
-import type { DictionaryEntry, RelationField, RhymeField } from "logos/adapters/dictionaries/dictionary-entry";
-import type { Client } from "logos/client";
+import type { LearningLanguage } from "rost:constants/languages/learning";
+import { DictionaryAdapter } from "rost/adapters/dictionaries/adapter";
+import type { DictionaryEntry, RelationField, RhymeField } from "rost/adapters/dictionaries/dictionary-entry";
+import type { Client } from "rost/client";
 
 interface WordnikResult {
 	readonly relationshipType: string;
@@ -46,7 +46,7 @@ class WordnikAdapter extends DictionaryAdapter<WordnikResult[]> {
 	}
 
 	parse(
-		_: Logos.Interaction,
+		_: Rost.Interaction,
 		lemma: string,
 		learningLanguage: LearningLanguage,
 		results: WordnikResult[],

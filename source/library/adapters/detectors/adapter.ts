@@ -1,7 +1,7 @@
-import type { DetectionLanguage } from "logos:constants/languages/detection";
-import type { Licence } from "logos:constants/licences";
-import type { Client } from "logos/client";
+import type { DetectionLanguage } from "rost:constants/languages/detection";
+import type { Licence } from "rost:constants/licences";
 import type pino from "pino";
+import type { Client } from "rost/client";
 
 interface SingleDetectionResult {
 	readonly language: DetectionLanguage;

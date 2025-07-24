@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import contributions, { contributors } from "logos:constants/contributions";
+import contributions, { contributors } from "rost:constants/contributions";
 import { expect } from "chai";
 
 describe("The contributions object", () => {

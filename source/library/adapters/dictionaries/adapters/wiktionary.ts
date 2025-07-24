@@ -1,9 +1,9 @@
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import { getWiktionaryLanguageName } from "logos:constants/languages/learning";
-import { getPartOfSpeech } from "logos:constants/parts-of-speech";
-import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
-import type { DictionaryEntry } from "logos/adapters/dictionaries/dictionary-entry";
-import type { Client } from "logos/client";
+import type { LearningLanguage } from "rost:constants/languages/learning";
+import { getWiktionaryLanguageName } from "rost:constants/languages/learning";
+import { getPartOfSpeech } from "rost:constants/parts-of-speech";
+import { DictionaryAdapter } from "rost/adapters/dictionaries/adapter";
+import type { DictionaryEntry } from "rost/adapters/dictionaries/dictionary-entry";
+import type { Client } from "rost/client";
 import * as Wiktionary from "wiktionary-scraper";
 
 class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
@@ -37,7 +37,7 @@ class WiktionaryAdapter extends DictionaryAdapter<Wiktionary.Entry[]> {
 	}
 
 	parse(
-		_: Logos.Interaction,
+		_: Rost.Interaction,
 		__: string,
 		learningLanguage: LearningLanguage,
 		results: Wiktionary.Entry[],

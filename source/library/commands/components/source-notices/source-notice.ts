@@ -1,5 +1,5 @@
-import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors";
+import type { Client } from "rost/client";
+import { InteractionCollector } from "rost/collectors";
 
 abstract class SourceNotice {
 	readonly client: Client;
@@ -7,7 +7,7 @@ abstract class SourceNotice {
 	readonly notice?: string;
 
 	readonly #buttonPresses: InteractionCollector;
-	readonly #interaction: Logos.Interaction;
+	readonly #interaction: Rost.Interaction;
 
 	get button(): Discord.ButtonComponent {
 		const strings = constants.contexts.source({
@@ -25,7 +25,7 @@ abstract class SourceNotice {
 
 	constructor(
 		client: Client,
-		{ interaction, sources, notice }: { interaction: Logos.Interaction; sources: string[]; notice?: string },
+		{ interaction, sources, notice }: { interaction: Rost.Interaction; sources: string[]; notice?: string },
 	) {
 		this.client = client;
 		this.sources = sources;
@@ -35,7 +35,7 @@ abstract class SourceNotice {
 		this.#interaction = interaction;
 	}
 
-	async display(buttonPress: Logos.Interaction): Promise<void> {
+	async display(buttonPress: Rost.Interaction): Promise<void> {
 		const sourcesFormatted = this.sources.join(constants.special.sigils.separator);
 
 		await this.client.reply(buttonPress, {

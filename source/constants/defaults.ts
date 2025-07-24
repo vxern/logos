@@ -1,9 +1,9 @@
-import type { FeatureLanguage } from "logos:constants/languages/feature";
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
-import type { TranslationLanguage } from "logos:constants/languages/translation";
-import type { TimeStruct } from "logos:constants/time";
-import type { RateLimit } from "logos/models/guild";
+import type { FeatureLanguage } from "rost:constants/languages/feature";
+import type { LearningLanguage } from "rost:constants/languages/learning";
+import type { Locale, LocalisationLanguage } from "rost:constants/languages/localisation";
+import type { TranslationLanguage } from "rost:constants/languages/translation";
+import type { TimeStruct } from "rost:constants/time";
+import type { RateLimit } from "rost/models/guild";
 
 const FEATURE_LOCALE: Locale = "eng-GB";
 const FEATURE_LANGUAGE: FeatureLanguage = "English";

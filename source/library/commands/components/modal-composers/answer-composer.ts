@@ -1,17 +1,17 @@
-import { trim } from "logos:constants/formatting";
-import type { Client } from "logos/client";
-import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
+import { trim } from "rost:constants/formatting";
+import type { Client } from "rost/client";
+import { type Modal, ModalComposer } from "rost/commands/components/modal-composers/modal-composer";
 
 interface AnswerFormData {
 	readonly question: string;
 	readonly answer: string;
 }
 class AnswerComposer extends ModalComposer<AnswerFormData, never> {
-	constructor(client: Client, { interaction, question }: { interaction: Logos.Interaction; question: string }) {
+	constructor(client: Client, { interaction, question }: { interaction: Rost.Interaction; question: string }) {
 		super(client, { interaction, initialFormData: { question: trim(question, 4000), answer: "" } });
 	}
 
-	buildModal(submission: Logos.Interaction, { formData }: { formData: AnswerFormData }): Modal<AnswerFormData> {
+	buildModal(submission: Rost.Interaction, { formData }: { formData: AnswerFormData }): Modal<AnswerFormData> {
 		const strings = constants.contexts.answerModal({
 			localise: this.client.localise,
 			locale: submission.locale,

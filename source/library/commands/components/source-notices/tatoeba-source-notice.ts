@@ -1,5 +1,5 @@
-import type { Client } from "logos/client";
-import { SourceNotice } from "logos/commands/components/source-notices/source-notice";
+import type { Client } from "rost/client";
+import { SourceNotice } from "rost/commands/components/source-notices/source-notice";
 
 class TatoebaSourceNotice extends SourceNotice {
 	constructor(
@@ -8,7 +8,7 @@ class TatoebaSourceNotice extends SourceNotice {
 			interaction,
 			sentenceId,
 			translationId,
-		}: { interaction: Logos.Interaction; sentenceId: number; translationId: number },
+		}: { interaction: Rost.Interaction; sentenceId: number; translationId: number },
 	) {
 		const sentenceLink = constants.links.tatoebaSentence(sentenceId.toString());
 		const translationLink = constants.links.tatoebaSentence(translationId.toString());

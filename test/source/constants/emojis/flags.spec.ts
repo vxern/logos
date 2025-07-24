@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import flags from "logos:constants/emojis/flags";
+import flags from "rost:constants/emojis/flags";
 import { expect } from "chai";
 
 describe("The flags object", () => {

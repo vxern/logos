@@ -1,5 +1,5 @@
-import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors";
+import type { Client } from "rost/client";
+import { InteractionCollector } from "rost/collectors";
 
 interface View {
 	embed: Discord.Camelize<Discord.DiscordEmbed>;
@@ -12,7 +12,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 
 	readonly #tabs: Generic["groups"];
 	readonly #showable: boolean;
-	readonly #anchor: Logos.Interaction;
+	readonly #anchor: Rost.Interaction;
 
 	get #view(): View {
 		const view = this.build(this.#anchor, { tabs: this.#tabs });
@@ -42,11 +42,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 
 	constructor(
 		client: Client,
-		{
-			interaction,
-			tabs,
-			showable,
-		}: { interaction: Logos.Interaction; tabs: Generic["groups"]; showable?: boolean },
+		{ interaction, tabs, showable }: { interaction: Rost.Interaction; tabs: Generic["groups"]; showable?: boolean },
 	) {
 		this.client = client;
 		this.buttonPresses = new InteractionCollector(client, { guildId: interaction.guildId });
@@ -57,7 +53,7 @@ abstract class TabbedView<Generic extends { groups: Record<string, string> }> {
 		this.#anchor = interaction;
 	}
 
-	abstract build(interaction: Logos.Interaction, { tabs }: { tabs: Generic["groups"] }): View;
+	abstract build(interaction: Rost.Interaction, { tabs }: { tabs: Generic["groups"] }): View;
 
 	async #display(): Promise<void> {
 		const view = this.#view;

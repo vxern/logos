@@ -3,7 +3,7 @@ import slowmode, {
 	getSlowmodeDelayByLevel,
 	getSlowmodeLevelByDelay,
 	isValidSlowmodeLevel,
-} from "logos:constants/slowmode";
+} from "rost:constants/slowmode";
 import { expect } from "chai";
 
 describe("The slowmode object", () => {

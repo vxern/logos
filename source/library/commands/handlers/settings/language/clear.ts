@@ -1,7 +1,7 @@
-import type { Client } from "logos/client";
-import { User } from "logos/models/user";
+import type { Client } from "rost/client";
+import { User } from "rost/models/user";
 
-async function handleClearLanguage(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleClearLanguage(client: Client, interaction: Rost.Interaction): Promise<void> {
 	await client.postponeReply(interaction);
 
 	const userDocument = await User.getOrCreate(client, { userId: interaction.user.id.toString() });

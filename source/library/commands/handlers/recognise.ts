@@ -1,15 +1,15 @@
-import { list } from "logos:constants/formatting";
-import type { Client } from "logos/client";
-import { RecognitionSourceNotice } from "logos/commands/components/source-notices/recognition-source-notice";
+import { list } from "rost:constants/formatting";
+import type { Client } from "rost/client";
+import { RecognitionSourceNotice } from "rost/commands/components/source-notices/recognition-source-notice";
 
 async function handleRecogniseLanguageChatInput(
 	client: Client,
-	interaction: Logos.Interaction<any, { text: string }>,
+	interaction: Rost.Interaction<any, { text: string }>,
 ): Promise<void> {
 	await handleRecogniseLanguage(client, interaction, { text: interaction.parameters.text, isMessage: false });
 }
 
-async function handleRecogniseLanguageMessage(client: Client, interaction: Logos.Interaction): Promise<void> {
+async function handleRecogniseLanguageMessage(client: Client, interaction: Rost.Interaction): Promise<void> {
 	const message = interaction.data?.resolved?.messages?.array()?.at(0);
 	if (message === undefined) {
 		return;
@@ -31,7 +31,7 @@ async function handleRecogniseLanguageMessage(client: Client, interaction: Logos
 
 async function handleRecogniseLanguage(
 	client: Client,
-	interaction: Logos.Interaction,
+	interaction: Rost.Interaction,
 	{ text, isMessage }: { text: string; isMessage: boolean },
 ): Promise<void> {
 	const isTextEmpty = text.trim().length === 0;

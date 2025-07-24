@@ -1,9 +1,9 @@
-import type { WithBaseLanguage } from "logos:constants/languages";
-import { type DetectionLanguage, languages as detectionLanguages } from "logos:constants/languages/detection";
-import { type FeatureLanguage, languages as featureLanguages } from "logos:constants/languages/feature";
-import { collectLanguages } from "logos:constants/languages/languages";
-import { type LocalisationLanguage, languages as localisationLanguages } from "logos:constants/languages/localisation";
-import { type TranslationLanguage, languages as translationLanguages } from "logos:constants/languages/translation";
+import type { WithBaseLanguage } from "rost:constants/languages";
+import { type DetectionLanguage, languages as detectionLanguages } from "rost:constants/languages/detection";
+import { type FeatureLanguage, languages as featureLanguages } from "rost:constants/languages/feature";
+import { collectLanguages } from "rost:constants/languages/languages";
+import { type LocalisationLanguage, languages as localisationLanguages } from "rost:constants/languages/localisation";
+import { type TranslationLanguage, languages as translationLanguages } from "rost:constants/languages/translation";
 
 type LearningLanguage = DetectionLanguage | FeatureLanguage | LocalisationLanguage | TranslationLanguage;
 

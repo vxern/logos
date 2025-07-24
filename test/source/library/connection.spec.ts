@@ -1,7 +1,7 @@
 import { describe, it } from "bun:test";
-import { useEnvironment } from "logos:test/dependencies";
+import { useEnvironment } from "rost:test/dependencies";
 import { expect } from "chai";
-import { DiscordConnection } from "logos/connection";
+import { DiscordConnection } from "rost/connection";
 
 const TEST_TIMEOUT = constants.time.second * 10;
 

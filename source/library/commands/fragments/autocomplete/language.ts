@@ -1,11 +1,11 @@
-import { trim } from "logos:constants/formatting";
-import type { Client } from "logos/client";
-import { handleSimpleAutocomplete } from "logos/commands/fragments/autocomplete/simple";
+import { trim } from "rost:constants/formatting";
+import type { Client } from "rost/client";
+import { handleSimpleAutocomplete } from "rost/commands/fragments/autocomplete/simple";
 
 type LanguageType = keyof typeof constants.languages.languages;
 async function handleAutocompleteLanguage(
 	client: Client,
-	interaction: Logos.Interaction<any, any>,
+	interaction: Rost.Interaction<any, any>,
 	{ type }: { type: LanguageType },
 	{ parameter }: { parameter: string | undefined },
 ): Promise<void> {

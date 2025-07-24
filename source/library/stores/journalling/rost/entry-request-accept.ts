@@ -1,4 +1,4 @@
-import type { EventLogger } from "logos/stores/journalling/loggers";
+import type { EventLogger } from "rost/stores/journalling/loggers";
 
 const logger: EventLogger<"entryRequestAccept"> = (client, [user, author], { guildLocale }) => {
 	const strings = constants.contexts.entryRequestAccept({

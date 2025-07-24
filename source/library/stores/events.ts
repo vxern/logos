@@ -1,6 +1,6 @@
-import type { DesiredProperties, DesiredPropertiesBehaviour } from "logos:constants/properties";
-import type { Collector } from "logos/collectors";
+import type { DesiredProperties, DesiredPropertiesBehaviour } from "rost:constants/properties";
 import type pino from "pino";
+import type { Collector } from "rost/collectors";
 
 type Event = keyof Discord.EventHandlers<DesiredProperties, DesiredPropertiesBehaviour>;
 class EventStore {

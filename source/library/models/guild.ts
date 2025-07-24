@@ -1,9 +1,9 @@
-import type { Client } from "logos/client";
+import type { Client } from "rost/client";
 // biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
-import type { FeatureManagement, GuildDocument, RateLimit } from "logos/models/documents/guild";
-import { GuildStatistics } from "logos/models/guild-statistics";
-import { type CreateModelOptions, GuildModel, type IdentifierData, Model } from "logos/models/model";
-import type { DatabaseStore } from "logos/stores/database";
+import type { FeatureManagement, GuildDocument, RateLimit } from "rost/models/documents/guild";
+import { GuildStatistics } from "rost/models/guild-statistics";
+import { type CreateModelOptions, GuildModel, type IdentifierData, Model } from "rost/models/model";
+import type { DatabaseStore } from "rost/stores/database";
 
 type CreateGuildOptions = CreateModelOptions<Guild, GuildDocument>;
 

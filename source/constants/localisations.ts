@@ -1,7 +1,7 @@
-import type { Language } from "logos:constants/languages";
-import type { LocalisationLanguage } from "logos:constants/languages/localisation";
-import type { PartOfSpeech } from "logos:constants/parts-of-speech";
-import pluralisers from "logos:constants/transformers/pluralisers";
+import type { Language } from "rost:constants/languages";
+import type { LocalisationLanguage } from "rost:constants/languages/localisation";
+import type { PartOfSpeech } from "rost:constants/parts-of-speech";
+import pluralisers from "rost:constants/transformers/pluralisers";
 
 type TransformerType = "pluralise";
 type Transformer = (matchTerm: string, matches: Record<string, string>) => string | undefined;

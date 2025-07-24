@@ -1,4 +1,4 @@
-import type { PartOfSpeech } from "logos:constants/parts-of-speech";
+import type { PartOfSpeech } from "rost:constants/parts-of-speech";
 
 export default Object.freeze({
 	acronyme: "initialism",

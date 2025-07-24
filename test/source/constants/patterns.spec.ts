@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import patterns from "logos:constants/patterns";
+import patterns from "rost:constants/patterns";
 import { expect } from "chai";
 
 describe("The patterns object", () => {

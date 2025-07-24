@@ -1,15 +1,15 @@
-import type { Languages } from "logos:constants/languages";
+import type { Languages } from "rost:constants/languages";
 import {
 	type TranslationLanguage,
 	type Translator,
 	languageToLocale as languagesByIdentifier,
-} from "logos:constants/languages/translation";
-import { isDefined } from "logos:core/utilities";
-import type { TranslatorAdapter } from "logos/adapters/translators/adapter";
-import { DeepLAdapter } from "logos/adapters/translators/deepl";
-import { GoogleTranslateAdapter } from "logos/adapters/translators/google-translate";
-import { LingvanexAdapter } from "logos/adapters/translators/lingvanex";
-import type { Client } from "logos/client";
+} from "rost:constants/languages/translation";
+import { isDefined } from "rost:core/utilities";
+import type { TranslatorAdapter } from "rost/adapters/translators/adapter";
+import { DeepLAdapter } from "rost/adapters/translators/deepl";
+import { GoogleTranslateAdapter } from "rost/adapters/translators/google-translate";
+import { LingvanexAdapter } from "rost/adapters/translators/lingvanex";
+import type { Client } from "rost/client";
 
 class TranslatorStore {
 	static readonly priority: Translator[] = ["deepl", "google", "lingvanex"];
@@ -25,19 +25,17 @@ class TranslatorStore {
 
 		const deeplAdapter = DeepLAdapter.tryCreate(client);
 		if (deeplAdapter === undefined) {
-			log.warn("`SECRET_DEEPL` has not been provided. Logos will run without a DeepL integration.");
+			log.warn("`SECRET_DEEPL` has not been provided. Rost will run without a DeepL integration.");
 		}
 
 		const googleTranslateAdapter = GoogleTranslateAdapter.tryCreate(client);
 		if (googleTranslateAdapter === undefined) {
-			log.warn(
-				"`SECRET_RAPID_API` has not been provided. Logos will run without a Google Translate integration.",
-			);
+			log.warn("`SECRET_RAPID_API` has not been provided. Rost will run without a Google Translate integration.");
 		}
 
 		const lingvanexAdapter = LingvanexAdapter.tryCreate(client);
 		if (lingvanexAdapter === undefined) {
-			log.warn("`SECRET_RAPID_API` has not been provided. Logos will run without a Lingvanex integration.");
+			log.warn("`SECRET_RAPID_API` has not been provided. Rost will run without a Lingvanex integration.");
 		}
 
 		this.adapters = {

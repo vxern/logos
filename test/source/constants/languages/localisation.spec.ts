@@ -2,12 +2,12 @@ import { describe, it } from "bun:test";
 import {
 	getDiscordLanguageByLocale,
 	getDiscordLocaleByLanguage,
-	getLogosLanguageByLocale,
-	getLogosLocaleByLanguage,
+	getRostLanguageByLocale,
+	getRostLocaleByLanguage,
 	isDiscordLanguage,
-	isLogosLanguage,
-	isLogosLocale,
-} from "logos:constants/languages/localisation";
+	isRostLanguage,
+	isRostLocale,
+} from "rost:constants/languages/localisation";
 import { expect } from "chai";
 
 describe("isDiscordLanguage()", () => {
@@ -21,24 +21,24 @@ describe("isDiscordLanguage()", () => {
 	});
 });
 
-describe("isLogosLanguage()", () => {
-	it("returns true if the passed language is a supported Logos language.", () => {
-		expect(isLogosLanguage("German")).to.be.true;
-		expect(isLogosLanguage("Dutch")).to.be.true;
+describe("isRostLanguage()", () => {
+	it("returns true if the passed language is a supported Rost language.", () => {
+		expect(isRostLanguage("German")).to.be.true;
+		expect(isRostLanguage("Dutch")).to.be.true;
 	});
 
-	it("returns false if the passed language is not a supported Logos language.", () => {
-		expect(isLogosLanguage("this-is-not-a-supported-logos-language")).to.be.false;
+	it("returns false if the passed language is not a supported Rost language.", () => {
+		expect(isRostLanguage("this-is-not-a-supported-rost-language")).to.be.false;
 	});
 });
 
-describe("isLogosLocale()", () => {
-	it("returns true if the passed locale is supported by Logos.", () => {
-		expect(isLogosLocale("eng-GB")).to.be.true; // British English
+describe("isRostLocale()", () => {
+	it("returns true if the passed locale is supported by Rost.", () => {
+		expect(isRostLocale("eng-GB")).to.be.true; // British English
 	});
 
-	it("returns false if the passed locale is not supported by Logos.", () => {
-		expect(isLogosLocale("this-is-not-a-supported-logos-locale")).to.be.false;
+	it("returns false if the passed locale is not supported by Rost.", () => {
+		expect(isRostLocale("this-is-not-a-supported-rost-locale")).to.be.false;
 	});
 });
 
@@ -49,10 +49,10 @@ describe("getDiscordLocaleByLanguage()", () => {
 	});
 });
 
-describe("getLogosLocaleByLanguage()", () => {
+describe("getRostLocaleByLanguage()", () => {
 	it("returns the language corresponding to the passed locale.", () => {
-		expect(getLogosLocaleByLanguage("English/British")).to.equal("eng-GB");
-		expect(getLogosLocaleByLanguage("German")).to.equal("deu");
+		expect(getRostLocaleByLanguage("English/British")).to.equal("eng-GB");
+		expect(getRostLocaleByLanguage("German")).to.equal("deu");
 	});
 });
 
@@ -68,9 +68,9 @@ describe("getDiscordLanguageByLocale()", () => {
 	});
 });
 
-describe("getLogosLanguageByLocale()", () => {
+describe("getRostLanguageByLocale()", () => {
 	it("returns the language corresponding to the passed locale.", () => {
-		expect(getLogosLanguageByLocale("eng-GB")).to.equal("English/British");
-		expect(getLogosLanguageByLocale("ron")).to.equal("Romanian");
+		expect(getRostLanguageByLocale("eng-GB")).to.equal("English/British");
+		expect(getRostLanguageByLocale("ron")).to.equal("Romanian");
 	});
 });

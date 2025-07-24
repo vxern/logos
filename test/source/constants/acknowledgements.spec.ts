@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import acknowledgements from "logos:constants/acknowledgements";
+import acknowledgements from "rost:constants/acknowledgements";
 import { expect } from "chai";
 
 describe("The acknowledgements object", () => {

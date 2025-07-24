@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package",
-  "name": "logos",
+  "name": "rost",
   "description": "A multi-purpose community bot built to cater to language-learning communities on Discord.",
   "license": "Apache-2.0",
   "version": "4.58.0",
@@ -20,19 +20,15 @@
     "detectors",
     "localised"
   ],
-  "homepage": "https://logos.wordcollector.co.uk",
+  "homepage": "https://dsc.gg/learnromanian",
   "repository": {
     "type": "git",
-    "url": "https://github.com/vxern/logos"
-  },
-  "bugs": {
-    "url": "https://github.com/vxern/logos",
-    "email": "vxern@wordcollector.co.uk"
+    "url": "https://github.com/LearnRomanian/rost"
   },
   "contributors": [
     {
       "name": "Dorian \"vxern\" Oszczęda",
-      "email": "vxern@wordcollector.co.uk",
+      "email": "vxern@learnromanian.co.uk",
       "url": "https://github.com/vxern"
     }
   ],

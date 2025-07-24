@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import { type PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
+import { type PartOfSpeech, getPartOfSpeech } from "rost:constants/parts-of-speech";
 import { expect } from "chai";
 
 describe("getPartOfSpeech()", () => {

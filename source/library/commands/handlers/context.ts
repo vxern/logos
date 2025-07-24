@@ -1,14 +1,14 @@
-import { type LearningLanguage, getLearningLocaleByLanguage } from "logos:constants/languages/learning";
-import { isLocalisationLanguage } from "logos:constants/languages/localisation";
+import { type LearningLanguage, getLearningLocaleByLanguage } from "rost:constants/languages/learning";
+import { isLocalisationLanguage } from "rost:constants/languages/localisation";
 import { shuffle } from "ioredis/built/utils";
-import type { Client } from "logos/client";
-import { ContextSourceNotice } from "logos/commands/components/source-notices/context-source-notice";
-import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
-import type { SentencePair } from "logos/stores/volatile";
+import type { Client } from "rost/client";
+import { ContextSourceNotice } from "rost/commands/components/source-notices/context-source-notice";
+import { handleAutocompleteLanguage } from "rost/commands/fragments/autocomplete/language";
+import type { SentencePair } from "rost/stores/volatile";
 
 async function handleFindInContextAutocomplete(
 	client: Client,
-	interaction: Logos.Interaction<any, { language: string | undefined }>,
+	interaction: Rost.Interaction<any, { language: string | undefined }>,
 ): Promise<void> {
 	await handleAutocompleteLanguage(
 		client,
@@ -20,7 +20,7 @@ async function handleFindInContextAutocomplete(
 
 async function handleFindInContext(
 	client: Client,
-	interaction: Logos.Interaction<
+	interaction: Rost.Interaction<
 		any,
 		{ phrase: string; language: string | undefined; "case-sensitive": boolean | undefined }
 	>,

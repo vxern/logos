@@ -1,5 +1,5 @@
-import type { DictionarySearchMode } from "logos:constants/dictionaries";
-import { code, escapeFormatting, trim } from "logos:constants/formatting";
+import type { DictionarySearchMode } from "rost:constants/dictionaries";
+import { code, escapeFormatting, trim } from "rost:constants/formatting";
 import type {
 	DictionaryEntry,
 	EtymologyField,
@@ -12,10 +12,10 @@ import type {
 	NoteField,
 	PartOfSpeechField,
 	RelationField,
-} from "logos/adapters/dictionaries/dictionary-entry";
-import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors";
-import { WordSourceNotice } from "logos/commands/components/source-notices/word-source-notice";
+} from "rost/adapters/dictionaries/dictionary-entry";
+import type { Client } from "rost/client";
+import { InteractionCollector } from "rost/collectors";
+import { WordSourceNotice } from "rost/commands/components/source-notices/word-source-notice";
 
 type MenuTab = "overview" | "inflection";
 
@@ -26,7 +26,7 @@ class WordInformationComponent {
 	readonly #entries: DictionaryEntry[];
 	readonly #showButton?: Discord.ButtonComponent;
 	readonly #verbose: boolean;
-	readonly #anchor: Logos.Interaction;
+	readonly #anchor: Rost.Interaction;
 	#tab: MenuTab;
 	#dictionaryEntryIndex: number;
 	#inflectionTableIndex: number;
@@ -37,7 +37,7 @@ class WordInformationComponent {
 			interaction,
 			entries,
 			searchMode,
-		}: { interaction: Logos.Interaction; entries: DictionaryEntry[]; searchMode: DictionarySearchMode },
+		}: { interaction: Rost.Interaction; entries: DictionaryEntry[]; searchMode: DictionarySearchMode },
 	) {
 		this.#client = client;
 		this.#entries = entries;

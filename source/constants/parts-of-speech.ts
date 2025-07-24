@@ -1,8 +1,8 @@
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import type { LocalisationLanguage } from "logos:constants/languages/localisation";
-import english from "logos:constants/parts-of-speech/english";
-import french from "logos:constants/parts-of-speech/french";
-import romanian from "logos:constants/parts-of-speech/romanian";
+import type { LearningLanguage } from "rost:constants/languages/learning";
+import type { LocalisationLanguage } from "rost:constants/languages/localisation";
+import english from "rost:constants/parts-of-speech/english";
+import french from "rost:constants/parts-of-speech/french";
+import romanian from "rost:constants/parts-of-speech/romanian";
 
 const partsOfSpeech = [
 	"adposition",

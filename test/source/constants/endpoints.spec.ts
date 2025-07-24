@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import endpoints from "logos:constants/endpoints";
+import endpoints from "rost:constants/endpoints";
 import { expect } from "chai";
 
 describe("The endpoints object", () => {

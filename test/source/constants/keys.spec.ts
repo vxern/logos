@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import keys from "logos:constants/keys";
+import keys from "rost:constants/keys";
 import { expect } from "chai";
 
 describe("The keys object", () => {

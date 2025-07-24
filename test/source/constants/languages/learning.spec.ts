@@ -1,6 +1,6 @@
 import { describe, it } from "bun:test";
-import { getWiktionaryLanguageName, isLearningLanguage } from "logos:constants/languages/learning";
-import { getLogosLocaleByLanguage } from "logos:constants/languages/localisation";
+import { getWiktionaryLanguageName, isLearningLanguage } from "rost:constants/languages/learning";
+import { getRostLocaleByLanguage } from "rost:constants/languages/localisation";
 import { expect } from "chai";
 
 describe("isLearningLanguage()", () => {
@@ -16,8 +16,8 @@ describe("isLearningLanguage()", () => {
 
 describe("getLocaleByLanguage()", () => {
 	it("returns the language corresponding to the passed learning locale.", () => {
-		expect(getLogosLocaleByLanguage("English/British")).to.equal("eng-GB");
-		expect(getLogosLocaleByLanguage("German")).to.equal("deu");
+		expect(getRostLocaleByLanguage("English/British")).to.equal("eng-GB");
+		expect(getRostLocaleByLanguage("German")).to.equal("deu");
 	});
 });
 

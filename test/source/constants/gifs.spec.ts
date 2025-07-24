@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import gifs from "logos:constants/gifs";
+import gifs from "rost:constants/gifs";
 import { expect } from "chai";
 
 describe("The gifs object", () => {

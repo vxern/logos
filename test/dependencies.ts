@@ -1,8 +1,8 @@
 import { afterEach, beforeEach } from "bun:test";
-import { type Environment, loadEnvironment } from "logos:core/loaders/environment";
-import { DiscordConnection } from "logos/connection";
-import { CacheStore } from "logos/stores/cache";
-import { DatabaseStore } from "logos/stores/database";
+import { type Environment, loadEnvironment } from "rost:core/loaders/environment";
+import { DiscordConnection } from "rost/connection";
+import { CacheStore } from "rost/stores/cache";
+import { DatabaseStore } from "rost/stores/database";
 
 type DependencyProvider<T> = () => T;
 

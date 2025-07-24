@@ -1,7 +1,7 @@
-import type { Client } from "logos/client";
-import { DetectorStore } from "logos/stores/adapters/detectors";
-import { DictionaryStore } from "logos/stores/adapters/dictionaries";
-import { TranslatorStore } from "logos/stores/adapters/translators";
+import type { Client } from "rost/client";
+import { DetectorStore } from "rost/stores/adapters/detectors";
+import { DictionaryStore } from "rost/stores/adapters/dictionaries";
+import { TranslatorStore } from "rost/stores/adapters/translators";
 
 class AdapterStore {
 	readonly detectors: DetectorStore;

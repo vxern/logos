@@ -1,8 +1,9 @@
-import { isAutocomplete } from "logos:constants/interactions";
-import { getDiscordLanguageByLocale } from "logos:constants/languages/localisation";
-import { timeStructToMilliseconds } from "logos:constants/time";
-import { isDefined } from "logos:core/utilities";
-import type { Client } from "logos/client";
+import { isAutocomplete } from "rost:constants/interactions";
+import { getDiscordLanguageByLocale } from "rost:constants/languages/localisation";
+import { timeStructToMilliseconds } from "rost:constants/time";
+import { isDefined } from "rost:core/utilities";
+import type pino from "pino";
+import type { Client } from "rost/client";
 import type {
 	BuiltCommand,
 	BuiltCommands,
@@ -15,11 +16,10 @@ import type {
 	OptionBuilder,
 	OptionMetadata,
 	OptionTemplate,
-} from "logos/commands/commands";
-import type { InteractionHandler } from "logos/commands/handlers/handler";
-import type { Guild } from "logos/models/guild";
-import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
-import type pino from "pino";
+} from "rost/commands/commands";
+import type { InteractionHandler } from "rost/commands/handlers/handler";
+import type { Guild } from "rost/models/guild";
+import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "rost/stores/localisations";
 
 interface RateLimit {
 	nextAllowedUsageTimestamp: number;
@@ -378,7 +378,7 @@ class CommandStore {
 			);
 	}
 
-	getHandler(interaction: Logos.Interaction): InteractionHandler | undefined {
+	getHandler(interaction: Rost.Interaction): InteractionHandler | undefined {
 		if (isAutocomplete(interaction)) {
 			return this.#handlers.autocomplete.get(interaction.commandName);
 		}
@@ -386,11 +386,11 @@ class CommandStore {
 		return this.#handlers.execute.get(interaction.commandName);
 	}
 
-	isShowable(interaction: Logos.Interaction) {
+	isShowable(interaction: Rost.Interaction) {
 		return this.#collection.showable.has(interaction.commandName);
 	}
 
-	hasRateLimit(interaction: Logos.Interaction) {
+	hasRateLimit(interaction: Rost.Interaction) {
 		return this.#collection.withRateLimit.has(interaction.commandName);
 	}
 
@@ -518,7 +518,7 @@ class CommandStore {
 		return lastUseTimestamps.filter((timestamp) => executedAt - timestamp <= intervalMilliseconds);
 	}
 
-	getRateLimit(interaction: Logos.Interaction, { executedAt }: { executedAt: number }): RateLimit | undefined {
+	getRateLimit(interaction: Rost.Interaction, { executedAt }: { executedAt: number }): RateLimit | undefined {
 		const commandId = interaction.data?.id;
 		if (commandId === undefined) {
 			return undefined;

@@ -1,7 +1,7 @@
-import type { LearningLanguage } from "logos:constants/languages/learning";
-import { type PartOfSpeech, getPartOfSpeech } from "logos:constants/parts-of-speech";
+import type { LearningLanguage } from "rost:constants/languages/learning";
+import { type PartOfSpeech, getPartOfSpeech } from "rost:constants/parts-of-speech";
 import * as Dexonline from "dexonline-scraper";
-import { DictionaryAdapter } from "logos/adapters/dictionaries/adapter";
+import { DictionaryAdapter } from "rost/adapters/dictionaries/adapter";
 import type {
 	DefinitionField,
 	DictionaryEntry,
@@ -10,8 +10,8 @@ import type {
 	ExpressionField,
 	InflectionField,
 	PartOfSpeechField,
-} from "logos/adapters/dictionaries/dictionary-entry";
-import type { Client } from "logos/client";
+} from "rost/adapters/dictionaries/dictionary-entry";
+import type { Client } from "rost/client";
 
 class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	static readonly #supportedPartsOfSpeech: PartOfSpeech[] = ["pronoun", "noun", "verb", "adjective", "determiner"];
@@ -38,7 +38,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	}
 
 	parse(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		_: string,
 		learningLanguage: LearningLanguage,
 		results: Dexonline.Results,
@@ -161,7 +161,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	}
 
 	#transformInflection(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		{
 			partOfSpeech,
 			table,
@@ -190,7 +190,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	}
 
 	#pronounTableToFields(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		{ table }: { table: string[][] },
 	): InflectionField | undefined {
 		const [nominativeAccusative, genitiveDative] = table
@@ -231,7 +231,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		};
 	}
 
-	#nounTableToFields(interaction: Logos.Interaction, { table }: { table: string[][] }): InflectionField | undefined {
+	#nounTableToFields(interaction: Rost.Interaction, { table }: { table: string[][] }): InflectionField | undefined {
 		const [nominativeAccusative, genitiveDative, vocative] = table
 			.slice(1)
 			.map((columns) => columns.slice(2))
@@ -292,7 +292,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 		};
 	}
 
-	#verbTableToFields(interaction: Logos.Interaction, { table }: { table: string[][] }): InflectionField | undefined {
+	#verbTableToFields(interaction: Rost.Interaction, { table }: { table: string[][] }): InflectionField | undefined {
 		const moods = table
 			.slice(2, 3)
 			.map((columns) => columns.slice(2))
@@ -515,7 +515,7 @@ class DexonlineAdapter extends DictionaryAdapter<Dexonline.Results> {
 	}
 
 	#adjectiveTableToFields(
-		interaction: Logos.Interaction,
+		interaction: Rost.Interaction,
 		{ table }: { table: string[][] },
 	): InflectionField | undefined {
 		const [nominativeAccusative, genitiveDative] = table

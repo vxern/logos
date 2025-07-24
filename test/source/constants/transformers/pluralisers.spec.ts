@@ -1,5 +1,5 @@
 import { describe, it } from "bun:test";
-import pluralisers from "logos:constants/transformers/pluralisers";
+import pluralisers from "rost:constants/transformers/pluralisers";
 import { expect } from "chai";
 
 describe("The pluralisers object", () => {

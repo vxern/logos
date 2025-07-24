@@ -1,5 +1,5 @@
-import { mention } from "logos:constants/formatting";
-import type { EventLogger } from "logos/stores/journalling/loggers";
+import { mention } from "rost:constants/formatting";
+import type { EventLogger } from "rost/stores/journalling/loggers";
 
 const logger: EventLogger<"purgeEnd"> = (client, [member, channel, messageCount, author], { guildLocale }) => {
 	const strings = constants.contexts.purgeEnd({ localise: client.localise, locale: guildLocale });

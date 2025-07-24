@@ -1,4 +1,4 @@
-import type { Language } from "logos:constants/languages";
+import type { Language } from "rost:constants/languages";
 
 function sortLanguages<T extends Language>(languages: T[]) {
 	return languages.sort((a, b) => a.localeCompare(b, "en", { sensitivity: "base" }));

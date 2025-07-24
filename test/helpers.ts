@@ -1,14 +1,14 @@
-import { type CreateEntryRequestOptions, EntryRequest } from "logos/models/entry-request";
-import { type CreateGuildOptions, Guild } from "logos/models/guild";
-import { type CreateGuildStatisticsOptions, GuildStatistics } from "logos/models/guild-statistics";
-import { type CreatePraiseOptions, Praise } from "logos/models/praise";
-import { type CreateReportOptions, Report } from "logos/models/report";
-import { type CreateResourceOptions, Resource } from "logos/models/resource";
-import { type CreateSuggestionOptions, Suggestion } from "logos/models/suggestion";
-import { type CreateTicketOptions, Ticket } from "logos/models/ticket";
-import { type CreateUserOptions, User } from "logos/models/user";
-import { type CreateWarningOptions, Warning } from "logos/models/warning";
-import type { DatabaseStore } from "logos/stores/database";
+import { type CreateEntryRequestOptions, EntryRequest } from "rost/models/entry-request";
+import { type CreateGuildOptions, Guild } from "rost/models/guild";
+import { type CreateGuildStatisticsOptions, GuildStatistics } from "rost/models/guild-statistics";
+import { type CreatePraiseOptions, Praise } from "rost/models/praise";
+import { type CreateReportOptions, Report } from "rost/models/report";
+import { type CreateResourceOptions, Resource } from "rost/models/resource";
+import { type CreateSuggestionOptions, Suggestion } from "rost/models/suggestion";
+import { type CreateTicketOptions, Ticket } from "rost/models/ticket";
+import { type CreateUserOptions, User } from "rost/models/user";
+import { type CreateWarningOptions, Warning } from "rost/models/warning";
+import type { DatabaseStore } from "rost/stores/database";
 
 function entryRequest(database: DatabaseStore, options?: Partial<CreateEntryRequestOptions>): EntryRequest {
 	return new EntryRequest(database, {
@@ -94,7 +94,7 @@ function suggestion(database: DatabaseStore, options?: Partial<CreateSuggestionO
 		guildId: `${123}`,
 		authorId: `${123}`,
 		createdAt: Date.now().toString(),
-		formData: { suggestion: "Add a new feature to Logos." },
+		formData: { suggestion: "Add a new feature to Rost." },
 		isResolved: false,
 		...options,
 	});

@@ -1,11 +1,11 @@
-import { getLocalisationLocaleByLanguage, isLocalisationLanguage } from "logos:constants/languages/localisation";
-import type { Client } from "logos/client";
-import { handleAutocompleteLanguage } from "logos/commands/fragments/autocomplete/language";
-import { User } from "logos/models/user";
+import { getLocalisationLocaleByLanguage, isLocalisationLanguage } from "rost:constants/languages/localisation";
+import type { Client } from "rost/client";
+import { handleAutocompleteLanguage } from "rost/commands/fragments/autocomplete/language";
+import { User } from "rost/models/user";
 
 async function handleSetLanguageAutocomplete(
 	client: Client,
-	interaction: Logos.Interaction<any, { language: string }>,
+	interaction: Rost.Interaction<any, { language: string }>,
 ): Promise<void> {
 	await handleAutocompleteLanguage(
 		client,
@@ -17,7 +17,7 @@ async function handleSetLanguageAutocomplete(
 
 async function handleSetLanguage(
 	client: Client,
-	interaction: Logos.Interaction<any, { language: string }>,
+	interaction: Rost.Interaction<any, { language: string }>,
 ): Promise<void> {
 	if (!isLocalisationLanguage(interaction.parameters.language)) {
 		const strings = constants.contexts.languageInvalid({ localise: client.localise, locale: interaction.locale });
