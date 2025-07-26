@@ -1,4 +1,4 @@
-import { migrateDocuments, deleteProperty, deleteProperties } from "../helpers.js";
+import { migrateDocuments, deleteProperty } from "../helpers.js";
 
 // This block is executed when the migration is enacted.
 async function up(database) {
@@ -12,7 +12,7 @@ async function up(database) {
 }
 
 // This block is executed when the migration is rolled back.
-async function down(database) {
+async function down(_) {
 	// No changes to make when rolling back.
 }
 
