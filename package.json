@@ -64,9 +64,7 @@
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/bun": "^1.2.18",
-    "@types/chai": "^5.2.2",
     "@types/object-hash": "^3.0.6",
-    "chai": "^5.2.1",
     "pino-pretty": "^13.0.0",
     "typescript": "^5.8.3"
   },
