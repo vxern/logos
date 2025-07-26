@@ -6,7 +6,7 @@ import type {
 	SelectedDesiredProperties,
 } from "rost:constants/properties";
 import type { SlowmodeLevel } from "rost:constants/slowmode";
-import type { PromiseOr, WithRequired } from "rost:core/utilities";
+import type { WithRequired } from "rost:core/utilities";
 import type { EntryRequest } from "rost/models/entry-request";
 import type { Praise } from "rost/models/praise";
 import type { Report } from "rost/models/report";
@@ -16,13 +16,6 @@ import type { Ticket } from "rost/models/ticket";
 import type { Warning } from "rost/models/warning";
 
 declare global {
-	interface PromiseConstructor {
-		createRace<T, R>(
-			elements: T[],
-			doAction: (element: T) => PromiseOr<R | undefined>,
-		): AsyncGenerator<{ element: T; result?: R }, void, void>;
-	}
-
 	interface Promise {
 		/** Ignores the result of the promise. Useful in fire-and-forget situations. */
 		ignore(): void;
@@ -36,14 +29,6 @@ declare global {
 		 * @returns The chunked array.
 		 */
 		toChunked(size: number): T[][];
-	}
-
-	interface ObjectConstructor {
-		mirror<O extends Record<string, string>>(
-			object: O,
-		): {
-			[K in keyof O as O[K]]: K;
-		};
 	}
 }
 
