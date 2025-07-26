@@ -300,9 +300,8 @@ class InteractionCollector<
 		const guildDocument = await Guild.getOrCreate(this.#client, { guildId: interaction.guildId!.toString() });
 
 		const guildLanguage = guildDocument.isTargetLanguageOnlyChannel(interaction.channelId!.toString())
-			? // TODO(vxern): Need to extract this as a constant.
-				"Romanian"
-			: guildDocument.languages.localisation;
+			? constants.GUILD_TARGET_LANGUAGE
+			: constants.GUILD_SOURCE_LANGUAGE;
 		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
 
 		// Otherwise default to the user's app language.

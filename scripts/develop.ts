@@ -109,10 +109,6 @@ const shutdown = bot.shutdown();
 
 const document = new Guild(database, { guildId: guild.id.toString() });
 await document.update(database, () => {
-	document.isNative = true;
-	document.languages = {
-		localisation: "English/American",
-	};
 	document.enabledFeatures = {
 		journalling: true,
 		notices: true,
@@ -120,17 +116,8 @@ await document.update(database, () => {
 		resourceNotices: true,
 		roleNotices: true,
 		welcomeNotices: true,
-		answers: true,
-		corrections: true,
-		cefr: true,
-		game: true,
 		resources: true,
-		translate: true,
-		word: true,
-		wordSigils: true,
-		context: true,
 		targetOnly: true,
-		roleLanguages: true,
 		alerts: true,
 		policy: true,
 		rules: true,
@@ -200,24 +187,11 @@ await document.update(database, () => {
 			channelId: idByName(channels, "verify・here"),
 			ruleChannelId: idByName(channels, "rule"),
 		},
-		cefr: {
-			examples: {
-				a1: "Salut!\n- Salut.\nMă numesc Marian.\nTu cum te numești?\n- Eu mă numesc Carmen.\nÎmi pare bine.\n- Încântat.",
-				a2: "- Săptămâna trecută a fost frig în toată ţara.\n- Azi vremea a fost frumoasă, dar nu foarte caldă dimineaţa.\n- Condiţiile meteo sunt obişnuite pentru această lună.",
-				b1: "Este nevoie, de exemplu, de soluţii pentru un transport mai rapid şi mai comod. Dacă numărul de locuitori creşte, vor fi mai multe mijloace de transport, deci mai multă poluare, mai mult zgomot şi stres... În unele oraşe, mulţi oameni folosesc acum trenul în loc de maşină.",
-				b2: "Toți oamenii se nasc liberi și egali și au anumite drepturi naturale, esențiale și inalienabile; printre care se pot menționa dreptul de a se bucura și a-și apăra viețiile și libertățile; acela de a achiziționa, poseda și proteja proprietatea personală; în fine, acela de a căuta și obține siguranța și fericirea.",
-				c1: "Este de așteptat ca membrii să se trateze reciproc cu respect, considerație și cu înțelegere. Comportamentul rău-intenționat sub formă de abuz verbal, discriminare, hărțuire și alte forme de comportament jignitor sau toxic nu vor fi tolerate.",
-				c2: "Dar văile vuiră. Căzută în genunchi,\nÎşi ridicase capul, îl clătină spre stele,\nÎl prăvăli apoi, stârnind pe apă\nFugare roiuri negre de mărgele.\nO pasăre albastră zvâcnise dintre ramuri,\nŞi viaţa căprioarei spre zările târzii\nZburase lin, cu ţipăt, ca păsările toamna\nCând lasă cuiburi sure şi pustii.\nÎmpleticit m-am dus şi i-am închis\nOchii umbroşi, trist străjuiţi de coarne,\nŞi-am tresărit tăcut şi alb când tata\nMi-a şuierat cu bucurie: - Avem carne!",
-			},
-		},
 		resources: {
 			url: "https://learnromanian.co.uk",
 		},
 		targetOnly: {
 			channelIds: [idByName(channels, "target・language")],
-		},
-		roleLanguages: {
-			ids: {},
 		},
 		alerts: {
 			channelId: idByName(channels, "alerts"),

@@ -74,10 +74,7 @@ class GuildStore {
 	async #setupGuildForFirstTime(guild: Discord.Guild | Rost.Guild): Promise<void> {
 		this.log.info(`Setting Rost up on ${this.#client.diagnostics.guild(guild)}...`);
 
-		const guildDocument = await Guild.getOrCreate(this.#client, { guildId: guild.id.toString() });
-		if (guildDocument.isNative) {
-			await this.#prefetchMembers(guild);
-		}
+		await this.#prefetchMembers(guild);
 
 		this.log.info(`Rost has been set up on ${this.#client.diagnostics.guild(guild)}.`);
 	}

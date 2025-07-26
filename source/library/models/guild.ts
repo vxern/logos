@@ -17,14 +17,11 @@ class Guild extends GuildModel {
 
 	constructor(
 		database: DatabaseStore,
-		{ createdAt, isNative, languages, enabledFeatures, journalling, features, ...data }: CreateGuildOptions,
+		{ createdAt, enabledFeatures, journalling, features, ...data }: CreateGuildOptions,
 	) {
 		super(database, data, { collection: "Guilds" });
 
 		this.createdAt = createdAt ?? Date.now();
-		this.languages = languages ?? {
-			localisation: constants.defaults.LOCALISATION_LANGUAGE,
-		};
 		this.enabledFeatures = enabledFeatures ?? {
 			journalling: false,
 			notices: false,
@@ -32,17 +29,8 @@ class Guild extends GuildModel {
 			resourceNotices: false,
 			roleNotices: false,
 			welcomeNotices: false,
-			answers: false,
-			corrections: false,
-			cefr: false,
-			game: false,
 			resources: false,
-			translate: false,
-			word: false,
-			wordSigils: false,
-			context: false,
 			targetOnly: false,
-			roleLanguages: false,
 			alerts: false,
 			policy: false,
 			rules: false,
@@ -77,7 +65,6 @@ class Guild extends GuildModel {
 			praises: false,
 		};
 		this.features = features ?? {};
-		this.isNative = isNative ?? false;
 	}
 
 	static async get(client: Client, data: IdentifierData<Guild>): Promise<Guild | undefined> {

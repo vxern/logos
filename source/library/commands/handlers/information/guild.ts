@@ -1,6 +1,5 @@
 import { mention, timestamp } from "rost:constants/formatting";
 import type { Client } from "rost/client";
-import { Guild } from "rost/models/guild";
 
 /** Displays information about the guild that this command was executed in. */
 async function handleDisplayGuildInformation(client: Client, interaction: Rost.Interaction): Promise<void> {
@@ -8,8 +7,6 @@ async function handleDisplayGuildInformation(client: Client, interaction: Rost.I
 	if (guild === undefined) {
 		return;
 	}
-
-	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 
 	const owner = client.entities.users.get(guild.ownerId);
 	if (owner === undefined) {
@@ -49,30 +46,20 @@ async function handleDisplayGuildInformation(client: Client, interaction: Rost.I
 								value: getChannelInformationSection(client, interaction, guild),
 								inline: true,
 							},
-							...(guildDocument.isNative
-								? [
-										{
-											name: `${constants.emojis.commands.information.guild.moderators} ${strings.description.moderators.title}`,
-											value: strings.description.moderators.overseenByModerators,
-											inline: false,
-										},
-										{
-											name: `${constants.emojis.commands.information.guild.proficiencyDistribution} ${strings.description.distribution}`,
-											value: formatDistribution(
-												client,
-												interaction,
-												getProficiencyRoleDistribution(client, guild),
-											),
-											inline: false,
-										},
-									]
-								: [
-										{
-											name: `${constants.emojis.commands.information.guild.owner} ${strings.description.owner}`,
-											value: mention(owner.id, { type: "user" }),
-											inline: true,
-										},
-									]),
+							{
+								name: `${constants.emojis.commands.information.guild.moderators} ${strings.description.moderators.title}`,
+								value: strings.description.moderators.overseenByModerators,
+								inline: false,
+							},
+							{
+								name: `${constants.emojis.commands.information.guild.proficiencyDistribution} ${strings.description.distribution}`,
+								value: formatDistribution(
+									client,
+									interaction,
+									getProficiencyRoleDistribution(client, guild),
+								),
+								inline: false,
+							},
 						],
 					},
 				],

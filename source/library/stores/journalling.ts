@@ -1,4 +1,3 @@
-import { getLocalisationLocaleByLanguage } from "rost:constants/languages/localisation";
 import type pino from "pino";
 import type { Client } from "rost/client";
 import { Collector } from "rost/collectors";
@@ -96,8 +95,7 @@ class JournallingStore {
 			return;
 		}
 
-		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.languages.localisation);
-		const message = await generateMessage(this.#client, args, { guildLocale });
+		const message = await generateMessage(this.#client, args, { guildLocale: constants.GUILD_TARGET_LOCALE });
 		if (message === undefined) {
 			return;
 		}

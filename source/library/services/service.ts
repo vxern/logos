@@ -42,7 +42,7 @@ abstract class LocalService extends Service {
 	}
 
 	get guildLocale(): Locale {
-		return getLocalisationLocaleByLanguage(this.guildDocument.languages.localisation);
+		return getLocalisationLocaleByLanguage(constants.GUILD_TARGET_LANGUAGE);
 	}
 
 	constructor(client: Client, { identifier, guildId }: { identifier: string; guildId: bigint }) {
