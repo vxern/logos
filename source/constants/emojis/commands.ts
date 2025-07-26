@@ -20,12 +20,6 @@ export default Object.freeze({
 				text: "📜",
 				voice: "🔊",
 			},
-			languages: {
-				languages: "🌍",
-				localisation: "🏠",
-				feature: "🎯",
-			},
-			owner: "👑",
 			moderators: "⚖️",
 			proficiencyDistribution: "🎓",
 		},

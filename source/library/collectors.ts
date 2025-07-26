@@ -1,5 +1,4 @@
 import { isSubcommand, isSubcommandGroup } from "rost:constants/interactions";
-import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "rost:constants/languages/localisation";
 import type { DesiredProperties, DesiredPropertiesBehaviour } from "rost:constants/properties";
 import type { PromiseOr } from "rost:core/utilities";
 import { nanoid } from "nanoid";
@@ -273,7 +272,6 @@ class InteractionCollector<
 				...locales,
 				...{
 					displayLocale: parameters.show ? locales.guildLocale : locales.locale,
-					displayLanguage: parameters.show ? locales.guildLanguage : locales.language,
 				},
 				commandName: name,
 				metadata,
@@ -284,32 +282,23 @@ class InteractionCollector<
 		});
 	}
 
-	async #getLocaleData(
-		interaction: Interaction,
-	): Promise<Omit<Rost.InteractionLocaleData, "displayLocale" | "displayLanguage">> {
+	async #getLocaleData(interaction: Interaction): Promise<Omit<Rost.InteractionLocaleData, "displayLocale">> {
 		const member = this.#client.entities.members.get(interaction.guildId!)?.get(interaction.user.id);
 		if (member === undefined) {
 			return {
-				locale: constants.defaults.LOCALISATION_LOCALE,
-				language: constants.defaults.LOCALISATION_LANGUAGE,
-				guildLocale: constants.defaults.LOCALISATION_LOCALE,
-				guildLanguage: constants.defaults.LOCALISATION_LANGUAGE,
+				locale: constants.defaults.GUILD_SOURCE_LOCALE,
+				guildLocale: constants.defaults.GUILD_SOURCE_LOCALE,
 			};
 		}
 
 		const guildDocument = await Guild.getOrCreate(this.#client, { guildId: interaction.guildId!.toString() });
 
-		const guildLanguage = guildDocument.isTargetLanguageOnlyChannel(interaction.channelId!.toString())
-			? constants.GUILD_TARGET_LANGUAGE
-			: constants.GUILD_SOURCE_LANGUAGE;
-		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
+		const guildLocale = guildDocument.isTargetLanguageOnlyChannel(interaction.channelId!.toString())
+			? guildDocument.locales.target
+			: guildDocument.locales.source;
 
 		// Otherwise default to the user's app language.
-		const appLocale = interaction.locale;
-		const language = getDiscordLanguageByLocale(appLocale) ?? constants.defaults.LOCALISATION_LANGUAGE;
-		const locale = getLocalisationLocaleByLanguage(language);
-
-		return { locale, language, guildLocale, guildLanguage };
+		return { locale: interaction.locale, guildLocale };
 	}
 
 	#getMetadata(interaction: Interaction): Rost.Interaction<Metadata>["metadata"] {

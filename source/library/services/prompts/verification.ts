@@ -243,7 +243,7 @@ class VerificationPromptService extends PromptService<{
 
 	getNoPromptsMessageContent(): Discord.CreateMessageOptions {
 		const strings = constants.contexts.noEntryRequests({
-			localise: this.client.localise.bind(this.client),
+			localise: this.client.localise,
 			locale: this.guildLocale,
 		});
 
@@ -290,7 +290,7 @@ class VerificationPromptService extends PromptService<{
 			const ticketChannel = await this.client.bot.helpers.getChannel(entryRequestDocument.ticketChannelId);
 			if (ticketChannel !== undefined) {
 				const strings = constants.contexts.inquiryInProgress({
-					localise: this.client.localise.bind(this.client),
+					localise: this.client.localise,
 					locale: interaction.locale,
 				});
 				this.client

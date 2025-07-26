@@ -11,7 +11,6 @@ import { RethinkDBAdapter } from "rost/adapters/databases/rethinkdb/database";
 import { DatabaseMetadata } from "rost/models/database-metadata";
 import { EntryRequest } from "rost/models/entry-request";
 import { Guild } from "rost/models/guild";
-import { GuildStatistics } from "rost/models/guild-statistics";
 import type { Model, ModelConstructor } from "rost/models/model";
 import { Praise } from "rost/models/praise";
 import { Report } from "rost/models/report";
@@ -26,7 +25,6 @@ class DatabaseStore {
 	static readonly #classes: Record<Collection, ModelConstructor> = Object.freeze({
 		DatabaseMetadata: DatabaseMetadata,
 		EntryRequests: EntryRequest,
-		GuildStatistics: GuildStatistics,
 		Guilds: Guild,
 		Praises: Praise,
 		Reports: Report,

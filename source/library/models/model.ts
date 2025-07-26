@@ -80,7 +80,7 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 		const [collectionCamelcase, ...data] = id.split(constants.special.database.separator) as [string, string[]];
 		const collection = capitalise(collectionCamelcase);
 		if (!isValidCollection(collection)) {
-			throw new Error(`Collection "${collectionCamelcase}" encoded in ID "${id}" is unknown.`);
+			throw new Error(`Collection '${collectionCamelcase}' encoded in ID '${id}' is unknown.`);
 		}
 
 		return [collection, data as IdentifierParts<M>];
@@ -175,7 +175,6 @@ abstract class Model<Generic extends { collection: Collection; idParts: readonly
 const DatabaseMetadataModel = Model<{ collection: "DatabaseMetadata"; idParts: [] }>;
 const EntryRequestModel = Model<{ collection: "EntryRequests"; idParts: ["guildId", "authorId"] }>;
 const GuildModel = Model<{ collection: "Guilds"; idParts: ["guildId"] }>;
-const GuildStatisticsModel = Model<{ collection: "GuildStatistics"; idParts: ["guildId"] }>;
 const PraiseModel = Model<{ collection: "Praises"; idParts: ["guildId", "authorId", "targetId", "createdAt"] }>;
 const ReportModel = Model<{ collection: "Reports"; idParts: ["guildId", "authorId", "createdAt"] }>;
 const ResourceModel = Model<{ collection: "Resources"; idParts: ["guildId", "authorId", "createdAt"] }>;
@@ -197,7 +196,6 @@ export {
 	DatabaseMetadataModel,
 	EntryRequestModel,
 	GuildModel,
-	GuildStatisticsModel,
 	PraiseModel,
 	ReportModel,
 	ResourceModel,

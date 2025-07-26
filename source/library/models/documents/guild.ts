@@ -2,6 +2,10 @@ import type { TimeStruct } from "rost:constants/time";
 
 interface GuildDocument {
 	createdAt: number;
+	locales: {
+		source: Discord.Locale;
+		target: Discord.Locale;
+	};
 	enabledFeatures: {
 		journalling: boolean;
 		notices: boolean;

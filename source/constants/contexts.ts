@@ -1,4 +1,3 @@
-import type { Locale } from "rost:constants/languages/localisation";
 import type { RuleOrOther } from "rost:constants/rules";
 import type { SlowmodeLevel } from "rost:constants/slowmode";
 import type { TimeUnit } from "rost:constants/time";
@@ -8,7 +7,7 @@ type ContextBuilder<T extends object> = ({
 	localise,
 	localiseRaw,
 	locale,
-}: { localise: Client["localise"]; localiseRaw?: Client["localiseRaw"]; locale: Locale }) => T;
+}: { localise: Client["localise"]; localiseRaw?: Client["localiseRaw"]; locale: Discord.Locale }) => T;
 
 export default Object.freeze({
 	botInformation: ({ localise, locale }) => ({

@@ -1,5 +1,4 @@
 import { timestamp, trim } from "rost:constants/formatting";
-import type { Locale, LocalisationLanguage } from "rost:constants/languages/localisation";
 import { getSnowflakeFromIdentifier } from "rost:constants/patterns";
 import { nanoid } from "nanoid";
 import type pino from "pino";
@@ -171,14 +170,11 @@ class InteractionStore {
 			return undefined;
 		}
 
-		let displayLocale: Locale;
-		let displayLanguage: LocalisationLanguage;
+		let displayLocale: Discord.Locale;
 		if (guildDocument.isTargetLanguageOnlyChannel(message.channelId.toString())) {
-			displayLocale = constants.GUILD_TARGET_LOCALE;
-			displayLanguage = constants.GUILD_TARGET_LANGUAGE;
+			displayLocale = guildDocument.locales.target;
 		} else {
-			displayLocale = constants.GUILD_SOURCE_LOCALE;
-			displayLanguage = constants.GUILD_SOURCE_LANGUAGE;
+			displayLocale = guildDocument.locales.source;
 		}
 
 		return {
@@ -193,12 +189,9 @@ class InteractionStore {
 			token: nanoid(),
 			data: { name: constants.components.none },
 			bot: this.#client.bot as unknown as Rost.Interaction["bot"],
-			locale: constants.GUILD_SOURCE_LOCALE,
-			language: constants.GUILD_SOURCE_LANGUAGE,
-			guildLocale: constants.GUILD_TARGET_LOCALE,
-			guildLanguage: constants.GUILD_TARGET_LANGUAGE,
+			locale: guildDocument.locales.source,
+			guildLocale: guildDocument.locales.source,
 			displayLocale,
-			displayLanguage,
 			commandName: constants.components.none,
 			metadata: [constants.components.none],
 			parameters: {
@@ -268,7 +261,7 @@ class InteractionStore {
 				);
 
 				const strings = constants.contexts.rateLimited({
-					localise: this.#client.localise.bind(this),
+					localise: this.#client.localise,
 					locale: interaction.locale,
 				});
 				this.warning(interaction, {

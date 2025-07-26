@@ -14,7 +14,10 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 		}
 
 		const strings = {
-			...constants.contexts.resourceNotice({ localise: this.client.localise, locale: this.guildLocale }),
+			...constants.contexts.resourceNotice({
+				localise: this.client.localise,
+				locale: this.guildLocale,
+			}),
 		};
 		return {
 			embeds: [

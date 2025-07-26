@@ -1,4 +1,3 @@
-import type { Locale } from "rost:constants/languages/localisation";
 import type { PromiseOr } from "rost:core/utilities";
 import type { Client } from "rost/client";
 import guildBanAdd from "rost/stores/journalling/discord/guild-ban-add";
@@ -65,7 +64,7 @@ type EventLoggers = { [Event in keyof Events]?: EventLogger<Event> };
 type EventLogger<Event extends keyof Events> = (
 	client: Client,
 	event: Events[Event],
-	{ guildLocale }: { guildLocale: Locale },
+	{ guildLocale }: { guildLocale: Discord.Locale },
 ) => PromiseOr<Discord.CreateMessageOptions | undefined>;
 
 export default loggers;

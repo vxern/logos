@@ -1,5 +1,4 @@
 import { isAutocomplete } from "rost:constants/interactions";
-import { getDiscordLanguageByLocale } from "rost:constants/languages/localisation";
 import { timeStructToMilliseconds } from "rost:constants/time";
 import { isDefined } from "rost:core/utilities";
 import type pino from "pino";
@@ -117,7 +116,7 @@ class CommandStore {
 			const { name, nameLocalizations } = nameLocalisations;
 
 			if (commandMetadataByDisplayName.has(name)) {
-				log.warn(`Duplicate command "${name}". Skipping addition...`);
+				log.warn(`Duplicate command '${name}'. Skipping addition...`);
 				continue;
 			}
 
@@ -134,8 +133,7 @@ class CommandStore {
 
 				const buffer = nameBuffers[locale]!;
 				if (buffer.has(name)) {
-					const language = getDiscordLanguageByLocale(locale)!;
-					log.warn(`Duplicate command "${name}" in ${language}. Skipping addition...`);
+					log.warn(`Duplicate command '${name}' in locale '${locale}'. Skipping addition...`);
 					delete nameLocalizations[locale];
 					continue;
 				}

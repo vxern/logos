@@ -1,5 +1,5 @@
 import type constants_ from "rost:constants/constants";
-import type { Locale, LocalisationLanguage } from "rost:constants/languages";
+import type { Locale } from "rost:constants/languages";
 import type {
 	DesiredProperties,
 	DesiredPropertiesBehaviour,
@@ -80,11 +80,8 @@ declare global {
 		interface InteractionLocaleData {
 			// Localisation
 			locale: Locale;
-			language: LocalisationLanguage;
 			guildLocale: Locale;
-			guildLanguage: LocalisationLanguage;
 			displayLocale: Locale;
-			displayLanguage: LocalisationLanguage;
 		}
 
 		type InteractionParameters<Parameters> = Parameters & {

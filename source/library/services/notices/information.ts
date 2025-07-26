@@ -7,7 +7,10 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const strings = constants.contexts.rules({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.rules({
+			localise: this.client.localise,
+			locale: this.guildLocale,
+		});
 		return {
 			embeds: [
 				{

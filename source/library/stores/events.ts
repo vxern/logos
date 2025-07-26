@@ -103,7 +103,7 @@ class EventStore {
 	#unregisterCollector(event: Event, collector: Collector<Event>): void {
 		const collectors = this.#collectors.get(event);
 		if (collectors === undefined) {
-			throw new Error(`Collectors for event "${event}" unexpectedly missing.`);
+			throw new Error(`Collectors for event '${event}' unexpectedly missing.`);
 		}
 
 		collectors.delete(collector);

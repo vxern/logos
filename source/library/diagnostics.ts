@@ -76,7 +76,7 @@ class Diagnostics {
 			role = roleOrId;
 		}
 
-		return `role "${role.name}" (ID ${role.id})`;
+		return `role '${role.name}' (ID ${role.id})`;
 	}
 
 	guild(guildOrId: IndexOr<GuildLike>): string {
@@ -91,7 +91,7 @@ class Diagnostics {
 			guild = guildOrId;
 		}
 
-		return `guild "${guild.name}" (ID ${guild.id})`;
+		return `guild '${guild.name}' (ID ${guild.id})`;
 	}
 
 	message(messageOrId: IndexOr<MessageLike>): string {
@@ -180,7 +180,7 @@ class Diagnostics {
 			return `unnamed ${channelTypeFormatted} (ID ${channel.id}) @ ${guildFormatted}`;
 		}
 
-		return `${channelTypeFormatted} "${channel.name}" (ID ${channel.id}) @ ${guildFormatted}`;
+		return `${channelTypeFormatted} '${channel.name}' (ID ${channel.id}) @ ${guildFormatted}`;
 	}
 
 	interaction(interaction: InteractionLike): string {

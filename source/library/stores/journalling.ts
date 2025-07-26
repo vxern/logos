@@ -95,7 +95,7 @@ class JournallingStore {
 			return;
 		}
 
-		const message = await generateMessage(this.#client, args, { guildLocale: constants.GUILD_TARGET_LOCALE });
+		const message = await generateMessage(this.#client, args, { guildLocale: guildDocument.locales.source });
 		if (message === undefined) {
 			return;
 		}
