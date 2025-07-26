@@ -187,7 +187,7 @@ await document.update(database, () => {
 			channelId: idByName(channels, "journal"),
 		},
 		informationNotices: {
-			channelId: idByName(channels, "rules"),
+			channelId: idByName(channels, "welcome"),
 			inviteLink: `https://discord.gg/${inviteCode}`,
 		},
 		resourceNotices: {
@@ -197,7 +197,7 @@ await document.update(database, () => {
 			channelId: idByName(channels, "roles"),
 		},
 		welcomeNotices: {
-			channelId: idByName(channels, "welcome"),
+			channelId: idByName(channels, "verify・here"),
 			ruleChannelId: idByName(channels, "rule"),
 		},
 		cefr: {
@@ -211,16 +211,16 @@ await document.update(database, () => {
 			},
 		},
 		resources: {
-			url: "https://github.com/vxern/romanian",
+			url: "https://learnromanian.co.uk",
 		},
 		targetOnly: {
-			channelIds: [idByName(channels, "romanian")],
+			channelIds: [idByName(channels, "target・language")],
 		},
 		roleLanguages: {
 			ids: {},
 		},
 		alerts: {
-			channelId: idByName(channels, "mod-chat"),
+			channelId: idByName(channels, "alerts"),
 		},
 		warns: {
 			expiration: [2, "month"],
