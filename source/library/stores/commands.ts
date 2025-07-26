@@ -74,6 +74,7 @@ class CommandStore {
 			this.commands.information,
 			this.commands.acknowledgements,
 			this.commands.credits,
+			this.commands.licence,
 		].filter(isDefined);
 	}
 
