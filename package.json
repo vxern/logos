@@ -38,13 +38,13 @@
     "develop": "bun run ./scripts/develop.ts",
     "start": "bun run ./scripts/run.ts",
     "setup": "bun load:sentence_pairs",
-    "### DATABASE ########################################################": "",
+    "### COMMANDS ########################################################": "",
     "database:migrate": "bun run ./scripts/database/migrate.ts",
-    "### GENERATORS ######################################################": "",
     "generate:migration": "bun run ./scripts/generate/migration.ts",
     "### ALIASES #########################################################": "",
     "g:migration": "bun run generate:migration",
-    "db:migrate": "bun run database:migrate"
+    "db:migrate": "bun run database:migrate",
+    "db:rollback": "bun run database:migrate --rollback"
   },
   "dependencies": {
     "@discordeno/bot": "^21.0.0",
