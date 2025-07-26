@@ -14,22 +14,18 @@ export default Object.freeze({
 	botInformation: ({ localise, locale }) => ({
 		concept: {
 			title: localise("information.options.bot.strings.concept.title", locale)(),
-			description: localise("information.options.bot.strings.concept.description", locale)(),
+			description: localise("information.options.bot.strings.concept.description", locale),
 		},
 		function: {
 			title: localise("information.options.bot.strings.function.title", locale)(),
 			description: localise("information.options.bot.strings.function.description", locale)(),
 			features: {
-				definitions: localise("information.options.bot.strings.function.features.definitions", locale)(),
-				translations: localise("information.options.bot.strings.function.features.translations", locale)(),
-				games: localise("information.options.bot.strings.function.features.games", locale)(),
-				messages: localise("information.options.bot.strings.function.features.messages", locale)(),
-				guides: localise("information.options.bot.strings.function.features.guides", locale)(),
+				information: localise("information.options.bot.strings.function.features.information", locale)(),
+				moderation: localise("information.options.bot.strings.function.features.moderation", locale)(),
+				roles: localise("information.options.bot.strings.function.features.roles", locale)(),
+				music: localise("information.options.bot.strings.function.features.music", locale)(),
+				social: localise("information.options.bot.strings.function.features.social", locale)(),
 			},
-		},
-		languages: {
-			title: localise("information.options.bot.strings.languages.title", locale)(),
-			description: localise("information.options.bot.strings.languages.description", locale)(),
 		},
 	}),
 	guildInformation: ({ localise, locale }) => ({

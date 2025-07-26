@@ -4,12 +4,11 @@ export default Object.freeze({
 			features: {
 				bot: "🤖",
 				function: "🛠️",
-				definitions: "🔍",
-				translations: "🌍",
-				games: "🎮",
-				messages: "✍️",
-				guides: "🎓",
-				languages: "🌍",
+				information: "ℹ️",
+				moderation: "💢",
+				roles: "💼",
+				music: "🎶",
+				social: "💐",
 			},
 		},
 		guild: {
