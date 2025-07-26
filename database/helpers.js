@@ -14,7 +14,7 @@ function renameProperty(document, { from, to }) {
 }
 
 function deleteProperty(document, property) {
-	delete document[property];
+	delete document?.[property];
 }
 
 function deleteProperties(document, properties) {
