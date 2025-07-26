@@ -34,7 +34,7 @@
   ],
   "scripts": {
     "### CORE ############################################################": "",
-    "check": "biome check --write --unsafe ./scripts/ ./source/ ./test/ && tsc",
+    "check": "biome check --write --unsafe ./scripts/ ./source/ && tsc",
     "develop": "bun run ./scripts/develop.ts",
     "start": "bun run ./scripts/run.ts",
     "setup": "bun load:sentence_pairs",

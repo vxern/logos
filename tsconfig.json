@@ -35,7 +35,6 @@
 			"rost:constants/*": ["./source/constants/*"],
 			"rost:database/*": ["./database/*"],
 			"rost:core/*": ["./source/*"],
-			"rost:test/*": ["./test/*"],
 			"rost:core/constants/*": ["./?"],
 			"rost:core/library/*": ["./?"],
 			"rost:core/index": ["./?"]
