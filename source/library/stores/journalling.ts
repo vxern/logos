@@ -97,10 +97,7 @@ class JournallingStore {
 		}
 
 		const guildLocale = getLocalisationLocaleByLanguage(guildDocument.languages.localisation);
-		const message = await generateMessage(this.#client, args, {
-			guildLocale,
-			featureLanguage: guildDocument.languages.feature,
-		});
+		const message = await generateMessage(this.#client, args, { guildLocale });
 		if (message === undefined) {
 			return;
 		}

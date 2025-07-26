@@ -1,5 +1,4 @@
 import type { Translation } from "rost:constants/contributions";
-import type { LocalisationLanguage } from "rost:constants/languages/localisation";
 import type { Client } from "rost/client";
 
 async function handleDisplayCredits(client: Client, interaction: Rost.Interaction): Promise<void> {
@@ -9,12 +8,9 @@ async function handleDisplayCredits(client: Client, interaction: Rost.Interactio
 function getTranslationView(client: Client, interaction: Rost.Interaction): Discord.Camelize<Discord.DiscordEmbed> {
 	const fields: Discord.Camelize<Discord.DiscordEmbedField>[] = [];
 
-	const strings = {
-		...constants.contexts.credits({ localise: client.localise, locale: interaction.locale }),
-		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
-	};
+	const strings = constants.contexts.credits({ localise: client.localise, locale: interaction.locale });
 	for (const [language, data] of (
-		Object.entries(constants.contributions.translation) as [LocalisationLanguage, Translation][]
+		Object.entries(constants.contributions.translation) as [string, Translation][]
 	).sort(([_, a], [__, b]) => b.completion - a.completion)) {
 		const contributorsFormatted = data.contributors
 			.map((contributor) => {
@@ -28,7 +24,7 @@ function getTranslationView(client: Client, interaction: Rost.Interaction): Disc
 			.join("\n");
 
 		fields.push({
-			name: `${data.flag} ${strings.language(language)} (${data.completion * 10}%)`,
+			name: `${data.flag} ${language} (${data.completion * 10}%)`,
 			value: contributorsFormatted,
 			inline: true,
 		});

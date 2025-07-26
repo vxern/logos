@@ -1,12 +1,10 @@
-import { isAutocomplete, isSubcommand, isSubcommandGroup } from "rost:constants/interactions";
-import { type LearningLanguage, getLearningLocaleByLanguage } from "rost:constants/languages/learning";
+import { isSubcommand, isSubcommandGroup } from "rost:constants/interactions";
 import { getDiscordLanguageByLocale, getLocalisationLocaleByLanguage } from "rost:constants/languages/localisation";
 import type { DesiredProperties, DesiredPropertiesBehaviour } from "rost:constants/properties";
 import type { PromiseOr } from "rost:core/utilities";
 import { nanoid } from "nanoid";
 import type { Client } from "rost/client";
 import { Guild } from "rost/models/guild";
-import { User } from "rost/models/user";
 
 type Interaction = Discord.SetupDesiredProps<Discord.Interaction, DesiredProperties, DesiredPropertiesBehaviour>;
 
@@ -296,47 +294,23 @@ class InteractionCollector<
 				language: constants.defaults.LOCALISATION_LANGUAGE,
 				guildLocale: constants.defaults.LOCALISATION_LOCALE,
 				guildLanguage: constants.defaults.LOCALISATION_LANGUAGE,
-				learningLocale: constants.defaults.LEARNING_LOCALE,
-				learningLanguage: constants.defaults.LEARNING_LANGUAGE,
-				featureLanguage: constants.defaults.FEATURE_LANGUAGE,
 			};
 		}
 
-		const [userDocument, guildDocument] = await Promise.all([
-			User.getOrCreate(this.#client, { userId: interaction.user.id.toString() }),
-			Guild.getOrCreate(this.#client, { guildId: interaction.guildId!.toString() }),
-		]);
-
-		const targetLanguage = guildDocument.languages.target;
-		const learningLanguage = this.#determineLearningLanguage(guildDocument, member) ?? targetLanguage;
-		const learningLocale = getLearningLocaleByLanguage(learningLanguage);
+		const guildDocument = await Guild.getOrCreate(this.#client, { guildId: interaction.guildId!.toString() });
 
 		const guildLanguage = guildDocument.isTargetLanguageOnlyChannel(interaction.channelId!.toString())
-			? targetLanguage
+			? // TODO(vxern): Need to extract this as a constant.
+				"Romanian"
 			: guildDocument.languages.localisation;
-		const guildLocale = getLearningLocaleByLanguage(guildLanguage);
-		const featureLanguage = guildDocument.languages.feature;
-
-		// If the user has configured a custom locale, use the user's preferred locale.
-		if (!isAutocomplete(interaction) && userDocument.preferredLanguage !== undefined) {
-			const language = userDocument.preferredLanguage;
-			const locale = getLocalisationLocaleByLanguage(language);
-			return {
-				locale,
-				language,
-				guildLocale,
-				guildLanguage,
-				learningLocale,
-				learningLanguage,
-				featureLanguage,
-			};
-		}
+		const guildLocale = getLocalisationLocaleByLanguage(guildLanguage);
 
 		// Otherwise default to the user's app language.
 		const appLocale = interaction.locale;
 		const language = getDiscordLanguageByLocale(appLocale) ?? constants.defaults.LOCALISATION_LANGUAGE;
 		const locale = getLocalisationLocaleByLanguage(language);
-		return { locale, language, guildLocale, guildLanguage, learningLocale, learningLanguage, featureLanguage };
+
+		return { locale, language, guildLocale, guildLanguage };
 	}
 
 	#getMetadata(interaction: Interaction): Rost.Interaction<Metadata>["metadata"] {
@@ -385,23 +359,6 @@ class InteractionCollector<
 		}
 
 		return result as unknown as Partial<Parameters>;
-	}
-
-	#determineLearningLanguage(guildDocument: Guild, member: Rost.Member): LearningLanguage | undefined {
-		if (!guildDocument.hasEnabled("roleLanguages")) {
-			return undefined;
-		}
-
-		const roleLanguages = guildDocument.feature("roleLanguages");
-
-		const userLearningLanguage = Object.entries(roleLanguages.ids).find(([key, _]) =>
-			member.roles.includes(BigInt(key)),
-		)?.[1];
-		if (userLearningLanguage === undefined) {
-			return undefined;
-		}
-
-		return userLearningLanguage;
 	}
 
 	encodeId<Metadata extends string[] = []>(metadata: Metadata): string {

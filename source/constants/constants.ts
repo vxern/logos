@@ -5,16 +5,11 @@ import contexts from "rost:constants/contexts";
 import contributions from "rost:constants/contributions";
 import database from "rost:constants/database";
 import defaults from "rost:constants/defaults";
-import dictionaries from "rost:constants/dictionaries";
 import directories from "rost:constants/directories";
 import discord from "rost:constants/discord";
 import emojis from "rost:constants/emojis";
-import endpoints from "rost:constants/endpoints";
 import gifs from "rost:constants/gifs";
-import keys from "rost:constants/keys";
-import languages from "rost:constants/languages";
 import lengths from "rost:constants/lengths";
-import licences from "rost:constants/licences";
 import links from "rost:constants/links";
 import localisations from "rost:constants/localisations";
 import logTargets from "rost:constants/log-targets";
@@ -26,7 +21,6 @@ import roles from "rost:constants/roles";
 import rules from "rost:constants/rules";
 import slowmode from "rost:constants/slowmode";
 import special from "rost:constants/special";
-import statuses from "rost:constants/statuses";
 import time from "rost:constants/time";
 
 const constants = Object.freeze({
@@ -73,16 +67,11 @@ export default Object.freeze({
 	contributions,
 	database,
 	defaults,
-	dictionaries,
 	directories,
 	discord,
 	emojis,
-	endpoints,
 	gifs,
-	keys,
-	languages,
 	lengths,
-	licences,
 	links,
 	localisations,
 	logTargets,
@@ -94,6 +83,5 @@ export default Object.freeze({
 	rules,
 	slowmode,
 	special,
-	statuses,
 	time,
 });

@@ -112,8 +112,6 @@ await document.update(database, () => {
 	document.isNative = true;
 	document.languages = {
 		localisation: "English/American",
-		target: "Romanian",
-		feature: "Romanian",
 	};
 	document.enabledFeatures = {
 		journalling: true,

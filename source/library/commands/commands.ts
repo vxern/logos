@@ -4,10 +4,6 @@ import type { InteractionHandler } from "rost/commands/handlers/handler";
 import { handleDisplayBotInformation } from "rost/commands/handlers/information/bot";
 import { handleDisplayGuildInformation } from "rost/commands/handlers/information/guild";
 import {
-	handleDisplaySoftwareLicence,
-	handleDisplaySoftwareLicenceAutocomplete,
-} from "rost/commands/handlers/licence/software";
-import {
 	handleDisplayAuthorPraises,
 	handleDisplayPraisesAutocomplete,
 	handleDisplayTargetPraises,
@@ -126,27 +122,6 @@ const commands = Object.freeze({
 		type: Discord.ApplicationCommandTypes.ChatInput,
 		handle: handleDisplayCredits,
 		defaultMemberPermissions: ["VIEW_CHANNEL"],
-	},
-	licence: {
-		identifier: "licence",
-		type: Discord.ApplicationCommandTypes.ChatInput,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		options: {
-			software: {
-				identifier: "software",
-				type: Discord.ApplicationCommandOptionTypes.SubCommand,
-				handle: handleDisplaySoftwareLicence,
-				handleAutocomplete: handleDisplaySoftwareLicenceAutocomplete,
-				options: {
-					package: {
-						identifier: "package",
-						type: Discord.ApplicationCommandOptionTypes.String,
-						required: true,
-						autocomplete: true,
-					},
-				},
-			},
-		},
 	},
 	pardon: {
 		identifier: "pardon",

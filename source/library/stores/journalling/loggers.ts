@@ -1,4 +1,3 @@
-import type { FeatureLanguage } from "rost:constants/languages/feature";
 import type { Locale } from "rost:constants/languages/localisation";
 import type { PromiseOr } from "rost:core/utilities";
 import type { Client } from "rost/client";
@@ -66,7 +65,7 @@ type EventLoggers = { [Event in keyof Events]?: EventLogger<Event> };
 type EventLogger<Event extends keyof Events> = (
 	client: Client,
 	event: Events[Event],
-	{ guildLocale, featureLanguage }: { guildLocale: Locale; featureLanguage: FeatureLanguage },
+	{ guildLocale }: { guildLocale: Locale },
 ) => PromiseOr<Discord.CreateMessageOptions | undefined>;
 
 export default loggers;

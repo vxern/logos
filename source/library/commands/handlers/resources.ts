@@ -6,21 +6,15 @@ async function handleDisplayResources(client: Client, interaction: Rost.Interact
 	const guildDocument = await Guild.getOrCreate(client, { guildId: interaction.guildId.toString() });
 	const configuration = guildDocument.feature("resources");
 
-	const strings = {
-		...constants.contexts.redirect({
-			localise: client.localise,
-			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
-		}),
-		...constants.contexts.language({
-			localise: client.localise,
-			locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
-		}),
-	};
+	const strings = constants.contexts.redirect({
+		localise: client.localise,
+		locale: interaction.parameters.show ? interaction.guildLocale : interaction.locale,
+	});
 
 	const buttons: Discord.ButtonComponent[] = [
 		{
 			type: Discord.MessageComponentTypes.Button,
-			label: strings.redirect({ language: strings.language(interaction.featureLanguage) }),
+			label: strings.redirect,
 			style: Discord.ButtonStyles.Link,
 			url: configuration.url,
 		},

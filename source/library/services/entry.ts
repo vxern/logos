@@ -47,24 +47,16 @@ class EntryService extends LocalService {
 
 		await this.client.registerInteractionCollector(languageProficiencyButtons);
 
-		const strings = {
-			...constants.contexts.chooseProficiency({
-				localise: this.client.localise,
-				locale: buttonPress.locale,
-			}),
-			...constants.contexts.language({
-				localise: this.client.localise,
-				locale: buttonPress.locale,
-			}),
-		};
+		const strings = constants.contexts.chooseProficiency({
+			localise: this.client.localise,
+			locale: buttonPress.locale,
+		});
 		this.client
 			.notice(buttonPress, {
 				embeds: [
 					{
 						title: strings.title,
-						description: `${strings.description.chooseProficiency({
-							language: strings.language(buttonPress.featureLanguage),
-						})}\n\n${strings.description.canChangeLater({
+						description: `${strings.description.chooseProficiency}\n\n${strings.description.canChangeLater({
 							command: code(
 								this.client.localiseCommand(
 									// @ts-ignore: This is fine for now.

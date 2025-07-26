@@ -1,10 +1,9 @@
 import { timestamp, trim } from "rost:constants/formatting";
 import {
-	type LearningLanguage,
-	type LearningLocale,
-	getLearningLocaleByLanguage,
-} from "rost:constants/languages/learning";
-import { getLocalisationLocaleByLanguage } from "rost:constants/languages/localisation";
+	type Locale,
+	type LocalisationLanguage,
+	getLocalisationLocaleByLanguage,
+} from "rost:constants/languages/localisation";
 import { getSnowflakeFromIdentifier } from "rost:constants/patterns";
 import { nanoid } from "nanoid";
 import type pino from "pino";
@@ -176,17 +175,15 @@ class InteractionStore {
 			return undefined;
 		}
 
-		const learningLanguage = guildDocument.languages.target;
-		const learningLocale = getLearningLocaleByLanguage(learningLanguage);
-
 		const language = guildDocument.languages.localisation;
 		const locale = getLocalisationLocaleByLanguage(language);
 
-		let displayLocale: LearningLocale;
-		let displayLanguage: LearningLanguage;
+		let displayLocale: Locale;
+		let displayLanguage: LocalisationLanguage;
 		if (guildDocument.isTargetLanguageOnlyChannel(message.channelId.toString())) {
-			displayLocale = learningLocale;
-			displayLanguage = learningLanguage;
+			// TODO(vxern): These need to be constants.
+			displayLocale = "ron";
+			displayLanguage = "Romanian";
 		} else {
 			displayLocale = locale;
 			displayLanguage = language;
@@ -208,9 +205,6 @@ class InteractionStore {
 			language,
 			guildLocale: locale,
 			guildLanguage: language,
-			learningLocale,
-			learningLanguage,
-			featureLanguage: guildDocument.languages.feature,
 			displayLocale,
 			displayLanguage,
 			commandName: constants.components.none,

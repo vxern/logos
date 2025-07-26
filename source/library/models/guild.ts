@@ -24,8 +24,6 @@ class Guild extends GuildModel {
 		this.createdAt = createdAt ?? Date.now();
 		this.languages = languages ?? {
 			localisation: constants.defaults.LOCALISATION_LANGUAGE,
-			target: constants.defaults.LEARNING_LANGUAGE,
-			feature: constants.defaults.FEATURE_LANGUAGE,
 		};
 		this.enabledFeatures = enabledFeatures ?? {
 			journalling: false,

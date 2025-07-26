@@ -1,5 +1,5 @@
 import type constants_ from "rost:constants/constants";
-import type { FeatureLanguage, LearningLanguage, Locale, LocalisationLanguage } from "rost:constants/languages";
+import type { Locale, LocalisationLanguage } from "rost:constants/languages";
 import type {
 	DesiredProperties,
 	DesiredPropertiesBehaviour,
@@ -85,11 +85,6 @@ declare global {
 			guildLanguage: LocalisationLanguage;
 			displayLocale: Locale;
 			displayLanguage: LocalisationLanguage;
-			// Learning
-			learningLocale: Locale;
-			learningLanguage: LearningLanguage;
-			// Feature
-			featureLanguage: FeatureLanguage;
 		}
 
 		type InteractionParameters<Parameters> = Parameters & {

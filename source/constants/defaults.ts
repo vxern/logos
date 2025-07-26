@@ -1,17 +1,9 @@
-import type { FeatureLanguage } from "rost:constants/languages/feature";
-import type { LearningLanguage } from "rost:constants/languages/learning";
 import type { Locale, LocalisationLanguage } from "rost:constants/languages/localisation";
-import type { TranslationLanguage } from "rost:constants/languages/translation";
 import type { TimeStruct } from "rost:constants/time";
 import type { RateLimit } from "rost/models/guild";
 
-const FEATURE_LOCALE: Locale = "eng-GB";
-const FEATURE_LANGUAGE: FeatureLanguage = "English";
-const LEARNING_LOCALE: Locale = "eng-GB";
-const LEARNING_LANGUAGE: LearningLanguage = "English/British";
 const LOCALISATION_LOCALE: Locale = "eng-GB";
 const LOCALISATION_LANGUAGE: LocalisationLanguage = "English/British";
-const TRANSLATION_LANGUAGE: TranslationLanguage = "English/British";
 
 const COMMAND_RATE_LIMIT: RateLimit = { uses: 5, within: [10, "second"] };
 const REPORT_RATE_LIMIT: RateLimit = { uses: 50, within: [1, "day"] };
@@ -36,11 +28,6 @@ const MAXIMUM_VOICE_CHANNELS = 5;
 export default Object.freeze({
 	LOCALISATION_LANGUAGE,
 	LOCALISATION_LOCALE,
-	LEARNING_LANGUAGE,
-	LEARNING_LOCALE,
-	FEATURE_LANGUAGE,
-	FEATURE_LOCALE,
-	TRANSLATION_LANGUAGE,
 	COMMAND_RATE_LIMIT,
 	REPORT_RATE_LIMIT,
 	RESOURCE_RATE_LIMIT,

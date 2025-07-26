@@ -7,16 +7,10 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 		submission: Rost.Interaction,
 		{ formData }: { formData: EntryRequestFormData },
 	): Modal<EntryRequestFormData> {
-		const strings = {
-			...constants.contexts.verificationModal({
-				localise: this.client.localise,
-				locale: submission.locale,
-			}),
-			...constants.contexts.language({
-				localise: this.client.localise,
-				locale: submission.locale,
-			}),
-		};
+		const strings = constants.contexts.verificationModal({
+			localise: this.client.localise,
+			locale: submission.locale,
+		});
 		return {
 			title: strings.title,
 			elements: [
@@ -26,10 +20,7 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 						{
 							customId: "reason",
 							type: Discord.MessageComponentTypes.InputText,
-							label: trim(
-								strings.fields.reason({ language: strings.language(submission.featureLanguage) }),
-								45,
-							),
+							label: trim(strings.fields.reason, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,
 							value: formData.reason,

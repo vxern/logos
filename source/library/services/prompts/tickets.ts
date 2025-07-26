@@ -266,10 +266,6 @@ class TicketPromptService extends PromptService<{
 					localise: this.client.localise,
 					locale: this.guildLocale,
 				}),
-				...constants.contexts.language({
-					localise: this.client.localise,
-					locale: this.guildLocale,
-				}),
 			};
 			await this.client.bot.helpers.sendMessage(channel.id, {
 				embeds: [
@@ -278,9 +274,7 @@ class TicketPromptService extends PromptService<{
 						color: constants.colours.husky,
 						fields: [
 							{
-								name: strings.fields.reason({
-									language: strings.language(this.guildDocument.languages.feature),
-								}),
+								name: strings.fields.reason,
 								value: codeMultiline(entryRequest.formData.reason),
 							},
 							{

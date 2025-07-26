@@ -16,7 +16,7 @@ export default Object.freeze([
 	},
 	{
 		users: [contributors.pascu],
-		reason: "Thank you for suggesting the name 'Rost'. Your suggestion ended a long cycle of thinking and rethinking different names, beginning with 'Teacher', going through 'Luna', 'Myna', 'Mollie', the notorious 'Talon', even 'Cards' and 'Tarots' and finally landing on 'Rost', which has now been the name for almost the past two years.",
+		reason: "Thank you for suggesting the name 'Logos'. Your suggestion ended a long cycle of thinking and rethinking different names, beginning with 'Teacher', going through 'Luna', 'Myna', 'Mollie', the notorious 'Talon', even 'Cards' and 'Tarots' and finally landing on 'Logos', which has now been the name for almost the past two years.",
 	},
 	{
 		users: [{ username: "The moderation teams on LR + LA", id: "0" }],

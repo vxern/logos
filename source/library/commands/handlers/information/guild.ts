@@ -49,11 +49,6 @@ async function handleDisplayGuildInformation(client: Client, interaction: Rost.I
 								value: getChannelInformationSection(client, interaction, guild),
 								inline: true,
 							},
-							{
-								name: `${constants.emojis.commands.information.guild.languages.languages} ${strings.description.languages}`,
-								value: getLanguageInformationSection(client, interaction, guildDocument),
-								inline: true,
-							},
 							...(guildDocument.isNative
 								? [
 										{
@@ -109,19 +104,6 @@ function getChannelInformationSection(client: Client, interaction: Rost.Interact
 	const strings = constants.contexts.channelTypes({ localise: client.localise, locale: interaction.locale });
 
 	return `${constants.emojis.commands.information.guild.channels.text} ${strings.text} – ${textChannelsCount}\n${constants.emojis.commands.information.guild.channels.voice} ${strings.voice} – ${voiceChannelsCount}`;
-}
-
-function getLanguageInformationSection(client: Client, interaction: Rost.Interaction, guildDocument: Guild): string {
-	const strings = {
-		...constants.contexts.languageTypes({ localise: client.localise, locale: interaction.locale }),
-		...constants.contexts.language({ localise: client.localise, locale: interaction.locale }),
-	};
-
-	return `${constants.emojis.commands.information.guild.languages.localisation} ${strings.home} – ${strings.language(
-		guildDocument.languages.localisation,
-	)}\n${constants.emojis.commands.information.guild.languages.feature} ${strings.target} – ${strings.language(
-		guildDocument.languages.feature,
-	)}`;
 }
 
 type ProficiencyRoleDistribution = [withRole: [roleId: bigint, frequency: number][], withoutRole: number];

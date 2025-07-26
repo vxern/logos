@@ -1,5 +1,3 @@
-import type { FeatureLanguage } from "rost:constants/languages/feature";
-import type { LearningLanguage } from "rost:constants/languages/learning";
 import type { LocalisationLanguage } from "rost:constants/languages/localisation";
 import type { TimeStruct } from "rost:constants/time";
 
@@ -8,8 +6,6 @@ interface GuildDocument {
 	isNative: boolean;
 	languages: {
 		localisation: LocalisationLanguage;
-		target: LearningLanguage;
-		feature: FeatureLanguage;
 	};
 	enabledFeatures: {
 		journalling: boolean;

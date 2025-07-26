@@ -1,11 +1,10 @@
 import { codeMultiline } from "rost:constants/formatting";
 import type { EventLogger } from "rost/stores/journalling/loggers";
 
-const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest], { guildLocale, featureLanguage }) => {
+const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest], { guildLocale }) => {
 	const strings = {
 		...constants.contexts.verificationModal({ localise: client.localise, locale: guildLocale }),
 		...constants.contexts.entryRequestSubmit({ localise: client.localise, locale: guildLocale }),
-		...constants.contexts.language({ localise: client.localise, locale: guildLocale }),
 	};
 	return {
 		embeds: [
@@ -15,7 +14,7 @@ const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest],
 				description: strings.description({ user: client.diagnostics.user(user) }),
 				fields: [
 					{
-						name: strings.fields.reason({ language: strings.language(featureLanguage) }),
+						name: strings.fields.reason,
 						value: codeMultiline(entryRequest.formData.reason),
 					},
 					{
