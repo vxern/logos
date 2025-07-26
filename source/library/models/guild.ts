@@ -1,7 +1,6 @@
 import type { Client } from "rost/client";
 // biome-ignore lint/nursery/noExportedImports: The re-export of `RateLimit` is okay for now.
 import type { FeatureManagement, GuildDocument, RateLimit } from "rost/models/documents/guild";
-import { GuildStatistics } from "rost/models/guild-statistics";
 import { type CreateModelOptions, GuildModel, type IdentifierData, Model } from "rost/models/model";
 import type { DatabaseStore } from "rost/stores/database";
 
@@ -82,8 +81,6 @@ class Guild extends GuildModel {
 		const guildDocument = await client.database.withSession((session) => {
 			return session.set(new Guild(client.database, data));
 		});
-
-		await GuildStatistics.getOrCreate(client, { guildId: guildDocument.id.toString() });
 
 		return guildDocument;
 	}

@@ -4,7 +4,6 @@ import type { PromiseOr } from "rost:core/utilities";
 import type pino from "pino";
 import type { EntryRequest } from "rost/models/entry-request";
 import type { Guild } from "rost/models/guild";
-import type { GuildStatistics } from "rost/models/guild-statistics";
 import type { Model } from "rost/models/model";
 import type { Praise } from "rost/models/praise";
 import type { Report } from "rost/models/report";
@@ -30,7 +29,6 @@ class CacheStore {
 	};
 	readonly documents: {
 		readonly entryRequests: Map<string, EntryRequest>;
-		readonly guildStatistics: Map<string, GuildStatistics>;
 		readonly guilds: Map<string, Guild>;
 		readonly praisesByAuthor: Map<string, Map<string, Praise>>;
 		readonly praisesByTarget: Map<string, Map<string, Praise>>;
@@ -60,7 +58,6 @@ class CacheStore {
 		};
 		this.documents = {
 			entryRequests: new Map(),
-			guildStatistics: new Map(),
 			guilds: new Map(),
 			praisesByAuthor: new Map(),
 			praisesByTarget: new Map(),
@@ -201,10 +198,6 @@ class CacheStore {
 				this.documents.entryRequests.set(document.partialId, document);
 				break;
 			}
-			case "GuildStatistics": {
-				this.documents.guildStatistics.set(document.partialId, document);
-				break;
-			}
 			case "Guilds": {
 				this.documents.guilds.set(document.partialId, document);
 				break;
@@ -267,10 +260,6 @@ class CacheStore {
 			}
 			case "Guilds": {
 				this.documents.guilds.delete(document.partialId);
-				break;
-			}
-			case "GuildStatistics": {
-				this.documents.guildStatistics.delete(document.partialId);
 				break;
 			}
 			case "Praises": {
