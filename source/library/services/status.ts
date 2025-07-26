@@ -22,11 +22,9 @@ class StatusService extends GlobalService {
 			.editBotStatus({
 				activities: [
 					{
-						// TODO(vxern): Localise.
-						name: "Status",
+						name: "custom",
 						type: Discord.ActivityTypes.Custom,
-						// TODO(vxern): Localise.
-						state: "Managing 🇷🇴 Learn Romanian",
+						state: constants.STATUS_MESSAGE,
 					},
 				],
 				status: "online",

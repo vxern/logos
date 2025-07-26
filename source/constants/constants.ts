@@ -33,6 +33,7 @@ const constants = Object.freeze({
 		size: 1024,
 	}),
 	BASE_LOCALE: "en-GB",
+	STATUS_MESSAGE: "Managing 🇷🇴 Learn Romanian",
 	MAXIMUM_DELETABLE_MESSAGES: 512,
 	MAXIMUM_INDEXABLE_MESSAGES: 1024,
 	MAXIMUM_CORRECTION_MESSAGE_LENGTH: 3072,
