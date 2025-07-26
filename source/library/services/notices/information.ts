@@ -1,5 +1,5 @@
-import type { Client } from "logos/client";
-import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
+import type { Client } from "rost/client";
+import { type HashableMessageContents, NoticeService } from "rost/services/notices/service";
 
 class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {

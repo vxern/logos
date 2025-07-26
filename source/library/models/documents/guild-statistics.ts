@@ -1,4 +1,4 @@
-import type { Locale } from "logos:constants/languages/localisation";
+import type { Locale } from "rost:constants/languages/localisation";
 
 type GameType = "pickMissingWord";
 

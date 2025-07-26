@@ -4,12 +4,11 @@ export default Object.freeze({
 			features: {
 				bot: "🤖",
 				function: "🛠️",
-				definitions: "🔍",
-				translations: "🌍",
-				games: "🎮",
-				messages: "✍️",
-				guides: "🎓",
-				languages: "🌍",
+				information: "ℹ️",
+				moderation: "💢",
+				roles: "💼",
+				music: "🎶",
+				social: "💐",
 			},
 		},
 		guild: {
@@ -31,16 +30,6 @@ export default Object.freeze({
 			proficiencyDistribution: "🎓",
 		},
 	},
-	word: {
-		definitions: "📚",
-		translations: "🌐",
-		relations: "🌳",
-		pronunciation: "🗣️",
-		expressions: "💐",
-		examples: "🏷️",
-		etymology: "🌱",
-		notes: "📝",
-	},
 	profile: {
 		roles: {
 			directory: "➜",
@@ -51,11 +40,6 @@ export default Object.freeze({
 			praises: "🙏",
 			warnings: "😖",
 		},
-	},
-	cefr: {
-		a: "🟩",
-		b: "🟨",
-		c: "🟥",
 	},
 	music: {
 		song: "🎵",
@@ -78,16 +62,7 @@ export default Object.freeze({
 		unskipped: "⏮️",
 		volume: "🔊",
 	},
-	answer: "📜",
-	correction: "🖋️",
-	recognise: {
-		likely: "💯",
-		possible: "🤔",
-	},
 	praise: {
 		madeBy: "➜",
-	},
-	translate: {
-		direction: "➜",
 	},
 } as const);

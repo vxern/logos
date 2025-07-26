@@ -17,7 +17,7 @@ const languages = Object.freeze({
 		"Swedish",
 		"Turkish",
 	],
-	logos: [
+	rost: [
 		"Armenian/Eastern",
 		"Armenian/Western",
 		"Danish",
@@ -59,7 +59,7 @@ const languageToLocale = Object.freeze({
 		Swedish: "sv-SE",
 		Turkish: "tr",
 	} as const satisfies Record<DiscordLanguage, Discord.Locale>,
-	logos: {
+	rost: {
 		"Armenian/Eastern": "hye",
 		"Armenian/Western": "hyw",
 		Danish: "dan",
@@ -79,58 +79,58 @@ const languageToLocale = Object.freeze({
 		Silesian: "szl",
 		Swedish: "swe",
 		Turkish: "tur",
-	} as const satisfies Record<LogosLanguage, string>,
+	} as const satisfies Record<RostLanguage, string>,
 } as const);
 
 const localeToLanguage = Object.freeze({
 	discord: Object.mirror(languageToLocale.discord),
-	logos: Object.mirror(languageToLocale.logos),
+	rost: Object.mirror(languageToLocale.rost),
 });
 
-const locales = Object.freeze(Object.keys(localeToLanguage.logos) as LocalisationLocale[]);
+const locales = Object.freeze(Object.keys(localeToLanguage.rost) as LocalisationLocale[]);
 
 type DiscordLanguage = (typeof languages.discord)[number];
-type LogosLanguage = (typeof languages.logos)[number];
-type LocalisationLanguage = LogosLanguage;
+type RostLanguage = (typeof languages.rost)[number];
+type LocalisationLanguage = RostLanguage;
 
 type DiscordLocale = (typeof languageToLocale.discord)[keyof typeof languageToLocale.discord];
-type LogosLocale = (typeof languageToLocale.logos)[keyof typeof languageToLocale.logos];
-type LocalisationLocale = LogosLocale;
+type RostLocale = (typeof languageToLocale.rost)[keyof typeof languageToLocale.rost];
+type LocalisationLocale = RostLocale;
 
 function isDiscordLanguage(language: string): language is DiscordLanguage {
 	return language in languageToLocale.discord;
 }
 
-function isLogosLanguage(language: string): language is LogosLanguage {
-	return language in languageToLocale.logos;
+function isRostLanguage(language: string): language is RostLanguage {
+	return language in languageToLocale.rost;
 }
 
 function isLocalisationLanguage(language: string): language is LocalisationLanguage {
-	return isLogosLanguage(language) || isDiscordLanguage(language);
+	return isRostLanguage(language) || isDiscordLanguage(language);
 }
 
 function isDiscordLocale(locale: string): locale is DiscordLocale {
 	return locale in localeToLanguage.discord;
 }
 
-function isLogosLocale(locale: string): locale is LogosLocale {
-	return locale in localeToLanguage.logos;
+function isRostLocale(locale: string): locale is RostLocale {
+	return locale in localeToLanguage.rost;
 }
 
 function isLocalisationLocale(locale: string): locale is LocalisationLocale {
-	return isLogosLocale(locale) || isDiscordLocale(locale);
+	return isRostLocale(locale) || isDiscordLocale(locale);
 }
 
 function getDiscordLocaleByLanguage(language: DiscordLanguage): DiscordLocale {
 	return languageToLocale.discord[language];
 }
 
-function getLogosLocaleByLanguage(language: LogosLanguage): LogosLocale {
-	return languageToLocale.logos[language];
+function getRostLocaleByLanguage(language: RostLanguage): RostLocale {
+	return languageToLocale.rost[language];
 }
 
 function getLocalisationLocaleByLanguage(language: LocalisationLanguage): LocalisationLocale {
-	return getLogosLocaleByLanguage(language);
+	return getRostLocaleByLanguage(language);
 }
 
 function getDiscordLanguageByLocale(locale: string | undefined): DiscordLanguage | undefined {
@@ -141,19 +141,19 @@ function getDiscordLanguageByLocale(locale: string | undefined): DiscordLanguage
 	return localeToLanguage.discord[locale as keyof typeof localeToLanguage.discord];
 }
 
-function getLogosLanguageByLocale(locale: LogosLocale): LogosLanguage {
-	return localeToLanguage.logos[locale];
+function getRostLanguageByLocale(locale: RostLocale): RostLanguage {
+	return localeToLanguage.rost[locale];
 }
 
 export {
 	getDiscordLocaleByLanguage,
-	getLogosLocaleByLanguage,
+	getRostLocaleByLanguage,
 	getDiscordLanguageByLocale,
-	getLogosLanguageByLocale,
+	getRostLanguageByLocale,
 	isDiscordLanguage,
 	isDiscordLocale,
-	isLogosLanguage,
-	isLogosLocale,
+	isRostLanguage,
+	isRostLocale,
 	isLocalisationLanguage,
 	isLocalisationLocale,
 	getLocalisationLocaleByLanguage,
@@ -165,7 +165,7 @@ export type {
 	LocalisationLanguage,
 	LocalisationLocale as Locale,
 	DiscordLanguage,
-	LogosLanguage,
+	RostLanguage,
 	DiscordLocale,
-	LogosLocale,
+	RostLocale,
 };

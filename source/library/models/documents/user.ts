@@ -1,5 +1,5 @@
-import type { Locale, LocalisationLanguage } from "logos:constants/languages/localisation";
-import type { GameType } from "logos/models/documents/guild-statistics";
+import type { Locale, LocalisationLanguage } from "rost:constants/languages/localisation";
+import type { GameType } from "rost/models/documents/guild-statistics";
 
 interface Account {
 	/**

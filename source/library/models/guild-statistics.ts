@@ -1,8 +1,8 @@
-import type { Locale } from "logos:constants/languages/localisation";
-import type { Client } from "logos/client";
-import type { GameStatistics, GameType, GuildStatisticsDocument } from "logos/models/documents/guild-statistics";
-import { type CreateModelOptions, GuildStatisticsModel, Model } from "logos/models/model";
-import type { DatabaseStore } from "logos/stores/database";
+import type { Locale } from "rost:constants/languages/localisation";
+import type { Client } from "rost/client";
+import type { GameStatistics, GameType, GuildStatisticsDocument } from "rost/models/documents/guild-statistics";
+import { type CreateModelOptions, GuildStatisticsModel, Model } from "rost/models/model";
+import type { DatabaseStore } from "rost/stores/database";
 
 type CreateGuildStatisticsOptions = CreateModelOptions<GuildStatistics, GuildStatisticsDocument>;
 

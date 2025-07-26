@@ -2,9 +2,9 @@ import {
 	type Locale,
 	type LocalisationLanguage,
 	getDiscordLocaleByLanguage,
-	getLogosLanguageByLocale,
+	getRostLanguageByLocale,
 	isDiscordLanguage,
-} from "logos:constants/languages/localisation";
+} from "rost:constants/languages/localisation";
 import type pino from "pino";
 
 type RawLocalisationBuilder = (data?: Record<string, unknown>) => string | undefined;
@@ -174,7 +174,7 @@ class LocalisationStore {
 
 			let language: LocalisationLanguage;
 			if (locale !== undefined) {
-				language = getLogosLanguageByLocale(locale);
+				language = getRostLanguageByLocale(locale);
 			} else {
 				language = constants.defaults.LOCALISATION_LANGUAGE;
 			}
@@ -219,7 +219,7 @@ class LocalisationStore {
 	}
 
 	pluralise(key: string, locale: Locale, { quantity }: { quantity: number }): string {
-		const language = getLogosLanguageByLocale(locale);
+		const language = getRostLanguageByLocale(locale);
 
 		const pluralise = constants.localisations.transformers[language].pluralise;
 		const { one, two, many } = {

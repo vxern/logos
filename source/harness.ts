@@ -1,4 +1,4 @@
-import { type PromiseOr, chunk } from "logos:core/utilities";
+import { type PromiseOr, chunk } from "rost:core/utilities";
 import * as Discord from "@discordeno/bot";
 
 Array.prototype.toChunked = function <T>(this, size: number) {

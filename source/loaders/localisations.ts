@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import {
 	type LocalisationLanguage,
-	type LogosLocale,
-	getLogosLanguageByLocale,
-} from "logos:constants/languages/localisation";
+	type RostLocale,
+	getRostLanguageByLocale,
+} from "rost:constants/languages/localisation";
 import type pino from "pino";
 
 const decoder = new TextDecoder();
@@ -37,8 +37,8 @@ async function loadLocalisations({
 				continue;
 			}
 
-			const [locale, _] = entryPath.split(".") as [LogosLocale, string];
-			const language = getLogosLanguageByLocale(locale);
+			const [locale, _] = entryPath.split(".") as [RostLocale, string];
+			const language = getRostLanguageByLocale(locale);
 			if (language === undefined) {
 				continue;
 			}

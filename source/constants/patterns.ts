@@ -1,4 +1,4 @@
-import special from "logos:constants/special";
+import special from "rost:constants/special";
 
 const patterns = Object.freeze({
 	/** Used for matching hex colour representations, e.g. #ffffff */
@@ -9,9 +9,9 @@ const patterns = Object.freeze({
 		/** Used for matching user mentions, e.g. <@902895279236333590> */
 		userMention: /^<@!?(\d{16,20})>$/,
 		userHandle: {
-			/** Used for matching new user handles, e.g. @logos */
+			/** Used for matching new user handles, e.g. @rost */
 			new: /^(@?.{2,32})$/,
-			/** Used for matching old user handles, e.g. Logos#6695 */
+			/** Used for matching old user handles, e.g. rost#6228 */
 			old: /^([^@](?:.{1,31})?#(?:\d{4}|0))$/,
 		},
 	},
@@ -19,7 +19,7 @@ const patterns = Object.freeze({
 	/** Used for matching YouTube video/playlist links, e.g. https://www.youtube.com/watch?v=zNbCbYbaE3Y */
 	youtubeUrl:
 		/^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z\d_-]{7,15})(?:[?&][a-zA-Z\d_-]+=[a-zA-Z\d_-]+)*$/,
-	/** Used for matching against role indicators in nicknames, e.g. Logos﹘EA・WA */
+	/** Used for matching against role indicators in nicknames, e.g. Rost﹘EA・WA */
 	roleIndicators: new RegExp(
 		`^(.+)${special.sigils.divider}([^${special.sigils.separator}]{2,4}(?:${special.sigils.separator}[^${special.sigils.separator}]{2,4})*)$`,
 	),

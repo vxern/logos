@@ -1,6 +1,6 @@
-import { code } from "logos:constants/formatting";
-import type { Client } from "logos/client";
-import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
+import { code } from "rost:constants/formatting";
+import type { Client } from "rost/client";
+import { type HashableMessageContents, NoticeService } from "rost/services/notices/service";
 
 class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -15,12 +15,11 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 
 		const strings = {
 			...constants.contexts.resourceNotice({ localise: this.client.localise, locale: this.guildLocale }),
-			...constants.contexts.language({ localise: this.client.localise, locale: this.guildLocale }),
 		};
 		return {
 			embeds: [
 				{
-					title: strings.title({ language: strings.language(this.guildDocument.languages.feature) }),
+					title: strings.title,
 					description:
 						`${strings.description.storedInRepository({ link: resourceConfiguration.url })}\n\n` +
 						`${strings.description.easierToManage}\n\n` +
@@ -39,9 +38,7 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 					components: [
 						{
 							type: Discord.MessageComponentTypes.Button,
-							label: strings.redirect({
-								language: strings.language(this.guildDocument.languages.feature),
-							}),
+							label: strings.redirect,
 							style: Discord.ButtonStyles.Link,
 							url: resourceConfiguration.url,
 						},

@@ -1,8 +1,9 @@
-import { isAutocomplete } from "logos:constants/interactions";
-import { getDiscordLanguageByLocale } from "logos:constants/languages/localisation";
-import { timeStructToMilliseconds } from "logos:constants/time";
-import { isDefined } from "logos:core/utilities";
-import type { Client } from "logos/client";
+import { isAutocomplete } from "rost:constants/interactions";
+import { getDiscordLanguageByLocale } from "rost:constants/languages/localisation";
+import { timeStructToMilliseconds } from "rost:constants/time";
+import { isDefined } from "rost:core/utilities";
+import type pino from "pino";
+import type { Client } from "rost/client";
 import type {
 	BuiltCommand,
 	BuiltCommands,
@@ -15,11 +16,10 @@ import type {
 	OptionBuilder,
 	OptionMetadata,
 	OptionTemplate,
-} from "logos/commands/commands";
-import type { InteractionHandler } from "logos/commands/handlers/handler";
-import type { Guild } from "logos/models/guild";
-import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "logos/stores/localisations";
-import type pino from "pino";
+} from "rost/commands/commands";
+import type { InteractionHandler } from "rost/commands/handlers/handler";
+import type { Guild } from "rost/models/guild";
+import type { DescriptionLocalisations, LocalisationStore, NameLocalisations } from "rost/stores/localisations";
 
 interface RateLimit {
 	nextAllowedUsageTimestamp: number;
@@ -74,10 +74,6 @@ class CommandStore {
 			this.commands.information,
 			this.commands.acknowledgements,
 			this.commands.credits,
-			this.commands.licence,
-			this.commands.settings,
-			this.commands.recognise,
-			this.commands.recogniseMessage,
 		].filter(isDefined);
 	}
 
@@ -378,7 +374,7 @@ class CommandStore {
 			);
 	}
 
-	getHandler(interaction: Logos.Interaction): InteractionHandler | undefined {
+	getHandler(interaction: Rost.Interaction): InteractionHandler | undefined {
 		if (isAutocomplete(interaction)) {
 			return this.#handlers.autocomplete.get(interaction.commandName);
 		}
@@ -386,54 +382,19 @@ class CommandStore {
 		return this.#handlers.execute.get(interaction.commandName);
 	}
 
-	isShowable(interaction: Logos.Interaction) {
+	isShowable(interaction: Rost.Interaction) {
 		return this.#collection.showable.has(interaction.commandName);
 	}
 
-	hasRateLimit(interaction: Logos.Interaction) {
+	hasRateLimit(interaction: Rost.Interaction) {
 		return this.#collection.withRateLimit.has(interaction.commandName);
 	}
 
 	getEnabledCommands(guildDocument: Guild): Command[] {
 		const commands: CommandBuilder[] = [];
 
-		if (guildDocument.hasEnabled("answers")) {
-			commands.push(this.commands.answerMessage);
-		}
-
-		if (guildDocument.hasEnabled("corrections")) {
-			commands.push(this.commands.correctionFullMessage, this.commands.correctionPartialMessage);
-		}
-
-		if (guildDocument.hasEnabled("cefr")) {
-			commands.push(this.commands.cefr);
-		}
-
-		if (guildDocument.hasEnabled("game") && this.#client.volatile) {
-			commands.push(this.commands.game);
-		}
-
 		if (guildDocument.hasEnabled("resources")) {
 			commands.push(this.commands.resources);
-		}
-
-		if (guildDocument.hasEnabled("translate")) {
-			commands.push(this.commands.translate, this.commands.translateMessage);
-		}
-
-		if (guildDocument.hasEnabled("word")) {
-			commands.push(this.commands.word);
-			commands.push(this.commands.meaning);
-			commands.push(this.commands.expressions);
-			commands.push(this.commands.inflection);
-			commands.push(this.commands.etymology);
-			commands.push(this.commands.pronunciation);
-			commands.push(this.commands.relations);
-			commands.push(this.commands.examples);
-		}
-
-		if (guildDocument.hasEnabled("context")) {
-			commands.push(this.commands.context);
 		}
 
 		if (guildDocument.hasEnabled("policy")) {
@@ -518,7 +479,7 @@ class CommandStore {
 		return lastUseTimestamps.filter((timestamp) => executedAt - timestamp <= intervalMilliseconds);
 	}
 
-	getRateLimit(interaction: Logos.Interaction, { executedAt }: { executedAt: number }): RateLimit | undefined {
+	getRateLimit(interaction: Rost.Interaction, { executedAt }: { executedAt: number }): RateLimit | undefined {
 		const commandId = interaction.data?.id;
 		if (commandId === undefined) {
 			return undefined;
