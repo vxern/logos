@@ -135,7 +135,7 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 				resolve(undefined);
 			});
 
-			const strings = constants.contexts.sureToCancelReport({
+			const strings = constants.contexts.sureToCancel({
 				localise: this.client.localise,
 				locale: submission.locale,
 			});

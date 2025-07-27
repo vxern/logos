@@ -245,7 +245,6 @@ const commands = Object.freeze({
 			reason: constants.parameters.reason,
 		},
 	},
-	//Server
 	resource: {
 		identifier: "resource",
 		type: Discord.ApplicationCommandTypes.ChatInput,

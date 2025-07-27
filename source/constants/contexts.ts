@@ -576,7 +576,8 @@ export default Object.freeze({
 			whereFound: localise("verification.fields.whereFound", locale)(),
 		},
 	}),
-	sureToCancelReport: ({ localise, locale }) => ({
+	// TODO(vxern): This is needs to be changed because none of these string keys are relevant.
+	sureToCancel: ({ localise, locale }) => ({
 		title: localise("report.strings.sureToCancel.title", locale)(),
 		description: localise("report.strings.sureToCancel.description", locale)(),
 		stay: localise("prompts.stay", locale)(),
