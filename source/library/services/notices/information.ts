@@ -15,7 +15,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 			embeds: [
 				{
 					title: strings.title,
-					color: constants.colours.blue,
+					color: constants.colours.notice,
 					fields: constants.rules.map((rule, index) => {
 						const strings = constants.contexts.rule({
 							localise: this.client.localise,
