@@ -5,7 +5,7 @@
   "information.options.bot.name": "bot",
   "information.options.bot.description": "Displays information about the bot.",
   "information.options.bot.strings.concept.title": "What is Rost?",
-  "information.options.bot.strings.concept.description": "Rost is the official bot managing {server_name}, the largest Discord community dedicated to learning Romanian.",
+  "information.options.bot.strings.concept.description": "**Rost** is the official bot managing **{server_name}**, the largest Discord community dedicated to learning Romanian.",
   "information.options.bot.strings.function.title": "What does Rost do?",
   "information.options.bot.strings.function.description": "It takes care of the administration & management needs of the community, including but not limited to:",
   "information.options.bot.strings.function.features.information": "Posting and maintaining important information around the community.",
