@@ -13,7 +13,6 @@ interface GuildDocument {
 		resourceNotices: boolean;
 		roleNotices: boolean;
 		welcomeNotices: boolean;
-		resources: boolean;
 		targetOnly: boolean;
 		alerts: boolean;
 		policy: boolean;
@@ -70,9 +69,9 @@ interface GuildDocument {
 			channelId: string;
 			inviteLink: string;
 		};
-		/** Relies on guild.features.language.features.resources.url */
 		resourceNotices?: {
 			channelId: string;
+			url: string;
 		};
 		roleNotices?: {
 			channelId: string;
@@ -80,9 +79,6 @@ interface GuildDocument {
 		welcomeNotices?: {
 			channelId: string;
 			ruleChannelId: string;
-		};
-		resources?: {
-			url: string;
 		};
 		targetOnly?: {
 			channelIds: string[];

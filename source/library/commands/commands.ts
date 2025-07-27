@@ -34,7 +34,6 @@ import { handleDisplayProfile, handleDisplayProfileAutocomplete } from "rost/com
 import { handlePurgeMessages, handlePurgeMessagesAutocomplete } from "rost/commands/handlers/purge";
 import { handleMakeReport } from "rost/commands/handlers/report";
 import { handleSubmitResource } from "rost/commands/handlers/resource";
-import { handleDisplayResources } from "rost/commands/handlers/resources";
 import { handleCiteRule, handleCiteRuleAutocomplete } from "rost/commands/handlers/rule";
 import { handleToggleSlowmode, handleToggleSlowmodeAutocomplete } from "rost/commands/handlers/slowmode";
 import { handleMakeSuggestion } from "rost/commands/handlers/suggestion";
@@ -102,14 +101,6 @@ const commands = Object.freeze({
 				options: { user: { ...constants.parameters.user, required: false } },
 			},
 		},
-	},
-	resources: {
-		identifier: "resources",
-		type: Discord.ApplicationCommandTypes.ChatInput,
-		defaultMemberPermissions: ["VIEW_CHANNEL"],
-		handle: handleDisplayResources,
-		options: { show: constants.parameters.show },
-		flags: { isShowable: true },
 	},
 	acknowledgements: {
 		identifier: "acknowledgements",

@@ -28,7 +28,6 @@ class Guild extends GuildModel {
 			resourceNotices: false,
 			roleNotices: false,
 			welcomeNotices: false,
-			resources: false,
 			targetOnly: false,
 			alerts: false,
 			policy: false,

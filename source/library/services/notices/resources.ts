@@ -8,8 +8,8 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const resourceConfiguration = this.guildDocument.feature("resources");
-		if (resourceConfiguration === undefined) {
+		const resourceNoticeConfiguration = this.guildDocument.feature("resourceNotices");
+		if (resourceNoticeConfiguration === undefined) {
 			return;
 		}
 
@@ -24,7 +24,7 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 				{
 					title: strings.title,
 					description:
-						`${strings.description.storedInRepository({ link: resourceConfiguration.url })}\n\n` +
+						`${strings.description.storedInRepository({ link: resourceNoticeConfiguration.url })}\n\n` +
 						`${strings.description.easierToManage}\n\n` +
 						`${strings.description.contributable.contributable}\n` +
 						`1. ${strings.description.contributable.usingCommand({
@@ -43,7 +43,7 @@ class ResourceNoticeService extends NoticeService<{ type: "resources" }> {
 							type: Discord.MessageComponentTypes.Button,
 							label: strings.redirect,
 							style: Discord.ButtonStyles.Link,
-							url: resourceConfiguration.url,
+							url: resourceNoticeConfiguration.url,
 						},
 					],
 				},

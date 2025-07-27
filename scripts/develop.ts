@@ -116,7 +116,6 @@ await document.update(database, () => {
 		resourceNotices: true,
 		roleNotices: true,
 		welcomeNotices: true,
-		resources: true,
 		targetOnly: true,
 		alerts: true,
 		policy: true,
@@ -186,9 +185,6 @@ await document.update(database, () => {
 		welcomeNotices: {
 			channelId: idByName(channels, "verify・here"),
 			ruleChannelId: idByName(channels, "rule"),
-		},
-		resources: {
-			url: "https://learnromanian.co.uk",
 		},
 		targetOnly: {
 			channelIds: [idByName(channels, "target・language")],

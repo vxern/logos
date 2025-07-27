@@ -1098,9 +1098,6 @@ export default Object.freeze({
 		title: localise("recognise.strings.fields.possibleMatches.title", locale)(),
 		description: localise("recognise.strings.fields.possibleMatches.description.multiple", locale)(),
 	}),
-	redirect: ({ localise, locale }) => ({
-		redirect: localise("resources.strings.redirect", locale)(),
-	}),
 	rules: ({ localise, locale }) => ({
 		title: localise("rules.title", locale)(),
 	}),
