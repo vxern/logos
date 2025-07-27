@@ -10,7 +10,7 @@ export default Object.freeze({
 	sigils: {
 		divider: "﹘",
 		separator: "・",
-		channelSeparator: "︲",
+		channelSeparator: "・",
 	},
 	bullet: "-",
 	strings: {
