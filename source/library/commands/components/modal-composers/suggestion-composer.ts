@@ -25,7 +25,7 @@ class SuggestionComposer extends ModalComposer<SuggestionFormData, never> {
 					components: [
 						{
 							customId: "suggestion",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.suggestion, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,

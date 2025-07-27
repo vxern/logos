@@ -19,7 +19,7 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 					components: [
 						{
 							customId: "reason",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.reason, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,
@@ -32,7 +32,7 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 					components: [
 						{
 							customId: "aim",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.aim, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,
@@ -45,7 +45,7 @@ class EntryRequestComposer extends ModalComposer<EntryRequestFormData, never> {
 					components: [
 						{
 							customId: "whereFound",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.whereFound, 45),
 							style: Discord.TextStyles.Short,
 							required: true,

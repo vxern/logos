@@ -16,7 +16,7 @@ class ResourceComposer extends ModalComposer<ResourceFormData, never> {
 					components: [
 						{
 							customId: "resource",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.resource, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,

@@ -2,7 +2,7 @@ import type { WithRequired } from "rost:core/utilities";
 import type { Client } from "rost/client";
 import { InteractionCollector } from "rost/collectors";
 
-type TypedInputTextComponent<CustomID> = WithRequired<Discord.InputTextComponent, "value"> & { customId: CustomID };
+type TypedInputTextComponent<CustomID> = WithRequired<Discord.TextInputComponent, "value"> & { customId: CustomID };
 interface ModalElement<FormData> {
 	type: Discord.MessageComponentTypes.ActionRow;
 	components: [TypedInputTextComponent<keyof FormData>];
@@ -55,11 +55,11 @@ abstract class ModalComposer<FormData, ValidationError extends string> {
 				continue;
 			}
 
-			if (field.customId === undefined) {
+			if (field.id === undefined) {
 				throw new Error("The custom ID of a submitted modal field was missing.");
 			}
 
-			const key = field.customId;
+			const key = field.id;
 			const value = field.value ?? "";
 
 			if (value.length > 0) {

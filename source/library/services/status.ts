@@ -28,6 +28,8 @@ class StatusService extends GlobalService {
 					},
 				],
 				status: "online",
+				since: null,
+				afk: false,
 			})
 			.catch((error) => this.log.warn(error, "Unable to edit bot status."));
 	}

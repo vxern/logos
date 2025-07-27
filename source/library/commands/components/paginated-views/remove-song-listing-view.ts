@@ -24,7 +24,7 @@ class RemoveSongListingView extends PaginatedView<SongListing> {
 			type: Discord.MessageComponentTypes.ActionRow,
 			components: [
 				{
-					type: Discord.MessageComponentTypes.SelectMenu,
+					type: Discord.MessageComponentTypes.StringSelect,
 					customId: this.#selectMenuSelection.customId,
 					minValues: 1,
 					maxValues: 1,

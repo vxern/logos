@@ -346,7 +346,7 @@ class RoleSelectionComponent {
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: Discord.MessageComponentTypes.SelectMenu,
+							type: Discord.MessageComponentTypes.StringSelect,
 							customId: this.#selections.customId,
 							options: selectOptions,
 							placeholder: isGroup(category) ? strings.chooseCategory : strings.chooseRole,

@@ -17,7 +17,7 @@ class ReportComposer extends ModalComposer<ReportFormData, never> {
 					components: [
 						{
 							customId: "reason",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.reason, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,
@@ -30,7 +30,7 @@ class ReportComposer extends ModalComposer<ReportFormData, never> {
 					components: [
 						{
 							customId: "users",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.users, 45),
 							style: Discord.TextStyles.Short,
 							required: true,
@@ -43,7 +43,7 @@ class ReportComposer extends ModalComposer<ReportFormData, never> {
 					components: [
 						{
 							customId: "messageLink",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.link, 45),
 							style: Discord.TextStyles.Short,
 							required: false,

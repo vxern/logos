@@ -55,7 +55,7 @@ class Diagnostics {
 		}
 
 		let guildFormatted: string;
-		if ("guildId" in member) {
+		if ("guildId" in member && member.guildId !== undefined) {
 			guildFormatted = this.guild(member.guildId);
 		} else {
 			guildFormatted = "unknown guild";

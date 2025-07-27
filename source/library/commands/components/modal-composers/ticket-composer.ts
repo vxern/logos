@@ -17,7 +17,7 @@ class TicketComposer extends ModalComposer<TicketFormData, never> {
 					components: [
 						{
 							customId: "topic",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.topic, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,

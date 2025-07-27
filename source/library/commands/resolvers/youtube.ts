@@ -115,7 +115,7 @@ async function search(client: Client, interaction: Rost.Interaction, query: stri
 					type: Discord.MessageComponentTypes.ActionRow,
 					components: [
 						{
-							type: Discord.MessageComponentTypes.SelectMenu,
+							type: Discord.MessageComponentTypes.StringSelect,
 							customId: selectMenuSelection.customId,
 							minValues: 1,
 							maxValues: 1,

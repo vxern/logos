@@ -139,7 +139,7 @@ class JournallingStore {
 	}
 
 	async #guildMemberAdd(member: Discord.Member, user: Discord.User): Promise<void> {
-		await this.tryLog("guildMemberAdd", { guildId: member.guildId, args: [member, user] });
+		await this.tryLog("guildMemberAdd", { guildId: member.guildId!, args: [member, user] });
 	}
 
 	async #guildMemberRemove(user: Discord.User, guildId: bigint): Promise<void> {

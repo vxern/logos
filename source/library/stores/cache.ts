@@ -126,6 +126,10 @@ class CacheStore {
 	}
 
 	#cacheMember(member: Discord.Member): void {
+		if (member.guildId === undefined) {
+			return;
+		}
+
 		if (this.entities.members.has(member.guildId)) {
 			this.entities.members.get(member.guildId)!.set(member.id, member);
 		} else {
