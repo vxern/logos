@@ -24,7 +24,6 @@
   "information.options.server.strings.languageTypes.target": "Hedef",
   "resources.name": "kaynaklar",
   "resources.description": "Dili öğrenmek için kullanabilinecek kaynaklar havuzuna yönlendirir.",
-  "resources.strings.redirect": "{language} öğrenme kaynakları için tıkla",
   "list.name": "liste",
   "list.description": "Kullanıcılar hakkında çeşitli bilgiler görüntülemeyi sağlar.",
   "list.options.warnings.name": "uyarılar",

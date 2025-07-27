@@ -24,7 +24,6 @@
   "information.options.server.strings.languageTypes.target": "Mål",
   "resources.name": "ressurser",
   "resources.description": "Omdirigerer til repositoriet til ressursen for å lære språket.",
-  "resources.strings.redirect": "Klikk for ressurser for å lære {language}",
   "list.name": "liste",
   "list.description": "Tillater visning av forskjellig informasjon om brukere.",
   "list.options.warnings.name": "advarsler",

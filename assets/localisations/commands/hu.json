@@ -24,7 +24,6 @@
   "information.options.server.strings.languageTypes.target": "Target",
   "resources.name": "segédanyagok",
   "resources.description": "Listázza a nyelvtanulási segédanyagokat.",
-  "resources.strings.redirect": "Click for resources to learn {language}",
   "list.name": "listázás",
   "list.description": "Különféle információkat tesz elérhetővé a felhasználókról.",
   "list.options.warnings.name": "figyelmeztetések",

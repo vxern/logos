@@ -24,7 +24,6 @@
   "information.options.server.strings.languageTypes.target": "Cible",
   "resources.name": "ressources",
   "resources.description": "Redirige vers le répertoire de ressources utiles pour apprendre la langue.",
-  "resources.strings.redirect": "Cliquez ici pour obtenir des ressources pour apprendre {language}",
   "list.name": "liste",
   "list.description": "Permet de voir des informations sur les utilisateurs.",
   "list.options.warnings.name": "avertissements",

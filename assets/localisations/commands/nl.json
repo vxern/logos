@@ -24,7 +24,6 @@
   "information.options.server.strings.languageTypes.target": "Doel",
   "resources.name": "bronnen",
   "resources.description": "Verwijst naar de verzameling bronnen om de taal te leren.",
-  "resources.strings.redirect": "Klik hier voor bronnen om {language} te leren",
   "list.name": "lijst",
   "list.description": "Allows the viewing of various information about users.",
   "list.options.warnings.name": "waarschuwingen",

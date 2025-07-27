@@ -24,7 +24,6 @@
   "information.options.server.strings.languageTypes.target": "Țintă",
   "resources.name": "resurse",
   "resources.description": "Afișează o listă cu resurse pentru învățarea limbii.",
-  "resources.strings.redirect": "Fă clic pentru resurse pentru a învăța {language}",
   "list.name": "listare",
   "list.description": "Permite afișarea diverselor informații despre utilizatori.",
   "list.options.warnings.name": "avertismente",

@@ -8,6 +8,7 @@
   "notices.resources.description.contributable.usingCommand": "Using the {command} command.",
   "notices.resources.description.contributable.openingIssue": "Opening an issue in the repository, mentioning the resources to add.",
   "notices.resources.description.contributable.makingPullRequest": "Forking the repository, adding the resources as needed, and creating a pull request.",
+  "notices.resources.strings.redirect": "Click for resources to learn Romanian",
   "reports.users": "Reported users",
   "reports.reason": "Reason for report",
   "reports.link": "Link to message",

@@ -24,7 +24,6 @@
   "information.options.server.strings.languageTypes.target": "Docelowy (Nauka)",
   "resources.name": "zasoby",
   "resources.description": "Wyświetla listę zasobów do nauki języka.",
-  "resources.strings.redirect": "Kliknij, aby zostać przeniesiony/a do zasobów dla języka {language}",
   "list.name": "spisz",
   "list.description": "Pozwala na wyświetlanie różnych informacji o użytkownikach.",
   "list.options.warnings.name": "ostrzeżenia",

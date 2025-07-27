@@ -18,8 +18,6 @@
   "information.description": "Wird verwendet, um verschiedene Informationen anzuzeigen.",
   "information.options.server.strings.channelTypes.voice": "Sprachkanal",
   "information.options.server.strings.channelTypes.text": "Textkanal",
-  "resources.name": "ressourcen",
-  "resources.strings.redirect": "Klick hier, um Ressourcen zum {language}-lernen anzuzeigen",
   "list.name": "liste",
   "list.options.warnings.strings.noActiveWarnings.description.other": "Für diesen Benutzer liegen keine aktiven Warnungen vor.",
   "pardon.name": "entschuldigt",

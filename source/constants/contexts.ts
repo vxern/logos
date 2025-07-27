@@ -708,7 +708,7 @@ export default Object.freeze({
 				pullRequest: localise("notices.resources.description.contributable.makingPullRequest", locale)(),
 			},
 		},
-		redirect: localise("resources.strings.redirect", locale)(),
+		redirect: localise("notices.resources.strings.redirect", locale)(),
 	}),
 	inquiryChannel: ({ localise, locale }) => ({
 		inquiryChannel: localise("entry.verification.inquiry.channel", locale),

@@ -26,7 +26,6 @@
   "information.options.server.strings.information.description.distribution": "Distribución de las habilidades lingüísticas de los miembros",
   "information.options.server.strings.channelTypes.text": "Texto",
   "information.options.server.strings.channelTypes.voice": "Voz",
-  "resources.strings.redirect": "Haga clic para obtener recursos para aprender {idioma}",
   "resources.name": "recursos",
   "resources.description": "Redirige al repositorio de recursos para aprender el idioma."
 }

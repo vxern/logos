@@ -22,6 +22,5 @@
   "information.options.server.strings.channelTypes.voice": "Röst",
   "information.options.server.strings.languageTypes.home": "Hem",
   "resources.name": "resurser",
-  "resources.description": "Skickar vidare användaren till en samling resurser och läromedel för att lära sig svenska.",
-  "resources.strings.redirect": "Klicka här för att hitta resurser för att lära dig {language}"
+  "resources.description": "Skickar vidare användaren till en samling resurser och läromedel för att lära sig svenska."
 }
