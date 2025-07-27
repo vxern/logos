@@ -5,11 +5,12 @@ async function up(database) {
 	await migrateDocuments(database, {
 		collection: "Guilds",
 		migrate: async (document) => {
-			document.resourceNotices ??= {};
+			document.features ??= {};
+			document.features.resourceNotices ??= {};
 			if (document.resources) {
-				document.resourceNotices.url = document.resources.url;
+				document.features.resourceNotices.url = document.resources.url;
 			} else {
-				document.resourceNotices.url = "https://learnromanian.co.uk";
+				document.features.resourceNotices.url = "https://learnromanian.co.uk";
 			}
 		},
 	});
