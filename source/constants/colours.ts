@@ -30,21 +30,17 @@ export default Object.freeze({
 	// Random colours.
 	red: fromHex("#b42f2f"),
 	darkRed: fromHex("#820000"),
-	lightGreen: fromHex("#89ef59"),
-	darkGreen: fromHex("#479621"),
 	blue: fromHex("#6269ed"),
 	dullYellow: fromHex("#f2f277"),
 	gray: fromHex("#637373"),
 	peach: fromHex("#ff9a76"),
 	husky: fromHex("#d6e3f8"),
 	murrey: fromHex("#87255b"),
-	black: fromHex("#1c1c1c"),
 	yellow: fromHex("#ffe548"),
 	orangeRed: fromHex("#ff4b3e"),
 	lightGray: fromHex("#daddd8"),
 	turquoise: fromHex("#68d8d6"),
 	green: fromHex("#00cc66"),
 	greenishLightGray: fromHex("#c5e0d8"),
-	orange: fromHex("#f28123"),
 } as const);
 export { fromHex };
