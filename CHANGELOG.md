@@ -1,3 +1,10 @@
+## 5.0.0
+
+- Renamed the bot from `Logos` to `Rost`.
+- Removed all of the language features.
+- Removed non-Discord languages.
+- Switched localisation files to be stored in Discord locales.
+
 ## 4.58.0
 
 - Improved the UI of notices.
