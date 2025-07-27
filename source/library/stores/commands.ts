@@ -391,10 +391,6 @@ class CommandStore {
 	getEnabledCommands(guildDocument: Guild): Command[] {
 		const commands: CommandBuilder[] = [];
 
-		if (guildDocument.hasEnabled("resources")) {
-			commands.push(this.commands.resources);
-		}
-
 		if (guildDocument.hasEnabled("policy")) {
 			commands.push(this.commands.policy);
 		}

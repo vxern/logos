@@ -178,6 +178,7 @@ await document.update(database, () => {
 		},
 		resourceNotices: {
 			channelId: idByName(channels, "resources"),
+			url: "https://learnromanian.co.uk",
 		},
 		roleNotices: {
 			channelId: idByName(channels, "roles"),
