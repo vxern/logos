@@ -109,6 +109,10 @@ const shutdown = bot.shutdown();
 
 const document = new Guild(database, { guildId: guild.id.toString() });
 await document.update(database, () => {
+	document.locales = {
+		source: "en-GB",
+		target: "ro",
+	};
 	document.enabledFeatures = {
 		journalling: true,
 		notices: true,
