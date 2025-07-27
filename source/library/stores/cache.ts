@@ -104,6 +104,7 @@ class CacheStore {
 			members: new Discord.Collection([...(oldGuild?.members ?? []), ...(guild_.members ?? [])]),
 			channels: new Discord.Collection([...(oldGuild?.channels ?? []), ...(guild_.channels ?? [])]),
 			threads: new Discord.Collection([...(oldGuild?.threads ?? []), ...(guild_.threads ?? [])]),
+			memberCount: oldGuild?.memberCount ?? 0,
 		};
 
 		this.entities.guilds.set(guild.id, guild);
