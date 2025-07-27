@@ -20,7 +20,7 @@ export default Object.freeze({
 	invisible: fromHex("#36393f"), // Used to blend in with the rest of an embed.
 	// Reply methods
 	unsupported: fromHex("#d6e3f8"),
-	notice: fromHex("#6269ed"),
+	notice: fromHex("#ffffff"),
 	success: fromHex("#89ef59"),
 	pushback: fromHex("#ff9a76"),
 	warning: fromHex("#f2f277"),
