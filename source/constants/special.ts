@@ -1,10 +1,4 @@
 export default Object.freeze({
-	meta: {
-		whitespace: " ",
-		// Used to insert a blank character where a standard whitespace character would otherwise get filtered out by
-		// Discord.
-		forcedWhitespace: "⠀",
-	},
 	interaction: {
 		// Acts as a delimeter for pieces of metadata encoded into an interaction custom ID.
 		separator: "|",
@@ -16,10 +10,8 @@ export default Object.freeze({
 	sigils: {
 		divider: "﹘",
 		separator: "・",
-		channelSeparator: "︲",
+		channelSeparator: "・",
 	},
-	divider: "—",
-	dividerShort: "-",
 	bullet: "-",
 	strings: {
 		trail: "...",
@@ -28,8 +20,5 @@ export default Object.freeze({
 	missingString: "?",
 	roles: {
 		back: "..",
-	},
-	game: {
-		mask: "░",
 	},
 } as const);

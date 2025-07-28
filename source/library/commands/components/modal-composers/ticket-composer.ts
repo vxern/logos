@@ -1,9 +1,9 @@
-import { trim } from "logos:constants/formatting";
-import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { TicketFormData } from "logos/models/documents/ticket";
+import { trim } from "rost:constants/formatting";
+import { type Modal, ModalComposer } from "rost/commands/components/modal-composers/modal-composer";
+import type { TicketFormData } from "rost/models/documents/ticket";
 
 class TicketComposer extends ModalComposer<TicketFormData, never> {
-	buildModal(submission: Logos.Interaction, { formData }: { formData: TicketFormData }): Modal<TicketFormData> {
+	buildModal(submission: Rost.Interaction, { formData }: { formData: TicketFormData }): Modal<TicketFormData> {
 		const strings = constants.contexts.ticketModal({
 			localise: this.client.localise,
 			locale: submission.locale,
@@ -17,7 +17,7 @@ class TicketComposer extends ModalComposer<TicketFormData, never> {
 					components: [
 						{
 							customId: "topic",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.topic, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,

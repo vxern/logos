@@ -1,8 +1,8 @@
-import { code } from "logos:constants/formatting";
-import type { Client } from "logos/client";
-import { InteractionCollector } from "logos/collectors";
-import { handleOpenRoleSelectionMenu } from "logos/commands/handlers/profile/roles";
-import { type HashableMessageContents, NoticeService } from "logos/services/notices/service";
+import { code } from "rost:constants/formatting";
+import type { Client } from "rost/client";
+import { InteractionCollector } from "rost/collectors";
+import { handleOpenRoleSelectionMenu } from "rost/commands/handlers/profile/roles";
+import { type HashableMessageContents, NoticeService } from "rost/services/notices/service";
 
 class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 	readonly #selectRolesButton: InteractionCollector;
@@ -45,7 +45,7 @@ class RoleNoticeService extends NoticeService<{ type: "roles" }> {
 					description: `${strings.description.usingCommand({
 						command: code(this.client.localiseCommand("profile.options.roles", this.guildLocale)),
 					})} ${strings.description.runAnywhere}\n\n${strings.description.pressButton}`,
-					color: constants.colours.blue,
+					color: constants.colours.notice,
 				},
 			],
 			components: [

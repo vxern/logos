@@ -1,9 +1,9 @@
-import { trim } from "logos:constants/formatting";
-import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { ResourceFormData } from "logos/models/documents/resource";
+import { trim } from "rost:constants/formatting";
+import { type Modal, ModalComposer } from "rost/commands/components/modal-composers/modal-composer";
+import type { ResourceFormData } from "rost/models/documents/resource";
 
 class ResourceComposer extends ModalComposer<ResourceFormData, never> {
-	buildModal(submission: Logos.Interaction, { formData }: { formData: ResourceFormData }): Modal<ResourceFormData> {
+	buildModal(submission: Rost.Interaction, { formData }: { formData: ResourceFormData }): Modal<ResourceFormData> {
 		const strings = constants.contexts.resourceModal({
 			localise: this.client.localise,
 			locale: submission.locale,
@@ -16,7 +16,7 @@ class ResourceComposer extends ModalComposer<ResourceFormData, never> {
 					components: [
 						{
 							customId: "resource",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.resource, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,

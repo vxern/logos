@@ -1,9 +1,9 @@
-import { trim } from "logos:constants/formatting";
-import { type Modal, ModalComposer } from "logos/commands/components/modal-composers/modal-composer";
-import type { ReportFormData } from "logos/models/documents/report";
+import { trim } from "rost:constants/formatting";
+import { type Modal, ModalComposer } from "rost/commands/components/modal-composers/modal-composer";
+import type { ReportFormData } from "rost/models/documents/report";
 
 class ReportComposer extends ModalComposer<ReportFormData, never> {
-	buildModal(submission: Logos.Interaction, { formData }: { formData: ReportFormData }): Modal<ReportFormData> {
+	buildModal(submission: Rost.Interaction, { formData }: { formData: ReportFormData }): Modal<ReportFormData> {
 		const strings = constants.contexts.reportModal({
 			localise: this.client.localise,
 			locale: submission.locale,
@@ -17,7 +17,7 @@ class ReportComposer extends ModalComposer<ReportFormData, never> {
 					components: [
 						{
 							customId: "reason",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.reason, 45),
 							style: Discord.TextStyles.Paragraph,
 							required: true,
@@ -30,7 +30,7 @@ class ReportComposer extends ModalComposer<ReportFormData, never> {
 					components: [
 						{
 							customId: "users",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.users, 45),
 							style: Discord.TextStyles.Short,
 							required: true,
@@ -43,7 +43,7 @@ class ReportComposer extends ModalComposer<ReportFormData, never> {
 					components: [
 						{
 							customId: "messageLink",
-							type: Discord.MessageComponentTypes.InputText,
+							type: Discord.MessageComponentTypes.TextInput,
 							label: trim(strings.fields.link, 45),
 							style: Discord.TextStyles.Short,
 							required: false,
