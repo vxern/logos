@@ -174,7 +174,10 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		const channelId = newVoiceState.channelId ?? 0n;
+		const channelId = newVoiceState.channelId;
+		if (channelId === undefined) {
+			return;
+		}
 
 		const channelData = channels.find(
 			(channel) =>
@@ -227,7 +230,10 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		const channelId = oldVoiceState.channelId ?? 0n;
+		const channelId = oldVoiceState.channelId;
+		if (channelId === undefined) {
+			return;
+		}
 
 		const channelData = channels.findLast(
 			(channel) =>
