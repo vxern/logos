@@ -113,7 +113,7 @@ class DynamicVoiceChannelService extends LocalService {
 
 		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
-		await this.#syncChannelsAndVoiceStates();
+		await this.#syncChannelsToVoiceStates();
 	}
 
 	async stop(): Promise<void> {
@@ -122,7 +122,9 @@ class DynamicVoiceChannelService extends LocalService {
 		this.oldVoiceStates.clear();
 	}
 
-	async #syncChannelsAndVoiceStates(): Promise<void> {
+	async #syncChannelsToVoiceStates(): Promise<void> {
+		this.log.info("Syncing channels to voice states...");
+
 		const voiceStatesAll = this.channels.flatMap((channel) => [
 			...channel.parent.voiceStates,
 			...channel.children.flatMap((channel) => channel.voiceStates),
@@ -155,6 +157,8 @@ class DynamicVoiceChannelService extends LocalService {
 				await this.client.bot.helpers.deleteChannel(channelId);
 			}
 		}
+
+		this.log.info("Channels and voice states have been synced.");
 	}
 
 	async #handleVoiceStateUpdate(newVoiceState: Rost.VoiceState): Promise<void> {
@@ -212,6 +216,10 @@ class DynamicVoiceChannelService extends LocalService {
 		if (parent.channel.name === undefined) {
 			return;
 		}
+
+		this.log.info(
+			`First user joined a dynamic voice channel ${this.client.diagnostics.channel(channelId)}. Creating new instance...`,
+		);
 
 		await this.client.bot.helpers
 			.createChannel(this.guildId, {
@@ -272,6 +280,10 @@ class DynamicVoiceChannelService extends LocalService {
 		if (lastVacantChannelId === undefined) {
 			return;
 		}
+
+		this.log.info(
+			`Last user left voice channel ${this.client.diagnostics.channel(lastVacantChannelId)}. Deleting instance...`,
+		);
 
 		this.client.bot.helpers
 			.deleteChannel(lastVacantChannelId)
