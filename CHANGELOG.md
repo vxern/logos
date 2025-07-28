@@ -1,3 +1,8 @@
+## Next (WIP)
+
+- Fixed modal composers not passing through the right data.
+- Fixed manually moving members to a dynamic VC causing multiple VCs to get created.
+
 ## 5.0.0
 
 - Renamed the bot from `Logos` to `Rost`.
