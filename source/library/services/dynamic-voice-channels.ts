@@ -12,8 +12,8 @@ function isVoice(channel: Rost.Channel): channel is VoiceChannel {
 
 type WithVoiceStates<T> = T & { voiceStates: Rost.VoiceState[] };
 type DynamicVoiceChannelData = {
-	parent: WithVoiceStates<{ channel: Rost.Channel }>;
-	children: WithVoiceStates<{ id: bigint }>[];
+	original: WithVoiceStates<{ channel: Rost.Channel }>;
+	copies: WithVoiceStates<{ id: bigint }>[];
 	configuration: DynamicVoiceChannel;
 };
 
@@ -30,7 +30,7 @@ class DynamicVoiceChannelService extends LocalService {
 		const channelIdConfigurationTuples = this.configuration.channels.map<[bigint, DynamicVoiceChannel]>(
 			(channelConfiguration) => [BigInt(channelConfiguration.id), channelConfiguration],
 		);
-		const parentChannelIds = channelIdConfigurationTuples.map(([channelId, _]) => channelId);
+		const originalChannelIds = channelIdConfigurationTuples.map(([channelId, _]) => channelId);
 
 		const channelsAll = this.guild.channels
 			.filter((channel) => isVoice(channel))
@@ -62,42 +62,42 @@ class DynamicVoiceChannelService extends LocalService {
 			]),
 		);
 
-		const parentChannels = channelsAll.filter((channel) => parentChannelIds.includes(channel.id));
+		const originalChannels = channelsAll.filter((channel) => originalChannelIds.includes(channel.id));
 
-		const parentChannelById = new Map<bigint, DynamicVoiceChannelData>();
+		const originalChannelById = new Map<bigint, DynamicVoiceChannelData>();
 		for (const channel of channelsAll) {
 			const voiceStates = voiceStatesByChannelId.get(channel.id) ?? [];
 
-			const parentChannel = parentChannels.find((parentChannel) => parentChannel.name === channel.name);
-			if (parentChannel === undefined) {
+			const originalChannel = originalChannels.find((originalChannel) => originalChannel.name === channel.name);
+			if (originalChannel === undefined) {
 				continue;
 			}
 
 			const configuration = channelIdConfigurationTuples.find(
-				([channelId, _]) => channelId === parentChannel.id,
+				([channelId, _]) => channelId === originalChannel.id,
 			)?.[1];
 			if (configuration === undefined) {
 				continue;
 			}
 
-			if (!parentChannelById.has(parentChannel.id)) {
-				const voiceStates = voiceStatesByChannelId.get(parentChannel.id) ?? [];
-				parentChannelById.set(parentChannel.id, {
-					parent: { channel: parentChannel, voiceStates },
+			if (!originalChannelById.has(originalChannel.id)) {
+				const voiceStates = voiceStatesByChannelId.get(originalChannel.id) ?? [];
+				originalChannelById.set(originalChannel.id, {
+					original: { channel: originalChannel, voiceStates },
 					configuration,
-					children: [],
+					copies: [],
 				});
 			}
 
-			// If the channel is a parent channel.
-			if (parentChannelIds.includes(channel.id)) {
+			// If the channel is a original channel.
+			if (originalChannelIds.includes(channel.id)) {
 				continue;
 			}
 
-			parentChannelById.get(parentChannel.id)?.children.push({ id: channel.id, voiceStates });
+			originalChannelById.get(originalChannel.id)?.copies.push({ id: channel.id, voiceStates });
 		}
 
-		return Array.from(parentChannelById.values());
+		return Array.from(originalChannelById.values());
 	}
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
@@ -113,26 +113,38 @@ class DynamicVoiceChannelService extends LocalService {
 
 		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
+		await this.#syncChannelsToVoiceStates();
+	}
+
+	async stop(): Promise<void> {
+		await this.#voiceStateUpdates.close();
+
+		this.oldVoiceStates.clear();
+	}
+
+	async #syncChannelsToVoiceStates(): Promise<void> {
+		this.log.info("Syncing channels to voice states...");
+
 		const voiceStatesAll = this.channels.flatMap((channel) => [
-			...channel.parent.voiceStates,
-			...channel.children.flatMap((channel) => channel.voiceStates),
+			...channel.original.voiceStates,
+			...channel.copies.flatMap((channel) => channel.voiceStates),
 		]);
 		for (const voiceState of voiceStatesAll) {
 			await this.#handleVoiceStateUpdate(voiceState);
 		}
 
-		for (const { parent, children, configuration } of this.channels) {
-			const groupChannelsCount = children.length + 1;
+		for (const { original, copies, configuration } of this.channels) {
+			const groupChannelsCount = copies.length + 1;
 			const surplusVacantChannels = Math.max(
 				0,
 				(configuration.maximum ?? constants.defaults.MAXIMUM_VOICE_CHANNELS) - groupChannelsCount,
 			);
 
-			const isParentVacant = parent.voiceStates.length === 0;
-			const vacantChannelIds = children.filter((channel) => channel.voiceStates.length === 0);
+			const isoriginalVacant = original.voiceStates.length === 0;
+			const vacantChannelIds = copies.filter((channel) => channel.voiceStates.length === 0);
 			const minimumVoiceChannels = configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS;
 			if (
-				(isParentVacant ? 1 : 0) + vacantChannelIds.length ===
+				(isoriginalVacant ? 1 : 0) + vacantChannelIds.length ===
 				(configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS) + 1
 			) {
 				return;
@@ -145,12 +157,8 @@ class DynamicVoiceChannelService extends LocalService {
 				await this.client.bot.helpers.deleteChannel(channelId);
 			}
 		}
-	}
 
-	async stop(): Promise<void> {
-		await this.#voiceStateUpdates.close();
-
-		this.oldVoiceStates.clear();
+		this.log.info("Channels and voice states have been synced.");
 	}
 
 	async #handleVoiceStateUpdate(newVoiceState: Rost.VoiceState): Promise<void> {
@@ -174,44 +182,50 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		const channelId = newVoiceState.channelId ?? 0n;
+		const channelId = newVoiceState.channelId;
+		if (channelId === undefined) {
+			return;
+		}
 
 		const channelData = channels.find(
 			(channel) =>
-				channel.parent.channel.id === channelId || channel.children.some((channel) => channel.id === channelId),
+				channel.original.channel.id === channelId || channel.copies.some((channel) => channel.id === channelId),
 		);
 		if (channelData === undefined) {
 			return;
 		}
 
-		const { parent, configuration, children } = channelData;
+		const { original, configuration, copies } = channelData;
 
-		const channel = parent.channel.id === channelId ? parent : children.find((channel) => channel.id === channelId);
+		const channel =
+			original.channel.id === channelId ? original : copies.find((channel) => channel.id === channelId);
 		if (channel === undefined) {
 			return;
 		}
 
-		const vacantChannels = [parent, ...children].filter((channel) => channel.voiceStates.length === 0);
+		const vacantChannels = [original, ...copies].filter((channel) => channel.voiceStates.length === 0);
 		if (vacantChannels.length === (configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS) + 1) {
 			return;
 		}
 
 		// If the channel limit has already been reached, do not process.
-		const groupChannels = children.length + 1;
+		const groupChannels = copies.length + 1;
 		if (groupChannels >= (configuration.maximum ?? constants.defaults.MAXIMUM_VOICE_CHANNELS)) {
 			return;
 		}
 
-		if (parent.channel.name === undefined) {
+		if (original.channel.name === undefined) {
 			return;
 		}
 
+		this.log.info(`First user joined ${this.client.diagnostics.channel(channelId)}. Creating new instance...`);
+
 		await this.client.bot.helpers
 			.createChannel(this.guildId, {
-				name: parent.channel.name,
+				name: original.channel.name,
 				type: Discord.ChannelTypes.GuildVoice,
-				parentId: parent.channel.parentId,
-				position: parent.channel.position,
+				parentId: original.channel.parentId,
+				position: original.channel.position,
 			})
 			.catch((error) =>
 				this.log.warn(
@@ -227,19 +241,23 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		const channelId = oldVoiceState.channelId ?? 0n;
+		const channelId = oldVoiceState.channelId;
+		if (channelId === undefined) {
+			return;
+		}
 
 		const channelData = channels.findLast(
 			(channel) =>
-				channel.parent.channel.id === channelId || channel.children.some((channel) => channel.id === channelId),
+				channel.original.channel.id === channelId || channel.copies.some((channel) => channel.id === channelId),
 		);
 		if (channelData === undefined) {
 			return;
 		}
 
-		const { parent, configuration, children } = channelData;
+		const { original, configuration, copies } = channelData;
 
-		const channel = parent.channel.id === channelId ? parent : children.find((channel) => channel.id === channelId);
+		const channel =
+			original.channel.id === channelId ? original : copies.find((channel) => channel.id === channelId);
 		if (channel === undefined) {
 			return;
 		}
@@ -249,10 +267,10 @@ class DynamicVoiceChannelService extends LocalService {
 			return;
 		}
 
-		const isParentVacant = parent.voiceStates.length === 0;
-		const vacantChannels = children.filter((channel) => channel.voiceStates.length === 0);
+		const isoriginalVacant = original.voiceStates.length === 0;
+		const vacantChannels = copies.filter((channel) => channel.voiceStates.length === 0);
 		if (
-			(isParentVacant ? 1 : 0) + vacantChannels.length ===
+			(isoriginalVacant ? 1 : 0) + vacantChannels.length ===
 			(configuration.minimum ?? constants.defaults.MINIMUM_VOICE_CHANNELS) + 1
 		) {
 			return;
@@ -262,6 +280,8 @@ class DynamicVoiceChannelService extends LocalService {
 		if (lastVacantChannelId === undefined) {
 			return;
 		}
+
+		this.log.info(`Last user left ${this.client.diagnostics.channel(lastVacantChannelId)}. Deleting instance...`);
 
 		this.client.bot.helpers
 			.deleteChannel(lastVacantChannelId)
