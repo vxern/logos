@@ -113,6 +113,16 @@ class DynamicVoiceChannelService extends LocalService {
 
 		await this.client.registerCollector("voiceStateUpdate", this.#voiceStateUpdates);
 
+		await this.#syncChannelsAndVoiceStates();
+	}
+
+	async stop(): Promise<void> {
+		await this.#voiceStateUpdates.close();
+
+		this.oldVoiceStates.clear();
+	}
+
+	async #syncChannelsAndVoiceStates(): Promise<void> {
 		const voiceStatesAll = this.channels.flatMap((channel) => [
 			...channel.parent.voiceStates,
 			...channel.children.flatMap((channel) => channel.voiceStates),
@@ -145,12 +155,6 @@ class DynamicVoiceChannelService extends LocalService {
 				await this.client.bot.helpers.deleteChannel(channelId);
 			}
 		}
-	}
-
-	async stop(): Promise<void> {
-		await this.#voiceStateUpdates.close();
-
-		this.oldVoiceStates.clear();
 	}
 
 	async #handleVoiceStateUpdate(newVoiceState: Rost.VoiceState): Promise<void> {
