@@ -721,10 +721,7 @@ export default Object.freeze({
 	}),
 	chooseProficiency: ({ localise, locale }) => ({
 		title: localise("entry.proficiency.title", locale)(),
-		description: {
-			chooseProficiency: localise("entry.proficiency.description.chooseProficiency", locale)(),
-			canChangeLater: localise("entry.proficiency.description.canChangeLater", locale),
-		},
+		description: localise("entry.proficiency.description", locale)(),
 	}),
 	getVerified: ({ localise, locale }) => ({
 		title: localise("entry.verification.getVerified.title", locale)(),
@@ -751,10 +748,7 @@ export default Object.freeze({
 	}),
 	receivedAccess: ({ localise, locale }) => ({
 		title: localise("entry.proficiency.receivedAccess.title", locale)(),
-		description: {
-			nowMember: localise("entry.proficiency.receivedAccess.description.nowMember", locale),
-			toStart: localise("entry.proficiency.receivedAccess.description.toStart", locale)(),
-		},
+		description: localise("entry.proficiency.receivedAccess.description", locale)(),
 	}),
 	sureToShow: ({ localise, locale }) => ({
 		title: localise("interactions.show.sureToShow.title", locale)(),

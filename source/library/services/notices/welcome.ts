@@ -1,6 +1,5 @@
 import type { Client } from "rost/client";
 import { type HashableMessageContents, NoticeService } from "rost/services/notices/service";
-import { SeparatorSpacingSize } from "@discordeno/bot";
 
 // TODO(vxern): Rename to `EntryNoticeService`
 class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
@@ -29,7 +28,7 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 						},
 						{
 							type: Discord.MessageComponentTypes.Separator,
-							spacing: SeparatorSpacingSize.Large,
+							spacing: Discord.SeparatorSpacingSize.Large,
 						},
 						{
 							type: Discord.MessageComponentTypes.TextDisplay,
@@ -37,7 +36,7 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 						},
 						{
 							type: Discord.MessageComponentTypes.Separator,
-							spacing: SeparatorSpacingSize.Large,
+							spacing: Discord.SeparatorSpacingSize.Large,
 						},
 						{
 							type: Discord.MessageComponentTypes.TextDisplay,

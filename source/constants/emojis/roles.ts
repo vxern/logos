@@ -7,10 +7,10 @@ export default Object.freeze({
 			category: "🎓",
 			proficiency: {
 				category: "🔰",
-				beginner: "🟩",
-				intermediate: "🟦",
-				advanced: "🟥",
-				native: "🟨",
+				beginner: "🟢",
+				intermediate: "🔵",
+				advanced: "🔴",
+				native: "🟡",
 			},
 			cefr: {
 				category: "🔤",

@@ -1,4 +1,3 @@
-import { code } from "rost:constants/formatting";
 import { timeStructToMilliseconds } from "rost:constants/time";
 import type { Client } from "rost/client";
 import { InteractionCollector } from "rost/collectors";
@@ -52,39 +51,39 @@ class EntryService extends LocalService {
 			locale: buttonPress.locale,
 		});
 		this.client
-			.notice(buttonPress, {
-				embeds: [
-					{
-						title: strings.title,
-						description: `${strings.description.chooseProficiency}\n\n${strings.description.canChangeLater({
-							command: code(
-								this.client.localiseCommand(
-									// @ts-ignore: This is fine for now.
-									this.client.commands.profile.options.roles.key,
-									buttonPress.locale,
-								),
-							),
-						})}`,
-					},
-				],
+			.reply(buttonPress, {
+				flags: Discord.MessageFlags.IsComponentV2,
 				components: [
 					{
-						type: Discord.MessageComponentTypes.ActionRow,
-						components: Object.values(
-							constants.roles.language.categories.proficiency.collection.list,
-						).map<Discord.ButtonComponent>((proficiencyRole, index) => {
-							const strings = constants.contexts.role({
-								localise: this.client.localise,
-								locale: buttonPress.locale,
-							});
-							return {
-								type: Discord.MessageComponentTypes.Button,
-								label: strings.name({ id: proficiencyRole.id }),
-								customId: languageProficiencyButtons.encodeId([index.toString()]),
-								style: Discord.ButtonStyles.Secondary,
-								emoji: { name: proficiencyRole.emoji },
-							};
-						}) as [Discord.ButtonComponent],
+						type: Discord.MessageComponentTypes.Container,
+						components: [
+							{
+								type: Discord.MessageComponentTypes.TextDisplay,
+								content: `# ${strings.title}\n${strings.description}`,
+							},
+							{
+								type: Discord.MessageComponentTypes.Separator,
+								spacing: Discord.SeparatorSpacingSize.Large,
+							},
+							{
+								type: Discord.MessageComponentTypes.ActionRow,
+								components: Object.values(
+									constants.roles.language.categories.proficiency.collection.list,
+								).map<Discord.ButtonComponent>((proficiencyRole, index) => {
+									const strings = constants.contexts.role({
+										localise: this.client.localise,
+										locale: buttonPress.locale,
+									});
+									return {
+										type: Discord.MessageComponentTypes.Button,
+										label: strings.name({ id: proficiencyRole.id }),
+										customId: languageProficiencyButtons.encodeId([index.toString()]),
+										style: Discord.ButtonStyles.Secondary,
+										emoji: { name: proficiencyRole.emoji },
+									};
+								}) as [Discord.ButtonComponent],
+							},
+						],
 					},
 				],
 			})
@@ -127,7 +126,6 @@ class EntryService extends LocalService {
 			const requestVerificationButton = new InteractionCollector<[index: string]>(this.client, {
 				only: [buttonPress.user.id],
 				dependsOn: collector,
-				isSingle: true,
 			});
 
 			requestVerificationButton.onInteraction(this.#handleRequestVerification.bind(this));
@@ -142,24 +140,31 @@ class EntryService extends LocalService {
 				});
 				this.client
 					.notice(buttonPress, {
-						embeds: [
-							{
-								title: strings.title,
-								description: `${strings.description.verificationRequired({
-									server_name: this.guild.name,
-								})}\n\n${strings.description.honestAnswers}`,
-							},
-						],
+						flags: Discord.MessageFlags.IsComponentV2,
 						components: [
 							{
-								type: Discord.MessageComponentTypes.ActionRow,
+								type: Discord.MessageComponentTypes.Container,
 								components: [
 									{
-										type: Discord.MessageComponentTypes.Button,
-										style: Discord.ButtonStyles.Secondary,
-										label: strings.description.understood,
-										customId: requestVerificationButton.encodeId([buttonPress.metadata[1]]),
-										emoji: { name: constants.emojis.services.notices.welcome.understood },
+										type: Discord.MessageComponentTypes.TextDisplay,
+										content: `# ${strings.title}\n${strings.description.verificationRequired({
+											server_name: this.guild.name,
+										})}\n\n${strings.description.honestAnswers}`,
+									},
+									{
+										type: Discord.MessageComponentTypes.Separator,
+										spacing: Discord.SeparatorSpacingSize.Large,
+									},
+									{
+										type: Discord.MessageComponentTypes.ActionRow,
+										components: [
+											{
+												type: Discord.MessageComponentTypes.Button,
+												style: Discord.ButtonStyles.Success,
+												label: strings.description.understood,
+												customId: requestVerificationButton.encodeId([buttonPress.metadata[1]]),
+											},
+										],
 									},
 								],
 							},
@@ -177,11 +182,26 @@ class EntryService extends LocalService {
 		});
 		this.client
 			.success(buttonPress, {
-				title: strings.title,
-				description: `${strings.description.nowMember({
-					server_name: this.guild.name,
-				})}\n\n${strings.description.toStart}`,
-				image: { url: constants.gifs.welcome },
+				flags: Discord.MessageFlags.IsComponentV2,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.Container,
+						components: [
+							{
+								type: Discord.MessageComponentTypes.MediaGallery,
+								items: [{ media: { url: constants.gifs.welcome } }],
+							},
+							{
+								type: Discord.MessageComponentTypes.Separator,
+								spacing: Discord.SeparatorSpacingSize.Large,
+							},
+							{
+								type: Discord.MessageComponentTypes.TextDisplay,
+								content: `# ${strings.title}\n${strings.description}`,
+							},
+						],
+					},
+				],
 			})
 			.ignore();
 
@@ -222,8 +242,18 @@ class EntryService extends LocalService {
 			});
 			this.client
 				.pushback(buttonPress, {
-					title: strings.title,
-					description: strings.description,
+					flags: Discord.MessageFlags.IsComponentV2,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.Container,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.TextDisplay,
+									content: `# ${strings.title}\n${strings.description}`,
+								},
+							],
+						},
+					],
 				})
 				.ignore();
 
@@ -248,7 +278,22 @@ class EntryService extends LocalService {
 					localise: this.client.localise,
 					locale: submission.locale,
 				});
-				this.client.pushback(submission, { title: strings.title, description: strings.description }).ignore();
+				this.client
+					.pushback(submission, {
+						flags: Discord.MessageFlags.IsComponentV2,
+						components: [
+							{
+								type: Discord.MessageComponentTypes.Container,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.TextDisplay,
+										content: `# ${strings.title}\n${strings.description}`,
+									},
+								],
+							},
+						],
+					})
+					.ignore();
 
 				return;
 			}
@@ -283,8 +328,18 @@ class EntryService extends LocalService {
 			});
 			this.client
 				.succeeded(submission, {
-					title: strings.title,
-					description: `${strings.description.submitted}\n\n${strings.description.willBeReviewed}`,
+					flags: Discord.MessageFlags.IsComponentV2,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.Container,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.TextDisplay,
+									content: `# ${strings.description.submitted}\n${strings.description.willBeReviewed}`,
+								},
+							],
+						},
+					],
 				})
 				.ignore();
 		});
@@ -303,7 +358,22 @@ class EntryService extends LocalService {
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			this.client.pushback(interaction, { title: strings.title, description: strings.description }).ignore();
+			this.client
+				.pushback(interaction, {
+					flags: Discord.MessageFlags.IsComponentV2,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.Container,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.TextDisplay,
+									content: strings.description,
+								},
+							],
+						},
+					],
+				})
+				.ignore();
 
 			return false;
 		}
@@ -317,7 +387,22 @@ class EntryService extends LocalService {
 				localise: this.client.localise,
 				locale: interaction.locale,
 			});
-			this.client.error(interaction, { title: strings.title, description: strings.description }).ignore();
+			this.client
+				.error(interaction, {
+					flags: Discord.MessageFlags.IsComponentV2,
+					components: [
+						{
+							type: Discord.MessageComponentTypes.Container,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.TextDisplay,
+									content: strings.description,
+								},
+							],
+						},
+					],
+				})
+				.ignore();
 
 			return false;
 		}
