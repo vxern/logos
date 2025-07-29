@@ -342,7 +342,11 @@ class RoleSelectionComponent {
 					components: [
 						{
 							type: Discord.MessageComponentTypes.TextDisplay,
-							content: `# ${title}\n${strings.description({ id: category.id })}`,
+							content: `### ${title}\n${strings.description({ id: category.id })}`,
+						},
+						{
+							type: Discord.MessageComponentTypes.Separator,
+							spacing: Discord.SeparatorSpacingSize.Large,
 						},
 						{
 							type: Discord.MessageComponentTypes.ActionRow,
