@@ -10,8 +10,6 @@ interface GuildDocument {
 		journalling: boolean;
 		notices: boolean;
 		informationNotices: boolean;
-		resourceNotices: boolean;
-		roleNotices: boolean;
 		welcomeNotices: boolean;
 		targetOnly: boolean;
 		alerts: boolean;
@@ -67,14 +65,13 @@ interface GuildDocument {
 		};
 		informationNotices?: {
 			channelId: string;
-			inviteLink: string;
-		};
-		resourceNotices?: {
-			channelId: string;
-			url: string;
-		};
-		roleNotices?: {
-			channelId: string;
+			urls: {
+				website: string;
+				discord: string;
+				instagram: string;
+				github: string;
+				resources: string;
+			};
 		};
 		welcomeNotices?: {
 			channelId: string;
