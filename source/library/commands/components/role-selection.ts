@@ -158,8 +158,17 @@ class RoleSelectionComponent {
 				});
 				this.#client
 					.notice(selection, {
-						title: strings.title,
-						description: `${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
+						components: [
+							{
+								type: Discord.MessageComponentTypes.Container,
+								components: [
+									{
+										type: Discord.MessageComponentTypes.TextDisplay,
+										content: `# ${strings.title}\n${strings.description.limitReached}\n\n${strings.description.toChooseNew}`,
+									},
+								],
+							},
+						],
 					})
 					.ignore();
 
