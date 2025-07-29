@@ -4,6 +4,7 @@ import { handleOpenRoleSelectionMenu } from "rost/commands/handlers/profile/role
 import { handleMakeReport } from "rost/commands/handlers/report";
 import { handleSubmitResource } from "rost/commands/handlers/resource";
 import { handleMakeSuggestion } from "rost/commands/handlers/suggestion";
+import { handleOpenTicket } from "rost/commands/handlers/ticket/open";
 import { type HashableMessageContents, NoticeService } from "rost/services/notices/service";
 
 class InformationNoticeService extends NoticeService<{ type: "information" }> {
@@ -11,6 +12,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 	readonly #makeSuggestionButton: InteractionCollector;
 	readonly #makeReportButton: InteractionCollector;
 	readonly #submitResourceButton: InteractionCollector;
+	readonly #openTicketButton: InteractionCollector;
 
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
 		super(client, { identifier: "InformationNoticeService", guildId }, { type: "information" });
@@ -35,6 +37,11 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 			customId: constants.components.notices.submitResource,
 			isPermanent: true,
 		});
+		this.#openTicketButton = new InteractionCollector(client, {
+			guildId,
+			customId: constants.components.notices.openTicket,
+			isPermanent: true,
+		});
 	}
 
 	async start(): Promise<void> {
@@ -44,11 +51,13 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 		this.#makeSuggestionButton.onInteraction(async (buttonPress) => handleMakeSuggestion(this.client, buttonPress));
 		this.#makeReportButton.onInteraction(async (buttonPress) => handleMakeReport(this.client, buttonPress));
 		this.#submitResourceButton.onInteraction(async (buttonPress) => handleSubmitResource(this.client, buttonPress));
+		this.#openTicketButton.onInteraction(async (buttonPress) => handleOpenTicket(this.client, buttonPress));
 
 		await this.client.registerInteractionCollector(this.#selectRolesButton);
 		await this.client.registerInteractionCollector(this.#makeSuggestionButton);
 		await this.client.registerInteractionCollector(this.#makeReportButton);
 		await this.client.registerInteractionCollector(this.#submitResourceButton);
+		await this.client.registerInteractionCollector(this.#openTicketButton);
 
 		await super.start();
 	}
@@ -90,57 +99,6 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 						{
 							type: Discord.MessageComponentTypes.Separator,
 							spacing: Discord.SeparatorSpacingSize.Large,
-						},
-						{
-							type: Discord.MessageComponentTypes.TextDisplay,
-							content: `### 📜 ${strings.sections.guidelines.title}`,
-						},
-						{
-							type: Discord.MessageComponentTypes.TextDisplay,
-							content: constants.rules
-								.map((rule, index) => {
-									const strings = constants.contexts.rule({
-										localise: this.client.localise,
-										locale: this.guildLocale,
-									});
-									return `${index + 1}. ${strings.summary(rule)}\n  -# ${strings.content(rule)}`;
-								})
-								.join("\n"),
-						},
-						{
-							type: Discord.MessageComponentTypes.Separator,
-							spacing: Discord.SeparatorSpacingSize.Large,
-						},
-						{
-							type: Discord.MessageComponentTypes.TextDisplay,
-							content: `### 📚 ${strings.sections.learning.title}`,
-						},
-						{
-							type: Discord.MessageComponentTypes.ActionRow,
-							components: [
-								{
-									type: Discord.MessageComponentTypes.Button,
-									style: Discord.ButtonStyles.Link,
-									label: strings.sections.learning.buttons.resources,
-									url: informationNoticeConfiguration.urls.resources,
-									emoji: { name: "📚" },
-								},
-								{
-									type: Discord.MessageComponentTypes.Button,
-									style: Discord.ButtonStyles.Secondary,
-									label: strings.sections.learning.buttons.resource,
-									customId: this.#submitResourceButton.customId,
-									emoji: { name: "📓" },
-								},
-							],
-						},
-						{
-							type: Discord.MessageComponentTypes.Separator,
-							spacing: Discord.SeparatorSpacingSize.Large,
-						},
-						{
-							type: Discord.MessageComponentTypes.TextDisplay,
-							content: `### 🌍 ${strings.sections.socials.title}`,
 						},
 						{
 							type: Discord.MessageComponentTypes.ActionRow,
@@ -186,7 +144,46 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 						},
 						{
 							type: Discord.MessageComponentTypes.TextDisplay,
-							content: `### 🌻 ${strings.sections.selfServe.title}`,
+							content: `### 📜 ${strings.sections.guidelines.title}`,
+						},
+						{
+							type: Discord.MessageComponentTypes.TextDisplay,
+							content: constants.rules
+								.map((rule, index) => {
+									const strings = constants.contexts.rule({
+										localise: this.client.localise,
+										locale: this.guildLocale,
+									});
+									return `${index + 1}. ${strings.summary(rule)}\n  -# ${strings.content(rule)}`;
+								})
+								.join("\n"),
+						},
+						{
+							type: Discord.MessageComponentTypes.Separator,
+							spacing: Discord.SeparatorSpacingSize.Large,
+						},
+						{
+							type: Discord.MessageComponentTypes.ActionRow,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Link,
+									label: strings.sections.learning.buttons.resources,
+									url: informationNoticeConfiguration.urls.resources,
+									emoji: { name: "📚" },
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Secondary,
+									label: strings.sections.learning.buttons.resource,
+									customId: this.#submitResourceButton.customId,
+									emoji: { name: "📓" },
+								},
+							],
+						},
+						{
+							type: Discord.MessageComponentTypes.Separator,
+							spacing: Discord.SeparatorSpacingSize.Large,
 						},
 						{
 							type: Discord.MessageComponentTypes.ActionRow,
@@ -211,6 +208,13 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 									label: strings.sections.selfServe.buttons.report,
 									customId: this.#makeReportButton.customId,
 									emoji: { name: "💢" },
+								},
+								{
+									type: Discord.MessageComponentTypes.Button,
+									style: Discord.ButtonStyles.Secondary,
+									label: strings.sections.selfServe.buttons.ticket,
+									customId: this.#openTicketButton.customId,
+									emoji: { name: "🎫" },
 								},
 							],
 						},

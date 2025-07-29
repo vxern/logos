@@ -15,6 +15,7 @@ export default Object.freeze({
 		makeSuggestion: "make_suggestion",
 		makeReport: "make_report",
 		submitResource: "submit_resource",
+		openTicket: "open_ticket",
 	},
 	createInquiry: "create_inquiry",
 	removePrompt: "remove_prompt",

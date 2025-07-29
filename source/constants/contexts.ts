@@ -693,14 +693,12 @@ export default Object.freeze({
 				title: localise("notices.information.sections.guidelines.title", locale)(),
 			},
 			learning: {
-				title: localise("notices.information.sections.learning.title", locale)(),
 				buttons: {
 					resources: localise("notices.information.sections.learning.buttons.resources", locale)(),
 					resource: localise("notices.information.sections.learning.buttons.resource", locale)(),
 				},
 			},
 			socials: {
-				title: localise("notices.information.sections.socials.title", locale)(),
 				buttons: {
 					website: localise("notices.information.sections.socials.buttons.website", locale)(),
 					discord: localise("notices.information.sections.socials.buttons.discord", locale)(),
@@ -709,11 +707,11 @@ export default Object.freeze({
 				},
 			},
 			selfServe: {
-				title: localise("notices.information.sections.selfServe.title", locale)(),
 				buttons: {
 					roles: localise("notices.information.sections.selfServe.buttons.roles", locale)(),
 					suggestion: localise("notices.information.sections.selfServe.buttons.suggestion", locale)(),
 					report: localise("notices.information.sections.selfServe.buttons.report", locale)(),
+					ticket: localise("notices.information.sections.selfServe.buttons.ticket", locale)(),
 				},
 			},
 		},
