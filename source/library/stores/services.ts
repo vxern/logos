@@ -10,8 +10,6 @@ import { InteractionRepetitionService } from "rost/services/interaction-repetiti
 import { LavalinkService } from "rost/services/lavalink";
 import { MusicService } from "rost/services/music";
 import { InformationNoticeService } from "rost/services/notices/information";
-import { ResourceNoticeService } from "rost/services/notices/resources";
-import { RoleNoticeService } from "rost/services/notices/roles";
 import { WelcomeNoticeService } from "rost/services/notices/welcome";
 import { ReportPromptService } from "rost/services/prompts/reports";
 import { ResourcePromptService } from "rost/services/prompts/resources";
@@ -35,8 +33,6 @@ interface LocalServices {
 	readonly entry: EntryService;
 	readonly music: MusicService;
 	readonly informationNotices: InformationNoticeService;
-	readonly resourceNotices: ResourceNoticeService;
-	readonly roleNotices: RoleNoticeService;
 	readonly welcomeNotices: WelcomeNoticeService;
 	readonly reportPrompts: ReportPromptService;
 	readonly resourcePrompts: ResourcePromptService;
@@ -163,20 +159,6 @@ class ServiceStore {
 			services.push(service);
 
 			this.#local.informationNotices.set(guildId, service);
-		}
-
-		if (guildDocument.hasEnabled("resourceNotices")) {
-			const service = new ResourceNoticeService(this.#client, { guildId });
-			services.push(service);
-
-			this.#local.resourceNotices.set(guildId, service);
-		}
-
-		if (guildDocument.hasEnabled("roleNotices")) {
-			const service = new RoleNoticeService(this.#client, { guildId });
-			services.push(service);
-
-			this.#local.roleNotices.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("welcomeNotices")) {

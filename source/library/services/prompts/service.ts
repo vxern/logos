@@ -46,11 +46,11 @@ abstract class PromptService<
 		tickets: (guildDocument) => guildDocument.feature("tickets"),
 	} as const satisfies ConfigurationLocators);
 	static readonly #customIds = Object.freeze({
-		verification: constants.components.verification,
-		reports: constants.components.reports,
-		resources: constants.components.resources,
-		suggestions: constants.components.suggestions,
-		tickets: constants.components.tickets,
+		verification: constants.components.prompts.verification,
+		reports: constants.components.prompts.reports,
+		resources: constants.components.prompts.resources,
+		suggestions: constants.components.prompts.suggestions,
+		tickets: constants.components.prompts.tickets,
 	} as const satisfies CustomIDs);
 
 	readonly documents: Map<string, Generic["model"]>;

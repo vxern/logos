@@ -1,10 +1,11 @@
+import { MessageFlags } from "@discordeno/bot";
 import { default as hashObject } from "object-hash";
 import type { Client } from "rost/client";
 import { Collector } from "rost/collectors";
 import type { Guild } from "rost/models/guild";
 import { LocalService } from "rost/services/service";
 
-type HashableProperties = "embeds" | "components";
+type HashableProperties = "components" | "flags";
 type HashableMessageContents = Pick<Discord.CreateMessageOptions, HashableProperties>;
 
 interface NoticeData {
@@ -14,8 +15,6 @@ interface NoticeData {
 
 interface Configurations {
 	information: Guild["features"]["informationNotices"];
-	resources: Guild["features"]["resourceNotices"];
-	roles: Guild["features"]["roleNotices"];
 	welcome: Guild["features"]["welcomeNotices"];
 }
 
@@ -28,8 +27,6 @@ type NoticeTypes = keyof Configurations;
 abstract class NoticeService<Generic extends { type: NoticeTypes }> extends LocalService {
 	static readonly #configurationLocators = Object.freeze({
 		information: (guildDocument) => guildDocument.feature("informationNotices"),
-		resources: (guildDocument) => guildDocument.feature("resourceNotices"),
-		roles: (guildDocument) => guildDocument.feature("roleNotices"),
 		welcome: (guildDocument) => guildDocument.feature("welcomeNotices"),
 	} as const satisfies ConfigurationLocators);
 
@@ -65,12 +62,6 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			unorderedObjects: true,
 			unorderedSets: true,
 		});
-	}
-
-	static encodeHashInGuildIcon({ guild, hash }: { guild: Rost.Guild; hash: string }): string {
-		const iconUrl = Discord.guildIconUrl(guild.id, guild.icon);
-
-		return `${iconUrl}&hash=${hash}`;
 	}
 
 	abstract generateNotice(): HashableMessageContents | undefined;
@@ -131,10 +122,7 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 				return;
 			}
 
-			const { embeds, components }: HashableMessageContents = notice as unknown as HashableMessageContents;
-			const contents: HashableMessageContents = { embeds, components };
-
-			const hash = contents.embeds?.at(-1)?.footer?.iconUrl?.split("&hash=").at(-1);
+			const hash = notice.components?.at(0)?.components?.at(-1)?.content?.split("-# ")?.at(-1);
 			if (hash === undefined || hash !== expectedHash) {
 				await this.client.bot.helpers
 					.deleteMessage(channelId, notice.id)
@@ -227,12 +215,23 @@ abstract class NoticeService<Generic extends { type: NoticeTypes }> extends Loca
 			return undefined;
 		}
 
-		const lastEmbed = contents.embeds?.at(-1);
-		if (lastEmbed === undefined) {
+		const lastComponent = contents.components?.at(-1);
+		if (lastComponent === undefined || lastComponent.type !== Discord.MessageComponentTypes.Container) {
 			return undefined;
 		}
 
-		lastEmbed.footer = { text: guild.name, iconUrl: NoticeService.encodeHashInGuildIcon({ guild, hash }) };
+		contents.flags = MessageFlags.IsComponentV2;
+
+		lastComponent.components.push(
+			{
+				type: Discord.MessageComponentTypes.Separator,
+				spacing: Discord.SeparatorSpacingSize.Large,
+			},
+			{
+				type: Discord.MessageComponentTypes.TextDisplay,
+				content: `-# ${hash}`,
+			},
+		);
 
 		return this.client.bot.helpers.sendMessage(channelId, contents).catch((error) => {
 			this.log.warn(error, `Failed to send message to ${this.client.diagnostics.channel(channelId)}.`);
