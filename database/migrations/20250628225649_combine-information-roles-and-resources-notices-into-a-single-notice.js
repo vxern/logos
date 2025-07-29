@@ -12,6 +12,7 @@ async function up(database) {
 				website: "https://learnromanian.co.uk",
 				discord: "https://learnromanian.co.uk/socials/discord",
 				instagram: "https://learnromanian.co.uk/socials/instagram",
+				github: "https://learnromanian.co.uk/socials/github",
 				resources: "https://learnromanian.co.uk",
 			};
 		},
