@@ -88,8 +88,6 @@ class ServiceStore {
 			entry: new Map(),
 			music: new Map(),
 			informationNotices: new Map(),
-			resourceNotices: new Map(),
-			roleNotices: new Map(),
 			welcomeNotices: new Map(),
 			reportPrompts: new Map(),
 			resourcePrompts: new Map(),
