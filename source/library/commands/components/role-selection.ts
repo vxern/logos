@@ -334,22 +334,26 @@ class RoleSelectionComponent {
 			.join(` ${constants.emojis.commands.profile.roles.directory}  `);
 
 		return {
-			embeds: [
-				{
-					title,
-					description: strings.description({ id: category.id }),
-					color: category.color,
-				},
-			],
+			flags: Discord.MessageFlags.IsComponentV2,
 			components: [
 				{
-					type: Discord.MessageComponentTypes.ActionRow,
+					type: Discord.MessageComponentTypes.Container,
+					accentColor: category.color,
 					components: [
 						{
-							type: Discord.MessageComponentTypes.StringSelect,
-							customId: this.#selections.customId,
-							options: selectOptions,
-							placeholder: isGroup(category) ? strings.chooseCategory : strings.chooseRole,
+							type: Discord.MessageComponentTypes.TextDisplay,
+							content: `# ${title}\n${strings.description({ id: category.id })}`,
+						},
+						{
+							type: Discord.MessageComponentTypes.ActionRow,
+							components: [
+								{
+									type: Discord.MessageComponentTypes.StringSelect,
+									customId: this.#selections.customId,
+									options: selectOptions,
+									placeholder: isGroup(category) ? strings.chooseCategory : strings.chooseRole,
+								},
+							],
 						},
 					],
 				},
