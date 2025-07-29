@@ -117,8 +117,6 @@ await document.update(database, () => {
 		journalling: true,
 		notices: true,
 		informationNotices: true,
-		resourceNotices: true,
-		roleNotices: true,
 		welcomeNotices: true,
 		targetOnly: true,
 		alerts: true,
@@ -178,14 +176,13 @@ await document.update(database, () => {
 		},
 		informationNotices: {
 			channelId: idByName(channels, "welcome"),
-			inviteLink: `https://discord.gg/${inviteCode}`,
-		},
-		resourceNotices: {
-			channelId: idByName(channels, "resources"),
-			url: "https://learnromanian.co.uk",
-		},
-		roleNotices: {
-			channelId: idByName(channels, "roles"),
+			urls: {
+				website: "https://learnromanian.co.uk",
+				discord: "https://learnromanian.co.uk/socials/discord",
+				instagram: "https://learnromanian.co.uk/socials/instagram",
+				github: "https://learnromanian.co.uk/socials/github",
+				resources: "https://learnromanian.co.uk",
+			},
 		},
 		welcomeNotices: {
 			channelId: idByName(channels, "verify・here"),
