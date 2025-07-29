@@ -1,7 +1,6 @@
 {
   "entry.welcome.title": "Welcome to **{server_name}**",
-  "entry.welcome.description.toEnter": "To enter the server and become its official member, read the information in the {information_channel_mention} channel to get yourself familiarised with the server guidelines, and then press the button below.",
-  "entry.welcome.description.acceptedRules": "I have read the rules, and agree to abide by them",
+  "entry.welcome.description.acceptedRules": "Okay, let me in.",
   "entry.proficiency.title": "Language proficiency",
   "entry.proficiency.description.chooseProficiency": "Select the role that most accurately describes your Romanian language proficiency.",
   "entry.proficiency.description.canChangeLater": "Don't worry if you make the wrong choice now: You can always change it later using the {command} command.",

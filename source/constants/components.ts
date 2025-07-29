@@ -3,14 +3,21 @@ export default Object.freeze({
 	// seen again. 😈
 	none: "none",
 	acceptedRules: "accepted_rules",
-	verification: "verification",
-	reports: "reports",
-	resources: "resources",
-	suggestions: "suggestions",
-	tickets: "tickets",
+	prompts: {
+		verification: "verification",
+		reports: "reports",
+		resources: "resources",
+		suggestions: "suggestions",
+		tickets: "tickets",
+	},
+	notices: {
+		selectRoles: "select_roles",
+		makeSuggestion: "make_suggestion",
+		makeReport: "make_report",
+		submitResource: "submit_resource",
+	},
 	createInquiry: "create_inquiry",
 	removePrompt: "remove_prompt",
-	selectRoles: "select_roles",
 	showInChat: "show_in_chat",
 	noPrompts: "no_prompts",
 } as const);

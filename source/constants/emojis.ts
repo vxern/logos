@@ -1,13 +1,13 @@
 import commands from "rost:constants/emojis/commands";
 import events from "rost:constants/emojis/events";
 import roles from "rost:constants/emojis/roles";
-import services from "rost:constants/emojis/services";
+import notices from "rost:constants/emojis/notices";
 
 export default Object.freeze({
 	commands,
 	events,
 	roles,
-	services,
+	notices,
 	verification: {
 		for: "🟩",
 		against: "🟥",
