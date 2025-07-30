@@ -10,7 +10,7 @@ import { InteractionRepetitionService } from "rost/services/interaction-repetiti
 import { LavalinkService } from "rost/services/lavalink";
 import { MusicService } from "rost/services/music";
 import { InformationNoticeService } from "rost/services/notices/information";
-import { WelcomeNoticeService } from "rost/services/notices/welcome";
+import { EntryNoticeService } from "rost/services/notices/entry";
 import { ReportPromptService } from "rost/services/prompts/reports";
 import { ResourcePromptService } from "rost/services/prompts/resources";
 import { SuggestionPromptService } from "rost/services/prompts/suggestions";
@@ -33,7 +33,7 @@ interface LocalServices {
 	readonly entry: EntryService;
 	readonly music: MusicService;
 	readonly informationNotices: InformationNoticeService;
-	readonly welcomeNotices: WelcomeNoticeService;
+	readonly entryNotices: EntryNoticeService;
 	readonly reportPrompts: ReportPromptService;
 	readonly resourcePrompts: ResourcePromptService;
 	readonly suggestionPrompts: SuggestionPromptService;
@@ -88,7 +88,7 @@ class ServiceStore {
 			entry: new Map(),
 			music: new Map(),
 			informationNotices: new Map(),
-			welcomeNotices: new Map(),
+			entryNotices: new Map(),
 			reportPrompts: new Map(),
 			resourcePrompts: new Map(),
 			suggestionPrompts: new Map(),
@@ -159,11 +159,11 @@ class ServiceStore {
 			this.#local.informationNotices.set(guildId, service);
 		}
 
-		if (guildDocument.hasEnabled("welcomeNotices")) {
-			const service = new WelcomeNoticeService(this.#client, { guildId });
+		if (guildDocument.hasEnabled("entryNotices")) {
+			const service = new EntryNoticeService(this.#client, { guildId });
 			services.push(service);
 
-			this.#local.welcomeNotices.set(guildId, service);
+			this.#local.entryNotices.set(guildId, service);
 		}
 
 		if (guildDocument.hasEnabled("alerts")) {

@@ -117,7 +117,7 @@ await document.update(database, () => {
 		journalling: true,
 		notices: true,
 		informationNotices: true,
-		welcomeNotices: true,
+		entryNotices: true,
 		targetOnly: true,
 		alerts: true,
 		policy: true,
@@ -175,7 +175,7 @@ await document.update(database, () => {
 			channelId: idByName(channels, "journal"),
 		},
 		informationNotices: {
-			channelId: idByName(channels, "welcome"),
+			channelId: idByName(channels, "information"),
 			urls: {
 				website: "https://learnromanian.co.uk",
 				discord: "https://learnromanian.co.uk/socials/discord",
@@ -184,8 +184,8 @@ await document.update(database, () => {
 				resources: "https://learnromanian.co.uk",
 			},
 		},
-		welcomeNotices: {
-			channelId: idByName(channels, "verify・here"),
+		entryNotices: {
+			channelId: idByName(channels, "welcome"),
 			ruleChannelId: idByName(channels, "rule"),
 		},
 		targetOnly: {

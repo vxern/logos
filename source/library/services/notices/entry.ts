@@ -1,14 +1,13 @@
 import type { Client } from "rost/client";
 import { type HashableMessageContents, NoticeService } from "rost/services/notices/service";
 
-// TODO(vxern): Rename to `EntryNoticeService`
-class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
+class EntryNoticeService extends NoticeService<{ type: "entry" }> {
 	constructor(client: Client, { guildId }: { guildId: bigint }) {
-		super(client, { identifier: "WelcomeNoticeService", guildId }, { type: "welcome" });
+		super(client, { identifier: "EntryNoticeService", guildId }, { type: "entry" });
 	}
 
 	generateNotice(): HashableMessageContents | undefined {
-		const strings = constants.contexts.welcomeNotice({ localise: this.client.localise, locale: this.guildLocale });
+		const strings = constants.contexts.entryNotice({ localise: this.client.localise, locale: this.guildLocale });
 
 		return {
 			components: [
@@ -61,4 +60,4 @@ class WelcomeNoticeService extends NoticeService<{ type: "welcome" }> {
 	}
 }
 
-export { WelcomeNoticeService };
+export { EntryNoticeService };

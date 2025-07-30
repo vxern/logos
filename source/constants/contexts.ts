@@ -432,7 +432,7 @@ export default Object.freeze({
 		title: localise("music.options.play.strings.selectSong.title", locale)(),
 		description: localise("music.options.play.strings.selectSong.description", locale)(),
 	}),
-	welcomeNotice: ({ localise, locale }) => ({
+	entryNotice: ({ localise, locale }) => ({
 		title: localise("entry.welcome.title", locale),
 		description: {
 			toEnter: localise("entry.welcome.description.toEnter", locale),

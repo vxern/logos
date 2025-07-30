@@ -10,7 +10,7 @@ interface GuildDocument {
 		journalling: boolean;
 		notices: boolean;
 		informationNotices: boolean;
-		welcomeNotices: boolean;
+		entryNotices: boolean;
 		targetOnly: boolean;
 		alerts: boolean;
 		policy: boolean;
@@ -73,7 +73,7 @@ interface GuildDocument {
 				resources: string;
 			};
 		};
-		welcomeNotices?: {
+		entryNotices?: {
 			channelId: string;
 			ruleChannelId: string;
 		};
