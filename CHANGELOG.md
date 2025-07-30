@@ -1,3 +1,8 @@
+## Next (WIP)
+
+- Merged the role and resource notices into the information notice.
+- Updated all notices to use components V2.
+
 ## 5.0.0
 
 - Renamed the bot from `Logos` to `Rost`.
