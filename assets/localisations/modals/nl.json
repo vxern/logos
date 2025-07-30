@@ -1,4 +1,9 @@
 {
+  "form.failedToSubmit.title": "Er ging iets mis",
+  "prompts.continue": "Doorgaan",
+  "prompts.cancel": "Annuleren",
+  "prompts.stay": "Teruggaan",
+  "prompts.leave": "Verlaten",
   "verification.title": "Verificatievragen",
   "verification.fields.reason": "Wat is jouw reden om {language} te leren?",
   "verification.fields.aim": "How will you benefit from becoming a member?",
@@ -9,11 +14,6 @@
   "report.fields.link": "Link naar het bericht voor context",
   "suggestion.title": "Suggestie",
   "suggestion.fields.suggestion": "Wat is je suggestie?",
-  "prompts.continue": "Doorgaan",
-  "prompts.cancel": "Annuleren",
-  "prompts.stay": "Teruggaan",
-  "prompts.leave": "Verlaten",
   "resource.title": "Bron",
-  "resource.fields.resource": "Welke bron wil je indienen?",
-  "form.failedToSubmit.title": "Er ging iets mis"
+  "resource.fields.resource": "Welke bron wil je indienen?"
 }

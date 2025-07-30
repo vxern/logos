@@ -22,8 +22,6 @@
   "information.options.server.strings.channelTypes.voice": "Hang",
   "information.options.server.strings.languageTypes.home": "Home",
   "information.options.server.strings.languageTypes.target": "Target",
-  "resources.name": "segédanyagok",
-  "resources.description": "Listázza a nyelvtanulási segédanyagokat.",
   "list.name": "listázás",
   "list.description": "Különféle információkat tesz elérhetővé a felhasználókról.",
   "list.options.warnings.name": "figyelmeztetések",
@@ -411,8 +409,8 @@
   "licence.description": "Lehetővé teszi a Rost projekthez használt adatok és szoftverek leírásának megtekintését.",
   "licence.options.software.name": "szoftver",
   "licence.options.software.options.package.name": "csomag",
+  "licence.strings.invalid.title": "Érvénytelen licenc",
   "licence.strings.license": "Licenc - {entity}",
   "licence.strings.source": "Forrás",
-  "credits.strings.translation": "Fordítás",
-  "licence.strings.invalid.title": "Érvénytelen licenc"
+  "credits.strings.translation": "Fordítás"
 }

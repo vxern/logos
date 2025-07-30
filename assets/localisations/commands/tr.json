@@ -22,8 +22,6 @@
   "information.options.server.strings.channelTypes.voice": "Ses",
   "information.options.server.strings.languageTypes.home": "Home",
   "information.options.server.strings.languageTypes.target": "Hedef",
-  "resources.name": "kaynaklar",
-  "resources.description": "Dili öğrenmek için kullanabilinecek kaynaklar havuzuna yönlendirir.",
   "list.name": "liste",
   "list.description": "Kullanıcılar hakkında çeşitli bilgiler görüntülemeyi sağlar.",
   "list.options.warnings.name": "uyarılar",

@@ -1,4 +1,8 @@
 {
+  "prompts.continue": "Շարունակել",
+  "prompts.cancel": "Ջնջել",
+  "prompts.stay": "Ետ դարձնել",
+  "prompts.leave": "Մեկնիլ",
   "verification.title": "Ստուգման Հարցումներ",
   "verification.fields.reason": "Ի՞նչ պատճառով {language} կը սորվիք։",
   "verification.fields.aim": "Իմչպէ՞ս կ'օգտուիք անդամ դառնալով։",
@@ -8,9 +12,5 @@
   "report.fields.users": "Ամբաստանածները",
   "report.fields.link": "Հաղորդագրութեան յղումը",
   "suggestion.title": "Առաջարկ",
-  "suggestion.fields.suggestion": "Ի՞նչ է Ձեր առաջարկը։",
-  "prompts.continue": "Շարունակել",
-  "prompts.cancel": "Ջնջել",
-  "prompts.stay": "Ետ դարձնել",
-  "prompts.leave": "Մեկնիլ"
+  "suggestion.fields.suggestion": "Ի՞նչ է Ձեր առաջարկը։"
 }

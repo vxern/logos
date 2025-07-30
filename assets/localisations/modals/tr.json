@@ -1,4 +1,8 @@
 {
+  "prompts.continue": "Devam",
+  "prompts.cancel": "İptal",
+  "prompts.stay": "Take me back",
+  "prompts.leave": "Leave",
   "verification.title": "Doğrulama Soruları",
   "verification.fields.reason": "{language} dilini öğrenmenizdeki sebep nedir?",
   "verification.fields.aim": "Bir üye olmaktan ne yarar elde edeceksiniz?",
@@ -8,9 +12,5 @@
   "report.fields.users": "Bildirilecek kullanıcılar",
   "report.fields.link": "Bağlam (context) için mesaja link",
   "suggestion.title": "Öneri",
-  "suggestion.fields.suggestion": "Öneriniz nedir?",
-  "prompts.continue": "Devam",
-  "prompts.cancel": "İptal",
-  "prompts.stay": "Take me back",
-  "prompts.leave": "Leave"
+  "suggestion.fields.suggestion": "Öneriniz nedir?"
 }

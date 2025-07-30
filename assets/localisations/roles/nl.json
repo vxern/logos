@@ -7,6 +7,7 @@
   "roles.noCategory.name": "Geen categorie geselecteerd",
   "roles.noCategory.description": "Selecteer een rollencategorie om een lijst met beschikbare rollen te krijgen.",
   "roles.language.name": "Taal",
+  "roles.language.description": "Rollen die iemands taalvaardigheid aangeven.",
   "roles.language.categories.proficiency.name": "Vaardigheid",
   "roles.language.categories.proficiency.description": "Roles representing the user's language proficiency and knowledge of the language.",
   "roles.language.categories.proficiency.roles.beginner.name": "Beginner",
@@ -52,6 +53,7 @@
   "roles.learning.roles.classroomAttendee.description": "I attend sessions in the classroom channel and would like to be notified when a session takes place.",
   "roles.learning.roles.correctMe.name": "Verbeter mij",
   "roles.learning.roles.correctMe.description": "\"Ik denk, dus ik maak fouten\" - Verbeter mij alsjeblieft.",
+  "roles.learning.roles.doNotCorrectMe.name": "Verbeter mij niet",
   "roles.learning.roles.dailyPhrase.name": "Woord van de dag",
   "roles.learning.roles.dailyPhrase.description": "Ik wil op de hoogte worden gebracht wanneer er een nieuw woord van de dag wordt gepost.",
   "roles.learning.roles.voicechatter.name": "Voicechatter",
@@ -91,7 +93,5 @@
   "roles.regions.languages.romanian.roles.oltenia.name": "Oltenië",
   "roles.regions.languages.romanian.roles.oltenia.description": "Ik kom oorspronkelijk uit Oltenië.",
   "roles.regions.languages.romanian.roles.transilvania.name": "Transsylvanië",
-  "roles.regions.languages.romanian.roles.transilvania.description": "Ik kom oorspronkelijk uit Transsylvanië.",
-  "roles.language.description": "Rollen die iemands taalvaardigheid aangeven.",
-  "roles.learning.roles.doNotCorrectMe.name": "Verbeter mij niet"
+  "roles.regions.languages.romanian.roles.transilvania.description": "Ik kom oorspronkelijk uit Transsylvanië."
 }

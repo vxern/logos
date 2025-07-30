@@ -1,4 +1,8 @@
 {
+  "prompts.continue": "Continuer",
+  "prompts.cancel": "Annuler",
+  "prompts.stay": "Ramenez-moi",
+  "prompts.leave": "Quitter",
   "verification.title": "Questions relatives à la vérification",
   "verification.fields.reason": "Quelle est la raison pour laquelle vous apprenez {language} ?",
   "verification.fields.aim": "Quels avantages tirerez-vous à être membre ?",
@@ -8,9 +12,5 @@
   "report.fields.users": "Utilisateurs à signaler",
   "report.fields.link": "Lien vers le message pour le contexte",
   "suggestion.title": "Suggestion",
-  "suggestion.fields.suggestion": "Quelle est votre suggestion ?",
-  "prompts.continue": "Continuer",
-  "prompts.cancel": "Annuler",
-  "prompts.stay": "Ramenez-moi",
-  "prompts.leave": "Quitter"
+  "suggestion.fields.suggestion": "Quelle est votre suggestion ?"
 }
