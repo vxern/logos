@@ -432,16 +432,7 @@ export default Object.freeze({
 		title: localise("music.options.play.strings.selectSong.title", locale)(),
 		description: localise("music.options.play.strings.selectSong.description", locale)(),
 	}),
-	howToSelectRoles: ({ localise, locale }) => ({
-		title: localise("roles.selection.title", locale)(),
-		description: {
-			usingCommand: localise("roles.selection.description.usingCommand", locale),
-			runAnywhere: localise("roles.selection.description.runAnywhere", locale)(),
-			pressButton: localise("roles.selection.description.pressButton", locale)(),
-			clickHere: localise("roles.selection.description.clickHere", locale)(),
-		},
-	}),
-	welcomeNotice: ({ localise, locale }) => ({
+	entryNotice: ({ localise, locale }) => ({
 		title: localise("entry.welcome.title", locale),
 		description: {
 			toEnter: localise("entry.welcome.description.toEnter", locale),
@@ -696,29 +687,41 @@ export default Object.freeze({
 		chooseCategory: localise("profile.options.roles.strings.chooseCategory", locale)(),
 		chooseRole: localise("profile.options.roles.strings.chooseRole", locale)(),
 	}),
-	resourceNotice: ({ localise, locale }) => ({
-		title: localise("notices.resources.title", locale)(),
-		description: {
-			storedInRepository: localise("notices.resources.description.storedInRepository", locale),
-			easierToManage: localise("notices.resources.description.easierToManage", locale)(),
-			contributable: {
-				contributable: localise("notices.resources.description.contributable", locale)(),
-				usingCommand: localise("notices.resources.description.contributable.usingCommand", locale),
-				openingIssue: localise("notices.resources.description.contributable.openingIssue", locale)(),
-				pullRequest: localise("notices.resources.description.contributable.makingPullRequest", locale)(),
+	informationNotice: ({ localise, locale }) => ({
+		sections: {
+			guidelines: {
+				title: localise("notices.information.sections.guidelines.title", locale)(),
+			},
+			learning: {
+				buttons: {
+					resources: localise("notices.information.sections.learning.buttons.resources", locale)(),
+					resource: localise("notices.information.sections.learning.buttons.resource", locale)(),
+				},
+			},
+			socials: {
+				buttons: {
+					website: localise("notices.information.sections.socials.buttons.website", locale)(),
+					discord: localise("notices.information.sections.socials.buttons.discord", locale)(),
+					instagram: localise("notices.information.sections.socials.buttons.instagram", locale)(),
+					github: localise("notices.information.sections.socials.buttons.github", locale)(),
+				},
+			},
+			selfServe: {
+				buttons: {
+					roles: localise("notices.information.sections.selfServe.buttons.roles", locale)(),
+					suggestion: localise("notices.information.sections.selfServe.buttons.suggestion", locale)(),
+					report: localise("notices.information.sections.selfServe.buttons.report", locale)(),
+					ticket: localise("notices.information.sections.selfServe.buttons.ticket", locale)(),
+				},
 			},
 		},
-		redirect: localise("notices.resources.strings.redirect", locale)(),
 	}),
 	inquiryChannel: ({ localise, locale }) => ({
 		inquiryChannel: localise("entry.verification.inquiry.channel", locale),
 	}),
 	chooseProficiency: ({ localise, locale }) => ({
 		title: localise("entry.proficiency.title", locale)(),
-		description: {
-			chooseProficiency: localise("entry.proficiency.description.chooseProficiency", locale)(),
-			canChangeLater: localise("entry.proficiency.description.canChangeLater", locale),
-		},
+		description: localise("entry.proficiency.description", locale)(),
 	}),
 	getVerified: ({ localise, locale }) => ({
 		title: localise("entry.verification.getVerified.title", locale)(),
@@ -745,10 +748,7 @@ export default Object.freeze({
 	}),
 	receivedAccess: ({ localise, locale }) => ({
 		title: localise("entry.proficiency.receivedAccess.title", locale)(),
-		description: {
-			nowMember: localise("entry.proficiency.receivedAccess.description.nowMember", locale),
-			toStart: localise("entry.proficiency.receivedAccess.description.toStart", locale)(),
-		},
+		description: localise("entry.proficiency.receivedAccess.description", locale)(),
 	}),
 	sureToShow: ({ localise, locale }) => ({
 		title: localise("interactions.show.sureToShow.title", locale)(),
@@ -1097,9 +1097,6 @@ export default Object.freeze({
 	possibleMatches: ({ localise, locale }) => ({
 		title: localise("recognise.strings.fields.possibleMatches.title", locale)(),
 		description: localise("recognise.strings.fields.possibleMatches.description.multiple", locale)(),
-	}),
-	rules: ({ localise, locale }) => ({
-		title: localise("rules.title", locale)(),
 	}),
 	tldr: ({ localise, locale }) => ({
 		tldr: localise("rules.tldr", locale)(),

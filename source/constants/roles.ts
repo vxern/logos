@@ -23,6 +23,7 @@ const roles = Object.freeze({
 							emoji: emojis.roles.categories.language.proficiency.beginner,
 							snowflakes: {
 								"432173040638623746": "432204106615095307",
+								"1398666720591216691": "1398666720797003786",
 							},
 						},
 						intermediate: {
@@ -30,6 +31,7 @@ const roles = Object.freeze({
 							emoji: emojis.roles.categories.language.proficiency.intermediate,
 							snowflakes: {
 								"432173040638623746": "432176435311149056",
+								"1398666720591216691": "1398666720797003787",
 							},
 						},
 						advanced: {
@@ -37,6 +39,7 @@ const roles = Object.freeze({
 							emoji: emojis.roles.categories.language.proficiency.advanced,
 							snowflakes: {
 								"432173040638623746": "432176480269631502",
+								"1398666720591216691": "1398666720797003788",
 							},
 						},
 						native: {
@@ -44,6 +47,7 @@ const roles = Object.freeze({
 							emoji: emojis.roles.categories.language.proficiency.native,
 							snowflakes: {
 								"432173040638623746": "432175772623437825",
+								"1398666720591216691": "1398666720797003789",
 							},
 						},
 					},

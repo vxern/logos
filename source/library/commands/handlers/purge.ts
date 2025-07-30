@@ -588,7 +588,7 @@ async function handlePurgeMessages(
 					}),
 					channel_mention: channelMention,
 				}),
-				image: { url: constants.gifs.done },
+				image: { url: constants.media.gifs.done },
 			})
 			.ignore();
 	}

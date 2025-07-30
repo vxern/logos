@@ -8,8 +8,7 @@ import type { Guild } from "rost/models/guild";
 import { Model } from "rost/models/model";
 import type { CommandStore } from "rost/stores/commands";
 
-type InteractionCallbackData = Omit<Discord.InteractionCallbackData, "flags">;
-type EmbedOrCallbackData = Discord.Camelize<Discord.DiscordEmbed> | InteractionCallbackData;
+type EmbedOrCallbackData = Discord.Camelize<Discord.DiscordEmbed> | Discord.InteractionCallbackData;
 interface ReplyData {
 	readonly ephemeral: boolean;
 }
@@ -396,7 +395,7 @@ class InteractionStore {
 		const data = getInteractionCallbackData(embedOrData);
 
 		if (!visible) {
-			data.flags = Discord.MessageFlags.Ephemeral;
+			data.flags = (data.flags ?? 0) | Discord.MessageFlags.Ephemeral;
 		}
 
 		this.#replies.set(interaction.token, { ephemeral: !visible });
