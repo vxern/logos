@@ -8,6 +8,15 @@ export default Object.freeze({
 	events,
 	roles,
 	notices,
+	custom: {
+		learnRomanian: {
+			name: "LearnRomanian",
+			id: 1399737159002357872n,
+		},
+		discord: { name: "Discord", id: 1399736045452656824n },
+		instagram: { name: "Instagram", id: 1399735860479660032n },
+		github: { name: "GitHub", id: 1399738535816462336n },
+	},
 	verification: {
 		for: "🟩",
 		against: "🟥",

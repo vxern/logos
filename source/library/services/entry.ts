@@ -189,7 +189,7 @@ class EntryService extends LocalService {
 						components: [
 							{
 								type: Discord.MessageComponentTypes.MediaGallery,
-								items: [{ media: { url: constants.gifs.welcome } }],
+								items: [{ media: { url: constants.media.gifs.welcome } }],
 							},
 							{
 								type: Discord.MessageComponentTypes.Separator,

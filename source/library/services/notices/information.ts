@@ -87,14 +87,7 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 					components: [
 						{
 							type: Discord.MessageComponentTypes.MediaGallery,
-							items: [
-								{
-									media: {
-										// TODO(vxern): Don't hard-code this.
-										url: "https://media.discordapp.net/attachments/1398666723111997512/1399849870885519473/Discord_Banner_Small.png?ex=688a7f49&is=68892dc9&hm=245755e4b969f025631a95589a05ca080a7141c8add5cf4b8f7abc80c3b4649a&=&format=webp&quality=lossless&width=2000&height=500",
-									},
-								},
-							],
+							items: [{ media: { url: constants.media.images.banner } }],
 						},
 						{
 							type: Discord.MessageComponentTypes.Separator,
@@ -108,33 +101,28 @@ class InformationNoticeService extends NoticeService<{ type: "information" }> {
 									style: Discord.ButtonStyles.Link,
 									label: strings.sections.socials.buttons.website,
 									url: informationNoticeConfiguration.urls.website,
-									// TODO(vxern): Don't hard-code.
-									emoji: { name: "LearnRomanian", id: 1399737159002357872n },
+									emoji: constants.emojis.custom.learnRomanian,
 								},
 								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Link,
 									label: strings.sections.socials.buttons.discord,
 									url: informationNoticeConfiguration.urls.discord,
-									// TODO(vxern): Don't hard-code.
-									emoji: { name: "Discord", id: 1399736045452656824n },
+									emoji: constants.emojis.custom.discord,
 								},
 								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Link,
 									label: strings.sections.socials.buttons.instagram,
 									url: informationNoticeConfiguration.urls.instagram,
-									// TODO(vxern): Don't hard-code.
-									emoji: { name: "Instagram", id: 1399735860479660032n },
+									emoji: constants.emojis.custom.instagram,
 								},
 								{
 									type: Discord.MessageComponentTypes.Button,
 									style: Discord.ButtonStyles.Link,
 									label: strings.sections.socials.buttons.github,
-									// TODO(vxern): Wrong URL.
-									url: informationNoticeConfiguration.urls.instagram,
-									// TODO(vxern): Don't hard-code.
-									emoji: { name: "GitHub", id: 1399738535816462336n },
+									url: informationNoticeConfiguration.urls.github,
+									emoji: constants.emojis.custom.github,
 								},
 							],
 						},

@@ -8,12 +8,12 @@ import defaults from "rost:constants/defaults";
 import directories from "rost:constants/directories";
 import discord from "rost:constants/discord";
 import emojis from "rost:constants/emojis";
-import gifs from "rost:constants/gifs";
 import lengths from "rost:constants/lengths";
 import links from "rost:constants/links";
 import localisations from "rost:constants/localisations";
 import logTargets from "rost:constants/log-targets";
 import loggers from "rost:constants/loggers";
+import media from "rost:constants/media";
 import parameters from "rost:constants/parameters";
 import patterns from "rost:constants/patterns";
 import properties from "rost:constants/properties";
@@ -57,7 +57,7 @@ export default Object.freeze({
 	directories,
 	discord,
 	emojis,
-	gifs,
+	media,
 	lengths,
 	links,
 	localisations,
