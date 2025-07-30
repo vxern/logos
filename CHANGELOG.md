@@ -1,7 +1,7 @@
 ## Next (WIP)
 
 - Merged the role and resource notices into the information notice.
-- Updated all notices to use components V2.
+- Updated all notices + the `/profile roles` command to use components V2.
 
 ## 5.0.0
 
