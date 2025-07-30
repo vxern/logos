@@ -1,5 +1,7 @@
 ## Next (WIP)
 
+- Fixed modal composers not passing through the right data.
+- Fixed manually moving members to a dynamic VC causing multiple VCs to get created.
 - Merged the role and resource notices into the information notice.
 - Updated all notices + the `/profile roles` command to use components V2.
 
