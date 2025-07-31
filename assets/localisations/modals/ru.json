@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Что-то пошло не так",
+	"form.failedToSubmit.description": "Твоя заявка не может быть обработана.",
+	"prompts.continue": "Продолжить",
+	"prompts.cancel": "Отменить",
+	"prompts.stay": "Верни меня назад",
+	"prompts.leave": "Оставить",
+	"verification.title": "Вопросы для верификации",
+	"verification.fields.reason": "По какой причине ты решил выучить румынский язык?",
+	"verification.fields.aim": "Как ты планируешь использовать сообщество?",
+	"verification.fields.whereFound": "Откуда ты узнал о сервере?",
+	"report.title": "Отчет пользователя",
+	"report.fields.reason": "Какова причина репортажа?",
+	"report.fields.users": "Пользователи, о которых можно сообщить",
+	"report.fields.link": "Ссылка на сообщение для контекста",
+	"suggestion.title": "Предложение",
+	"suggestion.fields.suggestion": "Что ты предлагаешь?",
+	"resource.title": "Ресурс",
+	"resource.fields.resource": "Какой ресурс ты хотел бы представить?",
+	"ticket.title": "Билет",
+	"ticket.fields.topic": "Какова тема твоего тикета?"
+}

@@ -1,0 +1,20 @@
+{
+	"parameters.user.name": "ユーザー",
+	"parameters.user.description": "ユーザーのユーザー名、タグ、ID、または言及。",
+	"parameters.show.name": "表示する",
+	"parameters.show.description": "trueに設定すると、結果が他の人に表示される。",
+	"parameters.duration.name": "持続時間",
+	"parameters.duration.description": "制裁時間",
+	"parameters.reason.name": "理由",
+	"parameters.reason.description": "制裁またはその廃止の理由。説明的でなければならない。",
+	"parameters.query.name": "問い合わせ",
+	"parameters.query.description": "曲名または曲集へのリンク。",
+	"parameters.timestamp.name": "タイムスタンプ",
+	"parameters.timestamp.description": "シークに使用するタイムスタンプ。",
+	"parameters.collection.name": "コレクション",
+	"parameters.collection.description": "trueに設定すると、代わりにソングコレクションに対してアクションが実行される。",
+	"parameters.by.name": "による",
+	"parameters.by.description": "スキップする曲や曲リストの数。",
+	"parameters.to.name": "に変更する。",
+	"parameters.to.description": "スキップするトラックのインデックス。"
+}

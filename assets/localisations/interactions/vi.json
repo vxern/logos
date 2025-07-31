@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Tiếp tục trên trang tiếp theo...",
+	"interactions.page": "Trang",
+	"interactions.invalidUser.title": "Người dùng không hợp lệ",
+	"interactions.invalidUser.description": "Người dùng mà cậu đã chỉ định không hợp lệ.",
+	"interactions.rateLimited.title": "Bạn đang bị giới hạn tốc độ.",
+	"interactions.rateLimited.description.tooManyUses": "Bạn đã sử dụng lệnh này quá nhiều lần ({times}) trong một khoảng thời gian quá ngắn.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Các cậu sẽ lại có thể sử dụng lệnh {relative_timestamp}.",
+	"interactions.show": "Hiển thị tin nhắn trong chat",
+	"interactions.show.sureToShow.title": "Có chắc chắn hiển thị không?",
+	"interactions.show.sureToShow.description": "Cậu chắc chắn muốn hiển thị tin nhắn trong chat không?",
+	"interactions.show.sureToShow.yes": "Vâng, hiển thị",
+	"interactions.show.sureToShow.no": "Không, đừng hiển thị",
+	"interactions.thinking": "Rost đang suy nghĩ...",
+	"interactions.source": "Nguồn"
+}

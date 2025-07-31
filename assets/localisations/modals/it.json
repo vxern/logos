@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Qualcosa è andato storto",
+	"form.failedToSubmit.description": "Non è stato possibile elaborare il tuo messaggio.",
+	"prompts.continue": "Continua",
+	"prompts.cancel": "Annulla",
+	"prompts.stay": "Riportami indietro",
+	"prompts.leave": "Lasciare",
+	"verification.title": "Domande di verifica",
+	"verification.fields.reason": "Qual è il motivo per cui vuoi imparare il rumeno?",
+	"verification.fields.aim": "Come pensi di utilizzare la community?",
+	"verification.fields.whereFound": "Dove hai scoperto il server?",
+	"report.title": "Rapporto utente",
+	"report.fields.reason": "Qual è il motivo della segnalazione?",
+	"report.fields.users": "Utenti da segnalare",
+	"report.fields.link": "Link al messaggio per il contesto",
+	"suggestion.title": "Suggerimento",
+	"suggestion.fields.suggestion": "Qual è il tuo suggerimento?",
+	"resource.title": "Risorse",
+	"resource.fields.resource": "Quale risorsa vorresti inviare?",
+	"ticket.title": "Biglietto",
+	"ticket.fields.topic": "Qual è l'argomento del tuo biglietto?"
+}

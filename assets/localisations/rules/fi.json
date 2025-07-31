@@ -1,9 +1,9 @@
 {
-  "rules.rule": "Sääntö",
-  "rules.behaviour.title": "Käyttäytyminen",
-  "rules.behaviour.summary": "Pyri olemaan mukava.",
-  "rules.quality.title": "Laatu",
-  "rules.quality.summary": "Älä ole ärsyttävä.",
-  "rules.exclusivity.summary": "Älä mainosta.",
-  "rules.adherence.summary": "Kunnioita sääntöjä."
+	"rules.rule": "Sääntö",
+	"rules.behaviour.title": "Käyttäytyminen",
+	"rules.behaviour.summary": "Pyri olemaan mukava.",
+	"rules.quality.title": "Laatu",
+	"rules.quality.summary": "Älä ole ärsyttävä.",
+	"rules.exclusivity.summary": "Älä mainosta.",
+	"rules.adherence.summary": "Kunnioita sääntöjä."
 }

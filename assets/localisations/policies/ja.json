@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "モデレーションポリシー",
+	"policies.moderation.points.introduction.title": "モデレーターはどのようにサーバーを管理するのか？",
+	"policies.moderation.points.introduction.description": "このサーバーは3ワーンモデレーションポリシーを守っており、サーバーのガイドによって強制されている。",
+	"policies.moderation.points.breach.title": "ルールはどこに適用されるのか？",
+	"policies.moderation.points.breach.description": "サーバールールはサーバー全体に適用され、違反した場合は警告が出される。",
+	"policies.moderation.points.warnings.title": "何度か警告を受けたらどうなる？",
+	"policies.moderation.points.warnings.description": "ユーザーがすでに3回の警告を受けている場合、4回目の警告でタイムアウトになる。警告の有効期限は__2ヶ月__である。",
+	"policies.moderation.points.furtherAction.title": "するとどうなるか？",
+	"policies.moderation.points.furtherAction.description": "その結果、サーバースタッフは制限を超えたことを知らされ、その後、状況を確認し、適切な行動を決定する。",
+	"policies.moderation.points.ban.title": "気にしない場合はどうする？",
+	"policies.moderation.points.ban.description": "故意にサーバーのルールを破ったり、スタッフの提案を無視し続けたりしたことが判明した場合、そのユーザーはサーバーから永久追放される。"
+}

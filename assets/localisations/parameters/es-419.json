@@ -1,0 +1,20 @@
+{
+	"parameters.user.name": "usuario",
+	"parameters.user.description": "El nombre de usuario, la etiqueta, el ID o la mención del usuario.",
+	"parameters.show.name": "mostrar",
+	"parameters.show.description": "Si se establece en verdadero, el resultado se mostrará a los demás.",
+	"parameters.duration.name": "Duración",
+	"parameters.duration.description": "La duración de la sanción.",
+	"parameters.reason.name": "razón",
+	"parameters.reason.description": "El motivo de la sanción o su derogación. Debe ser descriptivo.",
+	"parameters.query.name": "consulta",
+	"parameters.query.description": "El título o un enlace a la canción o colección de canciones.",
+	"parameters.timestamp.name": "marca de tiempo",
+	"parameters.timestamp.description": "La marca de tiempo que se utilizará para la búsqueda.",
+	"parameters.collection.name": "colección",
+	"parameters.collection.description": "Si se establece en verdadero, la acción se llevará a cabo en la colección de canciones.",
+	"parameters.by.name": "por",
+	"parameters.by.description": "El número de canciones o listas de canciones que se deben omitir.",
+	"parameters.to.name": "a",
+	"parameters.to.description": "El índice de la pista a la que se debe saltar."
+}
