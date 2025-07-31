@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Pokračování na další stránce...",
+	"interactions.page": "Stránka",
+	"interactions.invalidUser.title": "Neplatný uživatel",
+	"interactions.invalidUser.description": "Uživatel, kterého jste zadali, není platný.",
+	"interactions.rateLimited.title": "Jste omezeni rychlostí",
+	"interactions.rateLimited.description.tooManyUses": "Tento příkaz jste použili příliš mnohokrát ({times}) v příliš krátkém časovém úseku.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Opět budete moci použít příkaz {relative_timestamp}.",
+	"interactions.show": "Zobrazit zprávu v chatu",
+	"interactions.show.sureToShow.title": "Jste si jisti, že se zobrazí?",
+	"interactions.show.sureToShow.description": "Jste si jisti, že chcete zprávu zobrazit v chatu?",
+	"interactions.show.sureToShow.yes": "Ano, zobrazte",
+	"interactions.show.sureToShow.no": "Ne, nezobrazujte",
+	"interactions.thinking": "Rost přemýšlí...",
+	"interactions.source": "Zdroj:"
+}

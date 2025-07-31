@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "Keress egy felhasználót a felhasználónév, @handle, tag#0000, XxNICKNAMExX, <@mention> vagy az ID 12345678 segítségével.",
+	"autocomplete.warning": "Keressen egy figyelmeztetést a tartalma alapján.",
+	"autocomplete.timestamp": "Adja meg az időbélyeget szavakkal (\"5 óra 30 perc 2 s\") vagy rövid formátumban (\"05:30:02\")."
+}

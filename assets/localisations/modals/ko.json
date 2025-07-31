@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "뭔가 잘못되었습니다.",
+	"form.failedToSubmit.description": "제출을 처리할 수 없습니다.",
+	"prompts.continue": "계속",
+	"prompts.cancel": "취소",
+	"prompts.stay": "나를 다시 데려다줘",
+	"prompts.leave": "Leave",
+	"verification.title": "인증 질문",
+	"verification.fields.reason": "루마니아어를 배우는 이유는 무엇인가요?",
+	"verification.fields.aim": "커뮤니티를 어떻게 사용할 계획인가요?",
+	"verification.fields.whereFound": "서버에 대해 어디서 알게 되었나요?",
+	"report.title": "사용자 신고",
+	"report.fields.reason": "신고 사유는 무엇인가요?",
+	"report.fields.users": "신고할 사용자",
+	"report.fields.link": "컨텍스트를 위한 메시지 링크",
+	"suggestion.title": "제안",
+	"suggestion.fields.suggestion": "여러분의 제안은 무엇인가요?",
+	"resource.title": "리소스",
+	"resource.fields.resource": "어떤 리소스를 제출하고 싶으신가요?",
+	"ticket.title": "티켓",
+	"ticket.fields.topic": "티켓의 주제가 무엇인가요?"
+}

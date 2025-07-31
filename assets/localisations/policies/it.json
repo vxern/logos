@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Politica di moderazione",
+	"policies.moderation.points.introduction.title": "Come fanno i moderatori a moderare il server?",
+	"policies.moderation.points.introduction.description": "Il server rispetta una politica di moderazione a 3 avvisi, applicata dalle guide del server.",
+	"policies.moderation.points.breach.title": "Dove si applicano le regole?",
+	"policies.moderation.points.breach.description": "Le regole del server si applicano a tutto il server e la loro violazione comporterà un avvertimento.",
+	"policies.moderation.points.warnings.title": "Cosa succede se vengo avvertito più volte?",
+	"policies.moderation.points.warnings.description": "Se un utente ha già ricevuto tre avvertimenti, il quarto avvertimento causerà il time out dell'utente. Gli avvertimenti scadono dopo un periodo di __due mesi__.",
+	"policies.moderation.points.furtherAction.title": "Cosa succede poi?",
+	"policies.moderation.points.furtherAction.description": "Di conseguenza, lo staff del server verrà informato del superamento del limite e, successivamente, esaminerà le circostanze e determinerà una linea d'azione appropriata.",
+	"policies.moderation.points.ban.title": "E se non mi interessa?",
+	"policies.moderation.points.ban.description": "Se si scopre che un utente ha consapevolmente e costantemente infranto le regole del server e/o ignorato i suggerimenti dello staff, l'utente sarà bandito in modo permanente dal server."
+}

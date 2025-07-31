@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Продолжение на следующей странице...",
+	"interactions.page": "Страница",
+	"interactions.invalidUser.title": "Неверный пользователь",
+	"interactions.invalidUser.description": "Пользователь, которого ты указал, недействителен.",
+	"interactions.rateLimited.title": "Тебе ограничили скорость",
+	"interactions.rateLimited.description.tooManyUses": "Ты использовал эту команду слишком много раз ({times}) за слишком короткий промежуток времени.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Ты снова сможешь использовать команду {relative_timestamp}.",
+	"interactions.show": "Показать сообщение в чате",
+	"interactions.show.sureToShow.title": "Уверен, что покажешь?",
+	"interactions.show.sureToShow.description": "Ты уверен, что хочешь показать сообщение в чате?",
+	"interactions.show.sureToShow.yes": "Да, покажи",
+	"interactions.show.sureToShow.no": "Нет, не показывайте",
+	"interactions.thinking": "Рост думает...",
+	"interactions.source": "Источник"
+}

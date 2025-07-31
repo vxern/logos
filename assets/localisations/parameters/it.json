@@ -1,0 +1,20 @@
+{
+	"parameters.user.name": "utente",
+	"parameters.user.description": "Il nome utente, il tag, l'ID o la menzione dell'utente.",
+	"parameters.show.name": "Mostra",
+	"parameters.show.description": "Se è impostato su true, il risultato verrà mostrato agli altri.",
+	"parameters.duration.name": "durata",
+	"parameters.duration.description": "La durata della sanzione.",
+	"parameters.reason.name": "motivo",
+	"parameters.reason.description": "Il motivo della sanzione o della sua revoca. Dovrebbe essere descrittivo.",
+	"parameters.query.name": "interrogazione",
+	"parameters.query.description": "Il titolo o un link alla canzone o alla raccolta di canzoni.",
+	"parameters.timestamp.name": "timestamp",
+	"parameters.timestamp.description": "Il timestamp da utilizzare per la ricerca.",
+	"parameters.collection.name": "raccolta",
+	"parameters.collection.description": "Se è impostato su true, l'azione verrà eseguita sulla collezione di canzoni.",
+	"parameters.by.name": "da",
+	"parameters.by.description": "Il numero di canzoni o di elenchi di canzoni da saltare.",
+	"parameters.to.name": "a",
+	"parameters.to.description": "L'indice del brano da saltare."
+}

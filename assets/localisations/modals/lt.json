@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Kažkas nutiko ne taip",
+	"form.failedToSubmit.description": "Jūsų pateikties nepavyko apdoroti.",
+	"prompts.continue": "Tęsti",
+	"prompts.cancel": "Atšaukti",
+	"prompts.stay": "Paimk mane atgal",
+	"prompts.leave": "Palikite",
+	"verification.title": "Patikrinimo klausimai",
+	"verification.fields.reason": "Dėl kokios priežasties mokotės rumunų kalbos?",
+	"verification.fields.aim": "Kaip planuojate naudoti bendruomenę?",
+	"verification.fields.whereFound": "Iš kur sužinojote apie serverį?",
+	"report.title": "Vartotojo ataskaita",
+	"report.fields.reason": "Kokia yra pranešimo priežastis?",
+	"report.fields.users": "Vartotojai, apie kuriuos reikia pranešti",
+	"report.fields.link": "Nuoroda į žinutę kontekstui",
+	"suggestion.title": "Pasiūlymai",
+	"suggestion.fields.suggestion": "Koks yra jūsų pasiūlymas?",
+	"resource.title": "Ištekliai",
+	"resource.fields.resource": "Kokį išteklių norėtumėte pateikti?",
+	"ticket.title": "Bilietas",
+	"ticket.fields.topic": "Kokia jūsų bilieto tema?"
+}

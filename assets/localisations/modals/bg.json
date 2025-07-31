@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Нещо се обърка",
+	"form.failedToSubmit.description": "Подадената от вас информация не можа да бъде обработена.",
+	"prompts.continue": "Продължете",
+	"prompts.cancel": "Отмяна на",
+	"prompts.stay": "Вземи ме обратно",
+	"prompts.leave": "Оставете",
+	"verification.title": "Въпроси за проверка",
+	"verification.fields.reason": "Каква е причината да учите румънски език?",
+	"verification.fields.aim": "Как планирате да използвате общността?",
+	"verification.fields.whereFound": "Откъде разбрахте за сървъра?",
+	"report.title": "Доклад на потребителя",
+	"report.fields.reason": "Каква е причината за доклада?",
+	"report.fields.users": "Потребители, които да докладват",
+	"report.fields.link": "Връзка към съобщението за контекст",
+	"suggestion.title": "Предложение",
+	"suggestion.fields.suggestion": "Какво е вашето предложение?",
+	"resource.title": "Ресурси",
+	"resource.fields.resource": "Какъв ресурс бихте искали да изпратите?",
+	"ticket.title": "Билет",
+	"ticket.fields.topic": "Каква е темата на вашия билет?"
+}

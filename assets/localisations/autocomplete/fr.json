@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "Recherche un utilisateur en utilisant son nom d'utilisateur, @handle, tag#0000, XxNICKNAMExX, <@mention>, ou ID 12345678.",
+	"autocomplete.warning": "Recherche un avertissement par son contenu.",
+	"autocomplete.timestamp": "Saisis un horodatage en toutes lettres (\"5 heures 30 minutes 2 s\") ou en format court (\"05:30:02\")."
+}

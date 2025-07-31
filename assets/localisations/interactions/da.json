@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Fortsættes på næste side...",
+	"interactions.page": "Side",
+	"interactions.invalidUser.title": "Ugyldig bruger",
+	"interactions.invalidUser.description": "Den bruger, du har angivet, er ikke gyldig.",
+	"interactions.rateLimited.title": "Din hastighed er begrænset",
+	"interactions.rateLimited.description.tooManyUses": "Du har brugt denne kommando for mange gange ({times}) på for kort tid.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Du vil igen kunne bruge kommandoen {relative_timestamp}.",
+	"interactions.show": "Vis besked i chat",
+	"interactions.show.sureToShow.title": "Er du sikker på at vise det?",
+	"interactions.show.sureToShow.description": "Er du sikker på, at du vil vise beskeden i chatten?",
+	"interactions.show.sureToShow.yes": "Ja, vis",
+	"interactions.show.sureToShow.no": "Nej, vis ikke",
+	"interactions.thinking": "Rost tænker...",
+	"interactions.source": "Kilde"
+}

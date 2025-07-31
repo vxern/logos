@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "Procure um usuário usando seu nome de usuário, @handle, tag#0000, XxNICKNAMExX, <@mention> ou ID 12345678.",
+	"autocomplete.warning": "Procure um aviso por seu conteúdo.",
+	"autocomplete.timestamp": "Insira um registro de data e hora em palavras (\"5 hours 30 mins 2 s\") ou em formato curto (\"05:30:02\")."
+}

@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Політика модерації",
+	"policies.moderation.points.introduction.title": "Як модератори модерують сервер?",
+	"policies.moderation.points.introduction.description": "Сервер дотримується політики модерації з 3-ма попередженнями, що забезпечується керівництвом сервера.",
+	"policies.moderation.points.breach.title": "Де застосовуються правила?",
+	"policies.moderation.points.breach.description": "Правила сервера поширюються на весь сервер, і їх порушення призведе до видачі попередження.",
+	"policies.moderation.points.warnings.title": "Що станеться, якщо я отримаю попередження кілька разів?",
+	"policies.moderation.points.warnings.description": "Якщо користувач вже отримав три попередження, четверте попередження призведе до вимкнення користувача. Термін дії попереджень закінчується через __два місяці__.",
+	"policies.moderation.points.furtherAction.title": "Що відбувається далі?",
+	"policies.moderation.points.furtherAction.description": "Таким чином, персонал сервера буде поінформований про перевищення ліміту, а згодом розгляне обставини і визначить відповідний курс дій.",
+	"policies.moderation.points.ban.title": "Що робити, якщо мені все одно?",
+	"policies.moderation.points.ban.description": "Якщо буде встановлено, що користувач свідомо і постійно порушує правила сервера та/або ігнорує пропозиції персоналу, він буде назавжди заблокований на сервері."
+}

@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Chính sách điều chỉnh",
+	"policies.moderation.points.introduction.title": "Các moderator điều hành server như thế nào?",
+	"policies.moderation.points.introduction.description": "Máy chủ tuân thủ chính sách điều hành 3 cảnh cáo, được thực thi bởi các quản trị viên của máy chủ.",
+	"policies.moderation.points.breach.title": "Quy tắc này áp dụng ở đâu?",
+	"policies.moderation.points.breach.description": "Quy tắc của máy chủ áp dụng cho toàn bộ máy chủ, và việc vi phạm quy tắc sẽ dẫn đến việc nhận cảnh cáo.",
+	"policies.moderation.points.warnings.title": "Nếu tớ bị cảnh cáo vài lần thì sao?",
+	"policies.moderation.points.warnings.description": "Nếu một người dùng đã nhận được ba cảnh báo, cảnh báo thứ tư sẽ khiến người dùng bị khóa tạm thời. Cảnh báo sẽ hết hiệu lực sau __hai tháng__.",
+	"policies.moderation.points.furtherAction.title": "Sau đó sẽ xảy ra điều gì?",
+	"policies.moderation.points.furtherAction.description": "Do đó, nhân viên quản trị máy chủ sẽ được thông báo khi giới hạn bị vượt qua và sau đó sẽ xem xét tình huống và quyết định biện pháp xử lý phù hợp.",
+	"policies.moderation.points.ban.title": "Nếu tớ không quan tâm thì sao?",
+	"policies.moderation.points.ban.description": "Trong trường hợp phát hiện ra rằng một người dùng đã cố ý và liên tục vi phạm quy tắc của máy chủ và/hoặc phớt lờ các đề xuất của nhân viên, người dùng đó sẽ bị cấm vĩnh viễn khỏi máy chủ."
+}

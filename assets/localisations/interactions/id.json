@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Berlanjut ke halaman berikutnya...",
+	"interactions.page": "Halaman",
+	"interactions.invalidUser.title": "Pengguna tidak valid",
+	"interactions.invalidUser.description": "Pengguna yang Anda tentukan tidak valid.",
+	"interactions.rateLimited.title": "Anda sedang dalam batas nilai",
+	"interactions.rateLimited.description.tooManyUses": "Anda telah menggunakan perintah ini terlalu sering ({times}) dalam rentang waktu yang terlalu singkat.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Anda akan sekali lagi dapat menggunakan perintah {relative_timestamp}.",
+	"interactions.show": "Menampilkan pesan dalam obrolan",
+	"interactions.show.sureToShow.title": "Yakin untuk ditampilkan?",
+	"interactions.show.sureToShow.description": "Apakah Anda yakin ingin menampilkan pesan dalam obrolan?",
+	"interactions.show.sureToShow.yes": "Ya, tunjukkan",
+	"interactions.show.sureToShow.no": "Tidak, jangan tampilkan",
+	"interactions.thinking": "Rost sedang berpikir...",
+	"interactions.source": "Sumber"
+}

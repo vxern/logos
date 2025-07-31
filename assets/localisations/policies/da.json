@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Politik for moderation",
+	"policies.moderation.points.introduction.title": "Hvordan modererer moderatorer serveren?",
+	"policies.moderation.points.introduction.description": "Serveren følger en moderationspolitik med 3 advarsler, som håndhæves af serverens guider.",
+	"policies.moderation.points.breach.title": "Hvor gælder reglerne?",
+	"policies.moderation.points.breach.description": "Serverreglerne gælder for hele serveren, og et brud på dem vil resultere i en advarsel.",
+	"policies.moderation.points.warnings.title": "Hvad sker der, hvis jeg bliver advaret et par gange?",
+	"policies.moderation.points.warnings.description": "Hvis en bruger allerede har fået tre advarsler, vil den fjerde advarsel medføre, at brugeren udløber. Advarsler udløber efter en periode på __to måneder__.",
+	"policies.moderation.points.furtherAction.title": "Hvad sker der så?",
+	"policies.moderation.points.furtherAction.description": "Derfor vil serverens personale blive informeret om, at grænsen er overskredet, og efterfølgende vil de gennemgå omstændighederne og beslutte en passende fremgangsmåde.",
+	"policies.moderation.points.ban.title": "Hvad hvis jeg er ligeglad?",
+	"policies.moderation.points.ban.description": "Hvis det viser sig, at en bruger bevidst og konstant har brudt serverens regler og/eller ignoreret forslag fra personalet, vil brugeren blive permanent udelukket fra serveren."
+}

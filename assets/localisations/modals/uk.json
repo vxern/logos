@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Щось пішло не так",
+	"form.failedToSubmit.description": "Ваш запит не може бути оброблений.",
+	"prompts.continue": "Продовжити",
+	"prompts.cancel": "Скасувати",
+	"prompts.stay": "Візьми мене назад",
+	"prompts.leave": "Залишити",
+	"verification.title": "Верифікаційні питання",
+	"verification.fields.reason": "Чому ви вивчаєте румунську мову?",
+	"verification.fields.aim": "Як ви плануєте використовувати спільноту?",
+	"verification.fields.whereFound": "Звідки ви дізналися про сервер?",
+	"report.title": "Звіт користувача",
+	"report.fields.reason": "Яка причина повідомлення?",
+	"report.fields.users": "Користувачі для повідомлень",
+	"report.fields.link": "Посилання на повідомлення для контексту",
+	"suggestion.title": "Пропозиція",
+	"suggestion.fields.suggestion": "Яка ваша пропозиція?",
+	"resource.title": "Ресурс",
+	"resource.fields.resource": "Який ресурс ви хотіли б подати?",
+	"ticket.title": "Квиток",
+	"ticket.fields.topic": "Яка тема вашого квитка?"
+}

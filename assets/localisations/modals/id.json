@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Ada yang tidak beres",
+	"form.failedToSubmit.description": "Kiriman Anda tidak dapat diproses.",
+	"prompts.continue": "Lanjutkan",
+	"prompts.cancel": "Membatalkan",
+	"prompts.stay": "Bawa aku kembali",
+	"prompts.leave": "Meninggalkan",
+	"verification.title": "Pertanyaan Verifikasi",
+	"verification.fields.reason": "Apa alasan Anda belajar bahasa Rumania?",
+	"verification.fields.aim": "Bagaimana Anda berencana untuk menggunakan komunitas?",
+	"verification.fields.whereFound": "Di mana Anda mengetahui tentang server?",
+	"report.title": "Laporan pengguna",
+	"report.fields.reason": "Apa alasan laporan tersebut?",
+	"report.fields.users": "Pengguna yang melaporkan",
+	"report.fields.link": "Tautkan ke pesan untuk konteks",
+	"suggestion.title": "Saran",
+	"suggestion.fields.suggestion": "Apa saran Anda?",
+	"resource.title": "Sumber daya",
+	"resource.fields.resource": "Sumber daya apa yang ingin Anda kirimkan?",
+	"ticket.title": "Tiket",
+	"ticket.fields.topic": "Apa topik dari tiket Anda?"
+}

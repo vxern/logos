@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Continua alla pagina successiva...",
+	"interactions.page": "Pagina",
+	"interactions.invalidUser.title": "Utente non valido",
+	"interactions.invalidUser.description": "L'utente specificato non è valido.",
+	"interactions.rateLimited.title": "La tua tariffa è limitata",
+	"interactions.rateLimited.description.tooManyUses": "Hai usato questo comando troppe volte ({volte}) in un arco di tempo troppo breve.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Potrai nuovamente utilizzare il comando {relative_timestamp}.",
+	"interactions.show": "Mostra il messaggio in chat",
+	"interactions.show.sureToShow.title": "Sei sicuro di voler mostrare?",
+	"interactions.show.sureToShow.description": "Sei sicuro di voler mostrare il messaggio in chat?",
+	"interactions.show.sureToShow.yes": "Sì, mostra",
+	"interactions.show.sureToShow.no": "No, non mostrare",
+	"interactions.thinking": "Rost sta pensando...",
+	"interactions.source": "Fonte"
+}

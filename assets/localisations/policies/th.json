@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "นโยบายการควบคุม",
+	"policies.moderation.points.introduction.title": "ผู้ดูแลเซิร์ฟเวอร์ทำหน้าที่อย่างไร?",
+	"policies.moderation.points.introduction.description": "เซิร์ฟเวอร์ปฏิบัติตามนโยบายการเตือน 3 ครั้ง โดยมีการบังคับใช้โดยผู้ดูแลเซิร์ฟเวอร์",
+	"policies.moderation.points.breach.title": "กฎระเบียบใช้บังคับที่ไหน?",
+	"policies.moderation.points.breach.description": "กฎของเซิร์ฟเวอร์มีผลบังคับใช้กับทุกส่วนของเซิร์ฟเวอร์ และการละเมิดกฎดังกล่าวจะส่งผลให้มีการออกคำเตือน",
+	"policies.moderation.points.warnings.title": "จะเกิดอะไรขึ้นถ้าฉันถูกเตือนหลายครั้ง?",
+	"policies.moderation.points.warnings.description": "หากผู้ใช้ได้รับคำเตือนไปแล้วสามครั้ง คำเตือนครั้งที่สี่จะทำให้ผู้ใช้ถูกตัดการเชื่อมต่อ คำเตือนจะหมดอายุหลังจากระยะเวลา __สองเดือน__",
+	"policies.moderation.points.furtherAction.title": "แล้วจะเกิดอะไรขึ้น?",
+	"policies.moderation.points.furtherAction.description": "ดังนั้น พนักงานเซิร์ฟเวอร์จะได้รับแจ้งถึงการเกินขีดจำกัด และต่อมา จะตรวจสอบสถานการณ์และตัดสินใจเลือกแนวทางที่เหมาะสมในการดำเนินการต่อไป",
+	"policies.moderation.points.ban.title": "ถ้าฉันไม่สนใจล่ะ?",
+	"policies.moderation.points.ban.description": "ในกรณีที่พบว่าผู้ใช้ได้จงใจและต่อเนื่องละเมิดกฎของเซิร์ฟเวอร์ และ/หรือไม่สนใจคำแนะนำของทีมงาน ผู้ใช้จะถูกแบนอย่างถาวรจากเซิร์ฟเวอร์"
+}

@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "ต่อในหน้าถัดไป...",
+	"interactions.page": "หน้า",
+	"interactions.invalidUser.title": "ผู้ใช้ไม่ถูกต้อง",
+	"interactions.invalidUser.description": "ผู้ใช้ที่คุณระบุไม่ถูกต้อง",
+	"interactions.rateLimited.title": "คุณกำลังถูกจำกัดอัตรา",
+	"interactions.rateLimited.description.tooManyUses": "คุณได้ใช้คำสั่งนี้มากเกินไป ({จำนวนครั้ง}) ในช่วงเวลาที่สั้นเกินไป",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "คุณจะสามารถใช้คำสั่ง {relative_timestamp} ได้อีกครั้ง",
+	"interactions.show": "แสดงข้อความในแชท",
+	"interactions.show.sureToShow.title": "แน่ใจว่าจะแสดง?",
+	"interactions.show.sureToShow.description": "คุณแน่ใจหรือไม่ว่าต้องการแสดงข้อความในแชท?",
+	"interactions.show.sureToShow.yes": "ใช่, แสดง",
+	"interactions.show.sureToShow.no": "ไม่, อย่าแสดง",
+	"interactions.thinking": "รอสต์กำลังคิด...",
+	"interactions.source": "แหล่งที่มา"
+}

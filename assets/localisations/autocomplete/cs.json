@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "Vyhledejte uživatele pomocí jeho uživatelského jména, @handle, tag#0000, XxNICKNAMExX, <@mention> nebo ID 12345678.",
+	"autocomplete.warning": "Vyhledejte varování podle jeho obsahu.",
+	"autocomplete.timestamp": "Časový údaj zadejte slovy (\"5 hodin 30 minut 2 s\") nebo ve zkráceném formátu (\"05:30:02\")."
+}

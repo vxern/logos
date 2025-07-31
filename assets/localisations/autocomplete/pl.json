@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "Wyszukaj użytkownika za pomocą jego nazwy użytkownika, @handle, tag#0000, XxNICKNAMExX, <@mention> lub ID 12345678.",
+	"autocomplete.warning": "Wyszukaj ostrzeżenie według jego treści.",
+	"autocomplete.timestamp": "Wprowadź znacznik czasu słownie (\"5 godzin 30 minut 2 s\") lub w krótkim formacie (\"05:30:02\")."
+}

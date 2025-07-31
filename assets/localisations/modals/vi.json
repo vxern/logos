@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Có điều gì đó đã xảy ra",
+	"form.failedToSubmit.description": "Đơn đăng ký của cậu không thể được xử lý.",
+	"prompts.continue": "Tiếp tục",
+	"prompts.cancel": "Hủy",
+	"prompts.stay": "Quay lại",
+	"prompts.leave": "Để nguyên",
+	"verification.title": "Câu hỏi xác minh",
+	"verification.fields.reason": "Tại sao cậu muốn học tiếng Romania?",
+	"verification.fields.aim": "Bạn dự định sử dụng cộng đồng này như thế nào?",
+	"verification.fields.whereFound": "Bạn đã biết đến máy chủ này từ đâu?",
+	"report.title": "Báo cáo của người dùng",
+	"report.fields.reason": "Lý do báo cáo là gì?",
+	"report.fields.users": "Người dùng cần báo cáo",
+	"report.fields.link": "Link đến tin nhắn để tham khảo bối cảnh",
+	"suggestion.title": "Gợi ý",
+	"suggestion.fields.suggestion": "Gợi ý của cậu là gì?",
+	"resource.title": "Tài nguyên",
+	"resource.fields.resource": "Bạn muốn gửi tài nguyên nào?",
+	"ticket.title": "Ticket",
+	"ticket.fields.topic": "Chủ đề của phiếu yêu cầu của cậu là gì?"
+}
