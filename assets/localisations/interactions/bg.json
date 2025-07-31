@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Продължава на следващата страница...",
+	"interactions.page": "Страница",
+	"interactions.invalidUser.title": "Невалиден потребител",
+	"interactions.invalidUser.description": "Потребителят, който сте посочили, не е валиден.",
+	"interactions.rateLimited.title": "Ограничава се скоростта ви",
+	"interactions.rateLimited.description.tooManyUses": "Използвали сте тази команда твърде много пъти ({times}) за твърде кратък период от време.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Отново ще можете да използвате командата {relative_timestamp}.",
+	"interactions.show": "Показване на съобщение в чата",
+	"interactions.show.sureToShow.title": "Сигурни ли сте, че ще покажете?",
+	"interactions.show.sureToShow.description": "Сигурни ли сте, че искате да покажете съобщението в чата?",
+	"interactions.show.sureToShow.yes": "Да, покажете",
+	"interactions.show.sureToShow.no": "Не, не показвайте",
+	"interactions.thinking": "Rost мисли...",
+	"interactions.source": "Източник:"
+}

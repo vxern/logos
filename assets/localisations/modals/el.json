@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Κάτι πήγε στραβά",
+	"form.failedToSubmit.description": "Η υποβολή σας δεν μπόρεσε να επεξεργαστεί.",
+	"prompts.continue": "Συνέχεια",
+	"prompts.cancel": "Ακύρωση",
+	"prompts.stay": "Πάρτε με πίσω",
+	"prompts.leave": "Αφήστε το",
+	"verification.title": "Ερωτήσεις επαλήθευσης",
+	"verification.fields.reason": "Ποιος είναι ο λόγος που μαθαίνετε ρουμανικά;",
+	"verification.fields.aim": "Πώς σκοπεύετε να χρησιμοποιήσετε την κοινότητα;",
+	"verification.fields.whereFound": "Πού μάθατε για τον διακομιστή;",
+	"report.title": "Αναφορά χρήστη",
+	"report.fields.reason": "Ποιος είναι ο λόγος της αναφοράς;",
+	"report.fields.users": "Χρήστες προς αναφορά",
+	"report.fields.link": "Σύνδεσμος στο μήνυμα για το πλαίσιο",
+	"suggestion.title": "Πρόταση",
+	"suggestion.fields.suggestion": "Ποια είναι η πρότασή σας;",
+	"resource.title": "Πόροι",
+	"resource.fields.resource": "Ποιον πόρο θα θέλατε να υποβάλετε;",
+	"ticket.title": "Εισιτήριο",
+	"ticket.fields.topic": "Ποιο είναι το θέμα του εισιτηρίου σας;"
+}

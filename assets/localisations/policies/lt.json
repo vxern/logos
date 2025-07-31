@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Moderavimo politika",
+	"policies.moderation.points.introduction.title": "Kaip moderatoriai moderuoja serverį?",
+	"policies.moderation.points.introduction.description": "Serveryje laikomasi 3 įspėjimų moderavimo politikos, kurią užtikrina serverio vadovai.",
+	"policies.moderation.points.breach.title": "Kur taikomos taisyklės?",
+	"policies.moderation.points.breach.description": "Šios serverio taisyklės taikomos visame serveryje, o už jų pažeidimą bus skiriamas įspėjimas.",
+	"policies.moderation.points.warnings.title": "Kas atsitiks, jei būsiu įspėtas kelis kartus?",
+	"policies.moderation.points.warnings.description": "Jei naudotojas jau gavo tris įspėjimus, dėl ketvirtojo įspėjimo naudotojo laikas bus išjungtas. Įspėjimai nustoja galioti po __dviejų mėnesių__.",
+	"policies.moderation.points.furtherAction.title": "Kas nutiks tada?",
+	"policies.moderation.points.furtherAction.description": "Todėl serverio darbuotojai bus informuoti apie peržengtą ribą, o vėliau peržiūrės aplinkybes ir nustatys tinkamus veiksmus.",
+	"policies.moderation.points.ban.title": "Ką daryti, jei man tai nerūpi?",
+	"policies.moderation.points.ban.description": "Nustačius, kad naudotojas sąmoningai ir nuolat pažeidinėjo serverio taisykles ir (arba) ignoravo darbuotojų pasiūlymus, naudotojas bus visam laikui pašalintas iš serverio."
+}

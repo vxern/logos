@@ -1,0 +1,20 @@
+{
+	"parameters.user.name": "ผู้ใช้",
+	"parameters.user.description": "ชื่อผู้ใช้, แท็ก, ID หรือการกล่าวถึงของผู้ใช้",
+	"parameters.show.name": "แสดง",
+	"parameters.show.description": "หากตั้งค่าเป็นจริง ผลลัพธ์จะแสดงให้ผู้อื่นเห็น",
+	"parameters.duration.name": "ระยะเวลา",
+	"parameters.duration.description": "ระยะเวลาของการลงโทษ",
+	"parameters.reason.name": "เหตุผล",
+	"parameters.reason.description": "เหตุผลของการลงโทษหรือการยกเลิกการลงโทษ. ควรมีการอธิบายอย่างละเอียด.",
+	"parameters.query.name": "คำค้นหา",
+	"parameters.query.description": "ชื่อเพลงหรือลิงก์ไปยังเพลงหรือคอลเลกชันเพลง",
+	"parameters.timestamp.name": "เวลาประทับตรา",
+	"parameters.timestamp.description": "เวลาประทับที่จะใช้สำหรับการค้นหา",
+	"parameters.collection.name": "คอลเล็กชัน",
+	"parameters.collection.description": "หากตั้งค่าเป็น true การกระทำจะถูกดำเนินการกับคอลเลกชันเพลงแทน",
+	"parameters.by.name": "โดย",
+	"parameters.by.description": "จำนวนเพลงหรือรายการเพลงที่ต้องการข้ามไป",
+	"parameters.to.name": "เพื่อ",
+	"parameters.to.description": "ดัชนีของแทร็กที่ต้องการข้ามไปยัง"
+}

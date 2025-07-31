@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Zásady moderování",
+	"policies.moderation.points.introduction.title": "Jak moderátoři moderují server?",
+	"policies.moderation.points.introduction.description": "Server dodržuje politiku moderování 3 varování, která je vynucována průvodci serveru.",
+	"policies.moderation.points.breach.title": "Kde platí pravidla?",
+	"policies.moderation.points.breach.description": "Pravidla serveru platí pro celý server a jejich porušení bude mít za následek udělení varování.",
+	"policies.moderation.points.warnings.title": "Co se stane, když dostanu několikrát varování?",
+	"policies.moderation.points.warnings.description": "Pokud uživatel obdržel již tři varování, čtvrté varování způsobí, že bude uživatel časově vyřazen. Platnost varování vyprší po uplynutí __dvou měsíců__.",
+	"policies.moderation.points.furtherAction.title": "Co se stane potom?",
+	"policies.moderation.points.furtherAction.description": "Následně bude o překročení limitu informován personál serveru, který následně prověří okolnosti a určí vhodný postup.",
+	"policies.moderation.points.ban.title": "Co když mě to nezajímá?",
+	"policies.moderation.points.ban.description": "V případě, že se zjistí, že uživatel vědomě a neustále porušoval pravidla serveru a/nebo ignoroval návrhy personálu, bude ze serveru trvale vykázán."
+}

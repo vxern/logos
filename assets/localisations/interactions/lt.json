@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Tęsinys kitame puslapyje...",
+	"interactions.page": "Puslapis",
+	"interactions.invalidUser.title": "Negaliojantis naudotojas",
+	"interactions.invalidUser.description": "Nurodytas naudotojas negalioja.",
+	"interactions.rateLimited.title": "Jums taikomas tarifo apribojimas",
+	"interactions.rateLimited.description.tooManyUses": "Šią komandą panaudojote per daug kartų ({times}) per trumpą laiką.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Vėl galėsite naudoti komandą {relative_timestamp}.",
+	"interactions.show": "Rodyti pranešimą pokalbyje",
+	"interactions.show.sureToShow.title": "Tikrai norite parodyti?",
+	"interactions.show.sureToShow.description": "Ar tikrai norite, kad žinutė būtų rodoma pokalbyje?",
+	"interactions.show.sureToShow.yes": "Taip, parodykite",
+	"interactions.show.sureToShow.no": "Ne, nerodykite",
+	"interactions.thinking": "Rostas galvoja...",
+	"interactions.source": "Šaltinis"
+}

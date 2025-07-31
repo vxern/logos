@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "중재 정책",
+	"policies.moderation.points.introduction.title": "중재자는 서버를 어떻게 중재하나요?",
+	"policies.moderation.points.introduction.description": "서버는 서버 가이드에 의해 시행되는 3 경고 중재 정책을 준수합니다.",
+	"policies.moderation.points.breach.title": "규칙은 어디에 적용되나요?",
+	"policies.moderation.points.breach.description": "서버 규칙은 서버 전체에 적용되며, 이를 위반하면 경고가 발령됩니다.",
+	"policies.moderation.points.warnings.title": "경고를 몇 번 받으면 어떻게 되나요?",
+	"policies.moderation.points.warnings.description": "사용자가 이미 세 번의 경고를 받은 경우 네 번째 경고를 받으면 시간 초과가 됩니다. 경고는 __2개월__의 기간이 지나면 만료됩니다.",
+	"policies.moderation.points.furtherAction.title": "그러면 어떻게 되나요?",
+	"policies.moderation.points.furtherAction.description": "결과적으로 서버 담당자에게 한도가 초과되었다는 알림이 전송되고, 이후 상황을 검토하여 적절한 조치를 결정하게 됩니다.",
+	"policies.moderation.points.ban.title": "신경 쓰지 않는다면 어떻게 하나요?",
+	"policies.moderation.points.ban.description": "사용자가 고의로 지속적으로 서버 규칙을 위반하거나 직원의 제안을 무시한 것이 발견될 경우, 해당 사용자는 서버에서 영구적으로 차단됩니다."
+}

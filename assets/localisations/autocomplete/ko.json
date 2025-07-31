@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "사용자 아이디, @핸들, 태그#0000, XxNICKNAMExX, <@멘션> 또는 ID 12345678 를 사용하여 사용자를 검색합니다.",
+	"autocomplete.warning": "경고의 내용으로 경고를 검색합니다.",
+	"autocomplete.timestamp": "타임스탬프를 단어(\"5시간 30분 2초\") 또는 짧은 형식(\"05:30:02\")으로 입력합니다."
+}

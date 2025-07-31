@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "เกิดข้อผิดพลาด",
+	"form.failedToSubmit.description": "ไม่สามารถประมวลผลการส่งของคุณได้",
+	"prompts.continue": "ดำเนินการต่อ",
+	"prompts.cancel": "ยกเลิก",
+	"prompts.stay": "พาฉันกลับ",
+	"prompts.leave": "ลา",
+	"verification.title": "คำถามยืนยัน",
+	"verification.fields.reason": "คุณมีเหตุผลอะไรในการเรียนภาษาโรมาเนีย?",
+	"verification.fields.aim": "คุณวางแผนที่จะใช้ชุมชนอย่างไร?",
+	"verification.fields.whereFound": "คุณทราบเกี่ยวกับเซิร์ฟเวอร์นี้จากที่ไหน?",
+	"report.title": "รายงานผู้ใช้",
+	"report.fields.reason": "เหตุผลของรายงานคืออะไร?",
+	"report.fields.users": "ผู้ใช้ที่ต้องรายงาน",
+	"report.fields.link": "ลิงก์ไปยังข้อความเพื่อบริบท",
+	"suggestion.title": "ข้อเสนอแนะ",
+	"suggestion.fields.suggestion": "คุณมีข้อเสนอแนะอะไร?",
+	"resource.title": "ทรัพยากร",
+	"resource.fields.resource": "คุณต้องการส่งทรัพยากรอะไร?",
+	"ticket.title": "ตั๋ว",
+	"ticket.fields.topic": "หัวข้อของตั๋วของคุณคืออะไร?"
+}
