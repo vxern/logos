@@ -7,8 +7,8 @@ export default Object.freeze({
 		kicked: "🚪",
 	},
 	message: {
-		updated: "⬆️",
-		deleted: "❌",
+		updated: "🔄",
+		deleted: "🗑️",
 	},
 	entryRequest: {
 		submitted: "ℹ️",
