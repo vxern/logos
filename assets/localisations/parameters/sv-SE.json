@@ -1,1 +1,20 @@
-{}
+{
+  "parameters.user.name": "användare",
+  "parameters.user.description": "Användarens användarnamn, tagg, ID eller omnämnande.",
+  "parameters.show.name": "visa",
+  "parameters.show.description": "Om värdet är true kommer resultatet att visas för andra.",
+  "parameters.duration.name": "varaktighet",
+  "parameters.duration.description": "Påföljdens varaktighet.",
+  "parameters.reason.name": "anledning",
+  "parameters.reason.description": "Anledningen till sanktionen eller upphävandet av den. Den bör vara beskrivande.",
+  "parameters.query.name": "fråga",
+  "parameters.query.description": "Titeln eller en länk till låten eller låtsamlingen.",
+  "parameters.timestamp.name": "tidsstämpel",
+  "parameters.timestamp.description": "Den tidsstämpel som ska användas för sökning.",
+  "parameters.collection.name": "samling",
+  "parameters.collection.description": "Om värdet är true kommer åtgärden att vidtas på låtsamlingen i stället.",
+  "parameters.by.name": "av",
+  "parameters.by.description": "Antalet låtar eller låtlistor som ska hoppas över.",
+  "parameters.to.name": "till",
+  "parameters.to.description": "Index för det spår du vill hoppa till."
+}

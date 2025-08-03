@@ -16,5 +16,7 @@
   "resource.title": "Zasób",
   "resource.fields.resource": "Jaki zasób chcesz przesłać?",
   "ticket.title": "Bilet usługi",
-  "ticket.fields.topic": "Jaki jest temat Twojego biletu usługi?"
+  "ticket.fields.topic": "Jaki jest temat Twojego biletu usługi?",
+  "form.failedToSubmit.title": "Coś poszło nie tak",
+  "form.failedToSubmit.description": "Twoje zgłoszenie nie mogło zostać przetworzone."
 }

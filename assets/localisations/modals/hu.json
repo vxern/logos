@@ -12,5 +12,11 @@
   "report.fields.users": "Users to report",
   "report.fields.link": "Link to the message for context",
   "suggestion.title": "Suggestion",
-  "suggestion.fields.suggestion": "What is your suggestion?"
+  "suggestion.fields.suggestion": "What is your suggestion?",
+  "form.failedToSubmit.title": "Valami rosszul sült el",
+  "form.failedToSubmit.description": "A beadványát nem sikerült feldolgozni.",
+  "resource.title": "Erőforrás",
+  "resource.fields.resource": "Milyen erőforrást szeretne benyújtani?",
+  "ticket.title": "Jegy",
+  "ticket.fields.topic": "Mi a jegy témája?"
 }

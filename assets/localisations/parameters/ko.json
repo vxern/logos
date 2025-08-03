@@ -1,0 +1,20 @@
+{
+  "parameters.user.name": "user",
+  "parameters.user.description": "사용자의 사용자 아이디, 태그, ID 또는 멘션입니다.",
+  "parameters.show.name": "show",
+  "parameters.show.description": "true로 설정하면 다른 사람들에게 결과가 표시됩니다.",
+  "parameters.duration.name": "지속-시간",
+  "parameters.duration.description": "제재 기간입니다.",
+  "parameters.reason.name": "이유",
+  "parameters.reason.description": "제재 또는 제재 폐지 사유. 설명적이어야 합니다.",
+  "parameters.query.name": "쿼리",
+  "parameters.query.description": "노래 또는 노래 모음에 대한 제목 또는 링크입니다.",
+  "parameters.timestamp.name": "타임스탬프",
+  "parameters.timestamp.description": "찾기에 사용할 타임스탬프입니다.",
+  "parameters.collection.name": "컬렉션",
+  "parameters.collection.description": "true로 설정하면 노래 모음에서 대신 작업을 수행합니다.",
+  "parameters.by.name": "by",
+  "parameters.by.description": "건너뛸 노래 또는 노래 목록의 수입니다.",
+  "parameters.to.name": "to",
+  "parameters.to.description": "건너뛸 트랙의 인덱스입니다."
+}

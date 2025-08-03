@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "다음 페이지에서 계속...",
+	"interactions.page": "페이지",
+	"interactions.invalidUser.title": "잘못된 사용자",
+	"interactions.invalidUser.description": "지정한 사용자가 유효하지 않습니다.",
+	"interactions.rateLimited.title": "요금이 제한됩니다.",
+	"interactions.rateLimited.description.tooManyUses": "이 명령을 너무 짧은 시간 동안 너무 많이({번}) 사용했습니다.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "상대 타임스탬프} 명령을 다시 한 번 사용할 수 있습니다.",
+	"interactions.show": "채팅에 메시지 표시",
+	"interactions.show.sureToShow.title": "보여줄까요?",
+	"interactions.show.sureToShow.description": "채팅에서 메시지를 표시하시겠어요?",
+	"interactions.show.sureToShow.yes": "예, 표시",
+	"interactions.show.sureToShow.no": "아니요, 표시하지 않음",
+	"interactions.thinking": "로스트는 생각하고 있습니다...",
+	"interactions.source": "출처"
+}

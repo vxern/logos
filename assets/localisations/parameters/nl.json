@@ -15,5 +15,6 @@
   "parameters.by.name": "by",
   "parameters.by.description": "Het aantal nummers of nummerlijsten dat moet overgeslagen worden.",
   "parameters.to.name": "to",
-  "parameters.to.description": "De index van het nummer waarnaar moet worden overgeslagen."
+  "parameters.to.description": "De index van het nummer waarnaar moet worden overgeslagen.",
+  "parameters.collection.description": "Als dit is ingesteld op waar, wordt de actie uitgevoerd op de muziekverzameling."
 }

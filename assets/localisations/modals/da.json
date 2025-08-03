@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Noget gik galt",
+	"form.failedToSubmit.description": "Din indsendelse kunne ikke behandles.",
+	"prompts.continue": "Fortsæt",
+	"prompts.cancel": "Annuller",
+	"prompts.stay": "Tag mig tilbage",
+	"prompts.leave": "Lad være",
+	"verification.title": "Verifikationsspørgsmål",
+	"verification.fields.reason": "Hvad er din grund til at lære rumænsk?",
+	"verification.fields.aim": "Hvordan har du tænkt dig at bruge fællesskabet?",
+	"verification.fields.whereFound": "Hvor har du hørt om serveren?",
+	"report.title": "Brugerrapport",
+	"report.fields.reason": "Hvad er årsagen til rapporten?",
+	"report.fields.users": "Brugere, der skal rapporteres",
+	"report.fields.link": "Link til beskeden for kontekst",
+	"suggestion.title": "Forslag",
+	"suggestion.fields.suggestion": "Hvad er dit forslag?",
+	"resource.title": "Ressource",
+	"resource.fields.resource": "Hvilken ressource vil du gerne indsende?",
+	"ticket.title": "Billet",
+	"ticket.fields.topic": "Hvad er emnet for din billet?"
+}

@@ -1,1 +1,13 @@
-{}
+{
+  "policies.moderation.title": "Policy för moderering",
+  "policies.moderation.points.introduction.title": "Hur modererar moderatorer servern?",
+  "policies.moderation.points.introduction.description": "Servern följer en modereringspolicy med 3 varningar, som verkställs av serverns guider.",
+  "policies.moderation.points.breach.title": "Var gäller reglerna?",
+  "policies.moderation.points.breach.description": "Serverreglerna gäller för hela servern och ett brott mot dem leder till att en varning utfärdas.",
+  "policies.moderation.points.warnings.title": "Vad händer om jag blir varnad ett par gånger?",
+  "policies.moderation.points.warnings.description": "Om en användare redan har fått tre varningar kommer den fjärde varningen att leda till att användaren tidsbegränsas. Varningar upphör att gälla efter __två månader__.",
+  "policies.moderation.points.furtherAction.title": "Vad händer då?",
+  "policies.moderation.points.furtherAction.description": "Följaktligen kommer serverpersonalen att informeras om att gränsen har passerats och därefter granska omständigheterna och besluta om lämpliga åtgärder.",
+  "policies.moderation.points.ban.title": "Tänk om jag inte bryr mig?",
+  "policies.moderation.points.ban.description": "Om det visar sig att en användare medvetet och konstant har brutit mot serverns regler och/eller ignorerat förslag från personalen, kommer användaren att bli permanent avstängd från servern."
+}

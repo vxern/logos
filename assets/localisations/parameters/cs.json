@@ -1,0 +1,20 @@
+{
+  "parameters.user.name": "uživatel",
+  "parameters.user.description": "Uživatelské jméno, značka, ID nebo zmínka uživatele.",
+  "parameters.show.name": "zobrazit",
+  "parameters.show.description": "Pokud je nastaveno na hodnotu true, bude výsledek zobrazen ostatním.",
+  "parameters.duration.name": "trvání",
+  "parameters.duration.description": "Doba trvání sankce.",
+  "parameters.reason.name": "důvod",
+  "parameters.reason.description": "Důvod sankce nebo jejího zrušení. Měl by být popisný.",
+  "parameters.query.name": "dotaz",
+  "parameters.query.description": "Název nebo odkaz na píseň či kolekci písní.",
+  "parameters.timestamp.name": "časové-razítko",
+  "parameters.timestamp.description": "Časové razítko, které se použije pro vyhledávání.",
+  "parameters.collection.name": "kolekce",
+  "parameters.collection.description": "Pokud je nastaveno na hodnotu true, bude akce provedena místo toho na kolekci skladeb.",
+  "parameters.by.name": "by",
+  "parameters.by.description": "Počet skladeb nebo seznamů skladeb, které se mají přeskočit.",
+  "parameters.to.name": "to",
+  "parameters.to.description": "Index skladby, na kterou se má přeskočit."
+}

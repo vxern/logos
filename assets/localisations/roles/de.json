@@ -92,5 +92,7 @@
   "roles.regions.languages.romanian.roles.oltenia.name": "Oltenia",
   "roles.regions.languages.romanian.roles.oltenia.description": "Ich komme ursprünglich aus Oltenia.",
   "roles.regions.languages.romanian.roles.transilvania.name": "Siebenbürgern/Transsilvanien",
-  "roles.regions.languages.romanian.roles.transilvania.description": "Ich komme ursprünglich aus Transsilvanien."
+  "roles.regions.languages.romanian.roles.transilvania.description": "Ich komme ursprünglich aus Transsilvanien.",
+  "roles.learning.roles.doNotCorrectMe.name": "Korrigieren Sie mich nicht",
+  "roles.learning.roles.doNotCorrectMe.description": "Ich lerne durch natürliche Interaktion und möchte nicht korrigiert werden."
 }

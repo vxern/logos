@@ -12,5 +12,11 @@
   "report.fields.users": "Ilmiannettavat käyttäjät",
   "report.fields.link": "Linkki viestiin asiayhteyttä varten",
   "suggestion.title": "Ehdotus",
-  "suggestion.fields.suggestion": "Mikä on ehdotuksesi?"
+  "suggestion.fields.suggestion": "Mikä on ehdotuksesi?",
+  "form.failedToSubmit.title": "Jokin meni pieleen",
+  "form.failedToSubmit.description": "Lähetystäsi ei voitu käsitellä.",
+  "resource.title": "Resurssit",
+  "resource.fields.resource": "Minkä resurssin haluaisit lähettää?",
+  "ticket.title": "Lippu",
+  "ticket.fields.topic": "Mikä on lippusi aihe?"
 }

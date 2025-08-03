@@ -15,5 +15,8 @@
   "suggestion.title": "Suggestie",
   "suggestion.fields.suggestion": "Wat is je suggestie?",
   "resource.title": "Bron",
-  "resource.fields.resource": "Welke bron wil je indienen?"
+  "resource.fields.resource": "Welke bron wil je indienen?",
+  "form.failedToSubmit.description": "Uw inzending kon niet worden verwerkt.",
+  "ticket.title": "Ticket",
+  "ticket.fields.topic": "Wat is het onderwerp van je ticket?"
 }

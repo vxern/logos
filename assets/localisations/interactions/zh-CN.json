@@ -11,5 +11,6 @@
   "interactions.show.sureToShow.description": "確認在聊天室顯示信息？",
   "interactions.show.sureToShow.yes": "確認顯示",
   "interactions.show.sureToShow.no": "否認顯示",
-  "interactions.thinking": "Rost正在思考中..."
+  "interactions.thinking": "Rost正在思考中...",
+  "interactions.source": "资料来源"
 }

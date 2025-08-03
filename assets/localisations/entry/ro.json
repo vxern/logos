@@ -61,5 +61,10 @@
   "entry.verification.inquiry.failed.title": "Începerea interogării a eșuat",
   "entry.verification.inquiry.failed.description": "Din motive necunoscute, începerea interogării acestui utilizator a eșuat.",
   "entry.verification.inquiry.opened.title": "Interogare începută!",
-  "entry.verification.inquiry.opened.description": "O investigație a fost deschisă privind solicitarea de intrare a utilizatorului pe {guild_name}."
+  "entry.verification.inquiry.opened.description": "O investigație a fost deschisă privind solicitarea de intrare a utilizatorului pe {guild_name}.",
+  "entry.proficiency.description": "Selectați rolul care reprezintă cel mai exact cât de bine cunoașteți limba.",
+  "entry.proficiency.receivedAccess.description": "Pentru a vă începe călătoria, navigați la lista de canale și alegeți un canal.",
+  "entry.verification.vote.inquiryInProgress.title": "Nu se poate vota în timpul anchetei",
+  "entry.verification.vote.inquiryInProgress.description": "Votul cu privire la această cerere de înscriere este în prezent dezactivat deoarece este în curs o anchetă.",
+  "entry.verification.inquiry.verificationAnswers": "Verificarea răspunsurilor"
 }

@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "次のページに続く",
+	"interactions.page": "ページ",
+	"interactions.invalidUser.title": "無効なユーザー",
+	"interactions.invalidUser.description": "指定されたユーザーは無効である。",
+	"interactions.rateLimited.title": "あなたはレート制限を受けている",
+	"interactions.rateLimited.description.tooManyUses": "あなたはこのコマンドを短時間に何度も使いすぎている。",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "relative_timestamp}コマンドが再び使えるようになる。",
+	"interactions.show": "チャットにメッセージを表示する",
+	"interactions.show.sureToShow.title": "本当に表示するのか？",
+	"interactions.show.sureToShow.description": "本当にチャットでメッセージを表示したいのか？",
+	"interactions.show.sureToShow.yes": "はい、表示する",
+	"interactions.show.sureToShow.no": "表示しない",
+	"interactions.thinking": "ロストは考えている...",
+	"interactions.source": "ソース"
+}

@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "ユーザー名、@ハンドル、タグ#0000、XxNICKNAMExX、<@mention>、ID 12345678を使ってユーザーを検索する。",
+	"autocomplete.warning": "警告の内容で検索する。",
+	"autocomplete.timestamp": "タイムスタンプを単語（\"5 hours 30 mins 2 s\"）または短いフォーマット（\"05:30:02\"）で入力する。"
+}

@@ -10,5 +10,7 @@
   "interactions.show.sureToShow.description": "Weet je zeker dat je het bericht in de chat wilt weergeven?",
   "interactions.show.sureToShow.yes": "Ja, toon het",
   "interactions.show.sureToShow.no": "Nee, toon het niet",
-  "interactions.thinking": "Rost is aan het denken..."
+  "interactions.thinking": "Rost is aan het denken...",
+  "interactions.rateLimited.title": "U wordt beperkt in tarieven",
+  "interactions.source": "Bron"
 }

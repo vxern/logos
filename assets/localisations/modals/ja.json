@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "何かが間違っている",
+	"form.failedToSubmit.description": "あなたの投稿は処理できなかった。",
+	"prompts.continue": "続ける",
+	"prompts.cancel": "キャンセルする",
+	"prompts.stay": "私を連れ戻して",
+	"prompts.leave": "離れる",
+	"verification.title": "検証の質問",
+	"verification.fields.reason": "ルーマニア語を学ぶ理由は？",
+	"verification.fields.aim": "コミュニティをどのように利用する予定か？",
+	"verification.fields.whereFound": "どこでこのサーバーを知った？",
+	"report.title": "ユーザーレポート",
+	"report.fields.reason": "報告の理由は？",
+	"report.fields.users": "報告するユーザー",
+	"report.fields.link": "文脈のためにメッセージにリンクする",
+	"suggestion.title": "提案",
+	"suggestion.fields.suggestion": "あなたの提案は？",
+	"resource.title": "リソース",
+	"resource.fields.resource": "どんなリソースを提出したい？",
+	"ticket.title": "チケット",
+	"ticket.fields.topic": "チケットのトピックは？"
+}

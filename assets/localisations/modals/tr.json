@@ -12,5 +12,11 @@
   "report.fields.users": "Bildirilecek kullanıcılar",
   "report.fields.link": "Bağlam (context) için mesaja link",
   "suggestion.title": "Öneri",
-  "suggestion.fields.suggestion": "Öneriniz nedir?"
+  "suggestion.fields.suggestion": "Öneriniz nedir?",
+  "form.failedToSubmit.title": "Bir şeyler ters gitti",
+  "form.failedToSubmit.description": "Gönderiniz işleme alınamadı.",
+  "resource.title": "Kaynak",
+  "resource.fields.resource": "Hangi kaynağı göndermek istersiniz?",
+  "ticket.title": "Bilet",
+  "ticket.fields.topic": "Biletinizin konusu nedir?"
 }

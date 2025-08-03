@@ -17,5 +17,8 @@
   "rules.exclusivity.content": "Det er forventet at medlemmer ikke skal bruke denne plassen til å reklamere, og aktive forsøk på den (inkludert uforutsette DMs) er forbudt.",
   "rules.adherence.title": "Overholdelse",
   "rules.adherence.summary": "Respekter reglene.",
-  "rules.adherence.content": "For medlemmer som ikke viser noen hensyn til regler, og ikke er interessert i å gi nyttige bidrag, kan det utstedes et permanent forbud."
+  "rules.adherence.content": "For medlemmer som ikke viser noen hensyn til regler, og ikke er interessert i å gi nyttige bidrag, kan det utstedes et permanent forbud.",
+  "rules.title": "Regler",
+  "rules.other.title": "Annet",
+  "rules.other.summary": "Begrunnelsen er berettiget."
 }

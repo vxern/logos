@@ -17,5 +17,8 @@
   "rules.exclusivity.content": "Se espera que los miembros no utilicen este espacio para publicidad, y se prohíben los intentos activos al respecto (incluidos los DMD no solicitados).",
   "rules.adherence.title": "Cumplimiento",
   "rules.adherence.summary": "Respeta las reglas.",
-  "rules.adherence.content": "Para los miembros que no muestran ningún respeto por las reglas del servidor, y no están interesados en hacer contribuciones útiles, serán baneados permanentemente."
+  "rules.adherence.content": "Para los miembros que no muestran ningún respeto por las reglas del servidor, y no están interesados en hacer contribuciones útiles, serán baneados permanentemente.",
+  "rules.title": "Reglas",
+  "rules.other.title": "Otros",
+  "rules.other.summary": "Justificado en la razón."
 }

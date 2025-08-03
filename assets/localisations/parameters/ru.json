@@ -1,0 +1,20 @@
+{
+	"parameters.user.name": "пользователь",
+	"parameters.user.description": "Имя пользователя, тег, ID или упоминание.",
+	"parameters.show.name": "показать",
+	"parameters.show.description": "Если установить значение true, результат будет показан другим.",
+	"parameters.duration.name": "duration",
+	"parameters.duration.description": "Продолжительность санкции.",
+	"parameters.reason.name": "причина",
+	"parameters.reason.description": "Причина санкции или ее отмены. Она должна быть описательной.",
+	"parameters.query.name": "запрос",
+	"parameters.query.description": "Название или ссылка на песню или коллекцию песен.",
+	"parameters.timestamp.name": "timestamp",
+	"parameters.timestamp.description": "Временная метка, которую нужно использовать для поиска.",
+	"parameters.collection.name": "коллекция",
+	"parameters.collection.description": "Если установить значение true, то вместо этого действие будет произведено над коллекцией песен.",
+	"parameters.by.name": "by",
+	"parameters.by.description": "Количество песен или списков песен, которые нужно пропустить.",
+	"parameters.to.name": "на",
+	"parameters.to.description": "Индекс трека, на который нужно перейти."
+}

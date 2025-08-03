@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Algo deu errado",
+	"form.failedToSubmit.description": "Seu envio não pôde ser processado.",
+	"prompts.continue": "Continuar",
+	"prompts.cancel": "Cancelar",
+	"prompts.stay": "Leve-me de volta",
+	"prompts.leave": "Sair",
+	"verification.title": "Perguntas de verificação",
+	"verification.fields.reason": "Qual é o motivo para você aprender romeno?",
+	"verification.fields.aim": "Como você planeja usar a comunidade?",
+	"verification.fields.whereFound": "Onde você ficou sabendo sobre o servidor?",
+	"report.title": "Relatório do usuário",
+	"report.fields.reason": "Qual é o motivo da denúncia?",
+	"report.fields.users": "Usuários a serem denunciados",
+	"report.fields.link": "Link para a mensagem para contexto",
+	"suggestion.title": "Sugestão",
+	"suggestion.fields.suggestion": "Qual é a sua sugestão?",
+	"resource.title": "Recurso",
+	"resource.fields.resource": "Que recurso você gostaria de enviar?",
+	"ticket.title": "Bilhete",
+	"ticket.fields.topic": "Qual é o tópico do seu tíquete?"
+}

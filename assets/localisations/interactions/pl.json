@@ -10,5 +10,7 @@
   "interactions.show.sureToShow.title": "Na pewno?",
   "interactions.show.sureToShow.description": "Czy na pewno chcesz pokazać komunikat na czacie?",
   "interactions.show.sureToShow.yes": "Tak, pokaż",
-  "interactions.show.sureToShow.no": "Nie, nie pokazuj"
+  "interactions.show.sureToShow.no": "Nie, nie pokazuj",
+  "interactions.thinking": "Rost myśli...",
+  "interactions.source": "Źródło"
 }

@@ -1,0 +1,20 @@
+{
+  "parameters.user.name": "user",
+  "parameters.user.description": "Tên người dùng, thẻ, ID hoặc đề cập đến người dùng.",
+  "parameters.show.name": "hiển-thị",
+  "parameters.show.description": "Nếu được đặt thành true, kết quả sẽ được hiển thị cho người khác.",
+  "parameters.duration.name": "thời-lượng",
+  "parameters.duration.description": "Thời gian áp dụng hình phạt.",
+  "parameters.reason.name": "lý-do",
+  "parameters.reason.description": "Lý do áp dụng hoặc bãi bỏ hình phạt. Nội dung cần mô tả chi tiết.",
+  "parameters.query.name": "query",
+  "parameters.query.description": "Tiêu đề hoặc liên kết đến bài hát hoặc bộ sưu tập bài hát.",
+  "parameters.timestamp.name": "dấu-thời-gian",
+  "parameters.timestamp.description": "Thời gian đánh dấu để tìm kiếm.",
+  "parameters.collection.name": "bộ-sưu-tập",
+  "parameters.collection.description": "Nếu được đặt thành true, hành động sẽ được thực hiện trên bộ sưu tập bài hát thay vì trên từng bài hát.",
+  "parameters.by.name": "bởi",
+  "parameters.by.description": "Số lượng bài hát hoặc danh sách bài hát cần bỏ qua.",
+  "parameters.to.name": "to",
+  "parameters.to.description": "Chỉ số của bài hát cần bỏ qua."
+}

@@ -92,5 +92,7 @@
   "roles.regions.languages.romanian.roles.oltenia.name": "Oltenya (Aşağı Eflak)",
   "roles.regions.languages.romanian.roles.oltenia.description": "Aslen Oltenyalıyım.",
   "roles.regions.languages.romanian.roles.transilvania.name": "Erdel (Transilvanya)",
-  "roles.regions.languages.romanian.roles.transilvania.description": "Aslen Erdelliyim."
+  "roles.regions.languages.romanian.roles.transilvania.description": "Aslen Erdelliyim.",
+  "roles.learning.roles.doNotCorrectMe.name": "Beni Düzeltme",
+  "roles.learning.roles.doNotCorrectMe.description": "Doğal etkileşim yoluyla öğrenirim ve düzeltilmek istemem."
 }

@@ -19,5 +19,6 @@
   "rules.adherence.summary": "Szanuj zasady.",
   "rules.adherence.content": "Członkowie, którzy nie liczą się z regułami serwera i nie są zainteresowani wnoszeniem produktywnego wkładu na serwer, mogą dostać permabana.",
   "rules.other.title": "Inne",
-  "rules.other.summary": "Do uzasadnienia w komentarzu."
+  "rules.other.summary": "Do uzasadnienia w komentarzu.",
+  "rules.title": "Zasady"
 }

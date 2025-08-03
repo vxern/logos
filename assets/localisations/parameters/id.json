@@ -1,0 +1,20 @@
+{
+  "parameters.user.name": "pengguna",
+  "parameters.user.description": "Nama pengguna, tag, ID, atau sebutan pengguna.",
+  "parameters.show.name": "tampilkan",
+  "parameters.show.description": "Jika disetel ke true, hasilnya akan ditampilkan kepada orang lain.",
+  "parameters.duration.name": "durasi",
+  "parameters.duration.description": "Durasi sanksi.",
+  "parameters.reason.name": "alasan",
+  "parameters.reason.description": "Alasan sanksi atau pencabutannya. Ini harus deskriptif.",
+  "parameters.query.name": "permintaan",
+  "parameters.query.description": "Judul atau tautan ke lagu atau koleksi lagu.",
+  "parameters.timestamp.name": "stempel-waktu",
+  "parameters.timestamp.description": "Cap waktu yang digunakan untuk pencarian.",
+  "parameters.collection.name": "koleksi",
+  "parameters.collection.description": "Jika disetel ke true, tindakan akan dilakukan pada koleksi lagu.",
+  "parameters.by.name": "oleh",
+  "parameters.by.description": "Jumlah lagu atau daftar lagu yang akan dilewati.",
+  "parameters.to.name": "untuk",
+  "parameters.to.description": "Indeks trek yang akan dilewati."
+}

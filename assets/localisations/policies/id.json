@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Kebijakan Moderasi",
+	"policies.moderation.points.introduction.title": "Bagaimana moderator memoderasi server?",
+	"policies.moderation.points.introduction.description": "Server mematuhi kebijakan moderasi 3-peringatan, yang ditegakkan oleh panduan server.",
+	"policies.moderation.points.breach.title": "Di mana saja peraturan tersebut berlaku?",
+	"policies.moderation.points.breach.description": "Peraturan server berlaku untuk keseluruhan server, dan pelanggaran terhadapnya akan mengakibatkan peringatan.",
+	"policies.moderation.points.warnings.title": "Apa yang terjadi jika saya diperingatkan beberapa kali?",
+	"policies.moderation.points.warnings.description": "Jika seorang pengguna telah menerima tiga peringatan, peringatan keempat akan menyebabkan pengguna tersebut akan habis masa berlakunya. Peringatan akan kedaluwarsa setelah jangka waktu __dua bulan__.",
+	"policies.moderation.points.furtherAction.title": "Lalu apa yang terjadi?",
+	"policies.moderation.points.furtherAction.description": "Dengan demikian, staf server akan diberitahu tentang batas yang telah dilewati dan, selanjutnya, akan meninjau situasi dan menentukan tindakan yang tepat.",
+	"policies.moderation.points.ban.title": "Bagaimana jika saya tidak peduli?",
+	"policies.moderation.points.ban.description": "Jika ditemukan bahwa seorang pengguna secara sadar dan terus-menerus melanggar peraturan server dan/atau mengabaikan saran dari staf, pengguna tersebut akan diblokir secara permanen dari server."
+}

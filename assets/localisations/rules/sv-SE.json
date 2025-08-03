@@ -1,1 +1,24 @@
-{}
+{
+  "rules.rule": "Regel",
+  "rules.title": "Regler",
+  "rules.behaviour.title": "Beteende",
+  "rules.behaviour.summary": "Var respektfull.",
+  "rules.behaviour.content": "Vi tolererar inte övergrepp av något slag. Om du är ute och attackerar folk kommer du inte att bli långvarig här.",
+  "rules.quality.title": "Kvalitet",
+  "rules.quality.summary": "Var inte irriterande.",
+  "rules.quality.content": "Var stolt över det du delar med dig av. Trollning, spamming, flooding och att publicera överdrivet nonsens är inte okej.",
+  "rules.relevance.title": "Relevans",
+  "rules.relevance.summary": "Skriv relevanta meddelanden.",
+  "rules.relevance.content": "Placera meddelanden i deras relevanta kanal. Meddelanden som har placerats på fel plats för sitt innehåll kommer att ombes att flyttas.",
+  "rules.suitability.title": "Lämplighet",
+  "rules.suitability.summary": "Var inte olämplig.",
+  "rules.suitability.content": "Sexuellt explicit, chockerande eller livshotande innehåll är strängt förbjudet. Om du inte skulle visa det för ditt barn eller dina föräldrar ska du inte lägga upp det.",
+  "rules.exclusivity.title": "Exklusivitet",
+  "rules.exclusivity.summary": "Annonsera inte.",
+  "rules.exclusivity.content": "Du kan inte annonsera dina egna saker här utan tillstånd. Alla former av reklam är förbjudna, inklusive oönskade DM.",
+  "rules.adherence.title": "Följsamhet",
+  "rules.adherence.summary": "Respektera samhället.",
+  "rules.adherence.content": "Det här är vårt gemensamma utrymme att umgås på och vi gillar vår frid - stör den inte. Om du inte anstränger dig för att samexistera med andra kommer du att bli borttagen.",
+  "rules.other.title": "Övriga",
+  "rules.other.summary": "Rättfärdigad i skälet."
+}

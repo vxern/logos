@@ -17,5 +17,8 @@
   "rules.adherence.title": "Naleving",
   "rules.adherence.summary": "Respecteer de regels.",
   "rules.adherence.content": "Voor leden die geen respect tonen voor de serverregels en niet geïnteresseerd zijn in het leveren van nuttige bijdragen, kan een permanente ban worden uitgevaardigd.",
-  "rules.other.title": "Overige"
+  "rules.other.title": "Overige",
+  "rules.title": "Regels",
+  "rules.relevance.content": "Plaats berichten in hun relevante kanaal. Berichten die op de verkeerde plaatsen voor hun inhoud zijn gemaakt, worden gevraagd te verhuizen.",
+  "rules.other.summary": "Gerechtvaardigd in de reden."
 }

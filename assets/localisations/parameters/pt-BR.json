@@ -1,0 +1,20 @@
+{
+  "parameters.user.name": "usuário",
+  "parameters.user.description": "O nome de usuário, a tag, o ID ou a menção do usuário.",
+  "parameters.show.name": "mostrar",
+  "parameters.show.description": "Se você definir como verdadeiro, o resultado será exibido para os outros.",
+  "parameters.duration.name": "duração",
+  "parameters.duration.description": "A duração da sanção.",
+  "parameters.reason.name": "razão",
+  "parameters.reason.description": "O motivo da sanção ou de sua revogação. Deve ser descritivo.",
+  "parameters.query.name": "consulta",
+  "parameters.query.description": "O título ou um link para a música ou coleção de músicas.",
+  "parameters.timestamp.name": "carimbo-de-hora",
+  "parameters.timestamp.description": "O registro de data e hora a ser usado para a busca.",
+  "parameters.collection.name": "coleção",
+  "parameters.collection.description": "Se você definir como true, a ação será executada na coleção de músicas.",
+  "parameters.by.name": "por",
+  "parameters.by.description": "O número de músicas ou listagens de músicas que você deve pular.",
+  "parameters.to.name": "para",
+  "parameters.to.description": "O índice da faixa para a qual você deve pular."
+}

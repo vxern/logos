@@ -5,5 +5,20 @@
   "rules.quality.title": "Laatu",
   "rules.quality.summary": "Älä ole ärsyttävä.",
   "rules.exclusivity.summary": "Älä mainosta.",
-  "rules.adherence.summary": "Kunnioita sääntöjä."
+  "rules.adherence.summary": "Kunnioita sääntöjä.",
+  "rules.title": "Säännöt",
+  "rules.behaviour.content": "Emme siedä minkäänlaista väärinkäyttöä. Jos käyt ihmisten kimppuun, et kestä täällä kauan.",
+  "rules.quality.content": "Ole ylpeä siitä, mitä jaat. Trollaaminen, roskapostitus, tulviminen ja yliampuvien hölynpölyjen lähettäminen ei ole oikein.",
+  "rules.relevance.title": "Merkitys",
+  "rules.relevance.summary": "Kirjoita asiaankuuluvia viestejä.",
+  "rules.relevance.content": "Sijoita viestit niille sopivaan kanavaan. Väärään paikkaan tehtyjä viestejä pyydetään siirtämään.",
+  "rules.suitability.title": "Soveltuvuus",
+  "rules.suitability.summary": "Älä ole sopimaton.",
+  "rules.suitability.content": "Seksuaalisesti ilmeinen, järkyttävä tai hengenvaarallinen sisältö on ehdottomasti kielletty. Jos et näyttäisi sitä lapsellesi tai vanhemmillesi, älä lähetä sitä.",
+  "rules.exclusivity.title": "Yksinoikeus",
+  "rules.exclusivity.content": "Et voi mainostaa omia juttujasi täällä ilman lupaa. Kaikki mainonnan muodot ovat kiellettyjä, mukaan lukien ei-toivotut DM-viestit.",
+  "rules.adherence.title": "Kiinnittyminen",
+  "rules.adherence.content": "Tämä on yhteinen tilamme hengailla, ja pidämme rauhasta - älä häiritse sitä. Jos et yritä elää rinnakkain muiden kanssa, sinut poistetaan.",
+  "rules.other.title": "Muut",
+  "rules.other.summary": "Perusteltu syy."
 }

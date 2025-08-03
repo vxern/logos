@@ -5,5 +5,12 @@
   "interactions.invalidUser.description": "Belirttiğiniz kullanıcı geçerli değil.",
   "interactions.rateLimited.title": "Tepki-limitine tâbi tutuluyorsunuz",
   "interactions.rateLimited.description.tooManyUses": "Bu komutu pek kısa süre zarfı içerisinde çok kez kullandınız ({times}).",
-  "interactions.rateLimited.description.cannotUseAgainUntil": "Bu komutu yeniden {relative_timestamp}de kullanabilieceksiniz."
+  "interactions.rateLimited.description.cannotUseAgainUntil": "Bu komutu yeniden {relative_timestamp}de kullanabilieceksiniz.",
+  "interactions.show": "Sohbette mesaj göster",
+  "interactions.show.sureToShow.title": "Geleceğinden emin misin?",
+  "interactions.show.sureToShow.description": "Mesajı sohbette göstermek istediğinizden emin misiniz?",
+  "interactions.show.sureToShow.yes": "Evet, göster",
+  "interactions.show.sureToShow.no": "Hayır, göstermeyin",
+  "interactions.thinking": "Rost düşünüyor.",
+  "interactions.source": "Kaynak"
 }

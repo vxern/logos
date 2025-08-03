@@ -17,5 +17,8 @@
   "rules.exclusivity.content": "Minden tagtól elvárt, hogy ne használják ezt a teret hirdetésre. Tilos tevőlegesen próbálkozni ezzel - ideértve a kéretlen privát üzeneteket is.",
   "rules.adherence.title": "Szabálykövetés",
   "rules.adherence.summary": "Tartsd tiszteletben a szabályokat.",
-  "rules.adherence.content": "Végleges kitiltásban részesülhetnek azok a tagok, akik semmibe veszik a szerver szabályait, és semmilyen módon nem szándékoznak hasznosan hozzájárulni a szerverhez."
+  "rules.adherence.content": "Végleges kitiltásban részesülhetnek azok a tagok, akik semmibe veszik a szerver szabályait, és semmilyen módon nem szándékoznak hasznosan hozzájárulni a szerverhez.",
+  "rules.title": "Szabályok",
+  "rules.other.title": "Egyéb",
+  "rules.other.summary": "Indokoltan indokolt."
 }

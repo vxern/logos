@@ -1,1 +1,13 @@
-{}
+{
+  "policies.moderation.title": "Política de moderación",
+  "policies.moderation.points.introduction.title": "¿Cómo moderan los moderadores el servidor?",
+  "policies.moderation.points.introduction.description": "El servidor se rige por una política de moderación de 3 avisos, aplicada por los guías del servidor.",
+  "policies.moderation.points.breach.title": "¿Dónde se aplican las normas?",
+  "policies.moderation.points.breach.description": "Las normas del servidor se aplican a todo el servidor, y su incumplimiento dará lugar a una advertencia.",
+  "policies.moderation.points.warnings.title": "¿Qué pasa si me avisan varias veces?",
+  "policies.moderation.points.warnings.description": "Si un usuario ya ha recibido tres avisos, el cuarto aviso provocará la caducidad del usuario. Los avisos caducan al cabo de un periodo de __dos meses__.",
+  "policies.moderation.points.furtherAction.title": "¿Qué ocurre entonces?",
+  "policies.moderation.points.furtherAction.description": "En consecuencia, se informará al personal del servidor de que se ha sobrepasado el límite y, posteriormente, se revisarán las circunstancias y se determinará una actuación adecuada.",
+  "policies.moderation.points.ban.title": "¿Y si no me importa?",
+  "policies.moderation.points.ban.description": "En caso de que se descubra que un usuario ha infringido las normas del servidor a sabiendas y de forma constante y/o ha ignorado las sugerencias del personal, el usuario será expulsado permanentemente del servidor."
+}

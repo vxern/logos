@@ -61,5 +61,10 @@
   "entry.verification.inquiry.failed.title": "Nie udało się rozpocząć rozmowy",
   "entry.verification.inquiry.failed.description": "Z nieznanych przyczyn nie udało się rozpocząć rozmowy z tym użytkownikiem.",
   "entry.verification.inquiry.opened.title": "Rozmowa rozpoczęta!",
-  "entry.verification.inquiry.opened.description": "Rozpoczęto rozmowę z użytkownikiem w sprawie jego prośby o dołączenie do {guild_name}."
+  "entry.verification.inquiry.opened.description": "Rozpoczęto rozmowę z użytkownikiem w sprawie jego prośby o dołączenie do {guild_name}.",
+  "entry.proficiency.description": "Wybierz rolę, która najlepiej odzwierciedla Twoją znajomość języka.",
+  "entry.proficiency.receivedAccess.description": "Aby rozpocząć podróż, przejdź do listy kanałów i wybierz kanał.",
+  "entry.verification.vote.inquiryInProgress.title": "Nie można głosować podczas zapytania",
+  "entry.verification.vote.inquiryInProgress.description": "Głosowanie nad tym wnioskiem o wpis jest obecnie wyłączone, ponieważ trwa zapytanie.",
+  "entry.verification.inquiry.verificationAnswers": "Weryfikacja odpowiedzi"
 }

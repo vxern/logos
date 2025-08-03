@@ -12,5 +12,11 @@
   "report.fields.users": "Utilisateurs à signaler",
   "report.fields.link": "Lien vers le message pour le contexte",
   "suggestion.title": "Suggestion",
-  "suggestion.fields.suggestion": "Quelle est votre suggestion ?"
+  "suggestion.fields.suggestion": "Quelle est votre suggestion ?",
+  "form.failedToSubmit.title": "Quelque chose n'a pas fonctionné",
+  "form.failedToSubmit.description": "Votre demande n'a pas pu être traitée.",
+  "resource.title": "Ressources",
+  "resource.fields.resource": "Quelle ressource souhaitez-vous soumettre ?",
+  "ticket.title": "Billet",
+  "ticket.fields.topic": "Quel est le sujet de votre billet ?"
 }

@@ -17,5 +17,8 @@
   "rules.exclusivity.content": "Von den Mitgliedern wird erwartet, dass sie diese Fläche nicht für Werbung nutzen, und aktive Versuche, dies zu tun, (Einschließlich unaufgeforderter Direktnachrichten) sind verboten.",
   "rules.adherence.title": "Adhärenz",
   "rules.adherence.summary": "Beachte die Regeln.",
-  "rules.adherence.content": "Für Mitglieder, die sich nicht an die Serverregeln halten und kein Interesse daran haben, nützliche Beiträge zu leisten, kann eine dauerhafte Sperre ausgesprochen werden."
+  "rules.adherence.content": "Für Mitglieder, die sich nicht an die Serverregeln halten und kein Interesse daran haben, nützliche Beiträge zu leisten, kann eine dauerhafte Sperre ausgesprochen werden.",
+  "rules.title": "Regeln",
+  "rules.other.title": "Andere",
+  "rules.other.summary": "Begründet in der Begründung."
 }

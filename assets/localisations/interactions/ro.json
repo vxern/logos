@@ -11,5 +11,6 @@
   "interactions.show.sureToShow.description": "Sigur dorești ca mesajul să fie afișat în canal?",
   "interactions.show.sureToShow.yes": "Da, afișează-l",
   "interactions.show.sureToShow.no": "Nu, nu îl afișa",
-  "interactions.thinking": "Rost se gândește..."
+  "interactions.thinking": "Rost se gândește...",
+  "interactions.source": "Sursa"
 }

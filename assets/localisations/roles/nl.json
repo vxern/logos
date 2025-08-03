@@ -93,5 +93,6 @@
   "roles.regions.languages.romanian.roles.oltenia.name": "Oltenië",
   "roles.regions.languages.romanian.roles.oltenia.description": "Ik kom oorspronkelijk uit Oltenië.",
   "roles.regions.languages.romanian.roles.transilvania.name": "Transsylvanië",
-  "roles.regions.languages.romanian.roles.transilvania.description": "Ik kom oorspronkelijk uit Transsylvanië."
+  "roles.regions.languages.romanian.roles.transilvania.description": "Ik kom oorspronkelijk uit Transsylvanië.",
+  "roles.learning.roles.doNotCorrectMe.description": "Ik leer door natuurlijke interactie en wil niet gecorrigeerd worden."
 }

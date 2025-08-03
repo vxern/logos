@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Политика модерирования",
+	"policies.moderation.points.introduction.title": "Как модераторы модерируют сервер?",
+	"policies.moderation.points.introduction.description": "На сервере действует политика модерации с 3 предупреждениями, которая обеспечивается гайдами сервера.",
+	"policies.moderation.points.breach.title": "Где применяются правила?",
+	"policies.moderation.points.breach.description": "Правила сервера распространяются на весь сервер, и их нарушение повлечет за собой вынесение предупреждения.",
+	"policies.moderation.points.warnings.title": "Что будет, если я получу предупреждение несколько раз?",
+	"policies.moderation.points.warnings.description": "Если пользователь уже получил три предупреждения, то четвертое предупреждение приведет к тайм-ауту пользователя. Срок действия предупреждений истекает через _два месяца__.",
+	"policies.moderation.points.furtherAction.title": "Что произойдет потом?",
+	"policies.moderation.points.furtherAction.description": "Соответственно, персонал сервера будет проинформирован о превышении лимита и, впоследствии, рассмотрит обстоятельства и определит соответствующую линию поведения.",
+	"policies.moderation.points.ban.title": "Что делать, если мне все равно?",
+	"policies.moderation.points.ban.description": "В случае если будет установлено, что пользователь сознательно и постоянно нарушал правила сервера и/или игнорировал предложения персонала, он будет навсегда забанен на сервере."
+}

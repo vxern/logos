@@ -1,0 +1,20 @@
+{
+  "parameters.user.name": "bruger",
+  "parameters.user.description": "Brugerens brugernavn, tag, ID eller omtale.",
+  "parameters.show.name": "vis",
+  "parameters.show.description": "Hvis den er sat til true, vil resultatet blive vist til andre.",
+  "parameters.duration.name": "varighed",
+  "parameters.duration.description": "Sanktionens varighed.",
+  "parameters.reason.name": "grund",
+  "parameters.reason.description": "Årsagen til sanktionen eller ophævelsen af den. Den skal være beskrivende.",
+  "parameters.query.name": "forespørgsel",
+  "parameters.query.description": "Titlen eller et link til sangen eller sangsamlingen.",
+  "parameters.timestamp.name": "tidsstempel",
+  "parameters.timestamp.description": "Det tidsstempel, der skal bruges til søgning.",
+  "parameters.collection.name": "indsamling",
+  "parameters.collection.description": "Hvis den er sat til true, vil handlingen blive udført på sangsamlingen i stedet.",
+  "parameters.by.name": "af",
+  "parameters.by.description": "Antallet af sange eller sanglister, der skal springes over.",
+  "parameters.to.name": "til",
+  "parameters.to.description": "Indekset for det spor, der skal springes til."
+}

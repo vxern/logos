@@ -483,5 +483,16 @@
   "credits.strings.translation": "Tłumaczenia",
   "acknowledgements.name": "podziękowania",
   "acknowledgements.description": "Wyświetla komunikat z podziękowaniami.",
-  "acknowledgements.strings.acknowledgements": "Podziękowania"
+  "acknowledgements.strings.acknowledgements": "Podziękowania",
+  "information.options.bot.strings.function.features.information": "Publikowanie i utrzymywanie ważnych informacji w społeczności.",
+  "information.options.bot.strings.function.features.moderation": "Narzędzia moderacyjne, w tym weryfikacja użytkowników, raporty użytkowników, system ostrzeżeń i ułaskawień, precyzyjnie regulowany tryb spowolnienia, usuwanie wiadomości, cytowanie reguł, przeglądanie zasad i inne.",
+  "information.options.bot.strings.function.features.roles": "Intuicyjne, unikalne zarządzanie rolami za pomocą menu wyboru ról przypominającego folder.",
+  "information.options.bot.strings.function.features.music": "Odtwarzanie audio z zaawansowaną manipulacją ścieżkami, zarządzanie kolejką i historią, obsługa najwyższej klasy list odtwarzania i nie tylko.",
+  "information.options.bot.strings.function.features.social": "Funkcje społecznościowe, w tym przeglądanie profili użytkowników i dziękowanie użytkownikom za ich wkład.",
+  "music.options.play.options.stream.name": "strumień",
+  "music.options.play.options.stream.description": "Odtwarza strumień audio.",
+  "music.options.play.options.stream.options.url.name": "url",
+  "music.options.play.options.stream.options.url.description": "Link do strumienia audio.",
+  "music.options.play.strings.stream": "Strumień audio",
+  "music.options.play.strings.nowPlaying.title.type.stream": "strumień audio"
 }

@@ -1,0 +1,22 @@
+{
+	"form.failedToSubmit.title": "Něco se pokazilo",
+	"form.failedToSubmit.description": "Váš příspěvek nemohl být zpracován.",
+	"prompts.continue": "Pokračovat",
+	"prompts.cancel": "Zrušit",
+	"prompts.stay": "Vezmi mě zpátky",
+	"prompts.leave": "Zanechte",
+	"verification.title": "Ověřovací otázky",
+	"verification.fields.reason": "Z jakého důvodu se učíte rumunsky?",
+	"verification.fields.aim": "Jak plánujete komunitu využívat?",
+	"verification.fields.whereFound": "Kde jste se o serveru dozvěděli?",
+	"report.title": "Hlášení uživatele",
+	"report.fields.reason": "Jaký je důvod hlášení?",
+	"report.fields.users": "Uživatelé, kteří se mají hlásit",
+	"report.fields.link": "Odkaz na zprávu pro kontext",
+	"suggestion.title": "Návrh",
+	"suggestion.fields.suggestion": "Jaký je váš návrh?",
+	"resource.title": "Zdroj",
+	"resource.fields.resource": "Jaký zdroj byste chtěli předložit?",
+	"ticket.title": "Ticket",
+	"ticket.fields.topic": "Jaké je téma vašeho tiketu?"
+}

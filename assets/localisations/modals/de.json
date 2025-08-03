@@ -12,5 +12,11 @@
   "report.fields.users": "Benutzer zum Melden",
   "report.fields.link": "Link zur Nachricht für den Kontext",
   "suggestion.title": "Vorschlag",
-  "suggestion.fields.suggestion": "Was ist dein Vorschlag?"
+  "suggestion.fields.suggestion": "Was ist dein Vorschlag?",
+  "form.failedToSubmit.title": "Etwas ist schief gelaufen",
+  "form.failedToSubmit.description": "Ihr Antrag konnte nicht bearbeitet werden.",
+  "resource.title": "Ressource",
+  "resource.fields.resource": "Welche Ressource möchten Sie einreichen?",
+  "ticket.title": "Ticket",
+  "ticket.fields.topic": "Was ist das Thema Ihres Tickets?"
 }

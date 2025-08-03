@@ -71,5 +71,12 @@
   "events.suggestionSend.fields.suggestion": "Sugestie",
   "events.ticketOpen.title": "Tichet deschis",
   "events.ticketOpen.description": "{user} a deschis un tichet.",
-  "events.ticketOpen.fields.topic": "Subiect"
+  "events.ticketOpen.fields.topic": "Subiect",
+  "events.messageDeleteBulk.title": "Mesaje șterse",
+  "events.messageDeleteBulk.description": "{messages} în {channel}.",
+  "events.messageDeleteBulk.description.messages.one": "{un} mesaj a fost șters",
+  "events.messageDeleteBulk.description.messages.two": "{două} mesaje au fost șterse",
+  "events.messageDeleteBulk.description.messages.many": "{multe} mesaje au fost șterse",
+  "events.memberKick.title": "Utilizator lovit",
+  "events.memberKick.description": "{user} a fost dat afară de {moderator}."
 }

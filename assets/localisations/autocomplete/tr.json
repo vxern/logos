@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "Bir kullanıcıyı kullanıcı adı, @handle, tag#0000, XxNICKNAMExX, <@mention> veya ID 12345678 kullanarak arayın.",
+	"autocomplete.warning": "Bir uyarıyı içeriğine göre arayın.",
+	"autocomplete.timestamp": "Zaman damgasını kelimelerle (\"5 saat 30 dakika 2 s\") veya kısa formatta (\"05:30:02\") girin."
+}

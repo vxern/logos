@@ -1,0 +1,16 @@
+{
+	"interactions.continuedOnNextPage": "Продовження на наступній сторінці...",
+	"interactions.page": "Сторінка",
+	"interactions.invalidUser.title": "Недійсний користувач",
+	"interactions.invalidUser.description": "Вказаний вами користувач не є дійсним.",
+	"interactions.rateLimited.title": "У вас обмежена швидкість",
+	"interactions.rateLimited.description.tooManyUses": "Ви використали цю команду занадто багато разів ({times}) за надто короткий проміжок часу.",
+	"interactions.rateLimited.description.cannotUseAgainUntil": "Ви знову зможете використовувати команду {відносна_мітка_часу}.",
+	"interactions.show": "Показати повідомлення в чаті",
+	"interactions.show.sureToShow.title": "Впевнені, що покажете?",
+	"interactions.show.sureToShow.description": "Ви впевнені, що хочете показати повідомлення в чаті?",
+	"interactions.show.sureToShow.yes": "Так, показати",
+	"interactions.show.sureToShow.no": "Ні, не показувати",
+	"interactions.thinking": "Рост думає...",
+	"interactions.source": "Джерело"
+}

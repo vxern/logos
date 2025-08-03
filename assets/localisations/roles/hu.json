@@ -92,5 +92,7 @@
   "roles.regions.languages.romanian.roles.oltenia.name": "Oltenia",
   "roles.regions.languages.romanian.roles.oltenia.description": "I am originally from Oltenia.",
   "roles.regions.languages.romanian.roles.transilvania.name": "Transilvania",
-  "roles.regions.languages.romanian.roles.transilvania.description": "I am originally from Transilvania."
+  "roles.regions.languages.romanian.roles.transilvania.description": "I am originally from Transilvania.",
+  "roles.learning.roles.doNotCorrectMe.name": "Ne javítson ki",
+  "roles.learning.roles.doNotCorrectMe.description": "Természetes interakciókon keresztül tanulok, és nem kívánom, hogy kijavítsanak."
 }

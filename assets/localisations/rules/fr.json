@@ -17,5 +17,8 @@
   "rules.exclusivity.content": "Il est attendu des membres de ne pas utiliser cet espace pour la publicité, et les tentatives actives (y compris les DMs non sollicités) sont interdites.",
   "rules.adherence.title": "Adhésion",
   "rules.adherence.summary": "Respecter les règles.",
-  "rules.adherence.content": "Les membres qui ne respectent pas les règles du serveur et qui ne souhaitent pas apporter de contribution utile peuvent faire l'objet d'un bannissement permanent."
+  "rules.adherence.content": "Les membres qui ne respectent pas les règles du serveur et qui ne souhaitent pas apporter de contribution utile peuvent faire l'objet d'un bannissement permanent.",
+  "rules.title": "Règles",
+  "rules.other.title": "Autres",
+  "rules.other.summary": "Justifié par la raison."
 }

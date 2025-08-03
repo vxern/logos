@@ -17,5 +17,8 @@
   "rules.exclusivity.content": "Kullanıcıların bu alanı reklam yapmak için kullanmaması beklenmektedir, ve yapılacak aktif teşebbüsler (DM'den reklam yapmak dahil) yasaktır.",
   "rules.adherence.title": "Uyum",
   "rules.adherence.summary": "Kurallara saygı duyun.",
-  "rules.adherence.content": "Sunucu kurallarını kâle almayan ve işe yarar katkıda bulunmaya ilgi duymayan üyeler için kalıcı ban verilebilir."
+  "rules.adherence.content": "Sunucu kurallarını kâle almayan ve işe yarar katkıda bulunmaya ilgi duymayan üyeler için kalıcı ban verilebilir.",
+  "rules.title": "Kurallar",
+  "rules.other.title": "Diğer",
+  "rules.other.summary": "Gerekçede haklı."
 }

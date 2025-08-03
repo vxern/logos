@@ -12,5 +12,11 @@
   "report.fields.users": "Brukere å rapportere",
   "report.fields.link": "Lenke til meldingen for kontekst",
   "suggestion.title": "Forslag",
-  "suggestion.fields.suggestion": "Hva er ditt forslag?"
+  "suggestion.fields.suggestion": "Hva er ditt forslag?",
+  "form.failedToSubmit.title": "Noe gikk galt",
+  "form.failedToSubmit.description": "Innsendingen din kunne ikke behandles.",
+  "resource.title": "Ressurs",
+  "resource.fields.resource": "Hvilken ressurs ønsker du å sende inn?",
+  "ticket.title": "Billett",
+  "ticket.fields.topic": "Hva er temaet for billetten din?"
 }

@@ -489,5 +489,10 @@
   "credits.strings.translation": "Traduceri",
   "acknowledgements.name": "mulțumiri",
   "acknowledgements.description": "Afișează meniul cu mulțumiri.",
-  "acknowledgements.strings.acknowledgements": "Mulțumiri"
+  "acknowledgements.strings.acknowledgements": "Mulțumiri",
+  "information.options.bot.strings.function.features.information": "Postarea și menținerea informațiilor importante în cadrul comunității.",
+  "information.options.bot.strings.function.features.moderation": "Instrumente de moderare, inclusiv verificarea utilizatorilor, rapoarte ale utilizatorilor, un sistem de avertizare + grațiere, modul lent reglabil, purjarea mesajelor, citarea regulilor, vizualizarea politicilor și multe altele.",
+  "information.options.bot.strings.function.features.roles": "Gestionarea intuitivă și unică a rolurilor utilizând un meniu de selectare a rolurilor de tip folder.",
+  "information.options.bot.strings.function.features.music": "Redare audio cu manipulare avansată a pieselor, gestionare a cozilor + istoric, suport de primă clasă pentru liste de redare și multe altele.",
+  "information.options.bot.strings.function.features.social": "Caracteristici sociale, inclusiv vizualizarea profilurilor utilizatorilor și mulțumirea utilizatorilor pentru contribuțiile lor."
 }

@@ -1,0 +1,13 @@
+{
+	"policies.moderation.title": "Политика за модериране",
+	"policies.moderation.points.introduction.title": "Как модераторите модерират сървъра?",
+	"policies.moderation.points.introduction.description": "Сървърът спазва политика на модериране с 3 предупреждения, която се прилага от ръководствата на сървъра.",
+	"policies.moderation.points.breach.title": "Къде се прилагат правилата?",
+	"policies.moderation.points.breach.description": "Правилата на сървъра важат за целия сървър и нарушаването им ще доведе до отправяне на предупреждение.",
+	"policies.moderation.points.warnings.title": "Какво ще стане, ако получа няколко предупреждения?",
+	"policies.moderation.points.warnings.description": "Ако потребителят вече е получил три предупреждения, четвъртото предупреждение ще доведе до изтичане на времето на потребителя. Предупрежденията изтичат след период от __два месеца__.",
+	"policies.moderation.points.furtherAction.title": "Какво се случва след това?",
+	"policies.moderation.points.furtherAction.description": "Вследствие на това персоналът на сървъра ще бъде информиран за преминаването на лимита и впоследствие ще разгледа обстоятелствата и ще определи подходящ начин на действие.",
+	"policies.moderation.points.ban.title": "Какво да правя, ако не ми пука?",
+	"policies.moderation.points.ban.description": "В случай, че се установи, че даден потребител съзнателно и постоянно е нарушавал правилата на сървъра и/или е игнорирал предложенията на персонала, потребителят ще бъде трайно изключен от сървъра."
+}

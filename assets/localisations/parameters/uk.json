@@ -1,0 +1,20 @@
+{
+  "parameters.user.name": "користувач",
+  "parameters.user.description": "Ім'я користувача, тег, ідентифікатор або згадка.",
+  "parameters.show.name": "показувати",
+  "parameters.show.description": "Якщо встановлено значення true, результат буде показано іншим користувачам.",
+  "parameters.duration.name": "тривалість",
+  "parameters.duration.description": "Термін дії санкції.",
+  "parameters.reason.name": "причина",
+  "parameters.reason.description": "Причина санкції або її скасування. Має бути описовою.",
+  "parameters.query.name": "запит",
+  "parameters.query.description": "Назва або посилання на пісню чи збірку пісень.",
+  "parameters.timestamp.name": "мітка-часу",
+  "parameters.timestamp.description": "Мітка часу для пошуку.",
+  "parameters.collection.name": "колекція",
+  "parameters.collection.description": "Якщо встановлено значення true, дія буде виконуватися над збіркою пісень.",
+  "parameters.by.name": "по",
+  "parameters.by.description": "Кількість пісень або списків пісень, які потрібно пропустити.",
+  "parameters.to.name": "до",
+  "parameters.to.description": "Індекс треку, до якого потрібно перейти."
+}

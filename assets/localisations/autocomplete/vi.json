@@ -1,0 +1,5 @@
+{
+	"autocomplete.user": "Tìm kiếm người dùng bằng tên người dùng, @handle, tag#0000, XxNICKNAMExX, <@mention> hoặc ID 12345678.",
+	"autocomplete.warning": "Tìm kiếm cảnh báo dựa trên nội dung của nó.",
+	"autocomplete.timestamp": "Nhập dấu thời gian bằng chữ (\"5 giờ 30 phút 2 giây\") hoặc định dạng ngắn gọn (\"05:30:02\")."
+}
