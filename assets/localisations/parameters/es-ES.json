@@ -9,7 +9,7 @@
   "parameters.reason.description": "El motivo de la sanción o de su derogación. Debe ser descriptivo.",
   "parameters.query.name": "consulta",
   "parameters.query.description": "El título o un enlace a la canción o colección de canciones.",
-  "parameters.timestamp.name": "marca de tiempo",
+  "parameters.timestamp.name": "marca-de-tiempo",
   "parameters.timestamp.description": "La marca de tiempo a utilizar para la búsqueda.",
   "parameters.collection.name": "colección",
   "parameters.collection.description": "Si se establece en true, la acción se llevará a cabo en la colección de canciones en su lugar.",

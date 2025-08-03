@@ -342,7 +342,7 @@
   "music.options.fast-forward.strings.invalidTimestamp.description": "Määrittämäsi aikaleima on virheellinen.",
   "music.options.fast-forward.strings.fastForwarded.title": "Pikakelaus",
   "music.options.fast-forward.strings.fastForwarded.description": "Toisto on ohittanut annetun ajan.",
-  "music.options.rewind.name": "kelaa takaisin",
+  "music.options.rewind.name": "kelaa-takaisin",
   "music.options.rewind.description": "Kelaa kappaleen taaksepäin tietyn ajan verran.",
   "music.options.rewind.strings.noSong.title": "Ei kappaletta taaksepäin kelattavaksi",
   "music.options.rewind.strings.noSong.description": "Kappaletta ei voi kelata taaksepäin.",

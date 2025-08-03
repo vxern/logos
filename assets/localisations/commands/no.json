@@ -462,7 +462,7 @@
   "music.options.fast-forward.strings.invalidTimestamp.description": "Tidsstempelet du har angitt, er ugyldig.",
   "music.options.fast-forward.strings.fastForwarded.title": "Spolte frem",
   "music.options.fast-forward.strings.fastForwarded.description": "Avspillingen har hoppet over den angitte tiden.",
-  "music.options.rewind.name": "spole tilbake",
+  "music.options.rewind.name": "spole-tilbake",
   "music.options.rewind.description": "Spoler tilbake sangen med en gitt tidsperiode.",
   "music.options.rewind.strings.noSong.title": "Ingen sang å spole tilbake",
   "music.options.rewind.strings.noSong.description": "Det er ingen sang å spole tilbake.",

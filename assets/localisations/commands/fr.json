@@ -454,7 +454,7 @@
   "music.options.play.options.stream.options.url.description": "Lien vers le flux audio.",
   "music.options.play.strings.stream": "Flux audio",
   "music.options.play.strings.nowPlaying.title.type.stream": "flux audio",
-  "music.options.fast-forward.name": "avance rapide",
+  "music.options.fast-forward.name": "avance-rapide",
   "music.options.fast-forward.description": "Avance rapide de la chanson d'une durée donnée.",
   "music.options.fast-forward.strings.noSong.title": "Pas de chanson à avancer rapidement",
   "music.options.fast-forward.strings.noSong.description": "Il n'y a pas de chanson à avancer rapidement.",
