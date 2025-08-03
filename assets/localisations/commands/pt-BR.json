@@ -159,7 +159,7 @@
   "rule.options.rule.description": "A regra a ser citada.",
   "rule.strings.invalid.title": "Regra inválida",
   "rule.strings.invalid.description": "A regra que você especificou é inválida.",
-  "slowmode.name": "Modo lento",
+  "slowmode.name": "modo lento",
   "slowmode.description": "Alterna o slowmode para o canal em que esse comando é executado.",
   "slowmode.options.level.name": "nível",
   "slowmode.options.level.description": "O nível de slowmode a ser aplicado.",
@@ -492,7 +492,7 @@
   "credits.name": "créditos",
   "credits.description": "Mostra o menu de créditos.",
   "credits.strings.translation": "Tradução",
-  "acknowledgements.name": "Agradecimentos",
+  "acknowledgements.name": "agradecimentos",
   "acknowledgements.description": "Mostra o menu de confirmações.",
   "acknowledgements.strings.acknowledgements": "Agradecimentos"
 }
