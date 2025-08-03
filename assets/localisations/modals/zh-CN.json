@@ -1,3 +1,22 @@
 {
-	"form.failedToSubmit.title": "出現問題"
+  "form.failedToSubmit.title": "出現問題",
+  "form.failedToSubmit.description": "您提交的信息无法处理。",
+  "prompts.continue": "继续",
+  "prompts.cancel": "取消",
+  "prompts.stay": "带我回去",
+  "prompts.leave": "离开",
+  "verification.title": "核查问题",
+  "verification.fields.reason": "您学习罗马尼亚语的原因是什么？",
+  "verification.fields.aim": "您计划如何利用该社区？",
+  "verification.fields.whereFound": "你从哪里知道服务器的？",
+  "report.title": "用户报告",
+  "report.fields.reason": "报告的原因是什么？",
+  "report.fields.users": "用户报告",
+  "report.fields.link": "信息链接",
+  "suggestion.title": "建议",
+  "suggestion.fields.suggestion": "你有什么建议？",
+  "resource.title": "资源",
+  "resource.fields.resource": "您想提交什么资源？",
+  "ticket.title": "门票",
+  "ticket.fields.topic": "您的机票主题是什么？"
 }

@@ -1,1 +1,16 @@
-{}
+{
+  "interactions.continuedOnNextPage": "Fortsättning på nästa sida...",
+  "interactions.page": "Sidan",
+  "interactions.invalidUser.title": "Ogiltig användare",
+  "interactions.invalidUser.description": "Den användare du angav är inte giltig.",
+  "interactions.rateLimited.title": "Du har en begränsad skattesats",
+  "interactions.rateLimited.description.tooManyUses": "Du har använt detta kommando för många gånger ({times}) på för kort tid.",
+  "interactions.rateLimited.description.cannotUseAgainUntil": "Du kommer återigen att kunna använda kommandot {relative_timestamp}.",
+  "interactions.show": "Visa meddelande i chatten",
+  "interactions.show.sureToShow.title": "Är du säker på att visa?",
+  "interactions.show.sureToShow.description": "Är du säker på att du vill visa meddelandet i chatten?",
+  "interactions.show.sureToShow.yes": "Ja, visa",
+  "interactions.show.sureToShow.no": "Nej, inte visa",
+  "interactions.thinking": "Rost tänker...",
+  "interactions.source": "Källa"
+}

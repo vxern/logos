@@ -1,9 +1,16 @@
 {
-	"interactions.continuedOnNextPage": "Jatkuu seuraavalla sivulla...",
-	"interactions.page": "Sivu",
-	"interactions.invalidUser.title": "Käyttäjä ei kelpaa",
-	"interactions.invalidUser.description": "Antamasi käyttäjä ei kelpaa.",
-	"interactions.rateLimited.title": "Viestiesi määrää rajoitetaan",
-	"interactions.rateLimited.description.tooManyUses": "Olet käyttänyt tätä komentoa liian usein ({times}) liian lyhyen ajan sisällä.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "Voit käyttää komentoa taas {relative_timestamp}."
+  "interactions.continuedOnNextPage": "Jatkuu seuraavalla sivulla...",
+  "interactions.page": "Sivu",
+  "interactions.invalidUser.title": "Käyttäjä ei kelpaa",
+  "interactions.invalidUser.description": "Antamasi käyttäjä ei kelpaa.",
+  "interactions.rateLimited.title": "Viestiesi määrää rajoitetaan",
+  "interactions.rateLimited.description.tooManyUses": "Olet käyttänyt tätä komentoa liian usein ({times}) liian lyhyen ajan sisällä.",
+  "interactions.rateLimited.description.cannotUseAgainUntil": "Voit käyttää komentoa taas {relative_timestamp}.",
+  "interactions.show": "Näytä viesti chatissa",
+  "interactions.show.sureToShow.title": "Oletko varma, että tulet?",
+  "interactions.show.sureToShow.description": "Haluatko varmasti näyttää viestin chatissa?",
+  "interactions.show.sureToShow.yes": "Kyllä, näytä",
+  "interactions.show.sureToShow.no": "Ei, älä näytä",
+  "interactions.thinking": "Rost ajattelee...",
+  "interactions.source": "Lähde"
 }

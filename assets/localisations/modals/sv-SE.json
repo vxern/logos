@@ -1,4 +1,22 @@
 {
-	"verification.title": "Verifieringsfrågor",
-	"verification.fields.reason": "Vad är din anledning till att lära dig {language}?"
+  "verification.title": "Verifieringsfrågor",
+  "verification.fields.reason": "Vad är din anledning till att lära dig {language}?",
+  "form.failedToSubmit.title": "Något gick fel",
+  "form.failedToSubmit.description": "Din ansökan kunde inte behandlas.",
+  "prompts.continue": "Fortsätt",
+  "prompts.cancel": "Avbryt",
+  "prompts.stay": "Ta mig tillbaka",
+  "prompts.leave": "Lämna",
+  "verification.fields.aim": "Hur planerar du att använda communityt?",
+  "verification.fields.whereFound": "Var fick du reda på om servern?",
+  "report.title": "Användarrapport",
+  "report.fields.reason": "Vad är anledningen till rapporten?",
+  "report.fields.users": "Användare att rapportera",
+  "report.fields.link": "Länk till meddelandet för sammanhang",
+  "suggestion.title": "Förslag till beslut",
+  "suggestion.fields.suggestion": "Vad är ditt förslag?",
+  "resource.title": "Resurs",
+  "resource.fields.resource": "Vilken resurs skulle du vilja skicka in?",
+  "ticket.title": "Biljett",
+  "ticket.fields.topic": "Vad är ämnet för din biljett?"
 }

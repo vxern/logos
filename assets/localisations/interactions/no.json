@@ -1,10 +1,16 @@
 {
-	"interactions.continuedOnNextPage": "Fortsetter på neste side...",
-	"interactions.page": "Side",
-	"interactions.invalidUser.title": "Ugyldig bruker",
-	"interactions.invalidUser.description": "Brukeren du angav er ugyldig.",
-	"interactions.rateLimited.title": "Du er på en takstgrense",
-	"interactions.rateLimited.description.tooManyUses": "Du har brukt denne kommandoen for mange ganger ({times}) i for kort tid.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "Du vil igjen kunne bruke kommandoen {relative_timestamp}.",
-	"interactions.show": "Vis melding i chat"
+  "interactions.continuedOnNextPage": "Fortsetter på neste side...",
+  "interactions.page": "Side",
+  "interactions.invalidUser.title": "Ugyldig bruker",
+  "interactions.invalidUser.description": "Brukeren du angav er ugyldig.",
+  "interactions.rateLimited.title": "Du er på en takstgrense",
+  "interactions.rateLimited.description.tooManyUses": "Du har brukt denne kommandoen for mange ganger ({times}) i for kort tid.",
+  "interactions.rateLimited.description.cannotUseAgainUntil": "Du vil igjen kunne bruke kommandoen {relative_timestamp}.",
+  "interactions.show": "Vis melding i chat",
+  "interactions.show.sureToShow.title": "Sikker på at du kommer?",
+  "interactions.show.sureToShow.description": "Er du sikker på at du vil vise meldingen i chatten?",
+  "interactions.show.sureToShow.yes": "Ja, vis",
+  "interactions.show.sureToShow.no": "Nei, ikke vis",
+  "interactions.thinking": "Rost tenker...",
+  "interactions.source": "Kilde"
 }

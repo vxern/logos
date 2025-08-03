@@ -1,9 +1,16 @@
 {
-	"interactions.continuedOnNextPage": "Folytatódik a következő oldalon...",
-	"interactions.page": "Oldal",
-	"interactions.invalidUser.title": "Érvénytelen felhasználó",
-	"interactions.invalidUser.description": "Érvénytelen felhasználót adtál meg.",
-	"interactions.rateLimited.title": "You are being rate-limited",
-	"interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}."
+  "interactions.continuedOnNextPage": "Folytatódik a következő oldalon...",
+  "interactions.page": "Oldal",
+  "interactions.invalidUser.title": "Érvénytelen felhasználó",
+  "interactions.invalidUser.description": "Érvénytelen felhasználót adtál meg.",
+  "interactions.rateLimited.title": "You are being rate-limited",
+  "interactions.rateLimited.description.tooManyUses": "You have used this command too many times ({times}) in too short of a span of time.",
+  "interactions.rateLimited.description.cannotUseAgainUntil": "You will once again be able to use the command {relative_timestamp}.",
+  "interactions.show": "Üzenet megjelenítése a csevegésben",
+  "interactions.show.sureToShow.title": "Biztos, hogy megmutatod?",
+  "interactions.show.sureToShow.description": "Biztos, hogy meg akarod mutatni az üzenetet a csevegésben?",
+  "interactions.show.sureToShow.yes": "Igen, mutasd",
+  "interactions.show.sureToShow.no": "Nem, ne mutassa meg",
+  "interactions.thinking": "Rost gondolkodik...",
+  "interactions.source": "Forrás"
 }

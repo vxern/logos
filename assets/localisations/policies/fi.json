@@ -1,1 +1,13 @@
-{}
+{
+  "policies.moderation.title": "Moderointipolitiikka",
+  "policies.moderation.points.introduction.title": "Miten moderaattorit moderoivat palvelinta?",
+  "policies.moderation.points.introduction.description": "Palvelimella noudatetaan 3 varoituksen moderointikäytäntöä, jota palvelimen oppaat valvovat.",
+  "policies.moderation.points.breach.title": "Missä sääntöjä sovelletaan?",
+  "policies.moderation.points.breach.description": "Palvelimen säännöt koskevat koko palvelinta, ja niiden rikkominen johtaa varoituksen antamiseen.",
+  "policies.moderation.points.warnings.title": "Mitä tapahtuu, jos minua varoitetaan muutaman kerran?",
+  "policies.moderation.points.warnings.description": "Jos käyttäjä on jo saanut kolme varoitusta, neljäs varoitus johtaa käyttäjän aikakatkaisuun. Varoitukset vanhentuvat __kaksi kuukautta__.",
+  "policies.moderation.points.furtherAction.title": "Mitä sitten tapahtuu?",
+  "policies.moderation.points.furtherAction.description": "Tämän vuoksi palvelimen henkilökunnalle ilmoitetaan rajan ylittämisestä, minkä jälkeen se tarkastelee olosuhteita ja päättää asianmukaisista toimista.",
+  "policies.moderation.points.ban.title": "Entä jos en välitä?",
+  "policies.moderation.points.ban.description": "Jos käy ilmi, että käyttäjä on tietoisesti ja jatkuvasti rikkonut palvelimen sääntöjä ja/tai jättänyt huomiotta henkilökunnan ehdotukset, käyttäjälle annetaan pysyvä porttikielto palvelimelle."
+}

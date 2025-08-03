@@ -1,1 +1,22 @@
-{}
+{
+  "form.failedToSubmit.title": "Algo salió mal",
+  "form.failedToSubmit.description": "No se ha podido procesar su envío.",
+  "prompts.continue": "Continúe en",
+  "prompts.cancel": "Cancelar",
+  "prompts.stay": "Llévame de vuelta",
+  "prompts.leave": "Deja",
+  "verification.title": "Preguntas de verificación",
+  "verification.fields.reason": "¿Cuál es su motivo para aprender rumano?",
+  "verification.fields.aim": "¿Cómo piensa utilizar la Comunidad?",
+  "verification.fields.whereFound": "¿Dónde se enteró de la existencia del servidor?",
+  "report.title": "Informe de usuario",
+  "report.fields.reason": "¿Cuál es el motivo del informe?",
+  "report.fields.users": "Usuarios a denunciar",
+  "report.fields.link": "Enlace al mensaje para contextualizarlo",
+  "suggestion.title": "Sugerencia",
+  "suggestion.fields.suggestion": "¿Cuál es su sugerencia?",
+  "resource.title": "Recursos",
+  "resource.fields.resource": "¿Qué recurso le gustaría presentar?",
+  "ticket.title": "Billete",
+  "ticket.fields.topic": "¿Cuál es el tema de su entrada?"
+}

@@ -1,14 +1,16 @@
 {
-	"interactions.continuedOnNextPage": "Kontynuacja na następnej stronie...",
-	"interactions.page": "Strona",
-	"interactions.invalidUser.title": "Nieprawidłowy użytkownik",
-	"interactions.invalidUser.description": "Użytkownik, którego sprecyzowałeś/aś, jest nieprawidłowy.",
-	"interactions.rateLimited.title": "Przekroczono limit żądań",
-	"interactions.rateLimited.description.tooManyUses": "Użyłeś/aś tego polecenia zbyt wiele razy ({times}) w zbyt krótkim okresie.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "Będziesz mógł/mogła ponownie użyć polecenia {relative_timestamp}.",
-	"interactions.show": "Pokaż wiadomość na czacie",
-	"interactions.show.sureToShow.title": "Na pewno?",
-	"interactions.show.sureToShow.description": "Czy na pewno chcesz pokazać komunikat na czacie?",
-	"interactions.show.sureToShow.yes": "Tak, pokaż",
-	"interactions.show.sureToShow.no": "Nie, nie pokazuj"
+  "interactions.continuedOnNextPage": "Kontynuacja na następnej stronie...",
+  "interactions.page": "Strona",
+  "interactions.invalidUser.title": "Nieprawidłowy użytkownik",
+  "interactions.invalidUser.description": "Użytkownik, którego sprecyzowałeś/aś, jest nieprawidłowy.",
+  "interactions.rateLimited.title": "Przekroczono limit żądań",
+  "interactions.rateLimited.description.tooManyUses": "Użyłeś/aś tego polecenia zbyt wiele razy ({times}) w zbyt krótkim okresie.",
+  "interactions.rateLimited.description.cannotUseAgainUntil": "Będziesz mógł/mogła ponownie użyć polecenia {relative_timestamp}.",
+  "interactions.show": "Pokaż wiadomość na czacie",
+  "interactions.show.sureToShow.title": "Na pewno?",
+  "interactions.show.sureToShow.description": "Czy na pewno chcesz pokazać komunikat na czacie?",
+  "interactions.show.sureToShow.yes": "Tak, pokaż",
+  "interactions.show.sureToShow.no": "Nie, nie pokazuj",
+  "interactions.thinking": "Rost myśli...",
+  "interactions.source": "Źródło"
 }

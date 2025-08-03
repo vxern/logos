@@ -1,9 +1,16 @@
 {
-	"interactions.continuedOnNextPage": "Suite à la page suivante...",
-	"interactions.page": "Page",
-	"interactions.invalidUser.title": "Utilisateur non valide",
-	"interactions.invalidUser.description": "L'utilisateur que vous avez spécifié n'est pas valide.",
-	"interactions.rateLimited.title": "Vous êtes soumis à un débit limité",
-	"interactions.rateLimited.description.tooManyUses": "Vous avez utilisé cette commande trop de fois ({times}) dans un laps de temps trop court.",
-	"interactions.rateLimited.description.cannotUseAgainUntil": "Vous pourrez à nouveau utiliser la commande {relative_timestamp}."
+  "interactions.continuedOnNextPage": "Suite à la page suivante...",
+  "interactions.page": "Page",
+  "interactions.invalidUser.title": "Utilisateur non valide",
+  "interactions.invalidUser.description": "L'utilisateur que vous avez spécifié n'est pas valide.",
+  "interactions.rateLimited.title": "Vous êtes soumis à un débit limité",
+  "interactions.rateLimited.description.tooManyUses": "Vous avez utilisé cette commande trop de fois ({times}) dans un laps de temps trop court.",
+  "interactions.rateLimited.description.cannotUseAgainUntil": "Vous pourrez à nouveau utiliser la commande {relative_timestamp}.",
+  "interactions.show": "Afficher le message dans le chat",
+  "interactions.show.sureToShow.title": "Vous êtes sûr de vous montrer ?",
+  "interactions.show.sureToShow.description": "Êtes-vous sûr de vouloir afficher le message dans le chat ?",
+  "interactions.show.sureToShow.yes": "Oui, montrer",
+  "interactions.show.sureToShow.no": "Non, ne pas montrer",
+  "interactions.thinking": "Rost réfléchit...",
+  "interactions.source": "Source"
 }
