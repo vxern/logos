@@ -13,24 +13,32 @@ const logger: EventLogger<"messageUpdate"> = (client, [message], { guildLocale }
 
 	const strings = constants.contexts.messageUpdate({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.message.updated} ${strings.title}`,
-				color: constants.colours.notice,
-				description: strings.description({
-					user: client.diagnostics.user(message.author),
-					channel: mention(message.channelId, { type: "channel" }),
-				}),
-				fields: [
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.notice,
+				components: [
 					{
-						name: strings.fields.before,
-						value: codeMultiline(
-							trim(oldMessage.content, constants.discord.MAXIMUM_EMBED_FIELD_LENGTH - 6),
-						),
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.message.updated} ${strings.title}\n${strings.description({
+							user: client.diagnostics.user(message.author),
+							channel: mention(message.channelId, { type: "channel" }),
+						})}`,
 					},
 					{
-						name: strings.fields.after,
-						value: codeMultiline(trim(message.content, constants.discord.MAXIMUM_EMBED_FIELD_LENGTH - 6)),
+						type: Discord.MessageComponentTypes.Separator,
+						spacing: Discord.SeparatorSpacingSize.Large,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.before}\n${codeMultiline(
+							trim(oldMessage.content, constants.discord.MAXIMUM_EMBED_FIELD_LENGTH - 6),
+						)}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.after}\n${codeMultiline(trim(message.content, constants.discord.MAXIMUM_EMBED_FIELD_LENGTH - 6))}`,
 					},
 				],
 			},

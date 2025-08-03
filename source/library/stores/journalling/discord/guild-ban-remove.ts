@@ -3,11 +3,17 @@ import type { EventLogger } from "rost/stores/journalling/loggers";
 const logger: EventLogger<"guildBanRemove"> = (client, [user, _], { guildLocale }) => {
 	const strings = constants.contexts.guildBanRemove({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.user.unbanned} ${strings.title}`,
-				color: constants.colours.success,
-				description: strings.description({ user: client.diagnostics.user(user) }),
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.success,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.user.unbanned} ${strings.title}\n${strings.description({ user: client.diagnostics.user(user) })}`,
+					},
+				],
 			},
 		],
 	};

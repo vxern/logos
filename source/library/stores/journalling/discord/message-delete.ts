@@ -10,23 +10,28 @@ const logger: EventLogger<"messageDelete"> = (client, [payload, _], { guildLocal
 
 	const strings = constants.contexts.messageDelete({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.message.deleted} ${strings.title}`,
-				color: constants.colours.failure,
-				description: strings.description({
-					user: client.diagnostics.user(message.author),
-					channel: mention(message.channelId, { type: "channel" }),
-				}),
-				fields:
-					message.content.length > 0
-						? [
-								{
-									name: strings.fields.content,
-									value: codeMultiline(message.content),
-								},
-							]
-						: undefined,
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.failure,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.message.deleted} ${strings.title}\n${strings.description({
+							user: client.diagnostics.user(message.author),
+							channel: mention(message.channelId, { type: "channel" }),
+						})}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.Separator,
+						spacing: Discord.SeparatorSpacingSize.Large,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.content}\n${codeMultiline(message.content)}`,
+					},
+				],
 			},
 		],
 		files: message.attachments

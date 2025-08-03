@@ -12,16 +12,22 @@ const logger: EventLogger<"messageDeleteBulk"> = (client, [payload], { guildLoca
 
 	const strings = constants.contexts.messageDeleteBulk({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.message.deleted} ${strings.title}`,
-				color: constants.colours.failure,
-				description: strings.description({
-					messages: client.pluralise("events.messageDeleteBulk.description.messages", guildLocale, {
-						quantity: messages.length,
-					}),
-					channel: mention(payload.channelId, { type: "channel" }),
-				}),
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.failure,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.message.deleted} ${strings.title}\n${strings.description({
+							messages: client.pluralise("events.messageDeleteBulk.description.messages", guildLocale, {
+								quantity: messages.length,
+							}),
+							channel: mention(payload.channelId, { type: "channel" }),
+						})}`,
+					},
+				],
 			},
 		],
 		files: [{ name: "log.txt", blob: new Blob([messageLog]) } as Discord.FileContent],
