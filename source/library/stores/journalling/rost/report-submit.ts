@@ -3,28 +3,32 @@ import type { EventLogger } from "rost/stores/journalling/loggers";
 const logger: EventLogger<"reportSubmit"> = (client, [author, report], { guildLocale }) => {
 	const strings = constants.contexts.reportSubmit({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.report} ${strings.title}`,
-				color: constants.colours.failure,
-				description: strings.description({ user: client.diagnostics.member(author) }),
-				fields: [
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.failure,
+				components: [
 					{
-						name: strings.fields.reason,
-						value: report.formData.reason,
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.report} ${strings.title}\n${strings.description({ user: client.diagnostics.member(author) })}`,
 					},
 					{
-						name: strings.fields.reportedUsers,
-						value: report.formData.users,
+						type: Discord.MessageComponentTypes.Separator,
+						spacing: Discord.SeparatorSpacingSize.Large,
 					},
-					...(report.formData.messageLink !== undefined
-						? [
-								{
-									name: strings.fields.messageLink,
-									value: report.formData.messageLink,
-								},
-							]
-						: []),
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.reason}\n${report.formData.reason}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.reportedUsers}\n${report.formData.users}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.messageLink}\n${report.formData.messageLink}`,
+					},
 				],
 			},
 		],

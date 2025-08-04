@@ -7,22 +7,30 @@ const logger: EventLogger<"memberTimeoutAdd"> = (client, [member, until, reason,
 		locale: guildLocale,
 	});
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.timeout.added} ${strings.title}`,
-				color: constants.colours.warning,
-				description: strings.description({
-					user: client.diagnostics.member(member),
-					moderator: client.diagnostics.user(author),
-				}),
-				fields: [
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.warning,
+				components: [
 					{
-						name: strings.fields.reason,
-						value: reason,
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.timeout.added} ${strings.title}\n${strings.description({
+							user: client.diagnostics.member(member),
+							moderator: client.diagnostics.user(author),
+						})}`,
 					},
 					{
-						name: strings.fields.lastsUntil,
-						value: timestamp(until, { format: "relative" }),
+						type: Discord.MessageComponentTypes.Separator,
+						spacing: Discord.SeparatorSpacingSize.Large,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.reason}\n${reason}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.lastsUntil}\n${timestamp(until, { format: "relative" })}`,
 					},
 				],
 			},

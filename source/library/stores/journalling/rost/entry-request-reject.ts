@@ -6,14 +6,22 @@ const logger: EventLogger<"entryRequestReject"> = (client, [user, author], { gui
 		locale: guildLocale,
 	});
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.entryRequest.rejected} ${strings.title}`,
-				color: constants.colours.failure,
-				description: strings.description({
-					user: client.diagnostics.user(user),
-					moderator: client.diagnostics.member(author),
-				}),
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.failure,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.entryRequest.rejected} ${strings.title}\n${strings.description(
+							{
+								user: client.diagnostics.user(user),
+								moderator: client.diagnostics.member(author),
+							},
+						)}`,
+					},
+				],
 			},
 		],
 	};

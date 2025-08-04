@@ -3,14 +3,20 @@ import type { EventLogger } from "rost/stores/journalling/loggers";
 const logger: EventLogger<"guildMemberKick"> = (client, [user, author], { guildLocale }) => {
 	const strings = constants.contexts.memberKick({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.user.kicked} ${strings.title}`,
-				color: constants.colours.warning,
-				description: strings.description({
-					user: client.diagnostics.user(user),
-					moderator: client.diagnostics.member(author),
-				}),
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.warning,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.user.kicked} ${strings.title}\n${strings.description({
+							user: client.diagnostics.user(user),
+							moderator: client.diagnostics.member(author),
+						})}`,
+					},
+				],
 			},
 		],
 	};

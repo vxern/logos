@@ -1,7 +1,7 @@
 interface ReportFormData {
 	reason: string;
 	users: string;
-	messageLink?: string;
+	messageLink: string;
 }
 
 interface ReportDocument {

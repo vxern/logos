@@ -4,14 +4,22 @@ import type { EventLogger } from "rost/stores/journalling/loggers";
 const logger: EventLogger<"slowmodeDisable"> = (client, [user, channel], { guildLocale }) => {
 	const strings = constants.contexts.slowmodeDisable({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.slowmode.disabled} ${strings.title}`,
-				color: constants.colours.warning,
-				description: strings.description({
-					moderator: client.diagnostics.user(user),
-					channel: mention(channel.id, { type: "channel" }),
-				}),
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.warning,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.slowmode.disabled} ${strings.title}\n${strings.description(
+							{
+								moderator: client.diagnostics.user(user),
+								channel: mention(channel.id, { type: "channel" }),
+							},
+						)}`,
+					},
+				],
 			},
 		],
 	};

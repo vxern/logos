@@ -6,14 +6,20 @@ const logger: EventLogger<"memberTimeoutRemove"> = (client, [member, author], { 
 		locale: guildLocale,
 	});
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.timeout.removed} ${strings.title}`,
-				color: constants.colours.notice,
-				description: strings.description({
-					user: client.diagnostics.member(member),
-					moderator: client.diagnostics.user(author),
-				}),
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.notice,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.timeout.removed} ${strings.title}\n${strings.description({
+							user: client.diagnostics.member(member),
+							moderator: client.diagnostics.user(author),
+						})}`,
+					},
+				],
 			},
 		],
 	};

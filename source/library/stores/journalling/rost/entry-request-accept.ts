@@ -6,14 +6,22 @@ const logger: EventLogger<"entryRequestAccept"> = (client, [user, author], { gui
 		locale: guildLocale,
 	});
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.entryRequest.accepted} ${strings.title}`,
-				color: constants.colours.success,
-				description: strings.description({
-					user: client.diagnostics.user(user),
-					moderator: client.diagnostics.member(author),
-				}),
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.success,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.entryRequest.accepted} ${strings.title}\n${strings.description(
+							{
+								user: client.diagnostics.user(user),
+								moderator: client.diagnostics.member(author),
+							},
+						)}`,
+					},
+				],
 			},
 		],
 	};

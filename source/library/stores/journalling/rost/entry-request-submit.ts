@@ -7,23 +7,31 @@ const logger: EventLogger<"entryRequestSubmit"> = (client, [user, entryRequest],
 		...constants.contexts.entryRequestSubmit({ localise: client.localise, locale: guildLocale }),
 	};
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.entryRequest.submitted} ${strings.title}`,
-				color: constants.colours.success,
-				description: strings.description({ user: client.diagnostics.user(user) }),
-				fields: [
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.success,
+				components: [
 					{
-						name: strings.fields.reason,
-						value: codeMultiline(entryRequest.formData.reason),
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.entryRequest.submitted} ${strings.title}\n${strings.description({ user: client.diagnostics.user(user) })}`,
 					},
 					{
-						name: strings.fields.aim,
-						value: codeMultiline(entryRequest.formData.aim),
+						type: Discord.MessageComponentTypes.Separator,
+						spacing: Discord.SeparatorSpacingSize.Large,
 					},
 					{
-						name: strings.fields.whereFound,
-						value: codeMultiline(entryRequest.formData.whereFound),
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.reason}\n${codeMultiline(entryRequest.formData.reason)}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.aim}\n${codeMultiline(entryRequest.formData.aim)}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.whereFound}\n${codeMultiline(entryRequest.formData.whereFound)}`,
 					},
 				],
 			},

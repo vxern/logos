@@ -3,15 +3,23 @@ import type { EventLogger } from "rost/stores/journalling/loggers";
 const logger: EventLogger<"suggestionSend"> = (client, [member, suggestion], { guildLocale }) => {
 	const strings = constants.contexts.suggestionSend({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.suggestion} ${strings.title}`,
-				color: constants.colours.success,
-				description: strings.description({ user: client.diagnostics.member(member) }),
-				fields: [
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.success,
+				components: [
 					{
-						name: strings.fields.suggestion,
-						value: suggestion.formData.suggestion,
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.suggestion} ${strings.title}\n${strings.description({ user: client.diagnostics.member(member) })}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.Separator,
+						spacing: Discord.SeparatorSpacingSize.Large,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.suggestion}\n${suggestion.formData.suggestion}`,
 					},
 				],
 			},

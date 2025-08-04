@@ -8,16 +8,24 @@ const logger: EventLogger<"slowmodeUpgrade"> = (
 ) => {
 	const strings = constants.contexts.slowmodeUpgrade({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.slowmode.upgraded} ${strings.title}`,
-				color: constants.colours.warning,
-				description: strings.description({
-					moderator: client.diagnostics.user(user),
-					channel: mention(channel.id, { type: "channel" }),
-					level_before: previousLevel,
-					level_after: currentLevel,
-				}),
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.warning,
+				components: [
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.slowmode.upgraded} ${strings.title}\n${strings.description(
+							{
+								moderator: client.diagnostics.user(user),
+								channel: mention(channel.id, { type: "channel" }),
+								level_before: previousLevel,
+								level_after: currentLevel,
+							},
+						)}`,
+					},
+				],
 			},
 		],
 	};

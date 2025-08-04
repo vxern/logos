@@ -3,18 +3,26 @@ import type { EventLogger } from "rost/stores/journalling/loggers";
 const logger: EventLogger<"memberWarnRemove"> = (client, [member, warning, author], { guildLocale }) => {
 	const strings = constants.contexts.memberWarnRemove({ localise: client.localise, locale: guildLocale });
 	return {
-		embeds: [
+		flags: Discord.MessageFlags.IsComponentV2,
+		components: [
 			{
-				title: `${constants.emojis.events.pardoned} ${strings.title}`,
-				color: constants.colours.success,
-				description: strings.description({
-					user: client.diagnostics.member(member),
-					moderator: client.diagnostics.user(author),
-				}),
-				fields: [
+				type: Discord.MessageComponentTypes.Container,
+				accentColor: constants.colours.success,
+				components: [
 					{
-						name: strings.fields.warning,
-						value: warning.reason,
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `# ${constants.emojis.events.pardoned} ${strings.title}\n${strings.description({
+							user: client.diagnostics.member(member),
+							moderator: client.diagnostics.user(author),
+						})}`,
+					},
+					{
+						type: Discord.MessageComponentTypes.Separator,
+						spacing: Discord.SeparatorSpacingSize.Large,
+					},
+					{
+						type: Discord.MessageComponentTypes.TextDisplay,
+						content: `### ${strings.fields.warning}\n${warning.reason}`,
 					},
 				],
 			},
