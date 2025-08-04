@@ -6,7 +6,7 @@
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=rost&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=rost) [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=rost&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=rost) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=rost&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=rost) [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=rost&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=rost) [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=rost&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=rost) [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=rost&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=rost)
 
-![Wakatime](https://wakatime.com/badge/github/LearnRomanian/rost.svg)
+[![wakatime](https://wakatime.com/badge/user/3c6430fb-799d-4505-828c-4a2f378f52e2/project/c85ab4bb-8f14-4ba5-9259-d38f68c1d50f.svg)](https://wakatime.com/badge/user/3c6430fb-799d-4505-828c-4a2f378f52e2/project/c85ab4bb-8f14-4ba5-9259-d38f68c1d50f)
 
 ### Features
 
